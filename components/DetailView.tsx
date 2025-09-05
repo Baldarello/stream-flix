@@ -104,9 +104,7 @@ const DetailView: React.FC = () => {
           </Box>
           <Grid container spacing={3}>
             {currentSeason?.episodes.map((episode: Episode) => (
-              // In MUI Grid v2+, a Grid component with breakpoint props (e.g., xs, sm) is implicitly
-              // a grid item when it's a direct child of a Grid container.
-              // FIX: Added the `item` prop to correctly define this as a Grid item.
+              // FIX: Added the `item` prop to the Grid component, as it's required for grid items.
               <Grid item xs={12} sm={6} md={4} lg={3} key={episode.id}>
                 <Card sx={{ bgcolor: 'background.paper', cursor: 'pointer', '&:hover .play-icon': { opacity: 1 } }}>
                   <Box sx={{ position: 'relative' }}>

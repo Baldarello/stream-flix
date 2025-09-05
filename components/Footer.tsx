@@ -31,9 +31,7 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // In MUI Grid v2+, a Grid component with breakpoint props (e.g., xs, sm) is implicitly
-          // a grid item when it's a direct child of a Grid container.
-          // FIX: Added the `item` prop to correctly define this as a Grid item.
+          // FIX: Added the `item` prop to the Grid component, as it's required for grid items.
           <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
