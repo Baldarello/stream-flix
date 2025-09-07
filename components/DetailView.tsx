@@ -65,7 +65,7 @@ const DetailView: React.FC = () => {
             </Stack>
             <Typography variant="body1" sx={{ maxWidth: '700px' }}>{item.overview}</Typography>
             <Stack direction="row" spacing={2} pt={2}>
-              <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }}>
+              <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }} onClick={() => mediaStore.startPlayback(item)}>
                 Riproduci
               </Button>
               <IconButton 
@@ -104,8 +104,8 @@ const DetailView: React.FC = () => {
           </Box>
           <Grid container spacing={3}>
             {currentSeason?.episodes.map((episode: Episode) => (
-              // FIX: Added the `item` prop to the Grid component, as it's required for grid items.
-              <Grid item xs={12} sm={6} md={4} lg={3} key={episode.id}>
+              // FIX: Removed invalid `item` prop from Grid component to resolve TypeScript error.
+              <Grid xs={12} sm={6} md={4} lg={3} key={episode.id}>
                 <Card sx={{ bgcolor: 'background.paper', cursor: 'pointer', '&:hover .play-icon': { opacity: 1 } }}>
                   <Box sx={{ position: 'relative' }}>
                     <CardMedia

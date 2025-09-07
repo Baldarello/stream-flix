@@ -7,9 +7,10 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 interface HeroProps {
   item: MediaItem;
   onMoreInfoClick: () => void;
+  onPlayClick: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ item, onMoreInfoClick }) => {
+export const Hero: React.FC<HeroProps> = ({ item, onMoreInfoClick, onPlayClick }) => {
   const title = item.title || item.name;
   const overview = item.overview.length > 200 ? `${item.overview.substring(0, 200)}...` : item.overview;
 
@@ -49,7 +50,7 @@ export const Hero: React.FC<HeroProps> = ({ item, onMoreInfoClick }) => {
             {overview}
           </Typography>
           <Stack direction="row" spacing={2} pt={2}>
-            <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }}>
+            <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }} onClick={onPlayClick}>
               Riproduci
             </Button>
             <Button variant="contained" startIcon={<InfoOutlinedIcon />} size="large" onClick={onMoreInfoClick} sx={{ bgcolor: 'rgba(109, 109, 110, 0.7)', '&:hover': { bgcolor: 'rgba(109, 109, 110, 0.4)' } }}>

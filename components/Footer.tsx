@@ -31,8 +31,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the `item` prop to the Grid component, as it's required for grid items.
-          <Grid item xs={6} sm={3} key={link}>
+          // FIX: Removed invalid `item` prop from Grid component to resolve TypeScript error.
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

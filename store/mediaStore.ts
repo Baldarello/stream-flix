@@ -11,6 +11,8 @@ class MediaStore {
   error: string | null = null;
   selectedItem: MediaItem | null = null;
   myList: number[] = [];
+  isPlaying = false;
+  nowPlayingItem: MediaItem | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -47,6 +49,16 @@ class MediaStore {
     this.selectedItem = null;
   }
   
+  startPlayback = (item: MediaItem) => {
+    this.nowPlayingItem = item;
+    this.isPlaying = true;
+  }
+
+  stopPlayback = () => {
+    this.isPlaying = false;
+    this.nowPlayingItem = null;
+  }
+
   get heroContent(): MediaItem | undefined {
     return this.trending[0];
   }

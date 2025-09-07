@@ -6,8 +6,8 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ContentRow } from './components/ContentRow';
 import { Footer } from './components/Footer';
-// FIX: Changed to a default import as DetailView is a default export.
 import DetailView from './components/DetailView';
+import VideoPlayer from './components/VideoPlayer';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -46,7 +46,11 @@ const App: React.FC = () => {
     );
   }
 
-  const { heroContent, latestMovies, myListItems, trending, topSeries, popularAnime, selectedItem } = mediaStore;
+  const { heroContent, latestMovies, myListItems, trending, topSeries, popularAnime, selectedItem, isPlaying } = mediaStore;
+
+  if (isPlaying) {
+    return <VideoPlayer />;
+  }
 
   return (
     <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
@@ -56,7 +60,13 @@ const App: React.FC = () => {
           <DetailView />
         ) : (
           <>
-            {heroContent && <Hero item={heroContent} onMoreInfoClick={() => mediaStore.selectMedia(heroContent)} />}
+            {heroContent && (
+              <Hero
+                item={heroContent}
+                onMoreInfoClick={() => mediaStore.selectMedia(heroContent)}
+                onPlayClick={() => mediaStore.startPlayback(heroContent)}
+              />
+            )}
             <Container maxWidth={false} sx={{ py: { xs: 4, md: 8 }, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 <ContentRow title="Ultime Uscite" items={latestMovies} />
