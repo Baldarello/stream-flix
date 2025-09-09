@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from './store/mediaStore';
-import { Box, CircularProgress, Alert, Container } from '@mui/material';
+import { Box, CircularProgress, Alert, Container, Typography } from '@mui/material';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ContentRow } from './components/ContentRow';
@@ -63,6 +63,11 @@ const App: React.FC = () => {
     allMovies,
     isRemoteMaster,
     isSmartTV,
+    continueWatchingItems,
+    isSearchActive,
+    searchResults,
+    searchQuery,
+    isSearching,
   } = mediaStore;
 
   // Remote Control (Master) View
@@ -80,8 +85,31 @@ const App: React.FC = () => {
       return <SmartTVScreen />;
   }
 
+  const renderSearchView = () => {
+    if (isSearching && searchQuery) {
+      return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 20 }}>
+          <CircularProgress />
+        </Box>
+      );
+    }
+    if (!searchQuery) {
+      return (
+        <Box sx={{ textAlign: 'center', pt: 20 }}>
+          <Typography variant="h5">Cerca film, serie TV e tanto altro</Typography>
+          <Typography color="text.secondary">Trova subito i tuoi contenuti preferiti.</Typography>
+        </Box>
+      )
+    }
+    return <GridView title={`Risultati per "${searchQuery}"`} items={searchResults} />;
+  }
+
   // Standard App View
   const renderMainContent = () => {
+    if (isSearchActive) {
+      return renderSearchView();
+    }
+
     switch (activeView) {
       case 'Home':
         return (
@@ -95,6 +123,9 @@ const App: React.FC = () => {
             )}
             <Container maxWidth={false} sx={{ py: { xs: 4, md: 8 }, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
+                {continueWatchingItems.length > 0 && (
+                  <ContentRow title="Continua a guardare" items={continueWatchingItems} />
+                )}
                 <ContentRow title="Ultime Uscite" items={latestMovies} />
                 {myListItems.length > 0 && (
                   <ContentRow title="La mia lista" items={myListItems} />

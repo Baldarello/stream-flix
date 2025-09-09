@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import type { MediaItem, PlayableItem, Episode } from '../types';
-import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime, getSeriesDetails, getSeriesEpisodes } from '../services/apiCall';
+import type { MediaItem, PlayableItem, Episode, ViewingHistoryItem } from '../types';
+import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime, getSeriesDetails, getSeriesEpisodes, searchShow } from '../services/apiCall';
 import { websocketService, ChatMessage } from '../services/websocketService';
 import { isSmartTV as detectSmartTV } from '../utils/device';
 
@@ -26,6 +26,15 @@ class MediaStore {
   isPlaying = false;
   nowPlayingItem: PlayableItem | null = null;
   activeView: ActiveView = 'Home';
+  viewingHistory: ViewingHistoryItem[] = [];
+  cachedItems: Map<number, MediaItem> = new Map();
+
+  // Search State
+  searchQuery = '';
+  searchResults: MediaItem[] = [];
+  isSearchActive = false;
+  isSearching = false;
+  private searchDebounceTimer: number | null = null;
 
   // Watch Together State
   watchTogetherModalOpen = false;
@@ -58,7 +67,9 @@ class MediaStore {
     makeAutoObservable(this);
     this.isSmartTV = detectSmartTV();
     this.loadMyListFromStorage();
+    this.loadCachedItemsFromStorage();
     this.loadEpisodeLinks();
+    this.loadViewingHistoryFromStorage();
     websocketService.events.on('message', this.handleIncomingMessage);
   }
   
@@ -272,14 +283,64 @@ class MediaStore {
     localStorage.setItem('myList', JSON.stringify(this.myList));
   }
   
+  loadCachedItemsFromStorage() {
+    const storedCache = localStorage.getItem('cachedItems');
+    if (storedCache) {
+      try {
+        this.cachedItems = new Map(JSON.parse(storedCache));
+      } catch (e) {
+        console.error("Failed to parse cached items from localStorage", e);
+        this.cachedItems = new Map();
+      }
+    }
+  }
+
+  saveCachedItemsToStorage() {
+    // Limit cache size to avoid localStorage quota issues
+    const CACHE_LIMIT = 50;
+    const entries = Array.from(this.cachedItems.entries());
+    if (entries.length > CACHE_LIMIT) {
+      // Evict oldest entries by keeping the newest ones
+      const trimmedEntries = entries.slice(entries.length - CACHE_LIMIT);
+      this.cachedItems = new Map(trimmedEntries);
+    }
+    localStorage.setItem('cachedItems', JSON.stringify(Array.from(this.cachedItems.entries())));
+  }
+
   toggleMyList = (item: MediaItem) => {
     const itemId = item.id;
     if (this.myList.includes(itemId)) {
       this.myList = this.myList.filter(id => id !== itemId);
     } else {
       this.myList.push(itemId);
+      this.cachedItems.set(itemId, item);
+      this.saveCachedItemsToStorage();
     }
     this.saveMyListToStorage();
+  }
+
+  // --- Viewing History Methods ---
+  loadViewingHistoryFromStorage = () => {
+    const storedHistory = localStorage.getItem('viewingHistory');
+    if (storedHistory) {
+      this.viewingHistory = JSON.parse(storedHistory);
+    }
+  }
+
+  saveViewingHistoryToStorage = () => {
+    const limitedHistory = this.viewingHistory.slice(0, 100);
+    localStorage.setItem('viewingHistory', JSON.stringify(limitedHistory));
+  }
+
+  addViewingHistoryEntry = (showId: number, episodeId: number) => {
+    const updatedHistory = this.viewingHistory.filter(item => item.episodeId !== episodeId);
+    updatedHistory.unshift({
+      showId,
+      episodeId,
+      watchedAt: Date.now(),
+    });
+    this.viewingHistory = updatedHistory;
+    this.saveViewingHistoryToStorage();
   }
 
   setActiveView = (view: ActiveView) => {
@@ -289,6 +350,50 @@ class MediaStore {
     this.activeView = view;
     window.scrollTo(0, 0);
   }
+
+  // --- Search Methods ---
+  toggleSearch = (isActive: boolean) => {
+    this.isSearchActive = isActive;
+    if (!isActive) {
+      this.searchQuery = '';
+      this.searchResults = [];
+    } else {
+      // When opening search, we might want to clear previous selection
+      this.selectedItem = null;
+    }
+  }
+
+  setSearchQuery = (query: string) => {
+    this.searchQuery = query;
+    this.isSearching = true;
+
+    if (this.searchDebounceTimer) {
+        clearTimeout(this.searchDebounceTimer);
+    }
+
+    if (!query.trim()) {
+        this.searchResults = [];
+        this.isSearching = false;
+        return;
+    }
+
+    this.searchDebounceTimer = window.setTimeout(async () => {
+        try {
+            const results = await searchShow(this.searchQuery);
+            runInAction(() => {
+                this.searchResults = results;
+                this.isSearching = false;
+            });
+        } catch (error) {
+            console.error("Failed to search for shows", error);
+            runInAction(() => {
+                this.isSearching = false;
+                // Optionally set an error state here
+            });
+        }
+    }, 500); // 500ms debounce
+  }
+
 
   applyEpisodeLinksToMedia = (items: MediaItem[]) => {
     items.forEach(item => {
@@ -305,6 +410,9 @@ class MediaStore {
   };
 
   selectMedia = async (item: MediaItem) => {
+    this.isSearchActive = false; // Close search when an item is selected
+    this.searchQuery = '';
+    this.searchResults = [];
     this.selectedItem = item; // Show basic info immediately
     window.scrollTo(0, 0);
   
@@ -340,6 +448,9 @@ class MediaStore {
   startPlayback = (item: PlayableItem) => {
     if (this.roomId && this.isHost) {
         this.sendPlaybackControl({ status: 'playing', time: 0 });
+    }
+    if ('show_id' in item) {
+      this.addViewingHistoryEntry(item.show_id, item.id);
     }
     this.nowPlayingItem = item;
     this.isPlaying = true;
@@ -435,6 +546,23 @@ class MediaStore {
     return this.trending[0];
   }
 
+  get continueWatchingItems(): MediaItem[] {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    
+    const recentHistory = this.viewingHistory.filter(h => h.watchedAt > thirtyDaysAgo);
+    
+    const uniqueShowIds: number[] = [];
+    for (const item of recentHistory) {
+      if (!uniqueShowIds.includes(item.showId)) {
+        uniqueShowIds.push(item.showId);
+      }
+    }
+
+    return uniqueShowIds
+      .map(showId => this.allItems.find(item => item.id === showId))
+      .filter((item): item is MediaItem => !!item && item.media_type === 'tv');
+  }
+
   get currentShow(): MediaItem | undefined {
     if (this.nowPlayingItem && 'show_id' in this.nowPlayingItem) {
         return this.allItems.find(item => item.id === (this.nowPlayingItem as any).show_id);
@@ -465,7 +593,13 @@ class MediaStore {
   }
 
   get allItems(): MediaItem[] {
-     const all = [...this.trending, ...this.latestMovies, ...this.topSeries, ...this.popularAnime];
+     const all = [
+        ...this.trending, 
+        ...this.latestMovies, 
+        ...this.topSeries, 
+        ...this.popularAnime,
+        ...Array.from(this.cachedItems.values())
+    ];
      return Array.from(new Map(all.map(item => [item.id, item])).values());
   }
 
@@ -477,9 +611,8 @@ class MediaStore {
     this.loading = true;
     this.error = null;
     try {
-      let asd=await getTrending()
-      console.log("ASD")
-      /*const [
+   
+      const [
         trendingData,
         latestMoviesData,
         topSeriesData,
@@ -496,7 +629,7 @@ class MediaStore {
         this.latestMovies = latestMoviesData;
         this.topSeries = topSeriesData;
         this.popularAnime = popularAnimeData;
-      });*/
+      });
 
     } catch (err) {
        runInAction(() => {

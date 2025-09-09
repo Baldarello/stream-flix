@@ -20,7 +20,7 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/';
 const BASE_PATH="service/tmdb/"
 
 const API_KEY_TMDB =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3JZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
 
 
 const apiClient = axios.create({
@@ -69,7 +69,7 @@ const tmdbToMediaItem = (item: any): MediaItem => ({
  */
 export const getTrending = async (): Promise<MediaItem[]> => {
   const response = await apiClient.get(`${BASE_PATH}3/trending/all/week`);
-  return response
+  return response.data.results.map(tmdbToMediaItem);
 };
 
 

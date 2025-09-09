@@ -1,6 +1,10 @@
 import React from 'react';
 import type { MediaItem } from '../types';
-import { Card as MuiCard, CardMedia, Typography, Box, CardActionArea } from '@mui/material';
+import { Card as MuiCard, CardMedia, Typography, Box, CardActionArea, IconButton, Tooltip } from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../store/mediaStore';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
 
 interface CardProps {
   item: MediaItem;
@@ -8,8 +12,15 @@ interface CardProps {
   displayMode?: 'row' | 'grid';
 }
 
-export const Card: React.FC<CardProps> = ({ item, onClick, displayMode = 'row' }) => {
+export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode = 'row' }) => {
   const title = item.title || item.name;
+  const isInMyList = mediaStore.myList.includes(item.id);
+
+  const handleToggleMyList = (event: React.MouseEvent) => {
+    // Prevent the click from bubbling up to the card's onClick handler
+    event.stopPropagation();
+    mediaStore.toggleMyList(item);
+  };
 
   const cardStyles =
     displayMode === 'row'
@@ -35,12 +46,38 @@ export const Card: React.FC<CardProps> = ({ item, onClick, displayMode = 'row' }
         '&:hover .title-overlay': {
           opacity: 1,
         },
+        '&:hover .add-to-list-btn': {
+            opacity: 1,
+        },
         ...cardStyles,
       }}
       onClick={() => onClick(item)}
       role="button"
       aria-label={`Vedi dettagli per ${title}`}
     >
+      <Tooltip title={isInMyList ? 'Rimuovi dalla mia lista' : 'Aggiungi alla mia lista'}>
+        <IconButton
+          className="add-to-list-btn"
+          onClick={handleToggleMyList}
+          aria-label={isInMyList ? 'Rimuovi dalla mia lista' : 'Aggiungi alla mia lista'}
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 11,
+            bgcolor: 'rgba(20, 20, 20, 0.7)',
+            color: 'white',
+            opacity: 0,
+            transition: 'opacity 0.2s ease-in-out, transform 0.2s ease-in-out',
+            '&:hover': {
+                bgcolor: 'rgba(20, 20, 20, 0.9)',
+                transform: 'scale(1.1)',
+            },
+          }}
+        >
+          {isInMyList ? <CheckIcon /> : <AddIcon />}
+        </IconButton>
+      </Tooltip>
       <CardActionArea>
         <CardMedia
           component="img"
@@ -71,4 +108,4 @@ export const Card: React.FC<CardProps> = ({ item, onClick, displayMode = 'row' }
       </CardActionArea>
     </MuiCard>
   );
-};
+});

@@ -1,26 +1,34 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Box, Button, IconButton, useScrollTrigger, Slide } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, Button, IconButton, useScrollTrigger, Slide, TextField, InputAdornment, Grow, Fade } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { mediaStore, ActiveView } from '../store/mediaStore';
 
 const navItems = ['Home', 'Serie TV', 'Film', 'Anime', 'La mia lista'];
 
 export const Header: React.FC = observer(() => {
+  const { isSearchActive, toggleSearch, searchQuery, setSearchQuery } = mediaStore;
+  
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 10,
   });
 
+  const handleNavClick = (view: ActiveView) => {
+    toggleSearch(false);
+    mediaStore.setActiveView(view);
+  }
+
   return (
-    <Slide appear={false} direction="down" in={!trigger}>
+    <Slide appear={false} direction="down" in={!trigger || isSearchActive}>
       <AppBar 
         elevation={0}
         sx={{ 
-          bgcolor: trigger ? 'rgba(20, 20, 20, 0.7)' : 'transparent',
-          backdropFilter: trigger ? 'blur(10px)' : 'none',
+          bgcolor: (trigger || isSearchActive) ? 'rgba(20, 20, 20, 0.8)' : 'transparent',
+          backdropFilter: (trigger || isSearchActive) ? 'blur(10px)' : 'none',
           transition: 'background-color 0.3s ease-in-out',
         }}
       >
@@ -30,7 +38,7 @@ export const Header: React.FC = observer(() => {
               variant="h6" 
               noWrap
               component="div"
-              onClick={() => mediaStore.setActiveView('Home')}
+              onClick={() => handleNavClick('Home')}
               sx={{
                 mr: 2,
                 fontWeight: 700,
@@ -43,38 +51,65 @@ export const Header: React.FC = observer(() => {
             >
               Quix
             </Typography>
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-              {navItems.map((item) => (
-                <Button 
-                  key={item} 
-                  sx={{ 
-                    color: 'white', 
-                    my: 2, 
-                    display: 'block',
-                    fontWeight: mediaStore.activeView === item ? 700 : 400,
-                    opacity: mediaStore.activeView === item ? 1 : 0.8,
-                     '&:hover': {
-                      opacity: 1,
-                    }
-                  }}
-                  onClick={() => mediaStore.setActiveView(item as ActiveView)}
-                >
-                  {item}
-                </Button>
-              ))}
-            </Box>
+            <Grow in={!isSearchActive}>
+                <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+                {navItems.map((item) => (
+                    <Button 
+                    key={item} 
+                    sx={{ 
+                        color: 'white', 
+                        my: 2, 
+                        display: 'block',
+                        fontWeight: mediaStore.activeView === item ? 700 : 400,
+                        opacity: mediaStore.activeView === item ? 1 : 0.8,
+                        '&:hover': {
+                        opacity: 1,
+                        }
+                    }}
+                    onClick={() => handleNavClick(item as ActiveView)}
+                    >
+                    {item}
+                    </Button>
+                ))}
+                </Box>
+            </Grow>
           </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit">
-              <SearchIcon />
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: isSearchActive ? 1 : 0, ml: 2 }}>
+             <Grow in={isSearchActive}>
+                <TextField
+                    fullWidth
+                    autoFocus
+                    variant="standard"
+                    placeholder="Cerca titoli..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{
+                        '& .MuiInput-underline:before': { borderBottomColor: 'rgba(255, 255, 255, 0.42)' },
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'white' },
+                    }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+             </Grow>
+            <IconButton color="inherit" onClick={() => toggleSearch(!isSearchActive)}>
+                {isSearchActive ? <CloseIcon /> : <SearchIcon />}
             </IconButton>
-            <IconButton color="inherit">
-              <NotificationsIcon />
-            </IconButton>
-            <IconButton color="inherit">
-              <AccountCircleIcon />
-            </IconButton>
+            <Fade in={!isSearchActive}>
+                <Box sx={{ display: isSearchActive ? 'none' : 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton color="inherit">
+                        <NotificationsIcon />
+                    </IconButton>
+                    <IconButton color="inherit">
+                        <AccountCircleIcon />
+                    </IconButton>
+                </Box>
+            </Fade>
           </Box>
         </Toolbar>
       </AppBar>

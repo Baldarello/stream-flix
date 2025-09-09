@@ -11,6 +11,33 @@ interface GridViewProps {
 }
 
 const GridView: React.FC<GridViewProps> = ({ title, items }) => {
+  const isMyList = title === 'La mia lista';
+  const isSearch = title.startsWith('Risultati per');
+
+  const renderEmptyState = () => {
+    let emptyTitle = 'Nessun contenuto disponibile';
+    let emptySubtitle = 'Torna più tardi per nuovi contenuti.';
+
+    if (isMyList) {
+      emptyTitle = 'La tua lista è vuota';
+      emptySubtitle = 'Aggiungi film e serie TV per vederli qui.';
+    } else if (isSearch) {
+      emptyTitle = 'Nessun risultato trovato';
+      emptySubtitle = 'Prova a cercare qualcos\'altro o controlla che il titolo sia corretto.';
+    }
+
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column', textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom>
+          {emptyTitle}
+        </Typography>
+        <Typography color="text.secondary">
+          {emptySubtitle}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Fade in={true} timeout={500}>
       <Container maxWidth={false} sx={{ pt: 12, pb: 8, pl: { xs: 2, md: 6 }, pr: { xs: 2, md: 6 } }}>
@@ -27,18 +54,7 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
             ))}
           </Grid>
         ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column', textAlign: 'center' }}>
-            <Typography variant="h5" gutterBottom>
-              {title === 'La mia lista' 
-                ? 'La tua lista è vuota' 
-                : 'Nessun contenuto disponibile'}
-            </Typography>
-            <Typography color="text.secondary">
-              {title === 'La mia lista' 
-                ? 'Aggiungi film e serie TV per vederli qui.' 
-                : 'Torna più tardi per nuovi contenuti.'}
-            </Typography>
-          </Box>
+          renderEmptyState()
         )}
       </Container>
     </Fade>

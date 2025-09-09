@@ -35,3 +35,9 @@ export type PlayableItem = MediaItem | (Episode & {
     backdrop_path: string;
     season_number: number;
 });
+
+export interface ViewingHistoryItem {
+  showId: number;
+  episodeId: number;
+  watchedAt: number; // timestamp
+}
