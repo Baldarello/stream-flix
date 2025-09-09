@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Container, Grid, Link, Typography, IconButton } from '@mui/material';
+// Fix: Changed Grid import to a direct import to solve TypeScript error with the 'item' prop.
+import { Box, Container, Link, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -31,8 +33,7 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Removed 'item' prop from Grid, as it's implied by breakpoint props (xs, sm) in this version of MUI Grid.
-          <Grid xs={6} sm={3} key={link}>
+          <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>
@@ -40,7 +41,7 @@ export const Footer: React.FC = () => {
         ))}
       </Grid>
       <Typography variant="body2" sx={{ mt: 4 }}>
-        &copy; 1997-2024 StreamFlix, Inc.
+        &copy; 1997-2024 Quix, Inc.
       </Typography>
     </Container>
   );

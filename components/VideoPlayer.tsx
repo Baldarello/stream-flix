@@ -77,8 +77,23 @@ const VideoPlayer: React.FC = () => {
         </Box>
     );
   }
+  
+  const isEpisode = 'episode_number' in nowPlayingItem;
+  let videoSrc = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+  // Fix: The 'title' property does not exist on all types of 'PlayableItem'.
+  // Initializing 'title' here caused a type error. The variable is correctly
+  // assigned within the subsequent if/else block which acts as a type guard.
+  let title: string;
 
-  const title = nowPlayingItem.title || nowPlayingItem.name;
+  if (isEpisode) {
+      videoSrc = nowPlayingItem.video_url || videoSrc; // Fallback to bunny
+      const S = String(nowPlayingItem.season_number).padStart(2,'0');
+      const E = String(nowPlayingItem.episode_number).padStart(2,'0');
+      title = `${nowPlayingItem.show_title} - S${S}E${E}: ${nowPlayingItem.name}`;
+  } else {
+      title = nowPlayingItem.title || nowPlayingItem.name || 'Contenuto Video';
+  }
+
   const isRemoteControlled = isSmartTV;
 
   return (
@@ -114,20 +129,21 @@ const VideoPlayer: React.FC = () => {
                 <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h6" sx={{ ml: 2, textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
-                {roomId ? `Stanza: ${roomId} - ` : ''}Stai guardando: {title}
+                {roomId ? `Stanza: ${roomId} - ` : ''}{title}
                 </Typography>
             </Toolbar>
             </AppBar>
         )}
         <video
           ref={videoRef}
-          src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+          src={videoSrc}
           controls={!roomId && !isRemoteControlled || isHost}
           autoPlay
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           onPlay={sendSlaveStatusUpdate}
           onPause={sendSlaveStatusUpdate}
           onEnded={() => stopPlayback()}
+          key={videoSrc} // Force re-render if src changes
         />
       </Box>
       {roomId && <Chat />}

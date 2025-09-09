@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, Grid, Card, CardMedia } from '@mui/material';
+// Fix: Changed Grid import to a direct import to solve TypeScript error with the 'item' prop.
+import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, Card, CardMedia, Tooltip } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import GroupIcon from '@mui/icons-material/Group';
+import LinkIcon from '@mui/icons-material/Link';
 import WatchTogetherModal from './WatchTogetherModal';
+import LinkEpisodesModal from './LinkEpisodesModal';
 import type { Episode } from '../types';
 
 const DetailView: React.FC = () => {
@@ -95,7 +99,14 @@ const DetailView: React.FC = () => {
       {item.media_type === 'tv' && item.seasons && item.seasons.length > 0 && (
         <Box sx={{ p: { xs: 2, md: 8 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Typography variant="h4" component="h2" fontWeight="bold">Episodi</Typography>
+             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography variant="h4" component="h2" fontWeight="bold">Episodi</Typography>
+                <Tooltip title="Collega file video per la stagione">
+                    <IconButton onClick={() => mediaStore.openLinkEpisodesModal(item)}>
+                        <LinkIcon />
+                    </IconButton>
+                </Tooltip>
+            </Box>
             <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
               <InputLabel id="season-select-label">Stagione</InputLabel>
               <Select
@@ -115,9 +126,25 @@ const DetailView: React.FC = () => {
           </Box>
           <Grid container spacing={3}>
             {currentSeason?.episodes.map((episode: Episode) => (
-              // FIX: Removed 'item' prop from Grid, as it's implied by breakpoint props (xs, sm, etc.) in this version of MUI Grid.
-              <Grid xs={12} sm={6} md={4} lg={3} key={episode.id}>
-                <Card sx={{ bgcolor: 'background.paper', cursor: 'pointer', '&:hover .play-icon': { opacity: 1 } }}>
+              <Grid item xs={12} sm={6} md={4} lg={3} key={episode.id}>
+                <Card 
+                  onClick={() => {
+                      if (episode.video_url && currentSeason) {
+                          mediaStore.startPlayback({
+                              ...episode,
+                              show_id: item.id,
+                              show_title: item.title || item.name || '',
+                              backdrop_path: item.backdrop_path,
+                              season_number: currentSeason.season_number,
+                          });
+                      }
+                  }}
+                  sx={{ 
+                    bgcolor: 'background.paper', 
+                    cursor: episode.video_url ? 'pointer' : 'default',
+                    '&:hover .play-icon': { opacity: episode.video_url ? 1 : 0.4 } 
+                  }}
+                >
                   <Box sx={{ position: 'relative' }}>
                     <CardMedia
                       component="img"
@@ -125,7 +152,19 @@ const DetailView: React.FC = () => {
                       alt={`Scena da ${episode.name}`}
                       sx={{ aspectRatio: '16/9', objectFit: 'cover' }}
                     />
-                    <Box className="play-icon" sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', opacity: 0, transition: 'opacity 0.3s' }}>
+                    <Box 
+                      className="play-icon" 
+                      sx={{ 
+                        position: 'absolute', 
+                        inset: 0, 
+                        bgcolor: 'rgba(0,0,0,0.4)', 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        opacity: episode.video_url ? 0 : 0.4,
+                        transition: 'opacity 0.3s' 
+                      }}
+                    >
                       <PlayArrowIcon sx={{ fontSize: 60, color: 'white' }} />
                     </Box>
                   </Box>
@@ -142,6 +181,7 @@ const DetailView: React.FC = () => {
         </Box>
       )}
       <WatchTogetherModal />
+      <LinkEpisodesModal />
     </Box>
   );
 };

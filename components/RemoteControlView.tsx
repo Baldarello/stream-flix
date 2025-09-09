@@ -34,7 +34,7 @@ const RemoteControlView: React.FC = () => {
              <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
                 <Toolbar>
                     <Typography variant="h6" color="primary.main" fontWeight="bold">
-                        Telecomando StreamFlix
+                        Telecomando Quix
                     </Typography>
                 </Toolbar>
              </AppBar>

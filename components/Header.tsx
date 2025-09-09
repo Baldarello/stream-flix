@@ -41,7 +41,7 @@ export const Header: React.FC = observer(() => {
                 cursor: 'pointer',
               }}
             >
-              StreamFlix
+              Quix
             </Typography>
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
               {navItems.map((item) => (

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, Fade } from '@mui/material';
+// Fix: Changed Grid import to a direct import to solve TypeScript error with the 'item' prop.
+import { Box, Container, Typography, Fade } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
@@ -20,8 +22,7 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Removed 'item' prop from Grid, as it's implied by breakpoint props (xs, sm, etc.) in this version of MUI Grid.
-              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
+              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}

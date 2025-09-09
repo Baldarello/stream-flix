@@ -4,6 +4,7 @@ export interface Episode {
   name: string;
   overview: string;
   still_path: string; // URL to an image
+  video_url?: string;
 }
 
 export interface Season {
@@ -27,3 +28,10 @@ export interface MediaItem {
   media_type: 'movie' | 'tv';
   seasons?: Season[];
 }
+
+export type PlayableItem = MediaItem | (Episode & {
+    show_id: number;
+    show_title: string;
+    backdrop_path: string;
+    season_number: number;
+});

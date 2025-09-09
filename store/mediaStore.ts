@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import type { MediaItem } from '../types';
+import type { MediaItem, PlayableItem, Episode } from '../types';
 import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime } from '../services/tmdbService';
 import { websocketService, ChatMessage } from '../services/websocketService';
 import { isSmartTV as detectSmartTV } from '../utils/device';
@@ -23,7 +23,7 @@ class MediaStore {
   selectedItem: MediaItem | null = null;
   myList: number[] = [];
   isPlaying = false;
-  nowPlayingItem: MediaItem | null = null;
+  nowPlayingItem: PlayableItem | null = null;
   activeView: ActiveView = 'Home';
 
   // Watch Together State
@@ -45,10 +45,16 @@ class MediaStore {
   isRemoteMasterConnected = false;
   remoteSlaveState: RemoteSlaveState | null = null;
 
+  // Episode Linking State
+  episodeLinks: Map<number, string> = new Map();
+  isLinkEpisodesModalOpen = false;
+  linkingEpisodesForItem: MediaItem | null = null;
+
   constructor() {
     makeAutoObservable(this);
     this.isSmartTV = detectSmartTV();
     this.loadMyListFromStorage();
+    this.loadEpisodeLinks();
     websocketService.events.on('message', this.handleIncomingMessage);
   }
   
@@ -167,7 +173,7 @@ class MediaStore {
             payload: {
                 slaveId: this.slaveId,
                 isPlaying: this.isPlaying,
-                nowPlayingItem: this.nowPlayingItem ? { ...this.nowPlayingItem, seasons: undefined } : null // Avoid sending bulky data
+                nowPlayingItem: this.nowPlayingItem && 'media_type' in this.nowPlayingItem ? { ...this.nowPlayingItem, seasons: undefined } : null // Avoid sending bulky data
             }
         });
     }
@@ -280,7 +286,24 @@ class MediaStore {
     window.scrollTo(0, 0);
   }
 
+  private applyEpisodeLinksToMedia = (items: MediaItem[]) => {
+    items.forEach(item => {
+        if (item.media_type === 'tv' && item.seasons) {
+            item.seasons.forEach(season => {
+                season.episodes.forEach(episode => {
+                    if (this.episodeLinks.has(episode.id)) {
+                        episode.video_url = this.episodeLinks.get(episode.id);
+                    }
+                });
+            });
+        }
+    });
+  };
+
   selectMedia = (item: MediaItem) => {
+    if (item.media_type === 'tv') {
+        this.applyEpisodeLinksToMedia([item]);
+    }
     this.selectedItem = item;
     window.scrollTo(0, 0);
   }
@@ -289,7 +312,7 @@ class MediaStore {
     this.selectedItem = null;
   }
   
-  startPlayback = (item: MediaItem) => {
+  startPlayback = (item: PlayableItem) => {
     if (this.roomId && this.isHost) {
         this.sendPlaybackControl({ status: 'playing', time: 0 });
     }
@@ -306,6 +329,74 @@ class MediaStore {
     this.nowPlayingItem = null;
     this.sendSlaveStatusUpdate(); // Notify remote master
   }
+
+  // --- Episode Linking Methods ---
+
+  openLinkEpisodesModal = (item: MediaItem) => {
+    this.linkingEpisodesForItem = item;
+    this.isLinkEpisodesModalOpen = true;
+  };
+
+  closeLinkEpisodesModal = () => {
+    this.isLinkEpisodesModalOpen = false;
+    this.linkingEpisodesForItem = null;
+  };
+
+  loadEpisodeLinks = () => {
+    const storedLinks = localStorage.getItem('episodeLinks');
+    if (storedLinks) {
+      this.episodeLinks = new Map(JSON.parse(storedLinks));
+    }
+  };
+
+  saveEpisodeLinks = () => {
+    localStorage.setItem('episodeLinks', JSON.stringify(Array.from(this.episodeLinks.entries())));
+  };
+
+  setEpisodeLinksForSeason = (payload: { seasonNumber: number; method: 'pattern' | 'list' | 'json'; data: any }) => {
+    const { seasonNumber, method, data } = payload;
+    const item = this.linkingEpisodesForItem;
+
+    if (!item || !item.seasons) return;
+
+    const season = item.seasons.find(s => s.season_number === seasonNumber);
+    if (!season) return;
+
+    let links: (string | undefined)[] = [];
+
+    switch (method) {
+        case 'pattern':
+            const { pattern, padding } = data;
+            if (!pattern || !pattern.includes('[@EP]')) return;
+            links = season.episodes.map(ep => 
+                pattern.replace('[@EP]', String(ep.episode_number).padStart(padding, '0'))
+            );
+            break;
+        case 'list':
+            links = data.list.split('\n').filter((line: string) => line.trim() !== '');
+            break;
+        case 'json':
+            try {
+                links = JSON.parse(data.json);
+                if (!Array.isArray(links)) links = [];
+            } catch (e) {
+                console.error("Invalid JSON for episode links", e);
+                links = [];
+            }
+            break;
+    }
+
+    season.episodes.forEach((episode, index) => {
+        if (links[index]) {
+            this.episodeLinks.set(episode.id, links[index] as string);
+        }
+    });
+
+    this.saveEpisodeLinks();
+    this.applyEpisodeLinksToMedia([item]); // Re-apply to the current item
+    this.closeLinkEpisodesModal();
+  };
+
 
   get heroContent(): MediaItem | undefined {
     return this.trending[0];
@@ -346,6 +437,9 @@ class MediaStore {
         this.latestMovies = latestMoviesData;
         this.topSeries = topSeriesData;
         this.popularAnime = popularAnimeData;
+
+        this.applyEpisodeLinksToMedia(this.topSeries);
+        this.applyEpisodeLinksToMedia(this.popularAnime);
       });
 
     } catch (err) {
