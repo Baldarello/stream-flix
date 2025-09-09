@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { AppBar, Toolbar, Typography, Box, Button, IconButton, useScrollTrigger, Slide, TextField, InputAdornment, Grow, Fade } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -11,11 +11,22 @@ const navItems = ['Home', 'Serie TV', 'Film', 'Anime', 'La mia lista'];
 
 export const Header: React.FC = observer(() => {
   const { isSearchActive, toggleSearch, searchQuery, setSearchQuery } = mediaStore;
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 10,
   });
+
+  useEffect(() => {
+    if (isSearchActive) {
+      // Timeout ensures the input is focusable after the transition starts
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isSearchActive]);
 
   const handleNavClick = (view: ActiveView) => {
     toggleSearch(false);
@@ -79,11 +90,11 @@ export const Header: React.FC = observer(() => {
              <Grow in={isSearchActive}>
                 <TextField
                     fullWidth
-                    autoFocus
                     variant="standard"
                     placeholder="Cerca titoli..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    inputRef={searchInputRef}
                     sx={{
                         '& .MuiInput-underline:before': { borderBottomColor: 'rgba(255, 255, 255, 0.42)' },
                         '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'white' },
