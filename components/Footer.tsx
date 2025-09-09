@@ -31,7 +31,7 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Removed invalid `item` prop from Grid component to resolve TypeScript error.
+          // FIX: Removed 'item' prop from Grid, as it's implied by breakpoint props (xs, sm) in this version of MUI Grid.
           <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}

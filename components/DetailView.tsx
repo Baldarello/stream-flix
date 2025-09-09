@@ -6,6 +6,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import GroupIcon from '@mui/icons-material/Group';
+import WatchTogetherModal from './WatchTogetherModal';
 import type { Episode } from '../types';
 
 const DetailView: React.FC = () => {
@@ -75,6 +77,15 @@ const DetailView: React.FC = () => {
               >
                 {isInMyList ? <CheckIcon /> : <AddIcon />}
               </IconButton>
+              <Button
+                variant="outlined"
+                startIcon={<GroupIcon />}
+                size="large"
+                onClick={() => mediaStore.openWatchTogetherModal(item)}
+                sx={{ borderColor: 'rgba(255,255,255,0.7)', color: 'white', '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)'} }}
+              >
+                Guarda Insieme
+              </Button>
             </Stack>
           </Stack>
         </Box>
@@ -104,7 +115,7 @@ const DetailView: React.FC = () => {
           </Box>
           <Grid container spacing={3}>
             {currentSeason?.episodes.map((episode: Episode) => (
-              // FIX: Removed invalid `item` prop from Grid component to resolve TypeScript error.
+              // FIX: Removed 'item' prop from Grid, as it's implied by breakpoint props (xs, sm, etc.) in this version of MUI Grid.
               <Grid xs={12} sm={6} md={4} lg={3} key={episode.id}>
                 <Card sx={{ bgcolor: 'background.paper', cursor: 'pointer', '&:hover .play-icon': { opacity: 1 } }}>
                   <Box sx={{ position: 'relative' }}>
@@ -130,6 +141,7 @@ const DetailView: React.FC = () => {
           </Grid>
         </Box>
       )}
+      <WatchTogetherModal />
     </Box>
   );
 };

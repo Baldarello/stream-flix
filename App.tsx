@@ -8,10 +8,14 @@ import { ContentRow } from './components/ContentRow';
 import { Footer } from './components/Footer';
 import DetailView from './components/DetailView';
 import VideoPlayer from './components/VideoPlayer';
+import GridView from './components/GridView';
+import SmartTVScreen from './components/SmartTVScreen';
+import RemoteControlView from './components/RemoteControlView';
 
 const App: React.FC = () => {
   useEffect(() => {
     mediaStore.fetchAllData();
+    mediaStore.initRemoteSession();
   }, []);
 
   if (mediaStore.loading) {
@@ -46,19 +50,41 @@ const App: React.FC = () => {
     );
   }
 
-  const { heroContent, latestMovies, myListItems, trending, topSeries, popularAnime, selectedItem, isPlaying } = mediaStore;
+  const {
+    heroContent,
+    latestMovies,
+    myListItems,
+    trending,
+    topSeries,
+    popularAnime,
+    selectedItem,
+    nowPlayingItem,
+    activeView,
+    allMovies,
+    isRemoteMaster,
+    isSmartTV,
+  } = mediaStore;
 
-  if (isPlaying) {
+  // Remote Control (Master) View
+  if (isRemoteMaster) {
+      return <RemoteControlView />;
+  }
+  
+  // Video Player takes precedence
+  if (nowPlayingItem) {
     return <VideoPlayer />;
   }
+  
+  // Smart TV (Slave) View
+  if (isSmartTV) {
+      return <SmartTVScreen />;
+  }
 
-  return (
-    <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
-      <Header />
-      <main>
-        {selectedItem ? (
-          <DetailView />
-        ) : (
+  // Standard App View
+  const renderMainContent = () => {
+    switch (activeView) {
+      case 'Home':
+        return (
           <>
             {heroContent && (
               <Hero
@@ -79,8 +105,24 @@ const App: React.FC = () => {
               </Box>
             </Container>
           </>
-        )}
-      </main>
+        );
+      case 'Serie TV':
+        return <GridView title="Serie TV" items={topSeries} />;
+      case 'Film':
+        return <GridView title="Film" items={allMovies} />;
+      case 'Anime':
+        return <GridView title="Anime" items={popularAnime} />;
+      case 'La mia lista':
+        return <GridView title="La mia lista" items={myListItems} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
+      <Header />
+      <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
       <Footer />
     </Box>
   );

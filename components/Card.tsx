@@ -5,17 +5,26 @@ import { Card as MuiCard, CardMedia, Typography, Box, CardActionArea } from '@mu
 interface CardProps {
   item: MediaItem;
   onClick: (item: MediaItem) => void;
+  displayMode?: 'row' | 'grid';
 }
 
-export const Card: React.FC<CardProps> = ({ item, onClick }) => {
+export const Card: React.FC<CardProps> = ({ item, onClick, displayMode = 'row' }) => {
   const title = item.title || item.name;
+
+  const cardStyles =
+    displayMode === 'row'
+      ? {
+          flexShrink: 0,
+          width: { xs: 160, md: 208, lg: 256 },
+        }
+      : {
+          width: '100%',
+        };
 
   return (
     <MuiCard
       sx={{
         position: 'relative',
-        flexShrink: 0,
-        width: { xs: 160, md: 208, lg: 256 },
         bgcolor: 'background.paper',
         transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
         '&:hover': {
@@ -23,6 +32,10 @@ export const Card: React.FC<CardProps> = ({ item, onClick }) => {
           zIndex: 10,
           boxShadow: '0px 10px 15px rgba(0,0,0,0.5)',
         },
+        '&:hover .title-overlay': {
+          opacity: 1,
+        },
+        ...cardStyles,
       }}
       onClick={() => onClick(item)}
       role="button"
@@ -39,6 +52,7 @@ export const Card: React.FC<CardProps> = ({ item, onClick }) => {
           }}
         />
         <Box
+          className="title-overlay"
           sx={{
             position: 'absolute',
             bottom: 0,
@@ -48,9 +62,6 @@ export const Card: React.FC<CardProps> = ({ item, onClick }) => {
             background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%)',
             opacity: 0,
             transition: 'opacity 0.3s',
-            '&:hover': {
-              opacity: 1,
-            },
           }}
         >
           <Typography variant="subtitle2" color="white" fontWeight="bold" noWrap>
