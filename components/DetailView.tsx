@@ -167,7 +167,9 @@ const DetailView: React.FC = () => {
                     sx={{ 
                         bgcolor: 'background.paper', 
                         cursor: episode.video_url ? 'pointer' : 'default',
-                        '&:hover .play-icon': { opacity: episode.video_url ? 1 : 0.4 } 
+                        '&:hover .play-icon': { opacity: episode.video_url ? 1 : 0.4 },
+                        maxWidth: 400,
+                        mx: 'auto'
                     }}
                     >
                     <Box sx={{ position: 'relative' }}>

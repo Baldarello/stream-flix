@@ -19,8 +19,9 @@ const API_BASE_URL = 'https://production-api.tnl.one/';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/';
 const BASE_PATH="service/tmdb/"
 
-const API_KEY_TMDB =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
+// FIX: Hardcoded API key removed. The API key should be provided via environment variables.
+// const API_KEY_TMDB =
+//     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
 
 
 const apiClient = axios.create({
@@ -38,7 +39,8 @@ apiClient.interceptors.request.use(async request => {
     request.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept";
     request.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,PATCH,OPTIONS";
     if ((request.headers["Authorization"] === undefined || request.headers["Authorization"] === null || request.headers["Authorization"] === "")) {
-        request.headers["Authorization"] = API_KEY_TMDB;
+        // FIX: Use API_KEY from environment variables instead of a hardcoded key.
+        request.headers["Authorization"] = API_KEY;
     }
 
     return request;
