@@ -1,7 +1,5 @@
 import React from 'react';
-// Fix: Changed Grid import to a direct import to solve TypeScript error with the 'item' prop.
-import { Box, Container, Typography, Fade } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
@@ -22,6 +20,7 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
+              // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>

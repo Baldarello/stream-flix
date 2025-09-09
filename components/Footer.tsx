@@ -1,7 +1,5 @@
 import React from 'react';
-// Fix: Changed Grid import to a direct import to solve TypeScript error with the 'item' prop.
-import { Box, Container, Link, Typography, IconButton } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -33,6 +31,7 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
+          // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
           <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}

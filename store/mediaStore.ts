@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import type { MediaItem, PlayableItem, Episode } from '../types';
-import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime } from '../services/tmdbService';
+import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime, getSeriesDetails, getSeriesEpisodes } from '../services/apiCall';
 import { websocketService, ChatMessage } from '../services/websocketService';
 import { isSmartTV as detectSmartTV } from '../utils/device';
 
@@ -21,6 +21,7 @@ class MediaStore {
   loading = true;
   error: string | null = null;
   selectedItem: MediaItem | null = null;
+  isDetailLoading = false;
   myList: number[] = [];
   isPlaying = false;
   nowPlayingItem: PlayableItem | null = null;
@@ -49,6 +50,9 @@ class MediaStore {
   episodeLinks: Map<number, string> = new Map();
   isLinkEpisodesModalOpen = false;
   linkingEpisodesForItem: MediaItem | null = null;
+
+  // Player Episode Drawer State
+  isEpisodesDrawerOpen = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -286,7 +290,7 @@ class MediaStore {
     window.scrollTo(0, 0);
   }
 
-  private applyEpisodeLinksToMedia = (items: MediaItem[]) => {
+  applyEpisodeLinksToMedia = (items: MediaItem[]) => {
     items.forEach(item => {
         if (item.media_type === 'tv' && item.seasons) {
             item.seasons.forEach(season => {
@@ -300,12 +304,33 @@ class MediaStore {
     });
   };
 
-  selectMedia = (item: MediaItem) => {
-    if (item.media_type === 'tv') {
-        this.applyEpisodeLinksToMedia([item]);
-    }
-    this.selectedItem = item;
+  selectMedia = async (item: MediaItem) => {
+    this.selectedItem = item; // Show basic info immediately
     window.scrollTo(0, 0);
+  
+    if (item.media_type === 'tv') {
+      this.isDetailLoading = true;
+      try {
+        const seriesDetails = await getSeriesDetails(item.id);
+        const seasonsWithEpisodes = await Promise.all(
+          seriesDetails.seasons?.map(async (season) => {
+            const episodes = await getSeriesEpisodes(item.id, season.season_number);
+            return { ...season, episodes };
+          }) ?? []
+        );
+        runInAction(() => {
+          this.selectedItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
+          this.applyEpisodeLinksToMedia([this.selectedItem]);
+        });
+      } catch (error) {
+        console.error("Failed to fetch series details and episodes", error);
+        // Optionally set an error state
+      } finally {
+        runInAction(() => {
+          this.isDetailLoading = false;
+        });
+      }
+    }
   }
 
   closeDetail = () => {
@@ -328,6 +353,7 @@ class MediaStore {
     this.isPlaying = false;
     this.nowPlayingItem = null;
     this.sendSlaveStatusUpdate(); // Notify remote master
+    this.closeEpisodesDrawer();
   }
 
   // --- Episode Linking Methods ---
@@ -397,13 +423,44 @@ class MediaStore {
     this.closeLinkEpisodesModal();
   };
 
+  // --- Player Episode Drawer Methods ---
+  openEpisodesDrawer = () => {
+    this.isEpisodesDrawerOpen = true;
+  }
+  closeEpisodesDrawer = () => {
+    this.isEpisodesDrawerOpen = false;
+  }
 
   get heroContent(): MediaItem | undefined {
     return this.trending[0];
   }
 
+  get currentShow(): MediaItem | undefined {
+    if (this.nowPlayingItem && 'show_id' in this.nowPlayingItem) {
+        return this.allItems.find(item => item.id === (this.nowPlayingItem as any).show_id);
+    }
+    return undefined;
+  }
+
+  get currentSeasonEpisodes(): Episode[] {
+    if (this.nowPlayingItem && 'season_number' in this.nowPlayingItem && this.currentShow) {
+        const season = this.currentShow.seasons?.find(s => s.season_number === (this.nowPlayingItem as any).season_number);
+        return season?.episodes ?? [];
+    }
+    return [];
+  }
+  
+  get nextEpisode(): Episode | undefined {
+      if (this.nowPlayingItem && 'episode_number' in this.nowPlayingItem) {
+          const currentEpisodeNumber = this.nowPlayingItem.episode_number;
+          const nextEpisode = this.currentSeasonEpisodes.find(ep => ep.episode_number === currentEpisodeNumber + 1);
+          return nextEpisode;
+      }
+      return undefined;
+  }
+
   get allMovies(): MediaItem[] {
-    const all = [...this.latestMovies, ...this.trending];
+    const all = [...this.latestMovies, ...this.trending.filter(i => i.media_type === 'movie')];
     return Array.from(new Map(all.map(item => [item.id, item])).values());
   }
 
@@ -420,7 +477,9 @@ class MediaStore {
     this.loading = true;
     this.error = null;
     try {
-      const [
+      let asd=await getTrending()
+      console.log("ASD")
+      /*const [
         trendingData,
         latestMoviesData,
         topSeriesData,
@@ -437,10 +496,7 @@ class MediaStore {
         this.latestMovies = latestMoviesData;
         this.topSeries = topSeriesData;
         this.popularAnime = popularAnimeData;
-
-        this.applyEpisodeLinksToMedia(this.topSeries);
-        this.applyEpisodeLinksToMedia(this.popularAnime);
-      });
+      });*/
 
     } catch (err) {
        runInAction(() => {

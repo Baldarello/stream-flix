@@ -1,9 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, IconButton, Typography, AppBar, Toolbar, CircularProgress } from '@mui/material';
+import { Box, IconButton, Typography, AppBar, Toolbar, CircularProgress, Tooltip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chat from './Chat';
+import EpisodesDrawer from './EpisodesDrawer';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 const VideoPlayer: React.FC = () => {
   const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate } = mediaStore;
@@ -70,12 +73,9 @@ const VideoPlayer: React.FC = () => {
   }, [isPlaying, isSmartTV, sendSlaveStatusUpdate]);
 
   if (!nowPlayingItem) {
-    mediaStore.stopPlayback();
-    return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'black' }}>
-            <CircularProgress color="primary" />
-        </Box>
-    );
+    // This component should be unmounted by App.tsx when nowPlayingItem is null.
+    // This is a safeguard against race conditions, preventing render errors and recursive loops.
+    return null;
   }
   
   const isEpisode = 'episode_number' in nowPlayingItem;
@@ -128,9 +128,43 @@ const VideoPlayer: React.FC = () => {
                 >
                 <ArrowBackIcon />
                 </IconButton>
-                <Typography variant="h6" sx={{ ml: 2, textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
-                {roomId ? `Stanza: ${roomId} - ` : ''}{title}
+                <Typography variant="h6" noWrap sx={{ ml: 2, textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
+                  {roomId ? `Stanza: ${roomId} - ` : ''}{title}
                 </Typography>
+                <Box sx={{ flexGrow: 1 }} />
+                {isEpisode && (
+                  <>
+                    <Tooltip title="Prossimo episodio">
+                      <span>
+                        <IconButton
+                          color="inherit"
+                          onClick={() => {
+                              if (mediaStore.nextEpisode) {
+                                  mediaStore.startPlayback({
+                                    ...mediaStore.nextEpisode,
+                                    show_id: mediaStore.currentShow!.id,
+                                    show_title: mediaStore.currentShow!.title || mediaStore.currentShow!.name || '',
+                                    backdrop_path: mediaStore.currentShow!.backdrop_path,
+                                    season_number: (nowPlayingItem as any).season_number,
+                                  });
+                              }
+                          }}
+                          disabled={!mediaStore.nextEpisode}
+                        >
+                          <SkipNextIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title="Lista episodi">
+                      <IconButton
+                        color="inherit"
+                        onClick={mediaStore.openEpisodesDrawer}
+                      >
+                        <ListAltIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                )}
             </Toolbar>
             </AppBar>
         )}
@@ -147,6 +181,7 @@ const VideoPlayer: React.FC = () => {
         />
       </Box>
       {roomId && <Chat />}
+      {isEpisode && <EpisodesDrawer />}
     </Box>
   );
 };
