@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, IconButton, Typography, AppBar, Toolbar, CircularProgress, Tooltip } from '@mui/material';
+import { Box, IconButton, Typography, AppBar, Toolbar, CircularProgress, Tooltip, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chat from './Chat';
 import EpisodesDrawer from './EpisodesDrawer';
@@ -12,6 +12,7 @@ const VideoPlayer: React.FC = () => {
   const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate } = mediaStore;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showSkipIntro, setShowSkipIntro] = useState(false);
 
   // Effect for Watch Together Synchronization
   useEffect(() => {
@@ -72,6 +73,34 @@ const VideoPlayer: React.FC = () => {
       }
   }, [isPlaying, isSmartTV, sendSlaveStatusUpdate]);
 
+  // Effect for "Skip Intro" button visibility
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement || !nowPlayingItem || !('intro_start_s' in nowPlayingItem) || !nowPlayingItem.intro_start_s) {
+        setShowSkipIntro(false);
+        return;
+    }
+
+    const handleTimeUpdate = () => {
+        const currentTime = videoElement.currentTime;
+        const introStart = nowPlayingItem.intro_start_s ?? -1;
+        const introEnd = nowPlayingItem.intro_end_s ?? -1;
+
+        if (currentTime >= introStart && currentTime < introEnd) {
+            if (!showSkipIntro) setShowSkipIntro(true);
+        } else {
+            if (showSkipIntro) setShowSkipIntro(false);
+        }
+    };
+
+    videoElement.addEventListener('timeupdate', handleTimeUpdate);
+
+    return () => {
+        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+    };
+  }, [nowPlayingItem, showSkipIntro]);
+
+
   if (!nowPlayingItem) {
     // This component should be unmounted by App.tsx when nowPlayingItem is null.
     // This is a safeguard against race conditions, preventing render errors and recursive loops.
@@ -80,9 +109,6 @@ const VideoPlayer: React.FC = () => {
   
   const isEpisode = 'episode_number' in nowPlayingItem;
   let videoSrc = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-  // Fix: The 'title' property does not exist on all types of 'PlayableItem'.
-  // Initializing 'title' here caused a type error. The variable is correctly
-  // assigned within the subsequent if/else block which acts as a type guard.
   let title: string;
 
   if (isEpisode) {
@@ -93,6 +119,13 @@ const VideoPlayer: React.FC = () => {
   } else {
       title = nowPlayingItem.title || nowPlayingItem.name || 'Contenuto Video';
   }
+
+  const handleSkipIntro = () => {
+    if (videoRef.current && isEpisode && nowPlayingItem.intro_end_s) {
+        videoRef.current.currentTime = nowPlayingItem.intro_end_s;
+        setShowSkipIntro(false);
+    }
+  };
 
   const isRemoteControlled = isSmartTV;
 
@@ -179,6 +212,28 @@ const VideoPlayer: React.FC = () => {
           onEnded={() => stopPlayback()}
           key={videoSrc} // Force re-render if src changes
         />
+         {showSkipIntro && !isRemoteControlled && (
+            <Button
+                variant="contained"
+                onClick={handleSkipIntro}
+                sx={{
+                    position: 'absolute',
+                    bottom: '80px',
+                    right: '20px',
+                    zIndex: 2001,
+                    bgcolor: 'rgba(28, 28, 28, 0.85)',
+                    color: 'white',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    backdropFilter: 'blur(5px)',
+                    '&:hover': {
+                        bgcolor: 'rgba(40, 40, 40, 1)',
+                        borderColor: 'white',
+                    }
+                }}
+            >
+                Salta introduzione
+            </Button>
+        )}
       </Box>
       {roomId && <Chat />}
       {isEpisode && <EpisodesDrawer />}

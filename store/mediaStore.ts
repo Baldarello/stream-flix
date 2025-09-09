@@ -63,6 +63,9 @@ class MediaStore {
   // Player Episode Drawer State
   isEpisodesDrawerOpen = false;
 
+  // Custom Intro Durations
+  showIntroDurations: Map<number, number> = new Map();
+
   constructor() {
     makeAutoObservable(this);
     this.isSmartTV = detectSmartTV();
@@ -70,6 +73,7 @@ class MediaStore {
     this.loadCachedItemsFromStorage();
     this.loadEpisodeLinks();
     this.loadViewingHistoryFromStorage();
+    this.loadShowIntroDurationsFromStorage();
     websocketService.events.on('message', this.handleIncomingMessage);
   }
   
@@ -343,6 +347,32 @@ class MediaStore {
     this.saveViewingHistoryToStorage();
   }
 
+  // --- Custom Intro Duration Methods ---
+  loadShowIntroDurationsFromStorage = () => {
+    const storedDurations = localStorage.getItem('showIntroDurations');
+    if (storedDurations) {
+        try {
+            this.showIntroDurations = new Map(JSON.parse(storedDurations));
+        } catch (e) {
+            console.error("Failed to parse show intro durations from localStorage", e);
+            this.showIntroDurations = new Map();
+        }
+    }
+  }
+
+  saveShowIntroDurationsToStorage = () => {
+    localStorage.setItem('showIntroDurations', JSON.stringify(Array.from(this.showIntroDurations.entries())));
+  }
+
+  setShowIntroDuration = (showId: number, duration: number) => {
+    if (duration >= 0) {
+        this.showIntroDurations.set(showId, duration);
+    } else {
+        this.showIntroDurations.delete(showId);
+    }
+    this.saveShowIntroDurationsToStorage();
+  }
+
   setActiveView = (view: ActiveView) => {
     if (this.activeView !== view) {
       this.selectedItem = null;
@@ -449,8 +479,15 @@ class MediaStore {
     if (this.roomId && this.isHost) {
         this.sendPlaybackControl({ status: 'playing', time: 0 });
     }
-    if ('show_id' in item) {
+    if ('episode_number' in item) {
       this.addViewingHistoryEntry(item.show_id, item.id);
+      
+      // New logic to calculate intro end time dynamically
+      if (item.intro_start_s !== undefined) {
+          const customDuration = this.showIntroDurations.get(item.show_id);
+          const introDuration = customDuration !== undefined ? customDuration : 80; // Default to 80 seconds
+          item.intro_end_s = item.intro_start_s + introDuration;
+      }
     }
     this.nowPlayingItem = item;
     this.isPlaying = true;
@@ -563,16 +600,25 @@ class MediaStore {
       .filter((item): item is MediaItem => !!item && item.media_type === 'tv');
   }
 
+  // FIX: Added a type guard to ensure `nowPlayingItem` is an episode before accessing
+  // episode-specific properties like `show_id`. This resolves a TypeScript error.
   get currentShow(): MediaItem | undefined {
-    if (this.nowPlayingItem && 'show_id' in this.nowPlayingItem) {
-        return this.allItems.find(item => item.id === (this.nowPlayingItem as any).show_id);
+    if (this.nowPlayingItem && 'episode_number' in this.nowPlayingItem) {
+      // Prioritize selectedItem if it's the show being played, as it's guaranteed to have full season details.
+      if (this.selectedItem && this.selectedItem.media_type === 'tv' && this.selectedItem.id === this.nowPlayingItem.show_id) {
+        return this.selectedItem;
+      }
+      // Fallback for cases where selectedItem is not set (e.g., deep link, history)
+      return this.allItems.find(item => item.id === this.nowPlayingItem.show_id);
     }
     return undefined;
   }
 
+  // FIX: Added a type guard to ensure `nowPlayingItem` is an episode before accessing
+  // episode-specific properties like `season_number`. This resolves a TypeScript error.
   get currentSeasonEpisodes(): Episode[] {
-    if (this.nowPlayingItem && 'season_number' in this.nowPlayingItem && this.currentShow) {
-        const season = this.currentShow.seasons?.find(s => s.season_number === (this.nowPlayingItem as any).season_number);
+    if (this.nowPlayingItem && 'episode_number' in this.nowPlayingItem && this.currentShow) {
+        const season = this.currentShow.seasons?.find(s => s.season_number === this.nowPlayingItem.season_number);
         return season?.episodes ?? [];
     }
     return [];

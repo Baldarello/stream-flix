@@ -5,6 +5,8 @@ export interface Episode {
   overview: string;
   still_path: string; // URL to an image
   video_url?: string;
+  intro_start_s?: number; // Start time of intro in seconds
+  intro_end_s?: number;   // End time of intro in seconds
 }
 
 export interface Season {
