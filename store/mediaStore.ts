@@ -600,25 +600,29 @@ class MediaStore {
       .filter((item): item is MediaItem => !!item && item.media_type === 'tv');
   }
 
-  // FIX: Added a type guard to ensure `nowPlayingItem` is an episode before accessing
-  // episode-specific properties like `show_id`. This resolves a TypeScript error.
+  // FIX: Replaced `this.nowPlayingItem` with a local constant. This allows TypeScript's
+  // type narrowing to correctly infer that `nowPlayingItem` is an episode within the
+  // if-block, resolving an error when accessing the episode-specific `show_id` property.
   get currentShow(): MediaItem | undefined {
-    if (this.nowPlayingItem && 'episode_number' in this.nowPlayingItem) {
+    const nowPlayingItem = this.nowPlayingItem;
+    if (nowPlayingItem && 'episode_number' in nowPlayingItem) {
       // Prioritize selectedItem if it's the show being played, as it's guaranteed to have full season details.
-      if (this.selectedItem && this.selectedItem.media_type === 'tv' && this.selectedItem.id === this.nowPlayingItem.show_id) {
+      if (this.selectedItem && this.selectedItem.media_type === 'tv' && this.selectedItem.id === nowPlayingItem.show_id) {
         return this.selectedItem;
       }
       // Fallback for cases where selectedItem is not set (e.g., deep link, history)
-      return this.allItems.find(item => item.id === this.nowPlayingItem.show_id);
+      return this.allItems.find(item => item.id === nowPlayingItem.show_id);
     }
     return undefined;
   }
 
-  // FIX: Added a type guard to ensure `nowPlayingItem` is an episode before accessing
-  // episode-specific properties like `season_number`. This resolves a TypeScript error.
+  // FIX: Replaced `this.nowPlayingItem` with a local constant. This allows TypeScript's
+  // type narrowing to correctly infer that `nowPlayingItem` is an episode within the
+  // if-block, resolving an error when accessing the episode-specific `season_number` property.
   get currentSeasonEpisodes(): Episode[] {
-    if (this.nowPlayingItem && 'episode_number' in this.nowPlayingItem && this.currentShow) {
-        const season = this.currentShow.seasons?.find(s => s.season_number === this.nowPlayingItem.season_number);
+    const nowPlayingItem = this.nowPlayingItem;
+    if (nowPlayingItem && 'episode_number' in nowPlayingItem && this.currentShow) {
+        const season = this.currentShow.seasons?.find(s => s.season_number === nowPlayingItem.season_number);
         return season?.episodes ?? [];
     }
     return [];
