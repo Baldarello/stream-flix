@@ -11,6 +11,8 @@ import VideoPlayer from './components/VideoPlayer';
 import GridView from './components/GridView';
 import SmartTVScreen from './components/SmartTVScreen';
 import RemoteControlView from './components/RemoteControlView';
+import ProfileDrawer from './components/ProfileDrawer';
+import QRScanner from './components/QRScanner';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -155,6 +157,8 @@ const App: React.FC = () => {
       <Header />
       <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
       <Footer />
+      <ProfileDrawer />
+      <QRScanner />
     </Box>
   );
 };

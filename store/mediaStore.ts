@@ -63,6 +63,10 @@ class MediaStore {
   // Player Episode Drawer State
   isEpisodesDrawerOpen = false;
 
+  // Profile Drawer & QR Scanner State
+  isProfileDrawerOpen = false;
+  isQRScannerOpen = false;
+
   // Custom Intro Durations
   showIntroDurations: Map<number, number> = new Map();
 
@@ -577,6 +581,20 @@ class MediaStore {
   }
   closeEpisodesDrawer = () => {
     this.isEpisodesDrawerOpen = false;
+  }
+
+  // --- Profile Drawer & QR Scanner Methods ---
+  toggleProfileDrawer = (isOpen: boolean) => {
+    this.isProfileDrawerOpen = isOpen;
+  }
+
+  openQRScanner = () => {
+    this.isProfileDrawerOpen = false; // Close drawer when opening scanner
+    this.isQRScannerOpen = true;
+  }
+
+  closeQRScanner = () => {
+    this.isQRScannerOpen = false;
   }
 
   get heroContent(): MediaItem | undefined {

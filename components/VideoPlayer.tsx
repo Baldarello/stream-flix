@@ -11,6 +11,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 const VideoPlayer: React.FC = () => {
   const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate } = mediaStore;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showSkipIntro, setShowSkipIntro] = useState(false);
 
@@ -99,6 +100,59 @@ const VideoPlayer: React.FC = () => {
         videoElement.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, [nowPlayingItem, showSkipIntro]);
+  
+  // Effect for Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      // Do not trigger shortcuts if the user is typing in an input (e.g., chat)
+      if (target.tagName.toLowerCase() === 'input' || target.tagName.toLowerCase() === 'textarea') {
+        return;
+      }
+
+      const videoElement = videoRef.current;
+      if (!videoElement) return;
+
+      const key = event.key.toLowerCase();
+      
+      if (['arrowright', 'arrowleft', 'arrowup', 'arrowdown', 'f', 'm'].includes(key)) {
+          event.preventDefault();
+      }
+
+      switch (key) {
+        case 'arrowright':
+          videoElement.currentTime += 10;
+          break;
+        case 'arrowleft':
+          videoElement.currentTime -= 10;
+          break;
+        case 'arrowup':
+            videoElement.currentTime += 30;
+            break;
+        case 'arrowdown':
+            videoElement.currentTime -= 30;
+            break;
+        case 'f':
+          if (!document.fullscreenElement) {
+            playerContainerRef.current?.requestFullscreen().catch(console.error);
+          } else {
+            document.exitFullscreen().catch(console.error);
+          }
+          break;
+        case 'm':
+          videoElement.muted = !videoElement.muted;
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []); // Empty dependency array ensures this runs once on mount/unmount
 
 
   if (!nowPlayingItem) {
@@ -117,121 +171,81 @@ const VideoPlayer: React.FC = () => {
       const E = String(nowPlayingItem.episode_number).padStart(2,'0');
       title = `${nowPlayingItem.show_title} - S${S}E${E}: ${nowPlayingItem.name}`;
   } else {
-      title = nowPlayingItem.title || nowPlayingItem.name || 'Contenuto Video';
+      title = nowPlayingItem.title || nowPlayingItem.name || 'Video';
   }
 
-  const handleSkipIntro = () => {
-    if (videoRef.current && isEpisode && nowPlayingItem.intro_end_s) {
-        videoRef.current.currentTime = nowPlayingItem.intro_end_s;
-        setShowSkipIntro(false);
-    }
+  const handleNextEpisode = () => {
+      const nextEp = mediaStore.nextEpisode;
+      if (nextEp && mediaStore.currentShow && 'episode_number' in nowPlayingItem) {
+          mediaStore.startPlayback({
+              ...nextEp,
+              show_id: mediaStore.currentShow.id,
+              show_title: mediaStore.currentShow.title || mediaStore.currentShow.name || '',
+              backdrop_path: mediaStore.currentShow.backdrop_path,
+              season_number: nowPlayingItem.season_number,
+          });
+      }
   };
 
-  const isRemoteControlled = isSmartTV;
-
+  const skipIntro = () => {
+      const videoElement = videoRef.current;
+      if (videoElement && 'intro_end_s' in nowPlayingItem && nowPlayingItem.intro_end_s) {
+          videoElement.currentTime = nowPlayingItem.intro_end_s;
+          setShowSkipIntro(false);
+      }
+  };
+  
   return (
-    <Box sx={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'black',
-      zIndex: 2000,
-      display: 'flex',
-      animation: 'fadeIn 0.3s ease-in-out'
-    }}>
-      <Box sx={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative'
-      }}>
-        {/* Do not show AppBar on remote controlled TV */}
-        {!isRemoteControlled && (
-            <AppBar position="absolute" sx={{ 
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                boxShadow: 'none' 
-            }}>
-            <Toolbar>
-                <IconButton
-                edge="start"
-                color="inherit"
-                onClick={() => stopPlayback()}
-                aria-label="go back"
-                >
-                <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h6" noWrap sx={{ ml: 2, textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
-                  {roomId ? `Stanza: ${roomId} - ` : ''}{title}
-                </Typography>
-                <Box sx={{ flexGrow: 1 }} />
-                {isEpisode && (
-                  <>
-                    <Tooltip title="Prossimo episodio">
-                      <span>
-                        <IconButton
-                          color="inherit"
-                          onClick={() => {
-                              if (mediaStore.nextEpisode) {
-                                  mediaStore.startPlayback({
-                                    ...mediaStore.nextEpisode,
-                                    show_id: mediaStore.currentShow!.id,
-                                    show_title: mediaStore.currentShow!.title || mediaStore.currentShow!.name || '',
-                                    backdrop_path: mediaStore.currentShow!.backdrop_path,
-                                    season_number: (nowPlayingItem as any).season_number,
-                                  });
-                              }
-                          }}
-                          disabled={!mediaStore.nextEpisode}
-                        >
-                          <SkipNextIcon />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                    <Tooltip title="Lista episodi">
-                      <IconButton
-                        color="inherit"
-                        onClick={mediaStore.openEpisodesDrawer}
-                      >
-                        <ListAltIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </>
-                )}
-            </Toolbar>
-            </AppBar>
-        )}
+    <Box ref={playerContainerRef} sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'black', display: 'flex', flexDirection: 'row' }}>
+      <Box sx={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <video
           ref={videoRef}
           src={videoSrc}
-          controls={!roomId && !isRemoteControlled || isHost}
+          controls={!isSmartTV} // Hide controls on Smart TV
           autoPlay
+          onEnded={handleNextEpisode}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-          onPlay={sendSlaveStatusUpdate}
-          onPause={sendSlaveStatusUpdate}
-          onEnded={() => stopPlayback()}
-          key={videoSrc} // Force re-render if src changes
         />
-         {showSkipIntro && !isRemoteControlled && (
-            <Button
-                variant="contained"
-                onClick={handleSkipIntro}
+        {/* Top bar overlay */}
+        <AppBar position="absolute" sx={{ top: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)', boxShadow: 'none' }}>
+            <Toolbar>
+                <IconButton edge="start" color="inherit" aria-label="back" onClick={stopPlayback}>
+                    <ArrowBackIcon />
+                </IconButton>
+                <Typography variant="h6" sx={{ flexGrow: 1 }}>{title}</Typography>
+                 {mediaStore.nextEpisode && (
+                     <Tooltip title="Prossimo Episodio">
+                        <IconButton color="inherit" onClick={handleNextEpisode}>
+                            <SkipNextIcon />
+                        </IconButton>
+                     </Tooltip>
+                 )}
+                 {isEpisode && (
+                    <Tooltip title="Lista Episodi">
+                        <IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}>
+                            <ListAltIcon />
+                        </IconButton>
+                    </Tooltip>
+                 )}
+            </Toolbar>
+        </AppBar>
+
+        {showSkipIntro && (
+            <Button 
+                variant="contained" 
+                color="inherit" 
+                onClick={skipIntro}
                 sx={{
                     position: 'absolute',
-                    bottom: '80px',
+                    bottom: '80px', // Adjust as needed
                     right: '20px',
-                    zIndex: 2001,
-                    bgcolor: 'rgba(28, 28, 28, 0.85)',
-                    color: 'white',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    backdropFilter: 'blur(5px)',
-                    '&:hover': {
-                        bgcolor: 'rgba(40, 40, 40, 1)',
-                        borderColor: 'white',
-                    }
+                    zIndex: 2,
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    color: 'black',
+                    '&:hover': { bgcolor: 'white' }
                 }}
             >
-                Salta introduzione
+                Salta Intro
             </Button>
         )}
       </Box>

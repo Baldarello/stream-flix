@@ -116,7 +116,7 @@ export const Header: React.FC = observer(() => {
                     <IconButton color="inherit">
                         <NotificationsIcon />
                     </IconButton>
-                    <IconButton color="inherit">
+                    <IconButton color="inherit" onClick={() => mediaStore.toggleProfileDrawer(true)}>
                         <AccountCircleIcon />
                     </IconButton>
                 </Box>
