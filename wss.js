@@ -134,6 +134,32 @@ const webSocketRouter = (wss) => {
                         if (room) handleDisconnect(ws);
                         break;
                     }
+                    case 'quix-select-media': {
+                        if (isHost && room && payload.media) {
+                            room.gameState.selectedMedia = payload.media;
+                            console.log(`Host of room ${ws.roomId} changed media to ${payload.media.title || payload.media.name}`);
+                            broadcastRoomState(ws.roomId);
+                        }
+                        break;
+                    }
+                    case 'quix-change-room-code': {
+                        if (isHost && room) {
+                            const oldRoomId = ws.roomId;
+                            const newRoomId = generateUniqueId('room').toUpperCase().substring(5, 11);
+                            
+                            room.id = newRoomId;
+                            room.players.forEach(player => {
+                                player.ws.roomId = newRoomId;
+                            });
+
+                            rooms.set(newRoomId, room);
+                            rooms.delete(oldRoomId);
+
+                            console.log(`Room code for ${oldRoomId} changed to ${newRoomId}`);
+                            broadcastRoomState(newRoomId);
+                        }
+                        break;
+                    }
                     case 'quix-playback-control': {
                         if (isHost && room && payload.playbackState) {
                             room.gameState.playbackState = payload.playbackState;

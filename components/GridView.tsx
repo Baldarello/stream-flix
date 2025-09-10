@@ -47,8 +47,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Removed the 'item' prop to resolve a type error where the prop was not recognized.
-              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Added the 'item' prop to allow responsive props like 'xs', 'sm', etc.
+              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}

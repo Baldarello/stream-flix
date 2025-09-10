@@ -58,6 +58,7 @@ class MediaStore {
     playbackState: PlaybackState = {status: 'paused', time: 0};
     chatHistory: ChatMessage[] = [];
     private playbackListeners: ((state: PlaybackState) => void)[] = [];
+    joinRoomIdFromUrl: string | null = null;
 
     // Remote Control State
     isSmartTV = false;
@@ -166,12 +167,12 @@ class MediaStore {
                     this.hostId = message.payload.hostId;
                     this.isHost = message.payload.isHost;
                     this.participants = message.payload.participants;
-                    this.selectedItem = message.payload.selectedMedia;
+                    // Only update selected item if it's different, to avoid disrupting local detail view loading
+                    if (JSON.stringify(this.selectedItem) !== JSON.stringify(message.payload.selectedMedia)) {
+                        this.selectedItem = message.payload.selectedMedia;
+                    }
                     this.chatHistory = message.payload.chatHistory ?? [];
                     this.watchTogetherError = null;
-                    if (!this.isHost && this.watchTogetherModalOpen) {
-                        // Keep modal open, but view will change to waiting state
-                    }
                     if (message.payload.playbackState.status === 'playing') {
                         this.nowPlayingItem = message.payload.selectedMedia;
                         this.isPlaying = true;
@@ -386,8 +387,14 @@ class MediaStore {
         this.remoteSelectedItem = null;
     }
 
-    openWatchTogetherModal = (item: MediaItem) => {
-        this.selectedItem = item;
+    setJoinRoomIdFromUrl = (roomId: string) => {
+        this.joinRoomIdFromUrl = roomId;
+    }
+
+    openWatchTogetherModal = (item: MediaItem | null) => {
+        if (item) {
+            this.selectedItem = item;
+        }
         this.watchTogetherModalOpen = true;
     };
 
@@ -409,6 +416,7 @@ class MediaStore {
         this.username = null;
         this.watchTogetherError = null;
         this.chatHistory = [];
+        this.joinRoomIdFromUrl = null;
     };
 
     createRoom = (username: string) => {
@@ -430,10 +438,28 @@ class MediaStore {
             this.watchTogetherError = null;
             websocketService.sendMessage({
                 type: 'quix-join-room',
-                payload: {roomId: roomId.trim(), username: this.username}
+                payload: {roomId: roomId.trim().toUpperCase(), username: this.username}
             });
         }
     };
+    
+    changeWatchTogetherMedia = (item: PlayableItem) => {
+        if (this.roomId && this.isHost) {
+            websocketService.sendMessage({
+                type: 'quix-select-media',
+                payload: { roomId: this.roomId, media: JSON.parse(JSON.stringify(item)) }
+            });
+        }
+    }
+    
+    changeRoomCode = () => {
+        if (this.roomId && this.isHost) {
+            websocketService.sendMessage({
+                type: 'quix-change-room-code',
+                payload: { roomId: this.roomId }
+            });
+        }
+    }
 
     leaveRoom = () => {
         if (this.roomId) {
@@ -609,8 +635,9 @@ class MediaStore {
                     }) ?? []
                 );
                 runInAction(() => {
-                    this.selectedItem = {...seriesDetails, seasons: seasonsWithEpisodes};
-                    this.applyEpisodeLinksToMedia([this.selectedItem]);
+                    const fullDetails = {...seriesDetails, seasons: seasonsWithEpisodes};
+                    this.applyEpisodeLinksToMedia([fullDetails]);
+                    this.selectedItem = fullDetails;
                 });
             } catch (error) {
                 console.error("Failed to fetch series details and episodes", error);
@@ -627,7 +654,9 @@ class MediaStore {
     }
 
     startPlayback = (item: PlayableItem) => {
+        // If the host starts playback, update the media for the whole room first.
         if (this.roomId && this.isHost) {
+            this.changeWatchTogetherMedia(item);
             this.sendPlaybackControl({status: 'playing', time: 0});
         }
         if ('episode_number' in item) {

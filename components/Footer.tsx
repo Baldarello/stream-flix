@@ -31,8 +31,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Removed the 'item' prop to resolve a type error where the prop was not recognized.
-          <Grid xs={6} sm={3} key={link}>
+          // FIX: Added the 'item' prop to allow responsive props like 'xs' and 'sm'.
+          <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>
