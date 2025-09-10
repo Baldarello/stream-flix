@@ -20,7 +20,7 @@ type PlaybackState = { status: 'playing' | 'paused'; time: number };
 
 type RemoteSlaveState = {
     isPlaying: boolean;
-    nowPlayingItem: MediaItem | null;
+    nowPlayingItem: PlayableItem | null;
 }
 
 class MediaStore {
@@ -241,15 +241,18 @@ class MediaStore {
 
     sendSlaveStatusUpdate = () => {
         if (this.isSmartTV && this.isRemoteMasterConnected) {
+            let itemToSend: PlayableItem | null = this.nowPlayingItem;
+            if (itemToSend && 'seasons' in itemToSend) {
+                // Don't send bulky season data over the wire
+                const { seasons, ...rest } = itemToSend;
+                itemToSend = rest as MediaItem;
+            }
             websocketService.sendMessage({
                 type: 'quix-slave-status-update',
                 payload: {
                     slaveId: this.slaveId,
                     isPlaying: this.isPlaying,
-                    nowPlayingItem: this.nowPlayingItem && 'media_type' in this.nowPlayingItem ? {
-                        ...this.nowPlayingItem,
-                        seasons: undefined
-                    } : null // Avoid sending bulky data
+                    nowPlayingItem: itemToSend,
                 }
             });
         }
@@ -265,6 +268,21 @@ class MediaStore {
                 }
             })
         }
+    }
+
+    playRemoteItem = (item: PlayableItem) => {
+        this.sendRemoteCommand({ command: 'select_media', item });
+        
+        // Optimistically update state for immediate UI transition
+        if (!this.remoteSlaveState) {
+            this.remoteSlaveState = { isPlaying: true, nowPlayingItem: item };
+        } else {
+            this.remoteSlaveState.isPlaying = true;
+            this.remoteSlaveState.nowPlayingItem = item;
+        }
+        
+        // Clear the detail view item to allow the player view to take over
+        this.remoteSelectedItem = null;
     }
     
     stopRemotePlayback = () => {

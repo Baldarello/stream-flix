@@ -26,9 +26,9 @@ export class QuixDB extends Dexie {
 
   constructor() {
     super('quixDB');
-    // FIX: Moved schema definition into the constructor, which is the standard
-    // and recommended way to declare schemas when subclassing Dexie. This
-    // resolves the TypeScript error where `.version` was not found on the instance.
+    // FIX: The schema definition must be placed inside the constructor when subclassing Dexie.
+    // This is the standard and recommended way to declare schemas, resolving potential
+    // TypeScript errors where `.version()` might not be found on the class instance.
     this.version(1).stores({
       myList: '&id', // Primary key is the media item ID
       // Auto-incrementing primary key 'id', and index on 'episodeId' and 'watchedAt'

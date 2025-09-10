@@ -4,10 +4,10 @@ import { mediaStore } from '../store/mediaStore';
 import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import type { Episode } from '../types';
+import type { Episode, PlayableItem } from '../types';
 
 const RemoteDetailView: React.FC = () => {
-  const { remoteSelectedItem: item, clearRemoteSelectedItem, isRemoteDetailLoading, sendRemoteCommand } = mediaStore;
+  const { remoteSelectedItem: item, clearRemoteSelectedItem, isRemoteDetailLoading } = mediaStore;
 
   // The view should not render if there's no item. This is a safeguard.
   if (!item) return null;
@@ -21,30 +21,6 @@ const RemoteDetailView: React.FC = () => {
 
   const title = item.title || item.name;
   const currentSeason = item.seasons?.find(s => s.season_number === selectedSeason);
-
-  const handlePlayOnTV = (episode?: Episode) => {
-    let itemToPlay;
-    if (episode) {
-      // Create a PlayableItem from the episode
-      itemToPlay = {
-        ...episode,
-        show_id: item.id,
-        show_title: item.title || item.name || '',
-        backdrop_path: item.backdrop_path,
-        season_number: currentSeason?.season_number || 1,
-      };
-    } else {
-      // It's a movie or the user wants to play the first episode of a series
-      itemToPlay = item;
-    }
-    
-    sendRemoteCommand({
-        command: 'select_media',
-        item: itemToPlay,
-    });
-    // Return to the main remote view after sending the command
-    clearRemoteSelectedItem();
-  };
 
   return (
     <Box sx={{ animation: 'fadeIn 0.5s ease-in-out', bgcolor: 'background.default', minHeight: '100vh', color: 'text.primary' }}>
@@ -90,32 +66,41 @@ const RemoteDetailView: React.FC = () => {
                  <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
             ) : (
                 <Stack spacing={1.5}>
-                    {currentSeason?.episodes.map((episode: Episode) => (
-                        <Button
-                            key={episode.id}
-                            onClick={() => handlePlayOnTV(episode)}
-                            variant="outlined"
-                            fullWidth
-                            sx={{ 
-                                justifyContent: 'flex-start', 
-                                p: 1.5, 
-                                textAlign: 'left', 
-                                borderColor: 'rgba(255,255,255,0.23)', 
-                                textTransform: 'none',
-                                '&:hover': {
-                                    bgcolor: 'rgba(255,255,255,0.08)'
-                                }
-                            }}
-                        >
-                            <PlayCircleOutlineIcon sx={{ mr: 2, color: 'text.secondary', flexShrink: 0 }} />
-                            <Box sx={{ overflow: 'hidden' }}>
-                                <Typography fontWeight="bold">{episode.episode_number}. {episode.name}</Typography>
-                                <Typography variant="caption" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                    {episode.overview}
-                                </Typography>
-                            </Box>
-                        </Button>
-                    ))}
+                    {currentSeason?.episodes.map((episode: Episode) => {
+                        const itemToPlay: PlayableItem = {
+                            ...episode,
+                            show_id: item.id,
+                            show_title: item.title || item.name || '',
+                            backdrop_path: item.backdrop_path,
+                            season_number: currentSeason?.season_number || 1,
+                        };
+                        return (
+                            <Button
+                                key={episode.id}
+                                onClick={() => mediaStore.playRemoteItem(itemToPlay)}
+                                variant="outlined"
+                                fullWidth
+                                sx={{ 
+                                    justifyContent: 'flex-start', 
+                                    p: 1.5, 
+                                    textAlign: 'left', 
+                                    borderColor: 'rgba(255,255,255,0.23)', 
+                                    textTransform: 'none',
+                                    '&:hover': {
+                                        bgcolor: 'rgba(255,255,255,0.08)'
+                                    }
+                                }}
+                            >
+                                <PlayCircleOutlineIcon sx={{ mr: 2, color: 'text.secondary', flexShrink: 0 }} />
+                                <Box sx={{ overflow: 'hidden' }}>
+                                    <Typography fontWeight="bold">{episode.episode_number}. {episode.name}</Typography>
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                        {episode.overview}
+                                    </Typography>
+                                </Box>
+                            </Button>
+                        )
+                    })}
                 </Stack>
             )}
           </>
@@ -126,7 +111,7 @@ const RemoteDetailView: React.FC = () => {
               variant="contained"
               size="large"
               startIcon={<PlayCircleOutlineIcon />}
-              onClick={() => handlePlayOnTV()}
+              onClick={() => mediaStore.playRemoteItem(item)}
             >
               Riproduci sulla TV
             </Button>

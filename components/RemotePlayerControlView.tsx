@@ -12,14 +12,16 @@ import type { MediaItem, Episode, PlayableItem } from '../types';
 
 const RemotePlayerControlView: React.FC = () => {
     const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback } = mediaStore;
-    const [fullItem, setFullItem] = useState<MediaItem | null>(null);
+    // FIX: Changed state to accept the PlayableItem union type to correctly handle both movies and episodes.
+    const [fullItem, setFullItem] = useState<PlayableItem | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
 
     useEffect(() => {
         const fetchDetails = async () => {
-            if (nowPlayingItem && nowPlayingItem.media_type === 'tv' && !nowPlayingItem.seasons) {
+            // FIX: Added a type guard ('media_type' in nowPlayingItem) to safely access properties of MediaItem.
+            if (nowPlayingItem && 'media_type' in nowPlayingItem && nowPlayingItem.media_type === 'tv' && !('seasons' in nowPlayingItem && nowPlayingItem.seasons)) {
                 setIsLoading(true);
                 try {
                     const seriesDetails = await getSeriesDetails(nowPlayingItem.id);
@@ -30,13 +32,15 @@ const RemotePlayerControlView: React.FC = () => {
                         }) ?? []
                     );
                     setFullItem({ ...seriesDetails, seasons: seasonsWithEpisodes });
-                } catch (error) {
+                } catch (error) => {
                     console.error("Failed to fetch full details for remote player", error);
+                    // FIX: This is now safe because the state type is PlayableItem.
                     setFullItem(nowPlayingItem); // Fallback to partial data
                 } finally {
                     setIsLoading(false);
                 }
             } else {
+                // FIX: This is now safe because the state type is PlayableItem.
                 setFullItem(nowPlayingItem);
             }
         };
@@ -54,24 +58,29 @@ const RemotePlayerControlView: React.FC = () => {
     }
     
     const isPlaying = remoteSlaveState?.isPlaying ?? false;
-    const title = nowPlayingItem.title || nowPlayingItem.name;
+    // FIX: Used a type guard to safely access properties on the PlayableItem union type.
+    const isEpisode = 'episode_number' in nowPlayingItem;
+    const title = isEpisode ? nowPlayingItem.show_title : (nowPlayingItem.title || nowPlayingItem.name);
 
     const handleTogglePlay = () => sendRemoteCommand({ command: isPlaying ? 'pause' : 'play' });
     const handleSeekForward = () => sendRemoteCommand({ command: 'seek_forward' });
     const handleSeekBackward = () => sendRemoteCommand({ command: 'seek_backward' });
     
     const handleSelectEpisode = (episode: Episode) => {
+        // FIX: Added a type guard to ensure `fullItem` is a MediaItem before accessing its properties.
+        if (!fullItem || !('media_type' in fullItem)) return;
         const itemToPlay: PlayableItem = {
             ...episode,
-            show_id: nowPlayingItem.id,
-            show_title: title || '',
-            backdrop_path: nowPlayingItem.backdrop_path,
-            season_number: fullItem?.seasons?.find(s => s.episodes.some(e => e.id === episode.id))?.season_number || 1,
+            show_id: fullItem.id,
+            show_title: fullItem.title || fullItem.name || '',
+            backdrop_path: fullItem.backdrop_path,
+            season_number: fullItem.seasons?.find(s => s.episodes.some(e => e.id === episode.id))?.season_number || 1,
         };
         sendRemoteCommand({ command: 'select_media', item: itemToPlay });
     };
 
-    const isSeries = fullItem?.media_type === 'tv';
+    // FIX: Added a type guard to safely check for series type.
+    const isSeries = fullItem && 'media_type' in fullItem && fullItem.media_type === 'tv';
     // For now, just show first season episodes. A season selector could be added later.
     const episodes = isSeries ? fullItem.seasons?.[0]?.episodes : [];
 
