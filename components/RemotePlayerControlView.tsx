@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
+import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import FastRewindIcon from '@mui/icons-material/FastRewind';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import type { Episode, PlayableItem } from '../types';
 
 const RemotePlayerControlView = () => {
@@ -38,6 +37,7 @@ const RemotePlayerControlView = () => {
     }
     
     const isPlaying = remoteSlaveState?.isPlaying ?? false;
+    const isIntroSkippable = remoteSlaveState?.isIntroSkippable ?? false;
     const isEpisode = 'episode_number' in nowPlayingItem;
     
     const title = isEpisode ? nowPlayingItem.show_title : (nowPlayingItem.title || nowPlayingItem.name);
@@ -46,7 +46,7 @@ const RemotePlayerControlView = () => {
     const handleTogglePlay = () => sendRemoteCommand({ command: isPlaying ? 'pause' : 'play' });
     const handleSeekForward = () => sendRemoteCommand({ command: 'seek_forward' });
     const handleSeekBackward = () => sendRemoteCommand({ command: 'seek_backward' });
-    const handleToggleFullscreen = () => sendRemoteCommand({ command: 'toggle_fullscreen' });
+    const handleSkipIntro = () => sendRemoteCommand({ command: 'skip_intro' });
     
     const handleSelectEpisode = (episode: Episode) => {
         if (!remoteFullItem || !selectedSeason) return;
@@ -108,7 +108,7 @@ const RemotePlayerControlView = () => {
             </Box>
 
             {/* Controls */}
-            <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ my: 4 }}>
+            <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ my: 4, position: 'relative' }}>
                 <IconButton onClick={handleSeekBackward} aria-label="indietro 10 secondi" sx={{ transform: 'scale(1.5)' }}>
                     <FastRewindIcon fontSize="large" />
                 </IconButton>
@@ -125,7 +125,22 @@ const RemotePlayerControlView = () => {
                 <IconButton onClick={handleSeekForward} aria-label="avanti 10 secondi" sx={{ transform: 'scale(1.5)' }}>
                     <FastForwardIcon fontSize="large" />
                 </IconButton>
-     
+                {isIntroSkippable && (
+                    <Button 
+                        variant="contained" 
+                        color="inherit" 
+                        onClick={handleSkipIntro}
+                        sx={{
+                            position: 'absolute',
+                            right: { xs: 16, sm: 32 },
+                            bgcolor: 'rgba(255, 255, 255, 0.8)',
+                            color: 'black',
+                            '&:hover': { bgcolor: 'white' }
+                        }}
+                    >
+                        Salta Intro
+                    </Button>
+                )}
             </Stack>
             
             {/* Episodes List for Series */}

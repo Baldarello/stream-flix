@@ -9,7 +9,7 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 
 const VideoPlayer: React.FC = () => {
-  const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate } = mediaStore;
+  const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate, setIntroSkippableOnSlave } = mediaStore;
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -90,15 +90,19 @@ const VideoPlayer: React.FC = () => {
             document.exitFullscreen().catch(console.error);
         }
       }
+      if (action.type === 'skip_intro' && videoElement && nowPlayingItem && 'intro_end_s' in nowPlayingItem && nowPlayingItem.intro_end_s) {
+          videoElement.currentTime = nowPlayingItem.intro_end_s;
+      }
       mediaStore.clearRemoteAction();
     }
-  }, [isSmartTV, mediaStore.remoteAction]);
+  }, [isSmartTV, mediaStore.remoteAction, nowPlayingItem]);
 
   // Effect for "Skip Intro" button visibility
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement || !nowPlayingItem || !('intro_start_s' in nowPlayingItem) || !nowPlayingItem.intro_start_s) {
-        setShowSkipIntro(false);
+        if(showSkipIntro) setShowSkipIntro(false);
+        if (isSmartTV) setIntroSkippableOnSlave(false);
         return;
     }
 
@@ -107,19 +111,24 @@ const VideoPlayer: React.FC = () => {
         const introStart = nowPlayingItem.intro_start_s ?? -1;
         const introEnd = nowPlayingItem.intro_end_s ?? -1;
 
-        if (currentTime >= introStart && currentTime < introEnd) {
-            if (!showSkipIntro) setShowSkipIntro(true);
-        } else {
-            if (showSkipIntro) setShowSkipIntro(false);
+        const isSkippable = currentTime >= introStart && currentTime < introEnd;
+
+        if (isSkippable !== showSkipIntro) {
+            setShowSkipIntro(isSkippable);
+            if (isSmartTV) {
+                setIntroSkippableOnSlave(isSkippable);
+            }
         }
     };
 
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
-        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        if(videoElement) {
+            videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        }
     };
-  }, [nowPlayingItem, showSkipIntro]);
+  }, [nowPlayingItem, showSkipIntro, isSmartTV, setIntroSkippableOnSlave]);
   
   // Effect for Keyboard Shortcuts
   useEffect(() => {

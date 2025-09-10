@@ -21,6 +21,7 @@ type PlaybackState = { status: 'playing' | 'paused'; time: number };
 type RemoteSlaveState = {
     isPlaying: boolean;
     nowPlayingItem: PlayableItem | null;
+    isIntroSkippable?: boolean;
 }
 
 class MediaStore {
@@ -69,6 +70,7 @@ class MediaStore {
     remoteAction: { type: string; payload?: any; id: number } | null = null;
     remoteFullItem: MediaItem | null = null;
     isRemoteFullItemLoading = false;
+    isIntroSkippableOnSlave = false;
 
 
     // Episode Linking State
@@ -234,6 +236,9 @@ class MediaStore {
                 case 'toggle_fullscreen':
                     this.remoteAction = { type: 'fullscreen', id: Date.now() };
                     break;
+                case 'skip_intro':
+                    this.remoteAction = { type: 'skip_intro', id: Date.now() };
+                    break;
                 case 'stop':
                     this.stopPlayback();
                     break;
@@ -259,6 +264,7 @@ class MediaStore {
                     slaveId: this.slaveId,
                     isPlaying: this.isPlaying,
                     nowPlayingItem: itemToSend,
+                    isIntroSkippable: this.isIntroSkippableOnSlave,
                 }
             });
         }
@@ -512,6 +518,13 @@ class MediaStore {
             }
         } catch (error) {
             console.error("Failed to set intro duration in DB", error);
+        }
+    }
+
+    setIntroSkippableOnSlave = (isSkippable: boolean) => {
+        if (this.isIntroSkippableOnSlave !== isSkippable) {
+            this.isIntroSkippableOnSlave = isSkippable;
+            this.sendSlaveStatusUpdate();
         }
     }
 

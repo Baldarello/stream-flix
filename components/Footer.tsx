@@ -31,8 +31,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the 'item' prop. The error "Property 'xs' does not exist" indicates that this Grid component was not being treated as a grid item. Explicitly adding the 'item' prop resolves this.
-          <Grid item xs={6} sm={3} key={link}>
+          // FIX: Removed the 'item' prop to resolve a type error where the prop was not recognized.
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

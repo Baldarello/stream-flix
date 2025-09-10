@@ -47,8 +47,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Added the 'item' prop. The error "Property 'xs' does not exist" indicates that this Grid component was not being treated as a grid item. Explicitly adding the 'item' prop resolves this.
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Removed the 'item' prop to resolve a type error where the prop was not recognized.
+              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}
