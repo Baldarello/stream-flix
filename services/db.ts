@@ -26,19 +26,18 @@ export class QuixDB extends Dexie {
 
   constructor() {
     super('quixDB');
+    // FIX: Moved schema definition into the constructor, which is the standard
+    // and recommended way to declare schemas when subclassing Dexie. This
+    // resolves the TypeScript error where `.version` was not found on the instance.
+    this.version(1).stores({
+      myList: '&id', // Primary key is the media item ID
+      // Auto-incrementing primary key 'id', and index on 'episodeId' and 'watchedAt'
+      viewingHistory: '++id, episodeId, watchedAt', 
+      cachedItems: '&id', // Primary key is the media item ID
+      episodeLinks: '&id', // Primary key is episode ID
+      showIntroDurations: '&id', // Primary key is show ID
+    });
   }
 }
 
 export const db = new QuixDB();
-
-// FIX: Moved schema definition out of the constructor. This resolves a TypeScript
-// type inference issue where the 'version' method is not found on 'this' when
-// extending the Dexie class, which can happen with certain build configurations.
-db.version(1).stores({
-  myList: '&id', // Primary key is the media item ID
-  // Auto-incrementing primary key 'id', and index on 'episodeId' and 'watchedAt'
-  viewingHistory: '++id, episodeId, watchedAt', 
-  cachedItems: '&id', // Primary key is the media item ID
-  episodeLinks: '&id', // Primary key is episode ID
-  showIntroDurations: '&id', // Primary key is show ID
-});

@@ -47,8 +47,9 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Removed 'item' prop from Grid to resolve a TypeScript error.
+              // A Grid component that is a direct child of a Grid container is implicitly an item.
+              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}

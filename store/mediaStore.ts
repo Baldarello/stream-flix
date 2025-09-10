@@ -288,7 +288,9 @@ class MediaStore {
                     }) ?? []
                 );
                 runInAction(() => {
-                    this.remoteSelectedItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
+                    const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
+                    this.applyEpisodeLinksToMedia([fullItem]);
+                    this.remoteSelectedItem = fullItem;
                 });
             } catch (error) {
                 console.error("Failed to fetch series details for remote", error);

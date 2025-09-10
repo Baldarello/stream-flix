@@ -31,8 +31,9 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
-          <Grid item xs={6} sm={3} key={link}>
+          // FIX: Removed 'item' prop from Grid to resolve a TypeScript error.
+          // A Grid component that is a direct child of a Grid container is implicitly an item.
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

@@ -1,17 +1,6 @@
 import axios from 'axios';
 import type { MediaItem, Season, Episode } from '../types';
 
-// FIX: Augment Axios's internal request config type to allow for a custom 'meta' property,
-// which is used for logging and timing requests within interceptors.
-declare module 'axios' {
-  interface InternalAxiosRequestConfig {
-    meta?: {
-      requestStartedAt?: number;
-      logData?: any;
-    };
-  }
-}
-
 // The API key must be obtained exclusively from the environment variable process.env.API_KEY
 // Assuming this is available in the execution environment.
 const API_KEY =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g";
