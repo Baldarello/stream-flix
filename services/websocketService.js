@@ -50,9 +50,9 @@ class WebSocketService {
                 const message = JSON.parse(event.data);
 
                 // Handle the 'connected' message from the server to get our unique ID
-                if (message.type === 'connected' && message.payload?.userName) {
-                    console.log(`Received client ID: ${message.payload.userName}`);
-                    this.setClientId(message.payload.userName);
+                if (message.type === 'connected' && message.payload?.clientId) {
+                    console.log(`Received client ID: ${message.payload.clientId}`);
+                    this.setClientId(message.payload.clientId);
                 }
 
                 this.events.emit('message', message);

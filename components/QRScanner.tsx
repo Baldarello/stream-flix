@@ -4,6 +4,7 @@ import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, IconButton, Typography, CircularProgress, Alert, ToggleButtonGroup, ToggleButton, Stack } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
+import jsQR from 'jsqr';
 
 const qualitySettings = {
   '480p': { width: { ideal: 640 }, height: { ideal: 480 } },
@@ -15,6 +16,7 @@ type Quality = keyof typeof qualitySettings;
 const QRScanner: React.FC = () => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;
     const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +48,42 @@ const QRScanner: React.FC = () => {
 
     // Start or restart the camera when dependencies change
     useEffect(() => {
+        let animationFrameId: number;
+
+        const scanQRCode = () => {
+            if (
+                videoRef.current &&
+                videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA &&
+                canvasRef.current
+            ) {
+                const video = videoRef.current;
+                const canvas = canvasRef.current;
+                const context = canvas.getContext('2d');
+
+                if (context) {
+                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    if (code) {
+                        try {
+                            const url = new URL(code.data);
+                            const slaveId = url.searchParams.get('remote_for');
+                            if (url.origin === window.location.origin && slaveId) {
+                                mediaStore.connectAsRemoteMaster(slaveId);
+                                // No need to stop scanning, component will unmount and cleanup will run
+                            }
+                        } catch (e) {
+                            // Not a valid URL, ignore and continue scanning
+                        }
+                    }
+                }
+            }
+            animationFrameId = requestAnimationFrame(scanQRCode);
+        };
+        
         const startCamera = async () => {
             if (isQRScannerOpen && selectedDeviceId) {
                 // Stop previous stream
@@ -74,6 +112,8 @@ const QRScanner: React.FC = () => {
                                 setError("Impossibile avviare il video.");
                             });
                             setIsLoading(false);
+                             // Start the scanning loop
+                            animationFrameId = requestAnimationFrame(scanQRCode);
                         };
                     }
                 } catch (err) {
@@ -91,6 +131,7 @@ const QRScanner: React.FC = () => {
         startCamera();
 
         return () => {
+            cancelAnimationFrame(animationFrameId);
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop());
                 streamRef.current = null;
@@ -119,12 +160,7 @@ const QRScanner: React.FC = () => {
         
         try {
             const capabilities = videoTrack.getCapabilities();
-            // FIX: The 'focusMode' property is experimental and not included in default TypeScript DOM types
-            // for MediaTrackCapabilities or MediaTrackConstraintSet, causing type errors.
-            // Casting to `any` and then to `MediaTrackConstraints` bypasses these checks,
-            // allowing the use of continuous autofocus if the device supports it.
             if ((capabilities as any).focusMode?.includes('continuous')) {
-                // FIX: Cast to 'unknown' first to satisfy TypeScript's strict type checking for non-standard properties.
                 await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] } as unknown as MediaTrackConstraints);
             }
         } catch (e) {
@@ -167,6 +203,8 @@ const QRScanner: React.FC = () => {
                         cursor: 'pointer'
                     }}
                 />
+                <canvas ref={canvasRef} style={{ display: 'none' }} />
+
 
                 {!isLoading && !error && (
                     <>

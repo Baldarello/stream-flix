@@ -599,6 +599,15 @@ class MediaStore {
         this.isQRScannerOpen = false;
     }
 
+    connectAsRemoteMaster = (slaveId: string) => {
+        runInAction(() => {
+            this.isRemoteMaster = true;
+            this.slaveId = slaveId;
+            this.closeQRScanner();
+        });
+        websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
+    }
+
     get heroContent(): MediaItem | undefined {
         return this.trending[0];
     }
