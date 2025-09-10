@@ -18,7 +18,8 @@
     "mobx": "6.13.1",
     "mobx-react-lite": "4.0.7",
     "react-dom": "^18.2.0",
-    "dexie": "^4.0.7"
+    "dexie": "^4.0.7",
+    "jsqr": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
