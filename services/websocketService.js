@@ -21,9 +21,9 @@ class WebSocketService {
   constructor() {
     this.rooms = new Map();
     this.remoteSessions = new Map();
-    this.clientId = `user_${Math.random().toString(36).substring(2, 9)}`;
+    this.userName = `user_${Math.random().toString(36).substring(2, 9)}`;
     this.events = new EventEmitter();
-    console.log(`WebSocketService (mock) initialized for client: ${this.clientId}`);
+    console.log(`WebSocketService (mock) initialized for client: ${this.userName}`);
   }
 
   // --- Public Methods ---
@@ -36,44 +36,44 @@ class WebSocketService {
   _handleMessage(message) {
     const { type, payload } = message;
     const room = payload?.roomId ? this.rooms.get(payload.roomId) : null;
-    const isHost = room && room.hostId === this.clientId;
+    const isHost = room && room.hostId === this.userName;
 
     switch (type) {
       // Watch Together
-      case 'create-room':
+      case 'quix-create-room':
         this._createRoom(payload.username, payload.media);
         break;
-      case 'join-room':
+      case 'quix-join-room':
         this._joinRoom(payload.roomId, payload.username);
         break;
-      case 'leave-room':
+      case 'quix-leave-room':
         this._leaveRoom(payload.roomId);
         break;
-      case 'playback-control':
+      case 'quix-playback-control':
         if (isHost) this._updatePlaybackState(payload.roomId, payload.playbackState);
         break;
-      case 'chat-message':
+      case 'quix-chat-message':
         this._handleChatMessage(payload.roomId, payload.message);
         break;
-      case 'transfer-host':
+      case 'quix-transfer-host':
         if (isHost) this._transferHost(payload.roomId, payload.newHostId);
         break;
-      case 'kick-player':
+      case 'quix-kick-player':
         // In the mock, kicking is just removing them from the state.
         if (isHost) this._kickPlayer(payload.roomId, payload.playerId);
         break;
 
       // Remote Control
-      case 'register-slave':
+      case 'quix-register-slave':
         this._registerSlave();
         break;
-      case 'register-master':
+      case 'quix-register-master':
         this._registerMaster(payload.slaveId);
         break;
-      case 'remote-command':
+      case 'quix-remote-command':
         this._forwardToSlave(payload);
         break;
-      case 'slave-status-update':
+      case 'quix-slave-status-update':
         this._forwardToMaster(payload);
         break;
     }
@@ -92,7 +92,7 @@ class WebSocketService {
       selectedMedia: room.gameState.selectedMedia,
       playbackState: room.gameState.playbackState,
       chatHistory: room.gameState.chatHistory,
-      isHost: room.hostId === this.clientId,
+      isHost: room.hostId === this.userName,
     };
     this.events.emit('message', { type: 'room-update', payload });
   }
@@ -106,8 +106,8 @@ class WebSocketService {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
     const newRoom = {
       id: roomId,
-      hostId: this.clientId,
-      players: new Map([[this.clientId, { id: this.clientId, name: username }]]),
+      hostId: this.userName,
+      players: new Map([[this.userName, { id: this.userName, name: username }]]),
       gameState: {
         selectedMedia: media,
         playbackState: { status: 'paused', time: 0 },
@@ -133,16 +133,16 @@ class WebSocketService {
       this.events.emit('message', { type: 'error', payload: { message: 'That name is already taken in this room.' } });
       return;
     }
-    room.players.set(this.clientId, { id: this.clientId, name: username });
+    room.players.set(this.userName, { id: this.userName, name: username });
     this._broadcastRoomState(roomId);
   }
 
   _leaveRoom(roomId) {
     const room = this.rooms.get(roomId);
-    if (!room || !room.players.has(this.clientId)) return;
+    if (!room || !room.players.has(this.userName)) return;
 
-    const wasHost = room.hostId === this.clientId;
-    room.players.delete(this.clientId);
+    const wasHost = room.hostId === this.userName;
+    room.players.delete(this.userName);
 
     if (room.players.size === 0) {
       this.rooms.delete(roomId);
@@ -159,17 +159,17 @@ class WebSocketService {
     if (room) {
       room.gameState.playbackState = playbackState;
       // In the mock, we send the update directly back to our client.
-      this.events.emit('message', { type: 'playback-update', payload: { playbackState } });
+      this.events.emit('message', { type: 'quix-playback-update', payload: { playbackState } });
     }
   }
 
   _handleChatMessage(roomId, message) {
     const room = this.rooms.get(roomId);
-    const sender = room?.players.get(this.clientId);
+    const sender = room?.players.get(this.userName);
     if (room && sender) {
       const chatMessage = {
         id: `msg_${Date.now()}_${Math.random()}`,
-        senderId: this.clientId,
+        senderId: this.userName,
         senderName: sender.name,
         text: message.text,
         image: message.image,
@@ -190,7 +190,7 @@ class WebSocketService {
 
   _kickPlayer(roomId, playerIdToKick) {
     const room = this.rooms.get(roomId);
-    if (room && playerIdToKick !== this.clientId && room.players.has(playerIdToKick)) {
+    if (room && playerIdToKick !== this.userName && room.players.has(playerIdToKick)) {
         room.players.delete(playerIdToKick);
         this._broadcastRoomState(roomId);
     }
@@ -198,31 +198,31 @@ class WebSocketService {
 
   // --- Remote Control Implementation ---
   _registerSlave() {
-    this.remoteSessions.set(this.clientId, { masterId: null });
-    this.events.emit('message', { type: 'slave-registered', payload: { slaveId: this.clientId } });
+    this.remoteSessions.set(this.userName, { masterId: null });
+    this.events.emit('message', { type: 'quix-slave-registered', payload: { slaveId: this.userName } });
   }
 
   _registerMaster(slaveId) {
     // In the mock, the only possible slave is this client.
-    if (this.remoteSessions.has(slaveId) && slaveId === this.clientId) {
+    if (this.remoteSessions.has(slaveId) && slaveId === this.userName) {
       const session = this.remoteSessions.get(slaveId);
-      session.masterId = this.clientId;
-      this.events.emit('message', { type: 'master-connected' });
+      session.masterId = this.userName;
+      this.events.emit('message', { type: 'quix-master-connected' });
     }
   }
   
   _forwardToSlave(payload) {
     // If this client is the intended slave, emit the event locally.
-    if (this.remoteSessions.has(payload.slaveId) && payload.slaveId === this.clientId) {
-      this.events.emit('message', { type: 'remote-command-received', payload });
+    if (this.remoteSessions.has(payload.slaveId) && payload.slaveId === this.userName) {
+      this.events.emit('message', { type: 'quix-remote-command-received', payload });
     }
   }
 
   _forwardToMaster(payload) {
     const session = this.remoteSessions.get(payload.slaveId);
     // If this client is the slave and has a master (itself in the mock), emit the event.
-    if (session && payload.slaveId === this.clientId && session.masterId) {
-      this.events.emit('message', { type: 'slave-status-update', payload });
+    if (session && payload.slaveId === this.userName && session.masterId) {
+      this.events.emit('message', { type: 'quix-slave-status-update', payload });
     }
   }
 }

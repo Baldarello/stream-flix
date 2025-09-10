@@ -115,9 +115,9 @@ class MediaStore {
             this.isRemoteMaster = true;
             this.slaveId = remoteForId;
         });
-        websocketService.sendMessage({ type: 'register-master', payload: { slaveId: remoteForId }});
+        websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId: remoteForId }});
     } else if (this.isSmartTV) {
-        websocketService.sendMessage({ type: 'register-slave' });
+        websocketService.sendMessage({ type: 'quix-register-slave' });
     }
   }
 
@@ -128,7 +128,7 @@ class MediaStore {
   transferHost = (newHostId: string) => {
     if (this.roomId && this.isHost) {
         websocketService.sendMessage({
-            type: 'transfer-host',
+            type: 'quix-transfer-host',
             payload: { roomId: this.roomId, newHostId }
         });
     }
@@ -182,10 +182,10 @@ class MediaStore {
             case 'master-connected':
                 this.isRemoteMasterConnected = true;
                 break;
-            case 'remote-command-received':
+            case 'quix-remote-command-received':
                 this.handleRemoteCommand(message.payload);
                 break;
-            case 'slave-status-update':
+            case 'quix-slave-status-update':
                  if (this.isRemoteMaster) {
                     this.remoteSlaveState = message.payload;
                 }
@@ -217,7 +217,7 @@ class MediaStore {
   sendSlaveStatusUpdate = () => {
     if (this.isSmartTV && this.isRemoteMasterConnected) {
         websocketService.sendMessage({
-            type: 'slave-status-update',
+            type: 'quix-slave-status-update',
             payload: {
                 slaveId: this.slaveId,
                 isPlaying: this.isPlaying,
@@ -230,7 +230,7 @@ class MediaStore {
   sendRemoteCommand = (payload: { command: string, media?: MediaItem }) => {
     if (this.isRemoteMaster && this.slaveId) {
         websocketService.sendMessage({
-            type: 'remote-command',
+            type: 'quix-remote-command',
             payload: {
                 ...payload,
                 slaveId: this.slaveId
@@ -268,7 +268,7 @@ class MediaStore {
     if (this.selectedItem && username.trim()) {
       this.username = username.trim();
       this.watchTogetherError = null;
-      websocketService.sendMessage({ type: 'create-room', payload: { media: this.selectedItem, username: this.username } });
+      websocketService.sendMessage({ type: 'quix-create-room', payload: { media: this.selectedItem, username: this.username } });
     }
   };
 
@@ -276,13 +276,13 @@ class MediaStore {
     if (roomId.trim() && username.trim()) {
       this.username = username.trim();
       this.watchTogetherError = null;
-      websocketService.sendMessage({ type: 'join-room', payload: { roomId: roomId.trim(), username: this.username } });
+      websocketService.sendMessage({ type: 'quix-join-room', payload: { roomId: roomId.trim(), username: this.username } });
     }
   };
 
   leaveRoom = () => {
     if (this.roomId) {
-        websocketService.sendMessage({ type: 'leave-room', payload: { roomId: this.roomId } });
+        websocketService.sendMessage({ type: 'quix-leave-room', payload: { roomId: this.roomId } });
     }
     this.resetWatchTogetherState();
   };
@@ -290,7 +290,7 @@ class MediaStore {
   sendPlaybackControl = (state: PlaybackState) => {
     if (this.roomId && this.isHost) {
       websocketService.sendMessage({
-        type: 'playback-control',
+        type: 'quix-playback-control',
         payload: { roomId: this.roomId, playbackState: state }
       });
     }
@@ -299,7 +299,7 @@ class MediaStore {
   sendChatMessage = (message: { text?: string, image?: string }) => {
     if (this.roomId && (message.text?.trim() || message.image)) {
         websocketService.sendMessage({
-            type: 'chat-message',
+            type: 'quix-chat-message',
             payload: { roomId: this.roomId, message }
         });
     }
