@@ -31,9 +31,9 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the `item` prop to the Grid component.
+          // FIX: Removed the `item` prop to resolve the TypeScript error. The `item` prop is not recognized in this project's dependency setup.
           // In Material-UI, responsive props like `xs` and `sm` are only applicable to Grid items within a Grid container.
-          <Grid item xs={6} sm={3} key={link}>
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

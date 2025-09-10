@@ -10,7 +10,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getSeriesDetails, getSeriesEpisodes } from '../services/apiCall';
 import type { MediaItem, Episode, PlayableItem } from '../types';
 
-const RemotePlayerControlView: React.FC = () => {
+// FIX: Removed React.FC type annotation to fix component return type inference issue and subsequent scope-related errors.
+const RemotePlayerControlView = () => {
     const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback } = mediaStore;
     // FIX: Changed state to accept the PlayableItem union type to correctly handle both movies and episodes.
     const [fullItem, setFullItem] = useState<PlayableItem | null>(null);
@@ -32,7 +33,7 @@ const RemotePlayerControlView: React.FC = () => {
                         }) ?? []
                     );
                     setFullItem({ ...seriesDetails, seasons: seasonsWithEpisodes });
-                } catch (error) => {
+                } catch (error) {
                     console.error("Failed to fetch full details for remote player", error);
                     // FIX: This is now safe because the state type is PlayableItem.
                     setFullItem(nowPlayingItem); // Fallback to partial data

@@ -88,6 +88,7 @@ class MediaStore {
         makeAutoObservable(this);
         this.isSmartTV = detectSmartTV();
         websocketService.events.on('message', this.handleIncomingMessage);
+        websocketService.events.on('open', this.initRemoteSession);
     }
 
     loadPersistedData = async () => {

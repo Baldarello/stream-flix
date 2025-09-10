@@ -1,4 +1,3 @@
-import {mediaStore} from '../store/mediaStore';
 // This service manages the WebSocket connection to the live server.
 
 // const WEBSOCKET_URL = 'ws://localhost:8080'; // For local development
@@ -42,7 +41,7 @@ class WebSocketService {
             console.log('WebSocket connection established.');
             // Client ID is now null until the server assigns one.
             this._clientId = null;
-            mediaStore.initRemoteSession()
+            this.events.emit('open');
         };
 
         this.ws.onmessage = (event) => {
