@@ -66,6 +66,8 @@ class MediaStore {
     remoteSlaveState: RemoteSlaveState | null = null;
     remoteSelectedItem: MediaItem | null = null;
     isRemoteDetailLoading = false;
+    remoteAction: { type: string; payload?: any; id: number } | null = null;
+
 
     // Episode Linking State
     episodeLinks: Map<number, string> = new Map();
@@ -220,9 +222,22 @@ class MediaStore {
                         this.isPlaying = false; // this will trigger the video player to pause
                     }
                     break;
+                case 'seek_forward':
+                    this.remoteAction = { type: 'seek', payload: 10, id: Date.now() };
+                    break;
+                case 'seek_backward':
+                     this.remoteAction = { type: 'seek', payload: -10, id: Date.now() };
+                    break;
+                case 'stop':
+                    this.stopPlayback();
+                    break;
             }
         }
     }
+    
+    clearRemoteAction = () => {
+        this.remoteAction = null;
+    };
 
     sendSlaveStatusUpdate = () => {
         if (this.isSmartTV && this.isRemoteMasterConnected) {
@@ -249,6 +264,14 @@ class MediaStore {
                     slaveId: this.slaveId
                 }
             })
+        }
+    }
+    
+    stopRemotePlayback = () => {
+        this.sendRemoteCommand({ command: 'stop' });
+        if (this.remoteSlaveState) {
+            this.remoteSlaveState.nowPlayingItem = null;
+            this.remoteSlaveState.isPlaying = false;
         }
     }
 

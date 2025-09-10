@@ -74,6 +74,18 @@ const VideoPlayer: React.FC = () => {
       }
   }, [isPlaying, isSmartTV, sendSlaveStatusUpdate]);
 
+  // Effect to handle remote actions like seeking
+  useEffect(() => {
+    const action = mediaStore.remoteAction;
+    const videoElement = videoRef.current;
+    if (isSmartTV && action && videoElement) {
+      if (action.type === 'seek') {
+        videoElement.currentTime += action.payload;
+      }
+      mediaStore.clearRemoteAction();
+    }
+  }, [isSmartTV, mediaStore.remoteAction]);
+
   // Effect for "Skip Intro" button visibility
   useEffect(() => {
     const videoElement = videoRef.current;

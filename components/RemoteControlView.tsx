@@ -1,43 +1,37 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, Container, Paper, IconButton, AppBar, Toolbar, Slide } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
+import { Box, Typography, Container, AppBar, Toolbar } from '@mui/material';
 import { ContentRow } from './ContentRow';
 import RemoteDetailView from './RemoteDetailView';
+import RemotePlayerControlView from './RemotePlayerControlView';
 
 const RemoteControlView: React.FC = () => {
     const { 
         latestMovies, 
         trending, 
         topSeries, 
-        popularAnime, 
-        remoteSlaveState, 
-        sendRemoteCommand,
+        popularAnime,
+        remoteSlaveState,
         continueWatchingItems,
         myListItems,
         remoteSelectedItem
     } = mediaStore;
+    
+    // Determine which view to show
+    const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
+
+    if (nowPlayingItem) {
+        return <RemotePlayerControlView />;
+    }
 
     if (remoteSelectedItem) {
         return <RemoteDetailView />;
     }
     
-    const handleTogglePlay = () => {
-        if (remoteSlaveState?.isPlaying) {
-            sendRemoteCommand({ command: 'pause' });
-        } else {
-            sendRemoteCommand({ command: 'play' });
-        }
-    };
-    
-    const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
-    const title = nowPlayingItem?.title || nowPlayingItem?.name;
-    const showNowPlaying = !!nowPlayingItem;
-
+    // Default view: Content Browser
     return (
-        <Box sx={{ bgcolor: 'background.default', color: 'text.primary', pb: showNowPlaying ? '100px' : 0 }}>
+        <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
              <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
                 <Toolbar>
                     <Typography variant="h6" color="primary.main" fontWeight="bold">
@@ -61,46 +55,6 @@ const RemoteControlView: React.FC = () => {
                 <ContentRow title="Anime da non Perdere" items={popularAnime} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
               </Box>
             </Container>
-
-            <Slide direction="up" in={showNowPlaying} mountOnEnter unmountOnExit>
-                <Paper
-                    elevation={8}
-                    sx={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        bgcolor: '#181818',
-                        zIndex: 1500
-                    }}
-                >
-                    <Box sx={{ display: 'flex', alignItems: 'center', p: 1.5 }}>
-                        {nowPlayingItem?.poster_path && (
-                             <Box
-                                component="img"
-                                src={nowPlayingItem.poster_path}
-                                sx={{ width: 60, height: 90, borderRadius: 1, objectFit: 'cover' }}
-                             />
-                        )}
-                        <Box sx={{ flex: 1, mx: 2, overflow: 'hidden' }}>
-                            <Typography variant="body1" fontWeight="bold" noWrap>{title}</Typography>
-                            <Typography variant="body2" color="text.secondary">In riproduzione sulla TV</Typography>
-                        </Box>
-                        <IconButton
-                            onClick={handleTogglePlay}
-                            sx={{
-                                bgcolor: 'white',
-                                color: 'black',
-                                width: 56,
-                                height: 56,
-                                '&:hover': { bgcolor: 'grey.300' }
-                            }}
-                        >
-                            {remoteSlaveState?.isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
-                        </IconButton>
-                    </Box>
-                </Paper>
-            </Slide>
         </Box>
     );
 };

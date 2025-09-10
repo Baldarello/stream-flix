@@ -21,7 +21,7 @@ function broadcastRoomState(roomId) {
             isHost: clientId === room.hostId,
         };
         if (clientWs.readyState === clientWs.OPEN) {
-            clientWs.send(JSON.stringify({ type: 'room-update', payload }));
+            clientWs.send(JSON.stringify({ type: 'quix-room-update', payload }));
         }
     });
 }
@@ -192,6 +192,8 @@ const webSocketRouter = (wss) => {
                     case 'quix-remote-command': {
                         const session = remoteSessions.get(payload.slaveId);
                         if (session?.slaveWs && session.slaveWs.readyState === ws.OPEN) {
+                            // The server just forwards the command; the slave client interprets it.
+                            // This supports play, pause, seek_forward, seek_backward, stop, select_media etc.
                             session.slaveWs.send(JSON.stringify({ type: 'quix-remote-command-received', payload: payload }));
                         }
                         break;
