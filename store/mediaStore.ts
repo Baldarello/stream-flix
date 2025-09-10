@@ -409,9 +409,11 @@ class MediaStore {
         if (this.selectedItem && username.trim()) {
             this.username = username.trim();
             this.watchTogetherError = null;
+            // Convert the MobX proxy to a plain JS object to ensure clean serialization
+            const plainMediaObject = JSON.parse(JSON.stringify(this.selectedItem));
             websocketService.sendMessage({
                 type: 'quix-create-room',
-                payload: {media: this.selectedItem, username: this.username}
+                payload: {media: plainMediaObject, username: this.username}
             });
         }
     };

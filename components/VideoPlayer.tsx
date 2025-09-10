@@ -221,34 +221,38 @@ const VideoPlayer: React.FC = () => {
         <video
           ref={videoRef}
           src={videoSrc}
-          controls={!isSmartTV} // Hide controls on Smart TV
+          controls={isSmartTV} // Hide controls on Smart TV
           autoPlay
           onEnded={handleNextEpisode}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
         {/* Top bar overlay */}
-        <AppBar position="absolute" sx={{ top: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)', boxShadow: 'none' }}>
-            <Toolbar>
-                <IconButton edge="start" color="inherit" aria-label="back" onClick={stopPlayback}>
-                    <ArrowBackIcon />
-                </IconButton>
-                <Typography variant="h6" sx={{ flexGrow: 1 }}>{title}</Typography>
-                 {mediaStore.nextEpisode && (
-                     <Tooltip title="Prossimo Episodio">
-                        <IconButton color="inherit" onClick={handleNextEpisode}>
-                            <SkipNextIcon />
-                        </IconButton>
-                     </Tooltip>
-                 )}
-                 {isEpisode && (
-                    <Tooltip title="Lista Episodi">
-                        <IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}>
-                            <ListAltIcon />
-                        </IconButton>
-                    </Tooltip>
-                 )}
-            </Toolbar>
-        </AppBar>
+          {!isSmartTV&&<AppBar position="absolute" sx={{
+              top: 0,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
+              boxShadow: 'none'
+          }}>
+              <Toolbar>
+                  <IconButton edge="start" color="inherit" aria-label="back" onClick={stopPlayback}>
+                      <ArrowBackIcon/>
+                  </IconButton>
+                  <Typography variant="h6" sx={{flexGrow: 1}}>{title}</Typography>
+                  {mediaStore.nextEpisode && (
+                      <Tooltip title="Prossimo Episodio">
+                          <IconButton color="inherit" onClick={handleNextEpisode}>
+                              <SkipNextIcon/>
+                          </IconButton>
+                      </Tooltip>
+                  )}
+                  {isEpisode && (
+                      <Tooltip title="Lista Episodi">
+                          <IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}>
+                              <ListAltIcon/>
+                          </IconButton>
+                      </Tooltip>
+                  )}
+              </Toolbar>
+          </AppBar>}
 
         {showSkipIntro && (
             <Button 

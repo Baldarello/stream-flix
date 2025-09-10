@@ -125,9 +125,7 @@ const RemotePlayerControlView = () => {
                 <IconButton onClick={handleSeekForward} aria-label="avanti 10 secondi" sx={{ transform: 'scale(1.5)' }}>
                     <FastForwardIcon fontSize="large" />
                 </IconButton>
-                <IconButton onClick={handleToggleFullscreen} aria-label="schermo intero" sx={{ transform: 'scale(1.5)' }}>
-                    <FullscreenIcon fontSize="large" />
-                </IconButton>
+     
             </Stack>
             
             {/* Episodes List for Series */}
