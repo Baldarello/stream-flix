@@ -59,6 +59,7 @@ class MediaStore {
     chatHistory: ChatMessage[] = [];
     private playbackListeners: ((state: PlaybackState) => void)[] = [];
     joinRoomIdFromUrl: string | null = null;
+    watchTogetherSelectedItem: PlayableItem | null = null;
 
     // Remote Control State
     isSmartTV = false;
@@ -162,28 +163,50 @@ class MediaStore {
     handleIncomingMessage = (message: any) => {
         runInAction(() => {
             switch (message.type) {
-                case 'quix-room-update':
+                case 'quix-room-update': {
                     this.roomId = message.payload.roomId;
                     this.hostId = message.payload.hostId;
                     this.isHost = message.payload.isHost;
                     this.participants = message.payload.participants;
-                    // Only update selected item if it's different, to avoid disrupting local detail view loading
-                    if (JSON.stringify(this.selectedItem) !== JSON.stringify(message.payload.selectedMedia)) {
-                        this.selectedItem = message.payload.selectedMedia;
-                    }
                     this.chatHistory = message.payload.chatHistory ?? [];
                     this.watchTogetherError = null;
+
+                    const newMedia = message.payload.selectedMedia;
+                    this.watchTogetherSelectedItem = newMedia;
+
+                    if (newMedia) {
+                        let showIdToLoad: number | null = null;
+                        let mediaType: 'tv' | 'movie' = 'movie';
+
+                        if ('show_id' in newMedia) { // It's an episode
+                            showIdToLoad = newMedia.show_id;
+                            mediaType = 'tv';
+                        } else { // It's a Movie or TV Show
+                            showIdToLoad = newMedia.id;
+                            mediaType = newMedia.media_type;
+                        }
+                        
+                        // If the main selected item is not the correct show, update it.
+                        // This is crucial for the modal UI to display seasons/episodes.
+                        if (this.selectedItem?.id !== showIdToLoad) {
+                            // selectMedia handles fetching full details.
+                            const partialItem: MediaItem = { id: showIdToLoad, media_type: mediaType } as MediaItem;
+                            this.selectMedia(partialItem);
+                        }
+                    }
+
                     if (message.payload.playbackState.status === 'playing') {
-                        this.nowPlayingItem = message.payload.selectedMedia;
+                        this.nowPlayingItem = this.watchTogetherSelectedItem;
                         this.isPlaying = true;
                     }
                     break;
+                }
                 case 'quix-playback-update':
                     if (this.roomId) {
                         this.playbackState = message.payload.playbackState;
                         this.isPlaying = this.playbackState.status === 'playing';
                         if (this.isPlaying && !this.nowPlayingItem) {
-                            this.nowPlayingItem = this.selectedItem;
+                            this.nowPlayingItem = this.watchTogetherSelectedItem;
                         }
                         this.playbackListeners.forEach(l => l(this.playbackState));
                     }
@@ -394,6 +417,7 @@ class MediaStore {
     openWatchTogetherModal = (item: MediaItem | null) => {
         if (item) {
             this.selectedItem = item;
+            this.watchTogetherSelectedItem = item;
         }
         this.watchTogetherModalOpen = true;
     };
@@ -417,14 +441,15 @@ class MediaStore {
         this.watchTogetherError = null;
         this.chatHistory = [];
         this.joinRoomIdFromUrl = null;
+        this.watchTogetherSelectedItem = null;
     };
 
     createRoom = (username: string) => {
-        if (this.selectedItem && username.trim()) {
+        if (this.watchTogetherSelectedItem && username.trim()) {
             this.username = username.trim();
             this.watchTogetherError = null;
             // Convert the MobX proxy to a plain JS object to ensure clean serialization
-            const plainMediaObject = JSON.parse(JSON.stringify(this.selectedItem));
+            const plainMediaObject = JSON.parse(JSON.stringify(this.watchTogetherSelectedItem));
             websocketService.sendMessage({
                 type: 'quix-create-room',
                 payload: {media: plainMediaObject, username: this.username}
@@ -445,6 +470,7 @@ class MediaStore {
     
     changeWatchTogetherMedia = (item: PlayableItem) => {
         if (this.roomId && this.isHost) {
+            this.watchTogetherSelectedItem = item; // Optimistic update for host's UI
             websocketService.sendMessage({
                 type: 'quix-select-media',
                 payload: { roomId: this.roomId, media: JSON.parse(JSON.stringify(item)) }
@@ -654,21 +680,24 @@ class MediaStore {
     }
 
     startPlayback = (item: PlayableItem) => {
+        let itemToPlay = this.roomId && this.isHost && this.watchTogetherSelectedItem ? this.watchTogetherSelectedItem : item;
+        
         // If the host starts playback, update the media for the whole room first.
         if (this.roomId && this.isHost) {
-            this.changeWatchTogetherMedia(item);
+            this.changeWatchTogetherMedia(itemToPlay);
             this.sendPlaybackControl({status: 'playing', time: 0});
         }
-        if ('episode_number' in item) {
-            this.addViewingHistoryEntry(item.show_id, item.id);
 
-            if (item.intro_start_s !== undefined) {
-                const customDuration = this.showIntroDurations.get(item.show_id);
+        if ('episode_number' in itemToPlay) {
+            this.addViewingHistoryEntry(itemToPlay.show_id, itemToPlay.id);
+
+            if (itemToPlay.intro_start_s !== undefined) {
+                const customDuration = this.showIntroDurations.get(itemToPlay.show_id);
                 const introDuration = customDuration !== undefined ? customDuration : 80;
-                item.intro_end_s = item.intro_start_s + introDuration;
+                itemToPlay.intro_end_s = itemToPlay.intro_start_s + introDuration;
             }
         }
-        this.nowPlayingItem = item;
+        this.nowPlayingItem = itemToPlay;
         this.isPlaying = true;
         this.watchTogetherModalOpen = false;
     }

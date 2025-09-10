@@ -29,7 +29,8 @@ const WatchTogetherModal: React.FC = () => {
   const { 
       watchTogetherModalOpen, closeWatchTogetherModal, createRoom, joinRoom, roomId, 
       isHost, participants, hostId, selectedItem, watchTogetherError, isDetailLoading, 
-      changeWatchTogetherMedia, joinRoomIdFromUrl, setJoinRoomIdFromUrl, changeRoomCode
+      changeWatchTogetherMedia, joinRoomIdFromUrl, setJoinRoomIdFromUrl, changeRoomCode,
+      watchTogetherSelectedItem
   } = mediaStore;
   
   const [inputRoomId, setInputRoomId] = useState('');
@@ -48,10 +49,15 @@ const WatchTogetherModal: React.FC = () => {
   }, [joinRoomIdFromUrl]);
   
   useEffect(() => {
-      if (selectedItem?.seasons) {
-          setSelectedSeason(selectedItem.seasons[0]?.season_number ?? 1);
+      if (selectedItem?.seasons && selectedItem.seasons.length > 0) {
+          const seasonExists = selectedItem.seasons.some(s => s.season_number === selectedSeason);
+          if (!seasonExists) {
+              setSelectedSeason(selectedItem.seasons[0].season_number);
+          }
+      } else if (selectedItem) {
+          setSelectedSeason(1);
       }
-  }, [selectedItem?.id]);
+  }, [selectedItem?.id, selectedItem?.seasons]);
   
   useEffect(() => {
     const searchDebounce = setTimeout(async () => {
@@ -101,7 +107,7 @@ const WatchTogetherModal: React.FC = () => {
   };
   
   const handleSelectNewContent = (item: MediaItem) => {
-      mediaStore.selectMedia(item); // this will fetch full details
+      changeWatchTogetherMedia(item);
       setIsChangingContent(false);
       setSearchQuery('');
       setSearchResults([]);
@@ -124,7 +130,7 @@ const WatchTogetherModal: React.FC = () => {
           autoFocus
         />
 
-       <Button variant="contained" size="large" onClick={() => createRoom(username)} disabled={!username.trim() || !selectedItem}>Crea una nuova stanza</Button>
+       <Button variant="contained" size="large" onClick={() => createRoom(username)} disabled={!username.trim() || !watchTogetherSelectedItem}>Crea una nuova stanza</Button>
        <Typography sx={{textAlign: 'center'}}>oppure</Typography>
        <Stack direction="row" spacing={1}>
          <TextField
@@ -166,7 +172,7 @@ const WatchTogetherModal: React.FC = () => {
   );
 
   const renderRoomView = () => {
-    if (!selectedItem) {
+    if (!selectedItem || !watchTogetherSelectedItem) {
         return <Box sx={{textAlign: 'center', p: 4}}><CircularProgress /><Typography sx={{mt:2}}>Sincronizzazione contenuti...</Typography></Box>
     }
     
@@ -210,7 +216,7 @@ const WatchTogetherModal: React.FC = () => {
                 </Box>
                 <List dense sx={{ overflowY: 'auto', flex: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1, p: 1 }}>
                   {isDetailLoading ? <CircularProgress sx={{display: 'block', margin: 'auto'}}/> : currentSeason?.episodes.map(ep => (
-                    <ListItemButton key={ep.id} selected={'episode_number' in selectedItem && selectedItem.id === ep.id} onClick={() => handleSelectEpisode(ep)}>
+                    <ListItemButton key={ep.id} selected={watchTogetherSelectedItem && 'episode_number' in watchTogetherSelectedItem && watchTogetherSelectedItem.id === ep.id} onClick={() => handleSelectEpisode(ep)}>
                       <ListItemText primary={`${ep.episode_number}. ${ep.name}`} />
                     </ListItemButton>
                   ))}
@@ -233,7 +239,7 @@ const WatchTogetherModal: React.FC = () => {
           {isHost && (
             <Stack direction="row" spacing={2}>
               <Button variant="outlined" fullWidth onClick={() => setIsChangingContent(true)}>Cambia Contenuto</Button>
-              <Button variant="contained" fullWidth color="primary" onClick={() => mediaStore.startPlayback(selectedItem)}>
+              <Button variant="contained" fullWidth color="primary" onClick={() => mediaStore.startPlayback(watchTogetherSelectedItem)}>
                 Inizia per tutti
               </Button>
             </Stack>

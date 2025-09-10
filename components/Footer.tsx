@@ -31,8 +31,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the 'item' prop to allow responsive props like 'xs' and 'sm'.
-          <Grid item xs={6} sm={3} key={link}>
+          // FIX: Removed redundant 'item' prop. In MUI v5, responsive props like 'xs' and 'sm' implicitly set the Grid as an item.
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>
