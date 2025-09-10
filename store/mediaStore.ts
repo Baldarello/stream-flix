@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import type { MediaItem, PlayableItem, Episode, ViewingHistoryItem } from '../types';
+import type { MediaItem, PlayableItem, Episode, ViewingHistoryItem, ChatMessage } from '../types';
 import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime, getSeriesDetails, getSeriesEpisodes, searchShow } from '../services/apiCall';
-import { websocketService, ChatMessage } from '../services/websocketService';
+import { websocketService } from '../services/websocketService.js';
 import { isSmartTV as detectSmartTV } from '../utils/device';
 import { db } from '../services/db';
 import type { EpisodeLink } from '../services/db';

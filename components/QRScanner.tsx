@@ -195,15 +195,18 @@ const QRScanner: React.FC = () => {
                         
                         {/* Camera controls */}
                         <Stack
-                            direction="row"
+                            direction={{ xs: 'column', sm: 'row' }}
                             spacing={2}
                             sx={{
                                 position: 'absolute',
                                 bottom: '5%',
+                                left: { xs: '50%', sm: 'auto' },
+                                transform: { xs: 'translateX(-50%)', sm: 'none' },
                                 zIndex: 2,
                                 bgcolor: 'rgba(0,0,0,0.5)',
                                 p: 1.5,
-                                borderRadius: 2
+                                borderRadius: 2,
+                                alignItems: 'center'
                             }}
                         >
                              <ToggleButtonGroup

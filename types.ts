@@ -43,3 +43,12 @@ export interface ViewingHistoryItem {
   episodeId: number;
   watchedAt: number; // timestamp
 }
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text?: string;
+  image?: string; // base64 encoded image
+  timestamp: number;
+}
