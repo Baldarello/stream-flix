@@ -19,7 +19,7 @@ const App: React.FC = () => {
     // Load persisted data first, then fetch new data and initialize sessions
     mediaStore.loadPersistedData();
     mediaStore.fetchAllData();
-    mediaStore.initRemoteSession();
+    //mediaStore.initRemoteSession();
   }, []);
 
   if (mediaStore.loading) {
