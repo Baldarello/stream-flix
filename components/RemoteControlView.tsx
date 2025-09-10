@@ -5,17 +5,24 @@ import { Box, Typography, Container, Paper, IconButton, AppBar, Toolbar, Slide }
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import { ContentRow } from './ContentRow';
-import type { MediaItem } from '../types';
+import RemoteDetailView from './RemoteDetailView';
 
 const RemoteControlView: React.FC = () => {
-    const { latestMovies, trending, topSeries, popularAnime, remoteSlaveState, sendRemoteCommand } = mediaStore;
+    const { 
+        latestMovies, 
+        trending, 
+        topSeries, 
+        popularAnime, 
+        remoteSlaveState, 
+        sendRemoteCommand,
+        continueWatchingItems,
+        myListItems,
+        remoteSelectedItem
+    } = mediaStore;
 
-    const handleSelectMedia = (item: MediaItem) => {
-        sendRemoteCommand({
-            command: 'select_media',
-            media: item,
-        });
-    };
+    if (remoteSelectedItem) {
+        return <RemoteDetailView />;
+    }
     
     const handleTogglePlay = () => {
         if (remoteSlaveState?.isPlaying) {
@@ -42,10 +49,16 @@ const RemoteControlView: React.FC = () => {
              <Container maxWidth={false} sx={{ py: 4, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 <Typography variant="h4" fontWeight="bold">Scegli cosa guardare sulla TV</Typography>
-                <ContentRow title="Ultime Uscite" items={latestMovies} />
-                <ContentRow title="I più Votati" items={trending} />
-                <ContentRow title="Serie TV Popolari" items={topSeries} />
-                <ContentRow title="Anime da non Perdere" items={popularAnime} />
+                  {continueWatchingItems.length > 0 && (
+                      <ContentRow title="Continua a guardare" items={continueWatchingItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                  )}
+                  {myListItems.length > 0 && (
+                      <ContentRow title="La mia lista" items={myListItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                  )}
+                <ContentRow title="Ultime Uscite" items={latestMovies} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title="I più Votati" items={trending} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title="Serie TV Popolari" items={topSeries} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title="Anime da non Perdere" items={popularAnime} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
               </Box>
             </Container>
 

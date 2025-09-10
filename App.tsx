@@ -128,15 +128,15 @@ const App: React.FC = () => {
             <Container maxWidth={false} sx={{ py: { xs: 4, md: 8 }, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 {continueWatchingItems.length > 0 && (
-                  <ContentRow title="Continua a guardare" items={continueWatchingItems} />
+                  <ContentRow title="Continua a guardare" items={continueWatchingItems} onCardClick={item => mediaStore.selectMedia(item)} />
                 )}
-                <ContentRow title="Ultime Uscite" items={latestMovies} />
+                <ContentRow title="Ultime Uscite" items={latestMovies} onCardClick={item => mediaStore.selectMedia(item)} />
                 {myListItems.length > 0 && (
-                  <ContentRow title="La mia lista" items={myListItems} />
+                  <ContentRow title="La mia lista" items={myListItems} onCardClick={item => mediaStore.selectMedia(item)} />
                 )}
-                <ContentRow title="I più Votati" items={trending} />
-                <ContentRow title="Serie TV Popolari" items={topSeries} />
-                <ContentRow title="Anime da non Perdere" items={popularAnime} />
+                <ContentRow title="I più Votati" items={trending} onCardClick={item => mediaStore.selectMedia(item)} />
+                <ContentRow title="Serie TV Popolari" items={topSeries} onCardClick={item => mediaStore.selectMedia(item)} />
+                <ContentRow title="Anime da non Perdere" items={popularAnime} onCardClick={item => mediaStore.selectMedia(item)} />
               </Box>
             </Container>
           </>

@@ -2,16 +2,16 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { Box, Typography, IconButton, Fade } from '@mui/material';
-import { mediaStore } from '../store/mediaStore';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface ContentRowProps {
   title: string;
   items: MediaItem[];
+  onCardClick: (item: MediaItem) => void;
 }
 
-export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
+export const ContentRow: React.FC<ContentRowProps> = ({ title, items, onCardClick }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -115,7 +115,7 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
           }}
         >
           {items.map((item) => (
-            <Card key={item.id} item={item} onClick={() => mediaStore.selectMedia(item)} />
+            <Card key={item.id} item={item} onClick={() => onCardClick(item)} />
           ))}
         </Box>
 

@@ -64,6 +64,8 @@ class MediaStore {
     slaveId: string | null = null;
     isRemoteMasterConnected = false;
     remoteSlaveState: RemoteSlaveState | null = null;
+    remoteSelectedItem: MediaItem | null = null;
+    isRemoteDetailLoading = false;
 
     // Episode Linking State
     episodeLinks: Map<number, string> = new Map();
@@ -202,11 +204,11 @@ class MediaStore {
         });
     };
 
-    private handleRemoteCommand(payload: { command: string, media?: MediaItem }) {
+    private handleRemoteCommand(payload: { command: string, item?: PlayableItem }) {
         if (this.isSmartTV) {
             switch (payload.command) {
                 case 'select_media':
-                    if (payload.media) this.startPlayback(payload.media);
+                    if (payload.item) this.startPlayback(payload.item);
                     break;
                 case 'play':
                     if (this.nowPlayingItem && !this.isPlaying) {
@@ -238,7 +240,7 @@ class MediaStore {
         }
     }
 
-    sendRemoteCommand = (payload: { command: string, media?: MediaItem }) => {
+    sendRemoteCommand = (payload: { command: string, item?: PlayableItem }) => {
         if (this.isRemoteMaster && this.slaveId) {
             websocketService.sendMessage({
                 type: 'quix-remote-command',
@@ -248,6 +250,35 @@ class MediaStore {
                 }
             })
         }
+    }
+
+    setRemoteSelectedItem = async (item: MediaItem) => {
+        this.remoteSelectedItem = item;
+        if (item.media_type === 'tv') {
+            this.isRemoteDetailLoading = true;
+            try {
+                const seriesDetails = await getSeriesDetails(item.id);
+                const seasonsWithEpisodes = await Promise.all(
+                    seriesDetails.seasons?.map(async (season) => {
+                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
+                        return { ...season, episodes };
+                    }) ?? []
+                );
+                runInAction(() => {
+                    this.remoteSelectedItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
+                });
+            } catch (error) {
+                console.error("Failed to fetch series details for remote", error);
+            } finally {
+                runInAction(() => {
+                    this.isRemoteDetailLoading = false;
+                });
+            }
+        }
+    }
+
+    clearRemoteSelectedItem = () => {
+        this.remoteSelectedItem = null;
     }
 
     openWatchTogetherModal = (item: MediaItem) => {
