@@ -16,6 +16,8 @@ import QRScanner from './components/QRScanner';
 
 const App: React.FC = () => {
   useEffect(() => {
+    // Load persisted data first, then fetch new data and initialize sessions
+    mediaStore.loadPersistedData();
     mediaStore.fetchAllData();
     mediaStore.initRemoteSession();
   }, []);

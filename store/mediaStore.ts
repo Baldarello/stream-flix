@@ -3,6 +3,8 @@ import type { MediaItem, PlayableItem, Episode, ViewingHistoryItem } from '../ty
 import { getTrending, getLatestMovies, getTopRatedSeries, getPopularAnime, getSeriesDetails, getSeriesEpisodes, searchShow } from '../services/apiCall';
 import { websocketService, ChatMessage } from '../services/websocketService';
 import { isSmartTV as detectSmartTV } from '../utils/device';
+import { db } from '../services/db';
+import type { EpisodeLink } from '../services/db';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
 
@@ -73,12 +75,35 @@ class MediaStore {
   constructor() {
     makeAutoObservable(this);
     this.isSmartTV = detectSmartTV();
-    this.loadMyListFromStorage();
-    this.loadCachedItemsFromStorage();
-    this.loadEpisodeLinks();
-    this.loadViewingHistoryFromStorage();
-    this.loadShowIntroDurationsFromStorage();
     websocketService.events.on('message', this.handleIncomingMessage);
+  }
+
+  loadPersistedData = async () => {
+    try {
+        const [
+            myListFromDb,
+            viewingHistoryFromDb,
+            cachedItemsFromDb,
+            episodeLinksFromDb,
+            introDurationsFromDb
+        ] = await Promise.all([
+            db.myList.toArray(),
+            db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray(),
+            db.cachedItems.toArray(),
+            db.episodeLinks.toArray(),
+            db.showIntroDurations.toArray()
+        ]);
+
+        runInAction(() => {
+            this.myList = myListFromDb.map(item => item.id);
+            this.viewingHistory = viewingHistoryFromDb;
+            this.cachedItems = new Map(cachedItemsFromDb.map(item => [item.id, item]));
+            this.episodeLinks = new Map(episodeLinksFromDb.map(item => [item.id, item.url]));
+            this.showIntroDurations = new Map(introDurationsFromDb.map(item => [item.id, item.duration]));
+        });
+    } catch (error) {
+        console.error("Failed to load persisted data from Dexie.", error);
+    }
   }
   
   initRemoteSession = () => {
@@ -280,101 +305,65 @@ class MediaStore {
     }
   }
 
-  loadMyListFromStorage() {
-    const storedList = localStorage.getItem('myList');
-    if (storedList) {
-      this.myList = JSON.parse(storedList);
-    }
-  }
-
-  saveMyListToStorage() {
-    localStorage.setItem('myList', JSON.stringify(this.myList));
-  }
-  
-  loadCachedItemsFromStorage() {
-    const storedCache = localStorage.getItem('cachedItems');
-    if (storedCache) {
-      try {
-        this.cachedItems = new Map(JSON.parse(storedCache));
-      } catch (e) {
-        console.error("Failed to parse cached items from localStorage", e);
-        this.cachedItems = new Map();
-      }
-    }
-  }
-
-  saveCachedItemsToStorage() {
-    // Limit cache size to avoid localStorage quota issues
-    const CACHE_LIMIT = 50;
-    const entries = Array.from(this.cachedItems.entries());
-    if (entries.length > CACHE_LIMIT) {
-      // Evict oldest entries by keeping the newest ones
-      const trimmedEntries = entries.slice(entries.length - CACHE_LIMIT);
-      this.cachedItems = new Map(trimmedEntries);
-    }
-    localStorage.setItem('cachedItems', JSON.stringify(Array.from(this.cachedItems.entries())));
-  }
-
-  toggleMyList = (item: MediaItem) => {
+  toggleMyList = async (item: MediaItem) => {
     const itemId = item.id;
-    if (this.myList.includes(itemId)) {
-      this.myList = this.myList.filter(id => id !== itemId);
-    } else {
-      this.myList.push(itemId);
-      this.cachedItems.set(itemId, item);
-      this.saveCachedItemsToStorage();
-    }
-    this.saveMyListToStorage();
-  }
+    const isInList = this.myList.includes(itemId);
 
-  // --- Viewing History Methods ---
-  loadViewingHistoryFromStorage = () => {
-    const storedHistory = localStorage.getItem('viewingHistory');
-    if (storedHistory) {
-      this.viewingHistory = JSON.parse(storedHistory);
-    }
-  }
-
-  saveViewingHistoryToStorage = () => {
-    const limitedHistory = this.viewingHistory.slice(0, 100);
-    localStorage.setItem('viewingHistory', JSON.stringify(limitedHistory));
-  }
-
-  addViewingHistoryEntry = (showId: number, episodeId: number) => {
-    const updatedHistory = this.viewingHistory.filter(item => item.episodeId !== episodeId);
-    updatedHistory.unshift({
-      showId,
-      episodeId,
-      watchedAt: Date.now(),
-    });
-    this.viewingHistory = updatedHistory;
-    this.saveViewingHistoryToStorage();
-  }
-
-  // --- Custom Intro Duration Methods ---
-  loadShowIntroDurationsFromStorage = () => {
-    const storedDurations = localStorage.getItem('showIntroDurations');
-    if (storedDurations) {
-        try {
-            this.showIntroDurations = new Map(JSON.parse(storedDurations));
-        } catch (e) {
-            console.error("Failed to parse show intro durations from localStorage", e);
-            this.showIntroDurations = new Map();
+    try {
+        if (isInList) {
+            await db.myList.delete(itemId);
+            await db.cachedItems.delete(itemId);
+            runInAction(() => {
+                this.myList = this.myList.filter(id => id !== itemId);
+                this.cachedItems.delete(itemId);
+            });
+        } else {
+            const plainItem = JSON.parse(JSON.stringify(item));
+            await db.myList.put({ id: itemId });
+            await db.cachedItems.put(plainItem);
+            runInAction(() => {
+                this.myList.push(itemId);
+                this.cachedItems.set(itemId, item);
+            });
         }
+    } catch (error) {
+        console.error("Failed to toggle My List in DB", error);
     }
   }
 
-  saveShowIntroDurationsToStorage = () => {
-    localStorage.setItem('showIntroDurations', JSON.stringify(Array.from(this.showIntroDurations.entries())));
+  addViewingHistoryEntry = async (showId: number, episodeId: number) => {
+    const newEntry = { showId, episodeId, watchedAt: Date.now() };
+
+    try {
+        await db.viewingHistory.where({ episodeId }).delete();
+        await db.viewingHistory.put(newEntry);
+        
+        const historyFromDb = await db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray();
+
+        runInAction(() => {
+            this.viewingHistory = historyFromDb;
+        });
+    } catch (error) {
+        console.error("Failed to update viewing history in DB", error);
+    }
   }
 
-  setShowIntroDuration = (showId: number, duration: number) => {
-    if (duration >= 0) {
-        this.showIntroDurations.set(showId, duration);
-    } else {
-        this.showIntroDurations.delete(showId);
+  setShowIntroDuration = async (showId: number, duration: number) => {
+    try {
+        if (duration >= 0) {
+            await db.showIntroDurations.put({ id: showId, duration });
+            runInAction(() => {
+                this.showIntroDurations.set(showId, duration);
+            });
+        } else {
+            await db.showIntroDurations.delete(showId);
+             runInAction(() => {
+                this.showIntroDurations.delete(showId);
+            });
+        }
+    } catch (error) {
+        console.error("Failed to set intro duration in DB", error);
     }
-    this.saveShowIntroDurationsToStorage();
   }
 
   setActiveView = (view: ActiveView) => {
@@ -385,14 +374,12 @@ class MediaStore {
     window.scrollTo(0, 0);
   }
 
-  // --- Search Methods ---
   toggleSearch = (isActive: boolean) => {
     this.isSearchActive = isActive;
     if (!isActive) {
       this.searchQuery = '';
       this.searchResults = [];
     } else {
-      // When opening search, we might want to clear previous selection
       this.selectedItem = null;
     }
   }
@@ -422,10 +409,9 @@ class MediaStore {
             console.error("Failed to search for shows", error);
             runInAction(() => {
                 this.isSearching = false;
-                // Optionally set an error state here
             });
         }
-    }, 500); // 500ms debounce
+    }, 500);
   }
 
 
@@ -444,10 +430,10 @@ class MediaStore {
   };
 
   selectMedia = async (item: MediaItem) => {
-    this.isSearchActive = false; // Close search when an item is selected
+    this.isSearchActive = false;
     this.searchQuery = '';
     this.searchResults = [];
-    this.selectedItem = item; // Show basic info immediately
+    this.selectedItem = item;
     window.scrollTo(0, 0);
   
     if (item.media_type === 'tv') {
@@ -466,7 +452,6 @@ class MediaStore {
         });
       } catch (error) {
         console.error("Failed to fetch series details and episodes", error);
-        // Optionally set an error state
       } finally {
         runInAction(() => {
           this.isDetailLoading = false;
@@ -486,10 +471,9 @@ class MediaStore {
     if ('episode_number' in item) {
       this.addViewingHistoryEntry(item.show_id, item.id);
       
-      // New logic to calculate intro end time dynamically
       if (item.intro_start_s !== undefined) {
           const customDuration = this.showIntroDurations.get(item.show_id);
-          const introDuration = customDuration !== undefined ? customDuration : 80; // Default to 80 seconds
+          const introDuration = customDuration !== undefined ? customDuration : 80;
           item.intro_end_s = item.intro_start_s + introDuration;
       }
     }
@@ -504,11 +488,9 @@ class MediaStore {
     }
     this.isPlaying = false;
     this.nowPlayingItem = null;
-    this.sendSlaveStatusUpdate(); // Notify remote master
+    this.sendSlaveStatusUpdate();
     this.closeEpisodesDrawer();
   }
-
-  // --- Episode Linking Methods ---
 
   openLinkEpisodesModal = (item: MediaItem) => {
     this.linkingEpisodesForItem = item;
@@ -520,18 +502,7 @@ class MediaStore {
     this.linkingEpisodesForItem = null;
   };
 
-  loadEpisodeLinks = () => {
-    const storedLinks = localStorage.getItem('episodeLinks');
-    if (storedLinks) {
-      this.episodeLinks = new Map(JSON.parse(storedLinks));
-    }
-  };
-
-  saveEpisodeLinks = () => {
-    localStorage.setItem('episodeLinks', JSON.stringify(Array.from(this.episodeLinks.entries())));
-  };
-
-  setEpisodeLinksForSeason = (payload: { seasonNumber: number; method: 'pattern' | 'list' | 'json'; data: any }) => {
+  setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: 'pattern' | 'list' | 'json'; data: any }) => {
     const { seasonNumber, method, data } = payload;
     const item = this.linkingEpisodesForItem;
 
@@ -564,18 +535,29 @@ class MediaStore {
             break;
     }
 
+    const linksToSave: EpisodeLink[] = [];
     season.episodes.forEach((episode, index) => {
         if (links[index]) {
-            this.episodeLinks.set(episode.id, links[index] as string);
+            const url = links[index] as string;
+            linksToSave.push({ id: episode.id, url });
         }
     });
 
-    this.saveEpisodeLinks();
-    this.applyEpisodeLinksToMedia([item]); // Re-apply to the current item
+    if (linksToSave.length > 0) {
+      try {
+        await db.episodeLinks.bulkPut(linksToSave);
+        runInAction(() => {
+          linksToSave.forEach(link => this.episodeLinks.set(link.id, link.url));
+        });
+      } catch (error) {
+        console.error("Failed to save episode links to DB", error);
+      }
+    }
+
+    this.applyEpisodeLinksToMedia([item]);
     this.closeLinkEpisodesModal();
   };
 
-  // --- Player Episode Drawer Methods ---
   openEpisodesDrawer = () => {
     this.isEpisodesDrawerOpen = true;
   }
@@ -583,13 +565,12 @@ class MediaStore {
     this.isEpisodesDrawerOpen = false;
   }
 
-  // --- Profile Drawer & QR Scanner Methods ---
   toggleProfileDrawer = (isOpen: boolean) => {
     this.isProfileDrawerOpen = isOpen;
   }
 
   openQRScanner = () => {
-    this.isProfileDrawerOpen = false; // Close drawer when opening scanner
+    this.isProfileDrawerOpen = false;
     this.isQRScannerOpen = true;
   }
 
@@ -618,25 +599,17 @@ class MediaStore {
       .filter((item): item is MediaItem => !!item && item.media_type === 'tv');
   }
 
-  // FIX: Replaced `this.nowPlayingItem` with a local constant. This allows TypeScript's
-  // type narrowing to correctly infer that `nowPlayingItem` is an episode within the
-  // if-block, resolving an error when accessing the episode-specific `show_id` property.
   get currentShow(): MediaItem | undefined {
     const nowPlayingItem = this.nowPlayingItem;
     if (nowPlayingItem && 'episode_number' in nowPlayingItem) {
-      // Prioritize selectedItem if it's the show being played, as it's guaranteed to have full season details.
       if (this.selectedItem && this.selectedItem.media_type === 'tv' && this.selectedItem.id === nowPlayingItem.show_id) {
         return this.selectedItem;
       }
-      // Fallback for cases where selectedItem is not set (e.g., deep link, history)
       return this.allItems.find(item => item.id === nowPlayingItem.show_id);
     }
     return undefined;
   }
 
-  // FIX: Replaced `this.nowPlayingItem` with a local constant. This allows TypeScript's
-  // type narrowing to correctly infer that `nowPlayingItem` is an episode within the
-  // if-block, resolving an error when accessing the episode-specific `season_number` property.
   get currentSeasonEpisodes(): Episode[] {
     const nowPlayingItem = this.nowPlayingItem;
     if (nowPlayingItem && 'episode_number' in nowPlayingItem && this.currentShow) {
