@@ -608,6 +608,14 @@ class MediaStore {
         websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
     }
 
+    enableSmartTVMode = () => {
+        runInAction(() => {
+            this.isSmartTV = true;
+            this.isProfileDrawerOpen = false;
+        });
+        websocketService.sendMessage({ type: 'quix-register-slave' });
+    }
+
     get heroContent(): MediaItem | undefined {
         return this.trending[0];
     }

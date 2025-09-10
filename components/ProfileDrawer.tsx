@@ -5,9 +5,10 @@ import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import GoogleIcon from '@mui/icons-material/Google';
 import CloseIcon from '@mui/icons-material/Close';
+import TvIcon from '@mui/icons-material/Tv';
 
 const ProfileDrawer: React.FC = () => {
-    const { isProfileDrawerOpen, toggleProfileDrawer, openQRScanner } = mediaStore;
+    const { isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode } = mediaStore;
 
     const handleScanQRCode = () => {
         // The openQRScanner action already closes the drawer
@@ -34,6 +35,12 @@ const ProfileDrawer: React.FC = () => {
                     <ListItemButton onClick={handleScanQRCode}>
                         <ListItemIcon><QrCodeScannerIcon /></ListItemIcon>
                         <ListItemText primary="Scansiona QR Code TV" />
+                    </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                    <ListItemButton onClick={enableSmartTVMode}>
+                        <ListItemIcon><TvIcon /></ListItemIcon>
+                        <ListItemText primary="Attiva modalità Smart TV" />
                     </ListItemButton>
                 </ListItem>
             </List>
