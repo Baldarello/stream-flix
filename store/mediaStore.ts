@@ -81,7 +81,7 @@ class MediaStore {
 
     constructor() {
         makeAutoObservable(this);
-        this.isSmartTV = true//detectSmartTV();
+        this.isSmartTV = detectSmartTV();
         websocketService.events.on('message', this.handleIncomingMessage);
     }
 
