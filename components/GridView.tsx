@@ -47,8 +47,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Added the `item` prop to the Grid component. Responsive props like `xs`, `sm`, etc. are only applicable to Grid items within a Grid container.
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Removed the `item` prop. The TypeScript error "Property 'item' does not exist" suggests that the project might be configured to use Grid v2, where the `item` prop is not used for grid items.
+              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}

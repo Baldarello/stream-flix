@@ -8,45 +8,25 @@ import FastForwardIcon from '@mui/icons-material/FastForward';
 import FastRewindIcon from '@mui/icons-material/FastRewind';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import { getSeriesDetails, getSeriesEpisodes } from '../services/apiCall';
-import type { Episode, PlayableItem, MediaItem } from '../types';
+import type { Episode, PlayableItem } from '../types';
 
 const RemotePlayerControlView = () => {
-    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback } = mediaStore;
-    const [fullItem, setFullItem] = useState<MediaItem | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading } = mediaStore;
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
 
     const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
 
     useEffect(() => {
-        const fetchDetails = async () => {
-            if (nowPlayingItem && 'show_id' in nowPlayingItem) {
-                setIsLoading(true);
-                try {
-                    const seriesDetails = await getSeriesDetails(nowPlayingItem.show_id);
-                    const seasonsWithEpisodes = await Promise.all(
-                        seriesDetails.seasons?.map(async (season) => {
-                            const episodes = await getSeriesEpisodes(nowPlayingItem.show_id, season.season_number);
-                            return { ...season, episodes };
-                        }) ?? []
-                    );
-                    setFullItem({ ...seriesDetails, seasons: seasonsWithEpisodes });
-                    setSelectedSeason(nowPlayingItem.season_number);
-                } catch (error) {
-                    console.error("Failed to fetch full details for remote player", error);
-                    setFullItem(null);
-                } finally {
-                    setIsLoading(false);
-                }
-            } else if (nowPlayingItem && 'media_type' in nowPlayingItem) {
-                setFullItem(nowPlayingItem);
-                setSelectedSeason(undefined);
-            }
-        };
-
-        fetchDetails();
+        mediaStore.fetchRemoteFullItem();
     }, [nowPlayingItem?.id]);
+
+    useEffect(() => {
+        if (nowPlayingItem && 'season_number' in nowPlayingItem) {
+            setSelectedSeason(nowPlayingItem.season_number);
+        } else {
+            setSelectedSeason(undefined);
+        }
+    }, [nowPlayingItem]);
 
 
     if (!nowPlayingItem) {
@@ -69,19 +49,19 @@ const RemotePlayerControlView = () => {
     const handleToggleFullscreen = () => sendRemoteCommand({ command: 'toggle_fullscreen' });
     
     const handleSelectEpisode = (episode: Episode) => {
-        if (!fullItem || !selectedSeason) return;
+        if (!remoteFullItem || !selectedSeason) return;
         const itemToPlay: PlayableItem = {
             ...episode,
-            show_id: fullItem.id,
-            show_title: fullItem.title || fullItem.name || '',
-            backdrop_path: fullItem.backdrop_path,
+            show_id: remoteFullItem.id,
+            show_title: remoteFullItem.title || remoteFullItem.name || '',
+            backdrop_path: remoteFullItem.backdrop_path,
             season_number: selectedSeason,
         };
-        sendRemoteCommand({ command: 'select_media', item: itemToPlay });
+        mediaStore.playRemoteItem(itemToPlay);
     };
 
-    const isSeries = fullItem?.media_type === 'tv';
-    const currentSeason = fullItem?.seasons?.find(s => s.season_number === selectedSeason);
+    const isSeries = remoteFullItem?.media_type === 'tv';
+    const currentSeason = remoteFullItem?.seasons?.find(s => s.season_number === selectedSeason);
     const episodes = currentSeason?.episodes ?? [];
 
     return (
@@ -157,7 +137,7 @@ const RemotePlayerControlView = () => {
                         <Typography variant="h5" fontWeight="bold">
                             Episodi
                         </Typography>
-                        {fullItem && fullItem.seasons && (
+                        {remoteFullItem && remoteFullItem.seasons && (
                              <FormControl sx={{ minWidth: 150 }} size="small">
                                 <InputLabel>Stagione</InputLabel>
                                 <Select
@@ -165,7 +145,7 @@ const RemotePlayerControlView = () => {
                                     label="Stagione"
                                     onChange={(e) => setSelectedSeason(Number(e.target.value))}
                                 >
-                                    {fullItem.seasons.map(season => (
+                                    {remoteFullItem.seasons.map(season => (
                                     <MenuItem key={season.id} value={season.season_number}>
                                         {season.name}
                                     </MenuItem>
@@ -174,13 +154,14 @@ const RemotePlayerControlView = () => {
                             </FormControl>
                         )}
                     </Box>
-                    {isLoading ? <Box sx={{ display: 'flex', justifyContent: 'center'}}><CircularProgress /></Box> : (
+                    {isRemoteFullItemLoading ? <Box sx={{ display: 'flex', justifyContent: 'center'}}><CircularProgress /></Box> : (
                         <List sx={{ maxHeight: 'calc(100vh - 500px)', overflowY: 'auto', bgcolor: 'background.paper', borderRadius: 2 }}>
                             {episodes.map(episode => (
                                 <ListItem key={episode.id} disablePadding>
                                     <ListItemButton 
                                         onClick={() => handleSelectEpisode(episode)}
                                         selected={isEpisode && episode.id === nowPlayingItem.id}
+                                        disabled={!episode.video_url}
                                     >
                                         <ListItemText 
                                             primary={`${episode.episode_number}. ${episode.name}`}

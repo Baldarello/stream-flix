@@ -31,8 +31,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the `item` prop to the Grid component. Responsive props like `xs` and `sm` are only applicable to Grid items within a Grid container.
-          <Grid item xs={6} sm={3} key={link}>
+          // FIX: Removed the `item` prop. The TypeScript error "Property 'item' does not exist" suggests that the project might be configured to use Grid v2, where the `item` prop is not used for grid items.
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

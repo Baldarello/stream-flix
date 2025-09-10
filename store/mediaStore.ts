@@ -67,6 +67,8 @@ class MediaStore {
     remoteSelectedItem: MediaItem | null = null;
     isRemoteDetailLoading = false;
     remoteAction: { type: string; payload?: any; id: number } | null = null;
+    remoteFullItem: MediaItem | null = null;
+    isRemoteFullItemLoading = false;
 
 
     // Episode Linking State
@@ -294,6 +296,56 @@ class MediaStore {
         if (this.remoteSlaveState) {
             this.remoteSlaveState.nowPlayingItem = null;
             this.remoteSlaveState.isPlaying = false;
+        }
+        this.remoteFullItem = null;
+    }
+
+    fetchRemoteFullItem = async () => {
+        const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
+
+        if (nowPlaying && 'show_id' in nowPlaying) {
+            const showId = nowPlaying.show_id;
+
+            // Avoid refetching if we already have it and it's fully loaded with seasons
+            if (this.remoteFullItem?.id === showId && this.remoteFullItem.seasons && this.remoteFullItem.seasons.length > 0) {
+                return;
+            }
+
+            this.isRemoteFullItemLoading = true;
+            try {
+                const seriesDetails = await getSeriesDetails(showId);
+                const seasonsWithEpisodes = await Promise.all(
+                    seriesDetails.seasons?.map(async (season) => {
+                        const episodes = await getSeriesEpisodes(showId, season.season_number);
+                        return { ...season, episodes };
+                    }) ?? []
+                );
+                const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
+                
+                // Apply locally stored video links
+                this.applyEpisodeLinksToMedia([fullItem]);
+                
+                runInAction(() => {
+                    this.remoteFullItem = fullItem;
+                });
+            } catch (error) {
+                console.error("Failed to fetch full details for remote player", error);
+                runInAction(() => {
+                    this.remoteFullItem = null;
+                });
+            } finally {
+                runInAction(() => {
+                    this.isRemoteFullItemLoading = false;
+                });
+            }
+        } else if (nowPlaying && 'media_type' in nowPlaying) {
+            runInAction(() => {
+                this.remoteFullItem = nowPlaying as MediaItem;
+            });
+        } else {
+            runInAction(() => {
+                this.remoteFullItem = null;
+            });
         }
     }
 
