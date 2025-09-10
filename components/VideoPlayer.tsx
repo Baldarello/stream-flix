@@ -74,13 +74,21 @@ const VideoPlayer: React.FC = () => {
       }
   }, [isPlaying, isSmartTV, sendSlaveStatusUpdate]);
 
-  // Effect to handle remote actions like seeking
+  // Effect to handle remote actions like seeking and fullscreen
   useEffect(() => {
     const action = mediaStore.remoteAction;
     const videoElement = videoRef.current;
-    if (isSmartTV && action && videoElement) {
-      if (action.type === 'seek') {
+    const containerElement = playerContainerRef.current;
+    if (isSmartTV && action && containerElement) {
+      if (action.type === 'seek' && videoElement) {
         videoElement.currentTime += action.payload;
+      }
+      if (action.type === 'fullscreen') {
+        if (!document.fullscreenElement) {
+            containerElement.requestFullscreen().catch(console.error);
+        } else {
+            document.exitFullscreen().catch(console.error);
+        }
       }
       mediaStore.clearRemoteAction();
     }

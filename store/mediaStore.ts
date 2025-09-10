@@ -229,6 +229,9 @@ class MediaStore {
                 case 'seek_backward':
                      this.remoteAction = { type: 'seek', payload: -10, id: Date.now() };
                     break;
+                case 'toggle_fullscreen':
+                    this.remoteAction = { type: 'fullscreen', id: Date.now() };
+                    break;
                 case 'stop':
                     this.stopPlayback();
                     break;

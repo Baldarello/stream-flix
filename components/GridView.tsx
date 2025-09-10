@@ -47,9 +47,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Removed the `item` prop to resolve the TypeScript error. The `item` prop is not recognized in this project's dependency setup.
-              // In Material-UI, responsive props like `xs`, `sm`, etc. are only applicable to Grid items within a Grid container.
-              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Added the `item` prop to the Grid component. Responsive props like `xs`, `sm`, etc. are only applicable to Grid items within a Grid container.
+              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}
