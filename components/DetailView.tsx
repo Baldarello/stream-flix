@@ -11,7 +11,6 @@ import LinkIcon from '@mui/icons-material/Link';
 import ImageIcon from '@mui/icons-material/Image';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import WatchTogetherModal from './WatchTogetherModal';
 import LinkEpisodesModal from './LinkEpisodesModal';
 import type { Episode } from '../types';
 
@@ -375,7 +374,6 @@ const DetailView: React.FC = () => {
           )}
         </Box>
       )}
-      <WatchTogetherModal />
       <LinkEpisodesModal />
     </Box>
   );

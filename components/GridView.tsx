@@ -47,8 +47,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Removed redundant 'item' prop. In MUI v5, responsive props like 'xs', 'sm', etc. implicitly set the Grid as an item.
-              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Added the `item` prop to the Grid component to resolve the type error.
+              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}

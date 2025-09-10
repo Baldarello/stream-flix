@@ -13,6 +13,7 @@ import SmartTVScreen from './components/SmartTVScreen';
 import RemoteControlView from './components/RemoteControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
+import WatchTogetherModal from './components/WatchTogetherModal';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -171,6 +172,7 @@ const App: React.FC = () => {
       <Footer />
       <ProfileDrawer />
       <QRScanner />
+      <WatchTogetherModal />
     </Box>
   );
 };
