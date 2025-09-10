@@ -124,7 +124,8 @@ const QRScanner: React.FC = () => {
             // Casting to `any` and then to `MediaTrackConstraints` bypasses these checks,
             // allowing the use of continuous autofocus if the device supports it.
             if ((capabilities as any).focusMode?.includes('continuous')) {
-                await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] } as MediaTrackConstraints);
+                // FIX: Cast to 'unknown' first to satisfy TypeScript's strict type checking for non-standard properties.
+                await videoTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] } as unknown as MediaTrackConstraints);
             }
         } catch (e) {
             console.warn("Autofocus trigger failed:", e);
