@@ -12,6 +12,7 @@ import {
 import {websocketService} from '../services/websocketService.js';
 import type {EpisodeLink} from '../services/db';
 import {db} from '../services/db';
+import { isSmartTV as detectSmartTV } from '../utils/device';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
 
