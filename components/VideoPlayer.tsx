@@ -21,6 +21,33 @@ const VideoPlayer: React.FC = () => {
     const videoElement = videoRef.current;
     if (!videoElement || !roomId) return;
 
+    // For clients, set the initial state from the store when the component first loads for this room.
+    if (!isHost) {
+        const { playbackState } = mediaStore;
+        
+        const initialSync = () => {
+             if (!videoRef.current) return;
+             // Set time
+             if (Math.abs(videoRef.current.currentTime - playbackState.time) > 1.5) {
+                videoRef.current.currentTime = playbackState.time;
+             }
+             // Set play/pause status
+             if (playbackState.status === 'playing' && videoRef.current.paused) {
+                 videoRef.current.play().catch(e => console.error("Sync play failed", e));
+             } else if (playbackState.status === 'paused' && !videoRef.current.paused) {
+                 videoRef.current.pause();
+             }
+        };
+
+        // If video metadata is already loaded, sync now. Otherwise, wait for it.
+        if (videoElement.readyState >= videoElement.HAVE_METADATA) {
+            initialSync();
+        } else {
+            videoElement.addEventListener('loadedmetadata', initialSync, { once: true });
+        }
+    }
+
+
     // Host event listeners to send updates
     const handlePlay = () => {
       if (isHost && !isSyncing) {

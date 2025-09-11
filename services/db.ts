@@ -32,16 +32,7 @@ export class QuixDB extends Dexie {
   constructor() {
     super('quixDB');
     
-    // First, define the latest version of the schema.
-    this.version(2).stores({
-      myList: '&id',
-      viewingHistory: '++id, episodeId, watchedAt', 
-      cachedItems: '&id',
-      episodeLinks: '&id',
-      showIntroDurations: '&id',
-      preferences: '&key', // New table for user preferences
-    });
-    
+    // FIX: Dexie versions must be declared in ascending order.
     // Define the previous version for backward compatibility. Dexie handles the upgrade.
     this.version(1).stores({
       myList: '&id',
@@ -49,6 +40,16 @@ export class QuixDB extends Dexie {
       cachedItems: '&id',
       episodeLinks: '&id',
       showIntroDurations: '&id',
+    });
+    
+    // Define the latest version of the schema.
+    this.version(2).stores({
+      myList: '&id',
+      viewingHistory: '++id, episodeId, watchedAt', 
+      cachedItems: '&id',
+      episodeLinks: '&id',
+      showIntroDurations: '&id',
+      preferences: '&key', // New table for user preferences
     });
   }
 }

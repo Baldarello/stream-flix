@@ -188,6 +188,8 @@ class MediaStore {
                     this.participants = message.payload.participants;
                     this.chatHistory = message.payload.chatHistory ?? [];
                     this.watchTogetherError = null;
+                    
+                    this.playbackState = message.payload.playbackState;
 
                     const newMedia = message.payload.selectedMedia;
                     this.watchTogetherSelectedItem = newMedia;
@@ -204,18 +206,15 @@ class MediaStore {
                             mediaType = newMedia.media_type;
                         }
                         
-                        // If the main selected item is not the correct show, update it.
-                        // This is crucial for the modal UI to display seasons/episodes.
                         if (this.selectedItem?.id !== showIdToLoad) {
-                            // selectMedia handles fetching full details.
                             const partialItem: MediaItem = { id: showIdToLoad, media_type: mediaType } as MediaItem;
                             this.selectMedia(partialItem);
                         }
                     }
 
-                    if (message.payload.playbackState.status === 'playing') {
+                    if (this.watchTogetherSelectedItem) {
                         this.nowPlayingItem = this.watchTogetherSelectedItem;
-                        this.isPlaying = true;
+                        this.isPlaying = this.playbackState.status === 'playing';
                     }
                     break;
                 }
