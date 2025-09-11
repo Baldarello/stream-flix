@@ -88,10 +88,13 @@ const QRScanner: React.FC = () => {
         
         const startCamera = async () => {
             if (isQRScannerOpen && selectedDeviceId) {
-                // Stop previous stream
+                // Stop previous stream and reset video element
                 if (streamRef.current) {
                     streamRef.current.getTracks().forEach(track => track.stop());
                     streamRef.current = null;
+                }
+                if (videoRef.current) {
+                    videoRef.current.srcObject = null; // Explicitly clear the source
                 }
                 if (animationFrameIdRef.current) {
                     cancelAnimationFrame(animationFrameIdRef.current);
@@ -192,6 +195,7 @@ const QRScanner: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                overflow: 'hidden',
             }}>
                 <IconButton
                     onClick={handleCloseScanner}
@@ -209,7 +213,10 @@ const QRScanner: React.FC = () => {
                     ref={videoRef}
                     onClick={handleVideoClick}
                     playsInline
-                    style={{ 
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
                         width: '100%', 
                         height: '100%', 
                         objectFit: 'cover',
