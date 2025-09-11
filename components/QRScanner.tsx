@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, IconButton, Typography, CircularProgress, Alert, ToggleButtonGroup, ToggleButton, Stack } from '@mui/material';
+import { Modal, Box, IconButton, Typography, CircularProgress, Alert, ToggleButtonGroup, ToggleButton, Stack, Fade } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
 import jsQR from 'jsqr';
@@ -18,8 +18,10 @@ const QRScanner: React.FC = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const animationFrameIdRef = useRef<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [scanResult, setScanResult] = useState<string | null>(null);
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
     const [selectedQuality, setSelectedQuality] = useState<Quality>('720p');
@@ -48,8 +50,6 @@ const QRScanner: React.FC = () => {
 
     // Start or restart the camera when dependencies change
     useEffect(() => {
-        let animationFrameId: number;
-
         const scanQRCode = () => {
             if (
                 videoRef.current &&
@@ -72,8 +72,10 @@ const QRScanner: React.FC = () => {
                             const url = new URL(code.data);
                             const slaveId = url.searchParams.get('remote_for');
                             if (url.origin === window.location.origin && slaveId) {
+                                setScanResult('Codice trovato! Connessione in corso...');
                                 mediaStore.connectAsRemoteMaster(slaveId);
-                                // No need to stop scanning, component will unmount and cleanup will run
+                                // No need to stop scanning, component will unmount/cleanup will run
+                                return; // Stop the loop
                             }
                         } catch (e) {
                             // Not a valid URL, ignore and continue scanning
@@ -81,7 +83,7 @@ const QRScanner: React.FC = () => {
                     }
                 }
             }
-            animationFrameId = requestAnimationFrame(scanQRCode);
+            animationFrameIdRef.current = requestAnimationFrame(scanQRCode);
         };
         
         const startCamera = async () => {
@@ -91,9 +93,14 @@ const QRScanner: React.FC = () => {
                     streamRef.current.getTracks().forEach(track => track.stop());
                     streamRef.current = null;
                 }
+                if (animationFrameIdRef.current) {
+                    cancelAnimationFrame(animationFrameIdRef.current);
+                }
 
                 setIsLoading(true);
                 setError(null);
+                setScanResult(null);
+
                 const constraints: MediaStreamConstraints = {
                     video: {
                         deviceId: { exact: selectedDeviceId },
@@ -113,7 +120,7 @@ const QRScanner: React.FC = () => {
                             });
                             setIsLoading(false);
                              // Start the scanning loop
-                            animationFrameId = requestAnimationFrame(scanQRCode);
+                            animationFrameIdRef.current = requestAnimationFrame(scanQRCode);
                         };
                     }
                 } catch (err) {
@@ -131,7 +138,9 @@ const QRScanner: React.FC = () => {
         startCamera();
 
         return () => {
-            cancelAnimationFrame(animationFrameId);
+            if (animationFrameIdRef.current) {
+                cancelAnimationFrame(animationFrameIdRef.current);
+            }
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop());
                 streamRef.current = null;
@@ -167,9 +176,14 @@ const QRScanner: React.FC = () => {
             console.warn("Autofocus trigger failed:", e);
         }
     };
+    
+    const handleCloseScanner = () => {
+        setScanResult(null);
+        closeQRScanner();
+    }
 
     return (
-        <Modal open={isQRScannerOpen} onClose={closeQRScanner}>
+        <Modal open={isQRScannerOpen} onClose={handleCloseScanner}>
             <Box sx={{
                 position: 'relative',
                 width: '100vw',
@@ -180,7 +194,7 @@ const QRScanner: React.FC = () => {
                 justifyContent: 'center',
             }}>
                 <IconButton
-                    onClick={closeQRScanner}
+                    onClick={handleCloseScanner}
                     aria-label="Chiudi scanner"
                     sx={{ position: 'absolute', top: 16, right: 16, color: 'white', zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
                 >
@@ -208,28 +222,34 @@ const QRScanner: React.FC = () => {
 
                 {!isLoading && !error && (
                     <>
-                        {/* Viewfinder overlay */}
+                        {/* Viewfinder and feedback overlay */}
                         <Box sx={{
                             position: 'absolute',
-                            border: '4px solid rgba(255, 255, 255, 0.8)',
+                            border: `4px solid ${scanResult ? 'rgba(76, 175, 80, 0.9)' : 'rgba(255, 255, 255, 0.8)'}`,
                             width: 'min(60vw, 300px)',
                             height: 'min(60vw, 300px)',
                             borderRadius: '16px',
                             boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)',
+                            transition: 'border-color 0.3s ease-in-out',
                         }} />
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                position: 'absolute',
-                                bottom: '20%',
-                                color: 'white',
-                                textShadow: '1px 1px 3px black',
-                                textAlign: 'center',
-                                px: 2,
-                            }}
-                        >
-                            Inquadra il QR Code sulla tua TV
-                        </Typography>
+                        <Fade in={!scanResult}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: '20%',
+                                    color: 'white',
+                                    textShadow: '1px 1px 3px black',
+                                    textAlign: 'center',
+                                    px: 2,
+                                }}
+                            >
+                                Inquadra il QR Code sulla tua TV
+                            </Typography>
+                        </Fade>
+                        {scanResult && (
+                             <Alert severity="success" sx={{ position: 'absolute', bottom: '20%' }}>{scanResult}</Alert>
+                        )}
                         
                         {/* Camera controls */}
                         <Stack
@@ -238,8 +258,8 @@ const QRScanner: React.FC = () => {
                             sx={{
                                 position: 'absolute',
                                 bottom: '5%',
-                                left: { xs: '50%', sm: 'auto' },
-                                transform: { xs: 'translateX(-50%)', sm: 'none' },
+                                left: '50%',
+                                transform: 'translateX(-50%)',
                                 zIndex: 2,
                                 bgcolor: 'rgba(0,0,0,0.5)',
                                 p: 1.5,
