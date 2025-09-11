@@ -66,6 +66,7 @@ class MediaStore {
 
     // Remote Control State
     isSmartTV = false;
+    isSmartTVPairingVisible = false;
     isRemoteMaster = false;
     slaveId: string | null = null;
     isRemoteMasterConnected = false;
@@ -99,6 +100,9 @@ class MediaStore {
     constructor() {
         makeAutoObservable(this);
         this.isSmartTV = detectSmartTV();
+        if (this.isSmartTV) {
+            this.isSmartTVPairingVisible = true;
+        }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
     }
@@ -245,6 +249,7 @@ class MediaStore {
                     break;
                 case 'quix-master-connected':
                     this.isRemoteMasterConnected = true;
+                    this.isSmartTVPairingVisible = false; // Hide QR code screen on TV
                     break;
                 case 'quix-remote-command-received':
                     this.handleRemoteCommand(message.payload);
@@ -843,9 +848,14 @@ class MediaStore {
     enableSmartTVMode = () => {
         runInAction(() => {
             this.isSmartTV = true;
+            this.isSmartTVPairingVisible = true;
             this.isProfileDrawerOpen = false;
         });
         websocketService.sendMessage({ type: 'quix-register-slave' });
+    }
+
+    exitSmartTVPairingMode = () => {
+        this.isSmartTVPairingVisible = false;
     }
 
     get heroContent(): MediaItem | undefined {

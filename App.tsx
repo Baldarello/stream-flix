@@ -43,12 +43,12 @@ const themePalettes: Record<ThemeName, any> = {
     },
     Film: {
         primary: { main: colors.amber[500] }, // Cinematic Gold
-        background: { default: '#181512', paper: '#211e1b' }, // Warmer, darker background
-        text: { primary: '#f5f5f5', secondary: '#c7c7c7' } // Slightly brighter secondary text
+        background: { default: '#101010', paper: '#1d1d1d' },
+        text: { primary: '#f5f5f5', secondary: '#a0a0a0' }
     },
     Anime: {
-        primary: { main: colors.deepPurple[300] }, // Brighter, more vibrant purple
-        background: { default: '#1c1a27', paper: '#282535' }, // More saturated purple-ish background
+        primary: { main: colors.deepPurple[400] }, // Vibrant Purple
+        background: { default: '#1a1820', paper: '#24212c' },
         text: { primary: '#e9e7ef', secondary: '#adaab8' }
     }
 };
@@ -80,7 +80,7 @@ const App: React.FC = () => {
     popularAnime,
     myListItems,
     isRemoteMaster,
-    isSmartTV,
+    isSmartTVPairingVisible,
     isSearchActive,
     searchResults,
     searchQuery,
@@ -117,7 +117,7 @@ const App: React.FC = () => {
 
   if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /></ThemeProvider>;
   if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /></ThemeProvider>;
-  if (isSmartTV) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /></ThemeProvider>;
+  if (isSmartTVPairingVisible) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /></ThemeProvider>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {

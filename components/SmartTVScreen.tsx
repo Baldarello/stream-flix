@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, CircularProgress, Paper } from '@mui/material';
+import { Box, Typography, CircularProgress, Paper, Button } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const SmartTVScreen: React.FC = () => {
@@ -63,6 +63,21 @@ const SmartTVScreen: React.FC = () => {
             }}
         >
             {renderContent()}
+            {!isRemoteMasterConnected && (
+                <Button
+                    variant="outlined"
+                    onClick={() => mediaStore.exitSmartTVPairingMode()}
+                    sx={{
+                        position: 'absolute',
+                        bottom: 40,
+                        borderColor: 'rgba(255,255,255,0.7)',
+                        color: 'white',
+                        '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' }
+                    }}
+                >
+                    Sfoglia il catalogo direttamente sulla TV
+                </Button>
+            )}
         </Box>
     );
 };

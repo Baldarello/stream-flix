@@ -125,7 +125,7 @@ const ProfileDrawer: React.FC = () => {
                 <ListItem disablePadding>
                     <ListItemButton onClick={enableSmartTVMode}>
                         <ListItemIcon><TvIcon /></ListItemIcon>
-                        <ListItemText primary="Attiva modalità Smart TV" />
+                        <ListItemText primary="Mostra QR Code per Telecomando" />
                     </ListItemButton>
                 </ListItem>
             </List>
