@@ -1,7 +1,6 @@
 import React from 'react';
-// FIX: The 'item' prop is valid on the Grid component. Changed to a direct import from '@mui/material/Grid' to ensure the correct type definition is used.
-import { Box, Container, Typography, Fade } from '@mui/material';
-import Grid from '@mui/material/Grid';
+// FIX: Consolidating the import for the Grid component to resolve a type error where the 'item' prop was not being recognized.
+import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';

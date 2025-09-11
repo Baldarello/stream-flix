@@ -19,6 +19,7 @@ import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
 import WatchTogetherModal from './components/WatchTogetherModal';
 import NotificationSnackbar from './components/NotificationSnackbar';
+import DebugOverlay from './components/DebugOverlay';
 
 // FIX: Explicitly type `baseThemeOptions` with `ThemeOptions`. This prevents TypeScript from widening
 // the types of CSS properties (e.g., `textTransform`) to a generic `string`, which resolves the
@@ -102,6 +103,7 @@ const App: React.FC = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
             <CircularProgress color="primary" />
           </Box>
+          <DebugOverlay />
         </ThemeProvider>
     );
   }
@@ -112,13 +114,14 @@ const App: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
                 <Alert severity="error">{error}</Alert>
             </Box>
+            <DebugOverlay />
         </ThemeProvider>
     );
   }
 
-  if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /> <NotificationSnackbar /></ThemeProvider>;
-  if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /> <NotificationSnackbar /></ThemeProvider>;
-  if (isSmartTVPairingVisible) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /> <NotificationSnackbar /></ThemeProvider>;
+  if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /> <NotificationSnackbar /><DebugOverlay /></ThemeProvider>;
+  if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /> <NotificationSnackbar /><DebugOverlay /></ThemeProvider>;
+  if (isSmartTVPairingVisible) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></ThemeProvider>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {
@@ -185,6 +188,7 @@ const App: React.FC = () => {
         <WatchTogetherModal />
         <NotificationSnackbar />
       </Box>
+      <DebugOverlay />
     </ThemeProvider>
   );
 };

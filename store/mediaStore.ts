@@ -101,6 +101,9 @@ class MediaStore {
     // Snackbar State
     snackbarMessage: { message: string, severity: AlertColor } | null = null;
 
+    // Debug Mode State
+    debugMessages: string[] = [];
+
 
     constructor() {
         makeAutoObservable(this);
@@ -110,6 +113,7 @@ class MediaStore {
         }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
+        websocketService.events.on('debug', this.addDebugMessage);
     }
 
     showSnackbar = (message: string, severity: AlertColor = 'info') => {
@@ -118,6 +122,17 @@ class MediaStore {
 
     hideSnackbar = () => {
         this.snackbarMessage = null;
+    }
+
+    addDebugMessage = (message: string) => {
+        const timestamp = new Date().toLocaleTimeString('it-IT');
+        const fullMessage = `[${timestamp}] ${message}`;
+        runInAction(() => {
+            this.debugMessages.push(fullMessage);
+            if (this.debugMessages.length > 50) {
+                this.debugMessages.shift();
+            }
+        });
     }
 
     loadPersistedData = async () => {
@@ -876,6 +891,11 @@ class MediaStore {
 
     exitSmartTVPairingMode = () => {
         this.isSmartTVPairingVisible = false;
+    }
+
+    get isDebugModeActive(): boolean {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('debug') === 'true';
     }
 
     get heroContent(): MediaItem | undefined {

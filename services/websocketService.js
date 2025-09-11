@@ -35,10 +35,12 @@ class WebSocketService {
 
     connect() {
         console.log('Attempting to connect to WebSocket server...');
+        this.events.emit('debug', 'Tentativo di connessione...');
         this.ws = new WebSocket(WEBSOCKET_URL);
 
         this.ws.onopen = () => {
             console.log('WebSocket connection established.');
+            this.events.emit('debug', 'Connessione aperta.');
             // Client ID is now null until the server assigns one.
             this._clientId = null;
             this.events.emit('open');
@@ -60,14 +62,16 @@ class WebSocketService {
             }
         };
 
-        this.ws.onclose = () => {
+        this.ws.onclose = (event) => {
             console.log('WebSocket connection closed. Attempting to reconnect...');
+            this.events.emit('debug', `Connessione chiusa. Codice: ${event.code}, Motivo: "${event.reason || 'Nessun motivo'}"`);
             this.ws = null;
             setTimeout(() => this.connect(), this.reconnectInterval);
         };
 
         this.ws.onerror = (error) => {
             console.error('WebSocket error:', error);
+            this.events.emit('debug', 'Errore WebSocket.');
             // onclose will be called next, triggering the reconnect logic.
         };
     }
