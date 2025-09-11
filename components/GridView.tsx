@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Container, Typography, Fade, Grid } from '@mui/material';
+import { Box, Container, Typography, Fade } from '@mui/material';
+// FIX: Changed Grid import to a direct path to resolve type conflicts with MUI components.
+import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
@@ -47,7 +49,6 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Added the `item` prop to the Grid component to resolve the type error.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>

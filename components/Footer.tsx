@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
+import { Box, Container, Link, Typography, IconButton } from '@mui/material';
+// FIX: Changed Grid import to a direct path to resolve type conflicts with MUI components.
+import Grid from '@mui/material/Grid';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -31,7 +33,6 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Added the `item` prop to the Grid component to resolve the type error.
           <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}

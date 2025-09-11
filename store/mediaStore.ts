@@ -469,8 +469,11 @@ class MediaStore {
     };
     
     changeWatchTogetherMedia = (item: PlayableItem) => {
+        // This action can now be called before a room exists to "stage" the media,
+        // or by the host inside a room to change the media for everyone.
+        this.watchTogetherSelectedItem = item;
+
         if (this.roomId && this.isHost) {
-            this.watchTogetherSelectedItem = item; // Optimistic update for host's UI
             websocketService.sendMessage({
                 type: 'quix-select-media',
                 payload: { roomId: this.roomId, media: JSON.parse(JSON.stringify(item)) }
@@ -781,6 +784,8 @@ class MediaStore {
         this.applyEpisodeLinksToMedia([item]);
         this.closeLinkEpisodesModal();
     };
+
+
 
     openEpisodesDrawer = () => {
         this.isEpisodesDrawerOpen = true;
