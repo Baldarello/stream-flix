@@ -1,6 +1,7 @@
 import React from 'react';
-// FIX: Using a named import for Grid from '@mui/material' to resolve a TypeScript error where the `item` prop was not being recognized.
-import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
+// FIX: The 'item' prop is valid on the Grid component. Changed to a direct import from '@mui/material/Grid' to ensure the correct type definition is used.
+import { Box, Container, Link, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';

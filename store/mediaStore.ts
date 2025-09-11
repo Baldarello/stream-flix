@@ -1,5 +1,6 @@
 import {makeAutoObservable, runInAction} from 'mobx';
 import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem} from '../types';
+import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
     getPopularAnime,
@@ -97,6 +98,10 @@ class MediaStore {
     // Theme state
     activeTheme: ThemeName = 'SerieTV';
 
+    // Snackbar State
+    snackbarMessage: { message: string, severity: AlertColor } | null = null;
+
+
     constructor() {
         makeAutoObservable(this);
         this.isSmartTV = detectSmartTV();
@@ -105,6 +110,14 @@ class MediaStore {
         }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
+    }
+
+    showSnackbar = (message: string, severity: AlertColor = 'info') => {
+        this.snackbarMessage = { message, severity };
+    }
+
+    hideSnackbar = () => {
+        this.snackbarMessage = null;
     }
 
     loadPersistedData = async () => {
@@ -202,6 +215,7 @@ class MediaStore {
                     // FIX: Prevent host from being sent to player on room creation.
                     // If the user just created the room and is the host, we keep them in the modal.
                     if (this.isCreatingRoom && this.isHost) {
+                        this.showSnackbar('Stanza creata! Condividi il codice per invitare amici.', 'success');
                         this.isCreatingRoom = false; // Reset the flag
                         return; // Exit here to prevent setting nowPlayingItem
                     }
@@ -246,10 +260,16 @@ class MediaStore {
                 // Remote Control Messages
                 case 'quix-slave-registered':
                     this.slaveId = message.payload.slaveId;
+                    this.showSnackbar('Dispositivo TV pronto. Scansiona il QR code per connetterti.', 'info');
                     break;
                 case 'quix-master-connected':
                     this.isRemoteMasterConnected = true;
                     this.isSmartTVPairingVisible = false; // Hide QR code screen on TV
+                    if (this.isRemoteMaster) {
+                        this.showSnackbar('Connesso alla TV con successo!', 'success');
+                    } else if (this.isSmartTV) {
+                        this.showSnackbar('Telecomando connesso!', 'success');
+                    }
                     break;
                 case 'quix-remote-command-received':
                     this.handleRemoteCommand(message.payload);

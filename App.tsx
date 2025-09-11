@@ -18,6 +18,7 @@ import RemoteControlView from './components/RemoteControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
 import WatchTogetherModal from './components/WatchTogetherModal';
+import NotificationSnackbar from './components/NotificationSnackbar';
 
 // FIX: Explicitly type `baseThemeOptions` with `ThemeOptions`. This prevents TypeScript from widening
 // the types of CSS properties (e.g., `textTransform`) to a generic `string`, which resolves the
@@ -182,6 +183,7 @@ const App: React.FC = () => {
         <ProfileDrawer />
         <QRScanner />
         <WatchTogetherModal />
+        <NotificationSnackbar />
       </Box>
     </ThemeProvider>
   );
