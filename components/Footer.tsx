@@ -33,7 +33,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          <Grid item xs={6} sm={3} key={link}>
+          // FIX: Removed the `item` prop. The error indicates that the Grid component in use (likely MUI's Grid v2) does not support this prop. Child Grids are implicitly items.
+          <Grid xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

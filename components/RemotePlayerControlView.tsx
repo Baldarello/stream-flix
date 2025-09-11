@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button } from '@mui/material';
+import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FastForwardIcon from '@mui/icons-material/FastForward';
 import FastRewindIcon from '@mui/icons-material/FastRewind';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import CloseIcon from '@mui/icons-material/Close';
 import type { Episode, PlayableItem } from '../types';
 
 const RemotePlayerControlView = () => {
     const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading } = mediaStore;
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
+    const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
 
     const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
 
@@ -58,14 +61,97 @@ const RemotePlayerControlView = () => {
             season_number: selectedSeason,
         };
         mediaStore.playRemoteItem(itemToPlay);
+        setIsEpisodesDrawerOpen(false); // Close drawer after selection
     };
 
     const isSeries = remoteFullItem?.media_type === 'tv';
-    const currentSeason = remoteFullItem?.seasons?.find(s => s.season_number === selectedSeason);
-    const episodes = currentSeason?.episodes ?? [];
+    
+    const introDuration = remoteFullItem ? (mediaStore.showIntroDurations.get(remoteFullItem.id) ?? 80) : 80;
+
+    const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        if (!remoteFullItem) return;
+        const duration = parseInt(value, 10);
+        if (value === '' || isNaN(duration)) {
+            mediaStore.setShowIntroDuration(remoteFullItem.id, 80); // Reset to default
+        } else if (duration >= 0) {
+            mediaStore.setShowIntroDuration(remoteFullItem.id, duration);
+        }
+    };
+    
+    const renderEpisodesDrawer = () => {
+        const currentSeason = remoteFullItem?.seasons?.find(s => s.season_number === selectedSeason);
+        const episodes = currentSeason?.episodes ?? [];
+
+        return (
+            <Drawer
+                anchor="right"
+                open={isEpisodesDrawerOpen}
+                onClose={() => setIsEpisodesDrawerOpen(false)}
+                PaperProps={{ sx: { width: { xs: '80vw', sm: 350 }, bgcolor: 'background.paper' } }}
+            >
+                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h6">Episodi</Typography>
+                    <IconButton onClick={() => setIsEpisodesDrawerOpen(false)}><CloseIcon /></IconButton>
+                </Box>
+                <Divider />
+                <Box sx={{ p: 2 }}>
+                    <TextField
+                        label="Durata Intro (sec)"
+                        type="number"
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        value={introDuration}
+                        onChange={handleIntroDurationChange}
+                        onFocus={(event) => event.target.select()}
+                        InputProps={{ inputProps: { min: 0 } }}
+                    />
+
+                    {remoteFullItem?.seasons && (
+                        <FormControl fullWidth margin="normal" size="small">
+                           <InputLabel>Stagione</InputLabel>
+                           <Select
+                               value={selectedSeason || ''}
+                               label="Stagione"
+                               onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                           >
+                               {remoteFullItem.seasons.map(season => (
+                               <MenuItem key={season.id} value={season.season_number}>
+                                   {season.name}
+                               </MenuItem>
+                               ))}
+                           </Select>
+                       </FormControl>
+                    )}
+                </Box>
+                <Divider />
+                {isRemoteFullItemLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+                ) : (
+                    <List sx={{ flex: 1, overflowY: 'auto' }}>
+                        {episodes.map(episode => (
+                            <ListItem key={episode.id} disablePadding>
+                                <ListItemButton 
+                                    onClick={() => handleSelectEpisode(episode)}
+                                    selected={isEpisode && episode.id === nowPlayingItem.id}
+                                    disabled={!episode.video_url}
+                                >
+                                    <ListItemText 
+                                        primary={`${episode.episode_number}. ${episode.name}`}
+                                        primaryTypographyProps={{ fontWeight: isEpisode && episode.id === nowPlayingItem.id ? 'bold' : 'normal', noWrap: true }}
+                                    />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                )}
+            </Drawer>
+        );
+    };
 
     return (
-        <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh' }}>
+        <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" onClick={stopRemotePlayback} aria-label="indietro">
@@ -107,88 +193,53 @@ const RemotePlayerControlView = () => {
                  </Box>
             </Box>
 
-            {/* Controls */}
-            <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ my: 4, position: 'relative' }}>
-                <IconButton onClick={handleSeekBackward} aria-label="indietro 10 secondi" sx={{ transform: 'scale(1.5)' }}>
-                    <FastRewindIcon fontSize="large" />
-                </IconButton>
-                <IconButton
-                    onClick={handleTogglePlay}
-                    aria-label={isPlaying ? 'pausa' : 'play'}
-                    sx={{
-                        bgcolor: 'white', color: 'black', transform: 'scale(2.2)',
-                        '&:hover': { bgcolor: 'grey.300' }
-                    }}
-                >
-                    {isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
-                </IconButton>
-                <IconButton onClick={handleSeekForward} aria-label="avanti 10 secondi" sx={{ transform: 'scale(1.5)' }}>
-                    <FastForwardIcon fontSize="large" />
-                </IconButton>
-                {isIntroSkippable && (
-                    <Button 
-                        variant="contained" 
-                        color="inherit" 
-                        onClick={handleSkipIntro}
+            <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                {/* Main Controls */}
+                <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ mb: 3 }}>
+                    <IconButton onClick={handleSeekBackward} aria-label="indietro 10 secondi" sx={{ transform: 'scale(1.5)' }}>
+                        <FastRewindIcon fontSize="large" />
+                    </IconButton>
+                    <IconButton
+                        onClick={handleTogglePlay}
+                        aria-label={isPlaying ? 'pausa' : 'play'}
                         sx={{
-                            position: 'absolute',
-                            right: { xs: 16, sm: 32 },
-                            bgcolor: 'rgba(255, 255, 255, 0.8)',
-                            color: 'black',
-                            '&:hover': { bgcolor: 'white' }
+                            bgcolor: 'white', color: 'black', transform: 'scale(2.2)',
+                            '&:hover': { bgcolor: 'grey.300' }
                         }}
                     >
-                        Salta Intro
-                    </Button>
-                )}
-            </Stack>
-            
-            {/* Episodes List for Series */}
-            {isSeries && (
-                <Box sx={{ px: { xs: 2, md: 4 }, pb: 4 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="h5" fontWeight="bold">
-                            Episodi
-                        </Typography>
-                        {remoteFullItem && remoteFullItem.seasons && (
-                             <FormControl sx={{ minWidth: 150 }} size="small">
-                                <InputLabel>Stagione</InputLabel>
-                                <Select
-                                    value={selectedSeason || ''}
-                                    label="Stagione"
-                                    onChange={(e) => setSelectedSeason(Number(e.target.value))}
-                                >
-                                    {remoteFullItem.seasons.map(season => (
-                                    <MenuItem key={season.id} value={season.season_number}>
-                                        {season.name}
-                                    </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        )}
-                    </Box>
-                    {isRemoteFullItemLoading ? <Box sx={{ display: 'flex', justifyContent: 'center'}}><CircularProgress /></Box> : (
-                        <List sx={{ maxHeight: 'calc(100vh - 500px)', overflowY: 'auto', bgcolor: 'background.paper', borderRadius: 2 }}>
-                            {episodes.map(episode => (
-                                <ListItem key={episode.id} disablePadding>
-                                    <ListItemButton 
-                                        onClick={() => handleSelectEpisode(episode)}
-                                        selected={isEpisode && episode.id === nowPlayingItem.id}
-                                        disabled={!episode.video_url}
-                                    >
-                                        <ListItemText 
-                                            primary={`${episode.episode_number}. ${episode.name}`}
-                                            primaryTypographyProps={{ fontWeight: isEpisode && episode.id === nowPlayingItem.id ? 'bold' : 'normal' }}
-                                            secondary={episode.overview}
-                                            secondaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis' }}
-                                        />
-                                    </ListItemButton>
-                                </ListItem>
-                            ))}
-                        </List>
+                        {isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
+                    </IconButton>
+                    <IconButton onClick={handleSeekForward} aria-label="avanti 10 secondi" sx={{ transform: 'scale(1.5)' }}>
+                        <FastForwardIcon fontSize="large" />
+                    </IconButton>
+                </Stack>
+
+                {/* Secondary Controls */}
+                <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 4, height: '48px' /* Reserve space for buttons */ }}>
+                    {isIntroSkippable && (
+                        <Button 
+                            variant="contained" 
+                            color="inherit" 
+                            onClick={handleSkipIntro}
+                            sx={{ bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black', '&:hover': { bgcolor: 'white' } }}
+                        >
+                            Salta Intro
+                        </Button>
                     )}
-                </Box>
-            )}
+                     {isSeries && (
+                        <Button 
+                            variant="outlined" 
+                            startIcon={<ListAltIcon />} 
+                            onClick={() => setIsEpisodesDrawerOpen(true)}
+                            sx={{ borderColor: 'rgba(255,255,255,0.7)', color: 'white' }}
+                        >
+                            Episodi
+                        </Button>
+                    )}
+                </Stack>
+            </Box>
+            
+            {isSeries && renderEpisodesDrawer()}
         </Box>
     );
 };

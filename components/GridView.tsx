@@ -49,7 +49,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Removed the `item` prop. The error indicates that the Grid component in use (likely MUI's Grid v2) does not support this prop. Child Grids are implicitly items.
+              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}
