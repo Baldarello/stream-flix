@@ -62,6 +62,7 @@ class MediaStore {
     joinRoomIdFromUrl: string | null = null;
     watchTogetherSelectedItem: PlayableItem | null = null;
     myClientId: string | null = null;
+    private isCreatingRoom = false; // Flag to manage host's view after room creation
 
     // Remote Control State
     isSmartTV = false;
@@ -189,34 +190,35 @@ class MediaStore {
                     this.participants = message.payload.participants;
                     this.chatHistory = message.payload.chatHistory ?? [];
                     this.watchTogetherError = null;
-                    
+
                     this.playbackState = message.payload.playbackState;
                     const newMedia = message.payload.selectedMedia;
                     this.watchTogetherSelectedItem = newMedia;
 
-                    // If there is media selected for the room, set nowPlayingItem immediately.
-                    // This ensures that clients joining the room will transition to the player view
-                    // with the correct video information provided by the host.
+                    // FIX: Prevent host from being sent to player on room creation.
+                    // If the user just created the room and is the host, we keep them in the modal.
+                    if (this.isCreatingRoom && this.isHost) {
+                        this.isCreatingRoom = false; // Reset the flag
+                        return; // Exit here to prevent setting nowPlayingItem
+                    }
+                    
                     if (newMedia) {
                         this.nowPlayingItem = newMedia;
                         this.isPlaying = this.playbackState.status === 'playing';
                         
-                        // In the background, fetch full details for the show if we don't have them.
-                        // This is for UI elements like the episode drawer.
                         let showIdToLoad: number | null = null;
                         let mediaType: 'tv' | 'movie' = 'movie';
 
-                        if ('show_id' in newMedia) { // It's an episode
+                        if ('show_id' in newMedia) {
                             showIdToLoad = newMedia.show_id;
                             mediaType = 'tv';
-                        } else { // It's a Movie or TV Show
+                        } else {
                             showIdToLoad = newMedia.id;
                             mediaType = newMedia.media_type;
                         }
                         
                         if (this.selectedItem?.id !== showIdToLoad) {
                             const partialItem: MediaItem = { id: showIdToLoad, media_type: mediaType } as MediaItem;
-                            // We don't await this; it runs in the background.
                             this.selectMedia(partialItem);
                         }
                     }
@@ -469,7 +471,7 @@ class MediaStore {
         if (this.watchTogetherSelectedItem && username.trim()) {
             this.username = username.trim();
             this.watchTogetherError = null;
-            // Convert the MobX proxy to a plain JS object to ensure clean serialization
+            this.isCreatingRoom = true; // Set flag to prevent immediate player transition for host
             const plainMediaObject = JSON.parse(JSON.stringify(this.watchTogetherSelectedItem));
             websocketService.sendMessage({
                 type: 'quix-create-room',

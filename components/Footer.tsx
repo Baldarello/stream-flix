@@ -1,7 +1,8 @@
 import React from 'react';
-// FIX: The default import for Grid was causing a type error where the 'item' prop was not recognized.
-// Changing to a named import from the top-level '@mui/material' package resolves this issue.
-import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
+// FIX: The named import for Grid was causing a type error where the 'item' prop was not recognized.
+// Changing to a default import from '@mui/material/Grid' resolves this issue.
+import { Box, Container, Link, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
