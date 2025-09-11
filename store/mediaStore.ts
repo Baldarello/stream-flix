@@ -61,6 +61,7 @@ class MediaStore {
     private playbackListeners: ((state: PlaybackState) => void)[] = [];
     joinRoomIdFromUrl: string | null = null;
     watchTogetherSelectedItem: PlayableItem | null = null;
+    myClientId: string | null = null;
 
     // Remote Control State
     isSmartTV = false;
@@ -158,10 +159,6 @@ class MediaStore {
         }
     }
 
-    get myClientId(): string {
-        return websocketService.clientId;
-    }
-
     transferHost = (newHostId: string) => {
         if (this.roomId && this.isHost) {
             websocketService.sendMessage({
@@ -180,6 +177,10 @@ class MediaStore {
 
     handleIncomingMessage = (message: any) => {
         runInAction(() => {
+            if (message.type === 'connected' && message.payload?.clientId) {
+                this.myClientId = message.payload.clientId;
+            }
+
             switch (message.type) {
                 case 'quix-room-update': {
                     this.roomId = message.payload.roomId;

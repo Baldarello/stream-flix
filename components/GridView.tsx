@@ -1,6 +1,7 @@
 import React from 'react';
-// FIX: Changed Grid import to named import from '@mui/material' to resolve 'item' prop type error.
-import { Box, Container, Typography, Fade, Grid } from '@mui/material';
+// FIX: Changed Grid import to use a direct path to resolve 'item' prop type error.
+import { Box, Container, Typography, Fade } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
