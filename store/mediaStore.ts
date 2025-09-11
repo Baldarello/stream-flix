@@ -15,6 +15,7 @@ import {db} from '../services/db';
 import { isSmartTV as detectSmartTV } from '../utils/device';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
+export type ThemeName = 'SerieTV' | 'Film' | 'Anime';
 
 type PlaybackState = { status: 'playing' | 'paused'; time: number };
 
@@ -90,6 +91,9 @@ class MediaStore {
     // Custom Intro Durations
     showIntroDurations: Map<number, number> = new Map();
 
+    // Theme state
+    activeTheme: ThemeName = 'SerieTV';
+
     constructor() {
         makeAutoObservable(this);
         this.isSmartTV = detectSmartTV();
@@ -104,13 +108,15 @@ class MediaStore {
                 viewingHistoryFromDb,
                 cachedItemsFromDb,
                 episodeLinksFromDb,
-                introDurationsFromDb
+                introDurationsFromDb,
+                themePreference
             ] = await Promise.all([
                 db.myList.toArray(),
                 db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray(),
                 db.cachedItems.toArray(),
                 db.episodeLinks.toArray(),
-                db.showIntroDurations.toArray()
+                db.showIntroDurations.toArray(),
+                db.preferences.get('activeTheme')
             ]);
 
             runInAction(() => {
@@ -119,9 +125,21 @@ class MediaStore {
                 this.cachedItems = new Map(cachedItemsFromDb.map(item => [item.id, item]));
                 this.episodeLinks = new Map(episodeLinksFromDb.map(item => [item.id, item.url]));
                 this.showIntroDurations = new Map(introDurationsFromDb.map(item => [item.id, item.duration]));
+                if (themePreference) {
+                    this.activeTheme = themePreference.value;
+                }
             });
         } catch (error) {
             console.error("Failed to load persisted data from Dexie.", error);
+        }
+    }
+
+    setActiveTheme = async (theme: ThemeName) => {
+        this.activeTheme = theme;
+        try {
+            await db.preferences.put({ key: 'activeTheme', value: theme });
+        } catch (error) {
+            console.error("Failed to save theme preference", error);
         }
     }
 
@@ -825,7 +843,40 @@ class MediaStore {
     }
 
     get heroContent(): MediaItem | undefined {
-        return this.trending[0];
+        switch (this.activeTheme) {
+            case 'Anime':
+                return this.popularAnime[0] || this.trending[0];
+            case 'Film':
+                return this.latestMovies[0] || this.trending.find(i => i.media_type === 'movie') || this.trending[0];
+            case 'SerieTV':
+                return this.topSeries[0] || this.trending.find(i => i.media_type === 'tv') || this.trending[0];
+            default:
+                return this.trending[0];
+        }
+    }
+
+    get homePageRows(): { title: string, items: MediaItem[] }[] {
+        const allRows: ({ title: string, items: MediaItem[], type?: ThemeName, condition?: boolean })[] = [
+            { title: "Continua a guardare", items: this.continueWatchingItems, condition: this.continueWatchingItems.length > 0 },
+            { title: "La mia lista", items: this.myListItems, condition: this.myListItems.length > 0 },
+            { title: "Ultime Uscite", items: this.latestMovies, type: 'Film' },
+            { title: "I più Votati", items: this.trending },
+            { title: "Serie TV Popolari", items: this.topSeries, type: 'SerieTV' },
+            { title: "Anime da non Perdere", items: this.popularAnime, type: 'Anime' },
+        ];
+        
+        const visibleRows = allRows.filter(row => row.condition !== false && row.items.length > 0);
+
+        const priorityRow = visibleRows.find(row => row.type === this.activeTheme);
+        const otherRows = visibleRows.filter(row => row.type !== this.activeTheme);
+        
+        if (priorityRow) {
+            const topRows = otherRows.filter(r => r.title === 'Continua a guardare' || r.title === 'La mia lista');
+            const bottomRows = otherRows.filter(r => r.title !== 'Continua a guardare' && r.title !== 'La mia lista');
+            return [...topRows, priorityRow, ...bottomRows];
+        }
+
+        return visibleRows;
     }
 
     get continueWatchingItems(): MediaItem[] {

@@ -14,32 +14,51 @@ const VideoPlayer: React.FC = () => {
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showSkipIntro, setShowSkipIntro] = useState(false);
+  const lastHostUpdateTimeRef = useRef(0);
 
   // Effect for Watch Together Synchronization
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement || !roomId) return;
 
+    // Host event listeners to send updates
     const handlePlay = () => {
       if (isHost && !isSyncing) {
         sendPlaybackControl({ status: 'playing', time: videoElement.currentTime });
       }
     };
-    
     const handlePause = () => {
       if (isHost && !isSyncing) {
         sendPlaybackControl({ status: 'paused', time: videoElement.currentTime });
       }
     };
+    const handleSeeked = () => {
+        if(isHost && !isSyncing) {
+            sendPlaybackControl({ status: videoElement.paused ? 'paused' : 'playing', time: videoElement.currentTime });
+        }
+    };
+    const handleTimeUpdate = () => {
+        const now = Date.now();
+        // Send periodic updates during playback, at most once per second
+        if(isHost && !isSyncing && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
+            lastHostUpdateTimeRef.current = now;
+            sendPlaybackControl({ status: 'playing', time: videoElement.currentTime });
+        }
+    }
+
 
     if (isHost) {
       videoElement.addEventListener('play', handlePlay);
       videoElement.addEventListener('pause', handlePause);
+      videoElement.addEventListener('seeked', handleSeeked);
+      videoElement.addEventListener('timeupdate', handleTimeUpdate);
     }
     
+    // Client listener to receive updates
     const disposer = mediaStore.addPlaybackListener((state) => {
         if (!isHost && videoElement) {
             setIsSyncing(true);
+            // Only seek if the time difference is significant to avoid jerky playback
             if (Math.abs(videoElement.currentTime - state.time) > 1.5) {
                 videoElement.currentTime = state.time;
             }
@@ -48,6 +67,7 @@ const VideoPlayer: React.FC = () => {
             } else if (state.status === 'paused' && !videoElement.paused) {
                 videoElement.pause();
             }
+            // Release the sync lock after a short delay
             setTimeout(() => setIsSyncing(false), 200);
         }
     });
@@ -56,6 +76,8 @@ const VideoPlayer: React.FC = () => {
       if (videoElement) {
         videoElement.removeEventListener('play', handlePlay);
         videoElement.removeEventListener('pause', handlePause);
+        videoElement.removeEventListener('seeked', handleSeeked);
+        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
       }
       if (disposer) disposer();
     };
@@ -230,7 +252,7 @@ const VideoPlayer: React.FC = () => {
         <video
           ref={videoRef}
           src={videoSrc}
-          controls={isSmartTV} // Hide controls on Smart TV
+          controls={!roomId || isHost}
           autoPlay
           onEnded={handleNextEpisode}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}

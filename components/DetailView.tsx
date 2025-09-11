@@ -142,7 +142,11 @@ const DetailView: React.FC = () => {
         <IconButton
           onClick={() => mediaStore.closeDetail()}
           aria-label="Chiudi dettaglio"
-          sx={{ position: 'absolute', top: 16, right: 16, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
+          sx={{ 
+            position: 'absolute', top: 80, right: 16, zIndex: 1300, 
+            bgcolor: 'rgba(0,0,0,0.5)', 
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } 
+          }}
         >
           <CloseIcon />
         </IconButton>

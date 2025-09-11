@@ -1,112 +1,127 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from './store/mediaStore';
-import { Box, CircularProgress, Alert, Container, Typography } from '@mui/material';
-import { Header } from './components/Header';
-import { Hero } from './components/Hero';
-import { ContentRow } from './components/ContentRow';
-import { Footer } from './components/Footer';
-import DetailView from './components/DetailView';
-import VideoPlayer from './components/VideoPlayer';
-import GridView from './components/GridView';
-import SmartTVScreen from './components/SmartTVScreen';
-import RemoteControlView from './components/RemoteControlView';
-import ProfileDrawer from './components/ProfileDrawer';
-import QRScanner from './components/QRScanner';
-import WatchTogetherModal from './components/WatchTogetherModal';
+import { mediaStore, ThemeName } from '../store/mediaStore';
+// FIX: Import 'colors' from '@mui/material' as it is no longer exported from '@mui/material/styles'.
+import { Box, CircularProgress, Alert, Container, Typography, colors } from '@mui/material';
+// FIX: Import `ThemeOptions` to provide an explicit type for the theme configuration.
+import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { Header } from './Header';
+import { Hero } from './Hero';
+import { ContentRow } from './ContentRow';
+import { Footer } from './Footer';
+import DetailView from './DetailView';
+import VideoPlayer from './VideoPlayer';
+import GridView from './GridView';
+import SmartTVScreen from './SmartTVScreen';
+import RemoteControlView from './RemoteControlView';
+import ProfileDrawer from './ProfileDrawer';
+import QRScanner from './QRScanner';
+import WatchTogetherModal from './WatchTogetherModal';
+
+// FIX: Explicitly type `baseThemeOptions` with `ThemeOptions`. This prevents TypeScript from widening
+// the types of CSS properties (e.g., `textTransform`) to a generic `string`, which resolves the
+// type error when passing this configuration to `createTheme`.
+const baseThemeOptions: ThemeOptions = {
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    textTransform: 'none',
+                    fontWeight: 'bold',
+                }
+            }
+        }
+    }
+};
+
+const themePalettes: Record<ThemeName, any> = {
+    SerieTV: {
+        primary: { main: '#E50914' }, // Netflix Red
+        background: { default: '#141414', paper: '#181818' },
+        text: { primary: '#ffffff', secondary: '#b3b3b3' }
+    },
+    Film: {
+        primary: { main: colors.amber[500] }, // Cinematic Gold
+        background: { default: '#101010', paper: '#1d1d1d' },
+        text: { primary: '#f5f5f5', secondary: '#a0a0a0' }
+    },
+    Anime: {
+        primary: { main: colors.deepPurple[400] }, // Vibrant Purple
+        background: { default: '#1a1820', paper: '#24212c' },
+        text: { primary: '#e9e7ef', secondary: '#adaab8' }
+    }
+};
 
 const App: React.FC = () => {
   useEffect(() => {
-    // Load persisted data first, then fetch new data and initialize sessions
     mediaStore.loadPersistedData();
     mediaStore.fetchAllData();
     
-    // Check for watch together invite link
     const params = new URLSearchParams(window.location.search);
     const roomIdFromUrl = params.get('roomId');
     if (roomIdFromUrl) {
         mediaStore.setJoinRoomIdFromUrl(roomIdFromUrl);
-        // Pass null because we don't have the media item yet. It will be synced from the room state.
         mediaStore.openWatchTogetherModal(null); 
-        // Clean up the URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
-  if (mediaStore.loading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          bgcolor: 'background.default',
-        }}
-      >
-        <CircularProgress color="primary" />
-      </Box>
-    );
-  }
-
-  if (mediaStore.error) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          bgcolor: 'background.default',
-        }}
-      >
-        <Alert severity="error">{mediaStore.error}</Alert>
-      </Box>
-    );
-  }
-
   const {
+    activeTheme,
+    loading,
+    error,
     heroContent,
-    latestMovies,
-    myListItems,
-    trending,
-    topSeries,
-    popularAnime,
     selectedItem,
     nowPlayingItem,
     activeView,
+    topSeries,
     allMovies,
+    popularAnime,
+    myListItems,
     isRemoteMaster,
     isSmartTV,
-    continueWatchingItems,
     isSearchActive,
     searchResults,
     searchQuery,
     isSearching,
   } = mediaStore;
 
-  // Remote Control (Master) View
-  if (isRemoteMaster) {
-      return <RemoteControlView />;
+  const dynamicTheme = createTheme({
+    palette: {
+        mode: 'dark',
+        ...themePalettes[activeTheme],
+    },
+    ...baseThemeOptions,
+  });
+
+  if (loading) {
+    return (
+        <ThemeProvider theme={dynamicTheme}><CssBaseline />
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+            <CircularProgress color="primary" />
+          </Box>
+        </ThemeProvider>
+    );
   }
-  
-  // Video Player takes precedence
-  if (nowPlayingItem) {
-    return <VideoPlayer />;
+
+  if (error) {
+    return (
+        <ThemeProvider theme={dynamicTheme}><CssBaseline />
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+                <Alert severity="error">{error}</Alert>
+            </Box>
+        </ThemeProvider>
+    );
   }
-  
-  // Smart TV (Slave) View
-  if (isSmartTV) {
-      return <SmartTVScreen />;
-  }
+
+  if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /></ThemeProvider>;
+  if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /></ThemeProvider>;
+  if (isSmartTV) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /></ThemeProvider>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {
-      return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 20 }}>
-          <CircularProgress />
-        </Box>
-      );
+      return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 20 }}><CircularProgress /></Box>;
     }
     if (!searchQuery) {
       return (
@@ -119,7 +134,6 @@ const App: React.FC = () => {
     return <GridView title={`Risultati per "${searchQuery}"`} items={searchResults} />;
   }
 
-  // Standard App View
   const renderMainContent = () => {
     if (isSearchActive) {
       return renderSearchView();
@@ -138,42 +152,38 @@ const App: React.FC = () => {
             )}
             <Container maxWidth={false} sx={{ py: { xs: 4, md: 8 }, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
-                {continueWatchingItems.length > 0 && (
-                  <ContentRow title="Continua a guardare" items={continueWatchingItems} onCardClick={item => mediaStore.selectMedia(item)} />
-                )}
-                <ContentRow title="Ultime Uscite" items={latestMovies} onCardClick={item => mediaStore.selectMedia(item)} />
-                {myListItems.length > 0 && (
-                  <ContentRow title="La mia lista" items={myListItems} onCardClick={item => mediaStore.selectMedia(item)} />
-                )}
-                <ContentRow title="I più Votati" items={trending} onCardClick={item => mediaStore.selectMedia(item)} />
-                <ContentRow title="Serie TV Popolari" items={topSeries} onCardClick={item => mediaStore.selectMedia(item)} />
-                <ContentRow title="Anime da non Perdere" items={popularAnime} onCardClick={item => mediaStore.selectMedia(item)} />
+                {mediaStore.homePageRows.map(row => (
+                    <ContentRow
+                        key={row.title}
+                        title={row.title}
+                        items={row.items}
+                        onCardClick={item => mediaStore.selectMedia(item)}
+                    />
+                ))}
               </Box>
             </Container>
           </>
         );
-      case 'Serie TV':
-        return <GridView title="Serie TV" items={topSeries} />;
-      case 'Film':
-        return <GridView title="Film" items={allMovies} />;
-      case 'Anime':
-        return <GridView title="Anime" items={popularAnime} />;
-      case 'La mia lista':
-        return <GridView title="La mia lista" items={myListItems} />;
-      default:
-        return null;
+      case 'Serie TV': return <GridView title="Serie TV" items={topSeries} />;
+      case 'Film': return <GridView title="Film" items={allMovies} />;
+      case 'Anime': return <GridView title="Anime" items={popularAnime} />;
+      case 'La mia lista': return <GridView title="La mia lista" items={myListItems} />;
+      default: return null;
     }
   };
 
   return (
-    <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
-      <Header />
-      <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
-      <Footer />
-      <ProfileDrawer />
-      <QRScanner />
-      <WatchTogetherModal />
-    </Box>
+    <ThemeProvider theme={dynamicTheme}>
+      <CssBaseline />
+      <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
+        <Header />
+        <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
+        <Footer />
+        <ProfileDrawer />
+        <QRScanner />
+        <WatchTogetherModal />
+      </Box>
+    </ThemeProvider>
   );
 };
 

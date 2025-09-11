@@ -117,6 +117,7 @@ const WatchTogetherModal: React.FC = () => {
 
   const renderInitialView = () => {
     const isTvShow = selectedItem?.media_type === 'tv';
+    const isJoiningViaLink = !!joinRoomIdFromUrl;
     
     // The staged item for playback can be a movie or an episode.
     const isEpisodeSelected = watchTogetherSelectedItem && 'episode_number' in watchTogetherSelectedItem;
@@ -129,7 +130,9 @@ const WatchTogetherModal: React.FC = () => {
 
     return (
      <Stack spacing={3}>
-       <Typography variant="h6" component="h2">Guarda insieme ai tuoi amici</Typography>
+       <Typography variant="h6" component="h2">
+         {isJoiningViaLink ? 'Unisciti alla stanza' : 'Guarda insieme ai tuoi amici'}
+       </Typography>
        
        {watchTogetherError && <Alert severity="error">{watchTogetherError}</Alert>}
        
@@ -141,42 +144,47 @@ const WatchTogetherModal: React.FC = () => {
           fullWidth
           autoFocus
         />
+        
+        {!isJoiningViaLink && (
+            <>
+                {isTvShow && selectedItem && (
+                    <React.Fragment>
+                        <Typography variant="subtitle1" fontWeight="bold">Seleziona un episodio per iniziare</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body1">Episodi</Typography>
+                            {selectedItem.seasons && selectedItem.seasons.length > 1 && (
+                                <FormControl size="small" sx={{minWidth: 150}}>
+                                    <InputLabel>Stagione</InputLabel>
+                                    <Select value={selectedSeason} label="Stagione" onChange={e => setSelectedSeason(Number(e.target.value))}>
+                                        {selectedItem.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
+                                    </Select>
+                                </FormControl>
+                            )}
+                        </Box>
+                        <List dense sx={{ overflowY: 'auto', maxHeight: '30vh', bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1, p: 1 }}>
+                            {isDetailLoading ? (
+                                <Box sx={{display: 'flex', justifyContent: 'center', p: 2}}><CircularProgress size={24}/></Box>
+                            ) : (
+                                currentSeason?.episodes.map(ep => (
+                                    <ListItemButton 
+                                        key={ep.id} 
+                                        selected={isEpisodeSelected && watchTogetherSelectedItem.id === ep.id} 
+                                        onClick={() => handleSelectEpisode(ep)}
+                                        disabled={!ep.video_url}
+                                    >
+                                        <ListItemText primary={`${ep.episode_number}. ${ep.name}`} />
+                                    </ListItemButton>
+                                ))
+                            )}
+                        </List>
+                    </React.Fragment>
+                )}
 
-        {isTvShow && selectedItem && (
-            <React.Fragment>
-                <Typography variant="subtitle1" fontWeight="bold">Seleziona un episodio per iniziare</Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body1">Episodi</Typography>
-                    {selectedItem.seasons && selectedItem.seasons.length > 1 && (
-                        <FormControl size="small" sx={{minWidth: 150}}>
-                            <InputLabel>Stagione</InputLabel>
-                            <Select value={selectedSeason} label="Stagione" onChange={e => setSelectedSeason(Number(e.target.value))}>
-                                {selectedItem.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
-                            </Select>
-                        </FormControl>
-                    )}
-                </Box>
-                <List dense sx={{ overflowY: 'auto', maxHeight: '30vh', bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1, p: 1 }}>
-                    {isDetailLoading ? (
-                        <Box sx={{display: 'flex', justifyContent: 'center', p: 2}}><CircularProgress size={24}/></Box>
-                    ) : (
-                        currentSeason?.episodes.map(ep => (
-                            <ListItemButton 
-                                key={ep.id} 
-                                selected={isEpisodeSelected && watchTogetherSelectedItem.id === ep.id} 
-                                onClick={() => handleSelectEpisode(ep)}
-                                disabled={!ep.video_url}
-                            >
-                                <ListItemText primary={`${ep.episode_number}. ${ep.name}`} />
-                            </ListItemButton>
-                        ))
-                    )}
-                </List>
-            </React.Fragment>
+               <Button variant="contained" size="large" onClick={() => createRoom(username)} disabled={!canCreateRoom}>Crea una nuova stanza</Button>
+               <Typography sx={{textAlign: 'center'}}>oppure</Typography>
+           </>
         )}
 
-       <Button variant="contained" size="large" onClick={() => createRoom(username)} disabled={!canCreateRoom}>Crea una nuova stanza</Button>
-       <Typography sx={{textAlign: 'center'}}>oppure</Typography>
        <Stack direction="row" spacing={1}>
          <TextField
             fullWidth
@@ -185,6 +193,7 @@ const WatchTogetherModal: React.FC = () => {
             value={inputRoomId}
             onChange={(e) => setInputRoomId(e.target.value.toUpperCase())}
             inputProps={{ maxLength: 6, style: { textTransform: 'uppercase' } }}
+            disabled={isJoiningViaLink}
          />
          <Button variant="outlined" onClick={() => joinRoom(inputRoomId, username)} disabled={!inputRoomId.trim() || !username.trim()}>Unisciti</Button>
        </Stack>

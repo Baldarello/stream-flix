@@ -13,6 +13,10 @@ export interface ShowIntroDuration {
     id: number; // show id
     duration: number;
 }
+export interface Preference {
+    key: string;
+    value: any;
+}
 
 // Add an optional 'id' for Dexie's auto-incrementing primary key
 export type StorableViewingHistoryItem = ViewingHistoryItem & { id?: number };
@@ -23,18 +27,28 @@ export class QuixDB extends Dexie {
   cachedItems!: Table<MediaItem, number>;
   episodeLinks!: Table<EpisodeLink, number>;
   showIntroDurations!: Table<ShowIntroDuration, number>;
+  preferences!: Table<Preference, string>;
 
   constructor() {
     super('quixDB');
-    // FIX: The schema definition must be placed inside the constructor when subclassing Dexie.
-    // This is the standard and recommended way to declare schemas.
-    this.version(1).stores({
-      myList: '&id', // Primary key is the media item ID
-      // Auto-incrementing primary key 'id', and index on 'episodeId' and 'watchedAt'
+    
+    // First, define the latest version of the schema.
+    this.version(2).stores({
+      myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
-      cachedItems: '&id', // Primary key is the media item ID
-      episodeLinks: '&id', // Primary key is episode ID
-      showIntroDurations: '&id', // Primary key is show ID
+      cachedItems: '&id',
+      episodeLinks: '&id',
+      showIntroDurations: '&id',
+      preferences: '&key', // New table for user preferences
+    });
+    
+    // Define the previous version for backward compatibility. Dexie handles the upgrade.
+    this.version(1).stores({
+      myList: '&id',
+      viewingHistory: '++id, episodeId, watchedAt', 
+      cachedItems: '&id',
+      episodeLinks: '&id',
+      showIntroDurations: '&id',
     });
   }
 }

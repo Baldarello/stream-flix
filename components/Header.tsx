@@ -38,9 +38,9 @@ export const Header: React.FC = observer(() => {
       <AppBar 
         elevation={0}
         sx={{ 
-          bgcolor: (trigger || isSearchActive) ? 'rgba(20, 20, 20, 0.8)' : 'transparent',
           backdropFilter: (trigger || isSearchActive) ? 'blur(10px)' : 'none',
-          transition: 'background-color 0.3s ease-in-out',
+          background: (trigger || isSearchActive) ? 'rgba(20, 20, 20, 0.8)' : 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
+          transition: 'background 0.3s ease-in-out',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between', height: 64 }}>

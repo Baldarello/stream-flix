@@ -1,4 +1,5 @@
 import React from 'react';
+// FIX: Switched to a direct default import for Grid to resolve a TypeScript error where the 'item' prop was not being recognized.
 import { Box, Container, Typography, Fade } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
@@ -48,7 +49,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Added the `item` prop. Responsive props like `xs`, `sm`, etc. are only valid on Grid items.
+              // FIX: Added the `item` prop. In MUI v5+, Grid items require the `item` prop
+              // for breakpoint props like `xs`, `sm`, `md`, and `lg` to be applied correctly.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
