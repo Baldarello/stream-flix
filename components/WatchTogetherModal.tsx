@@ -75,8 +75,7 @@ const WatchTogetherModal: React.FC = () => {
 
   const handleCopyToClipboard = () => {
     if (roomId) {
-      const inviteLink = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
-      navigator.clipboard.writeText(inviteLink);
+      navigator.clipboard.writeText(roomId);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -248,7 +247,7 @@ const WatchTogetherModal: React.FC = () => {
                     <IconButton onClick={changeRoomCode}><RefreshIcon /></IconButton>
                 </Tooltip>
             )}
-            <Tooltip title={copied ? "Copiato!" : "Copia Link Invito"}>
+            <Tooltip title={copied ? "Copiato!" : "Copia Codice Stanza"}>
               <IconButton onClick={handleCopyToClipboard}>
                 <ContentCopyIcon />
               </IconButton>

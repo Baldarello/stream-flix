@@ -190,11 +190,18 @@ class MediaStore {
                     this.watchTogetherError = null;
                     
                     this.playbackState = message.payload.playbackState;
-
                     const newMedia = message.payload.selectedMedia;
                     this.watchTogetherSelectedItem = newMedia;
 
+                    // If there is media selected for the room, set nowPlayingItem immediately.
+                    // This ensures that clients joining the room will transition to the player view
+                    // with the correct video information provided by the host.
                     if (newMedia) {
+                        this.nowPlayingItem = newMedia;
+                        this.isPlaying = this.playbackState.status === 'playing';
+                        
+                        // In the background, fetch full details for the show if we don't have them.
+                        // This is for UI elements like the episode drawer.
                         let showIdToLoad: number | null = null;
                         let mediaType: 'tv' | 'movie' = 'movie';
 
@@ -208,13 +215,9 @@ class MediaStore {
                         
                         if (this.selectedItem?.id !== showIdToLoad) {
                             const partialItem: MediaItem = { id: showIdToLoad, media_type: mediaType } as MediaItem;
+                            // We don't await this; it runs in the background.
                             this.selectMedia(partialItem);
                         }
-                    }
-
-                    if (this.watchTogetherSelectedItem) {
-                        this.nowPlayingItem = this.watchTogetherSelectedItem;
-                        this.isPlaying = this.playbackState.status === 'playing';
                     }
                     break;
                 }

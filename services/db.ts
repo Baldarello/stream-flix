@@ -32,9 +32,8 @@ export class QuixDB extends Dexie {
   constructor() {
     super('quixDB');
     
-    // FIX: Dexie versions must be declared in ascending order.
-    // Define the previous version for backward compatibility. Dexie handles the upgrade.
-    this.version(1).stores({
+    // FIX: Cast 'this' to Dexie to resolve TypeScript error where the 'version' method is not found on the extended class type.
+    (this as Dexie).version(1).stores({
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
@@ -42,8 +41,8 @@ export class QuixDB extends Dexie {
       showIntroDurations: '&id',
     });
     
-    // Define the latest version of the schema.
-    this.version(2).stores({
+    // FIX: Cast 'this' to Dexie to resolve TypeScript error where the 'version' method is not found on the extended class type.
+    (this as Dexie).version(2).stores({
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
