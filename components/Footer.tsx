@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Container, Link, Typography, IconButton } from '@mui/material';
-// FIX: Changed Grid import to a direct path to resolve type conflicts with MUI components.
 import Grid from '@mui/material/Grid';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -33,8 +32,8 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // FIX: Removed the `item` prop. The error indicates that the Grid component in use (likely MUI's Grid v2) does not support this prop. Child Grids are implicitly items.
-          <Grid xs={6} sm={3} key={link}>
+          // FIX: Added the `item` prop. Responsive props like `xs` and `sm` are only valid on Grid items.
+          <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}
             </Link>

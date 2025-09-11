@@ -13,13 +13,24 @@ import SmartTVScreen from './components/SmartTVScreen';
 import RemoteControlView from './components/RemoteControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
+import WatchTogetherModal from './components/WatchTogetherModal';
 
 const App: React.FC = () => {
   useEffect(() => {
     // Load persisted data first, then fetch new data and initialize sessions
     mediaStore.loadPersistedData();
     mediaStore.fetchAllData();
-    //mediaStore.initRemoteSession();
+    
+    // Check for watch together invite link
+    const params = new URLSearchParams(window.location.search);
+    const roomIdFromUrl = params.get('roomId');
+    if (roomIdFromUrl) {
+        mediaStore.setJoinRoomIdFromUrl(roomIdFromUrl);
+        // Pass null because we don't have the media item yet. It will be synced from the room state.
+        mediaStore.openWatchTogetherModal(null); 
+        // Clean up the URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   if (mediaStore.loading) {
@@ -161,6 +172,7 @@ const App: React.FC = () => {
       <Footer />
       <ProfileDrawer />
       <QRScanner />
+      <WatchTogetherModal />
     </Box>
   );
 };

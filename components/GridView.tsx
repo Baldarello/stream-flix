@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Container, Typography, Fade } from '@mui/material';
-// FIX: Changed Grid import to a direct path to resolve type conflicts with MUI components.
 import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
@@ -49,8 +48,8 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Removed the `item` prop. The error indicates that the Grid component in use (likely MUI's Grid v2) does not support this prop. Child Grids are implicitly items.
-              <Grid key={item.id} xs={6} sm={4} md={3} lg={2}>
+              // FIX: Added the `item` prop. Responsive props like `xs`, `sm`, etc. are only valid on Grid items.
+              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}
