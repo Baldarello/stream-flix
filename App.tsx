@@ -87,6 +87,7 @@ const App: React.FC = () => {
     searchResults,
     searchQuery,
     isSearching,
+    isQRScannerOpen,
   } = mediaStore;
 
   const dynamicTheme = createTheme({
@@ -184,7 +185,7 @@ const App: React.FC = () => {
         <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
         <Footer />
         <ProfileDrawer />
-        <QRScanner />
+        {isQRScannerOpen && <QRScanner />}
         <WatchTogetherModal />
         <NotificationSnackbar />
       </Box>

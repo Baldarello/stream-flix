@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { ViewingHistoryItem, MediaItem } from '../types';
+import dexieObservable from 'dexie-observable';
 
 // Define the structure of the data we're storing
 export interface MyListItem {
@@ -21,6 +22,19 @@ export interface Preference {
 // Add an optional 'id' for Dexie's auto-incrementing primary key
 export type StorableViewingHistoryItem = ViewingHistoryItem & { id?: number };
 
+// NEW: Interface for revision tracking
+// We'll augment the IDatabaseChange with a timestamp for our own tracking.
+export interface Revision {
+    id?: number; // Auto-incremented primary key
+    timestamp: number;
+    table: string;
+    key: any;
+    type: 1 | 2 | 3; // 1:create, 2:update, 3:delete
+    obj?: any;
+    oldObj?: any;
+}
+
+
 export class QuixDB extends Dexie {
   myList!: Table<MyListItem, number>;
   viewingHistory!: Table<StorableViewingHistoryItem, number>;
@@ -28,12 +42,12 @@ export class QuixDB extends Dexie {
   episodeLinks!: Table<EpisodeLink, number>;
   showIntroDurations!: Table<ShowIntroDuration, number>;
   preferences!: Table<Preference, string>;
+  revisions!: Table<Revision, number>; // NEW TABLE
 
   constructor() {
-    super('quixDB');
+    super('quixDB', { addons: [dexieObservable] }); // Register addon
     
-    // FIX: Cast 'this' to Dexie to resolve TypeScript error where the 'version' method is not found on the extended class type.
-    (this as Dexie).version(1).stores({
+    this.version(1).stores({
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
@@ -41,16 +55,38 @@ export class QuixDB extends Dexie {
       showIntroDurations: '&id',
     });
     
-    // FIX: Cast 'this' to Dexie to resolve TypeScript error where the 'version' method is not found on the extended class type.
-    (this as Dexie).version(2).stores({
-      myList: '&id',
-      viewingHistory: '++id, episodeId, watchedAt', 
-      cachedItems: '&id',
-      episodeLinks: '&id',
-      showIntroDurations: '&id',
+    this.version(2).stores({
       preferences: '&key', // New table for user preferences
+    });
+
+    this.version(3).stores({
+      revisions: '++id, timestamp',
     });
   }
 }
 
 export const db = new QuixDB();
+
+// NEW: Listen for database changes and log them as revisions
+// FIX: Changed to use the documented `db.on('changes', ...)` syntax for `dexie-observable` to resolve the TypeScript error.
+db.on('changes', (changes) => {
+    const revisionsToLog: Revision[] = changes
+        // Don't log changes to the revisions table itself to avoid an infinite loop
+        .filter(change => change.table !== 'revisions')
+        .map(change => ({
+            timestamp: Date.now(),
+            table: change.table,
+            key: change.key,
+            type: change.type as 1 | 2 | 3,
+            // FIX: Conditionally access `obj` and `oldObj`. These properties exist on different types
+            // within the IDatabaseChange union, and the `in` operator acts as a type guard.
+            obj: 'obj' in change ? change.obj : undefined,
+            oldObj: 'oldObj' in change ? change.oldObj : undefined,
+        }));
+    
+    if (revisionsToLog.length > 0) {
+        db.revisions.bulkAdd(revisionsToLog).catch(err => {
+            console.error('Failed to log database revisions:', err);
+        });
+    }
+});

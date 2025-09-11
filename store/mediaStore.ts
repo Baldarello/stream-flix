@@ -849,6 +849,47 @@ class MediaStore {
         this.closeLinkEpisodesModal();
     };
 
+    prepareUserDataBackup = async () => {
+        try {
+            const [
+                myList,
+                viewingHistory,
+                cachedItems,
+                episodeLinks,
+                showIntroDurations,
+                preferences,
+                revisions,
+            ] = await Promise.all([
+                db.myList.toArray(),
+                db.viewingHistory.toArray(),
+                db.cachedItems.toArray(),
+                db.episodeLinks.toArray(),
+                db.showIntroDurations.toArray(),
+                db.preferences.toArray(),
+                db.revisions.toArray(),
+            ]);
+
+            const backupData = {
+                version: 1,
+                timestamp: new Date().toISOString(),
+                data: {
+                    myList,
+                    viewingHistory,
+                    cachedItems,
+                    episodeLinks,
+                    showIntroDurations,
+                    preferences,
+                    revisions,
+                }
+            };
+            
+            return backupData;
+        } catch (error) {
+            console.error("Failed to prepare user data backup:", error);
+            this.showSnackbar("Errore durante la preparazione del backup.", "error");
+            return null;
+        }
+    }
 
 
     openEpisodesDrawer = () => {

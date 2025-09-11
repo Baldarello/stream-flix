@@ -9,63 +9,50 @@ const QRScanner: React.FC = () => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;
     const [scanError, setScanError] = useState<string | null>(null);
 
-    // This effect manages the lifecycle of the scanner
     useEffect(() => {
-        let scanner: Html5QrcodeScanner | null = null;
-        
-        if (isQRScannerOpen) {
-            // Configuration for the scanner
-            const config = {
-                fps: 10,
-                qrbox: { width: 250, height: 250 },
-                supportedScanTypes: [0 /* SCAN_TYPE_CAMERA */]
-            };
+        // Poiché questo componente viene ora montato solo quando lo scanner dovrebbe essere aperto,
+        // possiamo inizializzare lo scanner direttamente nell'effetto di montaggio.
+        // È garantito che il contenitore 'qr-reader-container' esista a questo punto.
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            supportedScanTypes: [0 /* SCAN_TYPE_CAMERA */]
+        };
 
-            // Success callback
-            const onScanSuccess = (decodedText: string) => {
-                // Prevent multiple triggers if a scan is processed
-                if (!mediaStore.isQRScannerOpen) return;
+        const onScanSuccess = (decodedText: string) => {
+            if (!mediaStore.isQRScannerOpen) return;
 
-                try {
-                    const url = new URL(decodedText);
-                    const slaveId = url.searchParams.get('remote_for');
+            try {
+                const url = new URL(decodedText);
+                const slaveId = url.searchParams.get('remote_for');
 
-                    if (url.origin === window.location.origin && slaveId) {
-                        // Successfully scanned a valid QR code for this app
-                        mediaStore.connectAsRemoteMaster(slaveId);
-                        // The scanner will be cleaned up by the return function of useEffect
-                        // as the modal will close.
-                    } else {
-                        // Scanned a QR code, but it's not for this app
-                        throw new Error("Invalid QR code for this application.");
-                    }
-                } catch (e) {
-                    setScanError("Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.");
-                    // Clear the error message after a few seconds
-                    setTimeout(() => setScanError(null), 4000);
+                if (url.origin === window.location.origin && slaveId) {
+                    mediaStore.connectAsRemoteMaster(slaveId);
+                } else {
+                    throw new Error("Invalid QR code for this application.");
                 }
-            };
+            } catch (e) {
+                setScanError("Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.");
+                setTimeout(() => setScanError(null), 4000);
+            }
+        };
 
-            // Error callback (optional)
-            const onScanFailure = (error: string) => {
-                // This is called frequently when no QR code is found, so we can ignore it.
-            };
+        const onScanFailure = (error: string) => {
+            // Questo viene chiamato frequentemente quando non viene trovato alcun codice QR, quindi possiamo ignorarlo.
+        };
 
-            // Initialize the scanner
-            scanner = new Html5QrcodeScanner('qr-reader-container', config, false);
-            scanner.render(onScanSuccess, onScanFailure);
-        }
+        const scanner = new Html5QrcodeScanner('qr-reader-container', config, false);
+        scanner.render(onScanSuccess, onScanFailure);
 
-        // Cleanup function
+        // La funzione di pulizia viene eseguita quando il componente viene smontato
         return () => {
             if (scanner && scanner.getState() !== 2 /* Html5QrcodeScannerState.NOT_STARTED */) {
                 scanner.clear().catch(error => {
-                    // This can fail if the DOM element is already removed, which is fine.
-                    console.warn("Failed to clear html5QrcodeScanner, it might have been removed already.", error);
+                    console.warn("Impossibile pulire html5QrcodeScanner, potrebbe essere già stato rimosso.", error);
                 });
             }
         };
-    }, [isQRScannerOpen]);
+    }, []); // L'array di dipendenze vuoto assicura che questo venga eseguito una volta al montaggio e ripulito allo smontaggio
 
     const handleClose = () => {
         setScanError(null);
@@ -97,7 +84,7 @@ const QRScanner: React.FC = () => {
                     Inquadra il QR Code sulla TV
                 </Typography>
                 
-                {/* Container where the scanner will be rendered */}
+                {/* Contenitore in cui verrà renderizzato lo scanner */}
                 <Box id="qr-reader-container" sx={{ 
                     width: 'min(90vw, 450px)',
                     "& #qr-reader__dashboard_section_swaplink": { color: 'white !important' },

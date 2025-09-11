@@ -9,6 +9,7 @@ import TvIcon from '@mui/icons-material/Tv';
 import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 import AnimationIcon from '@mui/icons-material/Animation';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const ProfileDrawer: React.FC = () => {
     const { isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode } = mediaStore;
@@ -23,6 +24,24 @@ const ProfileDrawer: React.FC = () => {
     ) => {
         if (newTheme !== null) {
             mediaStore.setActiveTheme(newTheme);
+        }
+    };
+
+    const handleBackup = async () => {
+        mediaStore.showSnackbar("Preparazione del backup in corso...", "info");
+        const backupData = await mediaStore.prepareUserDataBackup();
+        if (backupData) {
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `quix_backup_${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mediaStore.showSnackbar("Backup scaricato con successo!", "success");
         }
     };
     
@@ -114,6 +133,12 @@ const ProfileDrawer: React.FC = () => {
                     <ListItemButton>
                         <ListItemIcon><GoogleIcon /></ListItemIcon>
                         <ListItemText primary="Accedi con Google" />
+                    </ListItemButton>
+                </ListItem>
+                 <ListItem disablePadding>
+                    <ListItemButton onClick={handleBackup}>
+                        <ListItemIcon><CloudUploadIcon /></ListItemIcon>
+                        <ListItemText primary="Backup su Google Drive" secondary="Salva un file di backup" />
                     </ListItemButton>
                 </ListItem>
                  <ListItem disablePadding>
