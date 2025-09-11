@@ -15,6 +15,7 @@ const VideoPlayer: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [showSkipIntro, setShowSkipIntro] = useState(false);
   const lastHostUpdateTimeRef = useRef(0);
+  const isSeekingRef = useRef(false);
 
   // Effect for Watch Together Synchronization
   useEffect(() => {
@@ -55,19 +56,25 @@ const VideoPlayer: React.FC = () => {
       }
     };
     const handlePause = () => {
-      if (isHost && !isSyncing) {
+      if (isHost && !isSyncing && !isSeekingRef.current) {
         sendPlaybackControl({ status: 'paused', time: videoElement.currentTime });
       }
     };
+    const handleSeeking = () => {
+        if(isHost && !isSyncing) {
+            isSeekingRef.current = true;
+        }
+    };
     const handleSeeked = () => {
         if(isHost && !isSyncing) {
+            isSeekingRef.current = false;
             sendPlaybackControl({ status: videoElement.paused ? 'paused' : 'playing', time: videoElement.currentTime });
         }
     };
     const handleTimeUpdate = () => {
         const now = Date.now();
-        // Send periodic updates during playback, at most once per second
-        if(isHost && !isSyncing && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
+        // Send periodic updates during playback, at most once per second, and not while seeking.
+        if(isHost && !isSyncing && !isSeekingRef.current && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
             lastHostUpdateTimeRef.current = now;
             sendPlaybackControl({ status: 'playing', time: videoElement.currentTime });
         }
@@ -77,6 +84,7 @@ const VideoPlayer: React.FC = () => {
     if (isHost) {
       videoElement.addEventListener('play', handlePlay);
       videoElement.addEventListener('pause', handlePause);
+      videoElement.addEventListener('seeking', handleSeeking);
       videoElement.addEventListener('seeked', handleSeeked);
       videoElement.addEventListener('timeupdate', handleTimeUpdate);
     }
@@ -103,6 +111,7 @@ const VideoPlayer: React.FC = () => {
       if (videoElement) {
         videoElement.removeEventListener('play', handlePlay);
         videoElement.removeEventListener('pause', handlePause);
+        videoElement.removeEventListener('seeking', handleSeeking);
         videoElement.removeEventListener('seeked', handleSeeked);
         videoElement.removeEventListener('timeupdate', handleTimeUpdate);
       }
