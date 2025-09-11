@@ -704,24 +704,25 @@ class MediaStore {
     }
 
     startPlayback = (item: PlayableItem) => {
-        let itemToPlay = this.roomId && this.isHost && this.watchTogetherSelectedItem ? this.watchTogetherSelectedItem : item;
-        
-        // If the host starts playback, update the media for the whole room first.
+        // If the host starts playback or changes the media, update it for the whole room.
         if (this.roomId && this.isHost) {
-            this.changeWatchTogetherMedia(itemToPlay);
+            this.changeWatchTogetherMedia(item);
             this.sendPlaybackControl({status: 'playing', time: 0});
         }
-
-        if ('episode_number' in itemToPlay) {
-            this.addViewingHistoryEntry(itemToPlay.show_id, itemToPlay.id);
-
-            if (itemToPlay.intro_start_s !== undefined) {
-                const customDuration = this.showIntroDurations.get(itemToPlay.show_id);
+    
+        // The rest of the logic runs for the user initiating the action (host)
+        // or for any user watching solo. Room participants' players are updated
+        // by the server broadcast, which sets nowPlayingItem.
+        if ('episode_number' in item) {
+            this.addViewingHistoryEntry(item.show_id, item.id);
+    
+            if (item.intro_start_s !== undefined) {
+                const customDuration = this.showIntroDurations.get(item.show_id);
                 const introDuration = customDuration !== undefined ? customDuration : 80;
-                itemToPlay.intro_end_s = itemToPlay.intro_start_s + introDuration;
+                item.intro_end_s = item.intro_start_s + introDuration;
             }
         }
-        this.nowPlayingItem = itemToPlay;
+        this.nowPlayingItem = item;
         this.isPlaying = true;
         this.watchTogetherModalOpen = false;
     }

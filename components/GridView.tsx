@@ -1,7 +1,7 @@
 import React from 'react';
-// FIX: Changed Grid import to use a direct path to resolve 'item' prop type error.
-import { Box, Container, Typography, Fade } from '@mui/material';
-import Grid from '@mui/material/Grid';
+// FIX: The default import for Grid was causing a type error where the 'item' prop was not recognized.
+// Changing to a named import from the top-level '@mui/material' package resolves this issue.
+import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
@@ -49,8 +49,7 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // FIX: Added the `item` prop. In MUI v5+, Grid items require the `item` prop
-              // for breakpoint props like `xs`, `sm`, `md`, and `lg` to be applied correctly.
+              // In MUI v5+, Grid items require the `item` prop for breakpoint props like `xs`, `sm`, `md`, and `lg` to be applied correctly.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
