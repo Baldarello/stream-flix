@@ -116,9 +116,9 @@ const App: React.FC = () => {
     );
   }
 
-  if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /></ThemeProvider>;
-  if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /></ThemeProvider>;
-  if (isSmartTVPairingVisible) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /></ThemeProvider>;
+  if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /> <NotificationSnackbar /></ThemeProvider>;
+  if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /> <NotificationSnackbar /></ThemeProvider>;
+  if (isSmartTVPairingVisible) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /> <NotificationSnackbar /></ThemeProvider>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {
