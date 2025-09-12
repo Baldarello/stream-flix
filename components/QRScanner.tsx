@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, IconButton, Typography, Alert } from '@mui/material';
@@ -8,51 +8,64 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 const QRScanner: React.FC = () => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;
     const [scanError, setScanError] = useState<string | null>(null);
+    const scannerContainerRef = useRef<HTMLDivElement>(null);
+    const scannerInstanceRef = useRef<Html5QrcodeScanner | null>(null);
 
     useEffect(() => {
-        // Poiché questo componente viene ora montato solo quando lo scanner dovrebbe essere aperto,
-        // possiamo inizializzare lo scanner direttamente nell'effetto di montaggio.
-        // È garantito che il contenitore 'qr-reader-container' esista a questo punto.
-        const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
-            supportedScanTypes: [0 /* SCAN_TYPE_CAMERA */]
-        };
+        // This effect runs once when the component mounts.
+        // We initialize the scanner only if the container element is available in the DOM.
+        if (scannerContainerRef.current && !scannerInstanceRef.current) {
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                supportedScanTypes: [0 /* SCAN_TYPE_CAMERA */]
+            };
 
-        const onScanSuccess = (decodedText: string) => {
-            if (!mediaStore.isQRScannerOpen) return;
+            const onScanSuccess = (decodedText: string) => {
+                // Check if scanner is still supposed to be open before processing.
+                if (!mediaStore.isQRScannerOpen) return;
 
-            try {
-                const url = new URL(decodedText);
-                const slaveId = url.searchParams.get('remote_for');
+                try {
+                    const url = new URL(decodedText);
+                    const slaveId = url.searchParams.get('remote_for');
 
-                if (url.origin === window.location.origin && slaveId) {
-                    mediaStore.connectAsRemoteMaster(slaveId);
-                } else {
-                    throw new Error("Invalid QR code for this application.");
+                    if (url.origin === window.location.origin && slaveId) {
+                        mediaStore.connectAsRemoteMaster(slaveId);
+                    } else {
+                        throw new Error("Invalid QR code for this application.");
+                    }
+                } catch (e) {
+                    setScanError("Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.");
+                    setTimeout(() => setScanError(null), 4000);
                 }
-            } catch (e) {
-                setScanError("Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.");
-                setTimeout(() => setScanError(null), 4000);
-            }
-        };
+            };
 
-        const onScanFailure = (error: string) => {
-            // Questo viene chiamato frequentemente quando non viene trovato alcun codice QR, quindi possiamo ignorarlo.
-        };
+            const onScanFailure = (error: string) => {
+                // This is called frequently when no QR code is found, so we can ignore it.
+            };
 
-        const scanner = new Html5QrcodeScanner('qr-reader-container', config, false);
-        scanner.render(onScanSuccess, onScanFailure);
+            const scanner = new Html5QrcodeScanner(
+                scannerContainerRef.current.id, 
+                config, 
+                /* verbose= */ false
+            );
+            scanner.render(onScanSuccess, onScanFailure);
+            scannerInstanceRef.current = scanner;
+        }
 
-        // La funzione di pulizia viene eseguita quando il componente viene smontato
+        // The cleanup function is returned to be executed when the component unmounts.
         return () => {
-            if (scanner && scanner.getState() !== 2 /* Html5QrcodeScannerState.NOT_STARTED */) {
-                scanner.clear().catch(error => {
-                    console.warn("Impossibile pulire html5QrcodeScanner, potrebbe essere già stato rimosso.", error);
-                });
+            if (scannerInstanceRef.current) {
+                // Ensure we try to clear the scanner only if it's in a state that can be cleared.
+                if (scannerInstanceRef.current.getState() !== 2 /* Html5QrcodeScannerState.NOT_STARTED */) {
+                    scannerInstanceRef.current.clear().catch(error => {
+                        console.warn("Failed to clear html5QrcodeScanner.", error);
+                    });
+                }
+                scannerInstanceRef.current = null;
             }
         };
-    }, []); // L'array di dipendenze vuoto assicura che questo venga eseguito una volta al montaggio e ripulito allo smontaggio
+    }, []); // Empty dependency array ensures this effect runs only once on mount and cleans up on unmount.
 
     const handleClose = () => {
         setScanError(null);
@@ -84,19 +97,23 @@ const QRScanner: React.FC = () => {
                     Inquadra il QR Code sulla TV
                 </Typography>
                 
-                {/* Contenitore in cui verrà renderizzato lo scanner */}
-                <Box id="qr-reader-container" sx={{ 
-                    width: 'min(90vw, 450px)',
-                    "& #qr-reader__dashboard_section_swaplink": { color: 'white !important' },
-                    "& #qr-reader__dashboard_section select": { color: 'black' },
-                    "& #html5-qrcode-anchor-scan-type-change": {
-                        color: 'white !important',
-                        textDecoration: 'underline !important'
-                    },
-                    "& video": {
-                        borderRadius: '8px'
-                    }
-                }} />
+                {/* Container where the scanner will be rendered, now with a ref */}
+                <Box 
+                    id="qr-reader-container"
+                    ref={scannerContainerRef}
+                    sx={{ 
+                        width: 'min(90vw, 450px)',
+                        "& #qr-reader__dashboard_section_swaplink": { color: 'white !important' },
+                        "& #qr-reader__dashboard_section select": { color: 'black' },
+                        "& #html5-qrcode-anchor-scan-type-change": {
+                            color: 'white !important',
+                            textDecoration: 'underline !important'
+                        },
+                        "& video": {
+                            borderRadius: '8px'
+                        }
+                    }} 
+                />
 
                 {scanError && (
                     <Alert severity="error" sx={{ position: 'absolute', bottom: '10%', zIndex: 2 }}>
