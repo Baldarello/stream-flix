@@ -23,7 +23,7 @@ const SmartTVScreen: React.FC = () => {
         }
 
         if (slaveId) {
-            const remoteUrl = `${window.location.origin??"https://q.tnl.one/"}?remote_for=${slaveId}`;
+            const remoteUrl = `${"https://q.tnl.one/"}?remote_for=${slaveId}`;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
             return (
                 <Box sx={{ textAlign: 'center' }}>
