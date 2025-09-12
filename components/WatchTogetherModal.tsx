@@ -75,7 +75,9 @@ const WatchTogetherModal: React.FC = () => {
 
   const handleCopyToClipboard = () => {
     if (roomId) {
-      const joinUrl = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
+      const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const baseUrl = isLocalhost ? `${window.location.origin}${window.location.pathname}` : 'https://q.tnl.one/';
+      const joinUrl = `${baseUrl}?roomId=${roomId}`;
       navigator.clipboard.writeText(joinUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

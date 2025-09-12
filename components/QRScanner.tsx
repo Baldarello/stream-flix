@@ -35,7 +35,10 @@ const QRScanner: React.FC = () => {
                     const url = new URL(decodedText);
                     const slaveId = url.searchParams.get('remote_for');
 
-                    if (url.origin === window.location.origin && slaveId) {
+                    const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                    const expectedOrigin = isLocalhost ? window.location.origin : 'https://q.tnl.one';
+
+                    if (url.origin === expectedOrigin && slaveId) {
                         mediaStore.connectAsRemoteMaster(slaveId);
                     } else {
                         throw new Error("Invalid QR code for this application.");

@@ -1,7 +1,6 @@
 import React from 'react';
-// FIX: Changed the Grid import to be a direct import from '@mui/material/Grid'. This can resolve module resolution issues that cause incorrect type inference for the 'item' prop.
-import { Box, Container, Typography, Fade } from '@mui/material';
-import Grid from '@mui/material/Grid';
+// FIX: Consolidated Grid import with other MUI components to resolve a TypeScript error where the 'item' prop was not being recognized.
+import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
