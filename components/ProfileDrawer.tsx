@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore, ThemeName } from '../store/mediaStore';
-import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors } from '@mui/material';
+import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors, Avatar, ListItemAvatar, CircularProgress } from '@mui/material';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import GoogleIcon from '@mui/icons-material/Google';
 import CloseIcon from '@mui/icons-material/Close';
@@ -10,9 +10,15 @@ import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 import AnimationIcon from '@mui/icons-material/Animation';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { handleSignIn, handleSignOut } from '../services/googleAuthService';
 
 const ProfileDrawer: React.FC = () => {
-    const { isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode } = mediaStore;
+    const { 
+        isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
+        isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive
+    } = mediaStore;
 
     const handleScanQRCode = () => {
         openQRScanner();
@@ -24,24 +30,6 @@ const ProfileDrawer: React.FC = () => {
     ) => {
         if (newTheme !== null) {
             mediaStore.setActiveTheme(newTheme);
-        }
-    };
-
-    const handleBackup = async () => {
-        mediaStore.showSnackbar("Preparazione del backup in corso...", "info");
-        const backupData = await mediaStore.prepareUserDataBackup();
-        if (backupData) {
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const date = new Date().toISOString().slice(0, 10);
-            a.download = `quix_backup_${date}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            mediaStore.showSnackbar("Backup scaricato con successo!", "success");
         }
     };
     
@@ -60,6 +48,18 @@ const ProfileDrawer: React.FC = () => {
                  </IconButton>
             </Box>
             <Divider />
+
+            {isLoggedIn && googleUser ? (
+                <List>
+                    <ListItem>
+                        <ListItemAvatar>
+                            <Avatar alt={googleUser.name} src={googleUser.picture} />
+                        </ListItemAvatar>
+                        <ListItemText primary={googleUser.name} secondary={googleUser.email} />
+                    </ListItem>
+                </List>
+            ) : null}
+
             <Box sx={{ p: 2 }}>
                 <Typography variant="overline" color="text.secondary">Stile Sito</Typography>
                 <ToggleButtonGroup
@@ -129,18 +129,36 @@ const ProfileDrawer: React.FC = () => {
             </Box>
             <Divider />
             <List>
-                <ListItem disablePadding>
-                    <ListItemButton>
-                        <ListItemIcon><GoogleIcon /></ListItemIcon>
-                        <ListItemText primary="Accedi con Google" />
-                    </ListItemButton>
-                </ListItem>
-                 <ListItem disablePadding>
-                    <ListItemButton onClick={handleBackup}>
-                        <ListItemIcon><CloudUploadIcon /></ListItemIcon>
-                        <ListItemText primary="Backup su Google Drive" secondary="Salva un file di backup" />
-                    </ListItemButton>
-                </ListItem>
+                 {isLoggedIn ? (
+                    <>
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={backupToDrive} disabled={isBackingUp || isRestoring}>
+                                <ListItemIcon>{isBackingUp ? <CircularProgress size={24} /> : <CloudUploadIcon />}</ListItemIcon>
+                                <ListItemText primary="Backup su Google Drive" />
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={restoreFromDrive} disabled={isRestoring || isBackingUp}>
+                                <ListItemIcon>{isRestoring ? <CircularProgress size={24} /> : <CloudDownloadIcon />}</ListItemIcon>
+                                <ListItemText primary="Ripristina da Google Drive" />
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={handleSignOut}>
+                                <ListItemIcon><LogoutIcon /></ListItemIcon>
+                                <ListItemText primary="Logout" />
+                            </ListItemButton>
+                        </ListItem>
+                    </>
+                ) : (
+                    <ListItem disablePadding>
+                        <ListItemButton onClick={handleSignIn}>
+                            <ListItemIcon><GoogleIcon /></ListItemIcon>
+                            <ListItemText primary="Accedi con Google" />
+                        </ListItemButton>
+                    </ListItem>
+                )}
+                <Divider sx={{ my: 1 }} />
                  <ListItem disablePadding>
                     <ListItemButton onClick={handleScanQRCode}>
                         <ListItemIcon><QrCodeScannerIcon /></ListItemIcon>

@@ -1,6 +1,7 @@
 import React from 'react';
-// FIX: Consolidated Grid import with other MUI components to resolve a TypeScript error where the 'item' prop was not being recognized.
-import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
+// FIX: Use a direct import for the Grid component to resolve a TypeScript error where the 'item' prop was not being recognized.
+import { Box, Container, Link, Typography, IconButton } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';

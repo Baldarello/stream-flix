@@ -18,7 +18,9 @@ export default defineConfig(({ mode }) => {
         plugins: [react()],
         define: {
             ...processEnv,
-            'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version)
+            'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
+            // This makes the environment variable available in the client-side code
+            'process.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID),
         },
         resolve: {
             alias: {

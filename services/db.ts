@@ -67,6 +67,33 @@ export class QuixDB extends Dexie {
       revisions: '++id, timestamp',
     });
   }
+  
+  async importData(data: any) {
+    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'episodeLinks', 'showIntroDurations', 'preferences', 'revisions'];
+    const tablesInData = data ? Object.keys(data) : [];
+    
+    if (!tablesInData.length || !expectedTables.every(table => tablesInData.includes(table))) {
+      throw new Error("Backup file is missing required data tables or is empty.");
+    }
+    
+    // FIX: The transaction method expects an array of tables when multiple tables are involved,
+    // rather than listing them as separate arguments. This resolves the argument count error.
+    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions], async () => {
+        // Clear all existing data
+        for (const table of expectedTables) {
+            // Dexie's Table types are not easily indexable by string, so we cast to any.
+            await (this as any)[table].clear();
+        }
+
+        // Import new data
+        for (const tableName of expectedTables) {
+            const tableData = data[tableName];
+            if (tableData && Array.isArray(tableData) && tableData.length > 0) {
+                await (this as any)[tableName].bulkAdd(tableData);
+            }
+        }
+    });
+  }
 }
 
 export const db = new QuixDB();

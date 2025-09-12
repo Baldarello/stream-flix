@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar, Alert, Button } from '@mui/material';
 import { mediaStore } from '../store/mediaStore';
 
 const NotificationSnackbar: React.FC = () => {
@@ -13,10 +13,20 @@ const NotificationSnackbar: React.FC = () => {
         hideSnackbar();
     };
 
+    const action = snackbarMessage?.action ? (
+        <Button color="inherit" size="small" onClick={() => {
+            snackbarMessage.action?.onClick();
+            hideSnackbar();
+        }}>
+            {snackbarMessage.action.label}
+        </Button>
+    ) : undefined;
+
+
     return (
         <Snackbar
             open={!!snackbarMessage}
-            autoHideDuration={6000}
+            autoHideDuration={snackbarMessage?.action ? null : 6000}
             onClose={handleClose}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
@@ -25,6 +35,7 @@ const NotificationSnackbar: React.FC = () => {
                 severity={snackbarMessage?.severity || 'info'}
                 variant="filled"
                 sx={{ width: '100%' }}
+                action={action}
             >
                 {snackbarMessage?.message}
             </Alert>

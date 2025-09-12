@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem} from '../types';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -14,6 +14,8 @@ import {websocketService} from '../services/websocketService.js';
 import type {EpisodeLink} from '../services/db';
 import {db} from '../services/db';
 import { isSmartTV as detectSmartTV } from '../utils/device';
+import { initGoogleAuth } from '../services/googleAuthService';
+import * as driveService from '../services/googleDriveService';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
 export type ThemeName = 'SerieTV' | 'Film' | 'Anime';
@@ -99,10 +101,15 @@ class MediaStore {
     activeTheme: ThemeName = 'SerieTV';
 
     // Snackbar State
-    snackbarMessage: { message: string, severity: AlertColor } | null = null;
+    snackbarMessage: { message: string, severity: AlertColor, action?: { label: string, onClick: () => void } } | null = null;
 
     // Debug Mode State
     debugMessages: string[] = [];
+
+    // Google Auth & Sync State
+    googleUser: GoogleUser | null = null;
+    isBackingUp = false;
+    isRestoring = false;
 
 
     constructor() {
@@ -114,10 +121,15 @@ class MediaStore {
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
         websocketService.events.on('debug', this.addDebugMessage);
+        initGoogleAuth();
     }
 
     showSnackbar = (message: string, severity: AlertColor = 'info') => {
         this.snackbarMessage = { message, severity };
+    }
+
+    showSnackbarWithAction = (message: string, severity: AlertColor, actionLabel: string, onActionClick: () => void) => {
+        this.snackbarMessage = { message, severity, action: { label: actionLabel, onClick: onActionClick }};
     }
 
     hideSnackbar = () => {
@@ -870,8 +882,6 @@ class MediaStore {
             ]);
 
             const backupData = {
-                version: 1,
-                timestamp: new Date().toISOString(),
                 data: {
                     myList,
                     viewingHistory,
@@ -933,6 +943,98 @@ class MediaStore {
     exitSmartTVPairingMode = () => {
         this.isSmartTVPairingVisible = false;
     }
+    
+    get isLoggedIn(): boolean {
+        return this.googleUser !== null;
+    }
+
+    setGoogleUser = async (user: GoogleUser | null) => {
+        this.googleUser = user;
+        if (user) {
+            this.showSnackbar(`Benvenuto, ${user.name}!`, 'success');
+            // After user is set, check for a backup
+            await this.checkForRemoteBackup();
+        } else {
+             this.showSnackbar("Logout effettuato.", "info");
+        }
+    }
+
+    checkForRemoteBackup = async () => {
+        if (!this.googleUser) return;
+        try {
+            const backupFile = await driveService.findBackupFile(this.googleUser.accessToken);
+            if (backupFile) {
+                this.showSnackbarWithAction("Backup trovato su Google Drive. Vuoi ripristinare?", "info", "Ripristina", () => {
+                    this.restoreFromDrive();
+                });
+            }
+        } catch (error) {
+            console.error("Failed to check for remote backup:", error);
+            // Don't bother the user with an error here, it's a background check.
+        }
+    }
+
+    backupToDrive = async () => {
+        if (!this.googleUser) {
+            this.showSnackbar("Devi effettuare il login per usare questa funzione.", "warning");
+            return;
+        }
+
+        this.isBackingUp = true;
+        this.showSnackbar("Salvataggio su Google Drive in corso...", "info");
+        try {
+            const backupData = await this.prepareUserDataBackup();
+            if (!backupData || !backupData.data) throw new Error("Could not prepare backup data.");
+            
+            const existingFile = await driveService.findBackupFile(this.googleUser.accessToken);
+            await driveService.writeBackupFile(this.googleUser.accessToken, backupData.data, existingFile?.id || null);
+
+            this.showSnackbar("Backup completato con successo!", "success");
+        } catch (error) {
+            console.error("Failed to backup to Google Drive:", error);
+            this.showSnackbar("Errore durante il salvataggio su Google Drive.", "error");
+        } finally {
+            runInAction(() => {
+              this.isBackingUp = false;
+            });
+        }
+    }
+
+    restoreFromDrive = async () => {
+        if (!this.googleUser) {
+            this.showSnackbar("Devi effettuare il login per usare questa funzione.", "warning");
+            return;
+        }
+        
+        this.isRestoring = true;
+        this.showSnackbar("Ripristino da Google Drive in corso...", "info");
+        try {
+            const backupFile = await driveService.findBackupFile(this.googleUser.accessToken);
+            if (!backupFile) {
+                this.showSnackbar("Nessun backup trovato su Google Drive.", "warning");
+                return;
+            }
+
+            const backupData = await driveService.readBackupFile(this.googleUser.accessToken, backupFile.id);
+            await db.importData(backupData);
+
+            this.showSnackbar("Ripristino completato! L'app verrà ricaricata.", "success");
+            
+            // Reload the app to reflect changes from the DB
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } catch (error) {
+            console.error("Failed to restore from Google Drive:", error);
+            this.showSnackbar(`Errore durante il ripristino: ${(error as Error).message}`, "error");
+        } finally {
+            runInAction(() => {
+              this.isRestoring = false;
+            });
+        }
+    }
+
 
     get isDebugModeActive(): boolean {
         const params = new URLSearchParams(window.location.search);

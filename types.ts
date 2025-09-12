@@ -52,3 +52,10 @@ export interface ChatMessage {
   image?: string; // base64 encoded image
   timestamp: number;
 }
+
+export interface GoogleUser {
+    name: string;
+    email: string;
+    picture: string;
+    accessToken: string;
+}
