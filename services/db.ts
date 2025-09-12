@@ -1,10 +1,10 @@
+import 'dexie-observable/api';
 import Dexie, { type Table } from 'dexie';
 import type { ViewingHistoryItem, MediaItem } from '../types';
 import dexieObservable from 'dexie-observable';
 // FIX: Importing 'dexie-observable/api' is required for TypeScript to correctly
-// augment the Dexie class with the addon's methods like `on()`. This resolves
-// all reported type errors related to `version()` and `on()`.
-import 'dexie-observable/api';
+// augment the Dexie class with the addon's methods like on(). This resolves
+// all reported type errors related to version() and on().
 
 // Define the structure of the data we're storing
 export interface MyListItem {

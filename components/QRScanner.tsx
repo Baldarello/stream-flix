@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, IconButton, Typography, Alert } from '@mui/material';
@@ -8,13 +8,20 @@ import { Html5QrcodeScanner } from 'html5-qrcode';
 const QRScanner: React.FC = () => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;
     const [scanError, setScanError] = useState<string | null>(null);
-    const scannerContainerRef = useRef<HTMLDivElement>(null);
     const scannerInstanceRef = useRef<Html5QrcodeScanner | null>(null);
 
-    useEffect(() => {
-        // This effect runs once when the component mounts.
-        // We initialize the scanner only if the container element is available in the DOM.
-        if (scannerContainerRef.current && !scannerInstanceRef.current) {
+    // Using a callback ref is a more robust way to handle refs for DOM nodes that
+    // might not be immediately available on first render, especially inside modals or
+    // other components with complex lifecycles. It ensures our code runs only
+    // when the DOM node is actually ready.
+    const scannerContainerRef = useCallback((node: HTMLDivElement | null) => {
+        // The callback runs with the DOM node when the ref is attached.
+        if (node !== null) {
+            if (scannerInstanceRef.current) {
+                // Should not happen, but as a safeguard.
+                return;
+            }
+
             const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
@@ -22,7 +29,6 @@ const QRScanner: React.FC = () => {
             };
 
             const onScanSuccess = (decodedText: string) => {
-                // Check if scanner is still supposed to be open before processing.
                 if (!mediaStore.isQRScannerOpen) return;
 
                 try {
@@ -45,18 +51,16 @@ const QRScanner: React.FC = () => {
             };
 
             const scanner = new Html5QrcodeScanner(
-                scannerContainerRef.current.id, 
+                node.id, 
                 config, 
                 /* verbose= */ false
             );
             scanner.render(onScanSuccess, onScanFailure);
             scannerInstanceRef.current = scanner;
-        }
 
-        // The cleanup function is returned to be executed when the component unmounts.
-        return () => {
+        // The callback runs with `null` when the ref is detached (on component unmount).
+        } else {
             if (scannerInstanceRef.current) {
-                // Ensure we try to clear the scanner only if it's in a state that can be cleared.
                 if (scannerInstanceRef.current.getState() !== 2 /* Html5QrcodeScannerState.NOT_STARTED */) {
                     scannerInstanceRef.current.clear().catch(error => {
                         console.warn("Failed to clear html5QrcodeScanner.", error);
@@ -64,8 +68,9 @@ const QRScanner: React.FC = () => {
                 }
                 scannerInstanceRef.current = null;
             }
-        };
-    }, []); // Empty dependency array ensures this effect runs only once on mount and cleans up on unmount.
+        }
+    }, []); // Empty dependency array means the callback is created once.
+
 
     const handleClose = () => {
         setScanError(null);
@@ -97,7 +102,7 @@ const QRScanner: React.FC = () => {
                     Inquadra il QR Code sulla TV
                 </Typography>
                 
-                {/* Container where the scanner will be rendered, now with a ref */}
+                {/* Container where the scanner will be rendered, now with a callback ref */}
                 <Box 
                     id="qr-reader-container"
                     ref={scannerContainerRef}
