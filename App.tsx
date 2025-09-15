@@ -18,8 +18,11 @@ import RemoteControlView from './components/RemoteControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
 import WatchTogetherModal from './components/WatchTogetherModal';
-import NotificationSnackbar from './components/NotificationSnackbar';
+// FIX: Changed to a named import for NotificationSnackbar as it no longer has a default export.
+import { NotificationSnackbar } from './components/NotificationSnackbar';
 import DebugOverlay from './components/DebugOverlay';
+import LinkSelectionModal from './components/LinkSelectionModal';
+import { useTranslations } from './hooks/useTranslations';
 
 // FIX: Explicitly type `baseThemeOptions` with `ThemeOptions`. This prevents TypeScript from widening
 // the types of CSS properties (e.g., `textTransform`) to a generic `string`, which resolves the
@@ -55,22 +58,9 @@ const themePalettes: Record<ThemeName, any> = {
     }
 };
 
-const App: React.FC = () => {
-  useEffect(() => {
-    mediaStore.loadPersistedData();
-    mediaStore.fetchAllData();
-    
-    const params = new URLSearchParams(window.location.search);
-    const roomIdFromUrl = params.get('roomId');
-    if (roomIdFromUrl) {
-        mediaStore.setJoinRoomIdFromUrl(roomIdFromUrl);
-        mediaStore.openWatchTogetherModal(null); 
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
-
+const AppContent: React.FC = observer(() => {
+  const { t } = useTranslations();
   const {
-    activeTheme,
     loading,
     error,
     heroContent,
@@ -90,39 +80,25 @@ const App: React.FC = () => {
     isQRScannerOpen,
   } = mediaStore;
 
-  const dynamicTheme = createTheme({
-    palette: {
-        mode: 'dark',
-        ...themePalettes[activeTheme],
-    },
-    ...baseThemeOptions,
-  });
-
   if (loading) {
     return (
-        <ThemeProvider theme={dynamicTheme}><CssBaseline />
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
-            <CircularProgress color="primary" />
-          </Box>
-          <DebugOverlay />
-        </ThemeProvider>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+          <CircularProgress color="primary" />
+        </Box>
     );
   }
 
   if (error) {
     return (
-        <ThemeProvider theme={dynamicTheme}><CssBaseline />
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
-                <Alert severity="error">{error}</Alert>
-            </Box>
-            <DebugOverlay />
-        </ThemeProvider>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+            <Alert severity="error">{error}</Alert>
+        </Box>
     );
   }
 
-  if (isRemoteMaster) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><RemoteControlView /> <NotificationSnackbar /><DebugOverlay /></ThemeProvider>;
-  if (nowPlayingItem) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><VideoPlayer /> <NotificationSnackbar /><DebugOverlay /></ThemeProvider>;
-  if (isSmartTVPairingVisible) return <ThemeProvider theme={dynamicTheme}><CssBaseline /><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></ThemeProvider>;
+  if (isRemoteMaster) return <><RemoteControlView /> <NotificationSnackbar /><DebugOverlay /></>;
+  if (nowPlayingItem) return <><VideoPlayer /> <NotificationSnackbar /><DebugOverlay /></>;
+  if (isSmartTVPairingVisible) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {
@@ -131,12 +107,12 @@ const App: React.FC = () => {
     if (!searchQuery) {
       return (
         <Box sx={{ textAlign: 'center', pt: 20 }}>
-          <Typography variant="h5">Cerca film, serie TV e tanto altro</Typography>
-          <Typography color="text.secondary">Trova subito i tuoi contenuti preferiti.</Typography>
+          <Typography variant="h5">{t('misc.searchPrompt.title')}</Typography>
+          <Typography color="text.secondary">{t('misc.searchPrompt.subtitle')}</Typography>
         </Box>
       )
     }
-    return <GridView title={`Risultati per "${searchQuery}"`} items={searchResults} />;
+    return <GridView title={t('gridView.searchResultsFor', { query: searchQuery })} items={searchResults} />;
   }
 
   const renderMainContent = () => {
@@ -159,8 +135,8 @@ const App: React.FC = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 {mediaStore.homePageRows.map(row => (
                     <ContentRow
-                        key={row.title}
-                        title={row.title}
+                        key={row.titleKey}
+                        title={t(row.titleKey)}
                         items={row.items}
                         onCardClick={item => mediaStore.selectMedia(item)}
                     />
@@ -169,17 +145,15 @@ const App: React.FC = () => {
             </Container>
           </>
         );
-      case 'Serie TV': return <GridView title="Serie TV" items={topSeries} />;
-      case 'Film': return <GridView title="Film" items={allMovies} />;
-      case 'Anime': return <GridView title="Anime" items={popularAnime} />;
-      case 'La mia lista': return <GridView title="La mia lista" items={myListItems} />;
+      case 'Serie TV': return <GridView title={t('gridView.seriesTitle')} items={topSeries} />;
+      case 'Film': return <GridView title={t('gridView.moviesTitle')} items={allMovies} />;
+      case 'Anime': return <GridView title={t('gridView.animeTitle')} items={popularAnime} />;
+      case 'La mia lista': return <GridView title={t('gridView.myListTitle')} items={myListItems} />;
       default: return null;
     }
   };
 
   return (
-    <ThemeProvider theme={dynamicTheme}>
-      <CssBaseline />
       <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
         <Header />
         <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
@@ -188,7 +162,43 @@ const App: React.FC = () => {
         {isQRScannerOpen && <QRScanner />}
         <WatchTogetherModal />
         <NotificationSnackbar />
+        <LinkSelectionModal />
       </Box>
+  );
+});
+
+const App: React.FC = () => {
+  useEffect(() => {
+    const initializeApp = async () => {
+        await mediaStore.loadPersistedData();
+        mediaStore.fetchAllData();
+        
+        const params = new URLSearchParams(window.location.search);
+        const roomIdFromUrl = params.get('roomId');
+        if (roomIdFromUrl) {
+            mediaStore.setJoinRoomIdFromUrl(roomIdFromUrl);
+            mediaStore.openWatchTogetherModal(null); 
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    };
+    initializeApp();
+  }, []);
+  
+  const { activeTheme } = mediaStore;
+
+  const dynamicTheme = createTheme({
+    palette: {
+        mode: 'dark',
+        ...themePalettes[activeTheme],
+    },
+    ...baseThemeOptions,
+  });
+
+
+  return (
+    <ThemeProvider theme={dynamicTheme}>
+      <CssBaseline />
+      <AppContent />
       <DebugOverlay />
     </ThemeProvider>
   );

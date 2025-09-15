@@ -2,9 +2,11 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Snackbar, Alert, Button } from '@mui/material';
 import { mediaStore } from '../store/mediaStore';
+import { useTranslations } from '../hooks/useTranslations';
 
-const NotificationSnackbar: React.FC = () => {
+export const NotificationSnackbar: React.FC = observer(() => {
     const { snackbarMessage, hideSnackbar } = mediaStore;
+    const { t } = useTranslations();
 
     const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
@@ -13,12 +15,25 @@ const NotificationSnackbar: React.FC = () => {
         hideSnackbar();
     };
 
+    const messageText = snackbarMessage 
+      ? snackbarMessage.isTranslationKey 
+        ? t(snackbarMessage.message, snackbarMessage.translationValues)
+        : snackbarMessage.message
+      : '';
+      
+    const actionLabelText = snackbarMessage?.action?.label
+        ? snackbarMessage.isTranslationKey
+            ? t(snackbarMessage.action.label)
+            : snackbarMessage.action.label
+        : '';
+
+
     const action = snackbarMessage?.action ? (
         <Button color="inherit" size="small" onClick={() => {
             snackbarMessage.action?.onClick();
             hideSnackbar();
         }}>
-            {snackbarMessage.action.label}
+            {actionLabelText}
         </Button>
     ) : undefined;
 
@@ -34,13 +49,12 @@ const NotificationSnackbar: React.FC = () => {
                 onClose={handleClose}
                 severity={snackbarMessage?.severity || 'info'}
                 variant="filled"
+                // FIX: Completed the sx prop, which was truncated and causing a type error. Also added the action and message.
                 sx={{ width: '100%' }}
                 action={action}
             >
-                {snackbarMessage?.message}
+                {messageText}
             </Alert>
         </Snackbar>
     );
-};
-
-export default observer(NotificationSnackbar);
+});

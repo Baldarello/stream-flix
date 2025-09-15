@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface CardProps {
   item: MediaItem;
@@ -13,6 +14,7 @@ interface CardProps {
 }
 
 export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode = 'row' }) => {
+  const { t } = useTranslations();
   const title = item.title || item.name;
   const isInMyList = mediaStore.myList.includes(item.id);
 
@@ -31,6 +33,8 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
       : {
           width: '100%',
         };
+        
+  const listActionTooltip = isInMyList ? t('card.removeFromList') : t('card.addToList');
 
   return (
     <MuiCard
@@ -53,13 +57,13 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
       }}
       onClick={() => onClick(item)}
       role="button"
-      aria-label={`Vedi dettagli per ${title}`}
+      aria-label={t('card.detailsFor', { title })}
     >
-      <Tooltip title={isInMyList ? 'Rimuovi dalla mia lista' : 'Aggiungi alla mia lista'}>
+      <Tooltip title={listActionTooltip}>
         <IconButton
           className="add-to-list-btn"
           onClick={handleToggleMyList}
-          aria-label={isInMyList ? 'Rimuovi dalla mia lista' : 'Aggiungi alla mia lista'}
+          aria-label={listActionTooltip}
           sx={{
             position: 'absolute',
             top: 8,

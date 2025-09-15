@@ -1,18 +1,14 @@
+// FIX: Importing 'dexie-observable/api' is required for TypeScript to correctly
+// augment the Dexie class with addon methods like .on() and to ensure core
+// methods like .version() and .transaction() are also correctly typed.
 import 'dexie-observable/api';
 import Dexie, { type Table } from 'dexie';
-import type { ViewingHistoryItem, MediaItem } from '../types';
+import type { ViewingHistoryItem, MediaItem, EpisodeLink } from '../types';
 import dexieObservable from 'dexie-observable';
-// FIX: Importing 'dexie-observable/api' is required for TypeScript to correctly
-// augment the Dexie class with the addon's methods like on(). This resolves
-// all reported type errors related to version() and on().
 
 // Define the structure of the data we're storing
 export interface MyListItem {
   id: number;
-}
-export interface EpisodeLink {
-    id: number; // episode id
-    url: string;
 }
 export interface ShowIntroDuration {
     id: number; // show id
@@ -55,7 +51,7 @@ export class QuixDB extends Dexie {
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
-      episodeLinks: '&id',
+      episodeLinks: '&id', // This was the old primary key schema
       showIntroDurations: '&id',
     });
     
@@ -65,6 +61,15 @@ export class QuixDB extends Dexie {
 
     this.version(3).stores({
       revisions: '++id, timestamp',
+    });
+
+    this.version(4).stores({
+      episodeLinks: '++id, episodeId', // New schema with auto-incrementing PK and index on episodeId
+    }).upgrade(tx => {
+      // Since we are changing the schema in a breaking way (from string URL to object),
+      // it's safest to just clear the old table.
+      // The user will have to re-link their episodes.
+      return tx.table('episodeLinks').clear();
     });
   }
   
@@ -76,8 +81,6 @@ export class QuixDB extends Dexie {
       throw new Error("Backup file is missing required data tables or is empty.");
     }
     
-    // FIX: The transaction method expects an array of tables when multiple tables are involved,
-    // rather than listing them as separate arguments. This resolves the argument count error.
     await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions], async () => {
         // Clear all existing data
         for (const table of expectedTables) {
@@ -99,7 +102,6 @@ export class QuixDB extends Dexie {
 export const db = new QuixDB();
 
 // NEW: Listen for database changes and log them as revisions
-// FIX: Changed to use the documented `db.on('changes', ...)` syntax for `dexie-observable` to resolve the TypeScript error.
 db.on('changes', (changes) => {
     const revisionsToLog: Revision[] = changes
         // Don't log changes to the revisions table itself to avoid an infinite loop

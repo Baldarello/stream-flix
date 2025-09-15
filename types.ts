@@ -1,10 +1,18 @@
+export interface EpisodeLink {
+    id?: number; // Auto-incrementing primary key from Dexie
+    episodeId: number;
+    url: string;
+    label: string;
+}
+
 export interface Episode {
   id: number;
   episode_number: number;
   name: string;
   overview: string;
   still_path: string; // URL to an image
-  video_url?: string;
+  video_url?: string; // The first available URL for convenience
+  video_urls?: EpisodeLink[]; // Array of all available links
   intro_start_s?: number; // Start time of intro in seconds
   intro_end_s?: number;   // End time of intro in seconds
 }

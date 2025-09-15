@@ -6,9 +6,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import ImageIcon from '@mui/icons-material/Image';
 import type { Episode } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
-const EpisodesDrawer: React.FC = () => {
+const EpisodesDrawer: React.FC = observer(() => {
     const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem } = mediaStore;
+    const { t } = useTranslations();
 
     if (!currentShow || !nowPlayingItem || !('episode_number' in nowPlayingItem)) {
         return null;
@@ -18,15 +20,13 @@ const EpisodesDrawer: React.FC = () => {
     const seasonNumber = nowPlayingItem.season_number;
 
     const handleSelectEpisode = (episode: Episode) => {
-        if (episode.video_url) {
-            mediaStore.startPlayback({
-                ...episode,
-                show_id: currentShow.id,
-                show_title: currentShow.title || currentShow.name || '',
-                backdrop_path: currentShow.backdrop_path,
-                season_number: seasonNumber,
-            });
-        }
+        mediaStore.startPlayback({
+            ...episode,
+            show_id: currentShow.id,
+            show_title: currentShow.title || currentShow.name || '',
+            backdrop_path: currentShow.backdrop_path,
+            season_number: seasonNumber,
+        });
     };
 
     const ImageWithPlaceholder = ({ episode }: { episode: Episode }) => (
@@ -36,7 +36,7 @@ const EpisodesDrawer: React.FC = () => {
             height: 68,
             flexShrink: 0,
             '&:hover .play-overlay': {
-                opacity: episode.video_url ? 1 : 0, // Only show overlay if playable
+                opacity: 1,
             }
         }}>
             {episode.still_path ? (
@@ -59,26 +59,24 @@ const EpisodesDrawer: React.FC = () => {
                     <ImageIcon color="disabled" />
                 </Box>
             )}
-            {episode.video_url && (
-                <Box
-                    className="play-overlay"
-                    sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        bgcolor: 'rgba(0,0,0,0.6)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        opacity: 0,
-                        transition: 'opacity 0.2s ease-in-out',
-                        borderRadius: 1,
-                        cursor: 'pointer',
-                    }}
-                >
-                    <PlayArrowIcon fontSize="large" />
-                </Box>
-            )}
+            <Box
+                className="play-overlay"
+                sx={{
+                    position: 'absolute',
+                    inset: 0,
+                    bgcolor: 'rgba(0,0,0,0.6)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0,
+                    transition: 'opacity 0.2s ease-in-out',
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                }}
+            >
+                <PlayArrowIcon fontSize="large" />
+            </Box>
         </Box>
     );
 
@@ -98,7 +96,7 @@ const EpisodesDrawer: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Toolbar>
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Episodi
+                        {t('episodesDrawer.title')}
                     </Typography>
                     <IconButton edge="end" onClick={closeEpisodesDrawer}>
                         <CloseIcon />
@@ -110,7 +108,6 @@ const EpisodesDrawer: React.FC = () => {
                             <ListItemButton
                                 selected={episode.id === currentEpisodeId}
                                 onClick={() => handleSelectEpisode(episode)}
-                                disabled={!episode.video_url}
                                 sx={{ 
                                     gap: 2, 
                                     p: 1, 
@@ -131,7 +128,7 @@ const EpisodesDrawer: React.FC = () => {
                                         whiteSpace: 'normal',
                                         lineHeight: 1.3,
                                     }}
-                                    secondary={`Stagione ${seasonNumber}`}
+                                    secondary={t('episodesDrawer.season', { number: seasonNumber })}
                                     secondaryTypographyProps={{
                                         mt: 0.5
                                     }}
@@ -143,6 +140,6 @@ const EpisodesDrawer: React.FC = () => {
             </Box>
         </Drawer>
     );
-};
+});
 
-export default observer(EpisodesDrawer);
+export default EpisodesDrawer;

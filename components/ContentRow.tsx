@@ -4,6 +4,8 @@ import { Card } from './Card';
 import { Box, Typography, IconButton, Fade } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { observer } from 'mobx-react-lite';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface ContentRowProps {
   title: string;
@@ -11,11 +13,12 @@ interface ContentRowProps {
   onCardClick: (item: MediaItem) => void;
 }
 
-export const ContentRow: React.FC<ContentRowProps> = ({ title, items, onCardClick }) => {
+export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const { t } = useTranslations();
 
   const checkScrollability = () => {
     const el = scrollContainerRef.current;
@@ -93,7 +96,7 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items, onCardClic
               ...scrollButtonStyles,
               left: 0,
             }}
-            aria-label="scorri a sinistra"
+            aria-label={t('contentRow.scrollLeft')}
           >
             <ChevronLeftIcon fontSize="large" />
           </IconButton>
@@ -126,7 +129,7 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items, onCardClic
               ...scrollButtonStyles,
               right: 0,
             }}
-            aria-label="scorri a destra"
+            aria-label={t('contentRow.scrollRight')}
           >
             <ChevronRightIcon fontSize="large" />
           </IconButton>
@@ -134,4 +137,4 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items, onCardClic
       </Box>
     </Box>
   );
-};
+});

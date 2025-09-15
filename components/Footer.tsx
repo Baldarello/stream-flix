@@ -1,7 +1,6 @@
 import React from 'react';
-// FIX: Use a direct import for the Grid component to resolve a TypeScript error where the 'item' prop was not being recognized.
-import { Box, Container, Link, Typography, IconButton } from '@mui/material';
-import Grid from '@mui/material/Grid';
+// FIX: Changed Grid import to be a named import from '@mui/material' to resolve type error with the 'item' prop.
+import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -33,7 +32,6 @@ export const Footer: React.FC = () => {
       </Box>
       <Grid container spacing={2}>
         {links.map((link) => (
-          // In MUI v5+, Grid items require the `item` prop for breakpoint props like `xs` and `sm` to be applied correctly.
           <Grid item xs={6} sm={3} key={link}>
             <Link href="#" color="inherit" underline="hover" variant="body2">
               {link}

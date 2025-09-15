@@ -9,6 +9,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import type { Episode, MediaItem, PlayableItem } from '../types';
 import { searchShow } from '../services/apiCall';
 import SearchIcon from '@mui/icons-material/Search';
+import { useTranslations } from '../hooks/useTranslations';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -25,13 +26,14 @@ const style = {
   flexDirection: 'column',
 };
 
-const WatchTogetherModal: React.FC = () => {
+const WatchTogetherModal: React.FC = observer(() => {
   const { 
       watchTogetherModalOpen, closeWatchTogetherModal, createRoom, joinRoom, roomId, 
       isHost, participants, hostId, selectedItem, watchTogetherError, isDetailLoading, 
       changeWatchTogetherMedia, joinRoomIdFromUrl, setJoinRoomIdFromUrl, changeRoomCode,
       watchTogetherSelectedItem
   } = mediaStore;
+  const { t } = useTranslations();
   
   const [inputRoomId, setInputRoomId] = useState('');
   const [username, setUsername] = useState('');
@@ -133,13 +135,13 @@ const WatchTogetherModal: React.FC = () => {
     return (
      <Stack spacing={3}>
        <Typography variant="h6" component="h2">
-         {isJoiningViaLink ? 'Unisciti alla stanza' : 'Guarda insieme ai tuoi amici'}
+         {isJoiningViaLink ? t('watchTogether.joinRoomTitle') : t('watchTogether.createRoomTitle')}
        </Typography>
        
        {watchTogetherError && <Alert severity="error">{watchTogetherError}</Alert>}
        
        <TextField
-          label="Il tuo nome"
+          label={t('watchTogether.yourName')}
           variant="outlined"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -151,13 +153,13 @@ const WatchTogetherModal: React.FC = () => {
             <>
                 {isTvShow && selectedItem && (
                     <React.Fragment>
-                        <Typography variant="subtitle1" fontWeight="bold">Seleziona un episodio per iniziare</Typography>
+                        <Typography variant="subtitle1" fontWeight="bold">{t('watchTogether.selectEpisode')}</Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="body1">Episodi</Typography>
+                            <Typography variant="body1">{t('watchTogether.episodes')}</Typography>
                             {selectedItem.seasons && selectedItem.seasons.length > 1 && (
                                 <FormControl size="small" sx={{minWidth: 150}}>
-                                    <InputLabel>Stagione</InputLabel>
-                                    <Select value={selectedSeason} label="Stagione" onChange={e => setSelectedSeason(Number(e.target.value))}>
+                                    <InputLabel>{t('watchTogether.season')}</InputLabel>
+                                    <Select value={selectedSeason} label={t('watchTogether.season')} onChange={e => setSelectedSeason(Number(e.target.value))}>
                                         {selectedItem.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
                                     </Select>
                                 </FormControl>
@@ -182,22 +184,22 @@ const WatchTogetherModal: React.FC = () => {
                     </React.Fragment>
                 )}
 
-               <Button variant="contained" size="large" onClick={() => createRoom(username)} disabled={!canCreateRoom}>Crea una nuova stanza</Button>
-               <Typography sx={{textAlign: 'center'}}>oppure</Typography>
+               <Button variant="contained" size="large" onClick={() => createRoom(username)} disabled={!canCreateRoom}>{t('watchTogether.createRoom')}</Button>
+               <Typography sx={{textAlign: 'center'}}>{t('watchTogether.or')}</Typography>
            </>
         )}
 
        <Stack direction="row" spacing={1}>
          <TextField
             fullWidth
-            label="Inserisci codice stanza"
+            label={t('watchTogether.roomCodePlaceholder')}
             variant="outlined"
             value={inputRoomId}
             onChange={(e) => setInputRoomId(e.target.value.toUpperCase())}
             inputProps={{ maxLength: 6, style: { textTransform: 'uppercase' } }}
             disabled={isJoiningViaLink}
          />
-         <Button variant="outlined" onClick={() => joinRoom(inputRoomId, username)} disabled={!inputRoomId.trim() || !username.trim()}>Unisciti</Button>
+         <Button variant="outlined" onClick={() => joinRoom(inputRoomId, username)} disabled={!inputRoomId.trim() || !username.trim()}>{t('watchTogether.join')}</Button>
        </Stack>
     </Stack>
     );
@@ -205,9 +207,9 @@ const WatchTogetherModal: React.FC = () => {
   
   const renderChangeContentView = () => (
       <Stack spacing={2}>
-          <Typography variant="h6">Cambia Contenuto</Typography>
+          <Typography variant="h6">{t('watchTogether.changeContentTitle')}</Typography>
           <TextField 
-            label="Cerca film o serie tv"
+            label={t('watchTogether.searchPlaceholder')}
             fullWidth
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -224,7 +226,7 @@ const WatchTogetherModal: React.FC = () => {
                   </ListItemButton>
               ))}
           </List>
-          <Button onClick={() => setIsChangingContent(false)}>Annulla</Button>
+          <Button onClick={() => setIsChangingContent(false)}>{t('watchTogether.cancel')}</Button>
       </Stack>
   );
 
@@ -239,18 +241,18 @@ const WatchTogetherModal: React.FC = () => {
     
     return (
         <Stack spacing={2} sx={{ overflow: 'hidden', flex: 1 }}>
-          <Typography variant="h6" component="h2" noWrap>Stanza: {selectedItem.title || selectedItem.name}</Typography>
+          <Typography variant="h6" component="h2" noWrap>{t('watchTogether.roomTitle', { title: selectedItem.title || selectedItem.name })}</Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'rgba(255,255,255,0.1)', p: 1, borderRadius: 1 }}>
             <Typography variant="h5" component="p" sx={{ flexGrow: 1, textAlign: 'center', letterSpacing: '0.2rem', fontFamily: 'monospace' }}>
               {roomId}
             </Typography>
             {isHost && (
-                <Tooltip title="Cambia Codice">
+                <Tooltip title={t('watchTogether.changeCode')}>
                     <IconButton onClick={changeRoomCode}><RefreshIcon /></IconButton>
                 </Tooltip>
             )}
-            <Tooltip title={copied ? "Copiato!" : "Copia Link Stanza"}>
+            <Tooltip title={copied ? t('watchTogether.copied') : t('watchTogether.copyLink')}>
               <IconButton onClick={handleCopyToClipboard}>
                 <ContentCopyIcon />
               </IconButton>
@@ -261,11 +263,11 @@ const WatchTogetherModal: React.FC = () => {
           {isHost && selectedItem.media_type === 'tv' && (
               <>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body1" fontWeight="bold">Episodi</Typography>
+                    <Typography variant="body1" fontWeight="bold">{t('watchTogether.episodes')}</Typography>
                     {selectedItem.seasons && selectedItem.seasons.length > 1 && (
                         <FormControl size="small" sx={{minWidth: 150}}>
-                            <InputLabel>Stagione</InputLabel>
-                            <Select value={selectedSeason} label="Stagione" onChange={e => setSelectedSeason(Number(e.target.value))}>
+                            <InputLabel>{t('watchTogether.season')}</InputLabel>
+                            <Select value={selectedSeason} label={t('watchTogether.season')} onChange={e => setSelectedSeason(Number(e.target.value))}>
                                 {selectedItem.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
                             </Select>
                         </FormControl>
@@ -283,28 +285,28 @@ const WatchTogetherModal: React.FC = () => {
 
           <Box>
             <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <GroupIcon /> Partecipanti ({participants.length})
+              <GroupIcon /> {t('watchTogether.participants', { count: participants.length })}
             </Typography>
             <List dense sx={{ maxHeight: 150, overflow: 'auto' }}>
               {participants.map((p) => (
                 <ListItem key={p.id}>
-                  <ListItemText primary={p.name} secondary={p.id === hostId ? 'Host' : ''} />
+                  <ListItemText primary={p.name} secondary={p.id === hostId ? t('watchTogether.host') : ''} />
                 </ListItem>
               ))}
             </List>
           </Box>
           {isHost && (
             <Stack direction="row" spacing={2}>
-              <Button variant="outlined" fullWidth onClick={() => setIsChangingContent(true)}>Cambia Contenuto</Button>
+              <Button variant="outlined" fullWidth onClick={() => setIsChangingContent(true)}>{t('watchTogether.changeContent')}</Button>
               <Button variant="contained" fullWidth color="primary" onClick={() => mediaStore.startPlayback(watchTogetherSelectedItem)}>
-                Inizia per tutti
+                {t('watchTogether.startForAll')}
               </Button>
             </Stack>
           )}
           {!isHost && (
              <Box sx={{textAlign: 'center', color: 'text.secondary', p: 2}}>
                 <CircularProgress size={20} sx={{mr: 1, verticalAlign: 'middle'}}/>
-                <Typography component="span" sx={{verticalAlign: 'middle'}}>In attesa che l'host inizi...</Typography>
+                <Typography component="span" sx={{verticalAlign: 'middle'}}>{t('watchTogether.waitingForHost')}</Typography>
              </Box>
           )}
         </Stack>
@@ -329,6 +331,6 @@ const WatchTogetherModal: React.FC = () => {
       </Box>
     </Modal>
   );
-};
+});
 
-export default observer(WatchTogetherModal);
+export default WatchTogetherModal;

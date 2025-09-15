@@ -7,9 +7,11 @@ import Chat from './Chat';
 import EpisodesDrawer from './EpisodesDrawer';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import { useTranslations } from '../hooks/useTranslations';
 
-const VideoPlayer: React.FC = () => {
+const VideoPlayer: React.FC = observer(() => {
   const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate, setIntroSkippableOnSlave } = mediaStore;
+  const { t } = useTranslations();
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -300,19 +302,19 @@ const VideoPlayer: React.FC = () => {
               boxShadow: 'none'
           }}>
               <Toolbar>
-                  <IconButton edge="start" color="inherit" aria-label="back" onClick={stopPlayback}>
+                  <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}>
                       <ArrowBackIcon/>
                   </IconButton>
                   <Typography variant="h6" sx={{flexGrow: 1}}>{title}</Typography>
                   {mediaStore.nextEpisode && (
-                      <Tooltip title="Prossimo Episodio">
+                      <Tooltip title={t('videoPlayer.nextEpisode')}>
                           <IconButton color="inherit" onClick={handleNextEpisode}>
                               <SkipNextIcon/>
                           </IconButton>
                       </Tooltip>
                   )}
                   {isEpisode && (
-                      <Tooltip title="Lista Episodi">
+                      <Tooltip title={t('videoPlayer.episodeList')}>
                           <IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}>
                               <ListAltIcon/>
                           </IconButton>
@@ -336,7 +338,7 @@ const VideoPlayer: React.FC = () => {
                     '&:hover': { bgcolor: 'white' }
                 }}
             >
-                Salta Intro
+                {t('videoPlayer.skipIntro')}
             </Button>
         )}
       </Box>
@@ -344,6 +346,6 @@ const VideoPlayer: React.FC = () => {
       {isEpisode && <EpisodesDrawer />}
     </Box>
   );
-};
+});
 
-export default observer(VideoPlayer);
+export default VideoPlayer;

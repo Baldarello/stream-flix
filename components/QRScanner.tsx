@@ -4,9 +4,11 @@ import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, IconButton, Typography, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import { useTranslations } from '../hooks/useTranslations';
 
-const QRScanner: React.FC = () => {
+const QRScanner: React.FC = observer(() => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;
+    const { t } = useTranslations();
     const [scanError, setScanError] = useState<string | null>(null);
     const scannerInstanceRef = useRef<Html5QrcodeScanner | null>(null);
 
@@ -44,7 +46,7 @@ const QRScanner: React.FC = () => {
                         throw new Error("Invalid QR code for this application.");
                     }
                 } catch (e) {
-                    setScanError("Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.");
+                    setScanError(t('qrScanner.error'));
                     setTimeout(() => setScanError(null), 4000);
                 }
             };
@@ -72,7 +74,7 @@ const QRScanner: React.FC = () => {
                 scannerInstanceRef.current = null;
             }
         }
-    }, []); // Empty dependency array means the callback is created once.
+    }, [t]); // Add `t` to dependencies to re-create callbacks if language changes
 
 
     const handleClose = () => {
@@ -95,14 +97,14 @@ const QRScanner: React.FC = () => {
             }}>
                 <IconButton
                     onClick={handleClose}
-                    aria-label="Chiudi scanner"
+                    aria-label={t('qrScanner.close')}
                     sx={{ position: 'absolute', top: 16, right: 16, color: 'white', zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
                 >
                     <CloseIcon />
                 </IconButton>
 
                 <Typography variant="h6" sx={{ color: 'white', mb: 2, zIndex: 1, textAlign: 'center' }}>
-                    Inquadra il QR Code sulla TV
+                    {t('qrScanner.title')}
                 </Typography>
                 
                 {/* Container where the scanner will be rendered, now with a callback ref */}
@@ -131,6 +133,6 @@ const QRScanner: React.FC = () => {
             </Box>
         </Modal>
     );
-};
+});
 
-export default observer(QRScanner);
+export default QRScanner;

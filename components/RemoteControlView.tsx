@@ -5,8 +5,10 @@ import { Box, Typography, Container, AppBar, Toolbar } from '@mui/material';
 import { ContentRow } from './ContentRow';
 import RemoteDetailView from './RemoteDetailView';
 import RemotePlayerControlView from './RemotePlayerControlView';
+import { useTranslations } from '../hooks/useTranslations';
 
-const RemoteControlView: React.FC = () => {
+const RemoteControlView: React.FC = observer(() => {
+    const { t } = useTranslations();
     const { 
         latestMovies, 
         trending, 
@@ -35,28 +37,28 @@ const RemoteControlView: React.FC = () => {
              <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
                 <Toolbar>
                     <Typography variant="h6" color="primary.main" fontWeight="bold">
-                        Telecomando Quix
+                        {t('remote.title')}
                     </Typography>
                 </Toolbar>
              </AppBar>
 
              <Container maxWidth={false} sx={{ py: 4, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
-                <Typography variant="h4" fontWeight="bold">Scegli cosa guardare sulla TV</Typography>
+                <Typography variant="h4" fontWeight="bold">{t('remote.chooseForTV')}</Typography>
                   {continueWatchingItems.length > 0 && (
-                      <ContentRow title="Continua a guardare" items={continueWatchingItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                      <ContentRow title={t('misc.continueWatching')} items={continueWatchingItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
                   )}
                   {myListItems.length > 0 && (
-                      <ContentRow title="La mia lista" items={myListItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                      <ContentRow title={t('misc.myList')} items={myListItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
                   )}
-                <ContentRow title="Ultime Uscite" items={latestMovies} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
-                <ContentRow title="I più Votati" items={trending} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
-                <ContentRow title="Serie TV Popolari" items={topSeries} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
-                <ContentRow title="Anime da non Perdere" items={popularAnime} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title={t('misc.latestReleases')} items={latestMovies} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title={t('misc.topRated')} items={trending} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title={t('misc.popularSeries')} items={topSeries} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title={t('misc.mustWatchAnime')} items={popularAnime} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
               </Box>
             </Container>
         </Box>
     );
-};
+});
 
-export default observer(RemoteControlView);
+export default RemoteControlView;

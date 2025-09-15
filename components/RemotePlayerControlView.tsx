@@ -10,9 +10,11 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Episode, PlayableItem } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
-const RemotePlayerControlView = () => {
+const RemotePlayerControlView = observer(() => {
     const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading } = mediaStore;
+    const { t } = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
 
@@ -44,7 +46,7 @@ const RemotePlayerControlView = () => {
     const isEpisode = 'episode_number' in nowPlayingItem;
     
     const title = isEpisode ? nowPlayingItem.show_title : (nowPlayingItem.title || nowPlayingItem.name);
-    const episodeTitle = isEpisode ? `S${String(nowPlayingItem.season_number).padStart(2,'0')}E${String(nowPlayingItem.episode_number).padStart(2,'0')}: ${nowPlayingItem.name}` : 'In riproduzione sulla TV';
+    const episodeTitle = isEpisode ? `S${String(nowPlayingItem.season_number).padStart(2,'0')}E${String(nowPlayingItem.episode_number).padStart(2,'0')}: ${nowPlayingItem.name}` : t('remote.player.nowPlaying');
 
     const handleTogglePlay = () => sendRemoteCommand({ command: isPlaying ? 'pause' : 'play' });
     const handleSeekForward = () => sendRemoteCommand({ command: 'seek_forward' });
@@ -91,13 +93,13 @@ const RemotePlayerControlView = () => {
                 PaperProps={{ sx: { width: { xs: '80vw', sm: 350 }, bgcolor: 'background.paper' } }}
             >
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6">Episodi</Typography>
+                    <Typography variant="h6">{t('remote.player.episodes')}</Typography>
                     <IconButton onClick={() => setIsEpisodesDrawerOpen(false)}><CloseIcon /></IconButton>
                 </Box>
                 <Divider />
                 <Box sx={{ p: 2 }}>
                     <TextField
-                        label="Durata Intro (sec)"
+                        label={t('remote.player.introDuration')}
                         type="number"
                         variant="outlined"
                         size="small"
@@ -110,10 +112,10 @@ const RemotePlayerControlView = () => {
 
                     {remoteFullItem?.seasons && (
                         <FormControl fullWidth margin="normal" size="small">
-                           <InputLabel>Stagione</InputLabel>
+                           <InputLabel>{t('remote.detail.season')}</InputLabel>
                            <Select
                                value={selectedSeason || ''}
-                               label="Stagione"
+                               label={t('remote.detail.season')}
                                onChange={(e) => setSelectedSeason(Number(e.target.value))}
                            >
                                {remoteFullItem.seasons.map(season => (
@@ -154,11 +156,11 @@ const RemotePlayerControlView = () => {
         <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={stopRemotePlayback} aria-label="indietro">
+                    <IconButton edge="start" color="inherit" onClick={stopRemotePlayback} aria-label={t('remote.player.back')}>
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant="h6" noWrap>
-                        Telecomando
+                        {t('remote.player.title')}
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -196,12 +198,12 @@ const RemotePlayerControlView = () => {
             <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 {/* Main Controls */}
                 <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ mb: 3 }}>
-                    <IconButton onClick={handleSeekBackward} aria-label="indietro 10 secondi" sx={{ transform: 'scale(1.5)' }}>
+                    <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{ transform: 'scale(1.5)' }}>
                         <FastRewindIcon fontSize="large" />
                     </IconButton>
                     <IconButton
                         onClick={handleTogglePlay}
-                        aria-label={isPlaying ? 'pausa' : 'play'}
+                        aria-label={isPlaying ? t('remote.player.pause') : t('remote.player.play')}
                         sx={{
                             bgcolor: 'white', color: 'black', transform: 'scale(2.2)',
                             '&:hover': { bgcolor: 'grey.300' }
@@ -209,7 +211,7 @@ const RemotePlayerControlView = () => {
                     >
                         {isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
                     </IconButton>
-                    <IconButton onClick={handleSeekForward} aria-label="avanti 10 secondi" sx={{ transform: 'scale(1.5)' }}>
+                    <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{ transform: 'scale(1.5)' }}>
                         <FastForwardIcon fontSize="large" />
                     </IconButton>
                 </Stack>
@@ -223,7 +225,7 @@ const RemotePlayerControlView = () => {
                             onClick={handleSkipIntro}
                             sx={{ bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black', '&:hover': { bgcolor: 'white' } }}
                         >
-                            Salta Intro
+                            {t('remote.player.skipIntro')}
                         </Button>
                     )}
                      {isSeries && (
@@ -233,7 +235,7 @@ const RemotePlayerControlView = () => {
                             onClick={() => setIsEpisodesDrawerOpen(true)}
                             sx={{ borderColor: 'rgba(255,255,255,0.7)', color: 'white' }}
                         >
-                            Episodi
+                            {t('remote.player.episodes')}
                         </Button>
                     )}
                 </Stack>
@@ -242,6 +244,6 @@ const RemotePlayerControlView = () => {
             {isSeries && renderEpisodesDrawer()}
         </Box>
     );
-};
+});
 
-export default observer(RemotePlayerControlView);
+export default RemotePlayerControlView;

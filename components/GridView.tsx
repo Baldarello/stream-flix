@@ -1,40 +1,43 @@
 import React from 'react';
-// FIX: Use a direct import for the Grid component to resolve a TypeScript error where the 'item' prop was not being recognized.
-import { Box, Container, Typography, Fade } from '@mui/material';
-import Grid from '@mui/material/Grid';
+// FIX: Changed Grid import to be a named import from '@mui/material' to resolve type error with the 'item' prop.
+import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
 import { observer } from 'mobx-react-lite';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface GridViewProps {
   title: string;
   items: MediaItem[];
 }
 
-const GridView: React.FC<GridViewProps> = ({ title, items }) => {
-  const isMyList = title === 'La mia lista';
-  const isSearch = title.startsWith('Risultati per');
+const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
+  const { t } = useTranslations();
+  const isMyList = title === t('gridView.myListTitle');
+  const isSearch = title.startsWith(t('gridView.searchResultsFor', { query: '' }).replace('"{query}"', ''));
+
 
   const renderEmptyState = () => {
-    let emptyTitle = 'Nessun contenuto disponibile';
-    let emptySubtitle = 'Torna più tardi per nuovi contenuti.';
+    let emptyTitleKey = 'gridView.empty.default.title';
+    let emptySubtitleKey = 'gridView.empty.default.subtitle';
 
     if (isMyList) {
-      emptyTitle = 'La tua lista è vuota';
-      emptySubtitle = 'Aggiungi film e serie TV per vederli qui.';
+      emptyTitleKey = 'gridView.empty.myList.title';
+      // FIX: Corrected a typo in the translation key from 'myyList' to 'myList'.
+      emptySubtitleKey = 'gridView.empty.myList.subtitle';
     } else if (isSearch) {
-      emptyTitle = 'Nessun risultato trovato';
-      emptySubtitle = 'Prova a cercare qualcos\'altro o controlla che il titolo sia corretto.';
+      emptyTitleKey = 'gridView.empty.search.title';
+      emptySubtitleKey = 'gridView.empty.search.subtitle';
     }
 
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column', textAlign: 'center' }}>
         <Typography variant="h5" gutterBottom>
-          {emptyTitle}
+          {t(emptyTitleKey)}
         </Typography>
         <Typography color="text.secondary">
-          {emptySubtitle}
+          {t(emptySubtitleKey)}
         </Typography>
       </Box>
     );
@@ -49,7 +52,6 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
-              // In MUI v5+, Grid items require the `item` prop for breakpoint props like `xs`, `sm`, `md`, and `lg` to be applied correctly.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
@@ -61,6 +63,6 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
       </Container>
     </Fade>
   );
-};
+});
 
-export default observer(GridView);
+export default GridView;

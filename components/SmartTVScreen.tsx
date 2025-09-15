@@ -3,9 +3,11 @@ import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import { Box, Typography, CircularProgress, Paper, Button } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { useTranslations } from '../hooks/useTranslations';
 
-const SmartTVScreen: React.FC = () => {
+const SmartTVScreen: React.FC = observer(() => {
     const { slaveId, isRemoteMasterConnected } = mediaStore;
+    const { t } = useTranslations();
 
     const renderContent = () => {
         if (isRemoteMasterConnected) {
@@ -13,10 +15,10 @@ const SmartTVScreen: React.FC = () => {
                 <Box sx={{ textAlign: 'center', color: 'success.main' }}>
                     <CheckCircleOutlineIcon sx={{ fontSize: 80, mb: 2 }} />
                     <Typography variant="h4" component="h1" fontWeight="bold">
-                        Telecomando Connesso!
+                        {t('smartTV.connected')}
                     </Typography>
                     <Typography color="text.secondary">
-                        Usa il tuo dispositivo per scegliere cosa guardare.
+                        {t('smartTV.connectedSubtitle')}
                     </Typography>
                 </Box>
             );
@@ -30,15 +32,13 @@ const SmartTVScreen: React.FC = () => {
             return (
                 <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 3 }}>
-                        Controlla la TV con il tuo Telefono
+                        {t('smartTV.connectTitle')}
                     </Typography>
                     <Paper elevation={8} sx={{ p: 3, display: 'inline-block', background: 'white' }}>
-                        <img src={qrCodeUrl} alt="QR Code per il controllo remoto" width="250" height="250" />
+                        <img src={qrCodeUrl} alt={t('smartTV.qrAlt')} width="250" height="250" />
                     </Paper>
-                    <Typography variant="body1" sx={{ mt: 3, color: 'text.secondary' }}>
-                        1. Apri la fotocamera sul tuo telefono.
-                        <br />
-                        2. Inquadra il codice QR per connetterti.
+                    <Typography variant="body1" sx={{ mt: 3, color: 'text.secondary', whiteSpace: 'pre-line' }}>
+                        {t('smartTV.instructions')}
                     </Typography>
                 </Box>
             );
@@ -47,7 +47,7 @@ const SmartTVScreen: React.FC = () => {
         return (
             <Box sx={{ textAlign: 'center' }}>
                 <CircularProgress sx={{ mb: 2 }} />
-                <Typography variant="h6">Inizializzazione del dispositivo...</Typography>
+                <Typography variant="h6">{t('smartTV.initializing')}</Typography>
             </Box>
         );
     };
@@ -77,11 +77,11 @@ const SmartTVScreen: React.FC = () => {
                         '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' }
                     }}
                 >
-                    Sfoglia il catalogo direttamente sulla TV
+                    {t('smartTV.browseOnTV')}
                 </Button>
             )}
         </Box>
     );
-};
+});
 
-export default observer(SmartTVScreen);
+export default SmartTVScreen;

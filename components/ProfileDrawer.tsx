@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore, ThemeName } from '../store/mediaStore';
+import { mediaStore, ThemeName, Language } from '../store/mediaStore';
 import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors, Avatar, ListItemAvatar, CircularProgress } from '@mui/material';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -13,12 +13,14 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { handleSignIn, handleSignOut } from '../services/googleAuthService';
+import { useTranslations } from '../hooks/useTranslations';
 
-const ProfileDrawer: React.FC = () => {
+const ProfileDrawer: React.FC = observer(() => {
     const { 
         isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
-        isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive
+        isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive, language, setLanguage
     } = mediaStore;
+    const { t } = useTranslations();
 
     const handleScanQRCode = () => {
         openQRScanner();
@@ -33,6 +35,15 @@ const ProfileDrawer: React.FC = () => {
         }
     };
     
+    const handleLanguageChange = (
+        event: React.MouseEvent<HTMLElement>,
+        newLang: Language | null,
+    ) => {
+        if (newLang !== null) {
+            setLanguage(newLang);
+        }
+    };
+
     const themeColors: Record<ThemeName, string> = {
         SerieTV: '#E50914',
         Film: colors.amber[500],
@@ -42,7 +53,7 @@ const ProfileDrawer: React.FC = () => {
     const drawerContent = (
         <Box sx={{ width: { xs: '70vw', sm: 300 } }} role="presentation">
             <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <Typography variant="h6">Profilo</Typography>
+                 <Typography variant="h6">{t('profileDrawer.profile')}</Typography>
                  <IconButton onClick={() => toggleProfileDrawer(false)}>
                      <CloseIcon />
                  </IconButton>
@@ -61,7 +72,24 @@ const ProfileDrawer: React.FC = () => {
             ) : null}
 
             <Box sx={{ p: 2 }}>
-                <Typography variant="overline" color="text.secondary">Stile Sito</Typography>
+                <Typography variant="overline" color="text.secondary">{t('profileDrawer.language')}</Typography>
+                 <ToggleButtonGroup
+                    value={language}
+                    exclusive
+                    onChange={handleLanguageChange}
+                    aria-label="language"
+                    fullWidth
+                    sx={{ mt: 1 }}
+                >
+                    <ToggleButton value="it" aria-label="italiano">IT</ToggleButton>
+                    <ToggleButton value="en" aria-label="english">EN</ToggleButton>
+                </ToggleButtonGroup>
+            </Box>
+            <Divider />
+
+
+            <Box sx={{ p: 2 }}>
+                <Typography variant="overline" color="text.secondary">{t('profileDrawer.siteStyle')}</Typography>
                 <ToggleButtonGroup
                     value={mediaStore.activeTheme}
                     exclusive
@@ -85,7 +113,7 @@ const ProfileDrawer: React.FC = () => {
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <LiveTvIcon />
-                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>Serie TV</Typography>
+                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>{t('profileDrawer.theme.series')}</Typography>
                         </Box>
                         <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.SerieTV }} />
                     </ToggleButton>
@@ -103,7 +131,7 @@ const ProfileDrawer: React.FC = () => {
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <LocalMoviesIcon />
-                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>Film</Typography>
+                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>{t('profileDrawer.theme.movies')}</Typography>
                         </Box>
                         <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Film }} />
                     </ToggleButton>
@@ -121,7 +149,7 @@ const ProfileDrawer: React.FC = () => {
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <AnimationIcon />
-                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>Anime</Typography>
+                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>{t('profileDrawer.theme.anime')}</Typography>
                         </Box>
                         <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Anime }} />
                     </ToggleButton>
@@ -134,19 +162,19 @@ const ProfileDrawer: React.FC = () => {
                         <ListItem disablePadding>
                             <ListItemButton onClick={backupToDrive} disabled={isBackingUp || isRestoring}>
                                 <ListItemIcon>{isBackingUp ? <CircularProgress size={24} /> : <CloudUploadIcon />}</ListItemIcon>
-                                <ListItemText primary="Backup su Google Drive" />
+                                <ListItemText primary={t('profileDrawer.backup')} />
                             </ListItemButton>
                         </ListItem>
                         <ListItem disablePadding>
                             <ListItemButton onClick={restoreFromDrive} disabled={isRestoring || isBackingUp}>
                                 <ListItemIcon>{isRestoring ? <CircularProgress size={24} /> : <CloudDownloadIcon />}</ListItemIcon>
-                                <ListItemText primary="Ripristina da Google Drive" />
+                                <ListItemText primary={t('profileDrawer.restore')} />
                             </ListItemButton>
                         </ListItem>
                         <ListItem disablePadding>
                             <ListItemButton onClick={handleSignOut}>
                                 <ListItemIcon><LogoutIcon /></ListItemIcon>
-                                <ListItemText primary="Logout" />
+                                <ListItemText primary={t('profileDrawer.logout')} />
                             </ListItemButton>
                         </ListItem>
                     </>
@@ -154,7 +182,7 @@ const ProfileDrawer: React.FC = () => {
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleSignIn}>
                             <ListItemIcon><GoogleIcon /></ListItemIcon>
-                            <ListItemText primary="Accedi con Google" />
+                            <ListItemText primary={t('profileDrawer.login')} />
                         </ListItemButton>
                     </ListItem>
                 )}
@@ -162,13 +190,13 @@ const ProfileDrawer: React.FC = () => {
                  <ListItem disablePadding>
                     <ListItemButton onClick={handleScanQRCode}>
                         <ListItemIcon><QrCodeScannerIcon /></ListItemIcon>
-                        <ListItemText primary="Scansiona QR Code TV" />
+                        <ListItemText primary={t('profileDrawer.scanQR')} />
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton onClick={enableSmartTVMode}>
                         <ListItemIcon><TvIcon /></ListItemIcon>
-                        <ListItemText primary="Mostra QR Code per Telecomando" />
+                        <ListItemText primary={t('profileDrawer.showQR')} />
                     </ListItemButton>
                 </ListItem>
             </List>
@@ -189,6 +217,6 @@ const ProfileDrawer: React.FC = () => {
             {drawerContent}
         </Drawer>
     );
-};
+});
 
-export default observer(ProfileDrawer);
+export default ProfileDrawer;

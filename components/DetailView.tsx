@@ -13,9 +13,11 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import LinkEpisodesModal from './LinkEpisodesModal';
 import type { Episode } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
-const DetailView: React.FC = () => {
+const DetailView: React.FC = observer(() => {
   const { selectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration } = mediaStore;
+  const { t } = useTranslations();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -111,6 +113,8 @@ const DetailView: React.FC = () => {
       }
   }, [item.seasons, selectedSeason]);
 
+  const listActionLabel = isInMyList ? t('detail.removeFromList') : t('detail.addToList');
+
   return (
     <Box sx={{ animation: 'fadeIn 0.5s ease-in-out' }}>
       {/* Backdrop Section */}
@@ -141,7 +145,7 @@ const DetailView: React.FC = () => {
         />
         <IconButton
           onClick={() => mediaStore.closeDetail()}
-          aria-label="Chiudi dettaglio"
+          aria-label={t('detail.close')}
           sx={{ 
             position: 'absolute', top: 80, right: 16, zIndex: 1300, 
             bgcolor: 'rgba(0,0,0,0.5)', 
@@ -154,9 +158,9 @@ const DetailView: React.FC = () => {
           <Stack spacing={2}>
             <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
             <Stack direction="row" spacing={3} alignItems="center">
-              <Typography sx={{ color: 'success.main' }} fontWeight="bold">Voto: {item.vote_average.toFixed(1)}</Typography>
+              <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average.toFixed(1)}</Typography>
               <Typography>{releaseDate?.substring(0, 4)}</Typography>
-              {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} Stagioni</Typography>}
+              {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} {t('detail.seasons')}</Typography>}
             </Stack>
             <Typography variant="body1" sx={{ maxWidth: '700px' }}>{item.overview}</Typography>
             <Stack 
@@ -166,11 +170,11 @@ const DetailView: React.FC = () => {
               alignItems={{ xs: 'stretch', sm: 'baseline' }}
             >
               <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }} onClick={() => mediaStore.startPlayback(item)}>
-                Riproduci
+                {t('detail.play')}
               </Button>
               <IconButton 
                 onClick={() => mediaStore.toggleMyList(item)}
-                aria-label={isInMyList ? 'Rimuovi dalla mia lista' : 'Aggiungi alla mia lista'}
+                aria-label={listActionLabel}
                 sx={{ 
                   border: '2px solid rgba(255,255,255,0.7)', 
                   color: 'white',
@@ -188,7 +192,7 @@ const DetailView: React.FC = () => {
                 onClick={() => mediaStore.openWatchTogetherModal(item)}
                 sx={{ borderColor: 'rgba(255,255,255,0.7)', color: 'white', '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)'} }}
               >
-                Guarda Insieme
+                {t('detail.watchTogether')}
               </Button>
             </Stack>
           </Stack>
@@ -200,8 +204,8 @@ const DetailView: React.FC = () => {
         <Box sx={{ p: { xs: 2, md: 8 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="h4" component="h2" fontWeight="bold">Episodi</Typography>
-                <Tooltip title="Collega file video per la stagione">
+                <Typography variant="h4" component="h2" fontWeight="bold">{t('detail.episodes')}</Typography>
+                <Tooltip title={t('detail.linkEpisodesTooltip')}>
                     <IconButton onClick={() => mediaStore.openLinkEpisodesModal(item)}>
                         <LinkIcon />
                     </IconButton>
@@ -210,7 +214,7 @@ const DetailView: React.FC = () => {
             {item.seasons && item.seasons.length > 0 && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <TextField
-                        label="Durata Intro"
+                        label={t('detail.introDuration')}
                         type="number"
                         variant="outlined"
                         size="small"
@@ -235,11 +239,11 @@ const DetailView: React.FC = () => {
                         }}
                     />
                     <FormControl sx={{ minWidth: 120 }} size="small">
-                    <InputLabel id="season-select-label">Stagione</InputLabel>
+                    <InputLabel id="season-select-label">{t('detail.season')}</InputLabel>
                     <Select
                         labelId="season-select-label"
                         value={selectedSeason}
-                        label="Stagione"
+                        label={t('detail.season')}
                         onChange={(e) => setSelectedSeason(Number(e.target.value))}
                         sx={{ bgcolor: 'background.paper' }}
                     >
@@ -267,7 +271,7 @@ const DetailView: React.FC = () => {
                     <IconButton
                         onClick={() => handleScroll('left')}
                         sx={{ ...scrollButtonStyles, left: 0 }}
-                        aria-label="scorri episodi a sinistra"
+                        aria-label={t('detail.scrollEpisodesLeft')}
                     >
                         <ChevronLeftIcon fontSize="large" />
                     </IconButton>
@@ -297,27 +301,25 @@ const DetailView: React.FC = () => {
                         <Card
                             key={episode.id}
                             onClick={() => {
-                                if (episode.video_url && currentSeason) {
-                                    mediaStore.startPlayback({
-                                        ...episode,
-                                        show_id: item.id,
-                                        show_title: item.title || item.name || '',
-                                        backdrop_path: item.backdrop_path,
-                                        season_number: currentSeason.season_number,
-                                    });
-                                }
+                                mediaStore.startPlayback({
+                                    ...episode,
+                                    show_id: item.id,
+                                    show_title: item.title || item.name || '',
+                                    backdrop_path: item.backdrop_path,
+                                    season_number: currentSeason.season_number,
+                                });
                             }}
                             sx={{
                                 flexShrink: 0,
                                 width: { xs: '70vw', sm: 320 },
                                 bgcolor: 'background.paper',
-                                cursor: episode.video_url ? 'pointer' : 'default',
+                                cursor: 'pointer',
                                 transition: 'transform 0.2s ease-in-out',
                                 '&:hover': {
                                     transform: 'scale(1.03)',
                                     zIndex: 2
                                 },
-                                '&:hover .play-icon': { opacity: episode.video_url ? 1 : 0 },
+                                '&:hover .play-icon': { opacity: 1 },
                             }}
                         >
                             <Box sx={{ position: 'relative' }}>
@@ -369,7 +371,7 @@ const DetailView: React.FC = () => {
                     <IconButton
                         onClick={() => handleScroll('right')}
                         sx={{ ...scrollButtonStyles, right: 0 }}
-                        aria-label="scorri episodi a destra"
+                        aria-label={t('detail.scrollEpisodesRight')}
                     >
                         <ChevronRightIcon fontSize="large" />
                     </IconButton>
@@ -381,6 +383,6 @@ const DetailView: React.FC = () => {
       <LinkEpisodesModal />
     </Box>
   );
-};
+});
 
-export default observer(DetailView);
+export default DetailView;

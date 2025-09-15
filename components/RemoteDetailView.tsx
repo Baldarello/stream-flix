@@ -5,9 +5,11 @@ import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormContr
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import type { Episode, PlayableItem } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
-const RemoteDetailView: React.FC = () => {
+const RemoteDetailView: React.FC = observer(() => {
   const { remoteSelectedItem: item, clearRemoteSelectedItem, isRemoteDetailLoading } = mediaStore;
+  const { t } = useTranslations();
 
   // The view should not render if there's no item. This is a safeguard.
   if (!item) return null;
@@ -28,7 +30,7 @@ const RemoteDetailView: React.FC = () => {
       <Box sx={{ position: 'relative', height: '40vw', minHeight: {xs: '200px', sm: '300px'}, maxHeight: '600px' }}>
         <Box sx={{ position: 'absolute', inset: 0, backgroundImage: `url(${item.backdrop_path})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <Box sx={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #141414 10%, transparent 70%)' }} />
-        <IconButton onClick={clearRemoteSelectedItem} aria-label="Indietro" sx={{ position: 'absolute', top: 16, left: 16, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
+        <IconButton onClick={clearRemoteSelectedItem} aria-label={t('remote.detail.back')} sx={{ position: 'absolute', top: 16, left: 16, zIndex: 2, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}>
           <ArrowBackIcon />
         </IconButton>
         <Box sx={{ position: 'absolute', bottom: 0, left: 0, p: { xs: 2, md: 4 }, width: '100%' }}>
@@ -43,14 +45,14 @@ const RemoteDetailView: React.FC = () => {
           <>
             {/* TV Show Content */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-              <Typography variant="h5" component="h2" fontWeight="bold">Episodi</Typography>
+              <Typography variant="h5" component="h2" fontWeight="bold">{t('remote.detail.episodes')}</Typography>
               {item.seasons && item.seasons.length > 0 && (
                 <FormControl sx={{ minWidth: 150 }} size="small">
-                  <InputLabel id="season-select-label">Stagione</InputLabel>
+                  <InputLabel id="season-select-label">{t('remote.detail.season')}</InputLabel>
                   <Select
                     labelId="season-select-label"
                     value={selectedSeason}
-                    label="Stagione"
+                    label={t('remote.detail.season')}
                     onChange={(e) => setSelectedSeason(Number(e.target.value))}
                     sx={{ bgcolor: 'background.paper' }}
                   >
@@ -113,13 +115,13 @@ const RemoteDetailView: React.FC = () => {
               startIcon={<PlayCircleOutlineIcon />}
               onClick={() => mediaStore.playRemoteItem(item)}
             >
-              Riproduci sulla TV
+              {t('remote.detail.playOnTV')}
             </Button>
           </>
         )}
       </Box>
     </Box>
   );
-};
+});
 
-export default observer(RemoteDetailView);
+export default RemoteDetailView;

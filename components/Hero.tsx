@@ -3,6 +3,8 @@ import type { MediaItem } from '../types';
 import { Box, Typography, Button, Stack } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useTranslations } from '../hooks/useTranslations';
+import { observer } from 'mobx-react-lite';
 
 interface HeroProps {
   item: MediaItem;
@@ -10,7 +12,8 @@ interface HeroProps {
   onPlayClick: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ item, onMoreInfoClick, onPlayClick }) => {
+export const Hero: React.FC<HeroProps> = observer(({ item, onMoreInfoClick, onPlayClick }) => {
+  const { t } = useTranslations();
   const title = item.title || item.name;
   const overview = item.overview.length > 200 ? `${item.overview.substring(0, 200)}...` : item.overview;
 
@@ -51,14 +54,14 @@ export const Hero: React.FC<HeroProps> = ({ item, onMoreInfoClick, onPlayClick }
           </Typography>
           <Stack direction="row" spacing={2} pt={2}>
             <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }} onClick={onPlayClick}>
-              Riproduci
+              {t('hero.play')}
             </Button>
             <Button variant="contained" startIcon={<InfoOutlinedIcon />} size="large" onClick={onMoreInfoClick} sx={{ bgcolor: 'rgba(109, 109, 110, 0.7)', '&:hover': { bgcolor: 'rgba(109, 109, 110, 0.4)' } }}>
-              Altre Info
+              {t('hero.moreInfo')}
             </Button>
           </Stack>
         </Stack>
       </Box>
     </Box>
   );
-};
+});

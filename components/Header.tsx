@@ -6,11 +6,19 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { mediaStore, ActiveView } from '../store/mediaStore';
+import { useTranslations } from '../hooks/useTranslations';
 
-const navItems = ['Home', 'Serie TV', 'Film', 'Anime', 'La mia lista'];
+const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveView }[] = [
+    { key: 'home', view: 'Home'},
+    { key: 'series', view: 'Serie TV'},
+    { key: 'movies', view: 'Film'},
+    { key: 'anime', view: 'Anime'},
+    { key: 'myList', view: 'La mia lista'},
+];
 
 export const Header: React.FC = observer(() => {
   const { isSearchActive, toggleSearch, searchQuery, setSearchQuery } = mediaStore;
+  const { t } = useTranslations();
   const searchInputRef = useRef<HTMLInputElement>(null);
   
   const trigger = useScrollTrigger({
@@ -64,22 +72,24 @@ export const Header: React.FC = observer(() => {
             </Typography>
             <Grow in={!isSearchActive}>
                 <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-                {navItems.map((item) => (
+                {navKeys.map((item) => (
                     <Button 
-                    key={item} 
+                    // FIX: Explicitly convert `item.key` to a string. The inferred type `string | number | symbol` is not assignable to React's `Key` type, which excludes symbols.
+                    key={String(item.key)} 
                     sx={{ 
                         color: 'white', 
                         my: 2, 
                         display: 'block',
-                        fontWeight: mediaStore.activeView === item ? 700 : 400,
-                        opacity: mediaStore.activeView === item ? 1 : 0.8,
+                        fontWeight: mediaStore.activeView === item.view ? 700 : 400,
+                        opacity: mediaStore.activeView === item.view ? 1 : 0.8,
                         '&:hover': {
                         opacity: 1,
                         }
                     }}
-                    onClick={() => handleNavClick(item as ActiveView)}
+                    onClick={() => handleNavClick(item.view)}
                     >
-                    {item}
+                    {/* FIX: Explicitly convert `item.key` to a string to prevent a runtime error from implicit symbol-to-string conversion in template literals. */}
+                    {t(`header.${String(item.key)}`)}
                     </Button>
                 ))}
                 </Box>
@@ -91,7 +101,7 @@ export const Header: React.FC = observer(() => {
                 <TextField
                     fullWidth
                     variant="standard"
-                    placeholder="Cerca titoli..."
+                    placeholder={t('header.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     inputRef={searchInputRef}
