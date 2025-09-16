@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, Button, IconButton, Tooltip, Paper, List, Accordion, AccordionSummary, AccordionDetails, Stack, ListItemText } from '@mui/material';
+import { Box, Typography, Button, IconButton, Tooltip, Paper, List, Accordion, AccordionSummary, AccordionDetails, Stack, ListItemText, TextField } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -11,21 +11,55 @@ import { useTranslations } from '../hooks/useTranslations';
 interface ManageLinksViewProps {
     currentSeason: Season;
     item: MediaItem;
+    expandedAccordion: number | false;
+    onAccordionChange: (panelId: number) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
 }
 
-const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeason, item }) => {
+const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
     const { t } = useTranslations();
-    const { deleteEpisodeLink, clearLinksForSeason, showSnackbar } = mediaStore;
-    const [expandedAccordion, setExpandedAccordion] = useState<number | false>(false);
+    const { deleteEpisodeLink, clearLinksForSeason, showSnackbar, updateLinksDomain } = mediaStore;
+    const [domainInputs, setDomainInputs] = useState<Record<string, string>>({});
 
-    const handleAccordionChange = (panelId: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-        setExpandedAccordion(isExpanded ? panelId : false);
-    };
+    const linksByDomain = currentSeason.episodes
+        .flatMap(ep => ep.video_urls || [])
+        .reduce((acc, link) => {
+            try {
+                const origin = new URL(link.url).origin;
+                if (!acc[origin]) {
+                    acc[origin] = [];
+                }
+                acc[origin].push(link);
+            } catch (e) {
+                // Ignore invalid URLs
+            }
+            return acc;
+        }, {} as Record<string, EpisodeLink[]>);
+
+    useEffect(() => {
+        const initialInputs: Record<string, string> = {};
+        Object.keys(linksByDomain).forEach(origin => {
+            initialInputs[origin] = origin;
+        });
+        setDomainInputs(initialInputs);
+    }, [currentSeason.id]);
+
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
         showSnackbar("notifications.copiedToClipboard", "success", true);
     }
+
+    const handleDomainInputChange = (origin: string, value: string) => {
+        setDomainInputs(prev => ({ ...prev, [origin]: value }));
+    };
+
+    const handleUpdateDomain = (origin: string) => {
+        const linksToUpdate = linksByDomain[origin];
+        const newDomain = domainInputs[origin];
+        if (linksToUpdate && newDomain) {
+            updateLinksDomain({ links: linksToUpdate, newDomain });
+        }
+    };
 
     return (
         <Box sx={{mt: 2, flex: 1, overflowY: 'auto' }}>
@@ -37,12 +71,48 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
             >
                 {t('linkEpisodesModal.manage.deleteAllSeasonLinks')}
             </Button>
+
+            {Object.keys(linksByDomain).length > 0 && (
+                <Accordion sx={{ mb: 2, bgcolor: 'rgba(255,255,255,0.05)', backgroundImage: 'none' }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography>{t('linkEpisodesModal.manage.groupOps')}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            {t('linkEpisodesModal.manage.groupOpsInfo')}
+                        </Typography>
+                        <Stack spacing={2}>
+                            {Object.entries(linksByDomain).map(([origin, links]) => (
+                                <Paper key={origin} variant="outlined" sx={{ p: 2 }}>
+                                    <Typography gutterBottom>
+                                        {t('linkEpisodesModal.manage.linksFrom', { count: links.length })} <strong>{origin}</strong>
+                                    </Typography>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <TextField
+                                            label={t('linkEpisodesModal.manage.newDomain')}
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={domainInputs[origin] || ''}
+                                            onChange={(e) => handleDomainInputChange(origin, e.target.value)}
+                                        />
+                                        <Button variant="contained" onClick={() => handleUpdateDomain(origin)}>
+                                            {t('linkEpisodesModal.manage.update')}
+                                        </Button>
+                                    </Stack>
+                                </Paper>
+                            ))}
+                        </Stack>
+                    </AccordionDetails>
+                </Accordion>
+            )}
+
             <List>
                 {currentSeason.episodes.map(episode => (
                     <Accordion 
                         key={episode.id}
                         expanded={expandedAccordion === episode.id}
-                        onChange={handleAccordionChange(episode.id)}
+                        onChange={onAccordionChange(episode.id)}
                         sx={{ bgcolor: 'background.paper', backgroundImage: 'none', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.12)', '&:before': { display: 'none' } }}
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>

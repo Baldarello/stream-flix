@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert } from '@mui/material';
+import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert, SelectChangeEvent } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ManageLinksView from './ManageLinksView';
 import { useTranslations } from '../hooks/useTranslations';
@@ -150,7 +150,7 @@ const AddLinkTabs: React.FC<{
 
 
 const LinkEpisodesModal: React.FC = observer(() => {
-  const { isLinkEpisodesModalOpen, closeLinkEpisodesModal, linkingEpisodesForItem: item, setEpisodeLinksForSeason } = mediaStore;
+  const { isLinkEpisodesModalOpen, closeLinkEpisodesModal, linkingEpisodesForItem: item, setEpisodeLinksForSeason, expandedLinkAccordionId, setExpandedLinkAccordionId } = mediaStore;
   const { t } = useTranslations();
   
   const [activeTab, setActiveTab] = useState<TabValue>('add');
@@ -168,6 +168,15 @@ const LinkEpisodesModal: React.FC = observer(() => {
   if (!item) return null;
   
   const currentSeason = item.seasons?.find(s => s.season_number === selectedSeason);
+
+  const handleAccordionChange = (panelId: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpandedLinkAccordionId(isExpanded ? panelId : false);
+  };
+  
+  const handleSeasonChange = (event: SelectChangeEvent<number>) => {
+      setSelectedSeason(event.target.value as number);
+      setExpandedLinkAccordionId(false); // Reset expanded accordion when season changes
+  };
   
   return (
     <Modal open={isLinkEpisodesModalOpen} onClose={closeLinkEpisodesModal}>
@@ -178,7 +187,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
         <Stack spacing={2} mt={2} sx={{ overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <FormControl fullWidth required>
               <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
-              <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={e => setSelectedSeason(e.target.value as number)}>
+              <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={handleSeasonChange}>
                 {item.seasons?.map(season => <MenuItem key={season.id} value={season.season_number}>{season.name}</MenuItem>)}
               </Select>
             </FormControl>
@@ -189,7 +198,14 @@ const LinkEpisodesModal: React.FC = observer(() => {
             </Tabs>
 
             {activeTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number} seasonEpisodeCount={currentSeason.episode_count} onSave={setEpisodeLinksForSeason} />}
-            {activeTab === 'manage' && currentSeason && <ManageLinksView currentSeason={currentSeason} item={item} />}
+            {activeTab === 'manage' && currentSeason && (
+              <ManageLinksView 
+                currentSeason={currentSeason} 
+                item={item}
+                expandedAccordion={expandedLinkAccordionId}
+                onAccordionChange={handleAccordionChange}
+              />
+            )}
         </Stack>
       </Box>
     </Modal>

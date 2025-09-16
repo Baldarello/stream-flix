@@ -95,8 +95,10 @@ export const it = {
       "copyUrl": "Copia URL",
       "deleteLink": "Elimina Link",
       "groupOps": "Operazioni di Gruppo",
-      "groupOpsInfo": "Rimuovi tutti i link che condividono lo stesso percorso di base.",
-      "linksFrom": "{count} link da:"
+      "groupOpsInfo": "Modifica in blocco il dominio per tutti i link che condividono la stessa origine.",
+      "linksFrom": "{count} link da:",
+      "newDomain": "Nuovo Dominio/Origine",
+      "update": "Aggiorna"
     }
   },
   "linkSelectionModal": {
@@ -228,6 +230,8 @@ export const it = {
     "restoreInProgress": "Ripristino da Google Drive in corso...",
     "noBackupFound": "Nessun backup trovato su Google Drive.",
     "restoreComplete": "Ripristino completato! L'app verrà ricaricata.",
-    "restoreError": "Errore durante il ripristino: {error}"
+    "restoreError": "Errore durante il ripristino: {error}",
+    "linksUpdated": "{count} link aggiornati con successo.",
+    "domainUpdateError": "Errore nell'aggiornamento dei domini: {error}"
   }
 }

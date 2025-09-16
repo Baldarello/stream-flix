@@ -1,6 +1,7 @@
 import React from 'react';
-// FIX: Changed Grid import to be a named import from '@mui/material' to resolve type error with the 'item' prop.
-import { Box, Container, Typography, Fade, Grid } from '@mui/material';
+// FIX: Changed Grid import to a direct import to resolve a typing issue with the 'item' prop.
+import { Box, Container, Typography, Fade } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
@@ -52,6 +53,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item) => (
+              // The `item` prop is required for children of a Grid container when using responsive props like `xs`.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>

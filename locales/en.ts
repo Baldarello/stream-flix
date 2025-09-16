@@ -95,8 +95,10 @@ export const en = {
       "copyUrl": "Copy URL",
       "deleteLink": "Delete Link",
       "groupOps": "Group Operations",
-      "groupOpsInfo": "Remove all links that share the same base path.",
-      "linksFrom": "{count} links from:"
+      "groupOpsInfo": "Bulk edit the domain for all links that share the same origin.",
+      "linksFrom": "{count} links from:",
+      "newDomain": "New Domain/Origin",
+      "update": "Update"
     }
   },
   "linkSelectionModal": {
@@ -228,6 +230,8 @@ export const en = {
     "restoreInProgress": "Restoring from Google Drive...",
     "noBackupFound": "No backup found on Google Drive.",
     "restoreComplete": "Restore complete! The app will now reload.",
-    "restoreError": "Error during restore: {error}"
+    "restoreError": "Error during restore: {error}",
+    "linksUpdated": "{count} links updated successfully.",
+    "domainUpdateError": "Error updating domains: {error}"
   }
 }

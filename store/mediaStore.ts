@@ -94,6 +94,7 @@ class MediaStore {
     isLinkSelectionModalOpen = false;
     itemForLinkSelection: PlayableItem | null = null;
     linksForSelection: EpisodeLink[] = [];
+    expandedLinkAccordionId: number | false = false;
 
     // Player Episode Drawer State
     isEpisodesDrawerOpen = false;
@@ -928,12 +929,17 @@ class MediaStore {
     openLinkEpisodesModal = (item: MediaItem) => {
         this.linkingEpisodesForItem = item;
         this.isLinkEpisodesModalOpen = true;
+        this.expandedLinkAccordionId = false;
     };
 
     closeLinkEpisodesModal = () => {
         this.isLinkEpisodesModalOpen = false;
         // Do not nullify linkingEpisodesForItem here, modal might need it while closing
     };
+
+    setExpandedLinkAccordionId = (panelId: number | false) => {
+        this.expandedLinkAccordionId = panelId;
+    }
 
     setEpisodeLinksForSeason = async (payload: {
         seasonNumber: number;
@@ -1080,6 +1086,66 @@ class MediaStore {
             this.showSnackbar("notifications.allSeasonLinksDeleted", "success", true, { count: linkIdsToDelete.length, season: seasonNumber });
         } else {
             this.showSnackbar("notifications.noLinksToDelete", "info", true, { season: seasonNumber });
+        }
+    }
+
+    updateLinksDomain = async (payload: {
+        links: EpisodeLink[];
+        newDomain: string;
+    }) => {
+        const { links, newDomain } = payload;
+        if (!links || links.length === 0 || !newDomain.trim()) {
+            this.showSnackbar('notifications.processingError', 'error', true, { error: 'Dati per aggiornamento non validi.' });
+            return;
+        }
+
+        try {
+            const validatedNewUrl = new URL(newDomain); // This will throw if the new domain is not a valid URL structure.
+
+            const updatedLinks = links.map(link => {
+                try {
+                    const oldUrl = new URL(link.url);
+                    const newUrl = `${validatedNewUrl.origin}${oldUrl.pathname}${oldUrl.search}${oldUrl.hash}`;
+                    // Also update the label if it contains the old domain
+                    const newLabel = link.label.includes(oldUrl.origin)
+                        ? link.label.replace(oldUrl.origin, validatedNewUrl.origin)
+                        : link.label;
+                    return { ...link, url: newUrl, label: newLabel };
+                } catch (e) {
+                    console.warn(`Skipping invalid URL for update: ${link.url}`);
+                    return null;
+                }
+            }).filter((l): l is EpisodeLink => l !== null);
+
+
+            if (updatedLinks.length > 0) {
+                await db.episodeLinks.bulkPut(updatedLinks);
+
+                runInAction(() => {
+                    updatedLinks.forEach(updatedLink => {
+                        const episodeLinks = this.episodeLinks.get(updatedLink.episodeId);
+                        if (episodeLinks) {
+                            const linkIndex = episodeLinks.findIndex(l => l.id === updatedLink.id);
+                            if (linkIndex !== -1) {
+                                episodeLinks.splice(linkIndex, 1, updatedLink);
+                            }
+                        }
+                    });
+
+                    if (this.linkingEpisodesForItem) {
+                        this.applyEpisodeLinksToMedia([this.linkingEpisodesForItem]);
+                        this.linkingEpisodesForItem = { ...this.linkingEpisodesForItem };
+                        if (this.selectedItem?.id === this.linkingEpisodesForItem.id) {
+                            this.selectedItem = this.linkingEpisodesForItem;
+                        }
+                    }
+                });
+                
+                this.showSnackbar('notifications.linksUpdated', 'success', true, { count: updatedLinks.length });
+            }
+
+        } catch (error) {
+            this.showSnackbar('notifications.domainUpdateError', 'error', true, { error: (error as Error).message });
         }
     }
 
