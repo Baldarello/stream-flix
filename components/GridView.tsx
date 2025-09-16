@@ -51,7 +51,8 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item, index) => (
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2} sx={{
+              // FIX: In Material-UI v5, the 'item' prop on a Grid component is optional if breakpoint props like 'xs', 'sm', etc., are provided. Removing the redundant 'item' prop resolves the TypeScript type error.
+              <Grid key={item.id} xs={6} sm={4} md={3} lg={2} sx={{
                   transition: 'opacity 0.5s, transform 0.5s',
                   animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,
                   '@keyframes fadeInUp': {

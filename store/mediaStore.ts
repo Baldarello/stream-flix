@@ -712,6 +712,23 @@ class MediaStore {
         }
         this.activeView = view;
         window.scrollTo(0, 0);
+
+        let newTheme: ThemeName | null = null;
+        switch (view) {
+            case 'Serie TV':
+                newTheme = 'SerieTV';
+                break;
+            case 'Film':
+                newTheme = 'Film';
+                break;
+            case 'Anime':
+                newTheme = 'Anime';
+                break;
+        }
+
+        if (newTheme) {
+            this.setActiveTheme(newTheme);
+        }
     }
 
     toggleSearch = (isActive: boolean) => {
