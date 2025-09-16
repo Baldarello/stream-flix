@@ -5,6 +5,7 @@ import { Modal, Box, Typography, IconButton, List, ListItem, ListItemButton, Lis
 import CloseIcon from '@mui/icons-material/Close';
 import type { EpisodeLink } from '../types';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { useTranslations } from '../hooks/useTranslations';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -12,14 +13,17 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: { xs: '90%', sm: 400 },
-  bgcolor: 'background.paper',
+  bgcolor: 'rgba(20, 20, 30, 0.9)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
   boxShadow: 24,
   p: 4,
-  borderRadius: 2,
+  borderRadius: 3,
 };
 
 const LinkSelectionModal: React.FC = () => {
   const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlaybackConfirmed } = mediaStore;
+  const { t } = useTranslations();
 
   const handleSelectLink = (link: EpisodeLink) => {
     if (itemForLinkSelection) {
@@ -34,8 +38,8 @@ const LinkSelectionModal: React.FC = () => {
   };
   
   const title = (itemForLinkSelection && 'episode_number' in itemForLinkSelection) 
-    ? `Ep ${itemForLinkSelection.episode_number}: ${itemForLinkSelection.name}`
-    : 'Seleziona un link';
+    ? t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name })
+    : t('linkSelectionModal.defaultTitle');
 
   return (
     <Modal
@@ -55,14 +59,19 @@ const LinkSelectionModal: React.FC = () => {
           {title}
         </Typography>
         <Typography variant="subtitle1" sx={{ mt: 1, mb: 2 }}>
-            Scegli quale link avviare:
+            {t('linkSelectionModal.subtitle')}
         </Typography>
         <List>
           {linksForSelection.map((link) => (
             <ListItem key={link.id} disablePadding>
               <ListItemButton onClick={() => handleSelectLink(link)}>
                 <PlayArrowIcon sx={{ mr: 2 }}/>
-                <ListItemText primary={link.label} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
+                <ListItemText 
+                  primary={link.label} 
+                  secondary={link.url} 
+                  primaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}
+                  secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}
+                />
               </ListItemButton>
             </ListItem>
           ))}

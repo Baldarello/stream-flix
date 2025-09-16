@@ -126,17 +126,20 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                 <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
                             ) : (
                                 <Stack spacing={1}>
-                                    {episode.video_urls.map((link: EpisodeLink) => (
-                                        <Paper key={link.id} variant="outlined" sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <ListItemText primary={link.label} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
-                                            <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
-                                                <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
-                                            </Tooltip>
-                                            <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
-                                                <IconButton size="small" onClick={() => deleteEpisodeLink(link.id!)} color="error"><DeleteIcon fontSize='small'/></IconButton>
-                                            </Tooltip>
-                                        </Paper>
-                                    ))}
+                                    {episode.video_urls.map((link: EpisodeLink) => {
+                                        const truncatedLabel = link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
+                                        return (
+                                            <Paper key={link.id} variant="outlined" sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <ListItemText primary={truncatedLabel} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
+                                                <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
+                                                    <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
+                                                </Tooltip>
+                                                <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
+                                                    <IconButton size="small" onClick={() => deleteEpisodeLink(link.id!)} color="error"><DeleteIcon fontSize='small'/></IconButton>
+                                                </Tooltip>
+                                            </Paper>
+                                        );
+                                    })}
                                 </Stack>
                             )}
                         </AccordionDetails>

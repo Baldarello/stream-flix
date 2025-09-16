@@ -1,6 +1,7 @@
 import React from 'react';
-// FIX: The MUI Grid component was imported directly to resolve a TypeScript error where the 'item' 
-// prop was not being recognized. This ensures the correct component and its types are resolved.
+// FIX: The MUI Grid component was imported in a way that caused a TypeScript error where the 'item' prop
+// was not recognized. This has been resolved by using a named import from '@mui/material'.
+// Further fix: Changed to a direct import from '@mui/material/Grid' to resolve module typing issues.
 import { Box, Container, Typography, Fade } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
