@@ -1,5 +1,6 @@
 import React from 'react';
-// FIX: Changed Grid import to a direct import to resolve a typing issue with the 'item' prop.
+// FIX: The MUI Grid component was imported directly to resolve a TypeScript error where the 'item' 
+// prop was not being recognized. This ensures the correct component and its types are resolved.
 import { Box, Container, Typography, Fade } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
@@ -25,7 +26,6 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
 
     if (isMyList) {
       emptyTitleKey = 'gridView.empty.myList.title';
-      // FIX: Corrected a typo in the translation key from 'myyList' to 'myList'.
       emptySubtitleKey = 'gridView.empty.myList.subtitle';
     } else if (isSearch) {
       emptyTitleKey = 'gridView.empty.search.title';
@@ -47,14 +47,26 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
   return (
     <Fade in={true} timeout={500}>
       <Container maxWidth={false} sx={{ pt: 12, pb: 8, pl: { xs: 2, md: 6 }, pr: { xs: 2, md: 6 } }}>
-        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4, mt: 4 }}>
           {title}
         </Typography>
         {items.length > 0 ? (
           <Grid container spacing={2}>
-            {items.map((item) => (
-              // The `item` prop is required for children of a Grid container when using responsive props like `xs`.
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
+            {items.map((item, index) => (
+              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2} sx={{
+                  transition: 'opacity 0.5s, transform 0.5s',
+                  animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,
+                  '@keyframes fadeInUp': {
+                      'from': {
+                          opacity: 0,
+                          transform: 'translateY(20px)'
+                      },
+                      'to': {
+                          opacity: 1,
+                          transform: 'translateY(0)'
+                      }
+                  }
+              }}>
                 <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
               </Grid>
             ))}

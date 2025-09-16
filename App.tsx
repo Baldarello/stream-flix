@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore, ThemeName } from './store/mediaStore';
-// FIX: Import 'colors' from '@mui/material' as it is no longer exported from '@mui/material/styles'.
 import { Box, CircularProgress, Alert, Container, Typography, colors } from '@mui/material';
-// FIX: Import `ThemeOptions` to provide an explicit type for the theme configuration.
 import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Header } from './components/Header';
@@ -18,22 +16,40 @@ import RemoteControlView from './components/RemoteControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
 import WatchTogetherModal from './components/WatchTogetherModal';
-// FIX: Changed to a named import for NotificationSnackbar as it no longer has a default export.
 import { NotificationSnackbar } from './components/NotificationSnackbar';
 import DebugOverlay from './components/DebugOverlay';
 import LinkSelectionModal from './components/LinkSelectionModal';
 import { useTranslations } from './hooks/useTranslations';
 
-// FIX: Explicitly type `baseThemeOptions` with `ThemeOptions`. This prevents TypeScript from widening
-// the types of CSS properties (e.g., `textTransform`) to a generic `string`, which resolves the
-// type error when passing this configuration to `createTheme`.
 const baseThemeOptions: ThemeOptions = {
+    typography: {
+      fontFamily: "'Inter', sans-serif",
+      h1: { fontFamily: "'Poppins', sans-serif", fontWeight: 800 },
+      h2: { fontFamily: "'Poppins', sans-serif", fontWeight: 700 },
+      h3: { fontFamily: "'Poppins', sans-serif", fontWeight: 700 },
+      h4: { fontFamily: "'Poppins', sans-serif", fontWeight: 600 },
+      h5: { fontFamily: "'Poppins', sans-serif", fontWeight: 600 },
+      h6: { fontFamily: "'Poppins', sans-serif", fontWeight: 600 },
+    },
     components: {
         MuiButton: {
             styleOverrides: {
                 root: {
                     textTransform: 'none',
                     fontWeight: 'bold',
+                    borderRadius: '20px',
+                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                    '&:hover': {
+                        transform: 'scale(1.05)',
+                    }
+                }
+            }
+        },
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '12px',
+                    backgroundImage: 'none', // Remove default gradient
                 }
             }
         }
@@ -42,19 +58,22 @@ const baseThemeOptions: ThemeOptions = {
 
 const themePalettes: Record<ThemeName, any> = {
     SerieTV: {
-        primary: { main: '#E50914' }, // Netflix Red
-        background: { default: '#141414', paper: '#181818' },
-        text: { primary: '#ffffff', secondary: '#b3b3b3' }
+        primary: { main: '#00A3FF' }, // Electric Blue
+        secondary: { main: '#E50914' },
+        background: { default: 'transparent', paper: 'rgba(20, 20, 30, 0.7)' },
+        text: { primary: '#f5f5f5', secondary: '#c0c0c0' }
     },
     Film: {
-        primary: { main: colors.amber[500] }, // Cinematic Gold
-        background: { default: '#101010', paper: '#1d1d1d' },
-        text: { primary: '#f5f5f5', secondary: '#a0a0a0' }
+        primary: { main: colors.amber[500] },
+        secondary: { main: '#ffab00' },
+        background: { default: 'transparent', paper: 'rgba(25, 20, 15, 0.7)' },
+        text: { primary: '#f5f5f5', secondary: '#c0c0c0' }
     },
     Anime: {
-        primary: { main: colors.deepPurple[400] }, // Vibrant Purple
-        background: { default: '#1a1820', paper: '#24212c' },
-        text: { primary: '#e9e7ef', secondary: '#adaab8' }
+        primary: { main: colors.deepPurple[400] },
+        secondary: { main: '#ab47bc' },
+        background: { default: 'transparent', paper: 'rgba(25, 20, 30, 0.7)' },
+        text: { primary: '#f5f5f5', secondary: '#c0c0c0' }
     }
 };
 
@@ -82,7 +101,7 @@ const AppContent: React.FC = observer(() => {
 
   if (loading) {
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
           <CircularProgress color="primary" />
         </Box>
     );
@@ -90,7 +109,7 @@ const AppContent: React.FC = observer(() => {
 
   if (error) {
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <Alert severity="error">{error}</Alert>
         </Box>
     );
@@ -131,7 +150,7 @@ const AppContent: React.FC = observer(() => {
                 onPlayClick={() => mediaStore.startPlayback(heroContent)}
               />
             )}
-            <Container maxWidth={false} sx={{ py: { xs: 4, md: 8 }, pl: { xs: 2, md: 6 } }}>
+            <Container maxWidth={false} sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 {mediaStore.homePageRows.map(row => (
                     <ContentRow
@@ -154,9 +173,10 @@ const AppContent: React.FC = observer(() => {
   };
 
   return (
-      <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
+      <Box sx={{ color: 'text.primary' }}>
         <Header />
-        <main>{selectedItem ? <DetailView /> : renderMainContent()}</main>
+        <main>{renderMainContent()}</main>
+        {selectedItem && <DetailView />}
         <Footer />
         <ProfileDrawer />
         {isQRScannerOpen && <QRScanner />}

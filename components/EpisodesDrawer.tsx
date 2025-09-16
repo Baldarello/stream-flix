@@ -4,7 +4,7 @@ import { mediaStore } from '../store/mediaStore';
 import { Drawer, Box, List, ListItem, ListItemButton, ListItemText, Typography, IconButton, Toolbar, CardMedia } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import ImageIcon from '@mui/icons-material/Image';
+import TheatersIcon from '@mui/icons-material/Theaters';
 import type { Episode } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -56,7 +56,7 @@ const EpisodesDrawer: React.FC = observer(() => {
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                    <ImageIcon color="disabled" />
+                    <TheatersIcon color="disabled" sx={{ fontSize: '2.5rem' }} />
                 </Box>
             )}
             <Box

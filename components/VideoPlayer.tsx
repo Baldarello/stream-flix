@@ -245,8 +245,6 @@ const VideoPlayer: React.FC = observer(() => {
 
 
   if (!nowPlayingItem) {
-    // This component should be unmounted by App.tsx when nowPlayingItem is null.
-    // This is a safeguard against race conditions, preventing render errors and recursive loops.
     return null;
   }
   
@@ -297,8 +295,13 @@ const VideoPlayer: React.FC = observer(() => {
         />
         {/* Top bar overlay */}
           {!isSmartTV&&<AppBar position="absolute" sx={{
-              top: 0,
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)',
+              top: 16,
+              left: 16,
+              right: 16,
+              width: 'auto',
+              borderRadius: '16px',
+              background: 'rgba(20, 20, 30, 0.6)',
+              backdropFilter: 'blur(10px)',
               boxShadow: 'none'
           }}>
               <Toolbar>
@@ -330,7 +333,7 @@ const VideoPlayer: React.FC = observer(() => {
                 onClick={skipIntro}
                 sx={{
                     position: 'absolute',
-                    bottom: '80px', // Adjust as needed
+                    bottom: '80px',
                     right: '20px',
                     zIndex: 2,
                     bgcolor: 'rgba(255, 255, 255, 0.8)',
