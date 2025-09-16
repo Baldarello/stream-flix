@@ -108,7 +108,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
             display: 'flex',
             overflowX: 'auto',
             overflowY: 'hidden',
-            py: 4,
+            py: 6,
             px: 'calc(4rem + 40px)', // Space for buttons and overlap
             marginLeft: '-4rem',
             scrollPadding: '0 0 0 calc(4rem + 40px)',
