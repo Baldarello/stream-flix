@@ -67,3 +67,21 @@ export interface GoogleUser {
     picture: string;
     accessToken: string;
 }
+
+// Types for Library Sharing
+export interface SharedEpisodeLink {
+  seasonNumber: number;
+  episodeNumber: number;
+  url: string;
+  label: string;
+}
+
+export interface SharedShowData {
+  tmdbId: number;
+  links: SharedEpisodeLink[];
+}
+
+export interface SharedLibraryData {
+  version: 1;
+  shows: SharedShowData[];
+}

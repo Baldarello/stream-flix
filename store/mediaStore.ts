@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink} from '../types';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -102,6 +102,13 @@ class MediaStore {
     // Profile Drawer & QR Scanner State
     isProfileDrawerOpen = false;
     isQRScannerOpen = false;
+    
+    // Library Sharing State
+    isShareModalOpen = false;
+    isImportModalOpen = false;
+    isImportingLibrary = false;
+    importUrl: string | null = null;
+
 
     // Custom Intro Durations
     showIntroDurations: Map<number, number> = new Map();
@@ -1146,6 +1153,147 @@ class MediaStore {
 
         } catch (error) {
             this.showSnackbar('notifications.domainUpdateError', 'error', true, { error: (error as Error).message });
+        }
+    }
+
+    // --- Library Sharing Actions ---
+    openShareModal = () => { this.isShareModalOpen = true; }
+    closeShareModal = () => { this.isShareModalOpen = false; }
+    openImportModal = () => { this.isImportModalOpen = true; }
+    closeImportModal = () => { 
+        this.isImportModalOpen = false; 
+        this.importUrl = null;
+    }
+    setImportUrl = (url: string) => { this.importUrl = url; }
+    
+    get shareableShows(): MediaItem[] {
+        // Find all show IDs that have at least one episode link
+        const showIdsWithLinks = new Set<number>();
+        this.allItems.forEach(item => {
+            if (item.media_type === 'tv' && item.seasons) {
+                for (const season of item.seasons) {
+                    for (const episode of season.episodes) {
+                        if (this.episodeLinks.has(episode.id)) {
+                            showIdsWithLinks.add(item.id);
+                            return; // Go to next show
+                        }
+                    }
+                }
+            }
+        });
+
+        // Return the full MediaItem objects for those IDs
+        return this.allItems.filter(item => showIdsWithLinks.has(item.id));
+    }
+
+    generateShareableData = (showIds: number[]): SharedLibraryData => {
+        const showsToShare: SharedShowData[] = [];
+
+        showIds.forEach(id => {
+            const show = this.allItems.find(item => item.id === id);
+            if (!show || show.media_type !== 'tv' || !show.seasons) return;
+
+            const sharedLinks: SharedEpisodeLink[] = [];
+            show.seasons.forEach(season => {
+                season.episodes.forEach(episode => {
+                    const links = this.episodeLinks.get(episode.id);
+                    if (links) {
+                        links.forEach(link => {
+                            sharedLinks.push({
+                                seasonNumber: season.season_number,
+                                episodeNumber: episode.episode_number,
+                                url: link.url,
+                                label: link.label,
+                            });
+                        });
+                    }
+                });
+            });
+            
+            if (sharedLinks.length > 0) {
+                 showsToShare.push({
+                    tmdbId: show.id,
+                    links: sharedLinks
+                 });
+            }
+        });
+
+        return { version: 1, shows: showsToShare };
+    }
+    
+    importSharedLibrary = async (data: SharedLibraryData) => {
+        if (!data || data.version !== 1 || !Array.isArray(data.shows)) {
+            this.showSnackbar("notifications.importInvalidFile", "error", true);
+            return;
+        }
+
+        runInAction(() => { this.isImportingLibrary = true; });
+        this.showSnackbar("notifications.importInProgress", "info", true);
+
+        try {
+            const allNewLinks: Omit<EpisodeLink, 'id'>[] = [];
+            const showsToCache: MediaItem[] = [];
+            const showsToMyList: { id: number }[] = [];
+            let totalLinksImported = 0;
+
+            for (const sharedShow of data.shows) {
+                // 1. Fetch fresh show data from TMDB
+                const fullShow = await getSeriesDetails(sharedShow.tmdbId);
+                const seasonsWithEpisodes = await Promise.all(
+                    fullShow.seasons?.map(async (season) => {
+                        const episodes = await getSeriesEpisodes(fullShow.id, season.season_number);
+                        return { ...season, episodes };
+                    }) ?? []
+                );
+                const showWithData = { ...fullShow, seasons: seasonsWithEpisodes };
+                
+                showsToCache.push(showWithData);
+                showsToMyList.push({ id: showWithData.id });
+
+                // 2. Create a map for easy lookup: "S1-E1" -> episodeId
+                const episodeIdMap = new Map<string, number>();
+                showWithData.seasons?.forEach(s => {
+                    s.episodes.forEach(e => {
+                        episodeIdMap.set(`S${s.season_number}-E${e.episode_number}`, e.id);
+                    });
+                });
+                
+                // 3. Map shared links to new episode IDs
+                sharedShow.links.forEach(link => {
+                    const key = `S${link.seasonNumber}-E${link.episodeNumber}`;
+                    const episodeId = episodeIdMap.get(key);
+                    if (episodeId) {
+                        allNewLinks.push({
+                            episodeId: episodeId,
+                            url: link.url,
+                            label: link.label
+                        });
+                    }
+                });
+                totalLinksImported += sharedShow.links.length;
+            }
+
+            // 4. Bulk insert everything into the database
+            if (allNewLinks.length > 0) {
+                await db.episodeLinks.bulkAdd(allNewLinks);
+            }
+            if (showsToCache.length > 0) {
+                await db.cachedItems.bulkPut(showsToCache);
+            }
+            if (showsToMyList.length > 0) {
+                 await db.myList.bulkPut(showsToMyList);
+            }
+
+            this.showSnackbar("notifications.importSuccess", "success", true, { showCount: data.shows.length, linkCount: totalLinksImported });
+            
+            // Reload the app to reflect all changes
+            setTimeout(() => window.location.reload(), 2000);
+
+        } catch (error) {
+            console.error("Failed to import library:", error);
+            this.showSnackbar("notifications.importError", "error", true, { error: (error as Error).message });
+        } finally {
+             runInAction(() => { this.isImportingLibrary = false; });
         }
     }
 

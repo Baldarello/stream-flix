@@ -120,7 +120,10 @@ export const en = {
     "login": "Sign in with Google",
     "scanQR": "Scan TV QR Code",
     "showQR": "Show QR for Remote",
-    "language": "Language"
+    "language": "Language",
+    "library": "Library",
+    "share": "Share Library",
+    "import": "Import Library"
   },
   "qrScanner": {
     "close": "Close scanner",
@@ -203,6 +206,21 @@ export const en = {
       "subtitle": "Find your favorite content right away."
     }
   },
+  "shareAndImport": {
+    "shareTitle": "Share Library",
+    "importTitle": "Import Library",
+    "selectShows": "Select shows to include:",
+    "selectAll": "Select all ({count})",
+    "generateLink": "Generate Share Link",
+    "generating": "Generating...",
+    "shareLinkReady": "Your share link is ready:",
+    "copyLink": "Copy Link",
+    "back": "Back",
+    "pasteLink": "Paste a share link to add content to your library.",
+    "linkPlaceholder": "https://...",
+    "import": "Import",
+    "importing": "Importing..."
+  },
   "notifications": {
     "roomCreated": "Room created! Share the code to invite friends.",
     "tvReady": "TV device ready. Scan the QR code to connect.",
@@ -232,6 +250,12 @@ export const en = {
     "restoreComplete": "Restore complete! The app will now reload.",
     "restoreError": "Error during restore: {error}",
     "linksUpdated": "{count} links updated successfully.",
-    "domainUpdateError": "Error updating domains: {error}"
+    "domainUpdateError": "Error updating domains: {error}",
+    "shareNoShowsSelected": "Please select at least one show to share.",
+    "importInvalidFile": "Import file is invalid or corrupt.",
+    "importInvalidLink": "The provided share link is not valid.",
+    "importInProgress": "Importing library...",
+    "importSuccess": "Imported {showCount} shows and {linkCount} links successfully! The app will now reload.",
+    "importError": "Failed to import library: {error}"
   }
 }

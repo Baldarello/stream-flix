@@ -12,13 +12,16 @@ import AnimationIcon from '@mui/icons-material/Animation';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ShareIcon from '@mui/icons-material/Share';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { handleSignIn, handleSignOut } from '../services/googleAuthService';
 import { useTranslations } from '../hooks/useTranslations';
 
 const ProfileDrawer: React.FC = observer(() => {
     const { 
         isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
-        isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive, language, setLanguage
+        isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive, language, setLanguage,
+        openShareModal, openImportModal
     } = mediaStore;
     const { t } = useTranslations();
 
@@ -197,6 +200,22 @@ const ProfileDrawer: React.FC = observer(() => {
                     <ListItemButton onClick={enableSmartTVMode}>
                         <ListItemIcon><TvIcon /></ListItemIcon>
                         <ListItemText primary={t('profileDrawer.showQR')} />
+                    </ListItemButton>
+                </ListItem>
+                <Divider sx={{ my: 1 }} />
+                <ListItem>
+                    <Typography variant="overline" color="text.secondary">{t('profileDrawer.library')}</Typography>
+                </ListItem>
+                 <ListItem disablePadding>
+                    <ListItemButton onClick={() => openShareModal()}>
+                        <ListItemIcon><ShareIcon /></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.share')} />
+                    </ListItemButton>
+                </ListItem>
+                 <ListItem disablePadding>
+                    <ListItemButton onClick={() => openImportModal()}>
+                        <ListItemIcon><FileUploadIcon /></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.import')} />
                     </ListItemButton>
                 </ListItem>
             </List>

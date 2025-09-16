@@ -120,7 +120,10 @@ export const it = {
     "login": "Accedi con Google",
     "scanQR": "Scansiona QR Code TV",
     "showQR": "Mostra QR Code per Telecomando",
-    "language": "Lingua"
+    "language": "Lingua",
+    "library": "Libreria",
+    "share": "Condividi Libreria",
+    "import": "Importa Libreria"
   },
   "qrScanner": {
     "close": "Chiudi scanner",
@@ -203,6 +206,21 @@ export const it = {
       "subtitle": "Trova subito i tuoi contenuti preferiti."
     }
   },
+  "shareAndImport": {
+    "shareTitle": "Condividi Libreria",
+    "importTitle": "Importa Libreria",
+    "selectShows": "Seleziona gli show da includere:",
+    "selectAll": "Seleziona tutti ({count})",
+    "generateLink": "Genera Link di Condivisione",
+    "generating": "Generazione in corso...",
+    "shareLinkReady": "Il tuo link di condivisione è pronto:",
+    "copyLink": "Copia Link",
+    "back": "Indietro",
+    "pasteLink": "Incolla un link di condivisione per aggiungere i contenuti alla tua libreria.",
+    "linkPlaceholder": "https://...",
+    "import": "Importa",
+    "importing": "Importazione in corso..."
+  },
   "notifications": {
     "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
     "tvReady": "Dispositivo TV pronto. Scansiona il QR code per connetterti.",
@@ -232,6 +250,12 @@ export const it = {
     "restoreComplete": "Ripristino completato! L'app verrà ricaricata.",
     "restoreError": "Errore durante il ripristino: {error}",
     "linksUpdated": "{count} link aggiornati con successo.",
-    "domainUpdateError": "Errore nell'aggiornamento dei domini: {error}"
+    "domainUpdateError": "Errore nell'aggiornamento dei domini: {error}",
+    "shareNoShowsSelected": "Seleziona almeno uno show da condividere.",
+    "importInvalidFile": "File di importazione non valido o corrotto.",
+    "importInvalidLink": "Link di condivisione non valido.",
+    "importInProgress": "Importazione della libreria in corso...",
+    "importSuccess": "{showCount} show e {linkCount} link importati con successo! L'app verrà ricaricata.",
+    "importError": "Errore durante l'importazione: {error}"
   }
 }

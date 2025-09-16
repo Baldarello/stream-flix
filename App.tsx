@@ -19,6 +19,8 @@ import WatchTogetherModal from './components/WatchTogetherModal';
 import { NotificationSnackbar } from './components/NotificationSnackbar';
 import DebugOverlay from './components/DebugOverlay';
 import LinkSelectionModal from './components/LinkSelectionModal';
+import ShareLibraryModal from './components/ShareLibraryModal';
+import ImportLibraryModal from './components/ImportLibraryModal';
 import { useTranslations } from './hooks/useTranslations';
 
 const baseThemeOptions: ThemeOptions = {
@@ -183,6 +185,8 @@ const AppContent: React.FC = observer(() => {
         <WatchTogetherModal />
         <NotificationSnackbar />
         <LinkSelectionModal />
+        <ShareLibraryModal />
+        <ImportLibraryModal />
       </Box>
   );
 });
@@ -194,10 +198,22 @@ const App: React.FC = () => {
         mediaStore.fetchAllData();
         
         const params = new URLSearchParams(window.location.search);
+        
+        // Handle Watch Together room ID from URL
         const roomIdFromUrl = params.get('roomId');
         if (roomIdFromUrl) {
             mediaStore.setJoinRoomIdFromUrl(roomIdFromUrl);
             mediaStore.openWatchTogetherModal(null); 
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
+        // Handle Library Import from URL
+        const importData = params.get('importData');
+        if (importData) {
+            const fullUrl = window.location.href; // The URL contains the full param
+            mediaStore.setImportUrl(fullUrl);
+            mediaStore.openImportModal();
+            // Clean the URL in the browser bar
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     };
