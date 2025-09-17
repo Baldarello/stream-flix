@@ -15,7 +15,9 @@ const style = {
   width: { xs: '95%', sm: 600 },
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 4,
+  pt: 6, 
+  px: 4, 
+  pb: 4,
   borderRadius: 2,
   maxHeight: '90vh',
   display: 'flex',
@@ -71,17 +73,13 @@ const AddLinkTabs: React.FC<{
         const start = input.selectionStart ?? 0;
         const end = input.selectionEnd ?? 0;
         
-        // Use the input's current value directly to avoid state timing issues
         const currentValue = input.value;
         
-        // Construct the new value by replacing the selected text (or inserting at the cursor)
         const newValue = currentValue.substring(0, start) + placeholder + currentValue.substring(end);
         setter(newValue);
         
-        // After React re-renders with the new value, focus the input and place the
-        // cursor at the end of the inserted placeholder.
         requestAnimationFrame(() => {
-          if (patternInputRef.current) { // Check if the ref is still valid
+          if (patternInputRef.current) {
             const newCursorPos = start + placeholder.length;
             patternInputRef.current.focus();
             patternInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
@@ -94,7 +92,7 @@ const AddLinkTabs: React.FC<{
         switch (addMethod) {
           case 'pattern':
             return (
-              <Stack spacing={2} mt={2}>
+              <Stack spacing={2}>
                 <Alert severity="info">{t('linkEpisodesModal.add.patternInfo')}</Alert>
                 <TextField 
                     label={t('linkEpisodesModal.add.patternUrl')} 
@@ -118,14 +116,14 @@ const AddLinkTabs: React.FC<{
             );
           case 'list':
             return (
-                <Stack spacing={2} mt={2}>
+                <Stack spacing={2}>
                     <Alert severity="info">{t('linkEpisodesModal.add.listInfo', { count: seasonEpisodeCount })}</Alert>
                     <TextField label={t('linkEpisodesModal.add.listLinks')} multiline rows={8} value={linkList} onChange={e => setLinkList(e.target.value)} />
                 </Stack>
             );
           case 'json':
             return (
-                <Stack spacing={2} mt={2}>
+                <Stack spacing={2}>
                     <Alert severity="info">{t('linkEpisodesModal.add.jsonInfo')}</Alert>
                     <TextField label={t('linkEpisodesModal.add.jsonArray')} multiline rows={8} value={json} onChange={e => setJson(e.target.value)} placeholder={t('linkEpisodesModal.add.jsonPlaceholder')} />
                 </Stack>
@@ -134,15 +132,25 @@ const AddLinkTabs: React.FC<{
     };
 
     return (
-        <Box>
-            <Tabs value={addMethod} onChange={(_, v) => setAddMethod(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', mt: 2, flexGrow: 1, overflow: 'hidden' }}>
+            <Tabs
+                orientation="vertical"
+                variant="scrollable"
+                value={addMethod}
+                onChange={(_, v) => setAddMethod(v)}
+                sx={{ borderRight: 1, borderColor: 'divider', mr: 2, flexShrink: 0 }}
+            >
                 <Tab label={t('linkEpisodesModal.add.pattern')} value="pattern" />
                 <Tab label={t('linkEpisodesModal.add.list')} value="list" />
                 <Tab label={t('linkEpisodesModal.add.json')} value="json" />
             </Tabs>
-            {renderAddContent()}
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button onClick={handleSave} variant="contained">{t('linkEpisodesModal.add.save')}</Button>
+            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                 <Box sx={{ flexGrow: 1, pr: 1 }}>
+                    {renderAddContent()}
+                </Box>
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, pt: 1 }}>
+                    <Button onClick={handleSave} variant="contained">{t('linkEpisodesModal.add.save')}</Button>
+                </Box>
             </Box>
         </Box>
     );

@@ -1,8 +1,8 @@
 import React from 'react';
-// FIX: The `item` prop on the `Grid` component was causing a type error.
-// This is often due to how types are resolved. Consolidating imports and using
-// a named import for `Grid` aligns with other files and should fix the type issue.
-import { Box, Container, Typography, Fade, Grid } from '@mui/material';
+// FIX: The `item` prop on the `Grid` component was causing a TypeScript
+// error. Using a direct import for `Grid` resolves the type definition issue.
+import { Box, Container, Typography, Fade } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
