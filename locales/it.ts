@@ -123,7 +123,8 @@ export const it = {
     "language": "Lingua",
     "library": "Libreria",
     "share": "Condividi Libreria",
-    "import": "Importa Libreria"
+    "import": "Importa Libreria",
+    "history": "Cronologia Modifiche"
   },
   "qrScanner": {
     "close": "Chiudi scanner",
@@ -221,6 +222,39 @@ export const it = {
     "import": "Importa",
     "importing": "Importazione in corso..."
   },
+  "revisions": {
+    "title": "Cronologia Modifiche",
+    "revert": "Annulla",
+    "revertConfirm": "Sei sicuro di voler annullare questa modifica?",
+    "noHistory": "Nessuna modifica registrata.",
+    "loading": "Caricamento cronologia...",
+    "showRawData": "Mostra Dati Grezzi",
+    "hideRawData": "Nascondi Dati Grezzi",
+    "descriptions": {
+        "myList": {
+            "add": "Aggiunto '{name}' alla tua lista",
+            "remove": "Rimosso '{name}' dalla tua lista"
+        },
+        "cachedItems": {
+            "add": "Messo in cache '{name}' per accesso offline",
+            "update": "Aggiornati dati in cache per '{name}'",
+            "remove": "Rimosso '{name}' dalla cache"
+        },
+        "episodeLinks": {
+            "add": "Collegato video a '{show}' S{s}E{e}",
+            "remove": "Rimosso link da '{show}' S{s}E{e}",
+            "update": "Aggiornato link per '{show}' S{s}E{e}"
+        },
+        "showIntroDurations": {
+            "set": "Impostata durata intro a {duration}s per '{show}'",
+            "remove": "Rimossa durata intro per '{show}'"
+        },
+        "viewingHistory": {
+            "add": "Visto episodio '{show}' S{s}E{e}"
+        },
+        "unknown": "Azione '{type}' sulla tabella '{table}'"
+    }
+  },
   "notifications": {
     "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
     "tvReady": "Dispositivo TV pronto. Scansiona il QR code per connetterti.",
@@ -256,6 +290,8 @@ export const it = {
     "importInvalidLink": "Link di condivisione non valido.",
     "importInProgress": "Importazione della libreria in corso...",
     "importSuccess": "{showCount} show e {linkCount} link importati con successo! L'app verrà ricaricata.",
-    "importError": "Errore durante l'importazione: {error}"
+    "importError": "Errore durante l'importazione: {error}",
+    "revertSuccess": "Modifica annullata con successo.",
+    "revertError": "Impossibile annullare la modifica: {error}"
   }
 }

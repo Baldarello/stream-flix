@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink} from '../types';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -108,6 +108,12 @@ class MediaStore {
     isImportModalOpen = false;
     isImportingLibrary = false;
     importUrl: string | null = null;
+
+    // Revisions State
+    isRevisionsModalOpen = false;
+    isRevisionsLoading = false;
+    revisions: Revision[] = [];
+    private episodeContextMap: Map<number, { showName: string, epNum: number, sNum: number, epName: string }> = new Map();
 
 
     // Custom Intro Durations
@@ -1486,6 +1492,177 @@ class MediaStore {
             runInAction(() => {
               this.isRestoring = false;
             });
+        }
+    }
+
+    // --- Revisions Actions ---
+    openRevisionsModal = () => {
+        this.fetchRevisions();
+        this.isRevisionsModalOpen = true;
+    }
+    closeRevisionsModal = () => {
+        this.isRevisionsModalOpen = false;
+        this.revisions = []; // Clear data on close
+    }
+
+    private buildContextMaps = () => {
+        this.episodeContextMap.clear();
+        
+        const itemsForContext = new Map<number, MediaItem>();
+        
+        // Add all items from the allItems getter
+        this.allItems.forEach(item => itemsForContext.set(item.id, item));
+        
+        // Add the currently selected item if it exists and is a TV show
+        if (this.selectedItem && this.selectedItem.media_type === 'tv') {
+            itemsForContext.set(this.selectedItem.id, this.selectedItem);
+        }
+
+        itemsForContext.forEach(show => {
+            if (show.seasons) {
+                show.seasons.forEach(season => {
+                    season.episodes.forEach(episode => {
+                        this.episodeContextMap.set(episode.id, {
+                            showName: show.name || show.title,
+                            epNum: episode.episode_number,
+                            sNum: season.season_number,
+                            epName: episode.name,
+                        });
+                    });
+                });
+            }
+        });
+    }
+
+    fetchRevisions = async () => {
+        this.isRevisionsLoading = true;
+        this.buildContextMaps();
+
+        try {
+            const revs = await db.revisions.orderBy('timestamp').reverse().limit(100).toArray();
+            
+            const processedRevs = revs.map(rev => {
+                let description = `Azione sconosciuta`;
+                let icon: Revision['icon'] = 'unknown';
+
+                const data = rev.type === 1 ? rev.obj : (rev.oldObj || rev.obj);
+
+                switch (rev.table) {
+                    case 'myList': {
+                        const show = this.cachedItems.get(rev.key);
+                        const name = show?.name || show?.title || `ID ${rev.key}`;
+                        if (rev.type === 1) { // Add
+                            description = this.translations.revisions.descriptions.myList.add.replace('{name}', name);
+                            icon = 'add';
+                        } else { // Delete
+                            description = this.translations.revisions.descriptions.myList.remove.replace('{name}', name);
+                            icon = 'delete';
+                        }
+                        break;
+                    }
+                    case 'cachedItems': {
+                        const name = data?.name || data?.title || `ID ${rev.key}`;
+                        if (rev.type === 1) {
+                            description = this.translations.revisions.descriptions.cachedItems.add.replace('{name}', name);
+                            icon = 'add';
+                        } else if (rev.type === 2) {
+                            description = this.translations.revisions.descriptions.cachedItems.update.replace('{name}', name);
+                            icon = 'update';
+                        } else {
+                            description = this.translations.revisions.descriptions.cachedItems.remove.replace('{name}', name);
+                            icon = 'delete';
+                        }
+                        break;
+                    }
+                    case 'episodeLinks': {
+                        const context = this.episodeContextMap.get(data?.episodeId);
+                        const showName = context?.showName || 'Show sconosciuto';
+                        const seasonNum = context?.sNum || '?';
+                        const epNum = context?.epNum || '?';
+                        
+                        if (rev.type === 1) { // Add
+                           description = this.translations.revisions.descriptions.episodeLinks.add.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
+                           icon = 'add';
+                        } else if (rev.type === 2) { // Update
+                           description = this.translations.revisions.descriptions.episodeLinks.update.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
+                           icon = 'update';
+                        } else { // Delete
+                           description = this.translations.revisions.descriptions.episodeLinks.remove.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
+                           icon = 'delete';
+                        }
+                        break;
+                    }
+                     case 'showIntroDurations': {
+                        const show = this.allItems.find(item => item.id === rev.key);
+                        const name = show?.name || show?.title || `ID ${rev.key}`;
+                        if (rev.type === 1 || rev.type === 2) { // Set/Update
+                           description = this.translations.revisions.descriptions.showIntroDurations.set.replace('{show}', name).replace('{duration}', data.duration);
+                           icon = 'update';
+                        } else { // Delete
+                           description = this.translations.revisions.descriptions.showIntroDurations.remove.replace('{show}', name);
+                           icon = 'delete';
+                        }
+                        break;
+                    }
+                    case 'viewingHistory': {
+                         const context = this.episodeContextMap.get(data?.episodeId);
+                         const showName = context?.showName || 'Show sconosciuto';
+                         const seasonNum = context?.sNum || '?';
+                         const epNum = context?.epNum || '?';
+                         if (rev.type === 1) {
+                            description = this.translations.revisions.descriptions.viewingHistory.add.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
+                            icon = 'add';
+                         }
+                         break;
+                    }
+                    default:
+                        description = this.translations.revisions.descriptions.unknown.replace('{table}', rev.table).replace('{type}', String(rev.type));
+                        break;
+                }
+                return { ...rev, description, icon };
+            });
+
+            runInAction(() => {
+                this.revisions = processedRevs;
+            });
+
+        } catch (error) {
+            console.error("Failed to fetch revisions:", error);
+        } finally {
+            runInAction(() => {
+                this.isRevisionsLoading = false;
+            });
+        }
+    }
+    
+    revertRevision = async (revision: Revision) => {
+        const { table, type, key, oldObj, obj } = revision;
+        try {
+            const tableInstance = (db as any)[table];
+            if (!tableInstance) throw new Error(`Table ${table} not found in DB`);
+
+            if (type === 1) { // Revert CREATE by deleting
+                await tableInstance.delete(key);
+            } else if (type === 2) { // Revert UPDATE by putting back old object
+                 if (oldObj) {
+                    await tableInstance.put(oldObj);
+                } else {
+                    throw new Error(`Cannot revert update because the previous state (oldObj) is missing.`);
+                }
+            } else if (type === 3) { // Revert DELETE by putting back the deleted object
+                const objectToRestore = oldObj || obj;
+                if (objectToRestore) {
+                    await tableInstance.put(objectToRestore);
+                } else {
+                    throw new Error(`Cannot revert delete because the object to restore is missing.`);
+                }
+            }
+            this.showSnackbar('notifications.revertSuccess', 'success', true);
+            this.fetchRevisions(); // Refresh the list
+            this.loadPersistedData(); // Reload core app data
+        } catch (e) {
+            console.error("Failed to revert revision:", e);
+            this.showSnackbar('notifications.revertError', 'error', true, { error: (e as Error).message });
         }
     }
 

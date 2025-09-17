@@ -1,5 +1,5 @@
 import React from 'react';
-// FIX: Resolved a TypeScript error by changing the MUI Grid import to a named import from '@mui/material' to ensure component props are correctly typed.
+// FIX: Switched from a default import (`import Grid from '@mui//material/Grid'`) to a named import (`import { Grid } from '@mui/material'`) to resolve a TypeScript error where the `item` prop was not recognized.
 import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
@@ -51,7 +51,6 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item, index) => (
-              // FIX: In Material-UI v5, the `item` prop is required for a Grid component to be treated as a grid item and to accept breakpoint props like `xs`.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2} sx={{
                   transition: 'opacity 0.5s, transform 0.5s',
                   animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,

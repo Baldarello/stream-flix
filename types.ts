@@ -85,3 +85,17 @@ export interface SharedLibraryData {
   version: 1;
   shows: SharedShowData[];
 }
+
+// Interface for database revision tracking
+export interface Revision {
+    id?: number; // Auto-incremented primary key
+    timestamp: number;
+    table: string;
+    key: any;
+    type: 1 | 2 | 3; // 1:create, 2:update, 3:delete
+    obj?: any;
+    oldObj?: any;
+    // Client-side properties for UI display
+    description?: string;
+    icon?: 'add' | 'update' | 'delete' | 'unknown';
+}

@@ -21,6 +21,7 @@ import DebugOverlay from './components/DebugOverlay';
 import LinkSelectionModal from './components/LinkSelectionModal';
 import ShareLibraryModal from './components/ShareLibraryModal';
 import ImportLibraryModal from './components/ImportLibraryModal';
+import RevisionsModal from './components/RevisionsModal';
 import { useTranslations } from './hooks/useTranslations';
 
 const baseThemeOptions: ThemeOptions = {
@@ -187,6 +188,7 @@ const AppContent: React.FC = observer(() => {
         <LinkSelectionModal />
         <ShareLibraryModal />
         <ImportLibraryModal />
+        <RevisionsModal />
       </Box>
   );
 });

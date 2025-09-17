@@ -14,6 +14,7 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ShareIcon from '@mui/icons-material/Share';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
+import HistoryIcon from '@mui/icons-material/History';
 import { handleSignIn, handleSignOut } from '../services/googleAuthService';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -21,7 +22,7 @@ const ProfileDrawer: React.FC = observer(() => {
     const { 
         isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
         isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive, language, setLanguage,
-        openShareModal, openImportModal
+        openShareModal, openImportModal, openRevisionsModal
     } = mediaStore;
     const { t } = useTranslations();
 
@@ -216,6 +217,12 @@ const ProfileDrawer: React.FC = observer(() => {
                     <ListItemButton onClick={() => openImportModal()}>
                         <ListItemIcon><FileUploadIcon /></ListItemIcon>
                         <ListItemText primary={t('profileDrawer.import')} />
+                    </ListItemButton>
+                </ListItem>
+                 <ListItem disablePadding>
+                    <ListItemButton onClick={() => openRevisionsModal()}>
+                        <ListItemIcon><HistoryIcon /></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.history')} />
                     </ListItemButton>
                 </ListItem>
             </List>

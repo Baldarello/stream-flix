@@ -123,7 +123,8 @@ export const en = {
     "language": "Language",
     "library": "Library",
     "share": "Share Library",
-    "import": "Import Library"
+    "import": "Import Library",
+    "history": "Change History"
   },
   "qrScanner": {
     "close": "Close scanner",
@@ -221,6 +222,39 @@ export const en = {
     "import": "Import",
     "importing": "Importing..."
   },
+  "revisions": {
+    "title": "Change History",
+    "revert": "Revert",
+    "revertConfirm": "Are you sure you want to revert this change?",
+    "noHistory": "No changes have been recorded yet.",
+    "loading": "Loading history...",
+    "showRawData": "Show Raw Data",
+    "hideRawData": "Hide Raw Data",
+    "descriptions": {
+        "myList": {
+            "add": "Added '{name}' to your list",
+            "remove": "Removed '{name}' from your list"
+        },
+        "cachedItems": {
+            "add": "Cached '{name}' for offline access",
+            "update": "Updated cached data for '{name}'",
+            "remove": "Removed '{name}' from cache"
+        },
+        "episodeLinks": {
+            "add": "Linked a video to '{show}' S{s}E{e}",
+            "remove": "Removed a link from '{show}' S{s}E{e}",
+            "update": "Updated a link for '{show}' S{s}E{e}"
+        },
+        "showIntroDurations": {
+            "set": "Set intro duration to {duration}s for '{show}'",
+            "remove": "Removed custom intro duration for '{show}'"
+        },
+        "viewingHistory": {
+            "add": "Watched episode '{show}' S{s}E{e}"
+        },
+        "unknown": "Action '{type}' on table '{table}'"
+    }
+  },
   "notifications": {
     "roomCreated": "Room created! Share the code to invite friends.",
     "tvReady": "TV device ready. Scan the QR code to connect.",
@@ -256,6 +290,8 @@ export const en = {
     "importInvalidLink": "The provided share link is not valid.",
     "importInProgress": "Importing library...",
     "importSuccess": "Imported {showCount} shows and {linkCount} links successfully! The app will now reload.",
-    "importError": "Failed to import library: {error}"
+    "importError": "Failed to import library: {error}",
+    "revertSuccess": "Change successfully reverted.",
+    "revertError": "Failed to revert change: {error}"
   }
 }
