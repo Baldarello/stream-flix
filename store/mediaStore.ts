@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision} from '../types';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -45,9 +45,11 @@ class MediaStore {
     myList: number[] = [];
     isPlaying = false;
     nowPlayingItem: PlayableItem | null = null;
+    nowPlayingShowDetails: MediaItem | null = null; // Full details for the show currently playing
     activeView: ActiveView = 'Home';
     viewingHistory: ViewingHistoryItem[] = [];
     cachedItems: Map<number, MediaItem> = new Map();
+    episodeProgress: Map<number, EpisodeProgress> = new Map();
 
     // Search State
     searchQuery = '';
@@ -186,6 +188,7 @@ class MediaStore {
                 introDurationsFromDb,
                 themePreference,
                 languagePreference,
+                episodeProgressFromDb,
             ] = await Promise.all([
                 db.myList.toArray(),
                 db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray(),
@@ -193,7 +196,8 @@ class MediaStore {
                 db.episodeLinks.toArray(),
                 db.showIntroDurations.toArray(),
                 db.preferences.get('activeTheme'),
-                db.preferences.get('language')
+                db.preferences.get('language'),
+                db.episodeProgress.toArray(),
             ]);
 
             runInAction(() => {
@@ -211,6 +215,9 @@ class MediaStore {
                 this.episodeLinks = linksMap;
                 
                 this.showIntroDurations = new Map(introDurationsFromDb.map(item => [item.id, item.duration]));
+                
+                this.episodeProgress = new Map(episodeProgressFromDb.map(p => [p.episodeId, p]));
+
                 if (themePreference) {
                     this.activeTheme = themePreference.value;
                 }
@@ -687,6 +694,27 @@ class MediaStore {
         }
     }
 
+    updateEpisodeProgress = async (payload: { episodeId: number; currentTime: number; duration: number }) => {
+        const { episodeId, currentTime, duration } = payload;
+        if (!episodeId || !duration || isNaN(duration)) return;
+    
+        const progressPercent = currentTime / duration;
+        const watched = progressPercent >= 0.8;
+    
+        const newProgress: EpisodeProgress = {
+            episodeId,
+            currentTime,
+            duration,
+            watched,
+        };
+    
+        await db.episodeProgress.put(newProgress);
+    
+        runInAction(() => {
+            this.episodeProgress.set(episodeId, newProgress);
+        });
+    };
+
     setShowIntroDuration = async (showId: number, duration: number) => {
         try {
             if (duration >= 0) {
@@ -846,9 +874,8 @@ class MediaStore {
     }
 
     startPlayback = async (item: PlayableItem) => {
-        // If it's a TV show without season data, fetch it first.
+        // Step 1: Ensure we have full details for TV shows.
         if ('media_type' in item && item.media_type === 'tv' && !item.seasons) {
-            this.addDebugMessage(`Playback requested for shallow TV item #${item.id}. Fetching details...`);
             try {
                 runInAction(() => { this.isDetailLoading = true; });
                 const seriesDetails = await getSeriesDetails(item.id);
@@ -861,16 +888,9 @@ class MediaStore {
                 const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
                 this.applyEpisodeLinksToMedia([fullItem]);
                 
-                // FIX: Set selectedItem to ensure player components have access to full show data.
-                runInAction(() => {
-                    this.selectedItem = fullItem;
-                });
-
-                this.addDebugMessage(`Details for #${item.id} fetched. Re-initiating playback.`);
-                await this.startPlayback(fullItem);
+                await this.startPlayback(fullItem); // Re-run with full data
     
             } catch (e) {
-                this.addDebugMessage(`Error fetching details for #${item.id}: ${(e as Error).message}`);
                 console.error("Failed to load series details for playback", e);
                 this.showSnackbar("notifications.failedToLoadSeriesDetails", "error", true);
             } finally {
@@ -879,68 +899,95 @@ class MediaStore {
             return;
         }
     
-        // Handle playing a whole series (that now has season data)
+        // Step 2: Handle playing a whole series by finding the right episode.
         if ('media_type' in item && item.media_type === 'tv' && !('episode_number' in item)) {
-            this.addDebugMessage(`Playback requested for TV series #${item.id}. Finding first episode.`);
-            const firstSeason = item.seasons?.[0];
-            const firstEpisode = firstSeason?.episodes?.find(ep => ep.video_urls && ep.video_urls.length > 0);
-    
-            if (firstEpisode && firstSeason) {
-                this.addDebugMessage(`Found first playable episode: S${firstSeason.season_number}E${firstEpisode.episode_number}.`);
-                const episodeToPlay: PlayableItem = {
-                    ...firstEpisode,
+            const allEpisodes = item.seasons?.flatMap(s => 
+                s.episodes.map(e => ({
+                    ...e,
                     show_id: item.id,
-                    show_title: item.title || item.name || '',
+                    show_title: item.name || item.title,
                     backdrop_path: item.backdrop_path,
-                    season_number: firstSeason.season_number,
-                };
-                await this.startPlayback(episodeToPlay);
-                return;
-            } else {
-                this.addDebugMessage(`No playable episodes found for series #${item.id}.`);
-                this.showSnackbar("notifications.noPlayableEpisodes", "warning", true);
+                    season_number: s.season_number
+                }))
+            ) || [];
+    
+            const inProgressEpisode = allEpisodes.find(ep => {
+                const progress = this.episodeProgress.get(ep.id);
+                return progress && !progress.watched;
+            });
+    
+            if (inProgressEpisode) {
+                const progress = this.episodeProgress.get(inProgressEpisode.id)!;
+                await this.startPlayback({ ...inProgressEpisode, startTime: progress.currentTime });
                 return;
             }
-        }
     
-        // If it's an episode with multiple URLs, open the selection modal
-        if ('episode_number' in item && item.video_urls && item.video_urls.length > 1) {
-            this.addDebugMessage(`Episode #${item.id} has ${item.video_urls.length} links. Opening selection modal.`);
-            this.openLinkSelectionModal(item, item.video_urls);
+            const firstUnwatchedEpisode = allEpisodes.find(ep => !this.episodeProgress.get(ep.id)?.watched);
+    
+            if (firstUnwatchedEpisode) {
+                await this.startPlayback(firstUnwatchedEpisode);
+                return;
+            }
+            
+            this.showSnackbar("notifications.noPlayableEpisodes", "warning", true);
             return;
         }
     
-        const urlToPlay = ('video_urls' in item && item.video_urls?.[0]?.url) || ('video_url' in item ? item.video_url : undefined);
-    
-        if ('media_type' in item && item.media_type === 'movie') {
-            this.addDebugMessage(`Starting playback for movie #${item.id}.`);
-            this.startPlaybackConfirmed(item);
-        } else if (urlToPlay) {
-            this.addDebugMessage(`Starting playback for episode #${item.id} with single link.`);
-            this.startPlaybackConfirmed({ ...item, video_url: urlToPlay });
-        } else if (!('media_type' in item)) {
-            this.addDebugMessage(`Episode #${item.id} has no links. Aborting playback.`);
-            this.showSnackbar("notifications.noVideoLinks", "warning", true);
-        }
-    }
+        // Step 3: Handle individual episode or movie.
+        let urlToPlay: string | undefined;
+        if ('episode_number' in item) {
+            if (item.video_urls && item.video_urls.length > 1) {
+                this.openLinkSelectionModal(item, item.video_urls);
+                return;
+            }
+            urlToPlay = item.video_urls?.[0]?.url || item.video_url;
 
-    startPlaybackConfirmed = (item: PlayableItem) => {
-        // If the host starts playback or changes the media, update it for the whole room.
+            if (!urlToPlay) {
+                this.showSnackbar("notifications.noVideoLinks", "warning", true);
+                return;
+            }
+        }
+        
+        let startTime = item.startTime || 0;
+        if ('episode_number' in item && !startTime) {
+            const progress = this.episodeProgress.get(item.id);
+            if (progress && !progress.watched) {
+                startTime = progress.currentTime;
+            }
+        }
+
+        this.startPlaybackConfirmed({ ...item, video_url: urlToPlay }, startTime);
+    }
+    
+    startPlaybackConfirmed = async (item: PlayableItem, startTime: number = 0) => {
         if (this.roomId && this.isHost) {
             this.changeWatchTogetherMedia(item);
-            this.sendPlaybackControl({status: 'playing', time: 0});
+            this.sendPlaybackControl({ status: 'playing', time: startTime });
         }
     
         if ('episode_number' in item) {
             this.addViewingHistoryEntry(item.show_id, item.id);
     
-            if (item.intro_start_s !== undefined) {
-                const customDuration = this.showIntroDurations.get(item.show_id);
-                const introDuration = customDuration !== undefined ? customDuration : 80;
-                item.intro_end_s = item.intro_start_s + introDuration;
+            // Ensure full show details are loaded and stored for the player context
+            if (this.nowPlayingShowDetails?.id !== item.show_id) {
+                try {
+                    const seriesDetails = await getSeriesDetails(item.show_id);
+                    const seasonsWithEpisodes = await Promise.all(
+                        seriesDetails.seasons?.map(async (season) => {
+                            const episodes = await getSeriesEpisodes(item.show_id, season.season_number);
+                            return { ...season, episodes };
+                        }) ?? []
+                    );
+                    const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
+                    this.applyEpisodeLinksToMedia([fullItem]);
+                    runInAction(() => { this.nowPlayingShowDetails = fullItem; });
+                } catch (e) { console.error("Could not fetch show details for player", e); }
             }
+        } else {
+            runInAction(() => { this.nowPlayingShowDetails = null; });
         }
-        this.nowPlayingItem = item;
+    
+        this.nowPlayingItem = { ...item, startTime };
         this.isPlaying = true;
         this.watchTogetherModalOpen = false;
         this.closeLinkSelectionModal();
@@ -952,6 +999,7 @@ class MediaStore {
         }
         this.isPlaying = false;
         this.nowPlayingItem = null;
+        this.nowPlayingShowDetails = null;
         this.sendSlaveStatusUpdate();
         this.closeEpisodesDrawer();
     }
@@ -1331,6 +1379,7 @@ class MediaStore {
                 showIntroDurations,
                 preferences,
                 revisions,
+                episodeProgress,
             ] = await Promise.all([
                 db.myList.toArray(),
                 db.viewingHistory.toArray(),
@@ -1339,6 +1388,7 @@ class MediaStore {
                 db.showIntroDurations.toArray(),
                 db.preferences.toArray(),
                 db.revisions.toArray(),
+                db.episodeProgress.toArray(),
             ]);
 
             const backupData = {
@@ -1350,6 +1400,7 @@ class MediaStore {
                     showIntroDurations,
                     preferences,
                     revisions,
+                    episodeProgress,
                 }
             };
             
@@ -1728,13 +1779,15 @@ class MediaStore {
 
     get currentShow(): MediaItem | undefined {
         const nowPlayingItem = this.nowPlayingItem;
-        if (nowPlayingItem && 'episode_number' in nowPlayingItem) {
-            if (this.selectedItem && this.selectedItem.media_type === 'tv' && this.selectedItem.id === nowPlayingItem.show_id) {
-                return this.selectedItem;
-            }
-            return this.allItems.find(item => item.id === nowPlayingItem.show_id);
+        if (!nowPlayingItem || !('show_id' in nowPlayingItem)) {
+            return undefined;
         }
-        return undefined;
+        // Prioritize the fully-loaded show details for the player.
+        if (this.nowPlayingShowDetails && this.nowPlayingShowDetails.id === nowPlayingItem.show_id) {
+            return this.nowPlayingShowDetails;
+        }
+        // Fallback for safety, though nowPlayingShowDetails should be set.
+        return this.allItems.find(item => item.id === nowPlayingItem.show_id);
     }
 
     get currentSeasonEpisodes(): Episode[] {

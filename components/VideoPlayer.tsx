@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, IconButton, Typography, AppBar, Toolbar, CircularProgress, Tooltip, Button } from '@mui/material';
+import { Box, IconButton, Typography, AppBar, Toolbar, CircularProgress, Tooltip, Button, Fade } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chat from './Chat';
 import EpisodesDrawer from './EpisodesDrawer';
@@ -16,6 +16,8 @@ const VideoPlayer: React.FC = observer(() => {
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [showSkipIntro, setShowSkipIntro] = useState(false);
+  const [isUiVisible, setIsUiVisible] = useState(true);
+  const uiTimeoutRef = useRef<number | null>(null);
   const lastHostUpdateTimeRef = useRef(0);
   const isSeekingRef = useRef(false);
 
@@ -120,6 +122,54 @@ const VideoPlayer: React.FC = observer(() => {
       if (disposer) disposer();
     };
   }, [isHost, sendPlaybackControl, roomId]);
+  
+    // Effect for resuming playback from startTime
+    useEffect(() => {
+        const video = videoRef.current;
+        const startTime = nowPlayingItem?.startTime;
+        if (video && startTime) {
+            const handleMetadata = () => {
+                if (videoRef.current && videoRef.current.readyState >= 1) { // HAVE_METADATA
+                    videoRef.current.currentTime = startTime;
+                }
+            };
+            if (video.readyState >= 1) {
+                handleMetadata();
+            } else {
+                video.addEventListener('loadedmetadata', handleMetadata, { once: true });
+            }
+            return () => video.removeEventListener('loadedmetadata', handleMetadata);
+        }
+    }, [nowPlayingItem?.id, nowPlayingItem?.startTime]);
+  
+    // Effect for saving progress
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !nowPlayingItem || !('episode_number' in nowPlayingItem)) return;
+    
+        const episodeId = nowPlayingItem.id;
+    
+        const saveProgress = () => {
+            if (video && video.duration > 0 && !video.seeking) {
+                mediaStore.updateEpisodeProgress({
+                    episodeId,
+                    currentTime: video.currentTime,
+                    duration: video.duration,
+                });
+            }
+        };
+    
+        const interval = setInterval(saveProgress, 5000); // Save every 5 seconds
+        video.addEventListener('pause', saveProgress);
+    
+        return () => {
+            clearInterval(interval);
+            if (video) {
+                video.removeEventListener('pause', saveProgress);
+                saveProgress(); // Final save on unmount/cleanup
+            }
+        };
+    }, [nowPlayingItem?.id]);
 
   // Effect for Remote Control (Smart TV Slave)
   useEffect(() => {
@@ -241,8 +291,46 @@ const VideoPlayer: React.FC = observer(() => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); // Empty dependency array ensures this runs once on mount/unmount
+  }, []);
 
+    // Effect to manage UI visibility
+    useEffect(() => {
+        const playerContainer = playerContainerRef.current;
+        const video = videoRef.current;
+        if (!playerContainer || !video) return;
+
+        const showAndThenHideUi = () => {
+            setIsUiVisible(true);
+            if (uiTimeoutRef.current) {
+                clearTimeout(uiTimeoutRef.current);
+            }
+            uiTimeoutRef.current = window.setTimeout(() => {
+                if (!video.paused) {
+                    setIsUiVisible(false);
+                }
+            }, 3000); // Hide after 3 seconds
+        };
+
+        const showUiPermanently = () => {
+            if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
+            setIsUiVisible(true);
+        };
+
+        playerContainer.addEventListener('mousemove', showAndThenHideUi);
+        video.addEventListener('pause', showUiPermanently);
+        video.addEventListener('play', showAndThenHideUi);
+
+        showAndThenHideUi(); // Initial show
+
+        return () => {
+            if (uiTimeoutRef.current) {
+                clearTimeout(uiTimeoutRef.current);
+            }
+            playerContainer.removeEventListener('mousemove', showAndThenHideUi);
+            video.removeEventListener('pause', showUiPermanently);
+            video.removeEventListener('play', showAndThenHideUi);
+        };
+    }, []);
 
   if (!nowPlayingItem) {
     return null;
@@ -294,55 +382,63 @@ const VideoPlayer: React.FC = observer(() => {
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
         {/* Top bar overlay */}
-          {!isSmartTV&&<AppBar position="absolute" sx={{
-              top: 16,
-              left: 16,
-              right: 16,
-              width: 'auto',
-              borderRadius: '16px',
-              background: 'rgba(20, 20, 30, 0.6)',
-              backdropFilter: 'blur(10px)',
-              boxShadow: 'none'
-          }}>
-              <Toolbar>
-                  <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}>
-                      <ArrowBackIcon/>
-                  </IconButton>
-                  <Typography variant="h6" sx={{flexGrow: 1}}>{title}</Typography>
-                  {mediaStore.nextEpisode && (
-                      <Tooltip title={t('videoPlayer.nextEpisode')}>
-                          <IconButton color="inherit" onClick={handleNextEpisode}>
-                              <SkipNextIcon/>
-                          </IconButton>
-                      </Tooltip>
-                  )}
-                  {isEpisode && (
-                      <Tooltip title={t('videoPlayer.episodeList')}>
-                          <IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}>
-                              <ListAltIcon/>
-                          </IconButton>
-                      </Tooltip>
-                  )}
-              </Toolbar>
-          </AppBar>}
+          {!isSmartTV && (
+            <Fade in={isUiVisible} timeout={500}>
+              <AppBar position="absolute" sx={{
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  width: 'auto',
+                  borderRadius: '16px',
+                  background: 'rgba(20, 20, 30, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: 'none',
+                  transition: 'opacity 0.5s ease-in-out'
+              }}>
+                  <Toolbar>
+                      <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}>
+                          <ArrowBackIcon/>
+                      </IconButton>
+                      <Typography variant="h6" sx={{flexGrow: 1}}>{title}</Typography>
+                      {mediaStore.nextEpisode && (
+                          <Tooltip title={t('videoPlayer.nextEpisode')}>
+                              <IconButton color="inherit" onClick={handleNextEpisode}>
+                                  <SkipNextIcon/>
+                              </IconButton>
+                          </Tooltip>
+                      )}
+                      {isEpisode && (
+                          <Tooltip title={t('videoPlayer.episodeList')}>
+                              <IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}>
+                                  <ListAltIcon/>
+                              </IconButton>
+                          </Tooltip>
+                      )}
+                  </Toolbar>
+              </AppBar>
+            </Fade>
+          )}
 
         {showSkipIntro && (
-            <Button 
-                variant="contained" 
-                color="inherit" 
-                onClick={skipIntro}
-                sx={{
-                    position: 'absolute',
-                    bottom: '80px',
-                    right: '20px',
-                    zIndex: 2,
-                    bgcolor: 'rgba(255, 255, 255, 0.8)',
-                    color: 'black',
-                    '&:hover': { bgcolor: 'white' }
-                }}
-            >
-                {t('videoPlayer.skipIntro')}
-            </Button>
+            <Fade in={isUiVisible} timeout={500}>
+              <Button 
+                  variant="contained" 
+                  color="inherit" 
+                  onClick={skipIntro}
+                  sx={{
+                      position: 'absolute',
+                      bottom: '80px',
+                      right: '20px',
+                      zIndex: 2,
+                      bgcolor: 'rgba(255, 255, 255, 0.8)',
+                      color: 'black',
+                      '&:hover': { bgcolor: 'white' },
+                      transition: 'opacity 0.5s ease-in-out'
+                  }}
+              >
+                  {t('videoPlayer.skipIntro')}
+              </Button>
+            </Fade>
         )}
       </Box>
       {roomId && <Chat />}

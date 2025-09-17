@@ -1,15 +1,16 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Drawer, Box, List, ListItem, ListItemButton, ListItemText, Typography, IconButton, Toolbar, CardMedia } from '@mui/material';
+import { Drawer, Box, List, ListItem, ListItemButton, ListItemText, Typography, IconButton, Toolbar, CardMedia, LinearProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { Episode } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
 const EpisodesDrawer: React.FC = observer(() => {
-    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem } = mediaStore;
+    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress } = mediaStore;
     const { t } = useTranslations();
 
     if (!currentShow || !nowPlayingItem || !('episode_number' in nowPlayingItem)) {
@@ -29,56 +30,63 @@ const EpisodesDrawer: React.FC = observer(() => {
         });
     };
 
-    const ImageWithPlaceholder = ({ episode }: { episode: Episode }) => (
-        <Box sx={{
-            position: 'relative',
-            width: 120,
-            height: 68,
-            flexShrink: 0,
-            '&:hover .play-overlay': {
-                opacity: 1,
-            }
-        }}>
-            {episode.still_path ? (
-                <CardMedia
-                    component="img"
-                    image={episode.still_path}
-                    alt={episode.name}
-                    sx={{ width: '100%', height: '100%', borderRadius: 1, objectFit: 'cover' }}
-                />
-            ) : (
-                <Box sx={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 1,
-                    bgcolor: 'grey.900',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                    <TheatersIcon color="disabled" sx={{ fontSize: '2.5rem' }} />
+    const ImageWithProgress = ({ episode }: { episode: Episode }) => {
+        const progress = episodeProgress.get(episode.id);
+        const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
+        const isWatched = progress?.watched;
+
+        return (
+            <Box sx={{
+                position: 'relative',
+                width: 120,
+                height: 68,
+                flexShrink: 0,
+                borderRadius: 1,
+                overflow: 'hidden',
+                '&:hover .play-overlay': {
+                    opacity: 1,
+                }
+            }}>
+                {episode.still_path ? (
+                    <CardMedia
+                        component="img"
+                        image={episode.still_path}
+                        alt={episode.name}
+                        sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                ) : (
+                    <Box sx={{
+                        width: '100%', height: '100%',
+                        bgcolor: 'grey.900',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <TheatersIcon color="disabled" sx={{ fontSize: '2.5rem' }} />
+                    </Box>
+                )}
+                <Box
+                    className="play-overlay"
+                    sx={{
+                        position: 'absolute', inset: 0,
+                        bgcolor: 'rgba(0,0,0,0.6)', color: 'white',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        opacity: 0,
+                        transition: 'opacity 0.2s ease-in-out',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <PlayArrowIcon fontSize="large" />
                 </Box>
-            )}
-            <Box
-                className="play-overlay"
-                sx={{
-                    position: 'absolute',
-                    inset: 0,
-                    bgcolor: 'rgba(0,0,0,0.6)',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    opacity: 0,
-                    transition: 'opacity 0.2s ease-in-out',
-                    borderRadius: 1,
-                    cursor: 'pointer',
-                }}
-            >
-                <PlayArrowIcon fontSize="large" />
+                {watchedPercentage > 0 && !isWatched && (
+                    <LinearProgress variant="determinate" value={watchedPercentage} color="primary" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3 }} />
+                )}
+                {isWatched && (
+                    <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <CheckCircleIcon color="success" sx={{ fontSize: '2rem' }} />
+                    </Box>
+                )}
             </Box>
-        </Box>
-    );
+        );
+    };
 
     return (
         <Drawer
@@ -119,7 +127,7 @@ const EpisodesDrawer: React.FC = observer(() => {
                             >
                                 <Typography sx={{ minWidth: '2.5rem', alignSelf: 'center' }} align="center">{episode.episode_number}</Typography>
                                 
-                                <ImageWithPlaceholder episode={episode} />
+                                <ImageWithProgress episode={episode} />
 
                                 <ListItemText
                                     primary={episode.name}

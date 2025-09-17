@@ -3,7 +3,7 @@
 // methods like .version() and .transaction() are also correctly typed.
 import 'dexie-observable/api';
 import Dexie, { type Table } from 'dexie';
-import type { ViewingHistoryItem, MediaItem, EpisodeLink } from '../types';
+import type { ViewingHistoryItem, MediaItem, EpisodeLink, EpisodeProgress } from '../types';
 import dexieObservable from 'dexie-observable';
 
 // Define the structure of the data we're storing
@@ -43,6 +43,7 @@ export class QuixDB extends Dexie {
   showIntroDurations!: Table<ShowIntroDuration, number>;
   preferences!: Table<Preference, string>;
   revisions!: Table<Revision, number>; // NEW TABLE
+  episodeProgress!: Table<EpisodeProgress, number>;
 
   constructor() {
     super('quixDB', { addons: [dexieObservable] }); // Register addon
@@ -71,17 +72,21 @@ export class QuixDB extends Dexie {
       // The user will have to re-link their episodes.
       return tx.table('episodeLinks').clear();
     });
+
+    this.version(5).stores({
+        episodeProgress: '&episodeId'
+    });
   }
   
   async importData(data: any) {
-    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'episodeLinks', 'showIntroDurations', 'preferences', 'revisions'];
+    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'episodeLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress'];
     const tablesInData = data ? Object.keys(data) : [];
     
     if (!tablesInData.length || !expectedTables.every(table => tablesInData.includes(table))) {
       throw new Error("Backup file is missing required data tables or is empty.");
     }
     
-    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions], async () => {
+    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress], async () => {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.
@@ -105,7 +110,7 @@ export const db = new QuixDB();
 db.on('changes', (changes) => {
     const revisionsToLog: Revision[] = changes
         // Don't log changes to the revisions table itself to avoid an infinite loop
-        .filter(change => change.table !== 'revisions')
+        .filter(change => change.table !== 'revisions' && change.table !== 'episodeProgress')
         .map(change => ({
             timestamp: Date.now(),
             table: change.table,

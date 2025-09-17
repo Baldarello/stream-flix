@@ -39,17 +39,24 @@ export interface MediaItem {
   seasons?: Season[];
 }
 
-export type PlayableItem = MediaItem | (Episode & {
+export type PlayableItem = (MediaItem | (Episode & {
     show_id: number;
     show_title: string;
     backdrop_path: string;
     season_number: number;
-});
+})) & { startTime?: number };
 
 export interface ViewingHistoryItem {
   showId: number;
   episodeId: number;
   watchedAt: number; // timestamp
+}
+
+export interface EpisodeProgress {
+  episodeId: number; // Primary key
+  currentTime: number;
+  duration: number;
+  watched: boolean;
 }
 
 export interface ChatMessage {
