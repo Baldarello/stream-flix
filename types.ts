@@ -106,3 +106,8 @@ export interface Revision {
     description?: string;
     icon?: 'add' | 'update' | 'delete' | 'unknown';
 }
+
+export interface PreferredSource {
+  showId: number; // Primary key
+  origin: string; // e.g., "https://srv18-acqua.sweetpixel.org"
+}

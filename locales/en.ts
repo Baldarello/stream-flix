@@ -60,7 +60,9 @@ export const en = {
     "back": "back",
     "nextEpisode": "Next Episode",
     "episodeList": "Episode List",
-    "skipIntro": "Skip Intro"
+    "skipIntro": "Skip Intro",
+    "playbackSpeed": "Playback Speed",
+    "downloadVideo": "Download Video"
   },
   "episodesDrawer": {
     "title": "Episodes",
@@ -98,7 +100,9 @@ export const en = {
       "groupOpsInfo": "Bulk edit the domain for all links that share the same origin.",
       "linksFrom": "{count} links from:",
       "newDomain": "New Domain/Origin",
-      "update": "Update"
+      "update": "Update",
+      "setAsPreferred": "Set as preferred source",
+      "removePreferred": "Remove preference"
     }
   },
   "linkSelectionModal": {
@@ -292,6 +296,7 @@ export const en = {
     "importSuccess": "Imported {showCount} shows and {linkCount} links successfully! The app will now reload.",
     "importError": "Failed to import library: {error}",
     "revertSuccess": "Change successfully reverted.",
-    "revertError": "Failed to revert change: {error}"
+    "revertError": "Failed to revert change: {error}",
+    "preferredSourceSet": "Preferred source set successfully."
   }
 }

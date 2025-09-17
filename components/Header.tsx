@@ -56,7 +56,7 @@ export const Header: React.FC = observer(() => {
         maxWidth: '1600px',
         borderRadius: '16px',
         backdropFilter: 'blur(16px)',
-        background: 'rgba(20, 20, 30, 0.6)',
+        bgcolor: 'background.paper',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         transition: 'background 0.3s ease-in-out',
         zIndex: 1100, // Above content

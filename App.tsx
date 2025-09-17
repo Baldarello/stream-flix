@@ -63,19 +63,19 @@ const themePalettes: Record<ThemeName, any> = {
     SerieTV: {
         primary: { main: '#00A3FF' }, // Electric Blue
         secondary: { main: '#E50914' },
-        background: { default: 'transparent', paper: 'rgba(20, 20, 30, 0.7)' },
+        background: { default: 'transparent', paper: 'rgba(16, 24, 45, 0.75)' }, // Deep Blue
         text: { primary: '#f5f5f5', secondary: '#c0c0c0' }
     },
     Film: {
         primary: { main: colors.amber[500] },
         secondary: { main: '#ffab00' },
-        background: { default: 'transparent', paper: 'rgba(25, 20, 15, 0.7)' },
+        background: { default: 'transparent', paper: 'rgba(45, 32, 16, 0.75)' }, // Warm Amber
         text: { primary: '#f5f5f5', secondary: '#c0c0c0' }
     },
     Anime: {
         primary: { main: colors.deepPurple[400] },
         secondary: { main: '#ab47bc' },
-        background: { default: 'transparent', paper: 'rgba(25, 20, 30, 0.7)' },
+        background: { default: 'transparent', paper: 'rgba(40, 20, 48, 0.75)' }, // Vibrant Purple
         text: { primary: '#f5f5f5', secondary: '#c0c0c0' }
     }
 };
@@ -194,6 +194,8 @@ const AppContent: React.FC = observer(() => {
 });
 
 const App: React.FC = () => {
+  const { activeTheme } = mediaStore;
+  
   useEffect(() => {
     const initializeApp = async () => {
         await mediaStore.loadPersistedData();
@@ -222,7 +224,15 @@ const App: React.FC = () => {
     initializeApp();
   }, []);
   
-  const { activeTheme } = mediaStore;
+  useEffect(() => {
+    // Dynamically update body background based on theme
+    const themeClassMap: Record<ThemeName, string> = {
+      'SerieTV': 'theme-serietv',
+      'Film': 'theme-film',
+      'Anime': 'theme-anime',
+    };
+    document.body.className = themeClassMap[activeTheme] || 'theme-serietv';
+  }, [activeTheme]);
 
   const dynamicTheme = createTheme({
     palette: {

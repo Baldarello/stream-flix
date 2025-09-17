@@ -111,7 +111,7 @@ const DetailView: React.FC = observer(() => {
                 />
                 <Stack spacing={2} sx={{
                     p: { xs: 2, md: 4 },
-                    bgcolor: 'rgba(20, 20, 30, 0.7)',
+                    bgcolor: 'background.paper',
                     backdropFilter: 'blur(10px)',
                     borderRadius: 3,
                     border: '1px solid rgba(255,255,255,0.1)',

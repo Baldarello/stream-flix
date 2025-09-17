@@ -5,6 +5,8 @@ import { Box, Typography, Button, IconButton, Tooltip, Paper, List, Accordion, A
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import type { EpisodeLink, MediaItem, Season } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -17,7 +19,7 @@ interface ManageLinksViewProps {
 
 const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
     const { t } = useTranslations();
-    const { deleteEpisodeLink, clearLinksForSeason, showSnackbar, updateLinksDomain } = mediaStore;
+    const { deleteEpisodeLink, clearLinksForSeason, showSnackbar, updateLinksDomain, preferredSources, setPreferredSource } = mediaStore;
     const [domainInputs, setDomainInputs] = useState<Record<string, string>>({});
 
     const linksByDomain = currentSeason.episodes
@@ -60,6 +62,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
             updateLinksDomain({ links: linksToUpdate, newDomain });
         }
     };
+    
+    const preferredOriginForShow = preferredSources.get(item.id);
 
     return (
         <Box sx={{mt: 2, flex: 1, overflowY: 'auto' }}>
@@ -82,8 +86,19 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                             {t('linkEpisodesModal.manage.groupOpsInfo')}
                         </Typography>
                         <Stack spacing={2}>
-                            {Object.entries(linksByDomain).map(([origin, links]) => (
-                                <Paper key={origin} variant="outlined" sx={{ p: 2 }}>
+                            {Object.entries(linksByDomain).map(([origin, links]) => {
+                                const isPreferred = preferredOriginForShow === origin;
+                                const tooltipTitle = isPreferred ? t('linkEpisodesModal.manage.removePreferred') : t('linkEpisodesModal.manage.setAsPreferred');
+                                return (
+                                <Paper key={origin} variant="outlined" sx={{ p: 2, position: 'relative' }}>
+                                    <Tooltip title={tooltipTitle}>
+                                         <IconButton 
+                                            onClick={() => setPreferredSource(item.id, origin)}
+                                            sx={{ position: 'absolute', top: 4, right: 4 }}
+                                         >
+                                            {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
+                                        </IconButton>
+                                    </Tooltip>
                                     <Typography gutterBottom>
                                         {t('linkEpisodesModal.manage.linksFrom', { count: links.length })} <strong>{origin}</strong>
                                     </Typography>
@@ -101,7 +116,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                         </Button>
                                     </Stack>
                                 </Paper>
-                            ))}
+                            )})}
                         </Stack>
                     </AccordionDetails>
                 </Accordion>

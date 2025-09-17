@@ -1,5 +1,5 @@
 import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress} from '../types';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -50,6 +50,7 @@ class MediaStore {
     viewingHistory: ViewingHistoryItem[] = [];
     cachedItems: Map<number, MediaItem> = new Map();
     episodeProgress: Map<number, EpisodeProgress> = new Map();
+    preferredSources: Map<number, string> = new Map();
 
     // Search State
     searchQuery = '';
@@ -189,6 +190,7 @@ class MediaStore {
                 themePreference,
                 languagePreference,
                 episodeProgressFromDb,
+                preferredSourcesFromDb,
             ] = await Promise.all([
                 db.myList.toArray(),
                 db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray(),
@@ -198,6 +200,7 @@ class MediaStore {
                 db.preferences.get('activeTheme'),
                 db.preferences.get('language'),
                 db.episodeProgress.toArray(),
+                db.preferredSources.toArray(),
             ]);
 
             runInAction(() => {
@@ -217,6 +220,8 @@ class MediaStore {
                 this.showIntroDurations = new Map(introDurationsFromDb.map(item => [item.id, item.duration]));
                 
                 this.episodeProgress = new Map(episodeProgressFromDb.map(p => [p.episodeId, p]));
+
+                this.preferredSources = new Map(preferredSourcesFromDb.map(p => [p.showId, p.origin]));
 
                 if (themePreference) {
                     this.activeTheme = themePreference.value;
@@ -732,6 +737,31 @@ class MediaStore {
             console.error("Failed to set intro duration in DB", error);
         }
     }
+    
+    setPreferredSource = async (showId: number, origin: string) => {
+        const currentPreference = this.preferredSources.get(showId);
+
+        try {
+            if (currentPreference === origin) {
+                // If clicking the same one, unset it
+                await db.preferredSources.delete(showId);
+                runInAction(() => {
+                    this.preferredSources.delete(showId);
+                });
+            } else {
+                // Set a new preference
+                const pref: PreferredSource = { showId, origin };
+                await db.preferredSources.put(pref);
+                runInAction(() => {
+                    this.preferredSources.set(showId, origin);
+                });
+                 this.showSnackbar('notifications.preferredSourceSet', 'success', true);
+            }
+        } catch (error) {
+            console.error("Failed to set preferred source", error);
+            this.showSnackbar('notifications.processingError', 'error', true);
+        }
+    };
 
     setIntroSkippableOnSlave = (isSkippable: boolean) => {
         if (this.isIntroSkippableOnSlave !== isSkippable) {
@@ -874,123 +904,105 @@ class MediaStore {
     }
 
     startPlayback = async (item: PlayableItem) => {
-        // Step 1: Ensure we have full details for TV shows.
-        if ('media_type' in item && item.media_type === 'tv' && !item.seasons) {
-            try {
-                runInAction(() => { this.isDetailLoading = true; });
-                const seriesDetails = await getSeriesDetails(item.id);
-                const seasonsWithEpisodes = await Promise.all(
-                    seriesDetails.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
-                        return { ...season, episodes };
-                    }) ?? []
-                );
-                const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
-                this.applyEpisodeLinksToMedia([fullItem]);
-                
-                await this.startPlayback(fullItem); // Re-run with full data
+        runInAction(() => { this.isDetailLoading = true; });
+        try {
+            let episodeToPlay: (Episode & { show_id: number; show_title: string; backdrop_path: string; season_number: number; startTime?: number; video_url?: string; intro_end_s?: number }) | null = null;
+            let showForContext: MediaItem | null = null;
     
-            } catch (e) {
-                console.error("Failed to load series details for playback", e);
-                this.showSnackbar("notifications.failedToLoadSeriesDetails", "error", true);
-            } finally {
-                runInAction(() => { this.isDetailLoading = false; });
-            }
-            return;
-        }
-    
-        // Step 2: Handle playing a whole series by finding the right episode.
-        if ('media_type' in item && item.media_type === 'tv' && !('episode_number' in item)) {
-            const allEpisodes = item.seasons?.flatMap(s => 
-                s.episodes.map(e => ({
-                    ...e,
-                    show_id: item.id,
-                    show_title: item.name || item.title,
-                    backdrop_path: item.backdrop_path,
-                    season_number: s.season_number
-                }))
-            ) || [];
-    
-            const inProgressEpisode = allEpisodes.find(ep => {
-                const progress = this.episodeProgress.get(ep.id);
-                return progress && !progress.watched;
-            });
-    
-            if (inProgressEpisode) {
-                const progress = this.episodeProgress.get(inProgressEpisode.id)!;
-                await this.startPlayback({ ...inProgressEpisode, startTime: progress.currentTime });
+            // Phase 1: Determine the exact episode and load full show context
+            if ('episode_number' in item) {
+                episodeToPlay = item;
+                if (this.nowPlayingShowDetails?.id !== item.show_id) {
+                    const fullShow = await getSeriesDetails(item.show_id);
+                    const seasons = await Promise.all(fullShow.seasons?.map(async s => ({ ...s, episodes: await getSeriesEpisodes(item.show_id, s.season_number) })) ?? []);
+                    showForContext = { ...fullShow, seasons };
+                    this.applyEpisodeLinksToMedia([showForContext]);
+                } else {
+                    showForContext = this.nowPlayingShowDetails;
+                }
+            } else if (item.media_type === 'tv') {
+                const details = (item.seasons && item.seasons.every(s => s.episodes.length > 0)) ? item : await getSeriesDetails(item.id);
+                const seasons = await Promise.all(details.seasons?.map(async s => ({ ...s, episodes: await getSeriesEpisodes(item.id, s.season_number) })) ?? []);
+                showForContext = { ...details, seasons };
+                this.applyEpisodeLinksToMedia([showForContext]);
+                const allEpisodes = showForContext.seasons?.flatMap(s => s.episodes.map(e => ({ ...e, show_id: showForContext!.id, show_title: showForContext!.name || showForContext!.title, backdrop_path: showForContext!.backdrop_path, season_number: s.season_number }))) || [];
+                const inProgress = allEpisodes.find(ep => { const p = this.episodeProgress.get(ep.id); return p && !p.watched; });
+                if (inProgress) {
+                    episodeToPlay = { ...inProgress, startTime: this.episodeProgress.get(inProgress.id)!.currentTime };
+                } else {
+                    episodeToPlay = allEpisodes.find(ep => !this.episodeProgress.get(ep.id)?.watched) || allEpisodes[0] || null;
+                }
+            } else { // It's a movie
+                this.nowPlayingItem = item;
+                this.isPlaying = true;
+                this.nowPlayingShowDetails = null;
                 return;
             }
     
-            const firstUnwatchedEpisode = allEpisodes.find(ep => !this.episodeProgress.get(ep.id)?.watched);
-    
-            if (firstUnwatchedEpisode) {
-                await this.startPlayback(firstUnwatchedEpisode);
+            if (!episodeToPlay) {
+                this.showSnackbar("notifications.noPlayableEpisodes", "warning", true);
                 return;
             }
-            
-            this.showSnackbar("notifications.noPlayableEpisodes", "warning", true);
-            return;
-        }
     
-        // Step 3: Handle individual episode or movie.
-        let urlToPlay: string | undefined;
-        if ('episode_number' in item) {
-            if (item.video_urls && item.video_urls.length > 1) {
-                this.openLinkSelectionModal(item, item.video_urls);
+            // BUG FIX: Calculate and add intro_end_s
+            const introDuration = this.showIntroDurations.get(episodeToPlay.show_id) ?? 80;
+            if (episodeToPlay.intro_start_s) {
+                episodeToPlay.intro_end_s = episodeToPlay.intro_start_s + introDuration;
+            }
+    
+            // Phase 2: Handle link selection (with preferred source logic)
+            const allLinks = episodeToPlay.video_urls || [];
+            let linksToConsider = allLinks;
+            const preferredOrigin = this.preferredSources.get(episodeToPlay.show_id);
+    
+            if (preferredOrigin) {
+                const preferredLinks = allLinks.filter(link => {
+                    try { return new URL(link.url).origin === preferredOrigin; } catch { return false; }
+                });
+                if (preferredLinks.length > 0) {
+                    linksToConsider = preferredLinks;
+                }
+            }
+    
+            const isPlayingFromSelection = 'episode_number' in item && item.video_url;
+            if (linksToConsider.length > 1 && !isPlayingFromSelection) {
+                this.openLinkSelectionModal(episodeToPlay, linksToConsider);
                 return;
             }
-            urlToPlay = item.video_urls?.[0]?.url || item.video_url;
-
+    
+            const urlToPlay = isPlayingFromSelection ? item.video_url : linksToConsider[0]?.url;
             if (!urlToPlay) {
                 this.showSnackbar("notifications.noVideoLinks", "warning", true);
                 return;
             }
-        }
-        
-        let startTime = item.startTime || 0;
-        if ('episode_number' in item && !startTime) {
-            const progress = this.episodeProgress.get(item.id);
-            if (progress && !progress.watched) {
-                startTime = progress.currentTime;
-            }
-        }
-
-        this.startPlaybackConfirmed({ ...item, video_url: urlToPlay }, startTime);
-    }
     
-    startPlaybackConfirmed = async (item: PlayableItem, startTime: number = 0) => {
-        if (this.roomId && this.isHost) {
-            this.changeWatchTogetherMedia(item);
-            this.sendPlaybackControl({ status: 'playing', time: startTime });
+            // Phase 3: Set state and play
+            runInAction(() => {
+                if (this.roomId && this.isHost) {
+                    this.changeWatchTogetherMedia(episodeToPlay!);
+                    this.sendPlaybackControl({ status: 'playing', time: episodeToPlay!.startTime || 0 });
+                }
+                this.addViewingHistoryEntry(episodeToPlay!.show_id, episodeToPlay!.id);
+                this.nowPlayingShowDetails = showForContext;
+                
+                let startTime = episodeToPlay!.startTime || 0;
+                if (!startTime) {
+                    const progress = this.episodeProgress.get(episodeToPlay!.id);
+                    if (progress && !progress.watched) startTime = progress.currentTime;
+                }
+                
+                this.nowPlayingItem = { ...episodeToPlay!, video_url: urlToPlay, startTime };
+                this.isPlaying = true;
+                this.watchTogetherModalOpen = false;
+                this.closeLinkSelectionModal();
+            });
+    
+        } catch (e) {
+            console.error("Error during playback start:", e);
+            this.showSnackbar("notifications.failedToLoadSeriesDetails", "error", true);
+        } finally {
+            runInAction(() => { this.isDetailLoading = false; });
         }
-    
-        if ('episode_number' in item) {
-            this.addViewingHistoryEntry(item.show_id, item.id);
-    
-            // Ensure full show details are loaded and stored for the player context
-            if (this.nowPlayingShowDetails?.id !== item.show_id) {
-                try {
-                    const seriesDetails = await getSeriesDetails(item.show_id);
-                    const seasonsWithEpisodes = await Promise.all(
-                        seriesDetails.seasons?.map(async (season) => {
-                            const episodes = await getSeriesEpisodes(item.show_id, season.season_number);
-                            return { ...season, episodes };
-                        }) ?? []
-                    );
-                    const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
-                    this.applyEpisodeLinksToMedia([fullItem]);
-                    runInAction(() => { this.nowPlayingShowDetails = fullItem; });
-                } catch (e) { console.error("Could not fetch show details for player", e); }
-            }
-        } else {
-            runInAction(() => { this.nowPlayingShowDetails = null; });
-        }
-    
-        this.nowPlayingItem = { ...item, startTime };
-        this.isPlaying = true;
-        this.watchTogetherModalOpen = false;
-        this.closeLinkSelectionModal();
     }
 
     stopPlayback = () => {
@@ -1380,6 +1392,7 @@ class MediaStore {
                 preferences,
                 revisions,
                 episodeProgress,
+                preferredSources,
             ] = await Promise.all([
                 db.myList.toArray(),
                 db.viewingHistory.toArray(),
@@ -1389,6 +1402,7 @@ class MediaStore {
                 db.preferences.toArray(),
                 db.revisions.toArray(),
                 db.episodeProgress.toArray(),
+                db.preferredSources.toArray(),
             ]);
 
             const backupData = {
@@ -1401,6 +1415,7 @@ class MediaStore {
                     preferences,
                     revisions,
                     episodeProgress,
+                    preferredSources,
                 }
             };
             

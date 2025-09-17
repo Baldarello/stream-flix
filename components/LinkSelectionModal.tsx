@@ -13,7 +13,7 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: { xs: '90%', sm: 400 },
-  bgcolor: 'rgba(20, 20, 30, 0.9)',
+  bgcolor: 'background.paper',
   backdropFilter: 'blur(10px)',
   border: '1px solid rgba(255, 255, 255, 0.1)',
   boxShadow: 24,
@@ -22,14 +22,14 @@ const style = {
 };
 
 const LinkSelectionModal: React.FC = () => {
-  const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlaybackConfirmed } = mediaStore;
+  const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlayback } = mediaStore;
   const { t } = useTranslations();
 
   const handleSelectLink = (link: EpisodeLink) => {
     if (itemForLinkSelection) {
       // Create a new item object with the selected video_url to pass to the player
       const itemToPlay = { ...itemForLinkSelection, video_url: link.url };
-      startPlaybackConfirmed(itemToPlay);
+      startPlayback(itemToPlay);
     }
   };
 

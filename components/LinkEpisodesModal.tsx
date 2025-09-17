@@ -148,7 +148,7 @@ const AddLinkTabs: React.FC<{
                  <Box sx={{ flexGrow: 1, pr: 1 }}>
                     {renderAddContent()}
                 </Box>
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, pt: 1 }}>
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1 }}>
                     <Button onClick={handleSave} variant="contained">{t('linkEpisodesModal.add.save')}</Button>
                 </Box>
             </Box>

@@ -60,7 +60,9 @@ export const it = {
     "back": "indietro",
     "nextEpisode": "Prossimo Episodio",
     "episodeList": "Lista Episodi",
-    "skipIntro": "Salta Intro"
+    "skipIntro": "Salta Intro",
+    "playbackSpeed": "Velocità di Riproduzione",
+    "downloadVideo": "Scarica Video"
   },
   "episodesDrawer": {
     "title": "Episodi",
@@ -98,7 +100,9 @@ export const it = {
       "groupOpsInfo": "Modifica in blocco il dominio per tutti i link che condividono la stessa origine.",
       "linksFrom": "{count} link da:",
       "newDomain": "Nuovo Dominio/Origine",
-      "update": "Aggiorna"
+      "update": "Aggiorna",
+      "setAsPreferred": "Imposta come fonte preferita",
+      "removePreferred": "Rimuovi preferenza"
     }
   },
   "linkSelectionModal": {
@@ -292,6 +296,7 @@ export const it = {
     "importSuccess": "{showCount} show e {linkCount} link importati con successo! L'app verrà ricaricata.",
     "importError": "Errore durante l'importazione: {error}",
     "revertSuccess": "Modifica annullata con successo.",
-    "revertError": "Impossibile annullare la modifica: {error}"
+    "revertError": "Impossibile annullare la modifica: {error}",
+    "preferredSourceSet": "Fonte preferita impostata con successo."
   }
 }

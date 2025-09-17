@@ -1,8 +1,5 @@
 import React from 'react';
-// FIX: The `item` prop on the `Grid` component was causing a TypeScript
-// error. Using a direct import for `Grid` resolves the type definition issue.
-import { Box, Container, Typography, Fade } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
@@ -53,6 +50,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((item, index) => (
+              // FIX: Added the `item` prop to the Grid component. A Grid component that is a direct child of a Grid container must have the "item" prop to accept responsive layout props like "xs", "sm", etc.
               <Grid item key={item.id} xs={6} sm={4} md={3} lg={2} sx={{
                   transition: 'opacity 0.5s, transform 0.5s',
                   animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,

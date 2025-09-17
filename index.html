@@ -15,9 +15,11 @@
         --glow-seriestv-color: #00A3FF;
         --glow-film-color: #ffab00;
         --glow-anime-color: #ab47bc;
-        --background-gradient-start: #0F0C29;
-        --background-gradient-mid: #1c1642;
-        --background-gradient-end: #141414;
+
+        /* Theme Gradients */
+        --serietv-gradient: linear-gradient(to bottom, #0F0C29, #1c1642, #141414);
+        --film-gradient: linear-gradient(to bottom, #2d1a04, #4a2a0a, #141414);
+        --anime-gradient: linear-gradient(to bottom, #1d0f29, #331642, #141414);
       }
 
       @keyframes kenburns {
@@ -46,10 +48,47 @@
       ::-webkit-scrollbar-thumb:hover {
         background-color: #555;
       }
+      
+      /* Custom Video Player Slider Styles */
+      .video-player-slider .MuiSlider-thumb {
+        width: 15px;
+        height: 15px;
+        transition: width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease;
+      }
+      .video-player-slider:hover .MuiSlider-thumb {
+        width: 18px;
+        height: 18px;
+        box-shadow: 0 0 10px 2px currentColor;
+      }
+      .video-player-slider .MuiSlider-track {
+        height: 4px;
+        transition: height 0.2s ease;
+        border: none;
+      }
+      .video-player-slider:hover .MuiSlider-track {
+        height: 6px;
+      }
+      .video-player-slider .MuiSlider-rail {
+        height: 4px;
+        transition: height 0.2s ease;
+      }
+      .video-player-slider:hover .MuiSlider-rail {
+        height: 6px;
+      }
+
 
       body {
-        background: linear-gradient(to bottom, var(--background-gradient-start), var(--background-gradient-mid), var(--background-gradient-end));
         background-attachment: fixed;
+        transition: background 0.5s ease-in-out;
+      }
+      body.theme-serietv {
+        background: var(--serietv-gradient);
+      }
+      body.theme-film {
+        background: var(--film-gradient);
+      }
+      body.theme-anime {
+        background: var(--anime-gradient);
       }
     </style>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
