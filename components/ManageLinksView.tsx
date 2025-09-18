@@ -133,8 +133,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography noWrap>{episode.episode_number}. {episode.name}</Typography>
                             <Typography sx={{ color: 'text.secondary', ml: 'auto', pl: 2 }}>
-                                {/* Cast to the correct type to resolve incorrect type inference by TypeScript. */}
-                                {t('linkEpisodesModal.manage.linksCount', { count: (episode.video_urls as EpisodeLink[])?.length || 0 })}
+                                {/* FIX: Use Array.isArray as a type guard to safely access the length property. */}
+                                {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>

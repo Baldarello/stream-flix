@@ -29,6 +29,8 @@ const DetailView: React.FC = observer(() => {
 
   const introDuration = showIntroDurations.get(item.id) ?? 80;
 
+  const backgroundImage = item.backdrop_path || item.poster_path;
+
 
   const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -62,15 +64,23 @@ const DetailView: React.FC = observer(() => {
 
   return (
     <Box sx={{ position: 'fixed', inset: 0, zIndex: 1200, animation: 'fadeIn 0.5s ease-in-out' }}>
-        <Box sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${item.backdrop_path})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'blur(20px) brightness(0.5)',
-            transform: 'scale(1.1)',
-        }} />
+        {backgroundImage ? (
+            <Box sx={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url(${backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(20px) brightness(0.5)',
+                transform: 'scale(1.1)',
+            }} />
+        ) : (
+             <Box sx={{
+                position: 'absolute',
+                inset: 0,
+                bgcolor: '#141414',
+            }} />
+        )}
 
         <IconButton
             onClick={() => mediaStore.closeDetail()}
@@ -96,19 +106,37 @@ const DetailView: React.FC = observer(() => {
                 minHeight: '60vh',
                 alignItems: 'center',
             }}>
-                <CardMedia
-                    component="img"
-                    image={item.poster_path}
-                    alt={title}
-                    sx={{
+                {item.poster_path ? (
+                    <CardMedia
+                        component="img"
+                        image={item.poster_path}
+                        alt={title}
+                        sx={{
+                            width: '100%',
+                            maxWidth: '350px',
+                            aspectRatio: '2/3',
+                            borderRadius: 3,
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                            justifySelf: 'center',
+                        }}
+                    />
+                ) : (
+                    <Box sx={{
                         width: '100%',
                         maxWidth: '350px',
                         aspectRatio: '2/3',
                         borderRadius: 3,
                         boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
                         justifySelf: 'center',
-                    }}
-                />
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        <TheatersIcon color="disabled" sx={{ fontSize: '6rem' }} />
+                    </Box>
+                )}
                 <Stack spacing={2} sx={{
                     p: { xs: 2, md: 4 },
                     bgcolor: 'background.paper',

@@ -65,7 +65,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
                       }
                   }
               }}>
-                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem)} displayMode="grid" style={{minHeight:"756px",minWidth:"504px"}}/>
+                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem)} displayMode="grid" style={{minHeight:"706px"}} />
               </Grid>
             ))}
           </Grid>
