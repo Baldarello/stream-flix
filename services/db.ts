@@ -99,13 +99,13 @@ export class QuixDB extends Dexie {
         // Migrate data from episodeLinks to mediaLinks
         const episodeLinks = await tx.table('episodeLinks').toArray();
         if (episodeLinks.length > 0) {
-            const mediaLinks = episodeLinks.map(link => ({
-                id: link.id,
+            const mediaLinksToMigrate = episodeLinks.map(link => ({
+                // id is auto-incrementing now, so we don't set it
                 mediaId: link.episodeId,
                 url: link.url,
-                label: link.label,
+                label: link.label || new URL(link.url).hostname,
             }));
-            await tx.table('mediaLinks').bulkAdd(mediaLinks);
+            await tx.table('mediaLinks').bulkAdd(mediaLinksToMigrate);
         }
     });
   }
@@ -119,7 +119,7 @@ export class QuixDB extends Dexie {
     }
     
     // FIX: Removed unnecessary and problematic cast to 'Dexie'.
-    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.mediaLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
+    await this.transaction('rw', this.tables, async () => {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, Card, CardMedia, Tooltip, CircularProgress, TextField, InputAdornment, List, ListItemButton, ListItemText, LinearProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -144,7 +145,8 @@ const DetailView: React.FC = observer(() => {
                     borderRadius: 3,
                     border: '1px solid rgba(255,255,255,0.1)',
                 }}>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
                         {item.media_type === 'movie' && (
                              <Tooltip title={t('detail.linkEpisodesTooltip')}>

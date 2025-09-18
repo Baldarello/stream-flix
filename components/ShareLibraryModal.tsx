@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemIcon, ListItemText, Checkbox, TextField, InputAdornment, Tooltip, ListItemButton, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -104,7 +105,7 @@ const ShareLibraryModal: React.FC = observer(() => {
              return (
                 <Box mt={2}>
                     <Typography gutterBottom>{t('shareAndImport.shareLinkReady')}</Typography>
-                    {/* The 'readOnly' prop on TextField is passed via 'InputProps' to avoid a TypeScript error. */}
+                    {/* FIX: The 'readOnly' prop on TextField is passed via 'InputProps' to avoid a TypeScript error. */}
                     <TextField
                         fullWidth
                         value={generatedLink}

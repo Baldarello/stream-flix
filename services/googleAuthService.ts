@@ -1,3 +1,4 @@
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import type { GoogleUser } from '../types';
 
@@ -42,6 +43,12 @@ const tryRestoringSession = async () => {
 
 
 export const initGoogleAuth = async () => {
+  // If the client ID is not configured, skip all Google authentication logic.
+  if (!GOOGLE_CLIENT_ID) {
+    console.warn("Google Client ID is not configured. Skipping Google Auth initialization.");
+    return;
+  }
+  
   if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
     // Wait a moment for the GSI script to load from index.html
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -49,11 +56,6 @@ export const initGoogleAuth = async () => {
       console.error("Google Identity Services library still not loaded after delay.");
       return;
     }
-  }
-  
-  if (!GOOGLE_CLIENT_ID) {
-    console.error("Google Client ID is not configured. Please set process.env.GOOGLE_CLIENT_ID.");
-    return;
   }
   
   // Attempt to restore session before initializing the client for new logins.

@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { observer } from 'mobx-react-lite';
 import { useTranslations } from '../hooks/useTranslations';
@@ -65,7 +66,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
                       }
                   }
               }}>
-                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem)} displayMode="grid" style={{minHeight:"756px",minWidth:"504px"}} />
+                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem)} displayMode="grid" />
               </Grid>
             ))}
           </Grid>

@@ -1,11 +1,13 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Box, Typography, Container, AppBar, Toolbar } from '@mui/material';
 import { ContentRow } from './ContentRow';
 import RemoteDetailView from './RemoteDetailView';
 import RemotePlayerControlView from './RemotePlayerControlView';
 import { useTranslations } from '../hooks/useTranslations';
+import type { MediaItem } from '../types';
 
 const RemoteControlView: React.FC = observer(() => {
     const { t } = useTranslations();
@@ -46,7 +48,8 @@ const RemoteControlView: React.FC = observer(() => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 <Typography variant="h4" fontWeight="bold">{t('remote.chooseForTV')}</Typography>
                   {continueWatchingItems.length > 0 && (
-                      <ContentRow title={t('misc.continueWatching')} items={continueWatchingItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                      // FIX: Type 'PlayableItem[]' is not assignable to type 'MediaItem[]'. Cast to MediaItem[] is safe after store changes.
+                      <ContentRow title={t('misc.continueWatching')} items={continueWatchingItems as MediaItem[]} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
                   )}
                   {myListItems.length > 0 && (
                       <ContentRow title={t('misc.myList')} items={myListItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />

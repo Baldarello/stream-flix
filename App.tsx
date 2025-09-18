@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore, ThemeName } from './store/mediaStore';
 import { Box, CircularProgress, Alert, Container, Typography, colors } from '@mui/material';
 import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';

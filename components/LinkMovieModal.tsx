@@ -5,6 +5,8 @@ import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemTex
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useTranslations } from '../hooks/useTranslations';
 import type { MediaLink } from '../types';
 
@@ -24,8 +26,16 @@ const style = {
 };
 
 const LinkMovieModal: React.FC = observer(() => {
-  // FIX: Destructure the correct properties from mediaStore, which will be added in the store refactoring.
-  const { isLinkMovieModalOpen, closeLinkMovieModal, linkingMovieItem, mediaLinks, addLinksToMedia, deleteMediaLink } = mediaStore;
+  const { 
+    isLinkMovieModalOpen, 
+    closeLinkMovieModal, 
+    linkingMovieItem, 
+    mediaLinks, 
+    addLinksToMedia, 
+    deleteMediaLink,
+    preferredSources,
+    setPreferredSource
+  } = mediaStore;
   const { t } = useTranslations();
   
   const [newUrl, setNewUrl] = useState('');
@@ -33,10 +43,20 @@ const LinkMovieModal: React.FC = observer(() => {
 
   const item = linkingMovieItem;
   
-  const currentLinks = useMemo(() => {
-    if (!item) return [];
-    return mediaLinks.get(item.id) || [];
+  const linksByOrigin = useMemo(() => {
+    if (!item) return {};
+    const links = mediaLinks.get(item.id) || [];
+    return links.reduce((acc, link) => {
+        try {
+            const origin = new URL(link.url).origin;
+            if (!acc[origin]) acc[origin] = [];
+            acc[origin].push(link);
+        } catch (e) { /* ignore invalid URLs */ }
+        return acc;
+    }, {} as Record<string, MediaLink[]>);
   }, [mediaLinks, item]);
+
+  const preferredOriginForMovie = item ? preferredSources.get(item.id) : undefined;
 
   if (!item) return null;
 
@@ -68,32 +88,50 @@ const LinkMovieModal: React.FC = observer(() => {
                 </Stack>
             </Paper>
 
-            <List sx={{ flex: 1, overflowY: 'auto' }}>
-                {currentLinks.length === 0 ? (
+            <List sx={{ flex: 1, overflowY: 'auto', p: 0 }}>
+                {Object.keys(linksByOrigin).length === 0 ? (
                     <Typography color="text.secondary" textAlign="center" sx={{p: 2}}>
                         {t('linkMovieModal.noLinks')}
                     </Typography>
                 ) : (
-                    currentLinks.map((link: MediaLink) => (
-                        <ListItem
-                            key={link.id}
-                            secondaryAction={
-                                <Tooltip title={t('linkMovieModal.deleteLink')}>
-                                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteLink(link.id!)} color="error">
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            }
-                            disablePadding
-                        >
-                            <ListItemText
-                                primary={link.label}
-                                secondary={link.url}
-                                primaryTypographyProps={{ noWrap: true }}
-                                secondaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden' }}
-                            />
-                        </ListItem>
-                    ))
+                    Object.entries(linksByOrigin).map(([origin, links]) => {
+                        const isPreferred = preferredOriginForMovie === origin;
+                        const tooltipTitle = isPreferred ? t('linkEpisodesModal.manage.removePreferred') : t('linkEpisodesModal.manage.setAsPreferred');
+                        
+                        return (
+                            <Paper key={origin} variant="outlined" sx={{ p: 2, mb: 2 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis' }}>{origin}</Typography>
+                                    <Tooltip title={tooltipTitle}>
+                                        <IconButton onClick={() => setPreferredSource(item.id, origin)}>
+                                            {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+                                {links.map((link: MediaLink) => (
+                                    <ListItem
+                                        key={link.id}
+                                        secondaryAction={
+                                            <Tooltip title={t('linkMovieModal.deleteLink')}>
+                                                <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteLink(link.id!)} color="error">
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        }
+                                        disablePadding
+                                        sx={{ pl: 1, borderTop: '1px solid rgba(255,255,255,0.12)' }}
+                                    >
+                                        <ListItemText
+                                            primary={link.label}
+                                            secondary={link.url}
+                                            primaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden' }}
+                                            secondaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden' }}
+                                        />
+                                    </ListItem>
+                                ))}
+                            </Paper>
+                        );
+                    })
                 )}
             </List>
         </Stack>

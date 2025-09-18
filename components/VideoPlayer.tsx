@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Box, IconButton, Typography, AppBar, Toolbar, Tooltip, Button, Fade, Slider, Stack, Popover, List, ListItemButton, ListItemText } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -296,6 +297,7 @@ const VideoPlayer: React.FC = observer(() => {
       const E = String(nowPlayingItem.episode_number).padStart(2,'0');
       title = `${nowPlayingItem.show_title} - S${S}E${E}: ${nowPlayingItem.name}`;
   } else {
+      videoSrc = nowPlayingItem.video_url || videoSrc;
       title = nowPlayingItem.title || nowPlayingItem.name || 'Video';
   }
   

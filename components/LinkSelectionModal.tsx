@@ -1,5 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -41,7 +42,8 @@ const LinkSelectionModal: React.FC = () => {
   let title: string;
   if (itemForLinkSelection && 'episode_number' in itemForLinkSelection) {
       title = t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name });
-  } else if (itemForLinkSelection) { // This will be a MediaItem
+  // FIX: Property 'title' does not exist on type 'PlayableItem'. Added a more specific type guard.
+  } else if (itemForLinkSelection && 'media_type' in itemForLinkSelection) { // This will be a MediaItem
       title = itemForLinkSelection.title || itemForLinkSelection.name || t('linkSelectionModal.defaultTitle');
   } else {
       title = t('linkSelectionModal.defaultTitle');

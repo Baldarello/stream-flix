@@ -308,7 +308,6 @@ export const en = {
     "revertSuccess": "Change successfully reverted.",
     "revertError": "Failed to revert change: {error}",
     "preferredSourceSet": "Preferred source set successfully.",
-    "syncing": "Syncing with cloud...",
     "syncChecking": "Checking for cloud data...",
     "syncError": "Error syncing with cloud.",
     "noBackupFoundCreating": "No cloud backup found. Creating one now...",
