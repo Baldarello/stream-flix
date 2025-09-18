@@ -2,7 +2,7 @@ import { mediaStore } from '../store/mediaStore';
 
 // This Client ID should be defined in a .env file for your project
 // You can get one from the Google Cloud Console: https://console.cloud.google.com/apis/credentials
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 
@@ -11,6 +11,12 @@ export const initGoogleAuth = () => {
     console.error("Google Identity Services library not loaded.");
     return;
   }
+  
+  if (!GOOGLE_CLIENT_ID) {
+    console.error("Google Client ID is not configured. Please set process.env.GOOGLE_CLIENT_ID.");
+    return;
+  }
+
 
   try {
     tokenClient = google.accounts.oauth2.initTokenClient({

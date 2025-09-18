@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
         plugins: [react()],
         define: {
             ...processEnv,
-            'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version)
+            'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
         },
         resolve: {
             alias: {
