@@ -297,6 +297,11 @@ export const it = {
     "importError": "Errore durante l'importazione: {error}",
     "revertSuccess": "Modifica annullata con successo.",
     "revertError": "Impossibile annullare la modifica: {error}",
-    "preferredSourceSet": "Fonte preferita impostata con successo."
+    "preferredSourceSet": "Fonte preferita impostata con successo.",
+    "syncing": "Sincronizzazione con il cloud...",
+    "syncChecking": "Verifica dei dati nel cloud...",
+    "syncError": "Errore di sincronizzazione con il cloud.",
+    "noBackupFoundCreating": "Nessun backup cloud trovato. Creazione in corso...",
+    "restoringFromCloud": "Dati più recenti trovati nel cloud. Ripristino in corso..."
   }
 }

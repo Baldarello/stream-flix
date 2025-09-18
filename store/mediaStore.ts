@@ -132,8 +132,8 @@ class MediaStore {
 
     // Google Auth & Sync State
     googleUser: GoogleUser | null = null;
-    isBackingUp = false;
-    isRestoring = false;
+    isSyncing = false;
+    private backupDebounceTimer: number | null = null;
     
     // Translation State
     language: Language = 'it';
@@ -1388,7 +1388,6 @@ class MediaStore {
                 episodeLinks,
                 showIntroDurations,
                 preferences,
-                revisions,
                 episodeProgress,
                 preferredSources,
             ] = await Promise.all([
@@ -1397,8 +1396,8 @@ class MediaStore {
                 db.cachedItems.toArray(),
                 db.episodeLinks.toArray(),
                 db.showIntroDurations.toArray(),
-                db.preferences.toArray(),
-                db.revisions.toArray(),
+                // Exclude sync timestamp from the backup payload, as a fresh one will be added.
+                db.preferences.where('key').notEqual('lastSyncTimestamp').toArray(),
                 db.episodeProgress.toArray(),
                 db.preferredSources.toArray(),
             ]);
@@ -1411,7 +1410,6 @@ class MediaStore {
                     episodeLinks,
                     showIntroDurations,
                     preferences,
-                    revisions,
                     episodeProgress,
                     preferredSources,
                 }
@@ -1472,68 +1470,78 @@ class MediaStore {
         return this.googleUser !== null;
     }
 
-    setGoogleUser = async (user: GoogleUser | null) => {
+    setGoogleUser = (user: GoogleUser | null) => {
         this.googleUser = user;
         if (user) {
             this.showSnackbar('notifications.welcomeUser', 'success', true, { name: user.name });
-            // After user is set, check for a backup
-            await this.checkForRemoteBackup();
         } else {
              this.showSnackbar("notifications.logoutSuccess", "info", true);
         }
     }
 
-    checkForRemoteBackup = async () => {
-        if (!this.googleUser) return;
-        try {
-            const backupFile = await driveService.findBackupFile(this.googleUser.accessToken);
-            if (backupFile) {
-                this.showSnackbarWithAction("notifications.backupFound", "info", "notifications.restore", () => {
-                    this.restoreFromDrive();
-                });
-            }
-        } catch (error) {
-            console.error("Failed to check for remote backup:", error);
-            // Don't bother the user with an error here, it's a background check.
+    triggerDebouncedBackup = () => {
+        if (!this.googleUser || this.isSyncing) return;
+
+        if (this.backupDebounceTimer) {
+            clearTimeout(this.backupDebounceTimer);
         }
+
+        this.backupDebounceTimer = window.setTimeout(async () => {
+            await this.backupToDrive(true); // isAuto is true for debounced backups
+        }, 15000); // 15-second debounce window
     }
 
-    backupToDrive = async () => {
-        if (!this.googleUser) {
-            this.showSnackbar("notifications.loginRequired", "warning", true);
+    backupToDrive = async (isAuto = false) => {
+        if (!this.googleUser || this.isSyncing) {
             return;
         }
 
-        this.isBackingUp = true;
-        this.showSnackbar("notifications.backupInProgress", "info", true);
+        this.isSyncing = true;
+        this.showSnackbar(isAuto ? "notifications.syncing" : "notifications.backupInProgress", "info", true);
         try {
             const backupData = await this.prepareUserDataBackup();
+            const newSyncTimestamp = Date.now();
+            
+            if (backupData?.data) {
+                // Add the new sync timestamp to the preferences within the backup data itself
+                backupData.data.preferences = [
+                    ...backupData.data.preferences,
+                    { key: 'lastSyncTimestamp', value: newSyncTimestamp }
+                ];
+            }
+            
             if (!backupData || !backupData.data) throw new Error("Could not prepare backup data.");
             
-            const existingFile = await driveService.findBackupFile(this.googleUser.accessToken);
-            await driveService.writeBackupFile(this.googleUser.accessToken, backupData.data, existingFile?.id || null);
+            await driveService.writeBackupFile(this.googleUser.accessToken, backupData.data);
+            
+            // Update local timestamp AFTER successful backup
+            await db.preferences.put({ key: 'lastSyncTimestamp', value: newSyncTimestamp });
 
             this.showSnackbar("notifications.backupComplete", "success", true);
+            
+            // Clean up old backups in the background, not critical to wait for it
+            driveService.deleteOldBackups(this.googleUser.accessToken);
+
         } catch (error) {
             console.error("Failed to backup to Google Drive:", error);
             this.showSnackbar("notifications.backupSaveError", "error", true);
         } finally {
             runInAction(() => {
-              this.isBackingUp = false;
+              this.isSyncing = false;
             });
         }
     }
 
-    restoreFromDrive = async () => {
-        if (!this.googleUser) {
+    restoreFromDrive = async (fileId?: string) => {
+        if (!this.googleUser || this.isSyncing) {
             this.showSnackbar("notifications.loginRequired", "warning", true);
             return;
         }
         
-        this.isRestoring = true;
+        this.isSyncing = true;
         this.showSnackbar("notifications.restoreInProgress", "info", true);
         try {
-            const backupFile = await driveService.findBackupFile(this.googleUser.accessToken);
+            const backupFile = fileId ? { id: fileId } : await driveService.findLatestBackupFile(this.googleUser.accessToken);
             if (!backupFile) {
                 this.showSnackbar("notifications.noBackupFound", "warning", true);
                 return;
@@ -1544,7 +1552,6 @@ class MediaStore {
 
             this.showSnackbar("notifications.restoreComplete", "success", true);
             
-            // Reload the app to reflect changes from the DB
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -1554,7 +1561,44 @@ class MediaStore {
             this.showSnackbar("notifications.restoreError", "error", true, { error: (error as Error).message });
         } finally {
             runInAction(() => {
-              this.isRestoring = false;
+              this.isSyncing = false; // Will be reset on reload anyway, but good practice
+            });
+        }
+    }
+    
+    synchronizeWithDrive = async () => {
+        if (!this.googleUser || this.isSyncing) return;
+
+        this.isSyncing = true;
+        this.showSnackbar("notifications.syncChecking", "info", true);
+
+        try {
+            const latestDriveBackup = await driveService.findLatestBackupFile(this.googleUser.accessToken);
+            const lastSyncRecord = await db.preferences.get('lastSyncTimestamp');
+            const lastLocalSyncTimestamp = lastSyncRecord?.value || 0;
+
+            if (!latestDriveBackup) {
+                this.showSnackbar("notifications.noBackupFoundCreating", "info", true);
+                await this.backupToDrive();
+                return;
+            }
+
+            const driveTimestampMatch = latestDriveBackup.name.match(/_(\d+)\.json$/);
+            const driveTimestamp = driveTimestampMatch ? parseInt(driveTimestampMatch[1], 10) : 0;
+
+            if (driveTimestamp > lastLocalSyncTimestamp) {
+                this.showSnackbar("notifications.restoringFromCloud", "info", true);
+                await this.restoreFromDrive(latestDriveBackup.id);
+            } else {
+                this.hideSnackbar();
+            }
+
+        } catch (error) {
+            console.error("Failed to synchronize with Google Drive:", error);
+            this.showSnackbar("notifications.syncError", "error", true);
+        } finally {
+            runInAction(() => {
+                this.isSyncing = false;
             });
         }
     }

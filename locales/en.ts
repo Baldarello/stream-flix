@@ -297,6 +297,11 @@ export const en = {
     "importError": "Failed to import library: {error}",
     "revertSuccess": "Change successfully reverted.",
     "revertError": "Failed to revert change: {error}",
-    "preferredSourceSet": "Preferred source set successfully."
+    "preferredSourceSet": "Preferred source set successfully.",
+    "syncing": "Syncing with cloud...",
+    "syncChecking": "Checking for cloud data...",
+    "syncError": "Error syncing with cloud.",
+    "noBackupFoundCreating": "No cloud backup found. Creating one now...",
+    "restoringFromCloud": "Newer data found in the cloud. Restoring now..."
   }
 }

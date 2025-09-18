@@ -31,6 +31,16 @@ export interface Revision {
     oldObj?: any;
 }
 
+// FIX: Define a local interface for database changes from dexie-observable
+// to provide strong typing for the 'changes' event.
+interface DbChange {
+    table: string;
+    key: any;
+    type: 1 | 2 | 3; // 1:create, 2:update, 3:delete
+    obj?: any;
+    oldObj?: any;
+}
+
 
 export class QuixDB extends Dexie {
   myList!: Table<MyListItem, number>;
@@ -85,7 +95,7 @@ export class QuixDB extends Dexie {
     const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'episodeLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources'];
     const tablesInData = data ? Object.keys(data) : [];
     
-    if (!tablesInData.length || !expectedTables.every(table => tablesInData.includes(table))) {
+    if (!tablesInData.length || !tablesInData.some(table => expectedTables.includes(table))) {
       throw new Error("Backup file is missing required data tables or is empty.");
     }
     
@@ -93,7 +103,7 @@ export class QuixDB extends Dexie {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.
-            if ((this as any)[table]) {
+            if ((this as any)[table] && data[table]) {
               await (this as any)[table].clear();
             }
         }
@@ -111,27 +121,45 @@ export class QuixDB extends Dexie {
   }
 }
 
+// FIX: Augment the QuixDB class with the 'on' method from the dexie-observable addon.
+// This informs TypeScript that instances of QuixDB will have this method at runtime,
+// resolving the "Property 'on' does not exist" error.
+export interface QuixDB {
+    on(eventName: 'changes', subscriber: (changes: DbChange[]) => void): void;
+}
+
 export const db = new QuixDB();
 
-// Listen for database changes and log them as revisions
-(db as Dexie).on('changes', (changes) => {
-    const revisionsToLog: Revision[] = changes
-        // Don't log changes to the revisions table itself to avoid an infinite loop
-        .filter(change => change.table !== 'revisions' && change.table !== 'episodeProgress' && change.table !== 'preferredSources')
-        .map(change => ({
-            timestamp: Date.now(),
-            table: change.table,
-            key: change.key,
-            type: change.type as 1 | 2 | 3,
-            // Conditionally access `obj` and `oldObj`. These properties exist on different types
-            // within the IDatabaseChange union, and the `in` operator acts as a type guard.
-            obj: 'obj' in change ? change.obj : undefined,
-            oldObj: 'oldObj' in change ? change.oldObj : undefined,
-        }));
-    
-    if (revisionsToLog.length > 0) {
-        db.revisions.bulkAdd(revisionsToLog).catch(err => {
-            console.error('Failed to log database revisions:', err);
+// Listen for database changes to log revisions and trigger automatic backups
+db.on('changes', (changes: DbChange[]) => {
+    // Filter out changes we don't want to track or that would cause loops
+    const relevantChanges = changes.filter(change => 
+        change.table !== 'revisions' && 
+        change.table !== 'preferences' // Don't trigger a backup when just updating the sync timestamp
+    );
+
+    if (relevantChanges.length > 0) {
+        const revisionsToLog: Revision[] = relevantChanges
+            .filter(change => change.table !== 'episodeProgress' && change.table !== 'preferredSources')
+            .map(change => ({
+                timestamp: Date.now(),
+                table: change.table,
+                key: change.key,
+                type: change.type as 1 | 2 | 3,
+                obj: 'obj' in change ? change.obj : undefined,
+                oldObj: 'oldObj' in change ? change.oldObj : undefined,
+            }));
+        
+        if (revisionsToLog.length > 0) {
+            db.revisions.bulkAdd(revisionsToLog).catch(err => {
+                console.error('Failed to log database revisions:', err);
+            });
+        }
+        
+        // Trigger a debounced backup to avoid excessive writes on rapid changes
+        // Using a dynamic import() here to break a potential module dependency cycle (db -> mediaStore -> db)
+        import('../store/mediaStore').then(({ mediaStore }) => {
+            mediaStore.triggerDebouncedBackup();
         });
     }
 });

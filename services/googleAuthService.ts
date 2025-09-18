@@ -27,8 +27,9 @@ const tryRestoringSession = async () => {
     });
 
     if (response.ok) {
-      // Token is valid, restore the session
-      mediaStore.setGoogleUser(user);
+      // Token is valid, set user and then trigger sync
+      await mediaStore.setGoogleUser(user);
+      await mediaStore.synchronizeWithDrive();
     } else {
       // Token is invalid/expired
       throw new Error("Token validation failed.");
@@ -56,7 +57,8 @@ export const initGoogleAuth = async () => {
     return;
   }
   
-  // Attempt to restore session before initializing the client for new logins
+  // Attempt to restore session before initializing the client for new logins.
+  // This now also handles the initial data sync.
   await tryRestoringSession();
 
 
@@ -84,7 +86,8 @@ export const initGoogleAuth = async () => {
               // Persist session to localStorage
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
               
-              mediaStore.setGoogleUser(user);
+              await mediaStore.setGoogleUser(user);
+              await mediaStore.synchronizeWithDrive();
               
             } catch (error) {
                 console.error("Error fetching user profile:", error);

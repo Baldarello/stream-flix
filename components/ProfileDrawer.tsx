@@ -21,7 +21,7 @@ import { useTranslations } from '../hooks/useTranslations';
 const ProfileDrawer: React.FC = observer(() => {
     const { 
         isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
-        isLoggedIn, googleUser, isBackingUp, isRestoring, backupToDrive, restoreFromDrive, language, setLanguage,
+        isLoggedIn, googleUser, isSyncing, backupToDrive, restoreFromDrive, language, setLanguage,
         openShareModal, openImportModal, openRevisionsModal
     } = mediaStore;
     const { t } = useTranslations();
@@ -164,14 +164,14 @@ const ProfileDrawer: React.FC = observer(() => {
                  {isLoggedIn ? (
                     <>
                         <ListItem disablePadding>
-                            <ListItemButton onClick={backupToDrive} disabled={isBackingUp || isRestoring}>
-                                <ListItemIcon>{isBackingUp ? <CircularProgress size={24} /> : <CloudUploadIcon />}</ListItemIcon>
+                            <ListItemButton onClick={() => backupToDrive()} disabled={isSyncing}>
+                                <ListItemIcon>{isSyncing ? <CircularProgress size={24} /> : <CloudUploadIcon />}</ListItemIcon>
                                 <ListItemText primary={t('profileDrawer.backup')} />
                             </ListItemButton>
                         </ListItem>
                         <ListItem disablePadding>
-                            <ListItemButton onClick={restoreFromDrive} disabled={isRestoring || isBackingUp}>
-                                <ListItemIcon>{isRestoring ? <CircularProgress size={24} /> : <CloudDownloadIcon />}</ListItemIcon>
+                            <ListItemButton onClick={() => restoreFromDrive()} disabled={isSyncing}>
+                                <ListItemIcon>{isSyncing ? <CircularProgress size={24} /> : <CloudDownloadIcon />}</ListItemIcon>
                                 <ListItemText primary={t('profileDrawer.restore')} />
                             </ListItemButton>
                         </ListItem>
