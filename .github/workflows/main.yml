@@ -96,6 +96,9 @@ jobs:
   # Single deploy job since we're just deploying
   deploy:
     runs-on: ubuntu-latest
+    env: # Or as an environment variable
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      API_KEY: ${{ secrets.API_KEY }}
     strategy:
       matrix:
         node-version: [22.x]

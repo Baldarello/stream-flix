@@ -18,6 +18,8 @@ export default defineConfig(({ mode }) => {
         define: {
             ...processEnv,
             'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
+            'process.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID),
+            'process.env.API_KEY': JSON.stringify(env.API_KEY),
         },
         resolve: {
             alias: {
