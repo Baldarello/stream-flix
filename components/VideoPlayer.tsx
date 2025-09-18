@@ -340,6 +340,7 @@ const VideoPlayer: React.FC = observer(() => {
           ref={videoRef}
           src={videoSrc}
           autoPlay
+          onClick={handleTogglePlay}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
         <Fade in={isUiVisible} timeout={500}>

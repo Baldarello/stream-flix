@@ -7,7 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import type { EpisodeLink, MediaItem, Season } from '../types';
+import type { MediaLink, MediaItem, Season } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface ManageLinksViewProps {
@@ -19,7 +19,7 @@ interface ManageLinksViewProps {
 
 const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
     const { t } = useTranslations();
-    const { deleteEpisodeLink, clearLinksForSeason, showSnackbar, updateLinksDomain, preferredSources, setPreferredSource } = mediaStore;
+    const { deleteMediaLink, clearLinksForSeason, showSnackbar, updateLinksDomain, preferredSources, setPreferredSource } = mediaStore;
     const [domainInputs, setDomainInputs] = useState<Record<string, string>>({});
 
     const linksByDomain = currentSeason.episodes
@@ -35,7 +35,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                 // Ignore invalid URLs
             }
             return acc;
-        }, {} as Record<string, EpisodeLink[]>);
+        }, {} as Record<string, MediaLink[]>);
 
     useEffect(() => {
         const initialInputs: Record<string, string> = {};
@@ -143,7 +143,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                 <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
                             ) : (
                                 <Stack spacing={1}>
-                                    {episode.video_urls.map((link: EpisodeLink) => {
+                                    {episode.video_urls.map((link: MediaLink) => {
                                         const truncatedLabel = link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
                                         return (
                                             <Paper key={link.id} variant="outlined" sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -152,7 +152,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                                     <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
                                                 </Tooltip>
                                                 <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
-                                                    <IconButton size="small" onClick={() => deleteEpisodeLink(link.id!)} color="error"><DeleteIcon fontSize='small'/></IconButton>
+                                                    <IconButton size="small" onClick={() => deleteMediaLink(link.id!)} color="error"><DeleteIcon fontSize='small'/></IconButton>
                                                 </Tooltip>
                                             </Paper>
                                         );

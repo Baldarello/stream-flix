@@ -19,6 +19,7 @@ import WatchTogetherModal from './components/WatchTogetherModal';
 import { NotificationSnackbar } from './components/NotificationSnackbar';
 import DebugOverlay from './components/DebugOverlay';
 import LinkSelectionModal from './components/LinkSelectionModal';
+import LinkMovieModal from './components/LinkMovieModal';
 import ShareLibraryModal from './components/ShareLibraryModal';
 import ImportLibraryModal from './components/ImportLibraryModal';
 import RevisionsModal from './components/RevisionsModal';
@@ -201,6 +202,7 @@ const AppContent: React.FC = observer(() => {
         <WatchTogetherModal />
         <NotificationSnackbar />
         <LinkSelectionModal />
+        <LinkMovieModal />
         <ShareLibraryModal />
         <ImportLibraryModal />
         <RevisionsModal />

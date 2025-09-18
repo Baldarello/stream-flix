@@ -29,7 +29,7 @@ export const it = {
     "addToList": "Aggiungi alla mia lista",
     "watchTogether": "Guarda Insieme",
     "episodes": "Episodi",
-    "linkEpisodesTooltip": "Collega file video per la stagione",
+    "linkEpisodesTooltip": "Collega file video",
     "introDuration": "Durata Intro",
     "season": "Stagione",
     "scrollEpisodesLeft": "scorri episodi a sinistra",
@@ -67,6 +67,15 @@ export const it = {
   "episodesDrawer": {
     "title": "Episodi",
     "season": "Stagione {number}"
+  },
+  "linkMovieModal": {
+    "title": "Collega Video per {title}",
+    "addLink": "Aggiungi Link",
+    "url": "URL",
+    "label": "Etichetta (opzionale)",
+    "add": "Aggiungi",
+    "noLinks": "Nessun link video associato a questo film.",
+    "deleteLink": "Elimina Link"
   },
   "linkEpisodesModal": {
     "title": "Collega Episodi per {name}",
@@ -267,7 +276,7 @@ export const it = {
     "remoteConnected": "Telecomando connesso!",
     "failedToLoadSeriesDetails": "Impossibile caricare i dettagli della serie.",
     "noPlayableEpisodes": "Nessun episodio riproducibile trovato per questa serie.",
-    "noVideoLinks": "Nessun link video trovato per questo episodio.",
+    "noVideoLinks": "Nessun link video trovato per questo contenuto.",
     "linkCountMismatch": "Il numero di link ({linkCount}) non corrisponde al numero di episodi ({episodeCount}).",
     "processingError": "Errore nell'elaborazione dei dati: {error}",
     "linksAddedSuccess": "{count} link aggiunti con successo!",

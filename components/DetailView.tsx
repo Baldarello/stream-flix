@@ -144,7 +144,17 @@ const DetailView: React.FC = observer(() => {
                     borderRadius: 3,
                     border: '1px solid rgba(255,255,255,0.1)',
                 }}>
-                    <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
+                        {item.media_type === 'movie' && (
+                             <Tooltip title={t('detail.linkEpisodesTooltip')}>
+                                {/* FIX: openLinkMovieModal will be added to mediaStore */}
+                                <IconButton onClick={() => mediaStore.openLinkMovieModal(item)}>
+                                    <LinkIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                    </Stack>
                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                     <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
                         <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average.toFixed(1)}</Typography>

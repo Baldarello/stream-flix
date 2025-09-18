@@ -1,5 +1,6 @@
 import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource} from '../types';
+// FIX: Replace deprecated EpisodeLink with MediaLink
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -89,13 +90,18 @@ class MediaStore {
     isIntroSkippableOnSlave = false;
 
 
+    // FIX: Rename episodeLinks state to mediaLinks and use MediaLink type
+    mediaLinks: Map<number, MediaLink[]> = new Map();
     // Episode Linking State
-    episodeLinks: Map<number, EpisodeLink[]> = new Map();
     isLinkEpisodesModalOpen = false;
     linkingEpisodesForItem: MediaItem | null = null;
+    // FIX: Add state for movie linking modal
+    isLinkMovieModalOpen = false;
+    linkingMovieItem: MediaItem | null = null;
     isLinkSelectionModalOpen = false;
     itemForLinkSelection: PlayableItem | null = null;
-    linksForSelection: EpisodeLink[] = [];
+    // FIX: Use MediaLink type for linksForSelection
+    linksForSelection: MediaLink[] = [];
     expandedLinkAccordionId: number | false = false;
 
     // Player Episode Drawer State
@@ -183,7 +189,8 @@ class MediaStore {
                 myListFromDb,
                 viewingHistoryFromDb,
                 cachedItemsFromDb,
-                episodeLinksFromDb,
+                // FIX: Load from mediaLinks table instead of episodeLinks
+                mediaLinksFromDb,
                 introDurationsFromDb,
                 themePreference,
                 languagePreference,
@@ -193,7 +200,8 @@ class MediaStore {
                 db.myList.toArray(),
                 db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray(),
                 db.cachedItems.toArray(),
-                db.episodeLinks.toArray(),
+                // FIX: Load from mediaLinks table instead of episodeLinks
+                db.mediaLinks.toArray(),
                 db.showIntroDurations.toArray(),
                 db.preferences.get('activeTheme'),
                 db.preferences.get('language'),
@@ -206,14 +214,15 @@ class MediaStore {
                 this.viewingHistory = viewingHistoryFromDb;
                 this.cachedItems = new Map(cachedItemsFromDb.map(item => [item.id, item]));
 
-                const linksMap = new Map<number, EpisodeLink[]>();
-                episodeLinksFromDb.forEach(link => {
-                    if (!linksMap.has(link.episodeId)) {
-                        linksMap.set(link.episodeId, []);
+                // FIX: Group links by mediaId from the mediaLinks table
+                const linksMap = new Map<number, MediaLink[]>();
+                mediaLinksFromDb.forEach(link => {
+                    if (!linksMap.has(link.mediaId)) {
+                        linksMap.set(link.mediaId, []);
                     }
-                    linksMap.get(link.episodeId)!.push(link);
+                    linksMap.get(link.mediaId)!.push(link);
                 });
-                this.episodeLinks = linksMap;
+                this.mediaLinks = linksMap;
                 
                 this.showIntroDurations = new Map(introDurationsFromDb.map(item => [item.id, item.duration]));
                 
@@ -491,8 +500,8 @@ class MediaStore {
                 );
                 const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
                 
-                // Apply locally stored video links
-                this.applyEpisodeLinksToMedia([fullItem]);
+                // FIX: Apply locally stored video links using the new applyMediaLinks method
+                this.applyMediaLinks([fullItem]);
                 
                 runInAction(() => {
                     this.remoteFullItem = fullItem;
@@ -532,7 +541,8 @@ class MediaStore {
                 );
                 runInAction(() => {
                     const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
-                    this.applyEpisodeLinksToMedia([fullItem]);
+                    // FIX: Apply locally stored video links using the new applyMediaLinks method
+                    this.applyMediaLinks([fullItem]);
                     this.remoteSelectedItem = fullItem;
                 });
             } catch (error) {
@@ -834,12 +844,13 @@ class MediaStore {
     }
 
 
-    applyEpisodeLinksToMedia = (items: MediaItem[]) => {
+    // FIX: Rename from applyEpisodeLinksToMedia to applyMediaLinks and handle both movies and TV shows
+    applyMediaLinks = (items: MediaItem[]) => {
         items.forEach(item => {
             if (item.media_type === 'tv' && item.seasons) {
                 item.seasons.forEach(season => {
                     season.episodes.forEach(episode => {
-                        const links = this.episodeLinks.get(episode.id);
+                        const links = this.mediaLinks.get(episode.id);
                         if (links && links.length > 0) {
                             episode.video_urls = links;
                             episode.video_url = links[0].url; // For convenience and backward compatibility
@@ -849,6 +860,15 @@ class MediaStore {
                         }
                     });
                 });
+            } else if (item.media_type === 'movie') {
+                const links = this.mediaLinks.get(item.id);
+                if (links && links.length > 0) {
+                    item.video_urls = links;
+                    item.video_url = links[0].url;
+                } else {
+                    item.video_urls = [];
+                    item.video_url = undefined;
+                }
             }
         });
     };
@@ -872,7 +892,8 @@ class MediaStore {
                 );
                 runInAction(() => {
                     const fullDetails = {...seriesDetails, seasons: seasonsWithEpisodes};
-                    this.applyEpisodeLinksToMedia([fullDetails]);
+                    // FIX: Apply locally stored video links using the new applyMediaLinks method
+                    this.applyMediaLinks([fullDetails]);
                     this.selectedItem = fullDetails;
                 });
             } catch (error) {
@@ -889,7 +910,8 @@ class MediaStore {
         this.selectedItem = null;
     }
 
-    openLinkSelectionModal = (item: PlayableItem, links: EpisodeLink[]) => {
+    // FIX: Update links parameter to use MediaLink type
+    openLinkSelectionModal = (item: PlayableItem, links: MediaLink[]) => {
         this.itemForLinkSelection = item;
         this.linksForSelection = links;
         this.isLinkSelectionModalOpen = true;
@@ -905,24 +927,32 @@ class MediaStore {
         runInAction(() => { this.isDetailLoading = true; });
         try {
             let episodeToPlay: (Episode & { show_id: number; show_title: string; backdrop_path: string; season_number: number; startTime?: number; video_url?: string; intro_end_s?: number }) | null = null;
+            let movieToPlay: MediaItem | null = null;
             let showForContext: MediaItem | null = null;
     
-            // Phase 1: Determine the exact episode and load full show context
-            if ('episode_number' in item) {
+            // Phase 1: Determine the exact item to play and load full context if needed
+            if ('episode_number' in item) { // Direct episode click
                 episodeToPlay = item;
                 if (this.nowPlayingShowDetails?.id !== item.show_id) {
                     const fullShow = await getSeriesDetails(item.show_id);
                     const seasons = await Promise.all(fullShow.seasons?.map(async s => ({ ...s, episodes: await getSeriesEpisodes(item.show_id, s.season_number) })) ?? []);
                     showForContext = { ...fullShow, seasons };
-                    this.applyEpisodeLinksToMedia([showForContext]);
+                    this.applyMediaLinks([showForContext]);
                 } else {
                     showForContext = this.nowPlayingShowDetails;
                 }
-            } else if (item.media_type === 'tv') {
+                 // Ensure episodeToPlay has the latest links from the full context
+                if (showForContext?.seasons) {
+                    const season = showForContext.seasons.find(s => s.season_number === item.season_number);
+                    const epInContext = season?.episodes.find(e => e.id === item.id);
+                    if (epInContext) episodeToPlay = { ...item, ...epInContext };
+                }
+
+            } else if (item.media_type === 'tv') { // TV series click
                 const details = (item.seasons && item.seasons.every(s => s.episodes.length > 0)) ? item : await getSeriesDetails(item.id);
                 const seasons = await Promise.all(details.seasons?.map(async s => ({ ...s, episodes: await getSeriesEpisodes(item.id, s.season_number) })) ?? []);
                 showForContext = { ...details, seasons };
-                this.applyEpisodeLinksToMedia([showForContext]);
+                this.applyMediaLinks([showForContext]);
                 const allEpisodes = showForContext.seasons?.flatMap(s => s.episodes.map(e => ({ ...e, show_id: showForContext!.id, show_title: showForContext!.name || showForContext!.title, backdrop_path: showForContext!.backdrop_path, season_number: s.season_number }))) || [];
                 const inProgress = allEpisodes.find(ep => { const p = this.episodeProgress.get(ep.id); return p && !p.watched; });
                 if (inProgress) {
@@ -931,27 +961,29 @@ class MediaStore {
                     episodeToPlay = allEpisodes.find(ep => !this.episodeProgress.get(ep.id)?.watched) || allEpisodes[0] || null;
                 }
             } else { // It's a movie
-                this.nowPlayingItem = item;
-                this.isPlaying = true;
-                this.nowPlayingShowDetails = null;
-                return;
+                this.applyMediaLinks([item]);
+                movieToPlay = item;
             }
     
-            if (!episodeToPlay) {
+            const itemToPlay = episodeToPlay || movieToPlay;
+            if (!itemToPlay) {
                 this.showSnackbar("notifications.noPlayableEpisodes", "warning", true);
                 return;
             }
     
-            // BUG FIX: Calculate and add intro_end_s
-            const introDuration = this.showIntroDurations.get(episodeToPlay.show_id) ?? 80;
-            if (episodeToPlay.intro_start_s) {
-                episodeToPlay.intro_end_s = episodeToPlay.intro_start_s + introDuration;
+            // BUG FIX: Calculate and add intro_end_s if it's an episode
+            if (episodeToPlay) {
+                const introDuration = this.showIntroDurations.get(episodeToPlay.show_id) ?? 80;
+                if (episodeToPlay.intro_start_s) {
+                    episodeToPlay.intro_end_s = episodeToPlay.intro_start_s + introDuration;
+                }
             }
     
             // Phase 2: Handle link selection (with preferred source logic)
-            const allLinks = episodeToPlay.video_urls || [];
+            const allLinks = itemToPlay.video_urls || [];
             let linksToConsider = allLinks;
-            const preferredOrigin = this.preferredSources.get(episodeToPlay.show_id);
+            const showIdForPreferredSource = 'show_id' in itemToPlay ? itemToPlay.show_id : itemToPlay.id;
+            const preferredOrigin = this.preferredSources.get(showIdForPreferredSource);
     
             if (preferredOrigin) {
                 const preferredLinks = allLinks.filter(link => {
@@ -962,9 +994,9 @@ class MediaStore {
                 }
             }
     
-            const isPlayingFromSelection = 'episode_number' in item && item.video_url;
+            const isPlayingFromSelection = 'video_url' in item && !!item.video_url;
             if (linksToConsider.length > 1 && !isPlayingFromSelection) {
-                this.openLinkSelectionModal(episodeToPlay, linksToConsider);
+                this.openLinkSelectionModal(itemToPlay, linksToConsider);
                 return;
             }
     
@@ -977,19 +1009,24 @@ class MediaStore {
             // Phase 3: Set state and play
             runInAction(() => {
                 if (this.roomId && this.isHost) {
-                    this.changeWatchTogetherMedia(episodeToPlay!);
-                    this.sendPlaybackControl({ status: 'playing', time: episodeToPlay!.startTime || 0 });
+                    this.changeWatchTogetherMedia(itemToPlay);
+                    this.sendPlaybackControl({ status: 'playing', time: itemToPlay.startTime || 0 });
                 }
-                this.addViewingHistoryEntry(episodeToPlay!.show_id, episodeToPlay!.id);
-                this.nowPlayingShowDetails = showForContext;
                 
-                let startTime = episodeToPlay!.startTime || 0;
-                if (!startTime) {
-                    const progress = this.episodeProgress.get(episodeToPlay!.id);
+                if (episodeToPlay) {
+                    this.addViewingHistoryEntry(episodeToPlay.show_id, episodeToPlay.id);
+                    this.nowPlayingShowDetails = showForContext;
+                } else {
+                    this.nowPlayingShowDetails = null;
+                }
+                
+                let startTime = itemToPlay.startTime || 0;
+                if (!startTime && 'id' in itemToPlay) {
+                    const progress = this.episodeProgress.get(itemToPlay.id);
                     if (progress && !progress.watched) startTime = progress.currentTime;
                 }
                 
-                this.nowPlayingItem = { ...episodeToPlay!, video_url: urlToPlay, startTime };
+                this.nowPlayingItem = { ...itemToPlay, video_url: urlToPlay, startTime };
                 this.isPlaying = true;
                 this.watchTogetherModalOpen = false;
                 this.closeLinkSelectionModal();
@@ -1024,11 +1061,23 @@ class MediaStore {
         this.isLinkEpisodesModalOpen = false;
         // Do not nullify linkingEpisodesForItem here, modal might need it while closing
     };
+    
+    // FIX: Add methods and state for the movie linking modal
+    openLinkMovieModal = (item: MediaItem) => {
+        this.linkingMovieItem = item;
+        this.isLinkMovieModalOpen = true;
+    };
+
+    closeLinkMovieModal = () => {
+        this.isLinkMovieModalOpen = false;
+        this.linkingMovieItem = null;
+    };
 
     setExpandedLinkAccordionId = (panelId: number | false) => {
         this.expandedLinkAccordionId = panelId;
     }
 
+    // FIX: Update to use MediaLink and db.mediaLinks table
     setEpisodeLinksForSeason = async (payload: {
         seasonNumber: number;
         method: 'pattern' | 'list' | 'json';
@@ -1075,11 +1124,13 @@ class MediaStore {
             return;
         }
 
-        const linksToSave: Omit<EpisodeLink, 'id'>[] = [];
+        // FIX: The type is Omit<MediaLink, 'id'>[]
+        const linksToSave: Omit<MediaLink, 'id'>[] = [];
         season.episodes.forEach((episode, index) => {
             if (urls[index]) {
                 linksToSave.push({
-                    episodeId: episode.id,
+                    // FIX: The property is mediaId
+                    mediaId: episode.id,
                     url: urls[index] as string,
                     label: labels[index] || urls[index] as string,
                 });
@@ -1093,29 +1144,35 @@ class MediaStore {
             // new links instead of replacing them. This allows multiple sources for episodes.
 
             if (linksToSave.length > 0) {
-                await db.episodeLinks.bulkAdd(linksToSave);
+                // FIX: Save to mediaLinks table
+                await db.mediaLinks.bulkAdd(linksToSave);
                 this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToSave.length });
             }
 
             // Refresh local state from DB to ensure consistency
-            const allLinksForSeason = await db.episodeLinks.where('episodeId').anyOf(episodeIds).toArray();
+            // FIX: Query from mediaLinks table
+            const allLinksForSeason = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
             runInAction(() => {
                 // Clear old state for the entire season before re-populating.
-                episodeIds.forEach(epId => this.episodeLinks.delete(epId));
+                // FIX: Update mediaLinks map
+                episodeIds.forEach(epId => this.mediaLinks.delete(epId));
                 
                 const grouped = allLinksForSeason.reduce((acc, link) => {
-                    const epId = link.episodeId;
-                    if (!acc[epId]) acc[epId] = [];
-                    acc[epId].push(link);
+                    // FIX: Use mediaId for grouping
+                    const mediaId = link.mediaId;
+                    if (!acc[mediaId]) acc[mediaId] = [];
+                    acc[mediaId].push(link);
                     return acc;
-                }, {} as Record<number, EpisodeLink[]>);
+                }, {} as Record<number, MediaLink[]>);
                 
-                for (const epIdStr in grouped) {
-                    this.episodeLinks.set(parseInt(epIdStr), grouped[epIdStr]);
+                for (const mediaIdStr in grouped) {
+                    // FIX: Update mediaLinks map
+                    this.mediaLinks.set(parseInt(mediaIdStr), grouped[mediaIdStr]);
                 }
                 
                 if (this.linkingEpisodesForItem) {
-                    this.applyEpisodeLinksToMedia([this.linkingEpisodesForItem]);
+                    // FIX: Use new method name
+                    this.applyMediaLinks([this.linkingEpisodesForItem]);
                     this.linkingEpisodesForItem = { ...this.linkingEpisodesForItem }; // Mobx trigger
                     if (this.selectedItem?.id === this.linkingEpisodesForItem.id) {
                         this.selectedItem = this.linkingEpisodesForItem;
@@ -1129,45 +1186,80 @@ class MediaStore {
         }
     };
     
-    deleteEpisodeLink = async (linkId: number) => {
-        const link = await db.episodeLinks.get(linkId);
+    // FIX: Rename deleteEpisodeLink to deleteMediaLink and update to use mediaLinks table
+    deleteMediaLink = async (linkId: number) => {
+        const link = await db.mediaLinks.get(linkId);
         if (!link) return;
 
-        await db.episodeLinks.delete(linkId);
+        await db.mediaLinks.delete(linkId);
         runInAction(() => {
-            const episodeLinks = this.episodeLinks.get(link.episodeId);
-            if (episodeLinks) {
-                const updatedLinks = episodeLinks.filter(l => l.id !== linkId);
+            const mediaLinksForId = this.mediaLinks.get(link.mediaId);
+            if (mediaLinksForId) {
+                const updatedLinks = mediaLinksForId.filter(l => l.id !== linkId);
                 if (updatedLinks.length > 0) {
-                    this.episodeLinks.set(link.episodeId, updatedLinks);
+                    this.mediaLinks.set(link.mediaId, updatedLinks);
                 } else {
-                    this.episodeLinks.delete(link.episodeId);
+                    this.mediaLinks.delete(link.mediaId);
                 }
                 
                 // Force a refresh of the selected item if it's open
                 if (this.selectedItem) {
-                    this.applyEpisodeLinksToMedia([this.selectedItem]);
+                    this.applyMediaLinks([this.selectedItem]);
                     this.selectedItem = {...this.selectedItem}; // Trigger mobx update
+                }
+                if (this.linkingMovieItem) {
+                    this.applyMediaLinks([this.linkingMovieItem]);
+                    this.linkingMovieItem = {...this.linkingMovieItem};
                 }
             }
         });
     }
 
+    // FIX: Add a generic method to add links to any media (movie or episode)
+    addLinksToMedia = async (mediaId: number, links: {url: string, label: string}[]) => {
+        const linksToSave: Omit<MediaLink, 'id'>[] = links.map(link => ({
+            mediaId,
+            url: link.url,
+            label: link.label || link.url,
+        }));
+
+        if (linksToSave.length > 0) {
+            await db.mediaLinks.bulkAdd(linksToSave);
+            
+            // Refresh local state from DB
+            const allLinksForMedia = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
+            runInAction(() => {
+                this.mediaLinks.set(mediaId, allLinksForMedia);
+
+                if (this.linkingMovieItem?.id === mediaId) {
+                    this.applyMediaLinks([this.linkingMovieItem]);
+                    this.linkingMovieItem = { ...this.linkingMovieItem };
+                }
+                if (this.selectedItem?.id === mediaId) {
+                    this.applyMediaLinks([this.selectedItem]);
+                    this.selectedItem = { ...this.selectedItem };
+                }
+            });
+            this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToSave.length });
+        }
+    };
+
+    // FIX: Update to use db.mediaLinks
     clearLinksForSeason = async (seasonNumber: number, showId: number) => {
         const item = this.linkingEpisodesForItem?.id === showId ? this.linkingEpisodesForItem : this.allItems.find(i => i.id === showId);
         const season = item?.seasons?.find(s => s.season_number === seasonNumber);
         if (!season) return;
 
         const episodeIds = season.episodes.map(e => e.id);
-        const linksToDelete = await db.episodeLinks.where('episodeId').anyOf(episodeIds).toArray();
+        const linksToDelete = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
         const linkIdsToDelete = linksToDelete.map(l => l.id!);
 
         if (linkIdsToDelete.length > 0) {
-            await db.episodeLinks.bulkDelete(linkIdsToDelete);
+            await db.mediaLinks.bulkDelete(linkIdsToDelete);
             runInAction(() => {
-                episodeIds.forEach(epId => this.episodeLinks.delete(epId));
+                episodeIds.forEach(epId => this.mediaLinks.delete(epId));
                 if (this.selectedItem) {
-                    this.applyEpisodeLinksToMedia([this.selectedItem]);
+                    this.applyMediaLinks([this.selectedItem]);
                     this.selectedItem = {...this.selectedItem};
                 }
             });
@@ -1177,8 +1269,9 @@ class MediaStore {
         }
     }
 
+    // FIX: Update to use MediaLink and db.mediaLinks
     updateLinksDomain = async (payload: {
-        links: EpisodeLink[];
+        links: MediaLink[];
         newDomain: string;
     }) => {
         const { links, newDomain } = payload;
@@ -1203,25 +1296,25 @@ class MediaStore {
                     console.warn(`Skipping invalid URL for update: ${link.url}`);
                     return null;
                 }
-            }).filter((l): l is EpisodeLink => l !== null);
+            }).filter((l): l is MediaLink => l !== null);
 
 
             if (updatedLinks.length > 0) {
-                await db.episodeLinks.bulkPut(updatedLinks);
+                await db.mediaLinks.bulkPut(updatedLinks);
 
                 runInAction(() => {
                     updatedLinks.forEach(updatedLink => {
-                        const episodeLinks = this.episodeLinks.get(updatedLink.episodeId);
-                        if (episodeLinks) {
-                            const linkIndex = episodeLinks.findIndex(l => l.id === updatedLink.id);
+                        const mediaLinksForId = this.mediaLinks.get(updatedLink.mediaId);
+                        if (mediaLinksForId) {
+                            const linkIndex = mediaLinksForId.findIndex(l => l.id === updatedLink.id);
                             if (linkIndex !== -1) {
-                                episodeLinks.splice(linkIndex, 1, updatedLink);
+                                mediaLinksForId.splice(linkIndex, 1, updatedLink);
                             }
                         }
                     });
 
                     if (this.linkingEpisodesForItem) {
-                        this.applyEpisodeLinksToMedia([this.linkingEpisodesForItem]);
+                        this.applyMediaLinks([this.linkingEpisodesForItem]);
                         this.linkingEpisodesForItem = { ...this.linkingEpisodesForItem };
                         if (this.selectedItem?.id === this.linkingEpisodesForItem.id) {
                             this.selectedItem = this.linkingEpisodesForItem;
@@ -1254,7 +1347,7 @@ class MediaStore {
             if (item.media_type === 'tv' && item.seasons) {
                 for (const season of item.seasons) {
                     for (const episode of season.episodes) {
-                        if (this.episodeLinks.has(episode.id)) {
+                        if (this.mediaLinks.has(episode.id)) {
                             showIdsWithLinks.add(item.id);
                             return; // Go to next show
                         }
@@ -1267,6 +1360,7 @@ class MediaStore {
         return this.allItems.filter(item => showIdsWithLinks.has(item.id));
     }
 
+    // FIX: Update to use mediaLinks map
     generateShareableData = (showIds: number[]): SharedLibraryData => {
         const showsToShare: SharedShowData[] = [];
 
@@ -1277,7 +1371,7 @@ class MediaStore {
             const sharedLinks: SharedEpisodeLink[] = [];
             show.seasons.forEach(season => {
                 season.episodes.forEach(episode => {
-                    const links = this.episodeLinks.get(episode.id);
+                    const links = this.mediaLinks.get(episode.id);
                     if (links) {
                         links.forEach(link => {
                             sharedLinks.push({
@@ -1302,6 +1396,7 @@ class MediaStore {
         return { version: 1, shows: showsToShare };
     }
     
+    // FIX: Update to use MediaLink, mediaId, and db.mediaLinks
     importSharedLibrary = async (data: SharedLibraryData) => {
         if (!data || data.version !== 1 || !Array.isArray(data.shows)) {
             this.showSnackbar("notifications.importInvalidFile", "error", true);
@@ -1312,7 +1407,7 @@ class MediaStore {
         this.showSnackbar("notifications.importInProgress", "info", true);
 
         try {
-            const allNewLinks: Omit<EpisodeLink, 'id'>[] = [];
+            const allNewLinks: Omit<MediaLink, 'id'>[] = [];
             const showsToCache: MediaItem[] = [];
             const showsToMyList: { id: number }[] = [];
             let totalLinksImported = 0;
@@ -1345,7 +1440,7 @@ class MediaStore {
                     const episodeId = episodeIdMap.get(key);
                     if (episodeId) {
                         allNewLinks.push({
-                            episodeId: episodeId,
+                            mediaId: episodeId,
                             url: link.url,
                             label: link.label
                         });
@@ -1356,7 +1451,7 @@ class MediaStore {
 
             // 4. Bulk insert everything into the database
             if (allNewLinks.length > 0) {
-                await db.episodeLinks.bulkAdd(allNewLinks);
+                await db.mediaLinks.bulkAdd(allNewLinks);
             }
             if (showsToCache.length > 0) {
                 await db.cachedItems.bulkPut(showsToCache);
@@ -1379,13 +1474,14 @@ class MediaStore {
     }
 
 
+    // FIX: Update to use db.mediaLinks
     prepareUserDataBackup = async () => {
         try {
             const [
                 myList,
                 viewingHistory,
                 cachedItems,
-                episodeLinks,
+                mediaLinks,
                 showIntroDurations,
                 preferences,
                 episodeProgress,
@@ -1394,7 +1490,7 @@ class MediaStore {
                 db.myList.toArray(),
                 db.viewingHistory.toArray(),
                 db.cachedItems.toArray(),
-                db.episodeLinks.toArray(),
+                db.mediaLinks.toArray(),
                 db.showIntroDurations.toArray(),
                 // Exclude sync timestamp from the backup payload, as a fresh one will be added.
                 db.preferences.where('key').notEqual('lastSyncTimestamp').toArray(),
@@ -1407,7 +1503,7 @@ class MediaStore {
                     myList,
                     viewingHistory,
                     cachedItems,
-                    episodeLinks,
+                    mediaLinks,
                     showIntroDurations,
                     preferences,
                     episodeProgress,
@@ -1682,8 +1778,8 @@ class MediaStore {
                         }
                         break;
                     }
-                    case 'episodeLinks': {
-                        const context = this.episodeContextMap.get(data?.episodeId);
+                    case 'mediaLinks': { // FIX: Renamed from episodeLinks
+                        const context = this.episodeContextMap.get(data?.mediaId);
                         const showName = context?.showName || 'Show sconosciuto';
                         const seasonNum = context?.sNum || '?';
                         const epNum = context?.epNum || '?';

@@ -65,7 +65,7 @@ export const deleteOldBackups = async (accessToken: string) => {
     // Google Drive API does not support batch delete in v3 with a single HTTP request.
     // We must send one request per file.
     for (const file of filesToDelete) {
-        await fetch(`${DRIVE_API_URL}/${file.id}`, {
+        await fetch(`${DRIVE_API_URL}/${file.id}?supportsAllDrives=true`, {
             method: 'DELETE',
             headers: createHeaders(accessToken),
         });
@@ -137,7 +137,7 @@ export const createPublicShareFile = async (accessToken: string, content: object
     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
     form.append('file', new Blob([JSON.stringify(content)], { type: 'application/json' }));
 
-    const createResponse = await fetch(`${DRIVE_UPLOAD_URL}?uploadType=multipart&fields=id`, {
+    const createResponse = await fetch(`${DRIVE_UPLOAD_URL}?uploadType=multipart&fields=id&supportsAllDrives=true`, {
         method: 'POST',
         headers: createHeaders(accessToken),
         body: form,
@@ -157,7 +157,7 @@ export const createPublicShareFile = async (accessToken: string, content: object
         'type': 'anyone'
     };
 
-    const permissionResponse = await fetch(`${DRIVE_API_URL}/${fileId}/permissions`, {
+    const permissionResponse = await fetch(`${DRIVE_API_URL}/${fileId}/permissions?supportsAllDrives=true`, {
         method: 'POST',
         headers: {
             ...createHeaders(accessToken),
@@ -170,7 +170,7 @@ export const createPublicShareFile = async (accessToken: string, content: object
         const errorData = await permissionResponse.json();
         console.error("Google Drive API Error (set permission):", errorData);
         // Clean up by deleting the created file if permissions fail
-        await fetch(`${DRIVE_API_URL}/${fileId}`, { method: 'DELETE', headers: createHeaders(accessToken) });
+        await fetch(`${DRIVE_API_URL}/${fileId}?supportsAllDrives=true`, { method: 'DELETE', headers: createHeaders(accessToken) });
         throw new Error('Failed to set file permissions to public.');
     }
 

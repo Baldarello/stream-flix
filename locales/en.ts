@@ -29,7 +29,7 @@ export const en = {
     "addToList": "Add to My List",
     "watchTogether": "Watch Together",
     "episodes": "Episodes",
-    "linkEpisodesTooltip": "Link video files for the season",
+    "linkEpisodesTooltip": "Link video files",
     "introDuration": "Intro Duration",
     "season": "Season",
     "scrollEpisodesLeft": "scroll episodes left",
@@ -67,6 +67,15 @@ export const en = {
   "episodesDrawer": {
     "title": "Episodes",
     "season": "Season {number}"
+  },
+  "linkMovieModal": {
+    "title": "Link Videos for {title}",
+    "addLink": "Add Link",
+    "url": "URL",
+    "label": "Label (optional)",
+    "add": "Add",
+    "noLinks": "No video links associated with this movie.",
+    "deleteLink": "Delete Link"
   },
   "linkEpisodesModal": {
     "title": "Link Episodes for {name}",
@@ -267,7 +276,7 @@ export const en = {
     "remoteConnected": "Remote connected!",
     "failedToLoadSeriesDetails": "Could not load series details.",
     "noPlayableEpisodes": "No playable episodes found for this series.",
-    "noVideoLinks": "No video links found for this episode.",
+    "noVideoLinks": "No video links found for this content.",
     "linkCountMismatch": "The number of links ({linkCount}) does not match the number of episodes ({episodeCount}).",
     "processingError": "Error processing data: {error}",
     "linksAddedSuccess": "{count} links added successfully!",

@@ -1,7 +1,7 @@
 import 'dexie-observable/api';
-// FIX: Import the 'Events' type from dexie to correctly type the event handling.
-import Dexie, { type Table, type Events } from 'dexie';
-import type { ViewingHistoryItem, MediaItem, EpisodeLink, EpisodeProgress, PreferredSource } from '../types';
+// FIX: Import the 'DbEvents' type from dexie to correctly type the event handling.
+import Dexie, { type Table, type DbEvents } from 'dexie';
+import type { ViewingHistoryItem, MediaItem, MediaLink, EpisodeProgress, PreferredSource } from '../types';
 import dexieObservable from 'dexie-observable';
 
 // Define the structure of the data we're storing
@@ -47,7 +47,7 @@ export class QuixDB extends Dexie {
   myList!: Table<MyListItem, number>;
   viewingHistory!: Table<StorableViewingHistoryItem, number>;
   cachedItems!: Table<MediaItem, number>;
-  episodeLinks!: Table<EpisodeLink, number>;
+  mediaLinks!: Table<MediaLink, number>;
   showIntroDurations!: Table<ShowIntroDuration, number>;
   preferences!: Table<Preference, string>;
   revisions!: Table<Revision, number>; // NEW TABLE
@@ -91,10 +91,27 @@ export class QuixDB extends Dexie {
     this.version(6).stores({
         preferredSources: '&showId'
     });
+    
+    this.version(7).stores({
+        mediaLinks: '++id, mediaId',
+        episodeLinks: null, // Remove old table
+    }).upgrade(async tx => {
+        // Migrate data from episodeLinks to mediaLinks
+        const episodeLinks = await tx.table('episodeLinks').toArray();
+        if (episodeLinks.length > 0) {
+            const mediaLinks = episodeLinks.map(link => ({
+                id: link.id,
+                mediaId: link.episodeId,
+                url: link.url,
+                label: link.label,
+            }));
+            await tx.table('mediaLinks').bulkAdd(mediaLinks);
+        }
+    });
   }
   
   async importData(data: any) {
-    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'episodeLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources'];
+    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources'];
     const tablesInData = data ? Object.keys(data) : [];
     
     if (!tablesInData.length || !tablesInData.some(table => expectedTables.includes(table))) {
@@ -102,7 +119,7 @@ export class QuixDB extends Dexie {
     }
     
     // FIX: Removed unnecessary and problematic cast to 'Dexie'.
-    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
+    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.mediaLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.
@@ -134,8 +151,8 @@ export const db = new QuixDB();
 // Listen for database changes to log revisions and trigger automatic backups
 // FIX: Cast `db.on` to extend its type with the 'changes' event signature from dexie-observable.
 // This resolves the type error without conflicting with the base class definition.
-// FIX: Use the imported 'Events' type for the cast instead of 'Dexie.Events', which refers to a value (the static class property) and not a type.
-(db.on as Events & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
+// FIX: Use the imported 'DbEvents' type for the cast instead of 'Dexie.Events', which refers to a value (the static class property) and not a type.
+(db.on as DbEvents & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
     // Filter out changes we don't want to track or that would cause loops
     const relevantChanges = changes.filter(change => 
         change.table !== 'revisions' && 

@@ -3,7 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import type { EpisodeLink } from '../types';
+import type { MediaLink } from '../types';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -25,7 +25,7 @@ const LinkSelectionModal: React.FC = () => {
   const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlayback } = mediaStore;
   const { t } = useTranslations();
 
-  const handleSelectLink = (link: EpisodeLink) => {
+  const handleSelectLink = (link: MediaLink) => {
     if (itemForLinkSelection) {
       // Create a new item object with the selected video_url to pass to the player
       const itemToPlay = { ...itemForLinkSelection, video_url: link.url };
@@ -37,9 +37,15 @@ const LinkSelectionModal: React.FC = () => {
     closeLinkSelectionModal();
   };
   
-  const title = (itemForLinkSelection && 'episode_number' in itemForLinkSelection) 
-    ? t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name })
-    : t('linkSelectionModal.defaultTitle');
+  // FIX: Use an explicit type guard to safely access properties on the PlayableItem union type.
+  let title: string;
+  if (itemForLinkSelection && 'episode_number' in itemForLinkSelection) {
+      title = t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name });
+  } else if (itemForLinkSelection) { // This will be a MediaItem
+      title = itemForLinkSelection.title || itemForLinkSelection.name || t('linkSelectionModal.defaultTitle');
+  } else {
+      title = t('linkSelectionModal.defaultTitle');
+  }
 
   return (
     <Modal
