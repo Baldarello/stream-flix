@@ -224,7 +224,8 @@ export const it = {
     "pasteLink": "Incolla un link di condivisione per aggiungere i contenuti alla tua libreria.",
     "linkPlaceholder": "https://...",
     "import": "Importa",
-    "importing": "Importazione in corso..."
+    "importing": "Importazione in corso...",
+    "loginRequired": "Devi aver effettuato l'accesso con Google per condividere la tua libreria."
   },
   "revisions": {
     "title": "Cronologia Modifiche",
@@ -302,6 +303,7 @@ export const it = {
     "syncChecking": "Verifica dei dati nel cloud...",
     "syncError": "Errore di sincronizzazione con il cloud.",
     "noBackupFoundCreating": "Nessun backup cloud trovato. Creazione in corso...",
-    "restoringFromCloud": "Dati più recenti trovati nel cloud. Ripristino in corso..."
+    "restoringFromCloud": "Dati più recenti trovati nel cloud. Ripristino in corso...",
+    "shareLinkCreateError": "Creazione del link di condivisione non riuscita: {error}"
   }
 }

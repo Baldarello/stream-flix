@@ -57,7 +57,8 @@ export class QuixDB extends Dexie {
   constructor() {
     super('quixDB', { addons: [dexieObservable] }); // Register addon
     
-    (this as Dexie).version(1).stores({
+    // FIX: Removed unnecessary and problematic casts to 'Dexie'. 'this' is already a Dexie instance here.
+    this.version(1).stores({
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
@@ -65,15 +66,15 @@ export class QuixDB extends Dexie {
       showIntroDurations: '&id',
     });
     
-    (this as Dexie).version(2).stores({
+    this.version(2).stores({
       preferences: '&key', // New table for user preferences
     });
 
-    (this as Dexie).version(3).stores({
+    this.version(3).stores({
       revisions: '++id, timestamp',
     });
 
-    (this as Dexie).version(4).stores({
+    this.version(4).stores({
       episodeLinks: '++id, episodeId', // New schema with auto-incrementing PK and index on episodeId
     }).upgrade(tx => {
       // Since we are changing the schema in a breaking way (from string URL to object),
@@ -82,11 +83,11 @@ export class QuixDB extends Dexie {
       return tx.table('episodeLinks').clear();
     });
 
-    (this as Dexie).version(5).stores({
+    this.version(5).stores({
         episodeProgress: '&episodeId'
     });
 
-    (this as Dexie).version(6).stores({
+    this.version(6).stores({
         preferredSources: '&showId'
     });
   }
@@ -99,7 +100,8 @@ export class QuixDB extends Dexie {
       throw new Error("Backup file is missing required data tables or is empty.");
     }
     
-    await (this as Dexie).transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
+    // FIX: Removed unnecessary and problematic cast to 'Dexie'.
+    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.
@@ -121,17 +123,17 @@ export class QuixDB extends Dexie {
   }
 }
 
-// FIX: Augment the QuixDB class with the 'on' method from the dexie-observable addon.
-// This informs TypeScript that instances of QuixDB will have this method at runtime,
-// resolving the "Property 'on' does not exist" error.
-export interface QuixDB {
-    on(eventName: 'changes', subscriber: (changes: DbChange[]) => void): void;
-}
+// FIX: Removed the problematic interface augmentation for QuixDB.
+// It caused a type conflict with the base Dexie class's 'on' property.
+// The correct way to handle the 'changes' event from dexie-observable is to cast
+// the 'on' property on the instance, as shown below.
 
 export const db = new QuixDB();
 
 // Listen for database changes to log revisions and trigger automatic backups
-db.on('changes', (changes: DbChange[]) => {
+// FIX: Cast `db.on` to extend its type with the 'changes' event signature from dexie-observable.
+// This resolves the type error without conflicting with the base class definition.
+(db.on as Dexie.DbEvents & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
     // Filter out changes we don't want to track or that would cause loops
     const relevantChanges = changes.filter(change => 
         change.table !== 'revisions' && 

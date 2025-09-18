@@ -224,7 +224,8 @@ export const en = {
     "pasteLink": "Paste a share link to add content to your library.",
     "linkPlaceholder": "https://...",
     "import": "Import",
-    "importing": "Importing..."
+    "importing": "Importing...",
+    "loginRequired": "You must be logged in with Google to share your library."
   },
   "revisions": {
     "title": "Change History",
@@ -302,6 +303,7 @@ export const en = {
     "syncChecking": "Checking for cloud data...",
     "syncError": "Error syncing with cloud.",
     "noBackupFoundCreating": "No cloud backup found. Creating one now...",
-    "restoringFromCloud": "Newer data found in the cloud. Restoring now..."
+    "restoringFromCloud": "Newer data found in the cloud. Restoring now...",
+    "shareLinkCreateError": "Failed to create share link: {error}"
   }
 }

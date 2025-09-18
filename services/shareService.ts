@@ -1,42 +1,51 @@
 import type { SharedLibraryData } from '../types';
+import * as driveService from './googleDriveService';
 
 /**
- * Creates a self-contained shareable link from library data.
+ * Creates a shareable link by uploading library data to Google Drive.
+ * @param accessToken The user's Google access token.
  * @param data The library data to share.
- * @returns A full URL string containing the encoded data.
+ * @returns A promise that resolves to a full Quix URL containing the link to the public Drive file.
  */
-export const createShareLink = (data: SharedLibraryData): string => {
+export const createShareLink = async (accessToken: string, data: SharedLibraryData): Promise<string> => {
   try {
-    const jsonString = JSON.stringify(data);
-    const base64String = btoa(unescape(encodeURIComponent(jsonString))); // Handle UTF-8 characters
-    const encodedData = encodeURIComponent(base64String);
+    const { downloadUrl } = await driveService.createPublicShareFile(accessToken, data);
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
-    return `${baseUrl}?importData=${encodedData}`;
+    return `${baseUrl}?importFromUrl=${encodeURIComponent(downloadUrl)}`;
   } catch (error) {
     console.error("Error creating share link:", error);
-    return '';
+    // Re-throw to be caught by the UI component for user feedback
+    throw error;
   }
 };
 
 /**
- * Parses a share link and extracts the library data.
- * @param link The share link URL.
- * @returns The parsed SharedLibraryData object, or null if parsing fails.
+ * Parses a share link by fetching data from the embedded Google Drive URL.
+ * @param link The share link URL (can be a Quix URL or a direct Google Drive link).
+ * @returns A promise that resolves to the parsed SharedLibraryData object, or null if parsing fails.
  */
-export const parseDataFromLink = (link: string): SharedLibraryData | null => {
+export const parseDataFromLink = async (link: string): Promise<SharedLibraryData | null> => {
   try {
     const url = new URL(link);
-    const encodedData = url.searchParams.get('importData');
-    if (!encodedData) return null;
-    
-    const base64String = decodeURIComponent(encodedData);
-    const jsonString = decodeURIComponent(escape(atob(base64String))); // Handle UTF-8 characters
-    const data = JSON.parse(jsonString);
+    // Extract the Google Drive URL from the 'importFromUrl' parameter, or use the link directly if it's a Drive URL.
+    const dataUrl = url.searchParams.get('importFromUrl') || (url.hostname.includes('drive.google.com') ? link : null);
 
-    // Basic validation to ensure the data structure is correct
+    if (!dataUrl) {
+      console.warn("Link does not contain a valid import URL.");
+      return null;
+    }
+    
+    const response = await fetch(dataUrl);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch library from URL. Status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    // Basic validation to ensure the fetched data has the correct structure.
     if (data && data.version === 1 && Array.isArray(data.shows)) {
       return data as SharedLibraryData;
     }
+    console.warn("Fetched data has invalid format.", data);
     return null;
   } catch (error) {
     console.error("Failed to parse share link:", error);

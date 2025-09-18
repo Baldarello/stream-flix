@@ -116,3 +116,66 @@ export const writeBackupFile = async (accessToken: string, content: object): Pro
     }
     return response.json();
 };
+
+/**
+ * Uploads a JSON file to the user's Google Drive, makes it public, and returns a direct download link.
+ * @param accessToken The user's Google access token.
+ * @param content The JSON object to upload.
+ * @returns A promise that resolves to an object containing the direct download URL and the file ID.
+ */
+export const createPublicShareFile = async (accessToken: string, content: object): Promise<{ downloadUrl: string, fileId: string }> => {
+    const timestamp = Date.now();
+    const filename = `quix_share_${timestamp}.json`;
+    
+    // Step 1: Create the file in the user's root Drive folder
+    const metadata = {
+        name: filename,
+        mimeType: 'application/json',
+    };
+
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', new Blob([JSON.stringify(content)], { type: 'application/json' }));
+
+    const createResponse = await fetch(`${DRIVE_UPLOAD_URL}?uploadType=multipart&fields=id`, {
+        method: 'POST',
+        headers: createHeaders(accessToken),
+        body: form,
+    });
+
+    if (!createResponse.ok) {
+        const errorData = await createResponse.json();
+        console.error("Google Drive API Error (create share file):", errorData);
+        throw new Error(`Failed to create share file.`);
+    }
+    
+    const { id: fileId } = await createResponse.json();
+
+    // Step 2: Make the file public (anyone with the link can read)
+    const permissionBody = {
+        'role': 'reader',
+        'type': 'anyone'
+    };
+
+    const permissionResponse = await fetch(`${DRIVE_API_URL}/${fileId}/permissions`, {
+        method: 'POST',
+        headers: {
+            ...createHeaders(accessToken),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(permissionBody)
+    });
+
+    if (!permissionResponse.ok) {
+        const errorData = await permissionResponse.json();
+        console.error("Google Drive API Error (set permission):", errorData);
+        // Clean up by deleting the created file if permissions fail
+        await fetch(`${DRIVE_API_URL}/${fileId}`, { method: 'DELETE', headers: createHeaders(accessToken) });
+        throw new Error('Failed to set file permissions to public.');
+    }
+
+    // Step 3: Construct and return the direct download URL
+    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+    return { downloadUrl, fileId };
+};

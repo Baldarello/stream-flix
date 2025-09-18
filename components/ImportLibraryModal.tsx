@@ -5,6 +5,7 @@ import { Modal, Box, Typography, Button, IconButton, TextField, CircularProgress
 import CloseIcon from '@mui/icons-material/Close';
 import { parseDataFromLink } from '../services/shareService';
 import { useTranslations } from '../hooks/useTranslations';
+import { runInAction } from 'mobx';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -26,17 +27,35 @@ const ImportLibraryModal: React.FC = observer(() => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (importUrl) {
+        // If the modal is opened with a URL from the address bar, start importing automatically.
+        if (importUrl && isImportModalOpen) {
             setLink(importUrl);
+            const doImport = async () => {
+                setError('');
+                try {
+                    const data = await parseDataFromLink(importUrl);
+                    if (data) {
+                        await importSharedLibrary(data);
+                        // On success, importSharedLibrary reloads the page, so no need to close modal here.
+                    } else {
+                        throw new Error(t('notifications.importInvalidLink'));
+                    }
+                } catch (e) {
+                    setError(t('notifications.importError', { error: (e as Error).message }));
+                    // Manually stop the spinner if fetch or parsing fails.
+                    runInAction(() => { (mediaStore as any).isImportingLibrary = false; });
+                }
+            };
+            doImport();
         }
-    }, [importUrl]);
+    }, [importUrl, isImportModalOpen, importSharedLibrary, t]);
     
-    const handleImport = () => {
+    const handleImport = async () => {
         setError('');
-        const data = parseDataFromLink(link);
+        const data = await parseDataFromLink(link);
         if (data) {
-            importSharedLibrary(data);
-            // The modal will stay open showing the progress spinner
+            await importSharedLibrary(data);
+            // The modal will show the progress spinner handled by the store
         } else {
             setError(t('notifications.importInvalidLink'));
         }

@@ -228,10 +228,9 @@ const App: React.FC = () => {
         }
         
         // Handle Library Import from URL
-        const importData = params.get('importData');
-        if (importData) {
-            const fullUrl = window.location.href; // The URL contains the full param
-            mediaStore.setImportUrl(fullUrl);
+        const importUrl = params.get('importFromUrl');
+        if (importUrl) {
+            mediaStore.setImportUrl(importUrl);
             mediaStore.openImportModal();
             // Clean the URL in the browser bar
             window.history.replaceState({}, document.title, window.location.pathname);

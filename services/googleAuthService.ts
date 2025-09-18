@@ -65,7 +65,7 @@ export const initGoogleAuth = async () => {
   try {
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.appdata',
+        scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             // Fetch user profile after getting the token
