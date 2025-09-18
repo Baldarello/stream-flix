@@ -18,7 +18,8 @@ export const it = {
   "card": {
     "detailsFor": "Vedi dettagli per {title}",
     "removeFromList": "Rimuovi dalla mia lista",
-    "addToList": "Aggiungi alla mia lista"
+    "addToList": "Aggiungi alla mia lista",
+    "removeFromContinueWatching": "Rimuovi da Continua a guardare"
   },
   "detail": {
     "close": "Chiudi dettaglio",
@@ -313,6 +314,8 @@ export const it = {
     "noBackupFoundCreating": "Nessun backup cloud trovato. Creazione in corso...",
     "restoringFromCloud": "Dati più recenti trovati nel cloud. Ripristino in corso...",
     "shareLinkCreateError": "Creazione del link di condivisione non riuscita: {error}",
-    "syncUpToDate": "I tuoi dati sono già aggiornati."
+    "syncUpToDate": "I tuoi dati sono già aggiornati.",
+    "removedFromContinueWatching": "Rimosso da 'Continua a guardare'.",
+    "removeFromContinueWatchingError": "Errore durante la rimozione da 'Continua a guardare'."
   }
 }

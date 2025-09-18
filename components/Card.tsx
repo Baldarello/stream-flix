@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -15,16 +16,21 @@ interface CardProps {
   displayMode?: 'row' | 'grid';
   className?: string;
   style?: React.CSSProperties;
+  isContinueWatching?: boolean;
 }
 
-export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode = 'row', className, style }) => {
+export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode = 'row', className, style, isContinueWatching = false }) => {
   const { t } = useTranslations();
   const title = item.title || item.name;
   const isInMyList = mediaStore.myList.includes(item.id);
 
-  const handleToggleMyList = (event: React.MouseEvent) => {
+  const handleActionButtonClick = (event: React.MouseEvent) => {
     event.stopPropagation();
-    mediaStore.toggleMyList(item);
+    if (isContinueWatching) {
+        mediaStore.removeFromContinueWatching(item.id);
+    } else {
+        mediaStore.toggleMyList(item);
+    }
   };
 
   const getGlowColor = () => {
@@ -35,6 +41,14 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
         default: return 'var(--glow-seriestv-color)';
     }
   }
+  
+  const actionButtonTooltip = isContinueWatching 
+    ? t('card.removeFromContinueWatching') 
+    : (isInMyList ? t('card.removeFromList') : t('card.addToList'));
+    
+  const actionButtonIcon = isContinueWatching 
+    ? <CloseIcon /> 
+    : (isInMyList ? <CheckIcon /> : <AddIcon />);
 
   const rowStyles = {
     marginLeft: '-40px',
@@ -72,8 +86,6 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
     '& .add-to-list-btn': { opacity: 0, transform: 'translateY(10px)', transition: 'opacity 0.3s, transform 0.3s' },
     '&:hover .add-to-list-btn': { opacity: 1, transform: 'translateY(0)' },
   };
-        
-  const listActionTooltip = isInMyList ? t('card.removeFromList') : t('card.addToList');
 
   return (
     <MuiCard
@@ -87,11 +99,11 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
       role="button"
       aria-label={t('card.detailsFor', { title })}
     >
-      <Tooltip title={listActionTooltip}>
+      <Tooltip title={actionButtonTooltip}>
         <IconButton
           className="add-to-list-btn"
-          onClick={handleToggleMyList}
-          aria-label={listActionTooltip}
+          onClick={handleActionButtonClick}
+          aria-label={actionButtonTooltip}
           sx={{
             position: 'absolute',
             top: 8,
@@ -105,7 +117,7 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
             },
           }}
         >
-          {isInMyList ? <CheckIcon /> : <AddIcon />}
+          {actionButtonIcon}
         </IconButton>
       </Tooltip>
       <CardActionArea sx={{ borderRadius: '10px', overflow: 'hidden', height: '100%' }}>

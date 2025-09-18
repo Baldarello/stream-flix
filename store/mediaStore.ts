@@ -556,6 +556,19 @@ class MediaStore {
             }
         }
     }
+    
+    removeFromContinueWatching = async (episodeId: number) => {
+        try {
+            await db.episodeProgress.delete(episodeId);
+            runInAction(() => {
+                this.episodeProgress.delete(episodeId);
+                this.showSnackbar('notifications.removedFromContinueWatching', 'success', true);
+            });
+        } catch (error) {
+            console.error('Failed to remove from continue watching list:', error);
+            this.showSnackbar('notifications.removeFromContinueWatchingError', 'error', true);
+        }
+    }
 
     updateEpisodeProgress = (progress: { episodeId: number; currentTime: number; duration: number; }) => {
         const { episodeId, currentTime, duration } = progress;

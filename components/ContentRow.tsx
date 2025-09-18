@@ -11,9 +11,10 @@ interface ContentRowProps {
   title: string;
   items: MediaItem[];
   onCardClick: (item: MediaItem) => void;
+  isContinueWatching?: boolean;
 }
 
-export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick }) => {
+export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick, isContinueWatching }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -136,6 +137,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
                 displayMode="row"
                 className="media-card"
                 style={{ zIndex: items.length - index }}
+                isContinueWatching={isContinueWatching}
             />
           ))}
         </Box>

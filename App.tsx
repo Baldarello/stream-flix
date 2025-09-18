@@ -26,6 +26,7 @@ import ImportLibraryModal from './components/ImportLibraryModal';
 import RevisionsModal from './components/RevisionsModal';
 import { useTranslations } from './hooks/useTranslations';
 import { initGoogleAuth } from './services/googleAuthService';
+import type { MediaItem, PlayableItem } from './types';
 
 const baseThemeOptions: ThemeOptions = {
     typography: {
@@ -172,14 +173,27 @@ const AppContent: React.FC = observer(() => {
             )}
             <Container maxWidth={false} sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
-                {mediaStore.homePageRows.map(row => (
+                {mediaStore.homePageRows.map(row => {
+                  const isContinueWatching = row.titleKey === 'misc.continueWatching';
+                  const handleCardClick = (item: MediaItem) => {
+                    if (isContinueWatching) {
+                      // The item is a PlayableItem here, safe to cast.
+                      mediaStore.startPlayback(item as PlayableItem);
+                    } else {
+                      mediaStore.selectMedia(item);
+                    }
+                  };
+
+                  return (
                     <ContentRow
                         key={row.titleKey}
                         title={t(row.titleKey)}
                         items={row.items}
-                        onCardClick={item => mediaStore.selectMedia(item)}
+                        onCardClick={handleCardClick}
+                        isContinueWatching={isContinueWatching}
                     />
-                ))}
+                  );
+                })}
               </Box>
             </Container>
           </>

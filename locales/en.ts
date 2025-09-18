@@ -18,7 +18,8 @@ export const en = {
   "card": {
     "detailsFor": "View details for {title}",
     "removeFromList": "Remove from My List",
-    "addToList": "Add to My List"
+    "addToList": "Add to My List",
+    "removeFromContinueWatching": "Remove from Continue Watching"
   },
   "detail": {
     "close": "Close detail",
@@ -313,6 +314,8 @@ export const en = {
     "noBackupFoundCreating": "No cloud backup found. Creating one now...",
     "restoringFromCloud": "Newer data found in the cloud. Restoring now...",
     "shareLinkCreateError": "Failed to create share link: {error}",
-    "syncUpToDate": "Your data is already up to date."
+    "syncUpToDate": "Your data is already up to date.",
+    "removedFromContinueWatching": "Removed from 'Continue Watching'.",
+    "removeFromContinueWatchingError": "Error removing from 'Continue Watching'."
   }
 }
