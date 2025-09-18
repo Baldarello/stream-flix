@@ -52,7 +52,7 @@ export const Hero: React.FC<HeroProps> = observer(({ item, onMoreInfoClick, onPl
           content: '""',
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(to top, var(--background-gradient-end) 10%, transparent 50%), radial-gradient(circle at 30% 50%, transparent 20%, var(--background-gradient-end) 80%)',
+          background: 'linear-gradient(to right, rgba(20, 20, 20, 0.8) 20%, transparent 70%), linear-gradient(to top, rgba(20, 20, 20, 1) 10%, transparent 50%)',
         }
       }}
     >

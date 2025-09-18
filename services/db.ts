@@ -1,5 +1,6 @@
 import 'dexie-observable/api';
-import Dexie, { type Table } from 'dexie';
+// FIX: Import the 'Events' type from dexie to correctly type the event handling.
+import Dexie, { type Table, type Events } from 'dexie';
 import type { ViewingHistoryItem, MediaItem, EpisodeLink, EpisodeProgress, PreferredSource } from '../types';
 import dexieObservable from 'dexie-observable';
 
@@ -133,8 +134,8 @@ export const db = new QuixDB();
 // Listen for database changes to log revisions and trigger automatic backups
 // FIX: Cast `db.on` to extend its type with the 'changes' event signature from dexie-observable.
 // This resolves the type error without conflicting with the base class definition.
-// FIX: Corrected typo from `Dexie.DbEvents` to `Dexie.Events`.
-(db.on as Dexie.Events & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
+// FIX: Use the imported 'Events' type for the cast instead of 'Dexie.Events', which refers to a value (the static class property) and not a type.
+(db.on as Events & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
     // Filter out changes we don't want to track or that would cause loops
     const relevantChanges = changes.filter(change => 
         change.table !== 'revisions' && 
