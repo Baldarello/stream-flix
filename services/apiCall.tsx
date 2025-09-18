@@ -23,7 +23,7 @@ apiClient.interceptors.request.use(async request => {
     request.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,PATCH,OPTIONS";
     if ((request.headers["Authorization"] === undefined || request.headers["Authorization"] === null || request.headers["Authorization"] === "")) {
         // FIX: Use TMDB_API_TOKEN from environment variables instead of a hardcoded key.
-        request.headers["Authorization"] = process.env.API_KEY;
+        request.headers["Authorization"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
     }
 
     return request;
