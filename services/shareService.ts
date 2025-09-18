@@ -35,13 +35,15 @@ export const parseDataFromLink = async (link: string): Promise<SharedLibraryData
       return null;
     }
     
-    // Prepend a CORS proxy to the Google Drive URL to bypass browser restrictions
-    const proxyUrl = `https://cors.eu.org/${dataUrl}`;
+    // Prepend a CORS proxy to the Google Drive URL to bypass browser restrictions.
+    // The previous proxy (cors.eu.org) was being blocked by Google Drive, resulting in a 403 error.
+    // This new proxy is an alternative to bypass CORS issues. The target URL must be encoded.
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(dataUrl)}`;
 
     const response = await fetch(proxyUrl);
     if (!response.ok) {
         // Provide a more specific error if the proxy itself fails
-        if (response.status === 404 && response.url.includes('cors.eu.org')) {
+        if (response.status === 404 && response.url.includes('corsproxy.io')) {
              throw new Error(`Failed to fetch from proxy. The original URL might be invalid or unreachable.`);
         }
         throw new Error(`Failed to fetch library from URL. Status: ${response.status}`);
