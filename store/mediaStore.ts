@@ -617,6 +617,16 @@ class MediaStore {
                     break;
             }
 
+            // Automatically set the first source as preferred if none is set for this show
+            if (linksToAdd.length > 0 && !this.preferredSources.has(show.id)) {
+                try {
+                    const firstUrl = new URL(linksToAdd[0].url);
+                    await this.setPreferredSource(show.id, firstUrl.origin);
+                } catch (e) {
+                    console.warn("Could not determine origin from the first link to set as preferred source", e);
+                }
+            }
+
             await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
             await this.refreshLinksForShow(show.id);
             this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToAdd.length });
@@ -632,6 +642,17 @@ class MediaStore {
             const linksToAdd: Omit<MediaLink, 'id'>[] = links.map(link => ({
                 mediaId, url: link.url, label: link.label || new URL(link.url).hostname,
             }));
+            
+            // Automatically set the first source as preferred if none is set
+            if (linksToAdd.length > 0 && !this.preferredSources.has(mediaId)) {
+                try {
+                    const firstUrl = new URL(linksToAdd[0].url);
+                    await this.setPreferredSource(mediaId, firstUrl.origin);
+                } catch (e) {
+                    console.warn("Could not determine origin from the first link to set as preferred source", e);
+                }
+            }
+            
             await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
             await this.refreshLinksForMediaId(mediaId);
         } catch (error) {
