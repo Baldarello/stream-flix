@@ -49,9 +49,9 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         </Typography>
         {items.length > 0 ? (
           <Grid container spacing={2}>
-            {/* FIX: Renamed `item` to `mediaItem` to avoid potential naming conflicts with the Grid's `item` prop. */}
+            {/* FIX: The `item` prop was causing a TypeScript error. The presence of breakpoint props (`xs`, `sm`, etc.) implies it's a grid item. */}
             {items.map((mediaItem, index) => (
-              <Grid item key={mediaItem.id} xs={6} sm={4} md={3} lg={2} sx={{
+              <Grid key={mediaItem.id} xs={6} sm={4} md={3} lg={2} sx={{
                   transition: 'opacity 0.5s, transform 0.5s',
                   animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,
                   '@keyframes fadeInUp': {

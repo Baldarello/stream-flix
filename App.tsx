@@ -102,6 +102,20 @@ const AppContent: React.FC = observer(() => {
     isQRScannerOpen,
   } = mediaStore;
 
+  useEffect(() => {
+    const shouldLockScroll = !!selectedItem || !!nowPlayingItem || isSmartTVPairingVisible || isRemoteMaster;
+    if (shouldLockScroll) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    // Cleanup function to restore scroll on unmount, just in case.
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster]);
+
   if (loading) {
     return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
