@@ -364,8 +364,10 @@ const VideoPlayer: React.FC = observer(() => {
                     onChange={handleSeek}
                     sx={{ color: themeColor }}
                 />
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Stack direction="row" alignItems="center" spacing={2}>
+                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
+                <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                    <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
                         <IconButton onClick={handleTogglePlay} color="inherit">
                             {playerState.isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
                         </IconButton>
@@ -395,7 +397,8 @@ const VideoPlayer: React.FC = observer(() => {
                             {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
                         </Typography>
                     </Stack>
-                    <Stack direction="row" alignItems="center" spacing={1}>
+                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         <Tooltip title={t('videoPlayer.downloadVideo')}>
                             <IconButton onClick={handleDownload} color="inherit"><DownloadIcon /></IconButton>
                         </Tooltip>

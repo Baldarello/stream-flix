@@ -13,7 +13,6 @@ import {
 import {websocketService} from '../services/websocketService.js';
 import {db} from '../services/db';
 import { isSmartTV as detectSmartTV } from '../utils/device';
-import { initGoogleAuth } from '../services/googleAuthService';
 import * as driveService from '../services/googleDriveService';
 import { it } from '../locales/it';
 import { en } from '../locales/en';
@@ -153,7 +152,6 @@ class MediaStore {
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
         websocketService.events.on('debug', this.addDebugMessage);
-        initGoogleAuth();
     }
 
     showSnackbar = (message: string, severity: AlertColor = 'info', isTranslationKey = false, translationValues?: Record<string, any>) => {

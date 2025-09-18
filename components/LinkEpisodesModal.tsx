@@ -195,7 +195,8 @@ const LinkEpisodesModal: React.FC = observer(() => {
         <IconButton onClick={closeLinkEpisodesModal} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>
         <Typography variant="h5" component="h2" fontWeight="bold">{t('linkEpisodesModal.title', { name: item.name })}</Typography>
 
-        <Stack spacing={2} mt={2} sx={{ overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* FIX: The `mt` prop is a system prop and should be passed inside the `sx` object. */}
+        <Stack spacing={2} sx={{ mt: 2, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <FormControl fullWidth required>
               <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
               <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={handleSeasonChange}>

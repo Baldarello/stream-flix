@@ -23,6 +23,7 @@ import ShareLibraryModal from './components/ShareLibraryModal';
 import ImportLibraryModal from './components/ImportLibraryModal';
 import RevisionsModal from './components/RevisionsModal';
 import { useTranslations } from './hooks/useTranslations';
+import { initGoogleAuth } from './services/googleAuthService';
 
 const baseThemeOptions: ThemeOptions = {
     typography: {
@@ -212,6 +213,7 @@ const App: React.FC = () => {
   
   useEffect(() => {
     const initializeApp = async () => {
+        await initGoogleAuth();
         await mediaStore.loadPersistedData();
         mediaStore.fetchAllData();
         

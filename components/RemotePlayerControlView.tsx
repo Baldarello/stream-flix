@@ -197,7 +197,8 @@ const RemotePlayerControlView = observer(() => {
 
             <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 {/* Main Controls */}
-                <Stack direction="row" spacing={3} justifyContent="center" alignItems="center" sx={{ mb: 3 }}>
+                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
+                <Stack direction="row" spacing={3} sx={{ justifyContent: 'center', alignItems: 'center', mb: 3 }}>
                     <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{ transform: 'scale(1.5)' }}>
                         <FastRewindIcon fontSize="large" />
                     </IconButton>
@@ -217,7 +218,8 @@ const RemotePlayerControlView = observer(() => {
                 </Stack>
 
                 {/* Secondary Controls */}
-                <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 4, height: '48px' /* Reserve space for buttons */ }}>
+                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
+                <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center', mt: 4, height: '48px' /* Reserve space for buttons */ }}>
                     {isIntroSkippable && (
                         <Button 
                             variant="contained" 

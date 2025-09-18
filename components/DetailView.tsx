@@ -145,17 +145,21 @@ const DetailView: React.FC = observer(() => {
                     border: '1px solid rgba(255,255,255,0.1)',
                 }}>
                     <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
-                    <Stack direction="row" spacing={3} alignItems="center">
+                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                    <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
                         <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average.toFixed(1)}</Typography>
                         <Typography>{releaseDate?.substring(0, 4)}</Typography>
                         {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} {t('detail.seasons')}</Typography>}
                     </Stack>
                     <Typography variant="body1" sx={{ maxHeight: '200px', overflowY: 'auto' }}>{item.overview}</Typography>
+                    {/* FIX: The `pt` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}
                         spacing={2}
-                        pt={2}
-                        alignItems={{ xs: 'stretch', sm: 'center' }}
+                        sx={{
+                            pt: 2,
+                            alignItems: { xs: 'stretch', sm: 'center' }
+                        }}
                     >
                         <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)' } }} onClick={() => mediaStore.startPlayback(item)}>
                             {t('detail.play')}

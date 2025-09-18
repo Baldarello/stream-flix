@@ -64,7 +64,8 @@ export const Hero: React.FC<HeroProps> = observer(({ item, onMoreInfoClick, onPl
           <Typography variant="body1" sx={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
             {overview}
           </Typography>
-          <Stack direction="row" spacing={2} pt={2}>
+          {/* FIX: The `pt` prop is a system prop and should be passed inside the `sx` object. */}
+          <Stack direction="row" spacing={2} sx={{ pt: 2 }}>
             <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)' } }} onClick={onPlayClick}>
               {t('hero.play')}
             </Button>

@@ -1,21 +1,63 @@
 import { mediaStore } from '../store/mediaStore';
+import type { GoogleUser } from '../types';
 
 // This Client ID should be defined in a .env file for your project
 // You can get one from the Google Cloud Console: https://console.cloud.google.com/apis/credentials
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const LOCAL_STORAGE_KEY = 'QUIX_GOOGLE_USER_SESSION';
 
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 
-export const initGoogleAuth = () => {
-  if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-    console.error("Google Identity Services library not loaded.");
+
+const tryRestoringSession = async () => {
+  const sessionData = localStorage.getItem(LOCAL_STORAGE_KEY);
+  if (!sessionData) {
     return;
+  }
+
+  try {
+    const user: GoogleUser = JSON.parse(sessionData);
+    if (!user || !user.accessToken) {
+      throw new Error("Invalid session data in localStorage.");
+    }
+
+    // Validate token by fetching user info
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { 'Authorization': `Bearer ${user.accessToken}` }
+    });
+
+    if (response.ok) {
+      // Token is valid, restore the session
+      mediaStore.setGoogleUser(user);
+    } else {
+      // Token is invalid/expired
+      throw new Error("Token validation failed.");
+    }
+  } catch (error) {
+    console.warn("Could not restore session:", error);
+    // Clean up invalid data
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  }
+};
+
+
+export const initGoogleAuth = async () => {
+  if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+    // Wait a moment for the GSI script to load from index.html
+    await new Promise(resolve => setTimeout(resolve, 500));
+    if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+      console.error("Google Identity Services library still not loaded after delay.");
+      return;
+    }
   }
   
   if (!GOOGLE_CLIENT_ID) {
     console.error("Google Client ID is not configured. Please set process.env.GOOGLE_CLIENT_ID.");
     return;
   }
+  
+  // Attempt to restore session before initializing the client for new logins
+  await tryRestoringSession();
 
 
   try {
@@ -32,12 +74,17 @@ export const initGoogleAuth = () => {
               if (!response.ok) throw new Error('Failed to fetch user info');
               const profile = await response.json();
               
-              mediaStore.setGoogleUser({
+              const user: GoogleUser = {
                   name: profile.name,
                   email: profile.email,
                   picture: profile.picture,
                   accessToken: tokenResponse.access_token,
-              });
+              };
+              
+              // Persist session to localStorage
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
+              
+              mediaStore.setGoogleUser(user);
               
             } catch (error) {
                 console.error("Error fetching user profile:", error);
@@ -70,6 +117,10 @@ export const handleSignIn = () => {
 
 export const handleSignOut = () => {
     const user = mediaStore.googleUser;
+    
+    // Clear the persisted session
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+
     if (user?.accessToken) {
         // Revoke the token to sever the connection
         google.accounts.oauth2.revoke(user.accessToken, () => {

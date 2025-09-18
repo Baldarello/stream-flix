@@ -102,7 +102,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                     <Typography gutterBottom>
                                         {t('linkEpisodesModal.manage.linksFrom', { count: links.length })} <strong>{origin}</strong>
                                     </Typography>
-                                    <Stack direction="row" spacing={1} alignItems="center">
+                                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                         <TextField
                                             label={t('linkEpisodesModal.manage.newDomain')}
                                             fullWidth
