@@ -304,7 +304,7 @@ export const it = {
     "importInvalidFile": "File di importazione non valido o corrotto.",
     "importInvalidLink": "Link di condivisione non valido.",
     "importInProgress": "Importazione della libreria in corso...",
-    "importSuccess": "{showCount} show e {linkCount} link importati con successo! L'app verrà ricaricata.",
+    "importSuccess": "{showCount} show e {linkCount} link importati e aggiunti a 'La mia lista'! L'app verrà ricaricata.",
     "importError": "Errore durante l'importazione: {error}",
     "revertSuccess": "Modifica annullata con successo.",
     "revertError": "Impossibile annullare la modifica: {error}",

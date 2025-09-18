@@ -911,7 +911,11 @@ class MediaStore {
         this.isImportingLibrary = true;
         try {
             let totalLinks = 0;
+            const showIdsToAddToMyList: number[] = [];
+
             for (const showData of data.shows) {
+                showIdsToAddToMyList.push(showData.tmdbId);
+
                 // Ensure show details are in cache
                 if (!this.cachedItems.has(showData.tmdbId)) {
                     await this.selectMedia({ id: showData.tmdbId, media_type: 'tv' } as MediaItem, false);
@@ -931,6 +935,21 @@ class MediaStore {
                 await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
                 totalLinks += linksToAdd.length;
             }
+
+            // NEW: Add imported shows to "My List"
+            if (showIdsToAddToMyList.length > 0) {
+                const itemsToAddToMyList = showIdsToAddToMyList
+                    .filter(id => !this.myList.includes(id)) // Filter out duplicates
+                    .map(id => ({ id }));
+                
+                if (itemsToAddToMyList.length > 0) {
+                    await db.myList.bulkAdd(itemsToAddToMyList);
+                    runInAction(() => {
+                        this.myList.push(...itemsToAddToMyList.map(item => item.id));
+                    });
+                }
+            }
+
             this.showSnackbar('notifications.importSuccess', 'success', true, { showCount: data.shows.length, linkCount: totalLinks });
             setTimeout(() => window.location.reload(), 3000);
         } catch (error) {

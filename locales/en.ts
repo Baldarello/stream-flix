@@ -304,7 +304,7 @@ export const en = {
     "importInvalidFile": "Import file is invalid or corrupt.",
     "importInvalidLink": "The provided share link is not valid.",
     "importInProgress": "Importing library...",
-    "importSuccess": "Imported {showCount} shows and {linkCount} links successfully! The app will now reload.",
+    "importSuccess": "Imported {showCount} shows and {linkCount} links successfully and added to 'My List'! The app will now reload.",
     "importError": "Failed to import library: {error}",
     "revertSuccess": "Change successfully reverted.",
     "revertError": "Failed to revert change: {error}",
