@@ -133,7 +133,8 @@ export const db = new QuixDB();
 // Listen for database changes to log revisions and trigger automatic backups
 // FIX: Cast `db.on` to extend its type with the 'changes' event signature from dexie-observable.
 // This resolves the type error without conflicting with the base class definition.
-(db.on as Dexie.DbEvents & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
+// FIX: Corrected typo from `Dexie.DbEvents` to `Dexie.Events`.
+(db.on as Dexie.Events & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
     // Filter out changes we don't want to track or that would cause loops
     const relevantChanges = changes.filter(change => 
         change.table !== 'revisions' && 

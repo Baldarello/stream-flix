@@ -27,9 +27,8 @@ const tryRestoringSession = async () => {
     });
 
     if (response.ok) {
-      // Token is valid, set user and then trigger sync
+      // Token is valid, set user. Sync will be triggered from the main App component.
       await mediaStore.setGoogleUser(user);
-      await mediaStore.synchronizeWithDrive();
     } else {
       // Token is invalid/expired
       throw new Error("Token validation failed.");
@@ -58,7 +57,6 @@ export const initGoogleAuth = async () => {
   }
   
   // Attempt to restore session before initializing the client for new logins.
-  // This now also handles the initial data sync.
   await tryRestoringSession();
 
 
