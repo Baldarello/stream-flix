@@ -159,7 +159,7 @@ const DetailView: React.FC = observer(() => {
                     </Stack>
                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                     <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
-                        <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average.toFixed(1)}</Typography>
+                        <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average?.toFixed(1)}</Typography>
                         <Typography>{releaseDate?.substring(0, 4)}</Typography>
                         {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} {t('detail.seasons')}</Typography>}
                     </Stack>
