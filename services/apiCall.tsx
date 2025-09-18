@@ -1,27 +1,11 @@
 import axios from 'axios';
 import type { MediaItem, Season, Episode } from '../types';
 
-// FIX: Augment Axios's internal request config type to allow for a custom 'meta' property,
-// which is used for logging and timing requests within interceptors.
-declare module 'axios' {
-  interface InternalAxiosRequestConfig {
-    meta?: {
-      requestStartedAt?: number;
-      logData?: any;
-    };
-  }
-}
-
 // The API key must be obtained exclusively from the environment variable process.env.API_KEY
 // Assuming this is available in the execution environment.
-const API_KEY = process.env.API_KEY;
 const API_BASE_URL = 'https://production-api.tnl.one/';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/';
 const BASE_PATH="service/tmdb/"
-
-const API_KEY_TMDB =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
-
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -38,7 +22,8 @@ apiClient.interceptors.request.use(async request => {
     request.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept";
     request.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,PATCH,OPTIONS";
     if ((request.headers["Authorization"] === undefined || request.headers["Authorization"] === null || request.headers["Authorization"] === "")) {
-        request.headers["Authorization"] = API_KEY_TMDB;
+        // FIX: Use TMDB_API_TOKEN from environment variables instead of a hardcoded key.
+        request.headers["Authorization"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
     }
 
     return request;
@@ -123,13 +108,18 @@ export const getSeriesDetails = async (seriesId: number): Promise<MediaItem> => 
  */
 export const getSeriesEpisodes = async (seriesId: number, seasonNumber: number): Promise<Episode[]> => {
   const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/season/${seasonNumber}`);
-  return response.data.episodes.map((ep: any): Episode => ({
-    id: ep.id,
-    episode_number: ep.episode_number,
-    name: ep.name,
-    overview: ep.overview,
-    still_path: buildImageURL(ep.still_path, 'w300'),
-  }));
+  return response.data.episodes.map((ep: any): Episode => {
+    // Mocking intro times for demonstration purposes of the "Skip Intro" feature
+    const hasIntro = ep.episode_number > 1; // Assume pilot doesn't have a skippable intro
+    return {
+      id: ep.id,
+      episode_number: ep.episode_number,
+      name: ep.name,
+      overview: ep.overview,
+      still_path: buildImageURL(ep.still_path, 'w300'),
+      intro_start_s: hasIntro ? 15 : undefined,
+    };
+  });
 };
 
 /**

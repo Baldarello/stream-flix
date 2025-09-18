@@ -1,18 +1,11 @@
 import React from 'react';
-import { Box, Container, Link, Typography, IconButton, Grid } from '@mui/material';
+import { Box, Container, Link, Typography, IconButton } from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 
 export const Footer: React.FC = () => {
-  const links = [
-    'Audio and Subtitles', 'Audio Description', 'Help Center', 'Gift Cards',
-    'Media Center', 'Investor Relations', 'Jobs', 'Terms of Use',
-    'Privacy', 'Legal Notices', 'Cookie Preferences', 'Corporate Information',
-    'Contact Us'
-  ];
-
   const socialIcons = [
     { icon: <FacebookIcon />, href: '#' },
     { icon: <InstagramIcon />, href: '#' },
@@ -21,24 +14,14 @@ export const Footer: React.FC = () => {
   ];
 
   return (
-    <Container maxWidth="md" component="footer" sx={{ pt: 8, pb: 6, color: 'text.secondary' }}>
-      <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+    <Container maxWidth="md" component="footer" sx={{ pt: 8, pb: 6, color: 'text.secondary', textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
         {socialIcons.map((social, index) => (
-          <IconButton key={index} component="a" href={social.href} color="inherit" sx={{ '&:hover': { color: 'text.primary' } }}>
+          <IconButton key={index} component="a" href={social.href} color="inherit" sx={{ '&:hover': { color: 'text.primary', transform: 'scale(1.1)' } }}>
             {social.icon}
           </IconButton>
         ))}
       </Box>
-      <Grid container spacing={2}>
-        {links.map((link) => (
-          // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
-          <Grid item xs={6} sm={3} key={link}>
-            <Link href="#" color="inherit" underline="hover" variant="body2">
-              {link}
-            </Link>
-          </Grid>
-        ))}
-      </Grid>
       <Typography variant="body2" sx={{ mt: 4 }}>
         &copy; 1997-2024 Quix, Inc.
       </Typography>

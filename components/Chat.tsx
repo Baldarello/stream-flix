@@ -5,6 +5,7 @@ import { Box, Typography, TextField, IconButton, List, ListItem, ListItemText, A
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import { useTranslations } from '../hooks/useTranslations';
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -15,8 +16,9 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-const Chat: React.FC = () => {
-  const { chatHistory, sendChatMessage, username, participants, hostId, isHost, myClientId, transferHost } = mediaStore;
+const Chat: React.FC = observer(() => {
+  const { chatHistory, sendChatMessage, participants, hostId, isHost, myClientId, transferHost } = mediaStore;
+  const { t } = useTranslations();
   const [text, setText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -56,14 +58,14 @@ const Chat: React.FC = () => {
       }}
     >
       <Box sx={{ p: 2, bgcolor: '#202020' }}>
-         <Typography variant="h6">Chat della stanza</Typography>
+         <Typography variant="h6">{t('chat.title')}</Typography>
       </Box>
       <Divider />
       
       {/* Participant List */}
       <Box sx={{ p: 1 }}>
           <Typography variant="overline" sx={{ px: 2, color: 'text.secondary' }}>
-              Partecipanti ({participants.length})
+              {t('chat.participants', { count: participants.length })}
           </Typography>
           <List dense sx={{ maxHeight: 180, overflowY: 'auto' }}>
               {participants.map(p => (
@@ -71,8 +73,8 @@ const Chat: React.FC = () => {
                       key={p.id}
                       secondaryAction={
                           isHost && p.id !== myClientId ? (
-                              <Tooltip title="Rendi Host">
-                                  <IconButton edge="end" aria-label="make host" onClick={() => transferHost(p.id)}>
+                              <Tooltip title={t('chat.makeHost')}>
+                                  <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => transferHost(p.id)}>
                                       <SwapHorizIcon />
                                   </IconButton>
                               </Tooltip>
@@ -88,7 +90,7 @@ const Chat: React.FC = () => {
                               noWrap: true,
                            }}
                       />
-                      {p.id === hostId && <Chip label="Host" size="small" color="primary" variant="outlined" sx={{height: 20}} />}
+                      {p.id === hostId && <Chip label={t('watchTogether.host')} size="small" color="primary" variant="outlined" sx={{height: 20}} />}
                   </ListItem>
               ))}
           </List>
@@ -125,7 +127,7 @@ const Chat: React.FC = () => {
                 <Box
                   component="img"
                   src={msg.image}
-                  alt="Immagine inviata"
+                  alt={t('chat.sentImageAlt')}
                   sx={{
                     maxWidth: '100%',
                     maxHeight: '200px',
@@ -150,14 +152,14 @@ const Chat: React.FC = () => {
           style={{ display: 'none' }}
           onChange={handleImageUpload}
         />
-        <IconButton onClick={() => fileInputRef.current?.click()} aria-label="upload image">
+        <IconButton onClick={() => fileInputRef.current?.click()} aria-label={t('chat.uploadImage')}>
             <ImageIcon />
         </IconButton>
         <TextField
           fullWidth
           variant="standard"
           size="small"
-          placeholder="Scrivi un messaggio..."
+          placeholder={t('chat.placeholder')}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -169,6 +171,6 @@ const Chat: React.FC = () => {
       </Box>
     </Box>
   );
-};
+});
 
-export default observer(Chat);
+export default Chat;

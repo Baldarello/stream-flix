@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, Card, CardMedia, Tooltip, Grid, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, Card, CardMedia, Tooltip, CircularProgress, TextField, InputAdornment, List, ListItemButton, ListItemText, LinearProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import GroupIcon from '@mui/icons-material/Group';
 import LinkIcon from '@mui/icons-material/Link';
-import WatchTogetherModal from './WatchTogetherModal';
+import TheatersIcon from '@mui/icons-material/Theaters';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LinkEpisodesModal from './LinkEpisodesModal';
 import type { Episode } from '../types';
+import { useTranslations } from '../hooks/useTranslations';
 
-const DetailView: React.FC = () => {
-  const { selectedItem: item, myList, isDetailLoading } = mediaStore;
+const DetailView: React.FC = observer(() => {
+  const { selectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration, episodeProgress } = mediaStore;
+  const { t } = useTranslations();
 
   if (!item) return null;
 
@@ -24,7 +27,21 @@ const DetailView: React.FC = () => {
   const currentSeason = item.seasons?.find(s => s.season_number === selectedSeason);
   const isInMyList = myList.includes(item.id);
 
-  // If the selectedItem is updated (e.g. from API) and the current season number is no longer valid, default to the first one.
+  const introDuration = showIntroDurations.get(item.id) ?? 80;
+
+  const backgroundImage = item.backdrop_path || item.poster_path;
+
+
+  const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    const duration = parseInt(value, 10);
+    if (value === '' || isNaN(duration)) {
+        setShowIntroDuration(item.id, 80); // Reset to default
+    } else if (duration >= 0) {
+        setShowIntroDuration(item.id, duration);
+    }
+  };
+
   React.useEffect(() => {
       if (item.seasons && item.seasons.length > 0) {
           const seasonExists = item.seasons.some(s => s.season_number === selectedSeason);
@@ -34,182 +51,272 @@ const DetailView: React.FC = () => {
       }
   }, [item.seasons, selectedSeason]);
 
-  return (
-    <Box sx={{ animation: 'fadeIn 0.5s ease-in-out' }}>
-      {/* Backdrop Section */}
-      <Box
-        sx={{
-          position: 'relative',
-          height: '40vw',
-          minHeight: '300px',
-          maxHeight: '600px',
-          color: 'white'
-        }}
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage: `url(${item.backdrop_path})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to top, #141414 10%, transparent 70%)'
-          }}
-        />
-        <IconButton
-          onClick={() => mediaStore.closeDetail()}
-          aria-label="Chiudi dettaglio"
-          sx={{ position: 'absolute', top: 16, right: 16, bgcolor: 'rgba(0,0,0,0.5)', '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' } }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <Box sx={{ position: 'absolute', bottom: 0, left: 0, p: { xs: 2, md: 8 }, width: { xs: '100%', md: '60%' } }}>
-          <Stack spacing={2}>
-            <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
-            <Stack direction="row" spacing={3} alignItems="center">
-              <Typography sx={{ color: 'success.main' }} fontWeight="bold">Voto: {item.vote_average.toFixed(1)}</Typography>
-              <Typography>{releaseDate?.substring(0, 4)}</Typography>
-              {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} Stagioni</Typography>}
-            </Stack>
-            <Typography variant="body1" sx={{ maxWidth: '700px' }}>{item.overview}</Typography>
-            <Stack 
-              direction={{ xs: 'column', sm: 'row' }} 
-              spacing={2} 
-              pt={2} 
-              alignItems={{ xs: 'stretch', sm: 'center' }}
-            >
-              <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'grey.300' } }} onClick={() => mediaStore.startPlayback(item)}>
-                Riproduci
-              </Button>
-              <IconButton 
-                onClick={() => mediaStore.toggleMyList(item)}
-                aria-label={isInMyList ? 'Rimuovi dalla mia lista' : 'Aggiungi alla mia lista'}
-                sx={{ 
-                  border: '2px solid rgba(255,255,255,0.7)', 
-                  color: 'white',
-                  alignSelf: { xs: 'flex-start' }
-                }}
-              >
-                {isInMyList ? <CheckIcon /> : <AddIcon />}
-              </IconButton>
-              <Button
-                variant="outlined"
-                startIcon={<GroupIcon />}
-                size="large"
-                onClick={() => mediaStore.openWatchTogetherModal(item)}
-                sx={{ borderColor: 'rgba(255,255,255,0.7)', color: 'white', '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)'} }}
-              >
-                Guarda Insieme
-              </Button>
-            </Stack>
-          </Stack>
-        </Box>
-      </Box>
+  const listActionLabel = isInMyList ? t('detail.removeFromList') : t('detail.addToList');
 
-      {/* Episodes Section */}
-      {item.media_type === 'tv' && (
-        <Box sx={{ p: { xs: 2, md: 8 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="h4" component="h2" fontWeight="bold">Episodi</Typography>
-                <Tooltip title="Collega file video per la stagione">
-                    <IconButton onClick={() => mediaStore.openLinkEpisodesModal(item)}>
-                        <LinkIcon />
-                    </IconButton>
-                </Tooltip>
-            </Box>
-            {item.seasons && item.seasons.length > 0 && (
-                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-                <InputLabel id="season-select-label">Stagione</InputLabel>
-                <Select
-                    labelId="season-select-label"
-                    value={selectedSeason}
-                    label="Stagione"
-                    onChange={(e) => setSelectedSeason(Number(e.target.value))}
-                    sx={{ bgcolor: 'background.paper' }}
-                >
-                    {item.seasons.map(season => (
-                    <MenuItem key={season.id} value={season.season_number}>
-                        {season.name}
-                    </MenuItem>
-                    ))}
-                </Select>
-                </FormControl>
-            )}
-          </Box>
-          {isDetailLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '20vh' }}>
-                <CircularProgress />
-            </Box>
-          ) : (
-            <Grid container spacing={3}>
-                {currentSeason?.episodes.map((episode: Episode) => (
-                // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
-                <Grid item xs={12} sm={6} md={4} lg={3} key={episode.id}>
-                    <Card 
-                    onClick={() => {
-                        if (episode.video_url && currentSeason) {
-                            mediaStore.startPlayback({
-                                ...episode,
-                                show_id: item.id,
-                                show_title: item.title || item.name || '',
-                                backdrop_path: item.backdrop_path,
-                                season_number: currentSeason.season_number,
-                            });
-                        }
-                    }}
-                    sx={{ 
-                        bgcolor: 'background.paper', 
-                        cursor: episode.video_url ? 'pointer' : 'default',
-                        '&:hover .play-icon': { opacity: episode.video_url ? 1 : 0.4 } 
-                    }}
-                    >
-                    <Box sx={{ position: 'relative' }}>
-                        <CardMedia
+  const getGlowColor = () => {
+    switch (mediaStore.activeTheme) {
+        case 'Film': return 'var(--glow-film-color)';
+        case 'Anime': return 'var(--glow-anime-color)';
+        case 'SerieTV':
+        default: return 'var(--glow-seriestv-color)';
+    }
+  }
+
+  return (
+    <Box sx={{ position: 'fixed', inset: 0, zIndex: 1200, animation: 'fadeIn 0.5s ease-in-out' }}>
+        {backgroundImage ? (
+            <Box sx={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url(${backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(20px) brightness(0.5)',
+                transform: 'scale(1.1)',
+            }} />
+        ) : (
+             <Box sx={{
+                position: 'absolute',
+                inset: 0,
+                bgcolor: '#141414',
+            }} />
+        )}
+
+        <IconButton
+            onClick={() => mediaStore.closeDetail()}
+            aria-label={t('detail.close')}
+            sx={{
+                position: 'absolute', top: 16, right: 16, zIndex: 1300,
+                bgcolor: 'rgba(0,0,0,0.5)',
+                transform: 'scale(1.2)',
+                transition: 'transform 0.3s ease, background-color 0.3s ease',
+                '&:hover': { bgcolor: 'rgba(0,0,0,0.8)', transform: 'scale(1.3) rotate(90deg)' }
+            }}
+        >
+            <CloseIcon />
+        </IconButton>
+
+        <Box sx={{ position: 'relative', height: '100%', overflowY: 'auto' }}>
+            <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '350px 1fr' },
+                gap: 4,
+                p: { xs: 2, md: 8 },
+                pt: { xs: 8, md: 8 },
+                minHeight: '60vh',
+                alignItems: 'center',
+            }}>
+                {item.poster_path ? (
+                    <CardMedia
                         component="img"
-                        image={episode.still_path}
-                        alt={`Scena da ${episode.name}`}
-                        sx={{ aspectRatio: '16/9', objectFit: 'cover' }}
-                        />
-                        <Box 
-                        className="play-icon" 
-                        sx={{ 
-                            position: 'absolute', 
-                            inset: 0, 
-                            bgcolor: 'rgba(0,0,0,0.4)', 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            alignItems: 'center', 
-                            opacity: episode.video_url ? 0 : 0.4,
-                            transition: 'opacity 0.3s' 
+                        image={item.poster_path}
+                        alt={title}
+                        sx={{
+                            width: '100%',
+                            maxWidth: '350px',
+                            aspectRatio: '2/3',
+                            borderRadius: 3,
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                            justifySelf: 'center',
                         }}
+                    />
+                ) : (
+                    <Box sx={{
+                        width: '100%',
+                        maxWidth: '350px',
+                        aspectRatio: '2/3',
+                        borderRadius: 3,
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                        justifySelf: 'center',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        <TheatersIcon color="disabled" sx={{ fontSize: '6rem' }} />
+                    </Box>
+                )}
+                <Stack spacing={2} sx={{
+                    p: { xs: 2, md: 4 },
+                    bgcolor: 'background.paper',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: 3,
+                    border: '1px solid rgba(255,255,255,0.1)',
+                }}>
+                    <Typography variant="h2" component="h1" fontWeight="bold">{title}</Typography>
+                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                    <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
+                        <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average.toFixed(1)}</Typography>
+                        <Typography>{releaseDate?.substring(0, 4)}</Typography>
+                        {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} {t('detail.seasons')}</Typography>}
+                    </Stack>
+                    <Typography variant="body1" sx={{ maxHeight: '200px', overflowY: 'auto' }}>{item.overview}</Typography>
+                    {/* FIX: The `pt` and `alignItems` props are system props and should be passed inside the `sx` object. */}
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        spacing={2}
+                        sx={{
+                            pt: 2,
+                            alignItems: { xs: 'stretch', sm: 'center' }
+                        }}
+                    >
+                        <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)' } }} onClick={() => mediaStore.startPlayback(item)}>
+                            {t('detail.play')}
+                        </Button>
+                        <Tooltip title={listActionLabel}>
+                            <IconButton
+                                onClick={() => mediaStore.toggleMyList(item)}
+                                aria-label={listActionLabel}
+                                sx={{
+                                    border: '2px solid rgba(255,255,255,0.7)',
+                                    color: 'white',
+                                    alignSelf: { xs: 'flex-start' },
+                                    width: 48,
+                                    height: 48,
+                                    '&:hover': { borderColor: 'white', boxShadow: `0 0 10px ${getGlowColor()}` }
+                                }}
+                            >
+                                {isInMyList ? <CheckIcon /> : <AddIcon />}
+                            </IconButton>
+                        </Tooltip>
+                        <Button
+                            variant="outlined"
+                            startIcon={<GroupIcon />}
+                            size="large"
+                            onClick={() => mediaStore.openWatchTogetherModal(item)}
+                            sx={{ borderColor: 'rgba(255,255,255,0.7)', color: 'white', '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)', boxShadow: `0 0 10px ${getGlowColor()}` } }}
                         >
-                        <PlayArrowIcon sx={{ fontSize: 60, color: 'white' }} />
+                            {t('detail.watchTogether')}
+                        </Button>
+                    </Stack>
+                </Stack>
+            </Box>
+
+            {item.media_type === 'tv' && (
+                <Box sx={{ p: { xs: 2, md: 8 }, pt: 0 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Typography variant="h4" component="h2" fontWeight="bold">{t('detail.episodes')}</Typography>
+                            <Tooltip title={t('detail.linkEpisodesTooltip')}>
+                                <IconButton onClick={() => mediaStore.openLinkEpisodesModal(item)}>
+                                    <LinkIcon />
+                                </IconButton>
+                            </Tooltip>
                         </Box>
+                        {item.seasons && item.seasons.length > 0 && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <TextField
+                                    label={t('detail.introDuration')}
+                                    type="number"
+                                    variant="outlined"
+                                    size="small"
+                                    value={introDuration}
+                                    onChange={handleIntroDurationChange}
+                                    onFocus={(event) => event.target.select()}
+                                    sx={{ width: 150 }}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">sec</InputAdornment>,
+                                        inputProps: { min: 0 }
+                                    }}
+                                />
+                                <FormControl sx={{ minWidth: 120 }} size="small">
+                                    <InputLabel id="season-select-label">{t('detail.season')}</InputLabel>
+                                    <Select
+                                        labelId="season-select-label"
+                                        value={selectedSeason}
+                                        label={t('detail.season')}
+                                        onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                                        sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}
+                                    >
+                                        {item.seasons.map(season => (
+                                            <MenuItem key={season.id} value={season.season_number}>
+                                                {season.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                        )}
                     </Box>
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="subtitle1" fontWeight="bold" noWrap>{episode.episode_number}. {episode.name}</Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ height: 60, overflow: 'hidden' }}>
-                        {episode.overview}
-                        </Typography>
-                    </Box>
-                    </Card>
-                </Grid>
-                ))}
-            </Grid>
-          )}
+                    {isDetailLoading ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '20vh' }}>
+                            <CircularProgress />
+                        </Box>
+                    ) : (
+                        <List>
+                            {currentSeason?.episodes.map((episode: Episode) => {
+                                const progress = episodeProgress.get(episode.id);
+                                const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
+                                const isWatched = progress?.watched;
+                                
+                                return (
+                                <ListItemButton
+                                    key={episode.id}
+                                    onClick={() => {
+                                        mediaStore.startPlayback({
+                                            ...episode,
+                                            show_id: item.id,
+                                            show_title: item.title || item.name || '',
+                                            backdrop_path: item.backdrop_path,
+                                            season_number: currentSeason.season_number,
+                                        });
+                                    }}
+                                    sx={{ 
+                                        mb: 1.5,
+                                        p: 2,
+                                        bgcolor: 'rgba(20, 20, 30, 0.6)',
+                                        borderRadius: 2,
+                                        transition: 'background-color 0.2s, transform 0.2s',
+                                        '&:hover': {
+                                            bgcolor: 'rgba(40, 40, 50, 0.8)',
+                                            transform: 'scale(1.02)'
+                                        }
+                                     }}
+                                >
+                                    <Typography sx={{ mr: 2, fontWeight: 'bold' }}>{episode.episode_number}</Typography>
+                                    <Box sx={{ position: 'relative', width: 150, aspectRatio: '16/9', mr: 2, flexShrink: 0, overflow: 'hidden', borderRadius: 1 }}>
+                                        {episode.still_path ? (
+                                            <CardMedia
+                                                component="img"
+                                                image={episode.still_path}
+                                                alt={`Scena da ${episode.name}`}
+                                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                        ) : (
+                                            <Box sx={{
+                                                width: '100%', height: '100%',
+                                                bgcolor: 'rgba(255,255,255,0.05)',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                            }}>
+                                                <TheatersIcon color="disabled" sx={{ fontSize: '3rem' }} />
+                                            </Box>
+                                        )}
+                                        {watchedPercentage > 0 && !isWatched && (
+                                            <LinearProgress variant="determinate" value={watchedPercentage} color="primary" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4 }} />
+                                        )}
+                                        {isWatched && (
+                                            <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                 <CheckCircleIcon color="success" sx={{ fontSize: '3rem' }} />
+                                            </Box>
+                                        )}
+                                    </Box>
+                                    <ListItemText
+                                        primary={episode.name}
+                                        secondary={episode.overview}
+                                        primaryTypographyProps={{ fontWeight: 'bold' }}
+                                        secondaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis' }}
+                                    />
+                                </ListItemButton>
+                            )})}
+                        </List>
+                    )}
+                </Box>
+            )}
         </Box>
-      )}
-      <WatchTogetherModal />
-      <LinkEpisodesModal />
+        <LinkEpisodesModal />
     </Box>
   );
-};
+});
 
-export default observer(DetailView);
+export default DetailView;

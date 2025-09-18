@@ -2,20 +2,23 @@ import React, { useRef, useState, useEffect } from 'react';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { Box, Typography, IconButton, Fade } from '@mui/material';
-import { mediaStore } from '../store/mediaStore';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { observer } from 'mobx-react-lite';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface ContentRowProps {
   title: string;
   items: MediaItem[];
+  onCardClick: (item: MediaItem) => void;
 }
 
-export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
+export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const { t } = useTranslations();
 
   const checkScrollability = () => {
     const el = scrollContainerRef.current;
@@ -30,7 +33,6 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
     const el = scrollContainerRef.current;
     if (!el) return;
     
-    // Check on mount and when items change
     checkScrollability();
 
     const handleResize = () => checkScrollability();
@@ -39,7 +41,6 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
     window.addEventListener('resize', handleResize);
     el.addEventListener('scroll', handleScrollEvent);
 
-    // Re-check after a small delay to account for image loading and layout shifts
     const timer = setTimeout(checkScrollability, 500);
 
     return () => {
@@ -65,20 +66,21 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
   const scrollButtonStyles = {
     position: 'absolute',
     top: 0,
-    bottom: 16, // Corresponds to pb: 2 on the scroll container
+    bottom: 0,
+    height: '100%',
     width: '4rem',
     zIndex: 20,
-    bgcolor: 'rgba(20, 20, 20, 0.7)',
+    bgcolor: 'transparent',
     color: 'white',
+    borderRadius: 0,
     '&:hover': {
-      bgcolor: 'rgba(20, 20, 20, 0.9)',
+      bgcolor: 'rgba(20, 20, 30, 0.8)',
     },
-    borderRadius: '4px',
   };
 
   return (
     <Box component="section">
-      <Typography variant="h5" component="h2" fontWeight="bold" sx={{ mb: 2 }}>
+      <Typography variant="h5" component="h2" fontWeight="bold" sx={{ mb: 0 }}>
         {title}
       </Typography>
       <Box 
@@ -93,7 +95,7 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
               ...scrollButtonStyles,
               left: 0,
             }}
-            aria-label="scorri a sinistra"
+            aria-label={t('contentRow.scrollLeft')}
           >
             <ChevronLeftIcon fontSize="large" />
           </IconButton>
@@ -101,21 +103,40 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
 
         <Box
           ref={scrollContainerRef}
+          className="filmstrip-container"
           sx={{
             display: 'flex',
             overflowX: 'auto',
             overflowY: 'hidden',
-            pb: 2,
-            gap: 2,
+            py: 6,
+            px: 'calc(4rem + 40px)', // Space for buttons and overlap
+            marginLeft: '-4rem',
+            scrollPadding: '0 0 0 calc(4rem + 40px)',
             scrollBehavior: 'smooth',
             '&::-webkit-scrollbar': {
               display: 'none',
             },
             scrollbarWidth: 'none', // For Firefox
+            '&:hover .media-card': {
+                opacity: 0.4,
+            },
+            '&:hover .media-card:hover': {
+                opacity: 1,
+            },
+            '& .media-card:hover ~ .media-card': {
+                transform: 'translateX(60px)',
+            }
           }}
         >
-          {items.map((item) => (
-            <Card key={item.id} item={item} onClick={() => mediaStore.selectMedia(item)} />
+          {items.map((item, index) => (
+            <Card 
+                key={item.id} 
+                item={item} 
+                onClick={() => onCardClick(item)} 
+                displayMode="row"
+                className="media-card"
+                style={{ zIndex: items.length - index }}
+            />
           ))}
         </Box>
 
@@ -126,7 +147,7 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
               ...scrollButtonStyles,
               right: 0,
             }}
-            aria-label="scorri a destra"
+            aria-label={t('contentRow.scrollRight')}
           >
             <ChevronRightIcon fontSize="large" />
           </IconButton>
@@ -134,4 +155,4 @@ export const ContentRow: React.FC<ContentRowProps> = ({ title, items }) => {
       </Box>
     </Box>
   );
-};
+});

@@ -4,35 +4,38 @@ import type { MediaItem } from '../types';
 import { Card } from './Card';
 import { mediaStore } from '../store/mediaStore';
 import { observer } from 'mobx-react-lite';
+import { useTranslations } from '../hooks/useTranslations';
 
 interface GridViewProps {
   title: string;
   items: MediaItem[];
 }
 
-const GridView: React.FC<GridViewProps> = ({ title, items }) => {
-  const isMyList = title === 'La mia lista';
-  const isSearch = title.startsWith('Risultati per');
+const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
+  const { t } = useTranslations();
+  const isMyList = title === t('gridView.myListTitle');
+  const isSearch = title.startsWith(t('gridView.searchResultsFor', { query: '' }).replace('"{query}"', ''));
+
 
   const renderEmptyState = () => {
-    let emptyTitle = 'Nessun contenuto disponibile';
-    let emptySubtitle = 'Torna più tardi per nuovi contenuti.';
+    let emptyTitleKey = 'gridView.empty.default.title';
+    let emptySubtitleKey = 'gridView.empty.default.subtitle';
 
     if (isMyList) {
-      emptyTitle = 'La tua lista è vuota';
-      emptySubtitle = 'Aggiungi film e serie TV per vederli qui.';
+      emptyTitleKey = 'gridView.empty.myList.title';
+      emptySubtitleKey = 'gridView.empty.myList.subtitle';
     } else if (isSearch) {
-      emptyTitle = 'Nessun risultato trovato';
-      emptySubtitle = 'Prova a cercare qualcos\'altro o controlla che il titolo sia corretto.';
+      emptyTitleKey = 'gridView.empty.search.title';
+      emptySubtitleKey = 'gridView.empty.search.subtitle';
     }
 
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column', textAlign: 'center' }}>
         <Typography variant="h5" gutterBottom>
-          {emptyTitle}
+          {t(emptyTitleKey)}
         </Typography>
         <Typography color="text.secondary">
-          {emptySubtitle}
+          {t(emptySubtitleKey)}
         </Typography>
       </Box>
     );
@@ -41,15 +44,28 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
   return (
     <Fade in={true} timeout={500}>
       <Container maxWidth={false} sx={{ pt: 12, pb: 8, pl: { xs: 2, md: 6 }, pr: { xs: 2, md: 6 } }}>
-        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4, mt: 4 }}>
           {title}
         </Typography>
         {items.length > 0 ? (
           <Grid container spacing={2}>
-            {items.map((item) => (
-              // FIX: Added the 'item' prop. Grid items need this prop to be recognized by the Grid container and to apply responsive layout props like xs, sm, etc.
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2}>
-                <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
+            {items.map((mediaItem, index) => (
+              // FIX: Added the "item" prop. The breakpoint props (xs, sm, etc.) are only valid on a Grid item within a Grid container.
+              <Grid item key={mediaItem.id} xs={6} sm={4} md={3} lg={2} sx={{
+                  transition: 'opacity 0.5s, transform 0.5s',
+                  animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,
+                  '@keyframes fadeInUp': {
+                      'from': {
+                          opacity: 0,
+                          transform: 'translateY(20px)'
+                      },
+                      'to': {
+                          opacity: 1,
+                          transform: 'translateY(0)'
+                      }
+                  }
+              }}>
+                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem)} displayMode="grid" style={{minHeight:"756px",minWidth:"504px"}} />
               </Grid>
             ))}
           </Grid>
@@ -59,6 +75,6 @@ const GridView: React.FC<GridViewProps> = ({ title, items }) => {
       </Container>
     </Fade>
   );
-};
+});
 
-export default observer(GridView);
+export default GridView;

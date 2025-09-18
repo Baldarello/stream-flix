@@ -1,219 +1,227 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Tooltip, Paper } from '@mui/material';
+import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert } from '@mui/material';
+// FIX: `SelectChangeEvent` is imported from '@mui/material/Select' instead of '@mui/material'.
+import { SelectChangeEvent } from '@mui/material/Select';
+// FIX: Imported CloseIcon to resolve the "Cannot find name" error.
 import CloseIcon from '@mui/icons-material/Close';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ManageLinksView from './ManageLinksView';
+import { useTranslations } from '../hooks/useTranslations';
+
 
 const style = {
   position: 'absolute' as 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: { xs: '95%', sm: 550 },
+  width: { xs: '95%', sm: 600 },
   bgcolor: 'background.paper',
   boxShadow: 24,
-  p: 4,
+  pt: 6, 
+  px: 4, 
+  pb: 4,
   borderRadius: 2,
   maxHeight: '90vh',
-  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
 };
 
-type TabValue = 'pattern' | 'list' | 'json';
+type TabValue = 'add' | 'manage';
 
-const LinkEpisodesModal: React.FC = () => {
-  const { isLinkEpisodesModalOpen, closeLinkEpisodesModal, linkingEpisodesForItem: item } = mediaStore;
+const AddLinkTabs: React.FC<{
+    selectedSeason: number;
+    seasonEpisodeCount: number;
+    onSave: (payload: any) => void;
+}> = observer(({ selectedSeason, seasonEpisodeCount, onSave }) => {
+    const { t } = useTranslations();
+    const [addMethod, setAddMethod] = useState<'pattern' | 'list' | 'json'>('pattern');
+    const [pattern, setPattern] = useState('');
+    const [padding, setPadding] = useState('2');
+    const [label, setLabel] = useState('');
+    const [linkList, setLinkList] = useState('');
+    const [json, setJson] = useState('');
+    const patternInputRef = useRef<HTMLInputElement>(null);
+
+    const handleSave = () => {
+        let data, error;
+        switch (addMethod) {
+            case 'pattern':
+                if (!pattern) error = "Il pattern non può essere vuoto.";
+                else if (!pattern.includes('[@EP]')) error = "Il pattern deve includere il segnaposto [@EP].";
+                else data = { pattern, padding: parseInt(padding, 10), label };
+                break;
+            case 'list':
+                if (!linkList.trim()) error = "La lista non può essere vuota.";
+                else data = { list: linkList };
+                break;
+            case 'json':
+                 if (!json.trim()) error = "Il JSON non può essere vuoto.";
+                else data = { json };
+                break;
+        }
+
+        if (error) {
+            mediaStore.showSnackbar(error, 'error');
+        } else if (data) {
+            onSave({ seasonNumber: selectedSeason, method: addMethod, data });
+        }
+    };
+    
+    const handleInsertPlaceholder = (placeholder: '[@EP]' | '[@LABEL]') => {
+      const input = placeholder === '[@EP]' ? patternInputRef.current : null; // Can be extended for label field
+      const setter = placeholder === '[@EP]' ? setPattern : setLabel;
+
+      if (input) {
+        const start = input.selectionStart ?? 0;
+        const end = input.selectionEnd ?? 0;
+        
+        const currentValue = input.value;
+        
+        const newValue = currentValue.substring(0, start) + placeholder + currentValue.substring(end);
+        setter(newValue);
+        
+        requestAnimationFrame(() => {
+          if (patternInputRef.current) {
+            const newCursorPos = start + placeholder.length;
+            patternInputRef.current.focus();
+            patternInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+          }
+        });
+      }
+    };
+    
+    const renderAddContent = () => {
+        switch (addMethod) {
+          case 'pattern':
+            return (
+              <Stack spacing={2}>
+                <Alert severity="info">{t('linkEpisodesModal.add.patternInfo')}</Alert>
+                <TextField 
+                    label={t('linkEpisodesModal.add.patternUrl')} 
+                    required value={pattern} 
+                    onChange={e => setPattern(e.target.value)} 
+                    inputRef={patternInputRef} 
+                    InputProps={{ 
+                        endAdornment: (
+                            <Button 
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => handleInsertPlaceholder('[@EP]')}
+                            >
+                                &#91;@EP&#93;
+                            </Button>
+                        )
+                    }} 
+                />
+                <TextField label={t('linkEpisodesModal.add.linkLabel')} value={label} onChange={e => setLabel(e.target.value)} helperText={t('linkEpisodesModal.add.linkLabelHelper')} />
+                <TextField label={t('linkEpisodesModal.add.padding')} required type="number" value={padding} onChange={e => setPadding(e.target.value)} helperText={t('linkEpisodesModal.add.paddingHelper')} />
+              </Stack>
+            );
+          case 'list':
+            return (
+                <Stack spacing={2}>
+                    <Alert severity="info">{t('linkEpisodesModal.add.listInfo', { count: seasonEpisodeCount })}</Alert>
+                    <TextField label={t('linkEpisodesModal.add.listLinks')} multiline rows={8} value={linkList} onChange={e => setLinkList(e.target.value)} />
+                </Stack>
+            );
+          case 'json':
+            return (
+                <Stack spacing={2}>
+                    <Alert severity="info">{t('linkEpisodesModal.add.jsonInfo')}</Alert>
+                    <TextField label={t('linkEpisodesModal.add.jsonArray')} multiline rows={8} value={json} onChange={e => setJson(e.target.value)} placeholder={t('linkEpisodesModal.add.jsonPlaceholder')} />
+                </Stack>
+            );
+        }
+    };
+
+    return (
+        <Box sx={{ display: 'flex', mt: 2, flexGrow: 1, overflow: 'hidden' }}>
+            <Tabs
+                orientation="vertical"
+                variant="scrollable"
+                value={addMethod}
+                onChange={(_, v) => setAddMethod(v)}
+                sx={{ borderRight: 1, borderColor: 'divider', mr: 2, flexShrink: 0 }}
+            >
+                <Tab label={t('linkEpisodesModal.add.pattern')} value="pattern" />
+                <Tab label={t('linkEpisodesModal.add.list')} value="list" />
+                <Tab label={t('linkEpisodesModal.add.json')} value="json" />
+            </Tabs>
+            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                 <Box sx={{ flexGrow: 1, pr: 1 }}>
+                    {renderAddContent()}
+                </Box>
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1 }}>
+                    <Button onClick={handleSave} variant="contained">{t('linkEpisodesModal.add.save')}</Button>
+                </Box>
+            </Box>
+        </Box>
+    );
+});
+
+
+const LinkEpisodesModal: React.FC = observer(() => {
+  const { isLinkEpisodesModalOpen, closeLinkEpisodesModal, linkingEpisodesForItem: item, setEpisodeLinksForSeason, expandedLinkAccordionId, setExpandedLinkAccordionId } = mediaStore;
+  const { t } = useTranslations();
   
-  const [activeTab, setActiveTab] = useState<TabValue>('pattern');
+  const [activeTab, setActiveTab] = useState<TabValue>('add');
   const [selectedSeason, setSelectedSeason] = useState<number | ''>('');
-  const [pattern, setPattern] = useState('');
-  const [padding, setPadding] = useState('2');
-  const [linkList, setLinkList] = useState('');
-  const [json, setJson] = useState('');
-  const patternInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (item?.seasons?.[0]) {
       setSelectedSeason(item.seasons[0].season_number);
     } else {
-        setSelectedSeason('');
+      setSelectedSeason('');
     }
-    // Reset fields on modal open
-    setPattern('');
-    setPadding('2');
-    setLinkList('');
-    setJson('');
-    setActiveTab('pattern');
+    setActiveTab('add');
   }, [item]);
 
   if (!item) return null;
   
-  const handleSave = () => {
-    if (!selectedSeason) return;
+  const currentSeason = item.seasons?.find(s => s.season_number === selectedSeason);
 
-    let data;
-    switch(activeTab) {
-        case 'pattern':
-            data = { pattern, padding: parseInt(padding, 10) };
-            break;
-        case 'list':
-            data = { list: linkList };
-            break;
-        case 'json':
-            data = { json };
-            break;
-    }
-
-    mediaStore.setEpisodeLinksForSeason({
-        seasonNumber: selectedSeason,
-        method: activeTab,
-        data
-    });
+  const handleAccordionChange = (panelId: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpandedLinkAccordionId(isExpanded ? panelId : false);
   };
-
-  const handleInsertPlaceholder = () => {
-    const input = patternInputRef.current;
-    if (!input) return;
-
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-    const placeholder = '[@EP]';
-    
-    if (start !== null && end !== null) {
-      const newPattern = pattern.substring(0, start) + placeholder + pattern.substring(end);
-      setPattern(newPattern);
-      
-      // Focus and set cursor position after the inserted text
-      input.focus();
-      setTimeout(() => {
-          input.selectionStart = input.selectionEnd = start + placeholder.length;
-      }, 0);
-    } else {
-      setPattern(prev => prev + placeholder);
-    }
+  
+  const handleSeasonChange = (event: SelectChangeEvent<number>) => {
+      setSelectedSeason(event.target.value as number);
+      setExpandedLinkAccordionId(false); // Reset expanded accordion when season changes
   };
-
-  const copyPlaceholder = () => {
-    navigator.clipboard.writeText('[@EP]');
-  };
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'pattern':
-        return (
-          <Stack spacing={3} mt={3}>
-            <Paper variant="outlined" sx={{ p: 2, borderColor: 'rgba(255,255,255,0.23)' }}>
-              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <InfoOutlinedIcon fontSize="small" />
-                <strong>Come funziona:</strong>
-              </Typography>
-              <Typography component="ol" sx={{ pl: 2, m: 0, '& li': { mb: 1 } }}>
-                <li>Trova il numero dell'episodio nel link (es. "01" in "Show_Ep_<b>01</b>_SUB.mp4").</li>
-                <li>Copia il link e incollalo sotto.</li>
-                <li>Sostituisci il numero (es. "01") con il segnaposto <code style={{background: 'rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: '4px'}}>&#91;@EP&#93;</code>.</li>
-              </Typography>
-            </Paper>
-            <TextField
-              label="Incolla il link qui"
-              required
-              value={pattern}
-              onChange={(e) => setPattern(e.target.value)}
-              inputRef={patternInputRef}
-              InputProps={{
-                endAdornment: (
-                    <Button onClick={handleInsertPlaceholder} sx={{whiteSpace: 'nowrap'}}>[@EP]</Button>
-                )
-              }}
-            />
-            <TextField
-              label="Padding (es. 2 per '01', 3 per '001')"
-              required
-              type="number"
-              value={padding}
-              onChange={(e) => setPadding(e.target.value)}
-            />
-          </Stack>
-        );
-      case 'list':
-        return (
-            <Stack spacing={2} mt={3}>
-                <Typography variant="body2">Incolla un elenco di link, uno per riga. L'ordine deve corrispondere a quello degli episodi.</Typography>
-                <TextField
-                    label="Lista di link"
-                    multiline
-                    rows={8}
-                    value={linkList}
-                    onChange={(e) => setLinkList(e.target.value)}
-                />
-            </Stack>
-        );
-      case 'json':
-        return (
-            <Stack spacing={2} mt={3}>
-                <Typography variant="body2">Incolla un array JSON di stringhe di link.</Typography>
-                <TextField
-                    label="Array JSON"
-                    multiline
-                    rows={8}
-                    value={json}
-                    onChange={(e) => setJson(e.target.value)}
-                    placeholder='[ "http://link1.mp4", "http://link2.mp4" ]'
-                />
-            </Stack>
-        );
-      default:
-        return null;
-    }
-  };
-
+  
   return (
     <Modal open={isLinkEpisodesModalOpen} onClose={closeLinkEpisodesModal}>
       <Box sx={style}>
-        <IconButton
-          onClick={closeLinkEpisodesModal}
-          sx={{ position: 'absolute', right: 8, top: 8, color: 'grey.500' }}
-        >
-          <CloseIcon />
-        </IconButton>
-        
-        <Typography variant="h5" component="h2" fontWeight="bold">
-            Collega link per una stagione intera
-        </Typography>
+        <IconButton onClick={closeLinkEpisodesModal} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>
+        <Typography variant="h5" component="h2" fontWeight="bold">{t('linkEpisodesModal.title', { name: item.name })}</Typography>
 
-        <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-            <Tab label="Pattern" value="pattern" />
-            <Tab label="Lista Link" value="list" />
-            <Tab label="JSON" value="json" />
-        </Tabs>
-        
-        <Stack spacing={3} mt={3}>
+        {/* FIX: The `mt` prop is a system prop and should be passed inside the `sx` object. */}
+        <Stack spacing={2} sx={{ mt: 2, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <FormControl fullWidth required>
-              <InputLabel id="season-select-label">Seleziona la stagione</InputLabel>
-              <Select
-                labelId="season-select-label"
-                value={selectedSeason}
-                label="Seleziona la stagione"
-                onChange={(e) => setSelectedSeason(e.target.value as number)}
-              >
-                {item.seasons?.map(season => (
-                  <MenuItem key={season.id} value={season.season_number}>
-                    {season.name}
-                  </MenuItem>
-                ))}
+              <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
+              <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={handleSeasonChange}>
+                {item.seasons?.map(season => <MenuItem key={season.id} value={season.season_number}>{season.name}</MenuItem>)}
               </Select>
             </FormControl>
 
-            {renderTabContent()}
-        </Stack>
+            <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Tab label={t('linkEpisodesModal.addLinks')} value="add" />
+                <Tab label={t('linkEpisodesModal.manageLinks')} value="manage" />
+            </Tabs>
 
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={closeLinkEpisodesModal} color="inherit">Chiudi</Button>
-            <Button onClick={handleSave} variant="contained">Salva</Button>
-        </Box>
+            {activeTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number} seasonEpisodeCount={currentSeason.episode_count} onSave={setEpisodeLinksForSeason} />}
+            {activeTab === 'manage' && currentSeason && (
+              <ManageLinksView 
+                currentSeason={currentSeason} 
+                item={item}
+                expandedAccordion={expandedLinkAccordionId}
+                onAccordionChange={handleAccordionChange}
+              />
+            )}
+        </Stack>
       </Box>
     </Modal>
   );
-};
+});
 
-export default observer(LinkEpisodesModal);
+export default LinkEpisodesModal;

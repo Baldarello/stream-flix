@@ -7,10 +7,32 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Poppins:wght@600;700;800&display=swap"
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
     />
     <style>
+      :root {
+        --glow-seriestv-color: #00A3FF;
+        --glow-film-color: #ffab00;
+        --glow-anime-color: #ab47bc;
+
+        /* Theme Gradients */
+        --serietv-gradient: linear-gradient(to bottom, #0F0C29, #1c1642, #141414);
+        --film-gradient: linear-gradient(to bottom, #2d1a04, #4a2a0a, #141414);
+        --anime-gradient: linear-gradient(to bottom, #1d0f29, #331642, #141414);
+      }
+
+      @keyframes kenburns {
+        0%, 100% {
+          transform: scale(1) translate(0, 0);
+          filter: brightness(1);
+        }
+        50% {
+          transform: scale(1.1) translate(-2%, 2%);
+          filter: brightness(1.1);
+        }
+      }
+
       /* Custom scrollbar for a better look on non-overlay scrollbar systems */
       ::-webkit-scrollbar {
         width: 8px;
@@ -26,7 +48,50 @@
       ::-webkit-scrollbar-thumb:hover {
         background-color: #555;
       }
+      
+      /* Custom Video Player Slider Styles */
+      .video-player-slider .MuiSlider-thumb {
+        width: 15px;
+        height: 15px;
+        transition: width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease;
+      }
+      .video-player-slider:hover .MuiSlider-thumb {
+        width: 18px;
+        height: 18px;
+        box-shadow: 0 0 10px 2px currentColor;
+      }
+      .video-player-slider .MuiSlider-track {
+        height: 4px;
+        transition: height 0.2s ease;
+        border: none;
+      }
+      .video-player-slider:hover .MuiSlider-track {
+        height: 6px;
+      }
+      .video-player-slider .MuiSlider-rail {
+        height: 4px;
+        transition: height 0.2s ease;
+      }
+      .video-player-slider:hover .MuiSlider-rail {
+        height: 6px;
+      }
+
+
+      body {
+        background-attachment: fixed;
+        transition: background 0.5s ease-in-out;
+      }
+      body.theme-serietv {
+        background: var(--serietv-gradient);
+      }
+      body.theme-film {
+        background: var(--film-gradient);
+      }
+      body.theme-anime {
+        background: var(--anime-gradient);
+      }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="importmap">
 {
   "imports": {
@@ -36,14 +101,21 @@
     "react/": "https://aistudiocdn.com/react@^19.1.1/",
     "mobx-react-lite": "https://aistudiocdn.com/mobx-react-lite@^4.1.0",
     "@mui/material": "https://aistudiocdn.com/@mui/material@^7.3.2",
-    "@mui/icons-material/": "https://aistudiocdn.com/@mui/icons-material@^7.3.2/",
     "mobx": "https://aistudiocdn.com/mobx@^6.13.7",
-    "axios": "https://aistudiocdn.com/axios@^1.6.8"
+    "axios": "https://aistudiocdn.com/axios@^1.6.8",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.0.2",
+    "vite": "https://aistudiocdn.com/vite@^7.1.5",
+    "url": "https://aistudiocdn.com/url@^0.11.4",
+    "dexie": "https://aistudiocdn.com/dexie@4.0.1-beta.2",
+    "html5-qrcode": "https://aistudiocdn.com/html5-qrcode@^2.3.8",
+    "dexie-observable": "https://aistudiocdn.com/dexie-observable@^4.0.1-beta.2",
+    "@mui/icons-material/": "https://aistudiocdn.com/@mui/icons-material@^7.3.2/",
+    "dexie-observable/": "https://aistudiocdn.com/dexie-observable@^4.0.1-beta.13/"
   }
 }
 </script>
   </head>
-  <body style="background-color: #141414;">
+  <body style="background-color: transparent;">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
