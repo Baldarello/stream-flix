@@ -125,7 +125,7 @@ const WatchTogetherModal: React.FC = observer(() => {
     
     // The staged item for playback can be a movie or an episode.
     const isEpisodeSelected = watchTogetherSelectedItem && 'episode_number' in watchTogetherSelectedItem;
-    // FIX: Safely check for 'media_type' property before accessing it, as PlayableItem is a union type
+    // Safely check for 'media_type' property before accessing it, as PlayableItem is a union type
     // and one of its types (Episode) does not have this property.
     const isMovieSelected = watchTogetherSelectedItem && 'media_type' in watchTogetherSelectedItem && watchTogetherSelectedItem.media_type === 'movie';
 

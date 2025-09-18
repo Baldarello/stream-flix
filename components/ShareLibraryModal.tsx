@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-// FIX: ListItemButton was missing from the import, causing a 'Cannot find name' error.
 import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemIcon, ListItemText, Checkbox, TextField, InputAdornment, Tooltip, ListItemButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -92,7 +91,7 @@ const ShareLibraryModal: React.FC = observer(() => {
                 {generatedLink ? (
                     <Box mt={2}>
                         <Typography gutterBottom>{t('shareAndImport.shareLinkReady')}</Typography>
-                        {/* FIX: The 'readOnly' prop on TextField is passed via 'InputProps' to avoid a TypeScript error. */}
+                        {/* The 'readOnly' prop on TextField is passed via 'InputProps' to avoid a TypeScript error. */}
                         <TextField
                             fullWidth
                             value={generatedLink}

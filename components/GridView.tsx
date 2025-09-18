@@ -49,9 +49,9 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         </Typography>
         {items.length > 0 ? (
           <Grid container spacing={2}>
-            {items.map((item, index) => (
-              // FIX: Added the `item` prop to the Grid component. A Grid component that is a direct child of a Grid container must have the "item" prop to accept responsive layout props like "xs", "sm", etc.
-              <Grid item key={item.id} xs={6} sm={4} md={3} lg={2} sx={{
+            {/* FIX: Renamed `item` to `mediaItem` to avoid potential naming conflicts with the Grid's `item` prop. */}
+            {items.map((mediaItem, index) => (
+              <Grid item key={mediaItem.id} xs={6} sm={4} md={3} lg={2} sx={{
                   transition: 'opacity 0.5s, transform 0.5s',
                   animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,
                   '@keyframes fadeInUp': {
@@ -65,7 +65,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
                       }
                   }
               }}>
-                <Card item={item} onClick={() => mediaStore.selectMedia(item)} displayMode="grid" />
+                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem)} displayMode="grid" style={{minHeight:"756px",minWidth:"504px"}}/>
               </Grid>
             ))}
           </Grid>

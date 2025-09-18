@@ -3,9 +3,8 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
-    // FIX: Environment variables loaded by `loadEnv` were not being used.
-    // This has been corrected by creating a `processEnv` object to expose them to the client
-    // via Vite's `define` option. This is necessary for `process.env.API_KEY` to be available in the app.
+    // Environment variables are loaded by `loadEnv` and exposed to the client
+    // via Vite's `define` option. This is necessary for `process.env.API_KEY` and other variables to be available in the app.
     const env = loadEnv(mode, '.', '');
 
     const processEnv: { [key: string]: string } = {};
@@ -18,9 +17,7 @@ export default defineConfig(({ mode }) => {
         plugins: [react()],
         define: {
             ...processEnv,
-            'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
-            // This makes the environment variable available in the client-side code
-            'process.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID),
+            'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version)
         },
         resolve: {
             alias: {

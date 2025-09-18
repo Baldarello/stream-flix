@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import TheatersIcon from '@mui/icons-material/Theaters';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface CardProps {
@@ -107,16 +108,29 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
         </IconButton>
       </Tooltip>
       <CardActionArea sx={{ borderRadius: '10px', overflow: 'hidden', height: '100%' }}>
-        <CardMedia
-          component="img"
-          image={item.poster_path}
-          alt={title}
-          sx={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
+        {item.poster_path ? (
+            <CardMedia
+              component="img"
+              image={item.poster_path}
+              alt={title}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+        ) : (
+            <Box sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(255,255,255,0.05)',
+            }}>
+                <TheatersIcon color="disabled" sx={{ fontSize: '6rem' }} />
+            </Box>
+        )}
         <Box
           className="title-overlay"
           sx={{

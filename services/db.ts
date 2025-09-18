@@ -1,6 +1,3 @@
-// FIX: Importing 'dexie-observable/api' is required for TypeScript to correctly
-// augment the Dexie class with addon methods like .on() and to ensure core
-// methods like .version() and .transaction() are also correctly typed.
 import 'dexie-observable/api';
 import Dexie, { type Table } from 'dexie';
 import type { ViewingHistoryItem, MediaItem, EpisodeLink, EpisodeProgress, PreferredSource } from '../types';
@@ -50,7 +47,7 @@ export class QuixDB extends Dexie {
   constructor() {
     super('quixDB', { addons: [dexieObservable] }); // Register addon
     
-    this.version(1).stores({
+    (this as Dexie).version(1).stores({
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
@@ -58,15 +55,15 @@ export class QuixDB extends Dexie {
       showIntroDurations: '&id',
     });
     
-    this.version(2).stores({
+    (this as Dexie).version(2).stores({
       preferences: '&key', // New table for user preferences
     });
 
-    this.version(3).stores({
+    (this as Dexie).version(3).stores({
       revisions: '++id, timestamp',
     });
 
-    this.version(4).stores({
+    (this as Dexie).version(4).stores({
       episodeLinks: '++id, episodeId', // New schema with auto-incrementing PK and index on episodeId
     }).upgrade(tx => {
       // Since we are changing the schema in a breaking way (from string URL to object),
@@ -75,11 +72,11 @@ export class QuixDB extends Dexie {
       return tx.table('episodeLinks').clear();
     });
 
-    this.version(5).stores({
+    (this as Dexie).version(5).stores({
         episodeProgress: '&episodeId'
     });
 
-    this.version(6).stores({
+    (this as Dexie).version(6).stores({
         preferredSources: '&showId'
     });
   }
@@ -92,7 +89,7 @@ export class QuixDB extends Dexie {
       throw new Error("Backup file is missing required data tables or is empty.");
     }
     
-    await this.transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
+    await (this as Dexie).transaction('rw', [this.myList, this.viewingHistory, this.cachedItems, this.episodeLinks, this.showIntroDurations, this.preferences, this.revisions, this.episodeProgress, this.preferredSources], async () => {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.
@@ -116,8 +113,8 @@ export class QuixDB extends Dexie {
 
 export const db = new QuixDB();
 
-// NEW: Listen for database changes and log them as revisions
-db.on('changes', (changes) => {
+// Listen for database changes and log them as revisions
+(db as Dexie).on('changes', (changes) => {
     const revisionsToLog: Revision[] = changes
         // Don't log changes to the revisions table itself to avoid an infinite loop
         .filter(change => change.table !== 'revisions' && change.table !== 'episodeProgress' && change.table !== 'preferredSources')
@@ -126,7 +123,7 @@ db.on('changes', (changes) => {
             table: change.table,
             key: change.key,
             type: change.type as 1 | 2 | 3,
-            // FIX: Conditionally access `obj` and `oldObj`. These properties exist on different types
+            // Conditionally access `obj` and `oldObj`. These properties exist on different types
             // within the IDatabaseChange union, and the `in` operator acts as a type guard.
             obj: 'obj' in change ? change.obj : undefined,
             oldObj: 'oldObj' in change ? change.oldObj : undefined,

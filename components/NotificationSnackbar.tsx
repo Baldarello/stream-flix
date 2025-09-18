@@ -49,7 +49,6 @@ export const NotificationSnackbar: React.FC = observer(() => {
                 onClose={handleClose}
                 severity={snackbarMessage?.severity || 'info'}
                 variant="filled"
-                // FIX: Completed the sx prop, which was truncated and causing a type error. Also added the action and message.
                 sx={{ width: '100%' }}
                 action={action}
             >
