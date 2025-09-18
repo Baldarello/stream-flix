@@ -219,12 +219,6 @@ const App: React.FC = () => {
         await initGoogleAuth();
         await mediaStore.loadPersistedData();
         mediaStore.fetchAllData();
-        
-        // After the main app data is loaded, synchronize with Google Drive if logged in.
-        // This prevents race conditions during initial load.
-        if (mediaStore.isLoggedIn) {
-            await mediaStore.synchronizeWithDrive();
-        }
 
         const params = new URLSearchParams(window.location.search);
         

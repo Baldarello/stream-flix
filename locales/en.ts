@@ -312,6 +312,7 @@ export const en = {
     "syncError": "Error syncing with cloud.",
     "noBackupFoundCreating": "No cloud backup found. Creating one now...",
     "restoringFromCloud": "Newer data found in the cloud. Restoring now...",
-    "shareLinkCreateError": "Failed to create share link: {error}"
+    "shareLinkCreateError": "Failed to create share link: {error}",
+    "syncUpToDate": "Your data is already up to date."
   }
 }

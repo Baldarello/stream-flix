@@ -4,7 +4,7 @@ const BACKUP_FILE_PREFIX = 'quix_backup_';
 const FOLDER = 'appDataFolder'; // Special, hidden folder for app data
 const MAX_BACKUPS_TO_KEEP = 5;
 
-interface DriveFile {
+export interface DriveFile {
     id: string;
     name: string;
 }

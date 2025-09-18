@@ -244,17 +244,29 @@ class MediaStore {
         try {
             this.showSnackbar('notifications.syncChecking', 'info', true);
             const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
+            const lastSyncFileId = (await db.preferences.get('lastSyncFileId'))?.value;
+
             if (remoteFile) {
-                // Backup exists, restore it.
+                // If the latest remote file is the same one we last synced with, do nothing.
+                if (remoteFile.id === lastSyncFileId) {
+                    this.showSnackbar('notifications.syncUpToDate', 'success', true);
+                    return; // Exit early
+                }
+                
+                // A newer remote file exists, restore it.
                 this.showSnackbar('notifications.restoringFromCloud', 'info', true);
                 const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
                 await db.importData(data);
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 setTimeout(() => window.location.reload(), 2000);
             } else {
-                // No backup exists, create one from local DB.
+                // No remote backup exists. Create one from local DB.
                 this.showSnackbar('notifications.noBackupFoundCreating', 'info', true);
-                await this.backupToDrive(false); // Pass false to prevent redundant notifications
+                const newFile = await this.backupToDrive(false);
+                if (newFile) {
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
+                }
             }
         } catch (error) {
             console.error("Error during initial sync:", error);
@@ -266,7 +278,7 @@ class MediaStore {
         }
     };
 
-    backupToDrive = async (showNotification = true) => {
+    backupToDrive = async (showNotification = true): Promise<driveService.DriveFile | undefined> => {
         if (!this.isLoggedIn || !this.googleUser?.accessToken) {
             if (showNotification) this.showSnackbar('notifications.loginRequired', 'warning', true);
             return;
@@ -282,13 +294,15 @@ class MediaStore {
                 }
             }
             
-            await driveService.writeBackupFile(this.googleUser.accessToken, data);
+            const newFile = await driveService.writeBackupFile(this.googleUser.accessToken, data);
             await driveService.deleteOldBackups(this.googleUser.accessToken);
             
             if (showNotification) this.showSnackbar('notifications.backupComplete', 'success', true);
+            return newFile;
         } catch (error) {
             console.error('Failed to backup to drive:', error);
             if (showNotification) this.showSnackbar('notifications.backupSaveError', 'error', true);
+            return undefined;
         } finally {
             runInAction(() => {
                 this.isSyncing = false;
@@ -308,6 +322,7 @@ class MediaStore {
             if (remoteFile) {
                 const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
                 await db.importData(data);
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 setTimeout(() => window.location.reload(), 2000);
             } else {
@@ -942,9 +957,12 @@ class MediaStore {
 
     triggerDebouncedBackup = () => {
         if (this.backupDebounceTimer) clearTimeout(this.backupDebounceTimer);
-        this.backupDebounceTimer = window.setTimeout(() => {
+        this.backupDebounceTimer = window.setTimeout(async () => {
             if (this.isLoggedIn) {
-                this.backupToDrive();
+                const newFile = await this.backupToDrive();
+                if (newFile) {
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
+                }
             }
         }, 30000); // 30-second debounce
     };

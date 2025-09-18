@@ -312,6 +312,7 @@ export const it = {
     "syncError": "Errore di sincronizzazione con il cloud.",
     "noBackupFoundCreating": "Nessun backup cloud trovato. Creazione in corso...",
     "restoringFromCloud": "Dati più recenti trovati nel cloud. Ripristino in corso...",
-    "shareLinkCreateError": "Creazione del link di condivisione non riuscita: {error}"
+    "shareLinkCreateError": "Creazione del link di condivisione non riuscita: {error}",
+    "syncUpToDate": "I tuoi dati sono già aggiornati."
   }
 }
