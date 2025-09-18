@@ -521,6 +521,9 @@ class MediaStore {
                     }) || []
                 );
                 const itemWithEpisodes = { ...fullDetails, seasons: seasonsWithEpisodes };
+                
+                await db.cachedItems.put(itemWithEpisodes);
+
                 runInAction(() => {
                     this.cachedItems.set(item.id, itemWithEpisodes);
                     if (this.selectedItem?.id === item.id) this.selectedItem = itemWithEpisodes;
@@ -529,8 +532,13 @@ class MediaStore {
             } else if (item.media_type === 'movie' && !item.video_urls) {
                 const links = await this.getLinksForMedia(item.id);
                 const updatedItem = { ...item, video_urls: links, video_url: links[0]?.url };
-                this.cachedItems.set(item.id, updatedItem);
-                if (this.selectedItem?.id === item.id) this.selectedItem = updatedItem;
+
+                await db.cachedItems.put(updatedItem);
+                
+                runInAction(() => {
+                    this.cachedItems.set(item.id, updatedItem);
+                    if (this.selectedItem?.id === item.id) this.selectedItem = updatedItem;
+                });
             }
         } catch (error) {
             console.error("Failed to load details", error);
@@ -910,7 +918,7 @@ class MediaStore {
     importSharedLibrary = async (data: SharedLibraryData) => {
         this.isImportingLibrary = true;
         try {
-            let totalLinks = 0;
+            let totalLinksAdded = 0;
             const showIdsToAddToMyList: number[] = [];
 
             for (const showData of data.shows) {
@@ -923,20 +931,33 @@ class MediaStore {
                 const show = this.cachedItems.get(showData.tmdbId);
                 if (!show || !show.seasons) continue;
 
+                // Prevent duplicate links
+                const allEpisodeIds = show.seasons.flatMap(s => s.episodes.map(e => e.id));
+                if (allEpisodeIds.length === 0) continue;
+
+                const existingLinks = await db.mediaLinks.where('mediaId').anyOf(allEpisodeIds).toArray();
+                const existingLinkSet = new Set(existingLinks.map(l => `${l.mediaId}|${l.url}`));
+                
                 const linksToAdd: Omit<MediaLink, "id">[] = [];
                 for (const link of showData.links) {
                     const episode = show.seasons
                         .find(s => s.season_number === link.seasonNumber)?.episodes
                         .find(e => e.episode_number === link.episodeNumber);
                     if (episode) {
-                        linksToAdd.push({ mediaId: episode.id, url: link.url, label: link.label });
+                        const linkIdentifier = `${episode.id}|${link.url}`;
+                        if (!existingLinkSet.has(linkIdentifier)) {
+                            linksToAdd.push({ mediaId: episode.id, url: link.url, label: link.label });
+                            existingLinkSet.add(linkIdentifier); // Avoid adding duplicates from within the same import file
+                        }
                     }
                 }
-                await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
-                totalLinks += linksToAdd.length;
+                if (linksToAdd.length > 0) {
+                    await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
+                    totalLinksAdded += linksToAdd.length;
+                }
             }
 
-            // NEW: Add imported shows to "My List"
+            // Add imported shows to "My List"
             if (showIdsToAddToMyList.length > 0) {
                 const itemsToAddToMyList = showIdsToAddToMyList
                     .filter(id => !this.myList.includes(id)) // Filter out duplicates
@@ -950,7 +971,7 @@ class MediaStore {
                 }
             }
 
-            this.showSnackbar('notifications.importSuccess', 'success', true, { showCount: data.shows.length, linkCount: totalLinks });
+            this.showSnackbar('notifications.importSuccess', 'success', true, { showCount: data.shows.length, linkCount: totalLinksAdded });
             setTimeout(() => window.location.reload(), 3000);
         } catch (error) {
             this.showSnackbar('notifications.importError', 'error', true, { error: (error as Error).message });
