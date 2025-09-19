@@ -376,7 +376,13 @@ class MediaStore {
     toggleProfileDrawer = (isOpen: boolean) => { this.isProfileDrawerOpen = isOpen; };
     openQRScanner = () => { this.isQRScannerOpen = true; this.isProfileDrawerOpen = false; };
     closeQRScanner = () => { this.isQRScannerOpen = false; };
-    enableSmartTVMode = () => { this.isSmartTVPairingVisible = true; this.isProfileDrawerOpen = false; };
+    enableSmartTVMode = () => {
+        this.isSmartTV = true; // Mark this client as acting as a TV
+        this.isSmartTVPairingVisible = true;
+        this.isProfileDrawerOpen = false;
+        // Manually send registration message, as websocket might already be connected
+        websocketService.sendMessage({ type: 'quix-register-slave' });
+    };
     exitSmartTVPairingMode = () => { this.isSmartTVPairingVisible = false; };
     setLanguage = (lang: Language) => { this.language = lang; db.preferences.put({ key: 'language', value: lang }); };
     openShareModal = () => { this.isShareModalOpen = true; };
@@ -500,14 +506,21 @@ class MediaStore {
     }
 
     selectMedia = async (item: MediaItem, openModal = true) => {
+        const isForWatchTogether = !openModal;
         if (openModal) {
             this.selectedItem = item;
             this.isDetailLoading = true;
         } else {
             this.watchTogetherSelectedItem = item;
         }
-
+        
         try {
+            // If the selected item for Watch Together changes, clear the now playing item
+            // to ensure the playback check triggers correctly when details are loaded.
+            if (isForWatchTogether && this.watchTogetherSelectedItem?.id !== item.id) {
+                this.nowPlayingItem = null;
+            }
+
             if (item.media_type === 'tv' && (!item.seasons || item.seasons.some(s => s.episodes.length === 0))) {
                 const fullDetails = await getSeriesDetails(item.id);
                 const seasonsWithEpisodes = await Promise.all(
@@ -528,6 +541,11 @@ class MediaStore {
                     this.cachedItems.set(item.id, itemWithEpisodes);
                     if (this.selectedItem?.id === item.id) this.selectedItem = itemWithEpisodes;
                     if (this.watchTogetherSelectedItem?.id === item.id) this.watchTogetherSelectedItem = itemWithEpisodes;
+
+                    // If joining a room that's already playing, start playback now that we have details.
+                    if (isForWatchTogether && this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
+                        this.startPlayback(itemWithEpisodes);
+                    }
                 });
             } else if (item.media_type === 'movie' && !item.video_urls) {
                 const links = await this.getLinksForMedia(item.id);
@@ -538,6 +556,11 @@ class MediaStore {
                 runInAction(() => {
                     this.cachedItems.set(item.id, updatedItem);
                     if (this.selectedItem?.id === item.id) this.selectedItem = updatedItem;
+                    
+                    // Same check for movies
+                    if (isForWatchTogether && this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
+                        this.startPlayback(updatedItem);
+                    }
                 });
             }
         } catch (error) {
@@ -1193,7 +1216,14 @@ class MediaStore {
                     }
                 }
                 break;
-            case 'quix-playback-update': this.playbackState = payload.playbackState; this.playbackListeners.forEach(l => l(this.playbackState)); break;
+            case 'quix-playback-update': 
+                this.playbackState = payload.playbackState; 
+                this.playbackListeners.forEach(l => l(this.playbackState)); 
+                // If we are in a room, not the host, and not currently playing, this update means the host has started playback.
+                if (this.roomId && !this.isHost && !this.nowPlayingItem && this.watchTogetherSelectedItem && payload.playbackState.status === 'playing') {
+                    this.startPlayback(this.watchTogetherSelectedItem);
+                }
+                break;
             case 'quix-error': this.watchTogetherError = payload.message; break;
             case 'quix-remote-command-received': this.handleRemoteCommand(payload); break;
             case 'quix-slave-status-update': this.remoteSlaveState = payload; break;
