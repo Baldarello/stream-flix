@@ -17,9 +17,10 @@ interface CardProps {
   className?: string;
   style?: React.CSSProperties;
   isContinueWatching?: boolean;
+  isReorderable?: boolean;
 }
 
-export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode = 'row', className, style, isContinueWatching = false }) => {
+export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode = 'row', className, style, isContinueWatching = false, isReorderable = false }) => {
   const { t } = useTranslations();
   const title = item.title || item.name;
   const isInMyList = mediaStore.myList.includes(item.id);
@@ -51,8 +52,6 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
     : (isInMyList ? <CheckIcon /> : <AddIcon />);
 
   const rowStyles = {
-    marginLeft: '-40px',
-    '&:first-of-type': { marginLeft: 0 },
     '&:hover': {
         transform: 'scale(1.15) translateY(-10px)',
         marginLeft: '10px',
@@ -94,6 +93,7 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
       sx={{
         ...cardBaseStyles,
         ...(displayMode === 'row' ? rowStyles : gridStyles),
+        cursor: isReorderable ? 'grab' : undefined,
       }}
       onClick={() => onClick(item)}
       role="button"

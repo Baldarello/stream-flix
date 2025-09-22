@@ -76,6 +76,20 @@
         height: 6px;
       }
 
+      /* Drag and Drop Styles */
+      .dragging-item {
+        opacity: 0.4;
+        border: 2px dashed var(--glow-seriestv-color);
+      }
+      .drop-target-item {
+        transform: scale(1.05);
+        border: 2px dashed var(--glow-seriestv-color);
+        box-shadow: 0 0 15px var(--glow-seriestv-color);
+      }
+      /* Disable sibling-shift hover effect during drag to prevent jank */
+      .filmstrip-container.is-dragging .dnd-wrapper:hover ~ .dnd-wrapper {
+          transform: none !important;
+      }
 
       body {
         background-attachment: fixed;

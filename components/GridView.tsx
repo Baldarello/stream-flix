@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Container, Typography, Fade, Grid } from '@mui/material';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
@@ -16,6 +16,9 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
   const { t } = useTranslations();
   const isMyList = title === t('gridView.myListTitle');
   const isSearch = title.startsWith(t('gridView.searchResultsFor', { query: '' }).replace('"{query}"', ''));
+  
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
 
 
   const renderEmptyState = () => {
@@ -42,6 +45,30 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
     );
   }
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.dataTransfer.setData("itemIndex", index.toString());
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (index !== draggedIndex) {
+      setDropTargetIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null) return;
+    mediaStore.reorderMyList(draggedIndex, dropIndex);
+    handleDragEnd();
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDropTargetIndex(null);
+  };
+
   return (
     <Fade in={true} timeout={500}>
       <Container maxWidth={false} sx={{ pt: 12, pb: 8, pl: { xs: 2, md: 6 }, pr: { xs: 2, md: 6 } }}>
@@ -52,9 +79,21 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
           <Grid container spacing={2}>
             {items.map((mediaItem, index) => (
               // FIX: Added the "item" prop. The breakpoint props (xs, sm, etc.) are only valid on a Grid item within a Grid container.
-              <Grid item key={mediaItem.id} xs={6} sm={4} md={3} lg={2} sx={{
-                  transition: 'opacity 0.5s, transform 0.5s',
+              <Grid 
+                item 
+                key={mediaItem.id} 
+                xs={6} sm={4} md={3} lg={2} 
+                draggable={isMyList}
+                onDragStart={(e) => isMyList && handleDragStart(e, index)}
+                onDragOver={(e) => isMyList && handleDragOver(e, index)}
+                onDrop={(e) => isMyList && handleDrop(e, index)}
+                onDragEnd={() => isMyList && handleDragEnd()}
+                onDragLeave={() => setDropTargetIndex(null)}
+                className={`${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''}`}
+                sx={{
+                  transition: 'opacity 0.3s, transform 0.3s, border 0.2s, box-shadow 0.2s',
                   animation: `fadeInUp 0.5s ${index * 0.05}s ease-out both`,
+                  cursor: isMyList ? 'grab' : 'default',
                   '@keyframes fadeInUp': {
                       'from': {
                           opacity: 0,

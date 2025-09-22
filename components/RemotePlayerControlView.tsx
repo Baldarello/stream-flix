@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField } from '@mui/material';
+import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FastForwardIcon from '@mui/icons-material/FastForward';
@@ -12,6 +12,24 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import CloseIcon from '@mui/icons-material/Close';
 import type { Episode, PlayableItem } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
+
+const formatTime = (timeInSeconds: number) => {
+    if (isNaN(timeInSeconds) || timeInSeconds < 0) {
+        return '00:00';
+    }
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+
+    if (hours > 0) {
+        return `${hours}:${formattedMinutes}:${formattedSeconds}`;
+    }
+    return `${formattedMinutes}:${formattedSeconds}`;
+};
+
 
 const RemotePlayerControlView = observer(() => {
     const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading } = mediaStore;
@@ -53,6 +71,11 @@ const RemotePlayerControlView = observer(() => {
     const handleSeekForward = () => sendRemoteCommand({ command: 'seek_forward' });
     const handleSeekBackward = () => sendRemoteCommand({ command: 'seek_backward' });
     const handleSkipIntro = () => sendRemoteCommand({ command: 'skip_intro' });
+
+    const handleSeek = (event: Event, newValue: number | number[]) => {
+        const newTime = ((newValue as number) / 100) * (remoteSlaveState?.duration || 0);
+        sendRemoteCommand({ command: 'seek_to', time: newTime });
+    };
     
     const handleSelectEpisode = (episode: Episode) => {
         if (!remoteFullItem || !selectedSeason) return;
@@ -153,6 +176,10 @@ const RemotePlayerControlView = observer(() => {
         );
     };
 
+    const currentTime = remoteSlaveState?.currentTime || 0;
+    const duration = remoteSlaveState?.duration || 0;
+    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
     return (
         <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
@@ -197,6 +224,18 @@ const RemotePlayerControlView = observer(() => {
             </Box>
 
             <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                {/* Progress Bar */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(currentTime)}</Typography>
+                    <Slider
+                        className="video-player-slider"
+                        aria-label="progress"
+                        value={progress}
+                        onChangeCommitted={handleSeek}
+                    />
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(duration)}</Typography>
+                </Box>
+                
                 {/* Main Controls */}
                 {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                 <Stack direction="row" spacing={3} sx={{ justifyContent: 'center', alignItems: 'center', mb: 3 }}>

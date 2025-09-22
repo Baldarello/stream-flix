@@ -29,6 +29,8 @@ type RemoteSlaveState = {
     isPlaying: boolean;
     nowPlayingItem: PlayableItem | null;
     isIntroSkippable?: boolean;
+    currentTime?: number;
+    duration?: number;
 }
 
 const allTranslations = { it, en };
@@ -351,7 +353,10 @@ class MediaStore {
         else if (view === 'Film') this.setActiveTheme('Film');
         else if (view === 'Anime') this.setActiveTheme('Anime');
     };
-    setActiveTheme = (theme: ThemeName) => { this.activeTheme = theme; };
+    setActiveTheme = (theme: ThemeName) => { 
+        this.activeTheme = theme; 
+        db.preferences.put({ key: 'activeTheme', value: theme });
+    };
     setSearchQuery = (query: string) => { 
         this.searchQuery = query;
          if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
@@ -505,8 +510,8 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myList, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username] = await Promise.all([
-            db.myList.toArray(),
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme] = await Promise.all([
+            db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
             db.showIntroDurations.toArray(),
@@ -514,9 +519,10 @@ class MediaStore {
             db.episodeProgress.toArray(),
             db.preferredSources.toArray(),
             db.preferences.get('username'),
+            db.preferences.get('activeTheme'),
         ]);
         runInAction(() => {
-            this.myList = myList.map(item => item.id);
+            this.myList = myListItems.map(item => item.id);
             this.cachedItems = new Map(cachedItems.map(item => [item.id, item]));
             
             const linksMap = new Map<number, MediaLink[]>();
@@ -529,6 +535,7 @@ class MediaStore {
             
             this.showIntroDurations = new Map(introDurations.map(item => [item.id, item.duration]));
             if (language?.value) this.language = language.value;
+            if (activeTheme?.value) this.activeTheme = activeTheme.value;
             this.episodeProgress = new Map(progress.map(p => [p.episodeId, p]));
             this.preferredSources = new Map(preferredSources.map(p => [p.showId, p.origin]));
             if (username?.value) this.username = username.value;
@@ -610,12 +617,25 @@ class MediaStore {
             db.myList.delete(itemId);
         } else {
             this.myList.push(itemId);
-            db.myList.put({ id: itemId });
+            db.myList.put({ id: itemId, order: this.myList.length });
             if (!this.cachedItems.has(itemId)) {
                 this.cachedItems.set(itemId, item);
                 db.cachedItems.put(item);
             }
         }
+    }
+
+    reorderMyList = async (dragIndex: number, dropIndex: number) => {
+        const reorderedList = [...this.myList];
+        const [draggedItem] = reorderedList.splice(dragIndex, 1);
+        reorderedList.splice(dropIndex, 0, draggedItem);
+        
+        runInAction(() => {
+            this.myList = reorderedList;
+        });
+        
+        const itemsToUpdate = this.myList.map((id, index) => ({ id, order: index }));
+        await db.myList.bulkPut(itemsToUpdate);
     }
     
     removeFromContinueWatching = async (episodeId: number) => {
@@ -908,13 +928,16 @@ class MediaStore {
     
     sendSlaveStatusUpdate = () => {
         if(this.isSmartTV && this.slaveId) {
+            const video = document.querySelector('video');
             websocketService.sendMessage({
                 type: 'quix-slave-status-update',
                 payload: {
                     slaveId: this.slaveId,
                     isPlaying: this.isPlaying,
                     nowPlayingItem: this.nowPlayingItem,
-                    isIntroSkippable: this.isIntroSkippableOnSlave
+                    isIntroSkippable: this.isIntroSkippableOnSlave,
+                    currentTime: video?.currentTime,
+                    duration: video?.duration
                 }
             });
         }
@@ -951,18 +974,21 @@ class MediaStore {
     };
     
     handleRemoteCommand = (payload: any) => {
-        const { command, item } = payload;
+        const { command, item, time } = payload;
+        const video = document.querySelector('video');
+        if (!video) return;
+
         switch(command) {
             case 'play_item': this.startPlayback(item); break;
-            case 'play': if (this.nowPlayingItem) this.isPlaying = true; document.querySelector('video')?.play(); break;
-            case 'pause': if (this.nowPlayingItem) this.isPlaying = false; document.querySelector('video')?.pause(); break;
+            case 'play': if (this.nowPlayingItem) this.isPlaying = true; video.play(); break;
+            case 'pause': if (this.nowPlayingItem) this.isPlaying = false; video.pause(); break;
             case 'stop': this.stopPlayback(); break;
-            case 'seek_forward': const fwdVid = document.querySelector('video'); if (fwdVid) fwdVid.currentTime += 10; break;
-            case 'seek_backward': const bwdVid = document.querySelector('video'); if (bwdVid) bwdVid.currentTime -= 10; break;
+            case 'seek_forward': video.currentTime += 10; break;
+            case 'seek_backward': video.currentTime -= 10; break;
+            case 'seek_to': video.currentTime = time; break;
             case 'skip_intro': 
-                const vid = document.querySelector('video');
-                if (vid && this.nowPlayingItem && 'intro_end_s' in this.nowPlayingItem && this.nowPlayingItem.intro_end_s) {
-                    vid.currentTime = this.nowPlayingItem.intro_end_s;
+                if (this.nowPlayingItem && 'intro_end_s' in this.nowPlayingItem && this.nowPlayingItem.intro_end_s) {
+                    video.currentTime = this.nowPlayingItem.intro_end_s;
                 }
                 break;
         }
@@ -1042,7 +1068,7 @@ class MediaStore {
             if (showIdsToAddToMyList.length > 0) {
                 const itemsToAddToMyList = showIdsToAddToMyList
                     .filter(id => !this.myList.includes(id)) // Filter out duplicates
-                    .map(id => ({ id }));
+                    .map((id, index) => ({ id, order: this.myList.length + index }));
                 
                 if (itemsToAddToMyList.length > 0) {
                     await db.myList.bulkAdd(itemsToAddToMyList);

@@ -191,6 +191,7 @@ const AppContent: React.FC = observer(() => {
                         items={row.items}
                         onCardClick={handleCardClick}
                         isContinueWatching={isContinueWatching}
+                        isReorderable={row.titleKey === 'misc.myList'}
                     />
                   );
                 })}

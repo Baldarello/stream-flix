@@ -160,6 +160,16 @@ const VideoPlayer: React.FC = observer(() => {
         return () => { clearInterval(interval); if (video) { video.removeEventListener('pause', saveProgress); saveProgress(); } };
     }, [nowPlayingItem?.id]);
 
+    // Effect for periodic Smart TV status updates
+    useEffect(() => {
+        if (isSmartTV && playerState.isPlaying) {
+            const interval = setInterval(() => {
+                sendSlaveStatusUpdate();
+            }, 1000); // Send update every second
+            return () => clearInterval(interval);
+        }
+    }, [isSmartTV, playerState.isPlaying, sendSlaveStatusUpdate]);
+
   // Effect for "Skip Intro" button visibility
   useEffect(() => {
     const videoElement = videoRef.current;

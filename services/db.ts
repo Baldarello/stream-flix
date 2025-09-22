@@ -7,6 +7,7 @@ import dexieObservable from 'dexie-observable';
 // Define the structure of the data we're storing
 export interface MyListItem {
   id: number;
+  order?: number; // Order is now optional for backward compatibility during migration
 }
 export interface ShowIntroDuration {
     id: number; // show id
@@ -112,6 +113,21 @@ export class QuixDB extends Dexie {
                 label: link.label || new URL(link.url).hostname,
             }));
             await tx.table('mediaLinks').bulkAdd(mediaLinksToMigrate);
+        }
+    });
+
+    (this as Dexie).version(8).stores({
+        myList: '&id, order', // Add order index
+    }).upgrade(async tx => {
+        // This upgrade ensures existing items in 'myList' get an order property.
+        const oldMyList = await tx.table('myList').toArray();
+        if (oldMyList.length > 0 && typeof oldMyList[0].order === 'undefined') {
+            const newMyList = oldMyList.map((item, index) => ({
+                id: item.id,
+                order: index
+            }));
+            await tx.table('myList').clear();
+            await tx.table('myList').bulkAdd(newMyList);
         }
     });
   }
