@@ -251,7 +251,7 @@ const RemotePlayerControlView = observer(() => {
 
             <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 {/* Progress Bar */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
                     <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(currentTime)}</Typography>
                     <Slider
                         className="video-player-slider"
@@ -263,7 +263,7 @@ const RemotePlayerControlView = observer(() => {
                 </Box>
                 
                 {/* Main Controls */}
-                <Stack direction="row" spacing={{xs: 2, sm: 4}} sx={{ justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+                <Stack direction="row" spacing={{xs: 2, sm: 4}} sx={{ justifyContent: 'center', alignItems: 'center', mb: 5 }}>
                     {isEpisode && (
                          <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode} aria-label={t('remote.player.previousEpisode')} sx={{ transform: 'scale(1.5)' }}>
                             <SkipPreviousIcon fontSize="large" />
