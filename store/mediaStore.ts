@@ -431,6 +431,19 @@ class MediaStore {
         }
         return null;
     }
+    get remoteNextEpisode() {
+        const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
+        if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
+        
+        const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
+        if (!season?.episodes) return null;
+
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) {
+            return season.episodes[currentEpisodeIndex + 1];
+        }
+        return null;
+    }
     get myListItems() { return this.myList.map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item); }
     get continueWatchingItems(): PlayableItem[] {
         const sortedProgress = Array.from(this.episodeProgress.values())
@@ -958,7 +971,11 @@ class MediaStore {
             const seasonsWithEpisodes = await Promise.all(
                 fullDetails.seasons?.map(async (season) => {
                     const episodes = await getSeriesEpisodes(showId, season.season_number);
-                    return { ...season, episodes };
+                    const episodesWithLinks = await Promise.all(episodes.map(async ep => {
+                        const links = await this.getLinksForMedia(ep.id);
+                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                    }));
+                    return { ...season, episodes: episodesWithLinks };
                 }) || []
             );
             runInAction(() => {

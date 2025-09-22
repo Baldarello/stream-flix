@@ -249,13 +249,12 @@ const WatchTogetherModal: React.FC = observer(() => {
     // FIX: Safely determine the title for the room based on the item type (Movie/Show vs Episode).
     let roomTitle = '';
     if (itemForModal) {
-      // FIX: Use 'episode_number' as a more reliable type guard to distinguish Episodes from MediaItems.
+      // By checking for 'episode_number', we can reliably distinguish Episodes from MediaItems within the PlayableItem union type.
       if ('episode_number' in itemForModal) {
-        // This is an Episode with show context from PlayableItem
+        // This is an Episode with show context from PlayableItem.
         roomTitle = itemForModal.show_title;
-// FIX: Safely determine the title for the room by adding an 'else if' to ensure itemForModal is a MediaItem before accessing its 'title' property.
-      } else if ('media_type' in itemForModal) { // This ensures it's a MediaItem
-        // This should be a MediaItem
+      } else {
+        // If it's not an episode, TypeScript correctly infers it's a MediaItem.
         roomTitle = itemForModal.title || itemForModal.name || '';
       }
     }

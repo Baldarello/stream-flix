@@ -141,7 +141,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                         </AccordionSummary>
                         <AccordionDetails>
                             {/* FIX: Use Array.isArray for a robust type check before accessing .length. */}
-                            {(!episode.video_urls || episode.video_urls.length === 0) ? (
+                            {(!Array.isArray(episode.video_urls) || episode.video_urls.length === 0) ? (
                                 <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
                             ) : (
                                 <Stack spacing={1}>
