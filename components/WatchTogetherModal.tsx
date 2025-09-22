@@ -253,8 +253,9 @@ const WatchTogetherModal: React.FC = observer(() => {
       if ('episode_number' in itemForModal) {
         // This is an Episode with show context from PlayableItem.
         roomTitle = itemForModal.show_title;
-      } else {
-        // If it's not an episode, TypeScript correctly infers it's a MediaItem.
+        // FIX: Added 'else if' to create a stronger type guard, resolving an error where '.title' might be accessed on an Episode type.
+      } else if ('title' in itemForModal) {
+        // If it's not an episode, it's a MediaItem.
         roomTitle = itemForModal.title || itemForModal.name || '';
       }
     }

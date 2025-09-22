@@ -140,10 +140,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                            {/* FIX: Use Array.isArray for a robust type check before accessing .length. */}
-                            {(!Array.isArray(episode.video_urls) || episode.video_urls.length === 0) ? (
-                                <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
-                            ) : (
+                            {/* FIX: Flipped the ternary and check for a valid array first to provide a better type guard and fix the 'length' on 'unknown' error. */}
+                            {(Array.isArray(episode.video_urls) && episode.video_urls.length > 0) ? (
                                 <Stack spacing={1}>
                                     {episode.video_urls.map((link: MediaLink) => {
                                         const truncatedLabel = link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
@@ -160,6 +158,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                         );
                                     })}
                                 </Stack>
+                            ) : (
+                                <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
                             )}
                         </AccordionDetails>
                     </Accordion>

@@ -927,9 +927,40 @@ class MediaStore {
         this.selectMedia(item, false);
     };
 
-    playRemoteItem = (item: PlayableItem) => {
-        this.sendRemoteCommand({ command: 'play_item', item });
-    };
+    playRemoteItem = async (item: PlayableItem) => {
+        // This method is called by the Master remote.
+        // It needs to resolve the video URL before sending the command to the Slave.
+        const playableItemWithUrl = { ...item };
+    
+        // If a URL is not already attached, resolve it.
+        if (!playableItemWithUrl.video_url) {
+            const mediaId = 'episode_number' in playableItemWithUrl ? playableItemWithUrl.id : playableItemWithUrl.id;
+            const links = await this.getLinksForMedia(mediaId);
+    
+            if (links.length === 0) {
+                this.showSnackbar("notifications.noVideoLinks", "warning", true);
+                return;
+            }
+    
+            const showId = 'show_id' in playableItemWithUrl ? playableItemWithUrl.show_id : playableItemWithUrl.id;
+            const preferredSource = this.preferredSources.get(showId);
+            const preferredLink = preferredSource ? links.find(l => l.url.startsWith(preferredSource)) : undefined;
+    
+            if (preferredLink) {
+                playableItemWithUrl.video_url = preferredLink.url;
+            } else {
+                // No preference, just pick the first one for remote play.
+                // We can't show a selection modal on the remote.
+                playableItemWithUrl.video_url = links[0].url;
+            }
+        }
+    
+        if (playableItemWithUrl.video_url) {
+            this.sendRemoteCommand({ command: 'play_item', item: playableItemWithUrl });
+        } else {
+            this.showSnackbar("notifications.noVideoLinks", "warning", true);
+        }
+    }
 
     sendRemoteCommand = (payload: any) => {
         // FIX: Cannot find name 'remoteSessions'. Logic rewritten to correctly send command from master to slave.

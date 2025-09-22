@@ -7,7 +7,7 @@ import { ContentRow } from './ContentRow';
 import RemoteDetailView from './RemoteDetailView';
 import RemotePlayerControlView from './RemotePlayerControlView';
 import { useTranslations } from '../hooks/useTranslations';
-import type { MediaItem } from '../types';
+import type { MediaItem, PlayableItem } from '../types';
 
 const RemoteControlView: React.FC = observer(() => {
     const { t } = useTranslations();
@@ -19,7 +19,9 @@ const RemoteControlView: React.FC = observer(() => {
         remoteSlaveState,
         continueWatchingItems,
         myListItems,
-        remoteSelectedItem
+        remoteSelectedItem,
+        playRemoteItem,
+        setRemoteSelectedItem
     } = mediaStore;
     
     // Determine which view to show
@@ -48,16 +50,20 @@ const RemoteControlView: React.FC = observer(() => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                 <Typography variant="h4" fontWeight="bold">{t('remote.chooseForTV')}</Typography>
                   {continueWatchingItems.length > 0 && (
-                      // FIX: Type 'PlayableItem[]' is not assignable to type 'MediaItem[]'. Cast to MediaItem[] is safe after store changes.
-                      <ContentRow title={t('misc.continueWatching')} items={continueWatchingItems as MediaItem[]} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                      <ContentRow 
+                        title={t('misc.continueWatching')} 
+                        items={continueWatchingItems as MediaItem[]} 
+                        onCardClick={(item) => playRemoteItem(item as PlayableItem)}
+                        isContinueWatching={true}
+                      />
                   )}
                   {myListItems.length > 0 && (
-                      <ContentRow title={t('misc.myList')} items={myListItems} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                      <ContentRow title={t('misc.myList')} items={myListItems} onCardClick={setRemoteSelectedItem} />
                   )}
-                <ContentRow title={t('misc.latestReleases')} items={latestMovies} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
-                <ContentRow title={t('misc.topRated')} items={trending} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
-                <ContentRow title={t('misc.popularSeries')} items={topSeries} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
-                <ContentRow title={t('misc.mustWatchAnime')} items={popularAnime} onCardClick={item => mediaStore.setRemoteSelectedItem(item)} />
+                <ContentRow title={t('misc.latestReleases')} items={latestMovies} onCardClick={setRemoteSelectedItem} />
+                <ContentRow title={t('misc.topRated')} items={trending} onCardClick={setRemoteSelectedItem} />
+                <ContentRow title={t('misc.popularSeries')} items={topSeries} onCardClick={setRemoteSelectedItem} />
+                <ContentRow title={t('misc.mustWatchAnime')} items={popularAnime} onCardClick={setRemoteSelectedItem} />
               </Box>
             </Container>
         </Box>
