@@ -140,7 +140,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                            {/* FIX: Flipped the ternary and check for a valid array first to provide a better type guard and fix the 'length' on 'unknown' error. */}
+                            {/* FIX: Add Array.isArray guard to ensure `episode.video_urls` is an array before calling .map() or accessing .length. */}
                             {(Array.isArray(episode.video_urls) && episode.video_urls.length > 0) ? (
                                 <Stack spacing={1}>
                                     {episode.video_urls.map((link: MediaLink) => {

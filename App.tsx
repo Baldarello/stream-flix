@@ -167,7 +167,7 @@ const AppContent: React.FC = observer(() => {
             {heroContent && (
               <Hero
                 item={heroContent}
-                onMoreInfoClick={() => mediaStore.selectMedia(heroContent)}
+                onMoreInfoClick={() => mediaStore.selectMedia(heroContent, 'detailView')}
                 onPlayClick={() => mediaStore.startPlayback(heroContent)}
               />
             )}

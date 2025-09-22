@@ -106,7 +106,8 @@ const WatchTogetherModal: React.FC = observer(() => {
   };
 
   const handleSelectEpisode = (episode: Episode) => {
-    if (!itemForModal || !currentSeason) return;
+    // FIX: Add a type guard to ensure itemForModal is a MediaItem before accessing its properties.
+    if (!itemForModal || !('seasons' in itemForModal) || !currentSeason) return;
     const itemToPlay: PlayableItem = {
       ...episode,
       show_id: itemForModal.id,

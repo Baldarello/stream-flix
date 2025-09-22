@@ -555,70 +555,89 @@ class MediaStore {
         });
     }
 
-    selectMedia = async (item: MediaItem, openModal = true) => {
-        const isForWatchTogether = !openModal;
-        if (openModal) {
-            this.selectedItem = item;
-            this.isDetailLoading = true;
-        } else {
-            this.watchTogetherSelectedItem = item;
+    selectMedia = async (item: MediaItem, context: 'detailView' | 'watchTogether' | 'remoteControl' | 'cacheOnly' = 'detailView') => {
+        // 1. Set initial state based on context
+        switch(context) {
+            case 'detailView':
+                this.selectedItem = item;
+                this.isDetailLoading = true;
+                break;
+            case 'watchTogether':
+                this.watchTogetherSelectedItem = item;
+                // Clear nowPlayingItem if content changes
+                if (this.watchTogetherSelectedItem?.id !== item.id) {
+                    this.nowPlayingItem = null;
+                }
+                break;
+            case 'remoteControl':
+                this.remoteSelectedItem = item;
+                this.isRemoteDetailLoading = true;
+                break;
+            case 'cacheOnly':
+                break;
         }
         
         try {
-            // If the selected item for Watch Together changes, clear the now playing item
-            // to ensure the playback check triggers correctly when details are loaded.
-            if (isForWatchTogether && this.watchTogetherSelectedItem?.id !== item.id) {
-                this.nowPlayingItem = null;
-            }
-
+            let needsFetching = false;
             if (item.media_type === 'tv' && (!item.seasons || item.seasons.some(s => s.episodes.length === 0))) {
-                const fullDetails = await getSeriesDetails(item.id);
-                const seasonsWithEpisodes = await Promise.all(
-                    fullDetails.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
-                        const episodesWithLinks = await Promise.all(episodes.map(async ep => {
-                            const links = await this.getLinksForMedia(ep.id);
-                            return { ...ep, video_urls: links, video_url: links[0]?.url };
-                        }));
-                        return { ...season, episodes: episodesWithLinks };
-                    }) || []
-                );
-                const itemWithEpisodes = { ...fullDetails, seasons: seasonsWithEpisodes };
-                
-                await db.cachedItems.put(itemWithEpisodes);
-
-                runInAction(() => {
-                    this.cachedItems.set(item.id, itemWithEpisodes);
-                    if (this.selectedItem?.id === item.id) this.selectedItem = itemWithEpisodes;
-                    if (this.watchTogetherSelectedItem?.id === item.id) this.watchTogetherSelectedItem = itemWithEpisodes;
-
-                    // If joining a room that's already playing, start playback now that we have details.
-                    if (isForWatchTogether && this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
-                        this.startPlayback(itemWithEpisodes);
-                    }
-                });
+                needsFetching = true;
             } else if (item.media_type === 'movie' && !item.video_urls) {
-                const links = await this.getLinksForMedia(item.id);
-                const updatedItem = { ...item, video_urls: links, video_url: links[0]?.url };
-
-                await db.cachedItems.put(updatedItem);
-                
-                runInAction(() => {
-                    this.cachedItems.set(item.id, updatedItem);
-                    if (this.selectedItem?.id === item.id) this.selectedItem = updatedItem;
-                    
-                    // Same check for movies
-                    if (isForWatchTogether && this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
-                        this.startPlayback(updatedItem);
-                    }
-                });
+                needsFetching = true;
+            }
+    
+            if (needsFetching) {
+                let fullItemDetails: MediaItem | null = null;
+                if (item.media_type === 'tv') {
+                    const fullDetails = await getSeriesDetails(item.id);
+                    const seasonsWithEpisodes = await Promise.all(
+                        fullDetails.seasons?.map(async (season) => {
+                            const episodes = await getSeriesEpisodes(item.id, season.season_number);
+                            const episodesWithLinks = await Promise.all(episodes.map(async ep => {
+                                const links = await this.getLinksForMedia(ep.id);
+                                return { ...ep, video_urls: links, video_url: links[0]?.url };
+                            }));
+                            return { ...season, episodes: episodesWithLinks };
+                        }) || []
+                    );
+                    fullItemDetails = { ...fullDetails, seasons: seasonsWithEpisodes };
+                } else if (item.media_type === 'movie') {
+                    const links = await this.getLinksForMedia(item.id);
+                    fullItemDetails = { ...item, video_urls: links, video_url: links[0]?.url };
+                }
+    
+                if (fullItemDetails) {
+                    await db.cachedItems.put(fullItemDetails);
+                    runInAction(() => {
+                        this.cachedItems.set(item.id, fullItemDetails!);
+                        // 2. Update the correct state property with full details
+                        switch(context) {
+                            case 'detailView':
+                                if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
+                                break;
+                            case 'watchTogether':
+                                if (this.watchTogetherSelectedItem?.id === item.id) this.watchTogetherSelectedItem = fullItemDetails;
+                                // Re-check for auto-play on join
+                                if (this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
+                                    this.startPlayback(fullItemDetails!);
+                                }
+                                break;
+                            case 'remoteControl':
+                                if (this.remoteSelectedItem?.id === item.id) this.remoteSelectedItem = fullItemDetails;
+                                break;
+                            case 'cacheOnly':
+                                break;
+                        }
+                    });
+                }
             }
         } catch (error) {
             console.error("Failed to load details", error);
             this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
         } finally {
             runInAction(() => {
-                this.isDetailLoading = false;
+                // 3. Reset loading flags
+                if (context === 'detailView') this.isDetailLoading = false;
+                if (context === 'remoteControl') this.isRemoteDetailLoading = false;
             });
         }
     }
@@ -868,13 +887,7 @@ class MediaStore {
     openWatchTogetherModal = (item: MediaItem | PlayableItem | null) => {
         this.watchTogetherError = null;
         if (item) {
-            this.selectMedia(item as MediaItem, false);
-            if (item && 'media_type' in item && item.media_type === 'movie') {
-                 this.watchTogetherSelectedItem = item;
-// FIX: Property 'seasons' does not exist on type '...'. Added a type guard to check for media_type 'tv' first.
-            } else if ('media_type' in item && item.media_type === 'tv' && (!item.seasons || item.seasons.length === 0)) {
-                 this.selectMedia(item as MediaItem, false); // Fetch details first
-            }
+            this.selectMedia(item as MediaItem, 'watchTogether');
         }
         this.watchTogetherModalOpen = true;
     };
@@ -922,9 +935,7 @@ class MediaStore {
     };
 
     setRemoteSelectedItem = (item: MediaItem) => {
-        this.remoteSelectedItem = item;
-        // Pre-fetch details for the remote view
-        this.selectMedia(item, false);
+        this.selectMedia(item, 'remoteControl');
     };
 
     playRemoteItem = async (item: PlayableItem) => {
@@ -1081,7 +1092,7 @@ class MediaStore {
 
                 // Ensure show details are in cache
                 if (!this.cachedItems.has(showData.tmdbId)) {
-                    await this.selectMedia({ id: showData.tmdbId, media_type: 'tv' } as MediaItem, false);
+                    await this.selectMedia({ id: showData.tmdbId, media_type: 'tv' } as MediaItem, 'cacheOnly');
                 }
                 const show = this.cachedItems.get(showData.tmdbId);
                 if (!show || !show.seasons) continue;
@@ -1342,9 +1353,9 @@ class MediaStore {
                     const existing = this.cachedItems.get(payload.selectedMedia.id);
                     if (existing) {
                         this.watchTogetherSelectedItem = payload.selectedMedia;
-                        this.selectMedia(existing, false);
+                        this.selectMedia(existing, 'watchTogether');
                     } else { // If not cached, fetch it
-                        this.selectMedia(payload.selectedMedia, false);
+                        this.selectMedia(payload.selectedMedia, 'watchTogether');
                     }
                 }
                 break;
