@@ -1034,18 +1034,42 @@ class MediaStore {
     
     handleRemoteCommand = (payload: any) => {
         const { command, item, time } = payload;
+    
+        // Commands that do NOT require an existing video element
+        switch (command) {
+            case 'play_item':
+                this.startPlayback(item);
+                this.sendSlaveStatusUpdate();
+                return; // Exit after handling
+            case 'stop':
+                this.stopPlayback();
+                this.sendSlaveStatusUpdate();
+                return; // Exit after handling
+        }
+    
+        // All subsequent commands require a video element
         const video = document.querySelector('video');
         if (!video) return;
-
-        switch(command) {
-            case 'play_item': this.startPlayback(item); break;
-            case 'play': if (this.nowPlayingItem) this.isPlaying = true; video.play(); break;
-            case 'pause': if (this.nowPlayingItem) this.isPlaying = false; video.pause(); break;
-            case 'stop': this.stopPlayback(); break;
-            case 'seek_forward': video.currentTime += 10; break;
-            case 'seek_backward': video.currentTime -= 10; break;
-            case 'seek_to': video.currentTime = time; break;
-            case 'skip_intro': 
+    
+        switch (command) {
+            case 'play':
+                if (this.nowPlayingItem) this.isPlaying = true;
+                video.play();
+                break;
+            case 'pause':
+                if (this.nowPlayingItem) this.isPlaying = false;
+                video.pause();
+                break;
+            case 'seek_forward':
+                video.currentTime += 10;
+                break;
+            case 'seek_backward':
+                video.currentTime -= 10;
+                break;
+            case 'seek_to':
+                video.currentTime = time;
+                break;
+            case 'skip_intro':
                 if (this.nowPlayingItem && 'intro_end_s' in this.nowPlayingItem && this.nowPlayingItem.intro_end_s) {
                     video.currentTime = this.nowPlayingItem.intro_end_s;
                 }
