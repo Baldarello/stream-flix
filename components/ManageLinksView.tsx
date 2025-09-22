@@ -101,7 +101,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                         </IconButton>
                                     </Tooltip>
                                     <Typography gutterBottom>
-                                        {t('linkEpisodesModal.manage.linksFrom', { count: links.length })} <strong>{origin}</strong>
+                                        {/* FIX: Added Array.isArray guard for robustness, preventing errors if 'links' is not an array. */}
+                                        {t('linkEpisodesModal.manage.linksFrom', { count: Array.isArray(links) ? links.length : 0 })} <strong>{origin}</strong>
                                     </Typography>
                                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>

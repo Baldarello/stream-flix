@@ -444,6 +444,19 @@ class MediaStore {
         }
         return null;
     }
+    get remotePreviousEpisode() {
+        const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
+        if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
+        
+        const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
+        if (!season?.episodes) return null;
+
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        if (currentEpisodeIndex > 0) {
+            return season.episodes[currentEpisodeIndex - 1];
+        }
+        return null;
+    }
     get myListItems() { return this.myList.map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item); }
     get continueWatchingItems(): PlayableItem[] {
         const sortedProgress = Array.from(this.episodeProgress.values())

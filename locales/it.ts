@@ -208,7 +208,9 @@ export const it = {
       "pause": "pausa",
       "skipIntro": "Salta Intro",
       "episodes": "Episodi",
-      "introDuration": "Durata Intro (sec)"
+      "introDuration": "Durata Intro (sec)",
+      "nextEpisode": "prossimo episodio",
+      "previousEpisode": "episodio precedente"
     }
   },
   "misc": {

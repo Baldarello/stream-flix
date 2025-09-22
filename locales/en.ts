@@ -208,7 +208,9 @@ export const en = {
       "pause": "pause",
       "skipIntro": "Skip Intro",
       "episodes": "Episodes",
-      "introDuration": "Intro Duration (sec)"
+      "introDuration": "Intro Duration (sec)",
+      "nextEpisode": "next episode",
+      "previousEpisode": "previous episode"
     }
   },
   "misc": {

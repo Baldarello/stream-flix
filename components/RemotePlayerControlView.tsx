@@ -10,6 +10,8 @@ import FastRewindIcon from '@mui/icons-material/FastRewind';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CloseIcon from '@mui/icons-material/Close';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import type { Episode, PlayableItem } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -32,7 +34,7 @@ const formatTime = (timeInSeconds: number) => {
 
 
 const RemotePlayerControlView = observer(() => {
-    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading } = mediaStore;
+    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading, remoteNextEpisode, remotePreviousEpisode, playRemoteItem } = mediaStore;
     const { t } = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
@@ -71,6 +73,30 @@ const RemotePlayerControlView = observer(() => {
     const handleSeekForward = () => sendRemoteCommand({ command: 'seek_forward' });
     const handleSeekBackward = () => sendRemoteCommand({ command: 'seek_backward' });
     const handleSkipIntro = () => sendRemoteCommand({ command: 'skip_intro' });
+
+    const handlePlayNext = () => {
+        if (remoteNextEpisode && remoteFullItem && isEpisode && 'season_number' in nowPlayingItem) {
+            playRemoteItem({
+                ...remoteNextEpisode,
+                show_id: remoteFullItem.id,
+                show_title: remoteFullItem.title || remoteFullItem.name || '',
+                backdrop_path: remoteFullItem.backdrop_path,
+                season_number: nowPlayingItem.season_number,
+            });
+        }
+    };
+
+    const handlePlayPrevious = () => {
+        if (remotePreviousEpisode && remoteFullItem && isEpisode && 'season_number' in nowPlayingItem) {
+            playRemoteItem({
+                ...remotePreviousEpisode,
+                show_id: remoteFullItem.id,
+                show_title: remoteFullItem.title || remoteFullItem.name || '',
+                backdrop_path: remoteFullItem.backdrop_path,
+                season_number: nowPlayingItem.season_number,
+            });
+        }
+    };
 
     const handleSeek = (event: Event, newValue: number | number[]) => {
         const newTime = ((newValue as number) / 100) * (remoteSlaveState?.duration || 0);
@@ -237,8 +263,12 @@ const RemotePlayerControlView = observer(() => {
                 </Box>
                 
                 {/* Main Controls */}
-                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
-                <Stack direction="row" spacing={3} sx={{ justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+                <Stack direction="row" spacing={{xs: 2, sm: 4}} sx={{ justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+                    {isEpisode && (
+                         <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode} aria-label={t('remote.player.previousEpisode')} sx={{ transform: 'scale(1.5)' }}>
+                            <SkipPreviousIcon fontSize="large" />
+                        </IconButton>
+                    )}
                     <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{ transform: 'scale(1.5)' }}>
                         <FastRewindIcon fontSize="large" />
                     </IconButton>
@@ -255,10 +285,14 @@ const RemotePlayerControlView = observer(() => {
                     <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{ transform: 'scale(1.5)' }}>
                         <FastForwardIcon fontSize="large" />
                     </IconButton>
+                    {isEpisode && (
+                        <IconButton onClick={handlePlayNext} disabled={!remoteNextEpisode} aria-label={t('remote.player.nextEpisode')} sx={{ transform: 'scale(1.5)' }}>
+                            <SkipNextIcon fontSize="large" />
+                        </IconButton>
+                    )}
                 </Stack>
 
                 {/* Secondary Controls */}
-                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                 <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center', mt: 4, height: '48px' /* Reserve space for buttons */ }}>
                     {isIntroSkippable && (
                         <Button 
