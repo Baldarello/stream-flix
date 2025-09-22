@@ -108,7 +108,8 @@ const LinkMovieModal: React.FC = observer(() => {
                                         </IconButton>
                                     </Tooltip>
                                 </Box>
-                                {links.map((link: MediaLink) => (
+                                {/* FIX: Add Array.isArray guard to prevent runtime errors if links is not an array. */}
+                                {Array.isArray(links) && links.map((link: MediaLink) => (
                                     <ListItem
                                         key={link.id}
                                         secondaryAction={

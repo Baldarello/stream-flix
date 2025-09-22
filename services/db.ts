@@ -58,8 +58,8 @@ export class QuixDB extends Dexie {
   constructor() {
     super('quixDB', { addons: [dexieObservable] }); // Register addon
     
-    // FIX: Removed unnecessary and problematic casts to 'Dexie'. 'this' is already a Dexie instance here.
-    this.version(1).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(1).stores({
       myList: '&id',
       viewingHistory: '++id, episodeId, watchedAt', 
       cachedItems: '&id',
@@ -67,15 +67,18 @@ export class QuixDB extends Dexie {
       showIntroDurations: '&id',
     });
     
-    this.version(2).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(2).stores({
       preferences: '&key', // New table for user preferences
     });
 
-    this.version(3).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(3).stores({
       revisions: '++id, timestamp',
     });
 
-    this.version(4).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(4).stores({
       episodeLinks: '++id, episodeId', // New schema with auto-incrementing PK and index on episodeId
     }).upgrade(tx => {
       // Since we are changing the schema in a breaking way (from string URL to object),
@@ -84,15 +87,18 @@ export class QuixDB extends Dexie {
       return tx.table('episodeLinks').clear();
     });
 
-    this.version(5).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(5).stores({
         episodeProgress: '&episodeId'
     });
 
-    this.version(6).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(6).stores({
         preferredSources: '&showId'
     });
     
-    this.version(7).stores({
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    (this as Dexie).version(7).stores({
         mediaLinks: '++id, mediaId',
         episodeLinks: null, // Remove old table
     }).upgrade(async tx => {
@@ -118,8 +124,8 @@ export class QuixDB extends Dexie {
       throw new Error("Backup file is missing required data tables or is empty.");
     }
     
-    // FIX: Removed unnecessary and problematic cast to 'Dexie'.
-    await this.transaction('rw', this.tables, async () => {
+    // FIX: Cast to Dexie to resolve type error where extended class methods are not found.
+    await (this as Dexie).transaction('rw', (this as Dexie).tables, async () => {
         // Clear all existing data
         for (const table of expectedTables) {
             // Dexie's Table types are not easily indexable by string, so we cast to any.
@@ -149,10 +155,10 @@ export class QuixDB extends Dexie {
 export const db = new QuixDB();
 
 // Listen for database changes to log revisions and trigger automatic backups
-// FIX: Cast `db.on` to extend its type with the 'changes' event signature from dexie-observable.
+// FIX: Cast `db` to `Dexie` before accessing the 'on' property to resolve type error.
 // This resolves the type error without conflicting with the base class definition.
 // FIX: Use the imported 'DbEvents' type for the cast instead of 'Dexie.Events', which refers to a value (the static class property) and not a type.
-(db.on as DbEvents & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
+((db as Dexie).on as DbEvents & { (event: 'changes', subscriber: (changes: DbChange[]) => void): void; })('changes', (changes: DbChange[]) => {
     // Filter out changes we don't want to track or that would cause loops
     const relevantChanges = changes.filter(change => 
         change.table !== 'revisions' && 

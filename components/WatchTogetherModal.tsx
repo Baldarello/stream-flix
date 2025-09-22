@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
+// FIX: mediaStore is now a named export, not a a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, Button, TextField, Stack, IconButton, List, ListItem, ListItemText, CircularProgress, Tooltip, Alert, FormControl, InputLabel, Select, MenuItem, ListItemButton, Card, CardMedia } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -247,9 +247,16 @@ const WatchTogetherModal: React.FC = observer(() => {
     }
     
     // FIX: Safely determine the title for the room based on the item type (Movie/Show vs Episode).
-    const roomTitle = 'media_type' in itemForModal
-        ? itemForModal.title || itemForModal.name || ''
-        : itemForModal.show_title;
+    let roomTitle;
+    if (!itemForModal) {
+        roomTitle = '';
+    } else if ('media_type' in itemForModal) {
+        // It's a MediaItem, which can be part of the PlayableItem union
+        roomTitle = itemForModal.title || itemForModal.name || '';
+    } else {
+        // It must be the Episode part of the PlayableItem union
+        roomTitle = itemForModal.show_title;
+    }
 
     if (isChangingContent && isHost) {
         return renderChangeContentView();

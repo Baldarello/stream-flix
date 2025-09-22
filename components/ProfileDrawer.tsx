@@ -37,6 +37,8 @@ const ProfileDrawer: React.FC = observer(() => {
     ) => {
         if (newTheme !== null) {
             mediaStore.setActiveTheme(newTheme);
+            mediaStore.setActiveView('Home'); // Navigate to home to see the changes
+            toggleProfileDrawer(false); // Close the drawer
         }
     };
     

@@ -400,7 +400,17 @@ class MediaStore {
     
     // Getters
     get isLoggedIn() { return !!this.googleUser; }
-    get heroContent() { return this.trending[0]; }
+    get heroContent() {
+        switch (this.activeTheme) {
+            case 'Film':
+                return this.latestMovies.length > 0 ? this.latestMovies[0] : this.trending[0];
+            case 'Anime':
+                return this.popularAnime.length > 0 ? this.popularAnime[0] : this.trending[0];
+            case 'SerieTV':
+            default:
+                return this.topSeries.length > 0 ? this.topSeries[0] : this.trending[0];
+        }
+    }
     get allMovies() { return [...this.latestMovies].sort((a,b) => (b.release_date || '').localeCompare(a.release_date || '')); }
     get currentShow() { return this.nowPlayingShowDetails; }
     get currentSeasonEpisodes() {
@@ -430,14 +440,34 @@ class MediaStore {
         }).filter(item => !!item) as PlayableItem[];
     }
     get homePageRows() {
-        return [
+        const rows = [
             ...(this.continueWatchingItems.length > 0 ? [{ titleKey: 'misc.continueWatching', items: this.continueWatchingItems as MediaItem[] }] : []),
             ...(this.myListItems.length > 0 ? [{ titleKey: 'misc.myList', items: this.myListItems }] : []),
-            { titleKey: 'misc.latestReleases', items: this.latestMovies },
-            { titleKey: 'misc.topRated', items: this.trending },
-            { titleKey: 'misc.popularSeries', items: this.topSeries },
-            { titleKey: 'misc.mustWatchAnime', items: this.popularAnime },
         ];
+
+        switch (this.activeTheme) {
+            case 'Film':
+                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                rows.push({ titleKey: 'misc.topRated', items: this.trending });
+                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
+                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                break;
+            case 'Anime':
+                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                rows.push({ titleKey: 'misc.topRated', items: this.trending });
+                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
+                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                break;
+            case 'SerieTV':
+            default:
+                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
+                rows.push({ titleKey: 'misc.topRated', items: this.trending });
+                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                break;
+        }
+        
+        return rows;
     }
     get shareableShows() {
         return Array.from(this.cachedItems.values()).filter(item => item.media_type === 'tv' && this.hasLinks(item.id));
