@@ -644,6 +644,34 @@ class MediaStore {
         }
     }
     
+    toggleEpisodeWatchedStatus = async (episodeId: number) => {
+        const existingProgress = this.episodeProgress.get(episodeId);
+    
+        if (existingProgress?.watched) {
+            // Mark as unwatched
+            const newProgress: EpisodeProgress = {
+                episodeId,
+                duration: existingProgress.duration,
+                currentTime: 0,
+                watched: false,
+            };
+            this.episodeProgress.set(episodeId, newProgress);
+            await db.episodeProgress.put(newProgress);
+            this.showSnackbar('notifications.markedAsUnwatched', 'info', true);
+        } else {
+            // Mark as watched
+            const newProgress: EpisodeProgress = {
+                episodeId,
+                duration: existingProgress?.duration || 1,
+                currentTime: existingProgress?.duration || 1,
+                watched: true,
+            };
+            this.episodeProgress.set(episodeId, newProgress);
+            await db.episodeProgress.put(newProgress);
+            this.showSnackbar('notifications.markedAsWatched', 'success', true);
+        }
+    }
+    
     setShowIntroDuration = (showId: number, duration: number) => {
         this.showIntroDurations.set(showId, duration);
         db.showIntroDurations.put({ id: showId, duration });

@@ -34,7 +34,9 @@ export const it = {
     "introDuration": "Durata Intro",
     "season": "Stagione",
     "scrollEpisodesLeft": "scorri episodi a sinistra",
-    "scrollEpisodesRight": "scorri episodi a destra"
+    "scrollEpisodesRight": "scorri episodi a destra",
+    "markAsWatched": "Segna come visto",
+    "markAsUnwatched": "Segna come non visto"
   },
   "gridView": {
     "myListTitle": "La mia lista",
@@ -316,6 +318,8 @@ export const it = {
     "shareLinkCreateError": "Creazione del link di condivisione non riuscita: {error}",
     "syncUpToDate": "I tuoi dati sono già aggiornati.",
     "removedFromContinueWatching": "Rimosso da 'Continua a guardare'.",
-    "removeFromContinueWatchingError": "Errore durante la rimozione da 'Continua a guardare'."
+    "removeFromContinueWatchingError": "Errore durante la rimozione da 'Continua a guardare'.",
+    "markedAsWatched": "Episodio segnato come visto.",
+    "markedAsUnwatched": "Episodio segnato come non visto."
   }
 }

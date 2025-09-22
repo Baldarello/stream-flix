@@ -34,7 +34,9 @@ export const en = {
     "introDuration": "Intro Duration",
     "season": "Season",
     "scrollEpisodesLeft": "scroll episodes left",
-    "scrollEpisodesRight": "scroll episodes right"
+    "scrollEpisodesRight": "scroll episodes right",
+    "markAsWatched": "Mark as watched",
+    "markAsUnwatched": "Mark as unwatched"
   },
   "gridView": {
     "myListTitle": "My List",
@@ -316,6 +318,8 @@ export const en = {
     "shareLinkCreateError": "Failed to create share link: {error}",
     "syncUpToDate": "Your data is already up to date.",
     "removedFromContinueWatching": "Removed from 'Continue Watching'.",
-    "removeFromContinueWatchingError": "Error removing from 'Continue Watching'."
+    "removeFromContinueWatchingError": "Error removing from 'Continue Watching'.",
+    "markedAsWatched": "Episode marked as watched.",
+    "markedAsUnwatched": "Episode marked as unwatched."
   }
 }

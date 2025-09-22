@@ -135,8 +135,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography noWrap>{episode.episode_number}. {episode.name}</Typography>
                             <Typography sx={{ color: 'text.secondary', ml: 'auto', pl: 2 }}>
-                                {/* FIX: Use optional chaining to safely access the length property. */}
-                                {t('linkEpisodesModal.manage.linksCount', { count: episode.video_urls?.length ?? 0 })}
+                                {/* FIX: Use Array.isArray for robustness against unexpected data shapes. */}
+                                {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
                             </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
