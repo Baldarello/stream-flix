@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert } from '@mui/material';
+import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert, FormControlLabel, Switch } from '@mui/material';
 // FIX: `SelectChangeEvent` is imported from '@mui/material/Select' instead of '@mui/material'.
 import { SelectChangeEvent } from '@mui/material/Select';
 // FIX: Imported CloseIcon to resolve the "Cannot find name" error.
@@ -43,14 +43,30 @@ const AddLinkTabs: React.FC<{
     const [linkList, setLinkList] = useState('');
     const [json, setJson] = useState('');
     const patternInputRef = useRef<HTMLInputElement>(null);
+    const [isAdvanced, setIsAdvanced] = useState(false);
+    const [startEpisode, setStartEpisode] = useState('1');
+    const [endEpisode, setEndEpisode] = useState('12');
 
     const handleSave = () => {
-        let data, error;
+        let data: any, error: string | null = null, isErrorKey = false;
         switch (addMethod) {
             case 'pattern':
                 if (!pattern) error = "Il pattern non può essere vuoto.";
                 else if (!pattern.includes('[@EP]')) error = "Il pattern deve includere il segnaposto [@EP].";
-                else data = { pattern, padding: parseInt(padding, 10), label };
+                else {
+                    data = { pattern, padding: parseInt(padding, 10), label };
+                    if (isAdvanced) {
+                        const start = parseInt(startEpisode, 10);
+                        const end = parseInt(endEpisode, 10);
+                        if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
+                            error = 'notifications.invalidEpisodeRange';
+                            isErrorKey = true;
+                        } else {
+                           data.start = start;
+                           data.end = end;
+                        }
+                    }
+                }
                 break;
             case 'list':
                 if (!linkList.trim()) error = "La lista non può essere vuota.";
@@ -63,7 +79,7 @@ const AddLinkTabs: React.FC<{
         }
 
         if (error) {
-            mediaStore.showSnackbar(error, 'error');
+            mediaStore.showSnackbar(error, 'error', isErrorKey);
         } else if (data) {
             onSave({ seasonNumber: selectedSeason, method: addMethod, data });
         }
@@ -114,6 +130,30 @@ const AddLinkTabs: React.FC<{
                         )
                     }} 
                 />
+                <FormControlLabel
+                    control={<Switch checked={isAdvanced} onChange={(e) => setIsAdvanced(e.target.checked)} />}
+                    label={t('linkEpisodesModal.add.advancedConfig')}
+                />
+                {isAdvanced && (
+                    <Stack direction="row" spacing={2}>
+                        <TextField
+                            label={t('linkEpisodesModal.add.startEpisode')}
+                            type="number"
+                            value={startEpisode}
+                            onChange={(e) => setStartEpisode(e.target.value)}
+                            inputProps={{ min: 1 }}
+                            fullWidth
+                        />
+                        <TextField
+                            label={t('linkEpisodesModal.add.endEpisode')}
+                            type="number"
+                            value={endEpisode}
+                            onChange={(e) => setEndEpisode(e.target.value)}
+                            inputProps={{ min: 1 }}
+                            fullWidth
+                        />
+                    </Stack>
+                )}
                 <TextField label={t('linkEpisodesModal.add.linkLabel')} value={label} onChange={e => setLabel(e.target.value)} helperText={t('linkEpisodesModal.add.linkLabelHelper')} />
                 <TextField label={t('linkEpisodesModal.add.padding')} required type="number" value={padding} onChange={e => setPadding(e.target.value)} helperText={t('linkEpisodesModal.add.paddingHelper')} />
               </Stack>
@@ -175,7 +215,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
       setSelectedSeason('');
     }
     setActiveTab('add');
-  }, [item]);
+  }, [item?.id]);
 
   if (!item) return null;
   
@@ -197,7 +237,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
         <Typography variant="h5" component="h2" fontWeight="bold">{t('linkEpisodesModal.title', { name: item.name })}</Typography>
 
         {/* FIX: The `mt` prop is a system prop and should be passed inside the `sx` object. */}
-        <Stack spacing={2} sx={{ mt: 2, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Stack spacing={2} sx={{ mt: 2, pt: 2, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <FormControl fullWidth required>
               <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
               <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={handleSeasonChange}>

@@ -759,7 +759,11 @@ class MediaStore {
         try {
             switch (method) {
                 case 'pattern':
-                    for (let i = 1; i <= season.episode_count; i++) {
+                    const startEpisode = data.start || 1;
+                    const endEpisode = data.end || season.episode_count;
+                    const safeEndEpisode = Math.min(endEpisode, season.episode_count);
+
+                    for (let i = startEpisode; i <= safeEndEpisode; i++) {
                         const epNum = String(i).padStart(data.padding, '0');
                         const ep = season.episodes.find(e => e.episode_number === i);
                         if(ep) {

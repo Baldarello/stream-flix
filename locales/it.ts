@@ -100,7 +100,10 @@ export const it = {
       "listLinks": "Lista di link",
       "jsonInfo": "Incolla un array JSON di stringhe (link) o di oggetti (es. {\"url\": \"...\", \"label\": \"...\"}).",
       "jsonArray": "Array JSON",
-      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]"
+      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]",
+      "advancedConfig": "Configurazione avanzata",
+      "startEpisode": "Da episodio",
+      "endEpisode": "A episodio"
     },
     "manage": {
       "deleteAllSeasonLinks": "Elimina tutti i link per questa stagione",
@@ -322,6 +325,7 @@ export const it = {
     "removedFromContinueWatching": "Rimosso da 'Continua a guardare'.",
     "removeFromContinueWatchingError": "Errore durante la rimozione da 'Continua a guardare'.",
     "markedAsWatched": "Episodio segnato come visto.",
-    "markedAsUnwatched": "Episodio segnato come non visto."
+    "markedAsUnwatched": "Episodio segnato come non visto.",
+    "invalidEpisodeRange": "Intervallo episodi non valido."
   }
 }

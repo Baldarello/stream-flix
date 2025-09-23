@@ -100,7 +100,10 @@ export const en = {
       "listLinks": "List of links",
       "jsonInfo": "Paste a JSON array of strings (links) or objects (e.g., {\"url\": \"...\", \"label\": \"...\"}).",
       "jsonArray": "JSON Array",
-      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]"
+      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]",
+      "advancedConfig": "Advanced configuration",
+      "startEpisode": "From episode",
+      "endEpisode": "To episode"
     },
     "manage": {
       "deleteAllSeasonLinks": "Delete all links for this season",
@@ -322,6 +325,7 @@ export const en = {
     "removedFromContinueWatching": "Removed from 'Continue Watching'.",
     "removeFromContinueWatchingError": "Error removing from 'Continue Watching'.",
     "markedAsWatched": "Episode marked as watched.",
-    "markedAsUnwatched": "Episode marked as unwatched."
+    "markedAsUnwatched": "Episode marked as unwatched.",
+    "invalidEpisodeRange": "Invalid episode range."
   }
 }
