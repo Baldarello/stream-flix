@@ -143,7 +143,11 @@ export const it = {
     "library": "Libreria",
     "share": "Condividi Libreria",
     "import": "Importa Libreria",
-    "history": "Cronologia Modifiche"
+    "history": "Cronologia Modifiche",
+    "playbackPreferences": "Preferenze di Riproduzione",
+    "preferredLabelsDesc": "Dai priorità ai link con queste etichette durante la selezione automatica.",
+    "noLabelsFound": "Nessuna etichetta trovata",
+    "noLabelsFoundDesc": "Aggiungi link con etichette per gestirle qui."
   },
   "qrScanner": {
     "close": "Chiudi scanner",
@@ -326,6 +330,8 @@ export const it = {
     "removeFromContinueWatchingError": "Errore durante la rimozione da 'Continua a guardare'.",
     "markedAsWatched": "Episodio segnato come visto.",
     "markedAsUnwatched": "Episodio segnato come non visto.",
-    "invalidEpisodeRange": "Intervallo episodi non valido."
+    "invalidEpisodeRange": "Intervallo episodi non valido.",
+    "preferredLabelSet": "Etichetta '{label}' impostata come preferita.",
+    "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'."
   }
 }

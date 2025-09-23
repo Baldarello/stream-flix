@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemText, TextField, Stack, Paper, Tooltip } from '@mui/material';
+import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemText, TextField, Stack, Paper, Tooltip, Autocomplete } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -83,7 +83,22 @@ const LinkMovieModal: React.FC = observer(() => {
                 <Typography variant="subtitle1" gutterBottom>{t('linkMovieModal.addLink')}</Typography>
                 <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}>
                     <TextField label={t('linkMovieModal.url')} value={newUrl} onChange={e => setNewUrl(e.target.value)} size="small" fullWidth />
-                    <TextField label={t('linkMovieModal.label')} value={newLabel} onChange={e => setNewLabel(e.target.value)} size="small" fullWidth />
+                    <Autocomplete
+                        freeSolo
+                        fullWidth
+                        size="small"
+                        options={mediaStore.allUniqueLabels}
+                        value={newLabel}
+                        onInputChange={(event, newInputValue) => {
+                            setNewLabel(newInputValue);
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label={t('linkMovieModal.label')}
+                            />
+                        )}
+                    />
                     <Button onClick={handleAddLink} variant="contained" startIcon={<AddIcon />} sx={{ flexShrink: 0 }}>{t('linkMovieModal.add')}</Button>
                 </Stack>
             </Paper>

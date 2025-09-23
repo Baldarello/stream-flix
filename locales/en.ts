@@ -143,7 +143,11 @@ export const en = {
     "library": "Library",
     "share": "Share Library",
     "import": "Import Library",
-    "history": "Change History"
+    "history": "Change History",
+    "playbackPreferences": "Playback Preferences",
+    "preferredLabelsDesc": "Prioritize links with these labels during auto-selection.",
+    "noLabelsFound": "No labels found",
+    "noLabelsFoundDesc": "Add links with labels to manage them here."
   },
   "qrScanner": {
     "close": "Close scanner",
@@ -326,6 +330,8 @@ export const en = {
     "removeFromContinueWatchingError": "Error removing from 'Continue Watching'.",
     "markedAsWatched": "Episode marked as watched.",
     "markedAsUnwatched": "Episode marked as unwatched.",
-    "invalidEpisodeRange": "Invalid episode range."
+    "invalidEpisodeRange": "Invalid episode range.",
+    "preferredLabelSet": "Label '{label}' set as preferred.",
+    "preferredLabelRemoved": "Preference removed for label '{label}'."
   }
 }

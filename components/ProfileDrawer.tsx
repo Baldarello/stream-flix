@@ -16,6 +16,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ShareIcon from '@mui/icons-material/Share';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import HistoryIcon from '@mui/icons-material/History';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { handleSignIn, handleSignOut } from '../services/googleAuthService';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -193,7 +195,37 @@ const ProfileDrawer: React.FC = observer(() => {
                         </ListItemButton>
                     </ListItem>
                 )}
-                <Divider sx={{ my: 1 }} />
+            </List>
+            <Divider />
+             <Box sx={{ p: 2 }}>
+                <Typography variant="overline" color="text.secondary">{t('profileDrawer.playbackPreferences')}</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t('profileDrawer.preferredLabelsDesc')}</Typography>
+                <Box sx={{ maxHeight: '20vh', overflowY: 'auto', mt: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                    <List dense disablePadding>
+                        {mediaStore.allUniqueLabels.length > 0 ? mediaStore.allUniqueLabels.map(label => (
+                            <ListItem
+                                key={label}
+                                secondaryAction={
+                                    <IconButton edge="end" onClick={() => mediaStore.togglePreferredLabel(label)} aria-label={`Toggle preference for ${label}`}>
+                                        {mediaStore.preferredLabels.includes(label) ? <StarIcon color="warning" /> : <StarBorderIcon />}
+                                    </IconButton>
+                                }
+                                disablePadding
+                            >
+                                <ListItemButton dense onClick={() => mediaStore.togglePreferredLabel(label)}>
+                                    <ListItemText primary={label} />
+                                </ListItemButton>
+                            </ListItem>
+                        )) : (
+                            <ListItem>
+                                <ListItemText primary={t('profileDrawer.noLabelsFound')} secondary={t('profileDrawer.noLabelsFoundDesc')} />
+                            </ListItem>
+                        )}
+                    </List>
+                </Box>
+            </Box>
+            <Divider />
+            <List>
                  <ListItem disablePadding>
                     <ListItemButton onClick={handleScanQRCode}>
                         <ListItemIcon><QrCodeScannerIcon /></ListItemIcon>

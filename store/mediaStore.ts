@@ -65,6 +65,7 @@ class MediaStore {
     cachedItems: Map<number, MediaItem> = new Map();
     episodeProgress: Map<number, EpisodeProgress> = new Map();
     preferredSources: Map<number, string> = new Map();
+    preferredLabels: string[] = [];
     selectedSeasons: Map<number, number> = new Map();
 
     // Search State
@@ -198,14 +199,30 @@ class MediaStore {
             if (links.length === 1) {
                 item.video_url = links[0].url;
             } else {
-                // Multiple links exist. Try to find a preferred source.
+                // Multiple links exist. Try to find a preferred source/label.
                 const showId = 'show_id' in item ? item.show_id : item.id;
-                const preferredSource = this.preferredSources.get(showId);
-                const preferredLink = preferredSource ? links.find(l => l.url.startsWith(preferredSource)) : undefined;
+                const preferredOrigin = this.preferredSources.get(showId);
+                const preferredLabels = this.preferredLabels;
 
-                // If a preferred link is found, use it. Otherwise, fall back to the first available link,
-                // avoiding the need to show a selection modal.
-                item.video_url = preferredLink ? preferredLink.url : links[0].url;
+                let bestLink: MediaLink | undefined = undefined;
+
+                // Priority 1: Match preferred origin AND a preferred label
+                if (preferredOrigin && preferredLabels.length > 0) {
+                    bestLink = links.find(l => l.url.startsWith(preferredOrigin) && l.label && preferredLabels.includes(l.label));
+                }
+
+                // Priority 2: Match preferred origin only
+                if (!bestLink && preferredOrigin) {
+                    bestLink = links.find(l => l.url.startsWith(preferredOrigin));
+                }
+
+                // Priority 3: Match a preferred label only
+                if (!bestLink && preferredLabels.length > 0) {
+                    bestLink = links.find(l => l.label && preferredLabels.includes(l.label));
+                }
+                
+                // Priority 4: Fallback to the first available link
+                item.video_url = bestLink ? bestLink.url : links[0].url;
             }
         }
 
@@ -398,6 +415,17 @@ class MediaStore {
     
     // Getters
     get isLoggedIn() { return !!this.googleUser; }
+    get allUniqueLabels(): string[] {
+        const labels = new Set<string>();
+        for (const links of this.mediaLinks.values()) {
+            for (const link of links) {
+                if (link.label) {
+                    labels.add(link.label);
+                }
+            }
+        }
+        return Array.from(labels).sort();
+    }
     get heroContent() {
         switch (this.activeTheme) {
             case 'Film':
@@ -529,7 +557,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -540,6 +568,7 @@ class MediaStore {
             db.preferences.get('username'),
             db.preferences.get('activeTheme'),
             db.selectedSeasons.toArray(),
+            db.preferences.get('preferredLabels'),
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -559,6 +588,7 @@ class MediaStore {
             this.episodeProgress = new Map(progress.map(p => [p.episodeId, p]));
             this.preferredSources = new Map(preferredSources.map(p => [p.showId, p.origin]));
             this.selectedSeasons = new Map(selectedSeasons.map(s => [s.showId, s.seasonNumber]));
+            if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
             if (username?.value) this.username = username.value;
         });
     }
@@ -740,6 +770,17 @@ class MediaStore {
     setSelectedSeasonForShow = (showId: number, seasonNumber: number) => {
         this.selectedSeasons.set(showId, seasonNumber);
         db.selectedSeasons.put({ showId, seasonNumber });
+    }
+
+    togglePreferredLabel = async (label: string) => {
+        const isPreferred = this.preferredLabels.includes(label);
+        if (isPreferred) {
+            this.preferredLabels = this.preferredLabels.filter(l => l !== label);
+        } else {
+            this.preferredLabels.push(label);
+        }
+        await db.preferences.put({ key: 'preferredLabels', value: this.preferredLabels });
+        this.showSnackbar(isPreferred ? 'notifications.preferredLabelRemoved' : 'notifications.preferredLabelSet', 'success', true, { label });
     }
 
     openLinkEpisodesModal = (item: MediaItem) => { this.linkingEpisodesForItem = item; this.isLinkEpisodesModalOpen = true; };
