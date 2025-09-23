@@ -65,6 +65,7 @@ class MediaStore {
     cachedItems: Map<number, MediaItem> = new Map();
     episodeProgress: Map<number, EpisodeProgress> = new Map();
     preferredSources: Map<number, string> = new Map();
+    selectedSeasons: Map<number, number> = new Map();
 
     // Search State
     searchQuery = '';
@@ -288,7 +289,7 @@ class MediaStore {
         if (showNotification) this.showSnackbar('notifications.backupInProgress', 'info', true);
         this.isSyncing = true;
         try {
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources'];
+            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons'];
             const data: { [key: string]: any[] } = {};
             for (const tableName of tablesToBackup) {
                 if ((db as any)[tableName]) {
@@ -536,7 +537,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -546,6 +547,7 @@ class MediaStore {
             db.preferredSources.toArray(),
             db.preferences.get('username'),
             db.preferences.get('activeTheme'),
+            db.selectedSeasons.toArray(),
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -564,6 +566,7 @@ class MediaStore {
             if (activeTheme?.value) this.activeTheme = activeTheme.value;
             this.episodeProgress = new Map(progress.map(p => [p.episodeId, p]));
             this.preferredSources = new Map(preferredSources.map(p => [p.showId, p.origin]));
+            this.selectedSeasons = new Map(selectedSeasons.map(s => [s.showId, s.seasonNumber]));
             if (username?.value) this.username = username.value;
         });
     }
@@ -742,6 +745,11 @@ class MediaStore {
         db.showIntroDurations.put({ id: showId, duration });
     }
     
+    setSelectedSeasonForShow = (showId: number, seasonNumber: number) => {
+        this.selectedSeasons.set(showId, seasonNumber);
+        db.selectedSeasons.put({ showId, seasonNumber });
+    }
+
     openLinkEpisodesModal = (item: MediaItem) => { this.linkingEpisodesForItem = item; this.isLinkEpisodesModalOpen = true; };
     closeLinkEpisodesModal = () => { this.isLinkEpisodesModalOpen = false; this.linkingEpisodesForItem = null; };
     openLinkMovieModal = (item: MediaItem) => { this.linkingMovieItem = item; this.isLinkMovieModalOpen = true; };

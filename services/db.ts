@@ -17,6 +17,10 @@ export interface Preference {
     key: string;
     value: any;
 }
+export interface SelectedSeason {
+  showId: number;
+  seasonNumber: number;
+}
 
 // Add an optional 'id' for Dexie's auto-incrementing primary key
 export type StorableViewingHistoryItem = ViewingHistoryItem & { id?: number };
@@ -54,6 +58,7 @@ export class QuixDB extends Dexie {
   revisions!: Table<Revision, number>; // NEW TABLE
   episodeProgress!: Table<EpisodeProgress, number>;
   preferredSources!: Table<PreferredSource, number>;
+  selectedSeasons!: Table<SelectedSeason, number>;
 
 
   constructor() {
@@ -130,10 +135,14 @@ export class QuixDB extends Dexie {
             await tx.table('myList').bulkAdd(newMyList);
         }
     });
+
+    (this as Dexie).version(9).stores({
+        selectedSeasons: '&showId'
+    });
   }
   
   async importData(data: any) {
-    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources'];
+    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources', 'selectedSeasons'];
     const tablesInData = data ? Object.keys(data) : [];
     
     if (!tablesInData.length || !tablesInData.some(table => expectedTables.includes(table))) {
@@ -183,7 +192,7 @@ export const db = new QuixDB();
 
     if (relevantChanges.length > 0) {
         const revisionsToLog: Revision[] = relevantChanges
-            .filter(change => change.table !== 'episodeProgress' && change.table !== 'preferredSources')
+            .filter(change => change.table !== 'episodeProgress' && change.table !== 'preferredSources' && change.table !== 'selectedSeasons')
             .map(change => ({
                 timestamp: Date.now(),
                 table: change.table,

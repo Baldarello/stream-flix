@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
@@ -17,12 +17,20 @@ import type { Episode } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
 const DetailView: React.FC = observer(() => {
-  const { selectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration, episodeProgress } = mediaStore;
+  const { selectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration, episodeProgress, selectedSeasons, setSelectedSeasonForShow } = mediaStore;
   const { t } = useTranslations();
 
   if (!item) return null;
 
-  const [selectedSeason, setSelectedSeason] = useState(item.seasons?.[0]?.season_number ?? 1);
+  const getValidSeason = () => {
+    if (!item.seasons || item.seasons.length === 0) return 1;
+    const storedSeason = selectedSeasons.get(item.id);
+    if (storedSeason && item.seasons.some(s => s.season_number === storedSeason)) {
+      return storedSeason;
+    }
+    return item.seasons[0].season_number;
+  };
+  const selectedSeason = getValidSeason();
 
   const title = item.title || item.name;
   const releaseDate = item.release_date || item.first_air_date;
@@ -43,15 +51,6 @@ const DetailView: React.FC = observer(() => {
         setShowIntroDuration(item.id, duration);
     }
   };
-
-  React.useEffect(() => {
-      if (item.seasons && item.seasons.length > 0) {
-          const seasonExists = item.seasons.some(s => s.season_number === selectedSeason);
-          if (!seasonExists) {
-              setSelectedSeason(item.seasons[0].season_number);
-          }
-      }
-  }, [item.seasons, selectedSeason]);
 
   const listActionLabel = isInMyList ? t('detail.removeFromList') : t('detail.addToList');
 
@@ -239,7 +238,7 @@ const DetailView: React.FC = observer(() => {
                                         labelId="season-select-label"
                                         value={selectedSeason}
                                         label={t('detail.season')}
-                                        onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                                        onChange={(e) => setSelectedSeasonForShow(item.id, Number(e.target.value))}
                                         sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}
                                     >
                                         {item.seasons.map(season => (
