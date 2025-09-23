@@ -90,15 +90,23 @@ export const getSeriesDetails = async (seriesId: number): Promise<MediaItem> => 
   const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}`);
   const seriesData = response.data;
 
+  // If the main data object is missing, we cannot proceed. Throw an error.
+  if (!seriesData) {
+      throw new Error(`API returned no data for series ${seriesId}`);
+  }
+
+  // Safely access the seasons array, defaulting to an empty array if it's missing or not an array.
+  const seasonsData = Array.isArray(seriesData.seasons) ? seriesData.seasons : [];
+
   const details: MediaItem = {
       ...tmdbToMediaItem(seriesData),
-      seasons: seriesData.seasons?.map((season: any): Season => ({
+      seasons: seasonsData.map((season: any): Season => ({
           id: season.id,
           season_number: season.season_number,
           name: season.name,
           episode_count: season.episode_count,
           episodes: [], // Episodes for each season must be fetched separately
-      })) || [],
+      })),
   };
   return details;
 };
@@ -108,8 +116,15 @@ export const getSeriesDetails = async (seriesId: number): Promise<MediaItem> => 
  */
 export const getSeriesEpisodes = async (seriesId: number, seasonNumber: number): Promise<Episode[]> => {
   const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/season/${seasonNumber}`);
-  const episodesData = response.data.episodes || [];
-  return episodesData.map((ep: any): Episode => {
+  const seasonData = response.data;
+
+  // If the season data object is missing, or if it doesn't contain a valid episodes array,
+  // return an empty array to prevent crashes.
+  if (!seasonData || !Array.isArray(seasonData.episodes)) {
+      return [];
+  }
+
+  return seasonData.episodes.map((ep: any): Episode => {
     // Mocking intro times for demonstration purposes of the "Skip Intro" feature
     const hasIntro = ep.episode_number > 1; // Assume pilot doesn't have a skippable intro
     return {
