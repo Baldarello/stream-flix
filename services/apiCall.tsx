@@ -108,7 +108,8 @@ export const getSeriesDetails = async (seriesId: number): Promise<MediaItem> => 
  */
 export const getSeriesEpisodes = async (seriesId: number, seasonNumber: number): Promise<Episode[]> => {
   const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/season/${seasonNumber}`);
-  return response.data.episodes.map((ep: any): Episode => {
+  const episodesData = response.data.episodes || [];
+  return episodesData.map((ep: any): Episode => {
     // Mocking intro times for demonstration purposes of the "Skip Intro" feature
     const hasIntro = ep.episode_number > 1; // Assume pilot doesn't have a skippable intro
     return {
