@@ -602,7 +602,6 @@ class MediaStore {
                 break;
             case 'watchTogether':
                 this.watchTogetherSelectedItem = item;
-                // Clear nowPlayingItem if content changes
                 if (this.watchTogetherSelectedItem?.id !== item.id) {
                     this.nowPlayingItem = null;
                 }
@@ -616,58 +615,65 @@ class MediaStore {
         }
         
         try {
-            let needsFetching = false;
-            if (item.media_type === 'tv' && (!item.seasons || item.seasons.some(s => s.episodes.length === 0))) {
-                needsFetching = true;
-            } else if (item.media_type === 'movie' && !item.video_urls) {
-                needsFetching = true;
+            let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
+    
+            const needsApiFetch = fullItemDetails.media_type === 'tv' && 
+                                  (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
+    
+            if (needsApiFetch) {
+                const apiDetails = await getSeriesDetails(item.id);
+                const seasonsWithEpisodes = await Promise.all(
+                    apiDetails.seasons?.map(async (season) => {
+                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
+                        const episodesWithLinks = await Promise.all(episodes.map(async ep => {
+                            const links = await this.getLinksForMedia(ep.id);
+                            return { ...ep, video_urls: links, video_url: links[0]?.url };
+                        }));
+                        return { ...season, episodes: episodesWithLinks };
+                    }) || []
+                );
+                fullItemDetails = { ...apiDetails, seasons: seasonsWithEpisodes };
+            } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
+                // If we didn't fetch from API, the item is from cache, but we still ensure links are fresh from our DB.
+                const seasonsWithFreshLinks = await Promise.all(
+                    fullItemDetails.seasons.map(async (season) => {
+                        const episodesWithLinks = await Promise.all(season.episodes.map(async ep => {
+                            const links = await this.getLinksForMedia(ep.id);
+                            return { ...ep, video_urls: links, video_url: links[0]?.url };
+                        }));
+                        return { ...season, episodes: episodesWithLinks };
+                    })
+                );
+                // Create a new object to ensure MobX detects the change.
+                fullItemDetails = { ...fullItemDetails, seasons: seasonsWithFreshLinks };
+            } else if (fullItemDetails.media_type === 'movie') {
+                // Also refresh links for movies just in case.
+                const links = await this.getLinksForMedia(item.id);
+                fullItemDetails = { ...fullItemDetails, video_urls: links, video_url: links[0]?.url };
             }
     
-            if (needsFetching) {
-                let fullItemDetails: MediaItem | null = null;
-                if (item.media_type === 'tv') {
-                    const fullDetails = await getSeriesDetails(item.id);
-                    const seasonsWithEpisodes = await Promise.all(
-                        fullDetails.seasons?.map(async (season) => {
-                            const episodes = await getSeriesEpisodes(item.id, season.season_number);
-                            const episodesWithLinks = await Promise.all(episodes.map(async ep => {
-                                const links = await this.getLinksForMedia(ep.id);
-                                return { ...ep, video_urls: links, video_url: links[0]?.url };
-                            }));
-                            return { ...season, episodes: episodesWithLinks };
-                        }) || []
-                    );
-                    fullItemDetails = { ...fullDetails, seasons: seasonsWithEpisodes };
-                } else if (item.media_type === 'movie') {
-                    const links = await this.getLinksForMedia(item.id);
-                    fullItemDetails = { ...item, video_urls: links, video_url: links[0]?.url };
-                }
-    
-                if (fullItemDetails) {
-                    await db.cachedItems.put(fullItemDetails);
-                    runInAction(() => {
-                        this.cachedItems.set(item.id, fullItemDetails!);
-                        // 2. Update the correct state property with full details
-                        switch(context) {
-                            case 'detailView':
-                                if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
-                                break;
-                            case 'watchTogether':
-                                if (this.watchTogetherSelectedItem?.id === item.id) this.watchTogetherSelectedItem = fullItemDetails;
-                                // Re-check for auto-play on join
-                                if (this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
-                                    this.startPlayback(fullItemDetails!);
-                                }
-                                break;
-                            case 'remoteControl':
-                                if (this.remoteSelectedItem?.id === item.id) this.remoteSelectedItem = fullItemDetails;
-                                break;
-                            case 'cacheOnly':
-                                break;
+            await db.cachedItems.put(fullItemDetails);
+            runInAction(() => {
+                this.cachedItems.set(item.id, fullItemDetails!);
+                // 2. Update the correct state property with full details
+                switch(context) {
+                    case 'detailView':
+                        if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
+                        break;
+                    case 'watchTogether':
+                        if (this.watchTogetherSelectedItem?.id === item.id) this.watchTogetherSelectedItem = fullItemDetails;
+                        if (this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
+                            this.startPlayback(fullItemDetails!);
                         }
-                    });
+                        break;
+                    case 'remoteControl':
+                        if (this.remoteSelectedItem?.id === item.id) this.remoteSelectedItem = fullItemDetails;
+                        break;
+                    case 'cacheOnly':
+                        break;
                 }
-            }
+            });
+            
         } catch (error) {
             console.error("Failed to load details", error);
             this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
