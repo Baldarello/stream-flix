@@ -198,22 +198,14 @@ class MediaStore {
             if (links.length === 1) {
                 item.video_url = links[0].url;
             } else {
-                // Multiple links exist, check for a preferred source.
+                // Multiple links exist. Try to find a preferred source.
                 const showId = 'show_id' in item ? item.show_id : item.id;
                 const preferredSource = this.preferredSources.get(showId);
                 const preferredLink = preferredSource ? links.find(l => l.url.startsWith(preferredSource)) : undefined;
 
-                if (preferredLink) {
-                    item.video_url = preferredLink.url;
-                } else {
-                    // No preferred source, so we must ask the user.
-                    runInAction(() => {
-                        this.itemForLinkSelection = item;
-                        this.linksForSelection = links;
-                        this.isLinkSelectionModalOpen = true;
-                    });
-                    return; // Exit and wait for user selection.
-                }
+                // If a preferred link is found, use it. Otherwise, fall back to the first available link,
+                // avoiding the need to show a selection modal.
+                item.video_url = preferredLink ? preferredLink.url : links[0].url;
             }
         }
 
@@ -222,7 +214,7 @@ class MediaStore {
             runInAction(() => {
                 this.nowPlayingItem = item;
                 this.closeDetail();
-                this.closeLinkSelectionModal(); // Close modal if it was open.
+                this.closeLinkSelectionModal(); // This is still useful in case it was opened by some other flow
 
                 if ('show_id' in item) {
                     this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
