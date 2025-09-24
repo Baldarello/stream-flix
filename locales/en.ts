@@ -36,7 +36,10 @@ export const en = {
     "scrollEpisodesLeft": "scroll episodes left",
     "scrollEpisodesRight": "scroll episodes right",
     "markAsWatched": "Mark as watched",
-    "markAsUnwatched": "Mark as unwatched"
+    "markAsUnwatched": "Mark as unwatched",
+    "filterLanguage": "Language",
+    "filterType": "Type",
+    "all": "All"
   },
   "gridView": {
     "myListTitle": "My List",
@@ -78,7 +81,11 @@ export const en = {
     "label": "Label (optional)",
     "add": "Add",
     "noLinks": "No video links associated with this movie.",
-    "deleteLink": "Delete Link"
+    "deleteLink": "Delete Link",
+    "language": "Language",
+    "type": "Type",
+    "sub": "Subtitled",
+    "dub": "Dubbed"
   },
   "linkEpisodesModal": {
     "title": "Link Episodes for {name}",
@@ -98,12 +105,16 @@ export const en = {
       "paddingHelper": "E.g., 2 for '01', 3 for '001'",
       "listInfo": "Paste a list of links, one per line. The number of links must match the number of episodes ({count}).",
       "listLinks": "List of links",
-      "jsonInfo": "Paste a JSON array of strings (links) or objects (e.g., {\"url\": \"...\", \"label\": \"...\"}).",
+      "jsonInfo": "Paste a JSON array of strings (links) or objects (e.g., {\"url\": \"...\", \"label\": \"...\", \"language\": \"ENG\", \"type\": \"dub\"}).",
       "jsonArray": "JSON Array",
       "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]",
       "advancedConfig": "Advanced configuration",
       "startEpisode": "From episode",
-      "endEpisode": "To episode"
+      "endEpisode": "To episode",
+      "language": "Language",
+      "type": "Type",
+      "sub": "Subtitled",
+      "dub": "Dubbed"
     },
     "manage": {
       "deleteAllSeasonLinks": "Delete all links for this season",

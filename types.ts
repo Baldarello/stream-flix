@@ -3,6 +3,8 @@ export interface MediaLink {
     mediaId: number;
     url: string;
     label: string;
+    language: string; // e.g., 'ITA', 'ENG', 'JPN'
+    type: 'sub' | 'dub'; // Subtitled or Dubbed
 }
 
 export interface Episode {
@@ -83,6 +85,8 @@ export interface SharedEpisodeLink {
   episodeNumber: number;
   url: string;
   label: string;
+  language: string;
+  type: 'sub' | 'dub';
 }
 
 export interface SharedShowData {

@@ -36,7 +36,10 @@ export const it = {
     "scrollEpisodesLeft": "scorri episodi a sinistra",
     "scrollEpisodesRight": "scorri episodi a destra",
     "markAsWatched": "Segna come visto",
-    "markAsUnwatched": "Segna come non visto"
+    "markAsUnwatched": "Segna come non visto",
+    "filterLanguage": "Lingua",
+    "filterType": "Tipo",
+    "all": "Tutti"
   },
   "gridView": {
     "myListTitle": "La mia lista",
@@ -78,7 +81,11 @@ export const it = {
     "label": "Etichetta (opzionale)",
     "add": "Aggiungi",
     "noLinks": "Nessun link video associato a questo film.",
-    "deleteLink": "Elimina Link"
+    "deleteLink": "Elimina Link",
+    "language": "Lingua",
+    "type": "Tipo",
+    "sub": "Sottotitolato",
+    "dub": "Doppiato"
   },
   "linkEpisodesModal": {
     "title": "Collega Episodi per {name}",
@@ -98,12 +105,16 @@ export const it = {
       "paddingHelper": "Es. 2 per '01', 3 per '001'",
       "listInfo": "Incolla un elenco di link, uno per riga. Il numero di link deve corrispondere al numero di episodi ({count}).",
       "listLinks": "Lista di link",
-      "jsonInfo": "Incolla un array JSON di stringhe (link) o di oggetti (es. {\"url\": \"...\", \"label\": \"...\"}).",
+      "jsonInfo": "Incolla un array JSON di stringhe (link) o di oggetti (es. {\"url\": \"...\", \"label\": \"...\", \"language\": \"ENG\", \"type\": \"dub\"}).",
       "jsonArray": "Array JSON",
       "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]",
       "advancedConfig": "Configurazione avanzata",
       "startEpisode": "Da episodio",
-      "endEpisode": "A episodio"
+      "endEpisode": "A episodio",
+      "language": "Lingua",
+      "type": "Tipo",
+      "sub": "Sottotitolato",
+      "dub": "Doppiato"
     },
     "manage": {
       "deleteAllSeasonLinks": "Elimina tutti i link per questa stagione",

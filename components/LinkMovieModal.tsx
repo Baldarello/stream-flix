@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemText, TextField, Stack, Paper, Tooltip, Autocomplete } from '@mui/material';
+import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemText, TextField, Stack, Paper, Tooltip, Autocomplete, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -40,6 +40,8 @@ const LinkMovieModal: React.FC = observer(() => {
   
   const [newUrl, setNewUrl] = useState('');
   const [newLabel, setNewLabel] = useState('');
+  const [newLanguage, setNewLanguage] = useState('ITA');
+  const [newType, setNewType] = useState<'sub' | 'dub'>('sub');
 
   const item = linkingMovieItem;
   
@@ -61,8 +63,13 @@ const LinkMovieModal: React.FC = observer(() => {
   if (!item) return null;
 
   const handleAddLink = () => {
-    if (newUrl.trim()) {
-      addLinksToMedia(item.id, [{ url: newUrl.trim(), label: newLabel.trim() || newUrl.trim() }]);
+    if (newUrl.trim() && newLanguage.trim()) {
+      addLinksToMedia(item.id, [{ 
+          url: newUrl.trim(), 
+          label: newLabel.trim() || new URL(newUrl.trim()).hostname,
+          language: newLanguage,
+          type: newType 
+        }]);
       setNewUrl('');
       setNewLabel('');
     }
@@ -81,8 +88,26 @@ const LinkMovieModal: React.FC = observer(() => {
         <Stack spacing={2} sx={{ mt: 3, flex: 1, overflow: 'hidden' }}>
             <Paper variant="outlined" sx={{ p: 2 }}>
                 <Typography variant="subtitle1" gutterBottom>{t('linkMovieModal.addLink')}</Typography>
-                <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}>
-                    <TextField label={t('linkMovieModal.url')} value={newUrl} onChange={e => setNewUrl(e.target.value)} size="small" fullWidth />
+                <Stack spacing={2}>
+                    <TextField label={t('linkMovieModal.url')} value={newUrl} onChange={e => setNewUrl(e.target.value)} size="small" fullWidth required />
+                     <Stack direction={{xs: 'column', sm: 'row'}} spacing={2}>
+                        <TextField
+                            label={t('linkMovieModal.language')}
+                            value={newLanguage}
+                            onChange={e => setNewLanguage(e.target.value.toUpperCase())}
+                            required
+                            size="small"
+                            sx={{width: {xs: '100%', sm: '120px'}}}
+                            inputProps={{ maxLength: 3 }}
+                        />
+                        <FormControl fullWidth required size="small">
+                            <InputLabel>{t('linkMovieModal.type')}</InputLabel>
+                            <Select value={newType} label={t('linkMovieModal.type')} onChange={(e) => setNewType(e.target.value as 'sub' | 'dub')}>
+                                <MenuItem value="sub">{t('linkMovieModal.sub')}</MenuItem>
+                                <MenuItem value="dub">{t('linkMovieModal.dub')}</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Stack>
                     <Autocomplete
                         freeSolo
                         fullWidth
@@ -99,7 +124,7 @@ const LinkMovieModal: React.FC = observer(() => {
                             />
                         )}
                     />
-                    <Button onClick={handleAddLink} variant="contained" startIcon={<AddIcon />} sx={{ flexShrink: 0 }}>{t('linkMovieModal.add')}</Button>
+                    <Button onClick={handleAddLink} variant="contained" startIcon={<AddIcon />} sx={{ flexShrink: 0, alignSelf: 'flex-end' }}>{t('linkMovieModal.add')}</Button>
                 </Stack>
             </Paper>
 

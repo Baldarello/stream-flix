@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
@@ -20,6 +20,9 @@ const DetailView: React.FC = observer(() => {
   const { selectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration, episodeProgress, selectedSeasons, setSelectedSeasonForShow } = mediaStore;
   const { t } = useTranslations();
 
+  const [languageFilter, setLanguageFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<'sub' | 'dub' | 'all'>('all');
+
   if (!item) return null;
 
   const getValidSeason = () => {
@@ -40,6 +43,32 @@ const DetailView: React.FC = observer(() => {
   const introDuration = showIntroDurations.get(item.id) ?? 80;
 
   const backgroundImage = item.backdrop_path || item.poster_path;
+
+  const { availableLanguages, availableTypes } = useMemo(() => {
+    if (!currentSeason) return { availableLanguages: [], availableTypes: [] };
+    const langSet = new Set<string>();
+    const typeSet = new Set<'sub' | 'dub'>();
+    currentSeason.episodes.forEach(ep => {
+        (ep.video_urls || []).forEach(link => {
+            if (link.language) langSet.add(link.language.toUpperCase());
+            if (link.type) typeSet.add(link.type);
+        });
+    });
+    return { availableLanguages: Array.from(langSet).sort(), availableTypes: Array.from(typeSet).sort() };
+  }, [currentSeason]);
+
+  const filteredEpisodes = useMemo(() => {
+    if (!currentSeason) return [];
+    if (languageFilter === 'all' && typeFilter === 'all') {
+        return currentSeason.episodes;
+    }
+    return currentSeason.episodes.filter(ep => {
+        return (ep.video_urls || []).some(link => 
+            (languageFilter === 'all' || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
+            (typeFilter === 'all' || link.type === typeFilter)
+        );
+    });
+  }, [currentSeason, languageFilter, typeFilter]);
 
 
   const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,7 +246,25 @@ const DetailView: React.FC = observer(() => {
                             </Tooltip>
                         </Box>
                         {item.seasons && item.seasons.length > 0 && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                                 {availableLanguages.length > 1 && (
+                                    <FormControl sx={{ minWidth: 120 }} size="small">
+                                        <InputLabel>{t('detail.filterLanguage')}</InputLabel>
+                                        <Select value={languageFilter} label={t('detail.filterLanguage')} onChange={(e) => setLanguageFilter(e.target.value)} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
+                                            <MenuItem value="all">{t('detail.all')}</MenuItem>
+                                            {availableLanguages.map(lang => <MenuItem key={lang} value={lang}>{lang}</MenuItem>)}
+                                        </Select>
+                                    </FormControl>
+                                )}
+                                {availableTypes.length > 1 && (
+                                    <FormControl sx={{ minWidth: 120 }} size="small">
+                                        <InputLabel>{t('detail.filterType')}</InputLabel>
+                                        <Select value={typeFilter} label={t('detail.filterType')} onChange={(e) => setTypeFilter(e.target.value as any)} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
+                                            <MenuItem value="all">{t('detail.all')}</MenuItem>
+                                            {availableTypes.map(type => <MenuItem key={type} value={type}>{t(`linkEpisodesModal.add.${type}`)}</MenuItem>)}
+                                        </Select>
+                                    </FormControl>
+                                )}
                                 <TextField
                                     label={t('detail.introDuration')}
                                     type="number"
@@ -257,7 +304,7 @@ const DetailView: React.FC = observer(() => {
                         </Box>
                     ) : (
                         <List>
-                            {currentSeason?.episodes.map((episode: Episode) => {
+                            {filteredEpisodes.map((episode: Episode) => {
                                 const progress = episodeProgress.get(episode.id);
                                 const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
                                 const isWatched = progress?.watched;
@@ -293,8 +340,15 @@ const DetailView: React.FC = observer(() => {
                                 >
                                     <ListItemButton
                                         onClick={() => {
+                                            const filteredLinks = (episode.video_urls || []).filter(link => 
+                                                (languageFilter === 'all' || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
+                                                (typeFilter === 'all' || link.type === typeFilter)
+                                            );
+
                                             mediaStore.startPlayback({
                                                 ...episode,
+                                                video_urls: filteredLinks,
+                                                video_url: undefined, // Let startPlayback decide
                                                 show_id: item.id,
                                                 show_title: item.title || item.name || '',
                                                 backdrop_path: item.backdrop_path,

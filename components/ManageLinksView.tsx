@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, Button, IconButton, Tooltip, Paper, List, Accordion, AccordionSummary, AccordionDetails, Stack, ListItemText, TextField } from '@mui/material';
+import { Box, Typography, Button, IconButton, Tooltip, Paper, List, Accordion, AccordionSummary, AccordionDetails, Stack, ListItemText, TextField, Chip } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -149,6 +149,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                         return (
                                             <Paper key={link.id} variant="outlined" sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                                                 <ListItemText primary={truncatedLabel} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
+                                                <Chip label={link.language} size="small" variant="outlined" sx={{ mr: 1 }} />
+                                                <Chip label={link.type} size="small" color={link.type === 'dub' ? 'info' : 'primary'} variant="outlined" sx={{ mr: 1 }} />
                                                 <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
                                                     <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
                                                 </Tooltip>

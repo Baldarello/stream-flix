@@ -184,9 +184,9 @@ class MediaStore {
         if (!item.video_url) {
             let links: MediaLink[] = [];
             if ('episode_number' in item) { // It's an Episode
-                links = await this.getLinksForMedia(item.id);
+                links = item.video_urls || await this.getLinksForMedia(item.id);
             } else { // It's a MediaItem (Movie)
-                links = await this.getLinksForMedia(item.id);
+                links = item.video_urls || await this.getLinksForMedia(item.id);
             }
             // Also attach the full list to the item for reference
             item.video_urls = links;
@@ -222,7 +222,13 @@ class MediaStore {
                 }
                 
                 // Priority 4: Fallback to the first available link
-                item.video_url = bestLink ? bestLink.url : links[0].url;
+                if (!bestLink) {
+                    this.linksForSelection = links;
+                    this.itemForLinkSelection = item;
+                    this.isLinkSelectionModalOpen = true;
+                    return;
+                }
+                item.video_url = bestLink.url;
             }
         }
 
@@ -796,8 +802,8 @@ class MediaStore {
     openLinkMovieModal = (item: MediaItem) => { this.linkingMovieItem = item; this.isLinkMovieModalOpen = true; };
     closeLinkMovieModal = () => { this.isLinkMovieModalOpen = false; this.linkingMovieItem = null; };
 
-    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; }): Promise<boolean> => {
-        const { seasonNumber, method, data } = payload;
+    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; }): Promise<boolean> => {
+        const { seasonNumber, method, data, language, type } = payload;
         const show = this.linkingEpisodesForItem;
         if (!show) return false;
 
@@ -819,7 +825,9 @@ class MediaStore {
                             linksToAdd.push({
                                 mediaId: ep.id,
                                 url: data.pattern.replace('[@EP]', epNum),
-                                label: data.label.replace('[@EP]', epNum) || `Episodio ${i}`
+                                label: data.label.replace('[@EP]', epNum) || `Episodio ${i}`,
+                                language,
+                                type,
                             });
                         }
                     }
@@ -831,7 +839,7 @@ class MediaStore {
                         return false;
                     }
                     season.episodes.forEach((ep, index) => {
-                        linksToAdd.push({ mediaId: ep.id, url: urls[index], label: new URL(urls[index]).hostname });
+                        linksToAdd.push({ mediaId: ep.id, url: urls[index], label: new URL(urls[index]).hostname, language, type });
                     });
                     break;
                 case 'json':
@@ -844,9 +852,15 @@ class MediaStore {
                     season.episodes.forEach((ep, index) => {
                         const item = parsedJson[index];
                         if (typeof item === 'string') {
-                            linksToAdd.push({ mediaId: ep.id, url: item, label: new URL(item).hostname });
+                            linksToAdd.push({ mediaId: ep.id, url: item, label: new URL(item).hostname, language, type });
                         } else if (typeof item === 'object' && item.url) {
-                            linksToAdd.push({ mediaId: ep.id, url: item.url, label: item.label || new URL(item.url).hostname });
+                            linksToAdd.push({
+                                mediaId: ep.id,
+                                url: item.url,
+                                label: item.label || new URL(item.url).hostname,
+                                language: item.language || language,
+                                type: item.type || type
+                            });
                         }
                     });
                     break;
@@ -874,10 +888,14 @@ class MediaStore {
         }
     }
     
-    addLinksToMedia = async (mediaId: number, links: { url: string, label: string }[]) => {
+    addLinksToMedia = async (mediaId: number, links: { url: string, label: string, language: string, type: 'sub' | 'dub' }[]) => {
         try {
             const linksToAdd: Omit<MediaLink, 'id'>[] = links.map(link => ({
-                mediaId, url: link.url, label: link.label || new URL(link.url).hostname,
+                mediaId,
+                url: link.url,
+                label: link.label || new URL(link.url).hostname,
+                language: link.language,
+                type: link.type,
             }));
             
             // Automatically set the first source as preferred if none is set
@@ -1161,7 +1179,9 @@ class MediaStore {
                             seasonNumber: season.season_number,
                             episodeNumber: episode.episode_number,
                             url: link.url,
-                            label: link.label
+                            label: link.label,
+                            language: link.language,
+                            type: link.type,
                         });
                     });
                 }
@@ -1204,7 +1224,13 @@ class MediaStore {
                     if (episode) {
                         const linkIdentifier = `${episode.id}|${link.url}`;
                         if (!existingLinkSet.has(linkIdentifier)) {
-                            linksToAdd.push({ mediaId: episode.id, url: link.url, label: link.label });
+                            linksToAdd.push({
+                                mediaId: episode.id,
+                                url: link.url,
+                                label: link.label,
+                                language: link.language,
+                                type: link.type
+                            });
                             existingLinkSet.add(linkIdentifier); // Avoid adding duplicates from within the same import file
                         }
                     }

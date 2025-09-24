@@ -33,7 +33,7 @@ type TabValue = 'add' | 'manage';
 const AddLinkTabs: React.FC<{
     selectedSeason: number;
     seasonEpisodeCount: number;
-    onSave: (payload: any) => Promise<boolean>;
+    onSave: (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; }) => Promise<boolean>;
     onSuccess: () => void;
 }> = observer(({ selectedSeason, seasonEpisodeCount, onSave, onSuccess }) => {
     const { t } = useTranslations();
@@ -48,6 +48,8 @@ const AddLinkTabs: React.FC<{
     const [startEpisode, setStartEpisode] = useState('1');
     const [endEpisode, setEndEpisode] = useState('12');
     const [isSaving, setIsSaving] = useState(false);
+    const [language, setLanguage] = useState('ITA');
+    const [type, setType] = useState<'sub' | 'dub'>('sub');
 
     useEffect(() => {
         setEndEpisode(seasonEpisodeCount.toString());
@@ -89,7 +91,7 @@ const AddLinkTabs: React.FC<{
             mediaStore.showSnackbar(error, 'error', isErrorKey);
             setIsSaving(false);
         } else if (data) {
-            const success = await onSave({ seasonNumber: selectedSeason, method: addMethod, data });
+            const success = await onSave({ seasonNumber: selectedSeason, method: addMethod, data, language, type });
             if (success) {
                 // Reset state for next time
                 setPattern('');
@@ -225,7 +227,26 @@ const AddLinkTabs: React.FC<{
             </Tabs>
             <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                  <Box sx={{ flexGrow: 1, pr: 1 }}>
-                    {renderAddContent()}
+                    <Stack spacing={2}>
+                        <Stack direction="row" spacing={2}>
+                            <TextField
+                                label={t('linkEpisodesModal.add.language')}
+                                value={language}
+                                onChange={e => setLanguage(e.target.value.toUpperCase())}
+                                required
+                                sx={{width: '100px'}}
+                                inputProps={{ maxLength: 3 }}
+                            />
+                            <FormControl fullWidth required>
+                                <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
+                                <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value as 'sub' | 'dub')}>
+                                    <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
+                                    <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Stack>
+                        {renderAddContent()}
+                    </Stack>
                 </Box>
                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1 }}>
                     <Button onClick={handleSave} variant="contained" disabled={isSaving}>
