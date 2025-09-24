@@ -652,7 +652,9 @@ class MediaStore {
                 fullItemDetails = { ...fullItemDetails, video_urls: links, video_url: links[0]?.url };
             }
     
-            await db.cachedItems.put(fullItemDetails);
+            // Dexie/IndexedDB cannot serialize MobX proxies. We must convert the object
+            // to a plain JavaScript object before saving to prevent an error.
+            await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
             runInAction(() => {
                 this.cachedItems.set(item.id, fullItemDetails!);
                 // 2. Update the correct state property with full details
@@ -794,13 +796,13 @@ class MediaStore {
     openLinkMovieModal = (item: MediaItem) => { this.linkingMovieItem = item; this.isLinkMovieModalOpen = true; };
     closeLinkMovieModal = () => { this.isLinkMovieModalOpen = false; this.linkingMovieItem = null; };
 
-    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; }) => {
+    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; }): Promise<boolean> => {
         const { seasonNumber, method, data } = payload;
         const show = this.linkingEpisodesForItem;
-        if (!show) return;
+        if (!show) return false;
 
         const season = show.seasons?.find(s => s.season_number === seasonNumber);
-        if (!season) return;
+        if (!season) return false;
 
         let linksToAdd: Omit<MediaLink, 'id'>[] = [];
         try {
@@ -826,7 +828,7 @@ class MediaStore {
                     const urls = data.list.split('\n').filter((u: string) => u.trim());
                     if (urls.length !== season.episode_count) {
                         this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: urls.length, episodeCount: season.episode_count });
-                        return;
+                        return false;
                     }
                     season.episodes.forEach((ep, index) => {
                         linksToAdd.push({ mediaId: ep.id, url: urls[index], label: new URL(urls[index]).hostname });
@@ -837,7 +839,7 @@ class MediaStore {
                     if (!Array.isArray(parsedJson)) throw new Error('JSON must be an array.');
                     if (parsedJson.length !== season.episode_count) {
                        this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: parsedJson.length, episodeCount: season.episode_count });
-                       return;
+                       return false;
                     }
                     season.episodes.forEach((ep, index) => {
                         const item = parsedJson[index];
@@ -863,10 +865,12 @@ class MediaStore {
             await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
             await this.refreshLinksForShow(show.id);
             this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToAdd.length });
+            return true;
 
         } catch (error) {
             console.error(error);
             this.showSnackbar('notifications.processingError', 'error', true, { error: (error as Error).message });
+            return false;
         }
     }
     

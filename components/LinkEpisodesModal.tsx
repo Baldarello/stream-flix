@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert, FormControlLabel, Switch, Autocomplete } from '@mui/material';
+import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert, FormControlLabel, Switch, Autocomplete, CircularProgress } from '@mui/material';
 // FIX: `SelectChangeEvent` is imported from '@mui/material/Select' instead of '@mui/material'.
 import { SelectChangeEvent } from '@mui/material/Select';
 // FIX: Imported CloseIcon to resolve the "Cannot find name" error.
@@ -33,8 +33,9 @@ type TabValue = 'add' | 'manage';
 const AddLinkTabs: React.FC<{
     selectedSeason: number;
     seasonEpisodeCount: number;
-    onSave: (payload: any) => void;
-}> = observer(({ selectedSeason, seasonEpisodeCount, onSave }) => {
+    onSave: (payload: any) => Promise<boolean>;
+    onSuccess: () => void;
+}> = observer(({ selectedSeason, seasonEpisodeCount, onSave, onSuccess }) => {
     const { t } = useTranslations();
     const [addMethod, setAddMethod] = useState<'pattern' | 'list' | 'json'>('pattern');
     const [pattern, setPattern] = useState('');
@@ -46,13 +47,19 @@ const AddLinkTabs: React.FC<{
     const [isAdvanced, setIsAdvanced] = useState(false);
     const [startEpisode, setStartEpisode] = useState('1');
     const [endEpisode, setEndEpisode] = useState('12');
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleSave = () => {
+    useEffect(() => {
+        setEndEpisode(seasonEpisodeCount.toString());
+    }, [seasonEpisodeCount]);
+
+    const handleSave = async () => {
+        setIsSaving(true);
         let data: any, error: string | null = null, isErrorKey = false;
         switch (addMethod) {
             case 'pattern':
-                if (!pattern) error = "Il pattern non può essere vuoto.";
-                else if (!pattern.includes('[@EP]')) error = "Il pattern deve includere il segnaposto [@EP].";
+                if (!pattern) { error = "Il pattern non può essere vuoto."; }
+                else if (!pattern.includes('[@EP]')) { error = "Il pattern deve includere il segnaposto [@EP]."; }
                 else {
                     data = { pattern, padding: parseInt(padding, 10), label };
                     if (isAdvanced) {
@@ -80,8 +87,22 @@ const AddLinkTabs: React.FC<{
 
         if (error) {
             mediaStore.showSnackbar(error, 'error', isErrorKey);
+            setIsSaving(false);
         } else if (data) {
-            onSave({ seasonNumber: selectedSeason, method: addMethod, data });
+            const success = await onSave({ seasonNumber: selectedSeason, method: addMethod, data });
+            if (success) {
+                // Reset state for next time
+                setPattern('');
+                setLabel('');
+                setLinkList('');
+                setJson('');
+                setStartEpisode('1');
+                setEndEpisode(seasonEpisodeCount.toString());
+                onSuccess();
+            }
+            setIsSaving(false);
+        } else {
+            setIsSaving(false);
         }
     };
     
@@ -207,7 +228,9 @@ const AddLinkTabs: React.FC<{
                     {renderAddContent()}
                 </Box>
                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1 }}>
-                    <Button onClick={handleSave} variant="contained">{t('linkEpisodesModal.add.save')}</Button>
+                    <Button onClick={handleSave} variant="contained" disabled={isSaving}>
+                        {isSaving ? <CircularProgress size={24} color="inherit" /> : t('linkEpisodesModal.add.save')}
+                    </Button>
                 </Box>
             </Box>
         </Box>
@@ -264,7 +287,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
                 <Tab label={t('linkEpisodesModal.manageLinks')} value="manage" />
             </Tabs>
 
-            {activeTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number} seasonEpisodeCount={currentSeason.episode_count} onSave={setEpisodeLinksForSeason} />}
+            {activeTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number} seasonEpisodeCount={currentSeason.episode_count} onSave={setEpisodeLinksForSeason} onSuccess={() => setActiveTab('manage')} />}
             {activeTab === 'manage' && currentSeason && (
               <ManageLinksView 
                 currentSeason={currentSeason} 
