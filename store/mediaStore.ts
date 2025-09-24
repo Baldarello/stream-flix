@@ -55,6 +55,7 @@ class MediaStore {
     loading = true;
     error: string | null = null;
     selectedItem: MediaItem | null = null;
+    private playbackOriginItem: MediaItem | null = null;
     isDetailLoading = false;
     myList: number[] = [];
     isPlaying = false;
@@ -190,12 +191,13 @@ class MediaStore {
             }
             // Also attach the full list to the item for reference
             item.video_urls = links;
-
+    
             if (links.length === 0) {
                 this.showSnackbar("notifications.noVideoLinks", "warning", true);
                 return; // Can't play, so exit.
-            } 
+            }
             
+            // If there's only one link, play it directly, fulfilling the user's primary request.
             if (links.length === 1) {
                 item.video_url = links[0].url;
             } else {
@@ -203,42 +205,57 @@ class MediaStore {
                 const showId = 'show_id' in item ? item.show_id : item.id;
                 const preferredOrigin = this.preferredSources.get(showId);
                 const preferredLabels = this.preferredLabels;
-
+    
                 let bestLink: MediaLink | undefined = undefined;
-
+    
                 // Priority 1: Match preferred origin AND a preferred label
                 if (preferredOrigin && preferredLabels.length > 0) {
                     bestLink = links.find(l => l.url.startsWith(preferredOrigin) && l.label && preferredLabels.includes(l.label));
                 }
-
+    
                 // Priority 2: Match preferred origin only
                 if (!bestLink && preferredOrigin) {
                     bestLink = links.find(l => l.url.startsWith(preferredOrigin));
                 }
-
+    
                 // Priority 3: Match a preferred label only
                 if (!bestLink && preferredLabels.length > 0) {
                     bestLink = links.find(l => l.label && preferredLabels.includes(l.label));
                 }
                 
-                // Priority 4: Fallback to the first available link
-                if (!bestLink) {
-                    this.linksForSelection = links;
-                    this.itemForLinkSelection = item;
-                    this.isLinkSelectionModalOpen = true;
-                    return;
+                if (bestLink) {
+                    item.video_url = bestLink.url;
+                } else {
+                    // No preference matched. Check if all links are from the same origin.
+                    const uniqueOrigins = new Set(links.map(l => {
+                        try { return new URL(l.url).origin } catch { return null }
+                    }).filter(Boolean));
+                    
+                    if (uniqueOrigins.size === 1) {
+                        // All available links are from the same source, so there's no meaningful choice
+                        // for the user to make based on the source. Play the first one automatically.
+                        item.video_url = links[0].url;
+                    } else {
+                        // Multiple links from different sources and no preference. Ask the user to choose.
+                        this.linksForSelection = links;
+                        this.itemForLinkSelection = item;
+                        this.isLinkSelectionModalOpen = true;
+                        return;
+                    }
                 }
-                item.video_url = bestLink.url;
             }
         }
-
+    
         // --- Step 2: If we have a URL, start playback ---
         if (item.video_url) {
             runInAction(() => {
+                if (this.selectedItem) {
+                    this.playbackOriginItem = this.selectedItem;
+                }
                 this.nowPlayingItem = item;
                 this.closeDetail();
                 this.closeLinkSelectionModal(); // This is still useful in case it was opened by some other flow
-
+    
                 if ('show_id' in item) {
                     this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
                 } else {
@@ -249,6 +266,10 @@ class MediaStore {
     }
 
     stopPlayback = () => {
+        if (this.playbackOriginItem) {
+            this.selectedItem = this.playbackOriginItem;
+            this.playbackOriginItem = null;
+        }
         this.nowPlayingItem = null;
         this.nowPlayingShowDetails = null;
         this.isPlaying = false;
@@ -1374,21 +1395,42 @@ class MediaStore {
     private async refreshLinksForShow(showId: number) {
         const show = this.cachedItems.get(showId);
         if (!show || !show.seasons) return;
+
+        // Create new season and episode objects to ensure MobX detects changes
+        const updatedSeasons = await Promise.all(
+            show.seasons.map(async (season) => {
+                const updatedEpisodes = await Promise.all(
+                    season.episodes.map(async (episode) => {
+                        const links = await db.mediaLinks.where('mediaId').equals(episode.id).toArray();
+                        runInAction(() => {
+                            this.mediaLinks.set(episode.id, links);
+                        });
+                        // Create a new episode object with updated links
+                        return { ...episode, video_urls: links, video_url: links[0]?.url };
+                    })
+                );
+                // Create a new season object with updated episodes
+                return { ...season, episodes: updatedEpisodes };
+            })
+        );
         
-        for (const season of show.seasons) {
-            for (const episode of season.episodes) {
-                const links = await db.mediaLinks.where('mediaId').equals(episode.id).toArray();
-                this.mediaLinks.set(episode.id, links);
-                episode.video_urls = links;
+        // Create a new show object with the updated seasons
+        const updatedShow = { ...show, seasons: updatedSeasons };
+        
+        runInAction(() => {
+            // Update the main cache
+            this.cachedItems.set(showId, updatedShow);
+
+            // If this show is the currently selected item in the detail view, update it to trigger a re-render.
+            if (this.selectedItem?.id === showId) {
+                this.selectedItem = updatedShow;
             }
-        }
-        
-        // Force a re-render by creating a new object for the selected item
-        if (this.linkingEpisodesForItem?.id === showId) {
-             runInAction(() => {
-                this.linkingEpisodesForItem = { ...this.linkingEpisodesForItem, seasons: show.seasons };
-             });
-        }
+
+            // Also update the item being linked in the modal.
+            if (this.linkingEpisodesForItem?.id === showId) {
+                this.linkingEpisodesForItem = updatedShow;
+            }
+        });
     }
 
     // FIX: Add private translation method for use inside the store.
