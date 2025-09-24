@@ -180,67 +180,72 @@ class MediaStore {
 
     startPlayback = async (item: PlayableItem) => {
         // --- Step 1: Ensure we have a single, playable URL ---
-        // If a URL is already provided, we're good to go. This check prevents
-        // an infinite loop when selecting a link from the modal.
+        // If a URL is already provided (e.g., from the selection modal), play it directly.
         if (!item.video_url) {
-            let links: MediaLink[] = [];
+            let allLinks: MediaLink[] = [];
             if ('episode_number' in item) { // It's an Episode
-                links = item.video_urls || await this.getLinksForMedia(item.id);
+                allLinks = item.video_urls || await this.getLinksForMedia(item.id);
             } else { // It's a MediaItem (Movie)
-                links = item.video_urls || await this.getLinksForMedia(item.id);
+                allLinks = item.video_urls || await this.getLinksForMedia(item.id);
             }
-            // Also attach the full list to the item for reference
-            item.video_urls = links;
+            item.video_urls = allLinks;
     
-            if (links.length === 0) {
+            if (allLinks.length === 0) {
                 this.showSnackbar("notifications.noVideoLinks", "warning", true);
                 return; // Can't play, so exit.
             }
             
             // If there's only one link, play it directly, fulfilling the user's primary request.
-            if (links.length === 1) {
-                item.video_url = links[0].url;
+            if (allLinks.length === 1) {
+                item.video_url = allLinks[0].url;
             } else {
-                // Multiple links exist. Try to find a preferred source/label.
+                // Multiple links exist. Apply preference logic.
                 const showId = 'show_id' in item ? item.show_id : item.id;
                 const preferredOrigin = this.preferredSources.get(showId);
                 const preferredLabels = this.preferredLabels;
     
-                let bestLink: MediaLink | undefined = undefined;
-    
-                // Priority 1: Match preferred origin AND a preferred label
-                if (preferredOrigin && preferredLabels.length > 0) {
-                    bestLink = links.find(l => l.url.startsWith(preferredOrigin) && l.label && preferredLabels.includes(l.label));
+                let linksFromPreferredOrigin: MediaLink[] = [];
+                if (preferredOrigin) {
+                    linksFromPreferredOrigin = allLinks.filter(l => l.url.startsWith(preferredOrigin));
                 }
     
-                // Priority 2: Match preferred origin only
-                if (!bestLink && preferredOrigin) {
-                    bestLink = links.find(l => l.url.startsWith(preferredOrigin));
-                }
-    
-                // Priority 3: Match a preferred label only
-                if (!bestLink && preferredLabels.length > 0) {
-                    bestLink = links.find(l => l.label && preferredLabels.includes(l.label));
-                }
-                
-                if (bestLink) {
-                    item.video_url = bestLink.url;
+                if (linksFromPreferredOrigin.length > 0) {
+                    // Preferred source is available. We will ONLY choose from these links.
+                    let bestLink: MediaLink | undefined = undefined;
+                    if (preferredLabels.length > 0) {
+                        bestLink = linksFromPreferredOrigin.find(l => l.label && preferredLabels.includes(l.label));
+                    }
+                    // If no label match, or no preferred labels, just use the first link from the preferred source.
+                    item.video_url = bestLink ? bestLink.url : linksFromPreferredOrigin[0].url;
                 } else {
-                    // No preference matched. Check if all links are from the same origin.
-                    const uniqueOrigins = new Set(links.map(l => {
-                        try { return new URL(l.url).origin } catch { return null }
-                    }).filter(Boolean));
+                    // Preferred source is NOT available for this episode.
+                    // We now consider all available links.
                     
-                    if (uniqueOrigins.size === 1) {
-                        // All available links are from the same source, so there's no meaningful choice
-                        // for the user to make based on the source. Play the first one automatically.
-                        item.video_url = links[0].url;
+                    // First, try to find a link with a preferred label among all links.
+                    let bestLink: MediaLink | undefined = undefined;
+                    if (preferredLabels.length > 0) {
+                        bestLink = allLinks.find(l => l.label && preferredLabels.includes(l.label));
+                    }
+    
+                    if (bestLink) {
+                        item.video_url = bestLink.url;
                     } else {
-                        // Multiple links from different sources and no preference. Ask the user to choose.
-                        this.linksForSelection = links;
-                        this.itemForLinkSelection = item;
-                        this.isLinkSelectionModalOpen = true;
-                        return;
+                        // No preference of any kind could be matched.
+                        // Check if all remaining links are from the same source.
+                        const uniqueOrigins = new Set(allLinks.map(l => {
+                            try { return new URL(l.url).origin } catch { return null }
+                        }).filter(Boolean));
+                        
+                        if (uniqueOrigins.size === 1) {
+                            // All available links are from the same source, play the first one.
+                            item.video_url = allLinks[0].url;
+                        } else {
+                            // Multiple links from different sources and no preference. Ask the user.
+                            this.linksForSelection = allLinks;
+                            this.itemForLinkSelection = item;
+                            this.isLinkSelectionModalOpen = true;
+                            return;
+                        }
                     }
                 }
             }
