@@ -47,17 +47,28 @@ const AddLinkTabs: React.FC<{
     const [isAdvanced, setIsAdvanced] = useState(false);
     const [startEpisode, setStartEpisode] = useState('1');
     const [endEpisode, setEndEpisode] = useState('12');
+    const [startNumber, setStartNumber] = useState('1');
+    const [endNumber, setEndNumber] = useState('12');
     const [isSaving, setIsSaving] = useState(false);
     const [language, setLanguage] = useState('ITA');
     const [type, setType] = useState<'sub' | 'dub'>('sub');
 
     useEffect(() => {
         setEndEpisode(seasonEpisodeCount.toString());
+        setEndNumber(seasonEpisodeCount.toString());
     }, [seasonEpisodeCount]);
+
+    useEffect(() => {
+        setStartNumber(startEpisode);
+    }, [startEpisode]);
+
+    useEffect(() => {
+        setEndNumber(endEpisode);
+    }, [endEpisode]);
 
     const handleSave = async () => {
         setIsSaving(true);
-        let data: any, error: string | null = null, isErrorKey = false;
+        let data: any, error: string | null = null, isErrorKey = false, errorValues: Record<string, any> = {};
         switch (addMethod) {
             case 'pattern':
                 if (!pattern) { error = "Il pattern non può essere vuoto."; }
@@ -65,14 +76,23 @@ const AddLinkTabs: React.FC<{
                 else {
                     data = { pattern, padding: parseInt(padding, 10), label };
                     if (isAdvanced) {
-                        const start = parseInt(startEpisode, 10);
-                        const end = parseInt(endEpisode, 10);
-                        if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
+                        const startEp = parseInt(startEpisode, 10);
+                        const endEp = parseInt(endEpisode, 10);
+                        const startNum = parseInt(startNumber, 10);
+                        const endNum = parseInt(endNumber, 10);
+                        if (isNaN(startEp) || isNaN(endEp) || startEp < 1 || endEp < startEp) {
                             error = 'notifications.invalidEpisodeRange';
                             isErrorKey = true;
-                        } else {
-                           data.start = start;
-                           data.end = end;
+                        } else if (endEp - startEp !== endNum - startNum) {
+                            error = 'notifications.episodeNumberRangeMismatch';
+                            isErrorKey = true;
+                            errorValues = { epRange: endEp - startEp + 1, numRange: endNum - startNum + 1 };
+                        }
+                        else {
+                           data.start = startEp;
+                           data.end = endEp;
+                           data.startNum = startNum;
+                           data.endNum = endNum;
                         }
                     }
                 }
@@ -88,7 +108,7 @@ const AddLinkTabs: React.FC<{
         }
 
         if (error) {
-            mediaStore.showSnackbar(error, 'error', isErrorKey);
+            mediaStore.showSnackbar(error, 'error', isErrorKey, errorValues);
             setIsSaving(false);
         } else if (data) {
             const success = await onSave({ seasonNumber: selectedSeason, method: addMethod, data, language, type });
@@ -100,6 +120,8 @@ const AddLinkTabs: React.FC<{
                 setJson('');
                 setStartEpisode('1');
                 setEndEpisode(seasonEpisodeCount.toString());
+                setStartNumber('1');
+                setEndNumber(seasonEpisodeCount.toString());
                 onSuccess();
             }
             setIsSaving(false);
@@ -158,41 +180,61 @@ const AddLinkTabs: React.FC<{
                     label={t('linkEpisodesModal.add.advancedConfig')}
                 />
                 {isAdvanced && (
-                    <Stack direction="row" spacing={2}>
-                        <TextField
-                            label={t('linkEpisodesModal.add.startEpisode')}
-                            type="number"
-                            value={startEpisode}
-                            onChange={(e) => setStartEpisode(e.target.value)}
-                            inputProps={{ min: 1 }}
-                            fullWidth
+                    <Stack spacing={2}>
+                        <Stack direction="row" spacing={2}>
+                            <TextField
+                                label={t('linkEpisodesModal.add.startEpisode')}
+                                type="number"
+                                value={startEpisode}
+                                onChange={(e) => setStartEpisode(e.target.value)}
+                                inputProps={{ min: 1 }}
+                                fullWidth
+                            />
+                            <TextField
+                                label={t('linkEpisodesModal.add.endEpisode')}
+                                type="number"
+                                value={endEpisode}
+                                onChange={(e) => setEndEpisode(e.target.value)}
+                                inputProps={{ min: 1 }}
+                                fullWidth
+                            />
+                        </Stack>
+                        <Stack direction="row" spacing={2}>
+                            <TextField
+                                label={t('linkEpisodesModal.add.startNumberPlaceholder')}
+                                type="number"
+                                value={startNumber}
+                                onChange={(e) => setStartNumber(e.target.value)}
+                                inputProps={{ min: 1 }}
+                                fullWidth
+                            />
+                            <TextField
+                                label={t('linkEpisodesModal.add.endNumberPlaceholder')}
+                                type="number"
+                                value={endNumber}
+                                onChange={(e) => setEndNumber(e.target.value)}
+                                inputProps={{ min: 1 }}
+                                fullWidth
+                            />
+                        </Stack>
+                        <Autocomplete
+                            freeSolo
+                            options={mediaStore.allUniqueLabels}
+                            value={label}
+                            onInputChange={(event, newInputValue) => {
+                                setLabel(newInputValue);
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label={t('linkEpisodesModal.add.linkLabel')}
+                                    helperText={t('linkEpisodesModal.add.linkLabelHelper')}
+                                />
+                            )}
                         />
-                        <TextField
-                            label={t('linkEpisodesModal.add.endEpisode')}
-                            type="number"
-                            value={endEpisode}
-                            onChange={(e) => setEndEpisode(e.target.value)}
-                            inputProps={{ min: 1 }}
-                            fullWidth
-                        />
+                        <TextField label={t('linkEpisodesModal.add.padding')} required type="number" value={padding} onChange={e => setPadding(e.target.value)} helperText={t('linkEpisodesModal.add.paddingHelper')} />
                     </Stack>
                 )}
-                <Autocomplete
-                    freeSolo
-                    options={mediaStore.allUniqueLabels}
-                    value={label}
-                    onInputChange={(event, newInputValue) => {
-                        setLabel(newInputValue);
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label={t('linkEpisodesModal.add.linkLabel')}
-                            helperText={t('linkEpisodesModal.add.linkLabelHelper')}
-                        />
-                    )}
-                />
-                <TextField label={t('linkEpisodesModal.add.padding')} required type="number" value={padding} onChange={e => setPadding(e.target.value)} helperText={t('linkEpisodesModal.add.paddingHelper')} />
               </Stack>
             );
           case 'list':

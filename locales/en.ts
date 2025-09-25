@@ -111,6 +111,8 @@ export const en = {
       "advancedConfig": "Advanced configuration",
       "startEpisode": "From episode",
       "endEpisode": "To episode",
+      "startNumberPlaceholder": "Start number for [@EP]",
+      "endNumberPlaceholder": "End number for [@EP]",
       "language": "Language",
       "type": "Type",
       "sub": "Subtitled",
@@ -342,6 +344,7 @@ export const en = {
     "markedAsWatched": "Episode marked as watched.",
     "markedAsUnwatched": "Episode marked as unwatched.",
     "invalidEpisodeRange": "Invalid episode range.",
+    "episodeNumberRangeMismatch": "The episode range ({epRange}) and the numbering range ({numRange}) must have the same length.",
     "preferredLabelSet": "Label '{label}' set as preferred.",
     "preferredLabelRemoved": "Preference removed for label '{label}'."
   }

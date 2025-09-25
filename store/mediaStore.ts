@@ -839,26 +839,33 @@ class MediaStore {
         let linksToAdd: Omit<MediaLink, 'id'>[] = [];
         try {
             switch (method) {
-                case 'pattern':
+                case 'pattern': {
                     const startEpisode = data.start || 1;
                     const endEpisode = data.end || season.episode_count;
                     const safeEndEpisode = Math.min(endEpisode, season.episode_count);
 
+                    // The counter for the [@EP] placeholder, which can be different from the actual episode number
+                    let currentNumber = data.startNum ?? startEpisode;
+
                     for (let i = startEpisode; i <= safeEndEpisode; i++) {
-                        const epNum = String(i).padStart(data.padding, '0');
+                        // 'i' is the episode number we are targeting in the season
+                        // 'currentNumber' is the number to put in the URL
+                        const epNum = String(currentNumber).padStart(data.padding, '0');
                         const ep = season.episodes.find(e => e.episode_number === i);
-                        if(ep) {
+                        if (ep) {
                             linksToAdd.push({
                                 mediaId: ep.id,
-                                url: data.pattern.replace('[@EP]', epNum),
-                                label: data.label.replace('[@EP]', epNum) || `Episodio ${i}`,
+                                url: data.pattern.replace(/\[@EP\]/g, epNum),
+                                label: data.label.replace(/\[@EP\]/g, epNum) || `Episodio ${i}`,
                                 language,
                                 type,
                             });
+                            currentNumber++; // Increment the placeholder number for the next episode in the range
                         }
                     }
                     break;
-                case 'list':
+                }
+                case 'list': {
                     const urls = data.list.split('\n').filter((u: string) => u.trim());
                     if (urls.length !== season.episode_count) {
                         this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: urls.length, episodeCount: season.episode_count });
@@ -868,7 +875,8 @@ class MediaStore {
                         linksToAdd.push({ mediaId: ep.id, url: urls[index], label: new URL(urls[index]).hostname, language, type });
                     });
                     break;
-                case 'json':
+                }
+                case 'json': {
                     const parsedJson = JSON.parse(data.json);
                     if (!Array.isArray(parsedJson)) throw new Error('JSON must be an array.');
                     if (parsedJson.length !== season.episode_count) {
@@ -890,6 +898,7 @@ class MediaStore {
                         }
                     });
                     break;
+                }
             }
 
             // Automatically set the first source as preferred if none is set for this show

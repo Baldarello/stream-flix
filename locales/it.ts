@@ -111,6 +111,8 @@ export const it = {
       "advancedConfig": "Configurazione avanzata",
       "startEpisode": "Da episodio",
       "endEpisode": "A episodio",
+      "startNumberPlaceholder": "Numero partenza per [@EP]",
+      "endNumberPlaceholder": "Numero fine per [@EP]",
       "language": "Lingua",
       "type": "Tipo",
       "sub": "Sottotitolato",
@@ -342,6 +344,7 @@ export const it = {
     "markedAsWatched": "Episodio segnato come visto.",
     "markedAsUnwatched": "Episodio segnato come non visto.",
     "invalidEpisodeRange": "Intervallo episodi non valido.",
+    "episodeNumberRangeMismatch": "L'intervallo di episodi ({epRange}) e l'intervallo di numerazione ({numRange}) devono avere la stessa lunghezza.",
     "preferredLabelSet": "Etichetta '{label}' impostata come preferita.",
     "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'."
   }

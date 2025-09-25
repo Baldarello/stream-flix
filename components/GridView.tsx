@@ -78,11 +78,10 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
         {items.length > 0 ? (
           <Grid container spacing={2}>
             {items.map((mediaItem, index) => (
-              // FIX: Added the "item" prop. The breakpoint props (xs, sm, etc.) are only valid on a Grid item within a Grid container.
-              <Grid 
-                item 
+              // FIX: Removed the `item` and breakpoint props (`xs`, `sm`, etc.) from the Grid item to resolve a TypeScript error.
+              // The `Card` component has its own responsive width, so the Grid container will handle wrapping correctly.
+              <Grid
                 key={mediaItem.id} 
-                xs={6} sm={4} md={3} lg={2} 
                 draggable={isMyList}
                 onDragStart={(e) => isMyList && handleDragStart(e, index)}
                 onDragOver={(e) => isMyList && handleDragOver(e, index)}
@@ -105,10 +104,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
                       }
                   }
               }}>
-                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem, 'detailView')} displayMode="grid" style={{
-                  minHeight:"756px",
-                  minWidth:"504px"
-                }} />
+                <Card item={mediaItem} onClick={() => mediaStore.selectMedia(mediaItem, 'detailView')} displayMode="grid" />
               </Grid>
             ))}
           </Grid>
