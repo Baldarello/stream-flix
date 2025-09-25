@@ -199,11 +199,19 @@ class MediaStore {
             const showId = 'show_id' in item ? item.show_id : item.id;
             const preferredOrigin = this.preferredSources.get(showId);
 
-            // If a preferred source is set, try to filter by it.
-            // If no links from the preferred source are found for this specific item,
-            // we will fall back to using all available links.
             if (preferredOrigin) {
-                const linksFromPreferred = allLinks.filter(l => l.url.startsWith(preferredOrigin));
+                const linksFromPreferred = allLinks.filter(l => {
+                    try {
+                        // Compare origins for a more robust match than startsWith
+                        return new URL(l.url).origin === preferredOrigin;
+                    } catch {
+                        return false;
+                    }
+                });
+
+                // If links from the preferred source are available for this specific item, use them.
+                // Otherwise, fall back to using all available links. This handles cases
+                // where an episode only has links from a non-preferred source.
                 if (linksFromPreferred.length > 0) {
                     candidateLinks = linksFromPreferred;
                 }
@@ -1059,13 +1067,24 @@ class MediaStore {
     
             const showId = 'show_id' in playableItemWithUrl ? playableItemWithUrl.show_id : playableItemWithUrl.id;
             const preferredSource = this.preferredSources.get(showId);
-            const preferredLink = preferredSource ? links.find(l => l.url.startsWith(preferredSource)) : undefined;
+            let preferredLink: MediaLink | undefined;
+
+            if (preferredSource) {
+                 preferredLink = links.find(l => {
+                    try {
+                        return new URL(l.url).origin === preferredSource;
+                    } catch {
+                        return false;
+                    }
+                });
+            }
     
             if (preferredLink) {
                 playableItemWithUrl.video_url = preferredLink.url;
             } else {
-                // No preference, just pick the first one for remote play.
-                // We can't show a selection modal on the remote.
+                // If no link from the preferred source is found for this item,
+                // or if no preferred source is set, fall back to the first available link.
+                // This is necessary because a remote can't display a selection modal.
                 playableItemWithUrl.video_url = links[0].url;
             }
         }
