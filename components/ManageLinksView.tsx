@@ -179,9 +179,8 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                         sx={{ bgcolor: 'background.paper', backgroundImage: 'none', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.12)', '&:before': { display: 'none' } }}
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography noWrap>{episode.episode_number}. {episode.name}</Typography>
-                            <Typography sx={{ color: 'text.secondary', ml: 'auto', pl: 2 }}>
-                                {/* FIX: Use Array.isArray for robustness against unexpected data shapes. */}
+                            <Typography noWrap sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>{episode.episode_number}. {episode.name}</Typography>
+                            <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
                                 {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
                             </Typography>
                         </AccordionSummary>
