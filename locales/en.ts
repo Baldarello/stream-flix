@@ -130,7 +130,12 @@ export const en = {
       "newDomain": "New Domain/Origin",
       "update": "Update",
       "setAsPreferred": "Set as preferred source",
-      "removePreferred": "Remove preference"
+      "removePreferred": "Remove preference",
+      "editLink": "Edit Link",
+      "save": "Save",
+      "cancel": "Cancel",
+      "deleteAllFromDomainTooltip": "Delete all links from this domain",
+      "deleteAllFromDomainConfirm": "Are you sure you want to delete all {count} links from {domain}?"
     }
   },
   "linkSelectionModal": {
@@ -346,6 +351,8 @@ export const en = {
     "invalidEpisodeRange": "Invalid episode range.",
     "episodeNumberRangeMismatch": "The episode range ({epRange}) and the numbering range ({numRange}) must have the same length.",
     "preferredLabelSet": "Label '{label}' set as preferred.",
-    "preferredLabelRemoved": "Preference removed for label '{label}'."
+    "preferredLabelRemoved": "Preference removed for label '{label}'.",
+    "linkUpdatedSuccess": "Link updated successfully.",
+    "linksFromDomainDeletedSuccess": "{count} links from {domain} deleted successfully."
   }
 }

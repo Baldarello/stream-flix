@@ -959,6 +959,20 @@ class MediaStore {
         }
     }
 
+    updateMediaLink = async (linkId: number, updates: Partial<Omit<MediaLink, 'id' | 'mediaId'>>) => {
+        try {
+            const link = await db.mediaLinks.get(linkId);
+            if (link) {
+                await db.mediaLinks.update(linkId, updates);
+                await this.refreshLinksForMediaId(link.mediaId);
+                this.showSnackbar('notifications.linkUpdatedSuccess', 'success', true);
+            }
+        } catch (error) {
+            console.error('Error updating media link:', error);
+            this.showSnackbar('notifications.processingError', 'error', true, { error: (error as Error).message });
+        }
+    }
+
     clearLinksForSeason = async (seasonNumber: number, showId: number) => {
         const show = this.cachedItems.get(showId);
         const season = show?.seasons?.find(s => s.season_number === seasonNumber);
@@ -972,6 +986,32 @@ class MediaStore {
             this.showSnackbar('notifications.allSeasonLinksDeleted', 'success', true, { count: linksToDelete.length, season: seasonNumber });
         } else {
              this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
+        }
+    }
+
+    clearLinksForDomain = async (showId: number, seasonNumber: number, origin: string) => {
+        const show = this.cachedItems.get(showId);
+        const season = show?.seasons?.find(s => s.season_number === seasonNumber);
+        if (!season) return;
+
+        const episodeIds = season.episodes.map(ep => ep.id);
+        const allLinks = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
+        
+        const linksToDelete = allLinks.filter(link => {
+            try {
+                return new URL(link.url).origin === origin;
+            } catch {
+                return false;
+            }
+        });
+
+        if (linksToDelete.length > 0) {
+            const linkIdsToDelete = linksToDelete.map(l => l.id!);
+            await db.mediaLinks.bulkDelete(linkIdsToDelete);
+            await this.refreshLinksForShow(showId);
+            this.showSnackbar('notifications.linksFromDomainDeletedSuccess', 'success', true, { count: linksToDelete.length, domain: origin });
+        } else {
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
         }
     }
     

@@ -130,7 +130,12 @@ export const it = {
       "newDomain": "Nuovo Dominio/Origine",
       "update": "Aggiorna",
       "setAsPreferred": "Imposta come fonte preferita",
-      "removePreferred": "Rimuovi preferenza"
+      "removePreferred": "Rimuovi preferenza",
+      "editLink": "Modifica Link",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "deleteAllFromDomainTooltip": "Elimina tutti i link da questo dominio",
+      "deleteAllFromDomainConfirm": "Sei sicuro di voler eliminare tutti i {count} link da {domain}?"
     }
   },
   "linkSelectionModal": {
@@ -346,6 +351,8 @@ export const it = {
     "invalidEpisodeRange": "Intervallo episodi non valido.",
     "episodeNumberRangeMismatch": "L'intervallo di episodi ({epRange}) e l'intervallo di numerazione ({numRange}) devono avere la stessa lunghezza.",
     "preferredLabelSet": "Etichetta '{label}' impostata come preferita.",
-    "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'."
+    "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'.",
+    "linkUpdatedSuccess": "Link aggiornato con successo.",
+    "linksFromDomainDeletedSuccess": "{count} link da {domain} eliminati con successo."
   }
 }
