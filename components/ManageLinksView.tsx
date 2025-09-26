@@ -179,7 +179,9 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                         sx={{ bgcolor: 'background.paper', backgroundImage: 'none', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.12)', '&:before': { display: 'none' } }}
                     >
                         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Typography noWrap sx={{ flexGrow: 1, minWidth: 0, mr: 2 }}>{episode.episode_number}. {episode.name}</Typography>
+                            <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
+                                <Typography noWrap>{episode.episode_number}. {episode.name}</Typography>
+                            </Box>
                             <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
                                 {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
                             </Typography>
