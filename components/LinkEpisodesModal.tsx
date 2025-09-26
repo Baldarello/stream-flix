@@ -157,7 +157,7 @@ const AddLinkTabs: React.FC<{
         switch (addMethod) {
           case 'pattern':
             return (
-              <Stack spacing={2}>
+              <Stack spacing={2} sx={{paddingTop:"10px"}}>
                 <Alert severity="info">{t('linkEpisodesModal.add.patternInfo')}</Alert>
                 <TextField 
                     label={t('linkEpisodesModal.add.patternUrl')} 

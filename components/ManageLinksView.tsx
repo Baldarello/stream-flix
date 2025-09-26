@@ -106,7 +106,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
     const preferredOriginForShow = preferredSources.get(item.id);
 
     return (
-        <Box sx={{mt: 2, flex: 1, overflowY: 'auto' }}>
+        <Box sx={{mt: 2, flex: 1, overflowY: 'auto',padding:"10px" }}>
             <Button
                 color="error"
                 variant="outlined"
