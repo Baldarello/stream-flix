@@ -178,13 +178,22 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                         onChange={onAccordionChange(episode.id)}
                         sx={{ bgcolor: 'background.paper', backgroundImage: 'none', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.12)', '&:before': { display: 'none' } }}
                     >
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                            <Box sx={{ flex: 1, minWidth: 0, mr: 2 }}>
-                                <Typography noWrap>{episode.episode_number}. {episode.name}</Typography>
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            sx={{
+                                '& .MuiAccordionSummary-content': {
+                                    maxWidth: 'calc(100% - 48px)' // Correctly accounts for expand icon width
+                                }
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }}>
+                                <Typography noWrap sx={{ flex: 1, mr: 2 }}>
+                                    {episode.episode_number}. {episode.name}
+                                </Typography>
+                                <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
+                                    {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
+                                </Typography>
                             </Box>
-                            <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
-                                {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
-                            </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
                             {/* FIX: Add Array.isArray guard to ensure `episode.video_urls` is an array before calling .map() or accessing .length. */}

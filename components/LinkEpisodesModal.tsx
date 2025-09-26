@@ -157,7 +157,7 @@ const AddLinkTabs: React.FC<{
         switch (addMethod) {
           case 'pattern':
             return (
-              <Stack spacing={2} sx={{paddingTop:"10px"}}>
+              <Stack spacing={2} >
                 <Alert severity="info">{t('linkEpisodesModal.add.patternInfo')}</Alert>
                 <TextField 
                     label={t('linkEpisodesModal.add.patternUrl')} 
@@ -267,7 +267,7 @@ const AddLinkTabs: React.FC<{
                 <Tab label={t('linkEpisodesModal.add.list')} value="list" />
                 <Tab label={t('linkEpisodesModal.add.json')} value="json" />
             </Tabs>
-            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingTop:"10px"}}>
                  <Box sx={{ flexGrow: 1, pr: 1 }}>
                     <Stack spacing={2}>
                         <Stack direction="row" spacing={2}>
