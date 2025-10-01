@@ -1387,7 +1387,7 @@ class MediaStore {
             switch (revision.type) {
                 case 1: await table.delete(revision.key); break; // Revert create -> delete
                 case 2: await table.put(revision.oldObj); break; // Revert update -> put old object
-                case 3: await table.put(revision.obj); break; // Revert delete -> put object back
+                case 3: await table.put(revision.oldObj); break; // Revert delete -> put object back
             }
             // Remove the revision itself
             if(revision.id) await db.revisions.delete(revision.id);
