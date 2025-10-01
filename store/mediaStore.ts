@@ -1,4 +1,5 @@
 import {makeAutoObservable, runInAction} from 'mobx';
+import Dexie from 'dexie';
 // FIX: Replace deprecated EpisodeLink with MediaLink
 import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types';
 import type { AlertColor } from '@mui/material';
@@ -947,10 +948,18 @@ class MediaStore {
     }
     
     deleteMediaLink = async (linkId: number) => {
-        const link = await db.mediaLinks.get(linkId);
-        if(link) {
-            await db.mediaLinks.delete(linkId);
-            await this.refreshLinksForMediaId(link.mediaId);
+        // FIX: Cast `db` to `Dexie` to call the `transaction` method, resolving a TypeScript error where the method was not found on the extended `QuixDB` class.
+        const mediaId = await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
+            const link = await db.mediaLinks.get(linkId);
+            if(link) {
+                await db.mediaLinks.delete(linkId);
+                return link.mediaId;
+            }
+            return null;
+        });
+    
+        if (mediaId) {
+            await this.refreshLinksForMediaId(mediaId);
         }
     }
 
@@ -1383,11 +1392,18 @@ class MediaStore {
         try {
             const table = (db as any)[revision.table];
             if (!table) throw new Error(`Table ${revision.table} not found.`);
-
+    
             switch (revision.type) {
-                case 1: await table.delete(revision.key); break; // Revert create -> delete
-                case 2: await table.put(revision.oldObj); break; // Revert update -> put old object
-                case 3: await table.put(revision.oldObj); break; // Revert delete -> put object back
+                case 1: // Revert create -> delete
+                    await table.delete(revision.key);
+                    break;
+                case 2: // Revert update
+                case 3: // Revert delete
+                    if (!revision.oldObj) {
+                        throw new Error(this.t('revisions.errors.missingOldObject'));
+                    }
+                    await table.put(revision.oldObj);
+                    break;
             }
             // Remove the revision itself
             if(revision.id) await db.revisions.delete(revision.id);

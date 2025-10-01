@@ -273,6 +273,9 @@ export const it = {
     "loading": "Caricamento cronologia...",
     "showRawData": "Mostra Dati Grezzi",
     "hideRawData": "Nascondi Dati Grezzi",
+    "errors": {
+      "missingOldObject": "Impossibile ripristinare: i dati della vecchia versione non sono disponibili nella cronologia."
+    },
     "descriptions": {
         "myList": {
             "add": "Aggiunto '{name}' alla tua lista",

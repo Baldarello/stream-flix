@@ -273,6 +273,9 @@ export const en = {
     "loading": "Loading history...",
     "showRawData": "Show Raw Data",
     "hideRawData": "Hide Raw Data",
+    "errors": {
+      "missingOldObject": "Cannot revert: old object data is missing from revision history."
+    },
     "descriptions": {
         "myList": {
             "add": "Added '{name}' to your list",
