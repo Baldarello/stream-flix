@@ -193,7 +193,7 @@ const DetailView: React.FC = observer(() => {
                 }}>
                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                        <Typography variant="h2" component="h1" fontWeight="bold" sx={{ fontSize: { xs: '2.5rem', sm: '3.75rem' } }}>{title}</Typography>
+                        <Typography variant="h2" component="h1" fontWeight="bold" sx={{ fontSize: { xs: '2rem', sm: '3.75rem' } }}>{title}</Typography>
                         {item.media_type === 'movie' && (
                              <Tooltip title={t('detail.linkEpisodesTooltip')}>
                                 {/* FIX: openLinkMovieModal will be added to mediaStore */}
@@ -204,12 +204,12 @@ const DetailView: React.FC = observer(() => {
                         )}
                     </Stack>
                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
-                    <Stack direction="row" spacing={3} sx={{ alignItems: 'center', fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+                    <Stack direction="row" spacing={3} sx={{ alignItems: 'center', fontSize: { xs: '0.8rem', sm: '1rem' } }}>
                         <Typography sx={{ color: 'success.main' }} fontWeight="bold">{t('detail.vote')}: {item.vote_average?.toFixed(1)}</Typography>
                         <Typography>{releaseDate?.substring(0, 4)}</Typography>
                         {item.media_type === 'tv' && item.seasons && <Typography>{item.seasons.length} {t('detail.seasons')}</Typography>}
                     </Stack>
-                    <Typography variant="body1" sx={{ maxHeight: '200px', overflowY: 'auto', fontSize: { xs: '0.9rem', sm: '1rem' } }}>{item.overview}</Typography>
+                    <Typography variant="body1" sx={{ maxHeight: '200px', overflowY: 'auto', fontSize: { xs: '0.85rem', sm: '1rem' } }}>{item.overview}</Typography>
                     {/* FIX: The `pt` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}

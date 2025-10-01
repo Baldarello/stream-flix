@@ -346,7 +346,7 @@ const VideoPlayer: React.FC = observer(() => {
   const themeColor = { SerieTV: 'var(--glow-seriestv-color)', Film: 'var(--glow-film-color)', Anime: 'var(--glow-anime-color)' }[activeTheme];
 
   return (
-    <Box ref={playerContainerRef} sx={{ position: 'relative', width: '100vw', height: '100vh', bgcolor: 'black', display: 'flex', flexDirection: 'row', cursor: isUiVisible ? 'default' : 'none' }}>
+    <Box ref={playerContainerRef} sx={{ position: 'relative', width: '100vw', height: '100dvh', bgcolor: 'black', display: 'flex', flexDirection: 'row', cursor: isUiVisible ? 'default' : 'none' }}>
       <Box sx={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <video
           ref={videoRef}
