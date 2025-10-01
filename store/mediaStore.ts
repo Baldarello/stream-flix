@@ -823,8 +823,8 @@ class MediaStore {
     openLinkMovieModal = (item: MediaItem) => { this.linkingMovieItem = item; this.isLinkMovieModalOpen = true; };
     closeLinkMovieModal = () => { this.isLinkMovieModalOpen = false; this.linkingMovieItem = null; };
 
-    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; }): Promise<boolean> => {
-        const { seasonNumber, method, data, language, type } = payload;
+    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; seasonName: string; }): Promise<boolean> => {
+        const { seasonNumber, method, data, language, type, seasonName } = payload;
         const show = this.linkingEpisodesForItem;
         if (!show) return false;
 
@@ -851,7 +851,7 @@ class MediaStore {
                             linksToAdd.push({
                                 mediaId: ep.id,
                                 url: data.pattern.replace(/\[@EP\]/g, epNum),
-                                label: data.label.replace(/\[@EP\]/g, epNum) || `Episodio ${i}`,
+                                label: data.label.replace(/\[@EP\]/g, epNum) || seasonName,
                                 language,
                                 type,
                             });

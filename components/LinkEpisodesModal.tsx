@@ -33,9 +33,10 @@ type TabValue = 'add' | 'manage';
 const AddLinkTabs: React.FC<{
     selectedSeason: number;
     seasonEpisodeCount: number;
-    onSave: (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; }) => Promise<boolean>;
+    seasonName: string;
+    onSave: (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; seasonName: string; }) => Promise<boolean>;
     onSuccess: () => void;
-}> = observer(({ selectedSeason, seasonEpisodeCount, onSave, onSuccess }) => {
+}> = observer(({ selectedSeason, seasonEpisodeCount, seasonName, onSave, onSuccess }) => {
     const { t } = useTranslations();
     const [addMethod, setAddMethod] = useState<'pattern' | 'list' | 'json'>('pattern');
     const [pattern, setPattern] = useState('');
@@ -111,7 +112,7 @@ const AddLinkTabs: React.FC<{
             mediaStore.showSnackbar(error, 'error', isErrorKey, errorValues);
             setIsSaving(false);
         } else if (data) {
-            const success = await onSave({ seasonNumber: selectedSeason, method: addMethod, data, language, type });
+            const success = await onSave({ seasonNumber: selectedSeason, method: addMethod, data, language, type, seasonName });
             if (success) {
                 // Reset state for next time
                 setPattern('');
@@ -350,7 +351,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
                 <Tab label={t('linkEpisodesModal.manageLinks')} value="manage" />
             </Tabs>
 
-            {activeTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number} seasonEpisodeCount={currentSeason.episode_count} onSave={setEpisodeLinksForSeason} onSuccess={() => setActiveTab('manage')} />}
+            {activeTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number} seasonEpisodeCount={currentSeason.episode_count} seasonName={currentSeason.name} onSave={setEpisodeLinksForSeason} onSuccess={() => setActiveTab('manage')} />}
             {activeTab === 'manage' && currentSeason && (
               <ManageLinksView 
                 currentSeason={currentSeason} 
