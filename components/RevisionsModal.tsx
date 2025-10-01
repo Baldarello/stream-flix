@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
@@ -11,6 +11,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import UndoIcon from '@mui/icons-material/Undo';
 import { useTranslations } from '../hooks/useTranslations';
 import type { Revision } from '../types';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -37,11 +38,16 @@ const iconMap: Record<NonNullable<Revision['icon']>, React.ReactElement> = {
 const RevisionsModal: React.FC = observer(() => {
     const { isRevisionsModalOpen, closeRevisionsModal, revisions, isRevisionsLoading, revertRevision } = mediaStore;
     const { t } = useTranslations();
+    const [expandedId, setExpandedId] = useState<number | null>(null);
 
     const handleRevert = (rev: Revision) => {
         if (window.confirm(t('revisions.revertConfirm'))) {
             revertRevision(rev);
         }
+    };
+
+    const handleToggle = (panelId: number) => {
+        setExpandedId(prevId => (prevId === panelId ? null : panelId));
     };
 
     const renderContent = () => {
@@ -63,38 +69,55 @@ const RevisionsModal: React.FC = observer(() => {
         }
 
         return (
-            <List sx={{ flex: 1, overflowY: 'auto', mt: 2 }}>
-                {revisions.map(rev => (
-                    <Accordion key={rev.id} sx={{ bgcolor: 'rgba(255,255,255,0.05)', backgroundImage: 'none', boxShadow: 'none' }}>
-                        <AccordionSummary
-                            aria-controls={`panel${rev.id}-content`}
-                            id={`panel${rev.id}-header`}
+            <List sx={{ flex: 1, overflowY: 'auto', mt: 2, pr: 1 }}>
+                {revisions.map(rev => {
+                    const isExpanded = expandedId === rev.id;
+                    return (
+                        <Accordion 
+                            key={rev.id} 
+                            sx={{ bgcolor: 'rgba(255,255,255,0.05)', backgroundImage: 'none', boxShadow: 'none' }}
+                            expanded={isExpanded}
+                            onChange={() => handleToggle(rev.id!)}
                         >
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
-                                {iconMap[rev.icon || 'unknown']}
-                                <Box sx={{ flex: 1, overflow: 'hidden' }}>
-                                    <Typography variant="body2" noWrap>{rev.description}</Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {new Date(rev.timestamp).toLocaleString()}
-                                    </Typography>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls={`panel${rev.id}-content`}
+                                id={`panel${rev.id}-header`}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
+                                    {iconMap[rev.icon || 'unknown']}
+                                    <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                                        <Typography variant="body2" noWrap>{rev.description}</Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            {new Date(rev.timestamp).toLocaleString()}
+                                        </Typography>
+                                    </Box>
+                                    <Tooltip title={t('revisions.revert')}>
+                                        <IconButton onClick={(e) => { e.stopPropagation(); handleRevert(rev); }} size="small">
+                                            <UndoIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Button 
+                                        size="small" 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleToggle(rev.id!);
+                                        }}
+                                    >
+                                        {isExpanded ? t('revisions.hideRawData') : t('revisions.showRawData')}
+                                    </Button>
                                 </Box>
-                                <Tooltip title={t('revisions.revert')}>
-                                    <IconButton onClick={(e) => { e.stopPropagation(); handleRevert(rev); }} size="small">
-                                        <UndoIcon />
-                                    </IconButton>
-                                </Tooltip>
-                                <Button size="small" onClick={(e) => e.stopPropagation()}>
-                                    {t('revisions.showRawData')}
-                                </Button>
-                            </Box>
-                        </AccordionSummary>
-                        <AccordionDetails sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
-                            <Typography variant="caption" component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>
-                                {JSON.stringify({ table: rev.table, key: rev.key, type: rev.type, obj: rev.obj, oldObj: rev.oldObj }, null, 2)}
-                            </Typography>
-                        </AccordionDetails>
-                    </Accordion>
-                ))}
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ bgcolor: 'rgba(0,0,0,0.2)' }}>
+                                {isExpanded && (
+                                    <Typography variant="caption" component="pre" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                                        {JSON.stringify({ table: rev.table, key: rev.key, type: rev.type, obj: rev.obj, oldObj: rev.oldObj }, null, 2)}
+                                    </Typography>
+                                )}
+                            </AccordionDetails>
+                        </Accordion>
+                    );
+                })}
             </List>
         );
     };
