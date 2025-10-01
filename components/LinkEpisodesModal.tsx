@@ -26,6 +26,7 @@ const style = {
   maxHeight: '90vh',
   display: 'flex',
   flexDirection: 'column',
+  overflowY: 'auto',
 };
 
 type TabValue = 'add' | 'manage';
@@ -256,9 +257,9 @@ const AddLinkTabs: React.FC<{
     };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2, flexGrow: 1, overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2 }}>
             {/* Top Controls: Common inputs + Mobile Method Selector */}
-            <Stack spacing={2} sx={{ mb: 2, pr: 1, flexShrink: 0 }}>
+            <Stack spacing={2} sx={{ mb: 2, flexShrink: 0 }}>
                 {/* Mobile-only method selector */}
                 <FormControl fullWidth required sx={{ display: { xs: 'block', md: 'none' } }}>
                     <InputLabel>Metodo</InputLabel>
@@ -290,7 +291,7 @@ const AddLinkTabs: React.FC<{
             </Stack>
             
             {/* Content area */}
-            <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+            <Box sx={{ display: 'flex' }}>
                 {/* Desktop-only vertical tabs */}
                 <Tabs
                     orientation="vertical"
@@ -305,8 +306,8 @@ const AddLinkTabs: React.FC<{
                 </Tabs>
                 
                 {/* The main content that changes based on method, and save button */}
-                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
+                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ pr: 1 }}>
                         {renderAddContent()}
                     </Box>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1, pr: 0 }}>
@@ -357,7 +358,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
         <Typography variant="h5" component="h2" fontWeight="bold">{t('linkEpisodesModal.title', { name: item.name })}</Typography>
 
         {/* FIX: The `mt` prop is a system prop and should be passed inside the `sx` object. */}
-        <Stack spacing={2} sx={{ mt: 2, pt: 2, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Stack spacing={2} sx={{ mt: 2, pt: 2, display: 'flex', flexDirection: 'column' }}>
             <FormControl fullWidth required>
               <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
               <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={handleSeasonChange}>
