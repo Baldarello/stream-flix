@@ -23,14 +23,18 @@ const style = {
 };
 
 const LinkSelectionModal: React.FC = () => {
-  const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlayback } = mediaStore;
+  const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlayback, linkSelectionContext, playRemoteItem } = mediaStore;
   const { t } = useTranslations();
 
   const handleSelectLink = (link: MediaLink) => {
     if (itemForLinkSelection) {
       // Create a new item object with the selected video_url to pass to the player
       const itemToPlay = { ...itemForLinkSelection, video_url: link.url };
-      startPlayback(itemToPlay);
+      if (linkSelectionContext === 'remote') {
+        playRemoteItem(itemToPlay);
+      } else {
+        startPlayback(itemToPlay);
+      }
     }
   };
 

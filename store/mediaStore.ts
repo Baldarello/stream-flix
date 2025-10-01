@@ -120,6 +120,7 @@ class MediaStore {
     itemForLinkSelection: PlayableItem | null = null;
     // FIX: Use MediaLink type for linksForSelection
     linksForSelection: MediaLink[] = [];
+    linkSelectionContext: 'local' | 'remote' = 'local';
     expandedLinkAccordionId: number | false = false;
 
     // Player Episode Drawer State
@@ -182,12 +183,8 @@ class MediaStore {
     startPlayback = async (item: PlayableItem) => {
         // --- Step 1: Ensure we have a single, playable URL ---
         if (!item.video_url) {
-            let allLinks: MediaLink[] = [];
-            if ('episode_number' in item) { // It's an Episode
-                allLinks = item.video_urls || await this.getLinksForMedia(item.id);
-            } else { // It's a MediaItem (Movie)
-                allLinks = item.video_urls || await this.getLinksForMedia(item.id);
-            }
+            const mediaId = item.id;
+            let allLinks: MediaLink[] = item.video_urls || await this.getLinksForMedia(mediaId);
             item.video_urls = allLinks;
     
             if (allLinks.length === 0) {
@@ -210,9 +207,6 @@ class MediaStore {
                     }
                 });
 
-                // If links from the preferred source are available for this specific item, use them.
-                // Otherwise, fall back to using all available links. This handles cases
-                // where an episode only has links from a non-preferred source.
                 if (linksFromPreferred.length > 0) {
                     candidateLinks = linksFromPreferred;
                 }
@@ -221,7 +215,7 @@ class MediaStore {
             // Now, from the candidate links, select one to play.
             if (candidateLinks.length === 1) {
                 item.video_url = candidateLinks[0].url;
-            } else {
+            } else { // candidateLinks.length > 1
                 // There are multiple candidates. Try to select based on preferred labels.
                 const preferredLabels = this.preferredLabels;
                 let bestLink: MediaLink | undefined = undefined;
@@ -233,21 +227,12 @@ class MediaStore {
                 if (bestLink) {
                     item.video_url = bestLink.url;
                 } else {
-                    // No preferred label matched.
-                    // If all remaining candidates share the same origin, just pick the first.
-                    // Otherwise, we must ask the user.
-                    const uniqueOrigins = new Set(candidateLinks.map(l => {
-                        try { return new URL(l.url).origin } catch { return null }
-                    }).filter(Boolean));
-
-                    if (uniqueOrigins.size === 1) {
-                        item.video_url = candidateLinks[0].url;
-                    } else {
-                        this.linksForSelection = candidateLinks;
-                        this.itemForLinkSelection = item;
-                        this.isLinkSelectionModalOpen = true;
-                        return;
-                    }
+                    // More than one link, and no preferred label match, so we must ask the user.
+                    this.linksForSelection = candidateLinks;
+                    this.itemForLinkSelection = item;
+                    this.linkSelectionContext = 'local';
+                    this.isLinkSelectionModalOpen = true;
+                    return;
                 }
             }
         }
@@ -260,7 +245,7 @@ class MediaStore {
                 }
                 this.nowPlayingItem = item;
                 this.closeDetail();
-                this.closeLinkSelectionModal(); // This is still useful in case it was opened by some other flow
+                this.closeLinkSelectionModal();
     
                 if ('show_id' in item) {
                     this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
@@ -439,7 +424,7 @@ class MediaStore {
     closeImportModal = () => { this.isImportModalOpen = false; if (this.importUrl) this.importUrl = null; };
     openRevisionsModal = () => { this.isRevisionsModalOpen = true; this.fetchRevisions(); };
     closeRevisionsModal = () => { this.isRevisionsModalOpen = false; };
-    closeLinkSelectionModal = () => { this.isLinkSelectionModalOpen = false; this.itemForLinkSelection = null; };
+    closeLinkSelectionModal = () => { this.isLinkSelectionModalOpen = false; this.itemForLinkSelection = null; this.linkSelectionContext = 'local'; };
     openEpisodesDrawer = () => { this.isEpisodesDrawerOpen = true; };
     closeEpisodesDrawer = () => { this.isEpisodesDrawerOpen = false; };
     setIntroSkippableOnSlave = (isSkippable: boolean) => { this.isIntroSkippableOnSlave = isSkippable; };
@@ -1112,46 +1097,63 @@ class MediaStore {
     playRemoteItem = async (item: PlayableItem) => {
         // This method is called by the Master remote.
         // It needs to resolve the video URL before sending the command to the Slave.
-        const playableItemWithUrl = { ...item };
-    
-        // If a URL is not already attached, resolve it.
-        if (!playableItemWithUrl.video_url) {
-            const mediaId = 'episode_number' in playableItemWithUrl ? playableItemWithUrl.id : playableItemWithUrl.id;
-            const links = await this.getLinksForMedia(mediaId);
-    
-            if (links.length === 0) {
-                this.showSnackbar("notifications.noVideoLinks", "warning", true);
-                return;
-            }
-    
-            const showId = 'show_id' in playableItemWithUrl ? playableItemWithUrl.show_id : playableItemWithUrl.id;
-            const preferredSource = this.preferredSources.get(showId);
-            let preferredLink: MediaLink | undefined;
+        
+        // If URL is already present, just play and close modal.
+        if (item.video_url) {
+            this.sendRemoteCommand({ command: 'play_item', item });
+            this.closeLinkSelectionModal(); // Ensure modal is closed
+            return;
+        }
 
-            if (preferredSource) {
-                 preferredLink = links.find(l => {
-                    try {
-                        return new URL(l.url).origin === preferredSource;
-                    } catch {
-                        return false;
-                    }
-                });
-            }
+        // --- Resolve URL ---
+        const mediaId = 'episode_number' in item ? item.id : item.id;
+        const allLinks = item.video_urls || await this.getLinksForMedia(mediaId);
     
-            if (preferredLink) {
-                playableItemWithUrl.video_url = preferredLink.url;
-            } else {
-                // If no link from the preferred source is found for this item,
-                // or if no preferred source is set, fall back to the first available link.
-                // This is necessary because a remote can't display a selection modal.
-                playableItemWithUrl.video_url = links[0].url;
+        if (allLinks.length === 0) {
+            this.showSnackbar("notifications.noVideoLinks", "warning", true);
+            return;
+        }
+
+        let candidateLinks: MediaLink[] = allLinks;
+        const showId = 'show_id' in item ? item.show_id : item.id;
+        const preferredOrigin = this.preferredSources.get(showId);
+
+        if (preferredOrigin) {
+             const linksFromPreferred = allLinks.filter(l => {
+                try {
+                    return new URL(l.url).origin === preferredOrigin;
+                } catch {
+                    return false;
+                }
+            });
+            if (linksFromPreferred.length > 0) {
+                candidateLinks = linksFromPreferred;
             }
         }
     
-        if (playableItemWithUrl.video_url) {
-            this.sendRemoteCommand({ command: 'play_item', item: playableItemWithUrl });
+        if (candidateLinks.length === 1) {
+            this.sendRemoteCommand({ command: 'play_item', item: { ...item, video_url: candidateLinks[0].url } });
+            return;
+        }
+        
+        // More than one candidate, try preferred labels.
+        const preferredLabels = this.preferredLabels;
+        let bestLink: MediaLink | undefined = undefined;
+
+        if (preferredLabels.length > 0) {
+            bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
+        }
+    
+        if (bestLink) {
+            this.sendRemoteCommand({ command: 'play_item', item: { ...item, video_url: bestLink.url } });
         } else {
-            this.showSnackbar("notifications.noVideoLinks", "warning", true);
+            // More than one link, no preferred label, must ask user.
+            runInAction(() => {
+                this.linksForSelection = candidateLinks;
+                this.itemForLinkSelection = item;
+                this.linkSelectionContext = 'remote'; // Set context for modal
+                this.isLinkSelectionModalOpen = true;
+            });
         }
     }
 
