@@ -279,8 +279,8 @@ export const it = {
             "remove": "Rimosso '{name}' dalla tua lista"
         },
         "cachedItems": {
-            "add": "Messo in cache '{name}' per accesso offline",
-            "update": "Aggiornati dati in cache per '{name}'",
+            "add": "Messo in cache '{name}'",
+            "update": "Aggiornati dati cache per '{name}'",
             "remove": "Rimosso '{name}' dalla cache"
         },
         "episodeLinks": {
@@ -293,7 +293,7 @@ export const it = {
             "remove": "Rimossa durata intro per '{show}'"
         },
         "viewingHistory": {
-            "add": "Visto episodio '{show}' S{s}E{e}"
+            "add": "Visto episodio: {show} S{s}E{e}"
         },
         "unknown": "Azione '{type}' sulla tabella '{table}'"
     }

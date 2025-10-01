@@ -279,7 +279,7 @@ export const en = {
             "remove": "Removed '{name}' from your list"
         },
         "cachedItems": {
-            "add": "Cached '{name}' for offline access",
+            "add": "Cached '{name}'",
             "update": "Updated cached data for '{name}'",
             "remove": "Removed '{name}' from cache"
         },
@@ -293,7 +293,7 @@ export const en = {
             "remove": "Removed custom intro duration for '{show}'"
         },
         "viewingHistory": {
-            "add": "Watched episode '{show}' S{s}E{e}"
+            "add": "Watched episode: {show} S{s}E{e}"
         },
         "unknown": "Action '{type}' on table '{table}'"
     }

@@ -140,7 +140,7 @@ class MediaStore {
     isRevisionsModalOpen = false;
     isRevisionsLoading = false;
     revisions: Revision[] = [];
-    private episodeContextMap: Map<number, { showName: string; sNum: number; epNum: number; epName: string; }> = new Map();
+    private episodeContextMap: Map<number, { show: string | undefined; s: number; e: number; epName: string; }> = new Map();
 
 
     // Custom Intro Durations
@@ -1392,7 +1392,8 @@ class MediaStore {
             // Remove the revision itself
             if(revision.id) await db.revisions.delete(revision.id);
             this.showSnackbar('notifications.revertSuccess', 'success', true);
-            this.fetchRevisions(); // Refresh list
+            // Reload the page after 1.5 seconds to ensure all state is consistent
+            setTimeout(() => window.location.reload(), 1500);
         } catch(error) {
             this.showSnackbar('notifications.revertError', 'error', true, { error: (error as Error).message });
         }
@@ -1532,42 +1533,62 @@ class MediaStore {
         for (const rev of revs) {
             rev.icon = rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'delete';
             const obj = rev.obj || rev.oldObj;
-            if (!obj) continue;
+            if (!obj) {
+                rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                continue;
+            }
 
             try {
                 switch(rev.table) {
                     case 'myList':
                         const myListItem = this.cachedItems.get(obj.id);
-                        // FIX: Cannot find name 't'. Use internal translation method.
-                        rev.description = this.t('revisions.descriptions.myList.' + (rev.type === 1 ? 'add' : 'remove'), { name: myListItem?.name || obj.id });
+                        rev.description = this.t('revisions.descriptions.myList.' + (rev.type === 1 ? 'add' : 'remove'), { name: myListItem?.name || myListItem?.title || obj.id });
+                        break;
+                    case 'cachedItems':
+                        rev.description = this.t('revisions.descriptions.cachedItems.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), { name: obj.name || obj.title });
                         break;
                     case 'mediaLinks':
                          const context = await this.findEpisodeContext(obj.mediaId);
                          if (context) {
-                             // FIX: Cannot find name 't'. Use internal translation method.
                              rev.description = this.t('revisions.descriptions.episodeLinks.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), context);
+                         } else {
+                            rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
                          }
                         break;
                     case 'showIntroDurations':
                         const show = this.cachedItems.get(obj.id);
-                        // FIX: Cannot find name 't'. Use internal translation method.
                         rev.description = this.t('revisions.descriptions.showIntroDurations.' + (rev.type === 1 || rev.type === 2 ? 'set' : 'remove'), { show: show?.name || obj.id, duration: obj.duration });
+                        break;
+                    case 'viewingHistory':
+                        const vhContext = await this.findEpisodeContext(obj.episodeId);
+                        if (vhContext) {
+                            rev.description = this.t('revisions.descriptions.viewingHistory.add', vhContext);
+                        } else {
+                            rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                        }
+                        break;
+                    default:
+                        rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
                         break;
                 }
             } catch (e) { console.warn("Error enriching revision", e); }
         }
     }
 
-    private async findEpisodeContext(episodeId: number): Promise<any> {
-        if(this.episodeContextMap.has(episodeId)) return this.episodeContextMap.get(episodeId);
+    private async findEpisodeContext(episodeId: number): Promise<{ show: string | undefined; s: number; e: number; epName: string; } | null> {
+        if(this.episodeContextMap.has(episodeId)) return this.episodeContextMap.get(episodeId) || null;
         
         for (const show of this.cachedItems.values()) {
             if (show.seasons) {
                 for (const season of show.seasons) {
                     const episode = season.episodes.find(ep => ep.id === episodeId);
                     if (episode) {
-                        // FIX: Property 'epNum' is missing. Renamed 'eNum' to 'epNum'.
-                        const context = { showName: show.name, sNum: season.season_number, epNum: episode.episode_number, epName: episode.name };
+                        const context = { 
+                            show: show.name || show.title,
+                            s: season.season_number,
+                            e: episode.episode_number,
+                            epName: episode.name,
+                        };
                         this.episodeContextMap.set(episodeId, context);
                         return context;
                     }
