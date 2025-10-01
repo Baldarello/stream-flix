@@ -87,17 +87,6 @@ const DetailView: React.FC = observer(() => {
     }
   }, [item, currentSeason, availableLanguages, availableTypes, showFilterPreferences, setShowFilterPreference]);
 
-  const filteredEpisodes = useMemo(() => {
-    if (!currentSeason) return [];
-    return currentSeason.episodes.filter(ep => {
-        return (ep.video_urls || []).some(link => {
-            const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
-            const typeMatch = !typeFilter || (link.type === typeFilter);
-            return langMatch && typeMatch;
-        });
-    });
-  }, [currentSeason, languageFilter, typeFilter]);
-
 
   const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -330,10 +319,15 @@ const DetailView: React.FC = observer(() => {
                         </Box>
                     ) : (
                         <List>
-                            {filteredEpisodes.map((episode: Episode) => {
+                            {(currentSeason?.episodes || []).map((episode: Episode) => {
                                 const progress = episodeProgress.get(episode.id);
                                 const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
                                 const isWatched = progress?.watched;
+                                const hasPlayableLinks = (episode.video_urls || []).some(link => {
+                                    const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+                                    const typeMatch = !typeFilter || (link.type === typeFilter);
+                                    return langMatch && typeMatch;
+                                });
                                 
                                 return (
                                 <ListItem
@@ -357,7 +351,7 @@ const DetailView: React.FC = observer(() => {
                                         transition: 'background-color 0.2s, transform 0.2s',
                                         '&:hover': {
                                             bgcolor: 'rgba(40, 40, 50, 0.8)',
-                                            transform: 'scale(1.02)'
+                                            transform: hasPlayableLinks ? 'scale(1.02)' : 'none',
                                         },
                                         '& .MuiListItemSecondaryAction-root': {
                                             right: '16px'
@@ -365,6 +359,7 @@ const DetailView: React.FC = observer(() => {
                                     }}
                                 >
                                     <ListItemButton
+                                        disabled={!hasPlayableLinks}
                                         onClick={() => {
                                             const filteredLinks = (episode.video_urls || []).filter(link => {
                                                 const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
@@ -386,6 +381,7 @@ const DetailView: React.FC = observer(() => {
                                             p: 2,
                                             borderRadius: 2,
                                             pr: '64px',
+                                            opacity: hasPlayableLinks ? 1 : 0.5,
                                         }}
                                     >
                                         <Typography sx={{ mr: 2, fontWeight: 'bold' }}>{episode.episode_number}</Typography>

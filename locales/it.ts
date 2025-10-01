@@ -38,8 +38,7 @@ export const it = {
     "markAsWatched": "Segna come visto",
     "markAsUnwatched": "Segna come non visto",
     "filterLanguage": "Lingua",
-    "filterType": "Tipo",
-    "all": "Tutti"
+    "filterType": "Tipo"
   },
   "gridView": {
     "myListTitle": "La mia lista",
