@@ -11,7 +11,7 @@ import type { Episode } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
 const EpisodesDrawer: React.FC = observer(() => {
-    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress } = mediaStore;
+    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress, showFilterPreferences } = mediaStore;
     const { t } = useTranslations();
 
     if (!currentShow || !nowPlayingItem || !('episode_number' in nowPlayingItem)) {
@@ -20,15 +20,29 @@ const EpisodesDrawer: React.FC = observer(() => {
 
     const currentEpisodeId = nowPlayingItem.id;
     const seasonNumber = nowPlayingItem.season_number;
+    
+    const currentPreferences = showFilterPreferences.get(currentShow.id) || {};
+    const languageFilter = currentPreferences.language;
+    const typeFilter = currentPreferences.type;
 
     const handleSelectEpisode = (episode: Episode) => {
+        const filteredLinks = (episode.video_urls || []).filter(link => {
+            const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+            const typeMatch = !typeFilter || (link.type === typeFilter);
+            return langMatch && typeMatch;
+        });
+        
         mediaStore.startPlayback({
             ...episode,
+            video_urls: filteredLinks,
+            video_url: undefined, // Let startPlayback decide
             show_id: currentShow.id,
             show_title: currentShow.title || currentShow.name || '',
             backdrop_path: currentShow.backdrop_path,
             season_number: seasonNumber,
         });
+        
+        closeEpisodesDrawer();
     };
 
     const ImageWithProgress = ({ episode }: { episode: Episode }) => {
@@ -112,39 +126,49 @@ const EpisodesDrawer: React.FC = observer(() => {
                     </IconButton>
                 </Toolbar>
                 <List sx={{ overflowY: 'auto', flex: 1, p: 1 }}>
-                    {currentSeasonEpisodes.map((episode) => (
-                        <ListItem key={episode.id} disablePadding sx={{ mb: 1 }}>
-                            <ListItemButton
-                                selected={episode.id === currentEpisodeId}
-                                onClick={() => handleSelectEpisode(episode)}
-                                sx={{ 
-                                    gap: 2, 
-                                    p: 1, 
-                                    borderRadius: 1,
-                                    '&.Mui-selected': {
-                                        bgcolor: 'rgba(255, 255, 255, 0.15)'
-                                    }
-                                }}
-                            >
-                                <Typography sx={{ minWidth: '2.5rem', alignSelf: 'center' }} align="center">{episode.episode_number}</Typography>
-                                
-                                <ImageWithProgress episode={episode} />
+                    {currentSeasonEpisodes.map((episode) => {
+                        const hasPlayableLinks = (episode.video_urls || []).some(link => {
+                            const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+                            const typeMatch = !typeFilter || (link.type === typeFilter);
+                            return langMatch && typeMatch;
+                        });
 
-                                <ListItemText
-                                    primary={episode.name}
-                                    primaryTypographyProps={{
-                                        fontWeight: 'bold',
-                                        whiteSpace: 'normal',
-                                        lineHeight: 1.3,
+                        return (
+                            <ListItem key={episode.id} disablePadding sx={{ mb: 1 }}>
+                                <ListItemButton
+                                    selected={episode.id === currentEpisodeId}
+                                    onClick={() => handleSelectEpisode(episode)}
+                                    disabled={!hasPlayableLinks}
+                                    sx={{ 
+                                        gap: 2, 
+                                        p: 1, 
+                                        borderRadius: 1,
+                                        opacity: hasPlayableLinks ? 1 : 0.5,
+                                        '&.Mui-selected': {
+                                            bgcolor: 'rgba(255, 255, 255, 0.15)'
+                                        }
                                     }}
-                                    secondary={t('episodesDrawer.season', { number: seasonNumber })}
-                                    secondaryTypographyProps={{
-                                        mt: 0.5
-                                    }}
-                                />
-                            </ListItemButton>
-                        </ListItem>
-                    ))}
+                                >
+                                    <Typography sx={{ minWidth: '2.5rem', alignSelf: 'center' }} align="center">{episode.episode_number}</Typography>
+                                    
+                                    <ImageWithProgress episode={episode} />
+
+                                    <ListItemText
+                                        primary={episode.name}
+                                        primaryTypographyProps={{
+                                            fontWeight: 'bold',
+                                            whiteSpace: 'normal',
+                                            lineHeight: 1.3,
+                                        }}
+                                        secondary={t('episodesDrawer.season', { number: seasonNumber })}
+                                        secondaryTypographyProps={{
+                                            mt: 0.5
+                                        }}
+                                    />
+                                </ListItemButton>
+                            </ListItem>
+                        );
+                    })}
                 </List>
             </Box>
         </Drawer>
