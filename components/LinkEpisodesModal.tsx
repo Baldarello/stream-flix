@@ -256,45 +256,64 @@ const AddLinkTabs: React.FC<{
     };
 
     return (
-        <Box sx={{ display: 'flex', mt: 2, flexGrow: 1, overflow: 'hidden' }}>
-            <Tabs
-                orientation="vertical"
-                variant="scrollable"
-                value={addMethod}
-                onChange={(_, v) => setAddMethod(v)}
-                sx={{ borderRight: 1, borderColor: 'divider', mr: 2, flexShrink: 0 }}
-            >
-                <Tab label={t('linkEpisodesModal.add.pattern')} value="pattern" />
-                <Tab label={t('linkEpisodesModal.add.list')} value="list" />
-                <Tab label={t('linkEpisodesModal.add.json')} value="json" />
-            </Tabs>
-            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingTop:"10px"}}>
-                 <Box sx={{ flexGrow: 1, pr: 1 }}>
-                    <Stack spacing={2}>
-                        <Stack direction="row" spacing={2}>
-                            <TextField
-                                label={t('linkEpisodesModal.add.language')}
-                                value={language}
-                                onChange={e => setLanguage(e.target.value.toUpperCase())}
-                                required
-                                sx={{width: '100px'}}
-                                inputProps={{ maxLength: 3 }}
-                            />
-                            <FormControl fullWidth required>
-                                <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
-                                <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value as 'sub' | 'dub')}>
-                                    <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
-                                    <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Stack>
+        <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2, flexGrow: 1, overflow: 'hidden' }}>
+            {/* Top Controls: Common inputs + Mobile Method Selector */}
+            <Stack spacing={2} sx={{ mb: 2, pr: 1, flexShrink: 0 }}>
+                {/* Mobile-only method selector */}
+                <FormControl fullWidth required sx={{ display: { xs: 'block', md: 'none' } }}>
+                    <InputLabel>Metodo</InputLabel>
+                    <Select value={addMethod} label="Metodo" onChange={(e) => setAddMethod(e.target.value as 'pattern' | 'list' | 'json')}>
+                        <MenuItem value="pattern">{t('linkEpisodesModal.add.pattern')}</MenuItem>
+                        <MenuItem value="list">{t('linkEpisodesModal.add.list')}</MenuItem>
+                        <MenuItem value="json">{t('linkEpisodesModal.add.json')}</MenuItem>
+                    </Select>
+                </FormControl>
+    
+                {/* Language and Type inputs */}
+                <Stack direction="row" spacing={2}>
+                    <TextField
+                        label={t('linkEpisodesModal.add.language')}
+                        value={language}
+                        onChange={e => setLanguage(e.target.value.toUpperCase())}
+                        required
+                        sx={{width: '100px'}}
+                        inputProps={{ maxLength: 3 }}
+                    />
+                    <FormControl fullWidth required>
+                        <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
+                        <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value as 'sub' | 'dub')}>
+                            <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
+                            <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Stack>
+            </Stack>
+            
+            {/* Content area */}
+            <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+                {/* Desktop-only vertical tabs */}
+                <Tabs
+                    orientation="vertical"
+                    variant="scrollable"
+                    value={addMethod}
+                    onChange={(_, v) => setAddMethod(v)}
+                    sx={{ borderRight: 1, borderColor: 'divider', mr: 2, flexShrink: 0, display: { xs: 'none', md: 'flex' } }}
+                >
+                    <Tab label={t('linkEpisodesModal.add.pattern')} value="pattern" />
+                    <Tab label={t('linkEpisodesModal.add.list')} value="list" />
+                    <Tab label={t('linkEpisodesModal.add.json')} value="json" />
+                </Tabs>
+                
+                {/* The main content that changes based on method, and save button */}
+                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
                         {renderAddContent()}
-                    </Stack>
-                </Box>
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1 }}>
-                    <Button onClick={handleSave} variant="contained" disabled={isSaving}>
-                        {isSaving ? <CircularProgress size={24} color="inherit" /> : t('linkEpisodesModal.add.save')}
-                    </Button>
+                    </Box>
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1, pr: 0 }}>
+                        <Button onClick={handleSave} variant="contained" disabled={isSaving}>
+                            {isSaving ? <CircularProgress size={24} color="inherit" /> : t('linkEpisodesModal.add.save')}
+                        </Button>
+                    </Box>
                 </Box>
             </Box>
         </Box>
