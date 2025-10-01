@@ -137,7 +137,7 @@ const AppContent: React.FC = observer(() => {
   }
 
   if (isRemoteMaster) return <><RemoteControlView /> <NotificationSnackbar /><DebugOverlay /></>;
-  if (nowPlayingItem) return <><VideoPlayer /> <NotificationSnackbar /><DebugOverlay /></>;
+  if (nowPlayingItem) return <><VideoPlayer /> <LinkSelectionModal /><NotificationSnackbar /><DebugOverlay /></>;
   if (isSmartTVPairingVisible) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
 
   const renderSearchView = () => {
