@@ -1,7 +1,7 @@
 import 'dexie-observable/api';
 // FIX: Import the 'DbEvents' type from dexie to correctly type the event handling.
 import Dexie, { type Table, type DbEvents } from 'dexie';
-import type { ViewingHistoryItem, MediaItem, MediaLink, EpisodeProgress, PreferredSource } from '../types';
+import type { ViewingHistoryItem, MediaItem, MediaLink, EpisodeProgress, PreferredSource, ShowFilterPreference } from '../types';
 import dexieObservable from 'dexie-observable';
 
 // Define the structure of the data we're storing
@@ -59,6 +59,7 @@ export class QuixDB extends Dexie {
   episodeProgress!: Table<EpisodeProgress, number>;
   preferredSources!: Table<PreferredSource, number>;
   selectedSeasons!: Table<SelectedSeason, number>;
+  showFilterPreferences!: Table<ShowFilterPreference, number>;
 
 
   constructor() {
@@ -139,10 +140,14 @@ export class QuixDB extends Dexie {
     (this as Dexie).version(9).stores({
         selectedSeasons: '&showId'
     });
+
+    (this as Dexie).version(10).stores({
+        showFilterPreferences: '&showId'
+    });
   }
   
   async importData(data: any) {
-    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources', 'selectedSeasons'];
+    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences'];
     const tablesInData = data ? Object.keys(data) : [];
     
     if (!tablesInData.length || !tablesInData.some(table => expectedTables.includes(table))) {

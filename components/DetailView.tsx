@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
@@ -17,11 +17,19 @@ import type { Episode } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
 const DetailView: React.FC = observer(() => {
-  const { selectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration, episodeProgress, selectedSeasons, setSelectedSeasonForShow } = mediaStore;
+  const { 
+    selectedItem: item, 
+    myList, 
+    isDetailLoading, 
+    showIntroDurations, 
+    setShowIntroDuration, 
+    episodeProgress, 
+    selectedSeasons, 
+    setSelectedSeasonForShow,
+    showFilterPreferences,
+    setShowFilterPreference
+  } = mediaStore;
   const { t } = useTranslations();
-
-  const [languageFilter, setLanguageFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<'sub' | 'dub' | 'all'>('all');
 
   if (!item) return null;
 
@@ -57,16 +65,36 @@ const DetailView: React.FC = observer(() => {
     return { availableLanguages: Array.from(langSet).sort(), availableTypes: Array.from(typeSet).sort() };
   }, [currentSeason]);
 
+  const currentPreferences = showFilterPreferences.get(item.id) || {};
+
+  const languageFilter = (currentPreferences.language && availableLanguages.includes(currentPreferences.language))
+      ? currentPreferences.language
+      : availableLanguages[0];
+
+  const typeFilter = (currentPreferences.type && availableTypes.includes(currentPreferences.type))
+      ? currentPreferences.type
+      : availableTypes[0];
+
+  useEffect(() => {
+    // Set initial default preferences in the store if they don't exist for this show
+    if (item && !showFilterPreferences.has(item.id) && currentSeason) {
+        const defaultPrefs: { language?: string; type?: 'sub' | 'dub' } = {};
+        if (availableLanguages.length > 0) defaultPrefs.language = availableLanguages[0];
+        if (availableTypes.length > 0) defaultPrefs.type = availableTypes[0];
+        if (Object.keys(defaultPrefs).length > 0) {
+            setShowFilterPreference(item.id, defaultPrefs);
+        }
+    }
+  }, [item, currentSeason, availableLanguages, availableTypes, showFilterPreferences, setShowFilterPreference]);
+
   const filteredEpisodes = useMemo(() => {
     if (!currentSeason) return [];
-    if (languageFilter === 'all' && typeFilter === 'all') {
-        return currentSeason.episodes;
-    }
     return currentSeason.episodes.filter(ep => {
-        return (ep.video_urls || []).some(link => 
-            (languageFilter === 'all' || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
-            (typeFilter === 'all' || link.type === typeFilter)
-        );
+        return (ep.video_urls || []).some(link => {
+            const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+            const typeMatch = !typeFilter || (link.type === typeFilter);
+            return langMatch && typeMatch;
+        });
     });
   }, [currentSeason, languageFilter, typeFilter]);
 
@@ -250,8 +278,7 @@ const DetailView: React.FC = observer(() => {
                                  {availableLanguages.length > 1 && (
                                     <FormControl sx={{ minWidth: 120 }} size="small">
                                         <InputLabel>{t('detail.filterLanguage')}</InputLabel>
-                                        <Select value={languageFilter} label={t('detail.filterLanguage')} onChange={(e) => setLanguageFilter(e.target.value)} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
-                                            <MenuItem value="all">{t('detail.all')}</MenuItem>
+                                        <Select value={languageFilter || ''} label={t('detail.filterLanguage')} onChange={(e) => setShowFilterPreference(item.id, { language: e.target.value })} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
                                             {availableLanguages.map(lang => <MenuItem key={lang} value={lang}>{lang}</MenuItem>)}
                                         </Select>
                                     </FormControl>
@@ -259,8 +286,7 @@ const DetailView: React.FC = observer(() => {
                                 {availableTypes.length > 1 && (
                                     <FormControl sx={{ minWidth: 120 }} size="small">
                                         <InputLabel>{t('detail.filterType')}</InputLabel>
-                                        <Select value={typeFilter} label={t('detail.filterType')} onChange={(e) => setTypeFilter(e.target.value as any)} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
-                                            <MenuItem value="all">{t('detail.all')}</MenuItem>
+                                        <Select value={typeFilter || ''} label={t('detail.filterType')} onChange={(e) => setShowFilterPreference(item.id, { type: e.target.value as 'sub' | 'dub' })} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
                                             {availableTypes.map(type => <MenuItem key={type} value={type}>{t(`linkEpisodesModal.add.${type}`)}</MenuItem>)}
                                         </Select>
                                     </FormControl>
@@ -340,10 +366,11 @@ const DetailView: React.FC = observer(() => {
                                 >
                                     <ListItemButton
                                         onClick={() => {
-                                            const filteredLinks = (episode.video_urls || []).filter(link => 
-                                                (languageFilter === 'all' || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
-                                                (typeFilter === 'all' || link.type === typeFilter)
-                                            );
+                                            const filteredLinks = (episode.video_urls || []).filter(link => {
+                                                const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+                                                const typeMatch = !typeFilter || (link.type === typeFilter);
+                                                return langMatch && typeMatch;
+                                            });
 
                                             mediaStore.startPlayback({
                                                 ...episode,

@@ -113,6 +113,12 @@ export interface Revision {
     icon?: 'add' | 'update' | 'delete' | 'unknown';
 }
 
+export interface ShowFilterPreference {
+  showId: number; // Primary key
+  language?: string;
+  type?: 'sub' | 'dub';
+}
+
 export interface PreferredSource {
   showId: number; // Primary key
   origin: string; // e.g., "https://srv18-acqua.sweetpixel.org"

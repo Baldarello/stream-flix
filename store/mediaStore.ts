@@ -1,6 +1,6 @@
 import {makeAutoObservable, runInAction} from 'mobx';
 // FIX: Replace deprecated EpisodeLink with MediaLink
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource} from '../types';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -68,6 +68,7 @@ class MediaStore {
     preferredSources: Map<number, string> = new Map();
     preferredLabels: string[] = [];
     selectedSeasons: Map<number, number> = new Map();
+    showFilterPreferences: Map<number, { language?: string; type?: 'sub' | 'dub'; }> = new Map();
 
     // Search State
     searchQuery = '';
@@ -330,7 +331,7 @@ class MediaStore {
         if (showNotification) this.showSnackbar('notifications.backupInProgress', 'info', true);
         this.isSyncing = true;
         try {
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons'];
+            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences'];
             const data: { [key: string]: any[] } = {};
             for (const tableName of tablesToBackup) {
                 if ((db as any)[tableName]) {
@@ -589,7 +590,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -601,6 +602,7 @@ class MediaStore {
             db.preferences.get('activeTheme'),
             db.selectedSeasons.toArray(),
             db.preferences.get('preferredLabels'),
+            db.showFilterPreferences.toArray(),
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -622,6 +624,7 @@ class MediaStore {
             this.selectedSeasons = new Map(selectedSeasons.map(s => [s.showId, s.seasonNumber]));
             if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
             if (username?.value) this.username = username.value;
+            this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, { language: p.language, type: p.type }]));
         });
     }
 
@@ -810,6 +813,13 @@ class MediaStore {
     setSelectedSeasonForShow = (showId: number, seasonNumber: number) => {
         this.selectedSeasons.set(showId, seasonNumber);
         db.selectedSeasons.put({ showId, seasonNumber });
+    }
+
+    setShowFilterPreference = (showId: number, preference: { language?: string; type?: 'sub' | 'dub'; }) => {
+        const currentPrefs = this.showFilterPreferences.get(showId) || {};
+        const newPrefs = { ...currentPrefs, ...preference };
+        this.showFilterPreferences.set(showId, newPrefs);
+        db.showFilterPreferences.put({ showId, ...newPrefs });
     }
 
     togglePreferredLabel = async (label: string) => {
