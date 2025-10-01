@@ -1262,10 +1262,18 @@ class MediaStore {
         this.sendSlaveStatusUpdate();
     };
 
-    generateShareableData = (showIds: number[]): SharedLibraryData => {
+    generateShareableData = async (showIds: number[]): Promise<SharedLibraryData> => {
         const shows: SharedShowData[] = [];
         for (const showId of showIds) {
-            const show = this.cachedItems.get(showId);
+            // Ensure full details are loaded, as the cached item might be partial.
+            const cachedShow = this.cachedItems.get(showId);
+            const needsFetch = !cachedShow || !cachedShow.seasons || cachedShow.seasons.some(s => s.episodes.length === 0);
+            if (needsFetch) {
+                // selectMedia with 'cacheOnly' will fetch from API and update the cache.
+                await this.selectMedia({ id: showId, media_type: 'tv' } as MediaItem, 'cacheOnly');
+            }
+            
+            const show = this.cachedItems.get(showId); // Get the updated item
             if (!show || !show.seasons) continue;
 
             const links: SharedEpisodeLink[] = [];

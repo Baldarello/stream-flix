@@ -61,7 +61,7 @@ const ShareLibraryModal: React.FC = observer(() => {
 
         setIsGenerating(true);
         try {
-            const data = generateShareableData(Array.from(selectedShows));
+            const data = await generateShareableData(Array.from(selectedShows));
             if (data.shows.length === 0) {
                 showSnackbar("notifications.shareNoShowsSelected", "warning", true);
                 return;

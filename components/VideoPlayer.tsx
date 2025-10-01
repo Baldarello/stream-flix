@@ -359,7 +359,7 @@ const VideoPlayer: React.FC = observer(() => {
           <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)', pointerEvents: 'none' }}>
             
             {/* Top Bar */}
-            <AppBar position="static" sx={{ bgcolor: 'transparent', boxShadow: 'none', pointerEvents: 'auto' }}>
+            <AppBar position="static" sx={{ bgcolor: 'transparent', boxShadow: 'none', pointerEvents: 'auto', paddingTop: 'env(safe-area-inset-top)' }}>
                 <Toolbar>
                     <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}><ArrowBackIcon/></IconButton>
                     <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
@@ -369,7 +369,7 @@ const VideoPlayer: React.FC = observer(() => {
             </AppBar>
             
             {/* Bottom Controls */}
-            <Box sx={{ p: 2, pointerEvents: 'auto' }}>
+            <Box sx={{ px: 2, pt: 2, pb: 'calc(1rem + env(safe-area-inset-bottom))', pointerEvents: 'auto' }}>
                  <Slider
                     className="video-player-slider"
                     aria-label="progress"
