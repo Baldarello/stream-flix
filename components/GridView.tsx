@@ -4,7 +4,7 @@ import { Box, Container, Typography, Grid } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { Card } from './Card';
 import type { MediaItem } from '../types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useTranslations } from '../hooks/useTranslations';
 
 interface GridViewProps {

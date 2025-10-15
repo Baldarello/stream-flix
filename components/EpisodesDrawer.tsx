@@ -9,7 +9,7 @@ import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { Episode, MediaItem, PlayableItem } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 interface EpisodesDrawerProps {
     nowPlayingItem: PlayableItem | null;

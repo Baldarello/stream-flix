@@ -6,7 +6,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslations } from '../hooks/useTranslations';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 interface HeroProps {
   item: MediaItem;

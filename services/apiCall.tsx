@@ -48,14 +48,6 @@ const tmdbToMediaItem = (item: any): MediaItem => ({
   media_type: item.media_type || (item.title ? 'movie' : 'tv'),
 });
 
-/**
- * Fetches detailed information for a specific media item (movie or TV series).
- */
-export const getMediaDetails = async (type: 'movie' | 'tv', id: number): Promise<MediaItem> => {
-  const response = await apiClient.get(`${BASE_PATH}3/${type}/${id}`);
-  return tmdbToMediaItem(response.data);
-};
-
 
 /**
  * Fetches trending movies and TV shows for the week.

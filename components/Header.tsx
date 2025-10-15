@@ -7,7 +7,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import { useTranslations } from '../hooks/useTranslations';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
+import { NavLink } from './CustomLink';
 
 const navLinks = [
     { key: 'home', path: '/'},
@@ -136,7 +137,7 @@ export const Header: React.FC = observer(() => {
                     to={item.path}
                     onClick={() => toggleSearch(false)}
                     sx={navLinkStyles}
-                    className={({ isActive }) => (isActive ? 'active' : '')}
+                    className={({ isActive } : { isActive: boolean }) => (isActive ? 'active' : '')}
                   >
                     {t(`header.${item.key}`)}
                   </Typography>

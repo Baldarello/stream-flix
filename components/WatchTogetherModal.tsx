@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, Button, TextField, Stack, IconButton, List, ListItem, ListItemText, CircularProgress, Tooltip, Alert, FormControl, InputLabel, Select, MenuItem, ListItemButton, Card, CardMedia } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -255,7 +255,7 @@ const WatchTogetherModal: React.FC = observer(() => {
         // This is an Episode with show context from PlayableItem.
         roomTitle = itemForModal.show_title;
         // FIX: Added 'else if' to create a stronger type guard, resolving an error where '.title' might be accessed on an Episode type.
-      } else if ('title' in itemForModal || 'name' in itemForModal) {
+      } else if ('title' in itemForModal) {
         // If it's not an episode, it's a MediaItem.
         roomTitle = itemForModal.title || itemForModal.name || '';
       }
