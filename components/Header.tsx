@@ -1,28 +1,26 @@
 import React, { useRef, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Box, IconButton, TextField, InputAdornment, Grow, Fade } from '@mui/material';
+import { AppBar, Toolbar, Typography, Box, Button, IconButton, useScrollTrigger, Slide, TextField, InputAdornment, Grow, Fade } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore';
+// FIX: mediaStore is now a named export, not a default one.
+import { mediaStore, ActiveView } from '../store/mediaStore';
 import { useTranslations } from '../hooks/useTranslations';
-import { useNavigate } from 'react-router';
-import { NavLink } from './CustomLink';
 
-const navLinks = [
-    { key: 'home', path: '/'},
-    { key: 'series', path: '/series'},
-    { key: 'movies', path: '/movies'},
-    { key: 'anime', path: '/anime'},
-    { key: 'myList', path: '/my-list'},
+const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveView }[] = [
+    { key: 'home', view: 'Home'},
+    { key: 'series', view: 'Serie TV'},
+    { key: 'movies', view: 'Film'},
+    { key: 'anime', view: 'Anime'},
+    { key: 'myList', view: 'La mia lista'},
 ];
 
 export const Header: React.FC = observer(() => {
   const { isSearchActive, toggleSearch, searchQuery, setSearchQuery } = mediaStore;
   const { t } = useTranslations();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (isSearchActive) {
@@ -33,13 +31,10 @@ export const Header: React.FC = observer(() => {
     }
   }, [isSearchActive]);
 
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim()) {
-        navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-        // Optionally close search bar after submission
-        // toggleSearch(false); 
-    }
-  };
+  const handleNavClick = (view: ActiveView) => {
+    toggleSearch(false);
+    mediaStore.setActiveView(view);
+  }
 
   const getGlowColor = () => {
     switch (mediaStore.activeTheme) {
@@ -49,43 +44,6 @@ export const Header: React.FC = observer(() => {
         default: return 'var(--glow-seriestv-color)';
     }
   }
-  
-  const navLinkStyles = {
-      color: 'white',
-      my: 2,
-      display: 'block',
-      fontWeight: 400,
-      opacity: 0.8,
-      position: 'relative',
-      textDecoration: 'none',
-      padding: '6px 8px',
-      borderRadius: '4px',
-      '&:hover': {
-        opacity: 1,
-      },
-      '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: 4,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '0',
-          height: '2px',
-          background: getGlowColor(),
-          boxShadow: `0 0 8px ${getGlowColor()}`,
-          transition: 'width 0.3s ease-in-out',
-      },
-      '&:hover::after': {
-          width: '40%',
-      },
-      '&.active': {
-        fontWeight: 700,
-        opacity: 1,
-        '&::after': {
-          width: '60%',
-        },
-      },
-  };
 
   return (
     <AppBar 
@@ -110,9 +68,8 @@ export const Header: React.FC = observer(() => {
           <Typography 
             variant="h6" 
             noWrap
-            component={NavLink}
-            to="/"
-            onClick={() => toggleSearch(false)}
+            component="div"
+            onClick={() => handleNavClick('Home')}
             sx={{
               mr: 2,
               fontWeight: 800,
@@ -130,17 +87,39 @@ export const Header: React.FC = observer(() => {
           </Typography>
           <Grow in={!isSearchActive}>
               <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-              {navLinks.map((item) => (
-                  <Typography
-                    key={item.key}
-                    component={NavLink}
-                    to={item.path}
-                    onClick={() => toggleSearch(false)}
-                    sx={navLinkStyles}
-                    className={({ isActive } : { isActive: boolean }) => (isActive ? 'active' : '')}
+              {navKeys.map((item) => (
+                  <Button 
+                  key={String(item.key)} 
+                  sx={{ 
+                      color: 'white', 
+                      my: 2, 
+                      display: 'block',
+                      fontWeight: mediaStore.activeView === item.view ? 700 : 400,
+                      opacity: mediaStore.activeView === item.view ? 1 : 0.8,
+                      position: 'relative',
+                      '&:hover': {
+                        opacity: 1,
+                      },
+                      '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          bottom: 4,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: mediaStore.activeView === item.view ? '60%' : '0',
+                          height: '2px',
+                          background: getGlowColor(),
+                          boxShadow: `0 0 8px ${getGlowColor()}`,
+                          transition: 'width 0.3s ease-in-out',
+                      },
+                      '&:hover::after': {
+                          width: mediaStore.activeView !== item.view ? '40%' : '60%',
+                      }
+                  }}
+                  onClick={() => handleNavClick(item.view)}
                   >
-                    {t(`header.${item.key}`)}
-                  </Typography>
+                  {t(`header.${String(item.key)}`)}
+                  </Button>
               ))}
               </Box>
           </Grow>
@@ -154,7 +133,6 @@ export const Header: React.FC = observer(() => {
                   placeholder={t('header.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
                   inputRef={searchInputRef}
                   sx={{
                       '& .MuiInput-underline:before': { borderBottomColor: 'rgba(255, 255, 255, 0.42)' },
