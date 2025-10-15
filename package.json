@@ -1,3 +1,4 @@
+
 {
   "name": "quix",
   "private": true,
@@ -18,6 +19,7 @@
     "mobx": "6.13.1",
     "mobx-react-lite": "4.0.7",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.25.1",
     "dexie": "4.0.1-beta.2",
     "html5-qrcode": "^2.3.8",
     "dexie-observable": "^4.0.1-beta.2"

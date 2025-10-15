@@ -5,8 +5,8 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslations } from '../hooks/useTranslations';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
+import { useNavigate } from 'react-router-dom';
 
 interface HeroProps {
   item: MediaItem;
@@ -16,6 +16,7 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = observer(({ item, onMoreInfoClick, onPlayClick }) => {
   const { t } = useTranslations();
+  const navigate = useNavigate();
   const title = item.title || item.name;
   const overview = item.overview.length > 200 ? `${item.overview.substring(0, 200)}...` : item.overview;
 
@@ -65,7 +66,6 @@ export const Hero: React.FC<HeroProps> = observer(({ item, onMoreInfoClick, onPl
           <Typography variant="body1" sx={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}>
             {overview}
           </Typography>
-          {/* FIX: The `pt` prop is a system prop and should be passed inside the `sx` object. */}
           <Stack direction="row" spacing={2} sx={{ pt: 2 }}>
             <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)' } }} onClick={onPlayClick}>
               {t('hero.play')}

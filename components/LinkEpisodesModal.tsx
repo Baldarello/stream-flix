@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert, FormControlLabel, Switch, Autocomplete, CircularProgress } from '@mui/material';
 // FIX: `SelectChangeEvent` is imported from '@mui/material/Select' instead of '@mui/material'.

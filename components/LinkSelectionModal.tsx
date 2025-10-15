@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';

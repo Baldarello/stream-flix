@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Snackbar, Alert, Button } from '@mui/material';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 import { useTranslations } from '../hooks/useTranslations';
 

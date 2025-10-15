@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { MediaItem } from '../types';
 import { Card as MuiCard, CardMedia, Typography, Box, CardActionArea, IconButton, Tooltip } from '@mui/material';

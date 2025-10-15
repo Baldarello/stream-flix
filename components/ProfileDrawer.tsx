@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore, ThemeName, Language } from '../store/mediaStore';
 import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors, Avatar, ListItemAvatar, CircularProgress } from '@mui/material';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';

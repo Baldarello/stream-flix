@@ -1,4 +1,4 @@
-// FIX: mediaStore is now a named export, not a default one.
+
 import { mediaStore } from '../store/mediaStore';
 import type { GoogleUser } from '../types';
 

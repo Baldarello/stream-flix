@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import type { MediaItem } from '../types';
 import { Card } from './Card';

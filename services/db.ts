@@ -1,3 +1,4 @@
+
 import 'dexie-observable/api';
 // FIX: Import the 'DbEvents' type from dexie to correctly type the event handling.
 import Dexie, { type Table, type DbEvents } from 'dexie';
