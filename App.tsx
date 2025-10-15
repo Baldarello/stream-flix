@@ -260,12 +260,19 @@ const App: React.FC = () => {
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
         // This event is triggered by the browser's back/forward buttons.
-        // We check if the new history state indicates that a detail view should be open.
-        // If not, and we currently have a selected item, it means the user has navigated "back"
-        // out of the detail view, so we should close it.
-        if (!event.state?.detailViewOpen && mediaStore.selectedItem) {
-            // The history has changed, so just update the state to match.
-            // Call a method that doesn't manipulate history back.
+        const state = event.state || {}; // Handle initial null state
+
+        // Case 1: User navigates BACK from the video player.
+        // We check if a player should be open. If not, but we have a playing item,
+        // it means we need to close it.
+        if (!state.playerOpen && mediaStore.nowPlayingItem) {
+            mediaStore._stopPlaybackWithoutHistory();
+        }
+        
+        // Case 2: User navigates BACK from the detail view.
+        // We check if a detail view should be open. If not, but we have one selected,
+        // it means we need to close it. We also ensure we are not currently playing a video.
+        if (!state.detailViewOpen && mediaStore.selectedItem && !mediaStore.nowPlayingItem) {
             mediaStore._closeDetailWithoutHistory();
         }
     };

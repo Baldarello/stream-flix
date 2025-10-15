@@ -243,9 +243,22 @@ class MediaStore {
             runInAction(() => {
                 if (this.selectedItem) {
                     this.playbackOriginItem = this.selectedItem;
+                    // Close detail view without affecting history, as we will push a new state for the player.
+                    this._closeDetailWithoutHistory();
+                } else {
+                    // Ensure playbackOriginItem is cleared if we start playing from a non-detail view.
+                    this.playbackOriginItem = null;
                 }
+
+                // Push a new history state for the video player.
+                // Replace state if another player is somehow already open.
+                if (window.history.state?.playerOpen) {
+                    window.history.replaceState({ playerOpen: true, itemId: item.id }, '', window.location.href);
+                } else {
+                    window.history.pushState({ playerOpen: true, itemId: item.id }, '', window.location.href);
+                }
+
                 this.nowPlayingItem = item;
-                this.closeDetail();
     
                 if ('show_id' in item) {
                     this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
@@ -256,7 +269,7 @@ class MediaStore {
         }
     }
 
-    stopPlayback = () => {
+    _stopPlaybackWithoutHistory = () => {
         if (this.playbackOriginItem) {
             this.selectedItem = this.playbackOriginItem;
             this.playbackOriginItem = null;
@@ -264,6 +277,18 @@ class MediaStore {
         this.nowPlayingItem = null;
         this.nowPlayingShowDetails = null;
         this.isPlaying = false;
+    }
+
+    stopPlayback = () => {
+        // This is called by UI elements (e.g., the back button in the player).
+        // It uses the History API to navigate back, which triggers the popstate
+        // event, ensuring the UI state and browser history remain synchronized.
+        if (window.history.state?.playerOpen) {
+            window.history.back();
+        } else {
+            // Fallback in case the history state is not what we expect.
+            this._stopPlaybackWithoutHistory();
+        }
     }
 
     synchronizeWithDrive = async () => {
