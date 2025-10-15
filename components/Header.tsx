@@ -76,14 +76,13 @@ export const Header: React.FC = observer(() => {
       },
       '&:hover::after': {
           width: '40%',
-      }
-  };
-  
-  const activeNavLinkStyles = {
-      fontWeight: 700,
-      opacity: 1,
-      '&::after': {
-        width: '60%',
+      },
+      '&.active': {
+        fontWeight: 700,
+        opacity: 1,
+        '&::after': {
+          width: '60%',
+        },
       },
   };
 
@@ -137,7 +136,7 @@ export const Header: React.FC = observer(() => {
                     to={item.path}
                     onClick={() => toggleSearch(false)}
                     sx={navLinkStyles}
-                    style={({ isActive }) => (isActive ? activeNavLinkStyles : {})}
+                    className={({ isActive }) => (isActive ? 'active' : '')}
                   >
                     {t(`header.${item.key}`)}
                   </Typography>
