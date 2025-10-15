@@ -35,6 +35,7 @@ const LinkSelectionModal: React.FC = () => {
       } else {
         startPlayback(itemToPlay);
       }
+      closeLinkSelectionModal();
     }
   };
 
