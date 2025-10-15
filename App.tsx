@@ -258,6 +258,26 @@ const App: React.FC = () => {
   }, []);
   
   useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+        // This event is triggered by the browser's back/forward buttons.
+        // We check if the new history state indicates that a detail view should be open.
+        // If not, and we currently have a selected item, it means the user has navigated "back"
+        // out of the detail view, so we should close it.
+        if (!event.state?.detailViewOpen && mediaStore.selectedItem) {
+            // The history has changed, so just update the state to match.
+            // Call a method that doesn't manipulate history back.
+            mediaStore._closeDetailWithoutHistory();
+        }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+        window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
     // Dynamically update body background based on theme
     const themeClassMap: Record<ThemeName, string> = {
       'SerieTV': 'theme-serietv',

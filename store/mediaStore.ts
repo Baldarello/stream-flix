@@ -246,7 +246,6 @@ class MediaStore {
                 }
                 this.nowPlayingItem = item;
                 this.closeDetail();
-                this.closeLinkSelectionModal();
     
                 if ('show_id' in item) {
                     this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
@@ -375,7 +374,22 @@ class MediaStore {
 
     // --- START OF IMPLEMENTED METHODS ---
     hideSnackbar = () => { this.snackbarMessage = null; };
-    closeDetail = () => { this.selectedItem = null; };
+    
+    // This is called by the popstate event handler to close the detail view
+    // without further manipulating the browser history.
+    _closeDetailWithoutHistory = () => { this.selectedItem = null; };
+
+    closeDetail = () => {
+        // This is called by UI elements (e.g., the 'X' button).
+        // It uses the History API to navigate back, which triggers the popstate
+        // event, ensuring the UI state and browser history remain synchronized.
+        if (window.history.state?.detailViewOpen) {
+            window.history.back();
+        } else {
+            // Fallback in case the history state is not what we expect.
+            this._closeDetailWithoutHistory();
+        }
+    };
     setActiveView = (view: ActiveView) => { 
         this.activeView = view; 
         if (view === 'Serie TV') this.setActiveTheme('SerieTV');
@@ -618,6 +632,13 @@ class MediaStore {
         // 1. Set initial state based on context
         switch(context) {
             case 'detailView':
+                // If another detail view is already open, replace the history state. Otherwise, push a new one.
+                // This ensures the back button always exits the detail view, instead of going to a previous detail view.
+                if (this.selectedItem) {
+                    window.history.replaceState({ detailViewOpen: true, itemId: item.id }, '', window.location.href);
+                } else {
+                    window.history.pushState({ detailViewOpen: true, itemId: item.id }, '', window.location.href);
+                }
                 this.selectedItem = item;
                 this.isDetailLoading = true;
                 break;
