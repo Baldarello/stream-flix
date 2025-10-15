@@ -145,6 +145,10 @@ export class QuixDB extends Dexie {
     (this as Dexie).version(10).stores({
         showFilterPreferences: '&showId'
     });
+
+    (this as Dexie).version(11).stores({
+        episodeProgress: '&episodeId, watched'
+    });
   }
   
   async importData(data: any) {
