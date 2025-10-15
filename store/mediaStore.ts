@@ -71,14 +71,14 @@ class MediaStore {
 
     // Detail View State
     isDetailLoading = false;
-    showIntroDurations = new Map<number, number>();
-    selectedSeasons = new Map<number, number>();
-    showFilterPreferences = new Map<number, Partial<ShowFilterPreference>>();
-    episodeProgress = new Map<number, EpisodeProgress>();
-    mediaLinks = new Map<number, MediaLink[]>();
+    showIntroDurations = observable.map<number, number>();
+    selectedSeasons = observable.map<number, number>();
+    showFilterPreferences = observable.map<number, Partial<ShowFilterPreference>>();
+    episodeProgress = observable.map<number, EpisodeProgress>();
+    mediaLinks = observable.map<number, MediaLink[]>();
     allUniqueLabels: string[] = [];
     preferredLabels: string[] = [];
-    preferredSources = new Map<number, string>();
+    preferredSources = observable.map<number, string>();
     expandedLinkAccordionId: number | false = false;
 
     // Watch Together State (via WebSocket)
@@ -131,15 +131,7 @@ class MediaStore {
     isImportingLibrary = false;
 
     constructor() {
-        makeAutoObservable(this, {
-            // Using observable.map for maps is recommended for performance
-            showIntroDurations: observable.map,
-            selectedSeasons: observable.map,
-            showFilterPreferences: observable.map,
-            episodeProgress: observable.map,
-            mediaLinks: observable.map,
-            preferredSources: observable.map,
-        });
+        makeAutoObservable(this);
         this.initWebSocketListeners();
 
         // Check for debug mode, remote control, or import URLs in query params on startup
