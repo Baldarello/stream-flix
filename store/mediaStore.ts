@@ -549,8 +549,8 @@ class MediaStore {
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id > 0);
-        if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) { // Adjusted logic to find actual next, not just > 0
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) {
             return season.episodes[currentEpisodeIndex + 1];
         }
         return null;
