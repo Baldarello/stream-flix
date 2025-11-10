@@ -1203,14 +1203,25 @@ class MediaStore {
         this.selectMedia(item, 'remoteControl');
     };
 
+    private sendPlayCommandAndOptimisticallyUpdate = (item: PlayableItem) => {
+        this.sendRemoteCommand({ command: 'play_item', item });
+        runInAction(() => {
+            this.remoteSlaveState = {
+                ...(this.remoteSlaveState ?? {}),
+                isPlaying: true,
+                nowPlayingItem: item,
+                currentTime: item.startTime ?? 0,
+                duration: this.remoteSlaveState?.nowPlayingItem?.id === item.id ? this.remoteSlaveState.duration : 0,
+            };
+        });
+    };
+
     playRemoteItem = async (item: PlayableItem) => {
         // This method is called by the Master remote.
         // It needs to resolve the video URL before sending the command to the Slave.
-        
-        // If URL is already present, just play and close modal.
         if (item.video_url) {
-            this.sendRemoteCommand({ command: 'play_item', item });
-            this.closeLinkSelectionModal(); // Ensure modal is closed
+            this.sendPlayCommandAndOptimisticallyUpdate(item);
+            this.closeLinkSelectionModal();
             return;
         }
 
@@ -1241,7 +1252,7 @@ class MediaStore {
         }
     
         if (candidateLinks.length === 1) {
-            this.sendRemoteCommand({ command: 'play_item', item: { ...item, video_url: candidateLinks[0].url } });
+            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: candidateLinks[0].url });
             return;
         }
         
@@ -1254,7 +1265,7 @@ class MediaStore {
         }
     
         if (bestLink) {
-            this.sendRemoteCommand({ command: 'play_item', item: { ...item, video_url: bestLink.url } });
+            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: bestLink.url });
         } else {
             // More than one link, no preferred label, must ask user.
             runInAction(() => {
@@ -1344,6 +1355,9 @@ class MediaStore {
                 return;
             case 'clear_selection': // Slave receives command to clear selected item
                 this.closeDetail();
+                this.sendSlaveStatusUpdate();
+                return;
+            case 'request_status':
                 this.sendSlaveStatusUpdate();
                 return;
         }
@@ -1775,6 +1789,8 @@ class MediaStore {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.
             websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId: this.slaveId } });
+            // Request the current status from the slave to sync the UI
+            this.sendRemoteCommand({ command: 'request_status' });
         }
     };
     handleIncomingMessage = (message: any) => { runInAction(() => {

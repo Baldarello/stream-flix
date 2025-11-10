@@ -49,7 +49,7 @@ const LinkSelectionModal: React.FC = () => {
   if (itemForLinkSelection && 'episode_number' in itemForLinkSelection) {
       title = t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name });
   // FIX: Property 'title' does not exist on type 'PlayableItem'. Added a more specific type guard.
-  } else if (itemForLinkSelection && 'media_type' in itemForLinkSelection) { // This will be a MediaItem
+  } else if (itemForLinkSelection && 'title' in itemForLinkSelection) { // This will be a MediaItem
       title = itemForLinkSelection.title || itemForLinkSelection.name || t('linkSelectionModal.defaultTitle');
   } else {
       title = t('linkSelectionModal.defaultTitle');

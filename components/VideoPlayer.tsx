@@ -455,7 +455,7 @@ const VideoPlayer: React.FC = observer(() => {
 
         {showSkipIntro && (
             // FIX: (line 453) Wrap Button with Fade component
-            <Fade in={isUiVisible} timeout={500}>
+            <Fade in={showSkipIntro && isUiVisible} timeout={500}>
               <Button 
                   variant="contained" 
                   onClick={skipIntro}

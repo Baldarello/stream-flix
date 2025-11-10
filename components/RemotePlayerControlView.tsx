@@ -65,7 +65,6 @@ const RemotePlayerControlView = observer(() => {
     }
     
     const isPlaying = remoteSlaveState?.isPlaying ?? false;
-    const isIntroSkippable = remoteSlaveState?.isIntroSkippable ?? false;
     const isEpisode = 'episode_number' in nowPlayingItem;
     
     const title = isEpisode ? nowPlayingItem.show_title : (nowPlayingItem.title || nowPlayingItem.name);
@@ -310,15 +309,10 @@ const RemotePlayerControlView = observer(() => {
                         variant="contained"
                         color="inherit"
                         onClick={handleSkipIntro}
-                        // disabled={!isIntroSkippable}
                         sx={{ 
                             bgcolor: 'rgba(255, 255, 255, 0.8)', 
                             color: 'black', 
                             '&:hover': { bgcolor: 'white' },
-                            '&.Mui-disabled': {
-                                bgcolor: 'rgba(128, 128, 128, 0.5)',
-                                color: 'rgba(255, 255, 255, 0.5)'
-                            }
                         }}
                     >
                         {t('remote.player.skipIntro')}
