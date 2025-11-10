@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore, ThemeName, Language } from '../store/mediaStore';
-import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors, Avatar, ListItemAvatar, CircularProgress } from '@mui/material';
+import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors, Avatar, ListItemAvatar, CircularProgress, Stack, TextField, Tooltip } from '@mui/material';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import GoogleIcon from '@mui/icons-material/Google';
 import CloseIcon from '@mui/icons-material/Close';
@@ -18,6 +18,9 @@ import FileUploadIcon from '@mui/icons-material/FileUpload';
 import HistoryIcon from '@mui/icons-material/History';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
 import { handleSignIn, handleSignOut } from '../services/googleAuthService';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -25,9 +28,12 @@ const ProfileDrawer: React.FC = observer(() => {
     const { 
         isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
         isLoggedIn, googleUser, isSyncing, backupToDrive, restoreFromDrive, language, setLanguage,
-        openShareModal, openImportModal, openRevisionsModal
+        openShareModal, openImportModal, openRevisionsModal, knownSlaves, reconnectToSlave,
+        updateSlaveName, forgetSlave
     } = mediaStore;
     const { t } = useTranslations();
+    const [editingSlaveId, setEditingSlaveId] = useState<string | null>(null);
+    const [editedName, setEditedName] = useState('');
 
     const handleScanQRCode = () => {
         openQRScanner();
@@ -50,6 +56,23 @@ const ProfileDrawer: React.FC = observer(() => {
     ) => {
         if (newLang !== null) {
             setLanguage(newLang);
+        }
+    };
+
+    const handleStartEdit = (slave: { id: string, name: string }) => {
+        setEditingSlaveId(slave.id);
+        setEditedName(slave.name);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingSlaveId(null);
+        setEditedName('');
+    };
+
+    const handleSaveEdit = () => {
+        if (editingSlaveId && editedName.trim()) {
+            updateSlaveName(editingSlaveId, editedName.trim());
+            handleCancelEdit();
         }
     };
 
@@ -197,7 +220,7 @@ const ProfileDrawer: React.FC = observer(() => {
                 )}
             </List>
             <Divider />
-             <Box sx={{ p: 2 }}>
+             <Box sx={{ p: 2, pb: 0 }}>
                 <Typography variant="overline" color="text.secondary">{t('profileDrawer.playbackPreferences')}</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t('profileDrawer.preferredLabelsDesc')}</Typography>
                 <Box sx={{ maxHeight: '20vh', overflowY: 'auto', mt: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
@@ -224,6 +247,63 @@ const ProfileDrawer: React.FC = observer(() => {
                     </List>
                 </Box>
             </Box>
+            <Divider sx={{ my: 1 }}/>
+            <Box sx={{ px: 2, pt: 1 }}>
+                <Typography variant="overline" color="text.secondary">{t('profileDrawer.savedDevices')}</Typography>
+            </Box>
+            <List dense>
+                {knownSlaves.length === 0 ? (
+                    <ListItem>
+                        <ListItemText secondary={t('profileDrawer.noSavedDevices')} sx={{ pl: 2 }} />
+                    </ListItem>
+                ) : (
+                    knownSlaves.map(slave => (
+                        <ListItem 
+                            key={slave.id}
+                            secondaryAction={ editingSlaveId !== slave.id ? (
+                                <>
+                                    <Tooltip title={t('profileDrawer.editName')}>
+                                        <IconButton edge="end" onClick={() => handleStartEdit(slave)}>
+                                            <EditIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title={t('profileDrawer.forgetDevice')}>
+                                        <IconButton edge="end" onClick={() => forgetSlave(slave.id)} sx={{ ml: 0.5 }}>
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </>
+                            ) : null}
+                            disablePadding
+                        >
+                            {editingSlaveId === slave.id ? (
+                                <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%', px: 2, py: 1 }}>
+                                    <TextField
+                                        value={editedName}
+                                        onChange={(e) => setEditedName(e.target.value)}
+                                        size="small"
+                                        variant="standard"
+                                        autoFocus
+                                        fullWidth
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
+                                    />
+                                    <Tooltip title={t('profileDrawer.save')}>
+                                        <IconButton onClick={handleSaveEdit} size="small"><CheckIcon /></IconButton>
+                                    </Tooltip>
+                                    <Tooltip title={t('profileDrawer.cancel')}>
+                                        <IconButton onClick={handleCancelEdit} size="small"><CloseIcon /></IconButton>
+                                    </Tooltip>
+                                </Stack>
+                            ) : (
+                                <ListItemButton onClick={() => reconnectToSlave(slave.id)}>
+                                    <ListItemIcon><TvIcon /></ListItemIcon>
+                                    <ListItemText primary={slave.name} secondary={`ID: ${slave.id.substring(7, 13)}`} />
+                                </ListItemButton>
+                            )}
+                        </ListItem>
+                    ))
+                )}
+            </List>
             <Divider />
             <List>
                  <ListItem disablePadding>

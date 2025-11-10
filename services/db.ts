@@ -48,6 +48,12 @@ interface DbChange {
     oldObj?: any;
 }
 
+export interface KnownSlave {
+  id: string; // slaveId
+  name: string;
+  lastSeen: number; // timestamp
+}
+
 
 export class QuixDB extends Dexie {
   myList!: Table<MyListItem, number>;
@@ -61,6 +67,7 @@ export class QuixDB extends Dexie {
   preferredSources!: Table<PreferredSource, number>;
   selectedSeasons!: Table<SelectedSeason, number>;
   showFilterPreferences!: Table<ShowFilterPreference, number>;
+  knownSlaves!: Table<KnownSlave, string>;
 
 
   constructor() {
@@ -145,10 +152,14 @@ export class QuixDB extends Dexie {
     (this as Dexie).version(10).stores({
         showFilterPreferences: '&showId'
     });
+    
+    (this as Dexie).version(11).stores({
+        knownSlaves: '&id, lastSeen' // Primary key is id, index on lastSeen
+    });
   }
   
   async importData(data: any) {
-    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences'];
+    const expectedTables = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'revisions', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
     const tablesInData = data ? Object.keys(data) : [];
     
     if (!tablesInData.length || !tablesInData.some(table => expectedTables.includes(table))) {

@@ -1,3 +1,4 @@
+
 export const en = {
   "header": {
     "home": "Home",
@@ -164,7 +165,14 @@ export const en = {
     "playbackPreferences": "Playback Preferences",
     "preferredLabelsDesc": "Prioritize links with these labels during auto-selection.",
     "noLabelsFound": "No labels found",
-    "noLabelsFoundDesc": "Add links with labels to manage them here."
+    "noLabelsFoundDesc": "Add links with labels to manage them here.",
+    "savedDevices": "Saved TV Devices",
+    "noSavedDevices": "No saved TV devices found.",
+    "connect": "Connect",
+    "editName": "Edit Name",
+    "forgetDevice": "Forget Device",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "qrScanner": {
     "close": "Close scanner",

@@ -1,3 +1,4 @@
+
 import {makeAutoObservable, runInAction, computed, observable} from 'mobx';
 import Dexie from 'dexie';
 import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types';
@@ -106,6 +107,7 @@ class MediaStore {
     remoteFullItem: MediaItem | null = null;
     isRemoteFullItemLoading = false;
     isIntroSkippableOnSlave = false;
+    @observable knownSlaves: { id: string; name: string; lastSeen: number; }[] = [];
 
     // UI states for the Master remote when it's controlling a TV
     @observable _masterUiActiveView: ActiveView = 'Home'; // The active view on the MASTER device
@@ -175,9 +177,10 @@ class MediaStore {
 
     constructor() {
         makeAutoObservable(this);
-        this.isSmartTV = detectSmartTV();
-        if (this.isSmartTV) {
-            this.isSmartTVPairingVisible = true;
+        // isSmartTV is now determined on app load based on DB preference.
+        // We still run the detector for first-time use.
+        if (detectSmartTV()) {
+            this.isSmartTV = true;
         }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
@@ -359,7 +362,7 @@ class MediaStore {
         if (showNotification) this.showSnackbar('notifications.backupInProgress', 'info', true);
         this.isSyncing = true;
         try {
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences'];
+            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
             const data: { [key: string]: any[] } = {};
             for (const tableName of tablesToBackup) {
                 if ((db as any)[tableName]) {
@@ -478,10 +481,14 @@ class MediaStore {
         this.isSmartTV = true; // Mark this client as acting as a TV
         this.isSmartTVPairingVisible = true;
         this.isProfileDrawerOpen = false;
+        db.preferences.put({ key: 'isConfiguredAsSlave', value: true });
         // Manually send registration message, as websocket might already be connected
         websocketService.sendMessage({ type: 'quix-register-slave' });
     };
-    exitSmartTVPairingMode = () => { this.isSmartTVPairingVisible = false; };
+    exitSmartTVPairingMode = () => { 
+        this.isSmartTVPairingVisible = false; 
+        db.preferences.delete('isConfiguredAsSlave');
+    };
     setLanguage = (lang: Language) => { this.language = lang; db.preferences.put({ key: 'language', value: lang }); };
     openShareModal = () => { this.isShareModalOpen = true; };
     closeShareModal = () => { this.isShareModalOpen = false; };
@@ -647,7 +654,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -661,6 +668,8 @@ class MediaStore {
             db.preferences.get('preferredLabels'),
             db.showFilterPreferences.toArray(),
             db.preferences.get('remoteMasterForSlaveId'),
+            db.preferences.get('isConfiguredAsSlave'),
+            db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -689,6 +698,12 @@ class MediaStore {
                 this.slaveId = remoteMasterSlaveId.value;
                 this.showSnackbar('notifications.reconnectingAsRemote', 'info', true);
             }
+
+            if (isConfiguredAsSlave?.value) {
+                this.isSmartTV = true;
+                this.isSmartTVPairingVisible = true;
+            }
+            this.knownSlaves = knownSlaves;
         });
     }
 
@@ -1174,11 +1189,25 @@ class MediaStore {
     changeRoomCode = () => { websocketService.sendMessage({ type: 'quix-change-room-code' }); };
 
     connectAsRemoteMaster = (slaveId: string) => {
-        runInAction(() => {
+        runInAction(async () => {
             websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
             this.isRemoteMaster = true;
             this.slaveId = slaveId;
             db.preferences.put({ key: 'remoteMasterForSlaveId', value: slaveId });
+
+            const existingSlave = await db.knownSlaves.get(slaveId);
+            const slaveData = {
+                id: slaveId,
+                name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
+                lastSeen: Date.now()
+            };
+            await db.knownSlaves.put(slaveData);
+            
+            const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+            runInAction(() => {
+                this.knownSlaves = updatedSlaves;
+            });
+
             this.isQRScannerOpen = false;
             this.showSnackbar('notifications.connectedToTV', 'success', true);
         });
@@ -1195,6 +1224,29 @@ class MediaStore {
             this.showSnackbar('notifications.disconnectedFromTV', 'info', true);
         });
     }
+
+    reconnectToSlave = (slaveId: string) => {
+        this.connectAsRemoteMaster(slaveId);
+    };
+
+    updateSlaveName = async (slaveId: string, name: string) => {
+        await db.knownSlaves.update(slaveId, { name });
+        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+        runInAction(() => {
+            this.knownSlaves = updatedSlaves;
+        });
+    };
+
+    forgetSlave = async (slaveId: string) => {
+        if (this.isRemoteMaster && this.slaveId === slaveId) {
+            this.disconnectRemoteMaster();
+        }
+        await db.knownSlaves.delete(slaveId);
+        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+        runInAction(() => {
+            this.knownSlaves = updatedSlaves;
+        });
+    };
 
     setRemoteSelectedItem = (item: MediaItem) => {
         // This is called by the RemoteControlView (now acting as master's home)
@@ -1797,7 +1849,13 @@ class MediaStore {
         const { type, payload } = message;
         this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
         switch (type) {
-            case 'quix-slave-registered': this.slaveId = payload.slaveId; this.showSnackbar('notifications.tvReady', 'info', true); break;
+            case 'quix-slave-registered': 
+                this.slaveId = payload.slaveId;
+                if (this.isSmartTV) {
+                    db.preferences.put({ key: 'selfSlaveId', value: payload.slaveId });
+                }
+                this.showSnackbar('notifications.tvReady', 'info', true); 
+                break;
             case 'quix-master-connected':
                 this.isRemoteMasterConnected = true;
                 if (this.isSmartTV) {

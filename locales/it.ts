@@ -1,3 +1,4 @@
+
 export const it = {
   "header": {
     "home": "Home",
@@ -164,7 +165,14 @@ export const it = {
     "playbackPreferences": "Preferenze di Riproduzione",
     "preferredLabelsDesc": "Dai priorità ai link con queste etichette durante la selezione automatica.",
     "noLabelsFound": "Nessuna etichetta trovata",
-    "noLabelsFoundDesc": "Aggiungi link con etichette per gestirle qui."
+    "noLabelsFoundDesc": "Aggiungi link con etichette per gestirle qui.",
+    "savedDevices": "Dispositivi TV Salvati",
+    "noSavedDevices": "Nessun dispositivo TV salvato.",
+    "connect": "Connetti",
+    "editName": "Modifica Nome",
+    "forgetDevice": "Dimentica Dispositivo",
+    "save": "Salva",
+    "cancel": "Annulla"
   },
   "qrScanner": {
     "close": "Chiudi scanner",
