@@ -189,7 +189,6 @@ class MediaStore {
     }
 
     @computed get currentSelectedItem(): MediaItem | null {
-        // Removed the condition `if (this.isRemoteMaster && this.remoteSlaveState?.nowPlayingItem) return null;`
         // The master device should still show the detail view even if the slave is playing.
         return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
     }
@@ -1756,7 +1755,13 @@ class MediaStore {
         this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
         switch (type) {
             case 'quix-slave-registered': this.slaveId = payload.slaveId; this.showSnackbar('notifications.tvReady', 'info', true); break;
-            case 'quix-master-connected': this.isRemoteMasterConnected = true; this.showSnackbar('notifications.remoteConnected', 'success', true); break;
+            case 'quix-master-connected':
+                this.isRemoteMasterConnected = true;
+                if (this.isSmartTV) {
+                    this.isSmartTVPairingVisible = false;
+                }
+                this.showSnackbar('notifications.remoteConnected', 'success', true);
+                break;
             case 'quix-room-update':
                 this.roomId = payload.roomId;
                 this.hostId = payload.hostId;
