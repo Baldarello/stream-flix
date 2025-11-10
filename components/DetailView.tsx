@@ -18,7 +18,7 @@ import { useTranslations } from '../hooks/useTranslations';
 
 const DetailView: React.FC = observer(() => {
   const { 
-    selectedItem: item, 
+    currentSelectedItem: item, 
     myList, 
     isDetailLoading, 
     showIntroDurations, 
@@ -105,7 +105,7 @@ const DetailView: React.FC = observer(() => {
         case 'Film': return 'var(--glow-film-color)';
         case 'Anime': return 'var(--glow-anime-color)';
         case 'SerieTV':
-        default: return 'var(--glow-seriestv-color)';
+        default: return 'var(--glow-serietv-color)';
     }
   }
 
