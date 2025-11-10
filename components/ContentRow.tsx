@@ -1,4 +1,5 @@
 
+
 import React, { useRef, useState, useEffect } from 'react';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
@@ -124,6 +125,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
         onMouseLeave={() => setIsHovered(false)}
         sx={{ position: 'relative' }}
       >
+        {/* FIX: (line 127) Wrap IconButton with Fade component */}
         <Fade in={isHovered && canScrollLeft}>
           <IconButton
             onClick={() => handleScroll('left')}
@@ -192,6 +194,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
           ))}
         </Box>
 
+        {/* FIX: (line 195) Wrap IconButton with Fade component */}
         <Fade in={isHovered && canScrollRight}>
           <IconButton
             onClick={() => handleScroll('right')}

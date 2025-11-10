@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -262,6 +263,7 @@ const AddLinkTabs: React.FC<{
             <Stack spacing={2} sx={{ mb: 2, flexShrink: 0 }}>
                 {/* Mobile-only method selector */}
                 <FormControl fullWidth required sx={{ display: { xs: 'block', md: 'none' } }}>
+                    {/* FIX: (line 265) Pass label text as children to InputLabel */}
                     <InputLabel>Metodo</InputLabel>
                     <Select value={addMethod} label="Metodo" onChange={(e) => setAddMethod(e.target.value as 'pattern' | 'list' | 'json')}>
                         <MenuItem value="pattern">{t('linkEpisodesModal.add.pattern')}</MenuItem>
@@ -281,6 +283,7 @@ const AddLinkTabs: React.FC<{
                         inputProps={{ maxLength: 3 }}
                     />
                     <FormControl fullWidth required>
+                        {/* FIX: (line 284) Pass label text as children to InputLabel */}
                         <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
                         <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value as 'sub' | 'dub')}>
                             <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
@@ -352,6 +355,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
   };
   
   return (
+    // FIX: (line 355) Wrap Box with Modal component
     <Modal open={isLinkEpisodesModalOpen} onClose={closeLinkEpisodesModal}>
       <Box sx={style}>
         <IconButton onClick={closeLinkEpisodesModal} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>
@@ -360,6 +364,7 @@ const LinkEpisodesModal: React.FC = observer(() => {
         {/* FIX: The `mt` prop is a system prop and should be passed inside the `sx` object. */}
         <Stack spacing={2} sx={{ mt: 2, pt: 2, display: 'flex', flexDirection: 'column' }}>
             <FormControl fullWidth required>
+              {/* FIX: (line 363) Pass label text as children to InputLabel */}
               <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
               <Select value={selectedSeason} label={t('linkEpisodesModal.selectSeason')} onChange={handleSeasonChange}>
                 {item.seasons?.map(season => <MenuItem key={season.id} value={season.season_number}>{season.name}</MenuItem>)}

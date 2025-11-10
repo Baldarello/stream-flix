@@ -355,6 +355,7 @@ const VideoPlayer: React.FC = observer(() => {
           onClick={handleTogglePlay}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
+        {/* FIX: (line 358) Wrap Box with Fade component */}
         <Fade in={isUiVisible} timeout={500}>
           <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)', pointerEvents: 'none' }}>
             
@@ -363,7 +364,9 @@ const VideoPlayer: React.FC = observer(() => {
                 <Toolbar>
                     <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}><ArrowBackIcon/></IconButton>
                     <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
+                    {/* FIX: (line 366) Wrap IconButton with Tooltip component */}
                     {mediaStore.nextEpisode && <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit" onClick={handleNextEpisode}><SkipNextIcon/></IconButton></Tooltip>}
+                    {/* FIX: (line 367) Wrap IconButton with Tooltip component */}
                     {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}><ListAltIcon/></IconButton></Tooltip>}
                 </Toolbar>
             </AppBar>
@@ -412,6 +415,7 @@ const VideoPlayer: React.FC = observer(() => {
                     </Stack>
                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        {/* FIX: (line 415) Wrap IconButton with Tooltip component */}
                         <Tooltip title={t('videoPlayer.downloadVideo')}>
                             <IconButton onClick={handleDownload} color="inherit"><DownloadIcon /></IconButton>
                         </Tooltip>
@@ -450,6 +454,7 @@ const VideoPlayer: React.FC = observer(() => {
         </Fade>
 
         {showSkipIntro && (
+            // FIX: (line 453) Wrap Button with Fade component
             <Fade in={isUiVisible} timeout={500}>
               <Button 
                   variant="contained" 

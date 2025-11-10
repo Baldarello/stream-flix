@@ -25,6 +25,7 @@ import ImportLibraryModal from './components/ImportLibraryModal';
 import RevisionsModal from './components/RevisionsModal';
 import { useTranslations } from './hooks/useTranslations';
 import { initGoogleAuth } from './services/googleAuthService';
+import { websocketService } from './services/websocketService.js';
 import type { MediaItem, PlayableItem } from './types';
 
 const baseThemeOptions: ThemeOptions = {
@@ -305,6 +306,18 @@ const App: React.FC = () => {
     };
     document.body.className = themeClassMap[activeTheme] || 'theme-serietv';
   }, [activeTheme]);
+  
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+            websocketService.connect();
+        }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const dynamicTheme = createTheme({
     palette: {

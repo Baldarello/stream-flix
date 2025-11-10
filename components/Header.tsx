@@ -5,7 +5,6 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore, ActiveView } from '../store/mediaStore';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -33,7 +32,15 @@ export const Header: React.FC = observer(() => {
 
   const handleNavClick = (view: ActiveView) => {
     toggleSearch(false);
-    mediaStore.setActiveView(view);
+    if (mediaStore.isRemoteMaster) {
+        // If remote master, clear any selected item on its own UI
+        mediaStore.clearMasterUiSelection();
+        // And set the master's active view
+        mediaStore.setActiveView(view);
+    } else {
+        // Otherwise, set the local active view
+        mediaStore.setActiveView(view);
+    }
   }
 
   const getGlowColor = () => {
@@ -85,6 +92,7 @@ export const Header: React.FC = observer(() => {
           >
             Quix
           </Typography>
+          {/* FIX: (line 95) Wrap Box with Grow component */}
           <Grow in={!isSearchActive}>
               <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
               {navKeys.map((item) => (
@@ -94,8 +102,9 @@ export const Header: React.FC = observer(() => {
                       color: 'white', 
                       my: 2, 
                       display: 'block',
-                      fontWeight: mediaStore.activeView === item.view ? 700 : 400,
-                      opacity: mediaStore.activeView === item.view ? 1 : 0.8,
+                      // Use currentActiveView for highlighting the active button
+                      fontWeight: mediaStore.currentActiveView === item.view ? 700 : 400,
+                      opacity: mediaStore.currentActiveView === item.view ? 1 : 0.8,
                       position: 'relative',
                       '&:hover': {
                         opacity: 1,
@@ -106,14 +115,15 @@ export const Header: React.FC = observer(() => {
                           bottom: 4,
                           left: '50%',
                           transform: 'translateX(-50%)',
-                          width: mediaStore.activeView === item.view ? '60%' : '0',
+                          // Use currentActiveView for the underline
+                          width: mediaStore.currentActiveView === item.view ? '60%' : '0',
                           height: '2px',
                           background: getGlowColor(),
                           boxShadow: `0 0 8px ${getGlowColor()}`,
                           transition: 'width 0.3s ease-in-out',
                       },
                       '&:hover::after': {
-                          width: mediaStore.activeView !== item.view ? '40%' : '60%',
+                          width: mediaStore.currentActiveView !== item.view ? '40%' : '60%',
                       }
                   }}
                   onClick={() => handleNavClick(item.view)}
@@ -126,6 +136,7 @@ export const Header: React.FC = observer(() => {
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: isSearchActive ? 1 : 0, ml: 2 }}>
+           {/* FIX: (line 138) Wrap TextField with Grow component */}
            <Grow in={isSearchActive}>
               <TextField
                   fullWidth
@@ -150,6 +161,7 @@ export const Header: React.FC = observer(() => {
           <IconButton color="inherit" onClick={() => toggleSearch(!isSearchActive)}>
               {isSearchActive ? <CloseIcon /> : <SearchIcon />}
           </IconButton>
+          {/* FIX: (line 162) Wrap Box with Fade component */}
           <Fade in={!isSearchActive}>
               <Box sx={{ display: isSearchActive ? 'none' : 'flex', alignItems: 'center', gap: 1 }}>
                   <IconButton color="inherit">

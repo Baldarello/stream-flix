@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -84,6 +85,7 @@ const QRScanner: React.FC = observer(() => {
     };
 
     return (
+        // FIX: (line 87) Wrap Box with Modal component
         <Modal open={isQRScannerOpen} onClose={handleClose}>
             <Box sx={{
                 position: 'relative',

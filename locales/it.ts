@@ -234,7 +234,8 @@ export const it = {
       "episodes": "Episodi",
       "introDuration": "Durata Intro (sec)",
       "nextEpisode": "prossimo episodio",
-      "previousEpisode": "episodio precedente"
+      "previousEpisode": "episodio precedente",
+      "disconnect": "Disconnetti"
     }
   },
   "misc": {
@@ -305,7 +306,9 @@ export const it = {
     "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
     "tvReady": "Dispositivo TV pronto. Scansiona il QR code per connetterti.",
     "connectedToTV": "Connesso alla TV con successo!",
+    "disconnectedFromTV": "Disconnesso dalla TV.",
     "remoteConnected": "Telecomando connesso!",
+    "reconnectingAsRemote": "Riconnessione come telecomando...",
     "failedToLoadSeriesDetails": "Impossibile caricare i dettagli della serie.",
     "noPlayableEpisodes": "Nessun episodio riproducibile trovato per questa serie.",
     "noVideoLinks": "Nessun link video trovato per questo contenuto.",

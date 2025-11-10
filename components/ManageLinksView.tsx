@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -117,6 +118,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
             </Button>
 
             {Object.keys(linksByDomain).length > 0 && (
+                // FIX: (line 120) Wrap Accordion content
                 <Accordion sx={{ mb: 2, bgcolor: 'rgba(255,255,255,0.05)', backgroundImage: 'none' }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>{t('linkEpisodesModal.manage.groupOps')}</Typography>
@@ -131,6 +133,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                 const tooltipTitle = isPreferred ? t('linkEpisodesModal.manage.removePreferred') : t('linkEpisodesModal.manage.setAsPreferred');
                                 return (
                                 <Paper key={origin} variant="outlined" sx={{ p: 2, position: 'relative' }}>
+                                    {/* FIX: (line 134) Wrap IconButton with Tooltip component */}
                                     <Tooltip title={tooltipTitle}>
                                          <IconButton 
                                             onClick={() => setPreferredSource(item.id, origin)}
@@ -156,6 +159,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                         <Button variant="contained" onClick={() => handleUpdateDomain(origin)}>
                                             {t('linkEpisodesModal.manage.update')}
                                         </Button>
+                                        {/* FIX: (line 159) Wrap IconButton with Tooltip component */}
                                         <Tooltip title={t('linkEpisodesModal.manage.deleteAllFromDomainTooltip')}>
                                             {/* FIX: Added Array.isArray guard for robustness, preventing errors if 'links' is not an array. */}
                                             <IconButton color="error" onClick={() => handleDeleteDomain(origin, Array.isArray(links) ? links.length : 0)}>
@@ -172,6 +176,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
 
             <List>
                 {currentSeason.episodes.map(episode => (
+                    // FIX: (line 175) Wrap Accordion content
                     <Accordion 
                         key={episode.id}
                         expanded={expandedAccordion === episode.id}
@@ -217,6 +222,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                                         inputProps={{ maxLength: 3 }}
                                                     />
                                                     <FormControl fullWidth size="small">
+                                                        {/* FIX: (line 220) Pass label text as children to InputLabel */}
                                                         <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
                                                         <Select value={editFormData.type} label={t('linkEpisodesModal.add.type')} onChange={(e) => handleEditFormChange('type', e.target.value as 'sub' | 'dub')}>
                                                             <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
@@ -225,9 +231,11 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                                     </FormControl>
                                                 </Stack>
                                                 <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                                                    {/* FIX: (line 228) Wrap IconButton with Tooltip component */}
                                                     <Tooltip title={t('linkEpisodesModal.manage.cancel')}>
                                                         <IconButton onClick={handleCancelEdit}><CancelIcon /></IconButton>
                                                     </Tooltip>
+                                                    {/* FIX: (line 231) Wrap IconButton with Tooltip component */}
                                                     <Tooltip title={t('linkEpisodesModal.manage.save')}>
                                                          <IconButton onClick={handleSaveEdit} color="primary"><SaveIcon /></IconButton>
                                                     </Tooltip>
@@ -238,12 +246,15 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                                                 <ListItemText primary={truncatedLabel} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
                                                 <Chip label={link.language} size="small" variant="outlined" sx={{ mr: 1 }} />
                                                 <Chip label={t(`linkEpisodesModal.add.${link.type}`)} size="small" color={link.type === 'dub' ? 'info' : 'primary'} variant="outlined" sx={{ mr: 1 }} />
+                                                {/* FIX: (line 241) Wrap IconButton with Tooltip component */}
                                                 <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
                                                     <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
                                                 </Tooltip>
+                                                {/* FIX: (line 244) Wrap IconButton with Tooltip component */}
                                                 <Tooltip title={t('linkEpisodesModal.manage.editLink')}>
                                                     <IconButton size="small" onClick={() => handleStartEdit(link)}><EditIcon fontSize='small' /></IconButton>
                                                 </Tooltip>
+                                                {/* FIX: (line 247) Wrap IconButton with Tooltip component */}
                                                 <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
                                                     <IconButton size="small" onClick={() => deleteMediaLink(link.id!)} color="error"><DeleteIcon fontSize='small'/></IconButton>
                                                 </Tooltip>

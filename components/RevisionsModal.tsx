@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -73,6 +74,7 @@ const RevisionsModal: React.FC = observer(() => {
                 {revisions.map(rev => {
                     const isExpanded = expandedId === rev.id;
                     return (
+                        // FIX: (line 76) Wrap Accordion content
                         <Accordion 
                             key={rev.id} 
                             sx={{ bgcolor: 'rgba(255,255,255,0.05)', backgroundImage: 'none', boxShadow: 'none' }}
@@ -92,6 +94,7 @@ const RevisionsModal: React.FC = observer(() => {
                                             {new Date(rev.timestamp).toLocaleString()}
                                         </Typography>
                                     </Box>
+                                    {/* FIX: (line 95) Wrap IconButton with Tooltip component */}
                                     <Tooltip title={t('revisions.revert')}>
                                         <IconButton onClick={(e) => { e.stopPropagation(); handleRevert(rev); }} size="small">
                                             <UndoIcon />
@@ -123,6 +126,7 @@ const RevisionsModal: React.FC = observer(() => {
     };
 
     return (
+        // FIX: (line 126) Wrap Box with Modal component
         <Modal open={isRevisionsModalOpen} onClose={closeRevisionsModal}>
             <Box sx={style}>
                 <IconButton onClick={closeRevisionsModal} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>

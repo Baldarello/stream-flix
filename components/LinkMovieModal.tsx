@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -81,6 +82,7 @@ const LinkMovieModal: React.FC = observer(() => {
   };
 
   return (
+    // FIX: (line 84) Wrap Box with Modal component
     <Modal open={isLinkMovieModalOpen} onClose={closeLinkMovieModal}>
       <Box sx={style}>
         <IconButton onClick={closeLinkMovieModal} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>
@@ -102,6 +104,7 @@ const LinkMovieModal: React.FC = observer(() => {
                             inputProps={{ maxLength: 3 }}
                         />
                         <FormControl fullWidth required size="small">
+                            {/* FIX: (line 105) Pass label text as children to InputLabel */}
                             <InputLabel>{t('linkMovieModal.type')}</InputLabel>
                             <Select value={newType} label={t('linkMovieModal.type')} onChange={(e) => setNewType(e.target.value as 'sub' | 'dub')}>
                                 <MenuItem value="sub">{t('linkMovieModal.sub')}</MenuItem>
@@ -143,6 +146,7 @@ const LinkMovieModal: React.FC = observer(() => {
                             <Paper key={origin} variant="outlined" sx={{ p: 2, mb: 2 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis' }}>{origin}</Typography>
+                                    {/* FIX: (line 146) Wrap IconButton with Tooltip component */}
                                     <Tooltip title={tooltipTitle}>
                                         <IconButton onClick={() => setPreferredSource(item.id, origin)}>
                                             {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
@@ -154,6 +158,7 @@ const LinkMovieModal: React.FC = observer(() => {
                                     <ListItem
                                         key={link.id}
                                         secondaryAction={
+                                            // FIX: (line 157) Wrap IconButton with Tooltip component
                                             <Tooltip title={t('linkMovieModal.deleteLink')}>
                                                 <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteLink(link.id!)} color="error">
                                                     <DeleteIcon />

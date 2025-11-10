@@ -647,7 +647,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -660,6 +660,7 @@ class MediaStore {
             db.selectedSeasons.toArray(),
             db.preferences.get('preferredLabels'),
             db.showFilterPreferences.toArray(),
+            db.preferences.get('remoteMasterForSlaveId'),
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -682,6 +683,12 @@ class MediaStore {
             if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
             if (username?.value) this.username = username.value;
             this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, { language: p.language, type: p.type }]));
+            
+            if (remoteMasterSlaveId?.value) {
+                this.isRemoteMaster = true;
+                this.slaveId = remoteMasterSlaveId.value;
+                this.showSnackbar('notifications.reconnectingAsRemote', 'info', true);
+            }
         });
     }
 
@@ -1170,12 +1177,24 @@ class MediaStore {
         runInAction(() => {
             websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
             this.isRemoteMaster = true;
-            // FIX: Store the ID of the TV we are controlling to send commands to it later.
             this.slaveId = slaveId;
-            this.isQRScannerOpen = false; // Close scanner on successful scan
+            db.preferences.put({ key: 'remoteMasterForSlaveId', value: slaveId });
+            this.isQRScannerOpen = false;
             this.showSnackbar('notifications.connectedToTV', 'success', true);
         });
     };
+    
+    disconnectRemoteMaster = () => {
+        runInAction(() => {
+            this.isRemoteMaster = false;
+            this.slaveId = null;
+            this.remoteSlaveState = null;
+            this._masterUiActiveView = 'Home';
+            this._masterUiSelectedItem = null;
+            db.preferences.delete('remoteMasterForSlaveId');
+            this.showSnackbar('notifications.disconnectedFromTV', 'info', true);
+        });
+    }
 
     setRemoteSelectedItem = (item: MediaItem) => {
         // This is called by the RemoteControlView (now acting as master's home)

@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -55,6 +56,7 @@ const LinkSelectionModal: React.FC = () => {
   }
 
   return (
+    // FIX: (line 58) Wrap Box with Modal component
     <Modal
       open={isLinkSelectionModalOpen}
       onClose={handleClose}

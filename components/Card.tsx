@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import type { MediaItem } from '../types';
 import { Card as MuiCard, CardMedia, Typography, Box, CardActionArea, IconButton, Tooltip } from '@mui/material';
@@ -100,6 +101,7 @@ export const Card: React.FC<CardProps> = observer(({ item, onClick, displayMode 
       role="button"
       aria-label={t('card.detailsFor', { title })}
     >
+      {/* FIX: (line 103) Wrap IconButton with Tooltip component */}
       <Tooltip title={actionButtonTooltip}>
         <IconButton
           className="add-to-list-btn"

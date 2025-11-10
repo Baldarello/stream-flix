@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -69,6 +70,7 @@ const ImportLibraryModal: React.FC = observer(() => {
     }
 
     return (
+        // FIX: (line 72) Wrap Box with Modal component
         <Modal open={isImportModalOpen} onClose={handleClose}>
             <Box sx={style}>
                  <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }} disabled={isImportingLibrary}><CloseIcon /></IconButton>

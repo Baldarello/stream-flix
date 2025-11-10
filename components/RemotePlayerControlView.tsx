@@ -1,8 +1,9 @@
 
+
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider, InputAdornment } from '@mui/material';
+import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider, InputAdornment, Tooltip } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FastForwardIcon from '@mui/icons-material/FastForward';
@@ -12,6 +13,7 @@ import ListAltIcon from '@mui/icons-material/ListAlt';
 import CloseIcon from '@mui/icons-material/Close';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import type { Episode, PlayableItem } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
@@ -34,7 +36,7 @@ const formatTime = (timeInSeconds: number) => {
 
 
 const RemotePlayerControlView = observer(() => {
-    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading, remoteNextEpisode, remotePreviousEpisode, playRemoteItem } = mediaStore;
+    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading, remoteNextEpisode, remotePreviousEpisode, playRemoteItem, disconnectRemoteMaster } = mediaStore;
     const { t } = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
@@ -165,6 +167,7 @@ const RemotePlayerControlView = observer(() => {
 
                     {remoteFullItem?.seasons && (
                         <FormControl fullWidth margin="normal" size="small">
+                           {/* FIX: (line 170) Pass label text as children to InputLabel */}
                            <InputLabel>{t('remote.detail.season')}</InputLabel>
                            <Select
                                value={selectedSeason || ''}
@@ -216,9 +219,15 @@ const RemotePlayerControlView = observer(() => {
                     <IconButton edge="start" color="inherit" onClick={stopRemotePlayback} aria-label={t('remote.player.back')}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap>
+                    <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
                         {t('remote.player.title')}
                     </Typography>
+                    {/* FIX: (line 224) Wrap IconButton with Tooltip component */}
+                    <Tooltip title={t('remote.player.disconnect')}>
+                        <IconButton color="inherit" onClick={disconnectRemoteMaster}>
+                            <PowerSettingsNewIcon />
+                        </IconButton>
+                    </Tooltip>
                 </Toolbar>
             </AppBar>
 

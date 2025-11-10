@@ -105,7 +105,7 @@ const DetailView: React.FC = observer(() => {
         case 'Film': return 'var(--glow-film-color)';
         case 'Anime': return 'var(--glow-anime-color)';
         case 'SerieTV':
-        default: return 'var(--glow-serietv-color)';
+        default: return 'var(--glow-seriestv-color)';
     }
   }
 
@@ -195,7 +195,8 @@ const DetailView: React.FC = observer(() => {
                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         <Typography variant="h2" component="h1" fontWeight="bold" sx={{ fontSize: { xs: '2rem', sm: '3.75rem' } }}>{title}</Typography>
                         {item.media_type === 'movie' && (
-                             <Tooltip title={t('detail.linkEpisodesTooltip')}>
+                            // FIX: (line 198) Wrap IconButton with Tooltip component
+                            <Tooltip title={t('detail.linkEpisodesTooltip')}>
                                 {/* FIX: openLinkMovieModal will be added to mediaStore */}
                                 <IconButton onClick={() => mediaStore.openLinkMovieModal(item)}>
                                     <LinkIcon />
@@ -222,6 +223,7 @@ const DetailView: React.FC = observer(() => {
                         <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon />} size="large" sx={{ bgcolor: 'white', color: 'black', '&:hover': { bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)' } }} onClick={() => mediaStore.startPlayback(item)}>
                             {t('detail.play')}
                         </Button>
+                        {/* FIX: (line 225) Wrap IconButton with Tooltip component */}
                         <Tooltip title={listActionLabel}>
                             <IconButton
                                 onClick={() => mediaStore.toggleMyList(item)}
@@ -256,6 +258,7 @@ const DetailView: React.FC = observer(() => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Typography variant="h4" component="h2" fontWeight="bold">{t('detail.episodes')}</Typography>
+                            {/* FIX: (line 259) Wrap IconButton with Tooltip component */}
                             <Tooltip title={t('detail.linkEpisodesTooltip')}>
                                 <IconButton onClick={() => mediaStore.openLinkEpisodesModal(item)}>
                                     <LinkIcon />
@@ -266,6 +269,7 @@ const DetailView: React.FC = observer(() => {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                                  {availableLanguages.length > 1 && (
                                     <FormControl sx={{ minWidth: 120 }} size="small">
+                                        {/* FIX: (line 269) Pass label text as children to InputLabel */}
                                         <InputLabel>{t('detail.filterLanguage')}</InputLabel>
                                         <Select value={languageFilter || ''} label={t('detail.filterLanguage')} onChange={(e) => setShowFilterPreference(item.id, { language: e.target.value })} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
                                             {availableLanguages.map(lang => <MenuItem key={lang} value={lang}>{lang}</MenuItem>)}
@@ -274,6 +278,7 @@ const DetailView: React.FC = observer(() => {
                                 )}
                                 {availableTypes.length > 1 && (
                                     <FormControl sx={{ minWidth: 120 }} size="small">
+                                        {/* FIX: (line 277) Pass label text as children to InputLabel */}
                                         <InputLabel>{t('detail.filterType')}</InputLabel>
                                         <Select value={typeFilter || ''} label={t('detail.filterType')} onChange={(e) => setShowFilterPreference(item.id, { type: e.target.value as 'sub' | 'dub' })} sx={{ bgcolor: 'rgba(20, 20, 30, 0.7)', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}>
                                             {availableTypes.map(type => <MenuItem key={type} value={type}>{t(`linkEpisodesModal.add.${type}`)}</MenuItem>)}
@@ -295,6 +300,7 @@ const DetailView: React.FC = observer(() => {
                                     }}
                                 />
                                 <FormControl sx={{ minWidth: 120 }} size="small">
+                                    {/* FIX: (line 298) Pass label text as children to InputLabel */}
                                     <InputLabel id="season-select-label">{t('detail.season')}</InputLabel>
                                     <Select
                                         labelId="season-select-label"
@@ -334,6 +340,7 @@ const DetailView: React.FC = observer(() => {
                                     key={episode.id}
                                     disablePadding
                                     secondaryAction={
+                                        // FIX: (line 337) Wrap IconButton with Tooltip component
                                         <Tooltip title={isWatched ? t('detail.markAsUnwatched') : t('detail.markAsWatched')}>
                                             <IconButton
                                                 edge="end"

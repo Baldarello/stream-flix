@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -114,6 +115,7 @@ const ShareLibraryModal: React.FC = observer(() => {
                             readOnly: true,
                             endAdornment: (
                                 <InputAdornment position="end">
+                                    {/* FIX: (line 117) Wrap IconButton with Tooltip component */}
                                     <Tooltip title={t('shareAndImport.copyLink')}>
                                         <IconButton onClick={handleCopyToClipboard}>
                                             <ContentCopyIcon />
@@ -172,6 +174,7 @@ const ShareLibraryModal: React.FC = observer(() => {
     }
 
     return (
+        // FIX: (line 175) Wrap Box with Modal component
         <Modal open={isShareModalOpen} onClose={handleClose}>
             <Box sx={style}>
                 <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>

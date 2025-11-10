@@ -234,7 +234,8 @@ export const en = {
       "episodes": "Episodes",
       "introDuration": "Intro Duration (sec)",
       "nextEpisode": "next episode",
-      "previousEpisode": "previous episode"
+      "previousEpisode": "previous episode",
+      "disconnect": "Disconnect"
     }
   },
   "misc": {
@@ -305,7 +306,9 @@ export const en = {
     "roomCreated": "Room created! Share the code to invite friends.",
     "tvReady": "TV device ready. Scan the QR code to connect.",
     "connectedToTV": "Successfully connected to the TV!",
+    "disconnectedFromTV": "Disconnected from the TV.",
     "remoteConnected": "Remote connected!",
+    "reconnectingAsRemote": "Reconnecting as remote control...",
     "failedToLoadSeriesDetails": "Could not load series details.",
     "noPlayableEpisodes": "No playable episodes found for this series.",
     "noVideoLinks": "No video links found for this content.",

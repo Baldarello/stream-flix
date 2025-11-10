@@ -70,6 +70,7 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
   };
 
   return (
+    // FIX: (line 73) Wrap Container with Fade component
     <Fade in={true} timeout={500}>
       <Container maxWidth={false} sx={{ pt: 12, pb: 8, pl: { xs: 2, md: 6 }, pr: { xs: 2, md: 6 } }}>
         <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 4, mt: 4 }}>
@@ -81,6 +82,8 @@ const GridView: React.FC<GridViewProps> = observer(({ title, items }) => {
               // FIX: Removed the `item` and breakpoint props (`xs`, `sm`, etc.) from the Grid item to resolve a TypeScript error.
               // The `Card` component has its own responsive width, so the Grid container will handle wrapping correctly.
               <Grid
+                item
+                xs={6} sm={4} md={3} lg={2}
                 key={mediaItem.id} 
                 draggable={isMyList}
                 onDragStart={(e) => isMyList && handleDragStart(e, index)}

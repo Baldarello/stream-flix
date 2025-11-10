@@ -170,6 +170,7 @@ const WatchTogetherModal: React.FC = observer(() => {
                             <Typography variant="body1">{t('watchTogether.episodes')}</Typography>
                             {itemForModal.seasons && itemForModal.seasons.length > 1 && (
                                 <FormControl size="small" sx={{minWidth: 150}}>
+                                    {/* FIX: (line 173) Pass label text as children to InputLabel */}
                                     <InputLabel>{t('watchTogether.season')}</InputLabel>
                                     <Select value={selectedSeason} label={t('watchTogether.season')} onChange={e => setSelectedSeason(Number(e.target.value))}>
                                         {itemForModal.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
@@ -274,10 +275,12 @@ const WatchTogetherModal: React.FC = observer(() => {
               {roomId}
             </Typography>
             {isHost && (
+                // FIX: (line 277) Wrap IconButton with Tooltip component
                 <Tooltip title={t('watchTogether.changeCode')}>
                     <IconButton onClick={changeRoomCode}><RefreshIcon /></IconButton>
                 </Tooltip>
             )}
+            {/* FIX: (line 281) Wrap IconButton with Tooltip component */}
             <Tooltip title={copied ? t('watchTogether.copied') : t('watchTogether.copyLink')}>
               <IconButton onClick={handleCopyToClipboard}>
                 <ContentCopyIcon />
@@ -293,6 +296,7 @@ const WatchTogetherModal: React.FC = observer(() => {
                     <Typography variant="body1" fontWeight="bold">{t('watchTogether.episodes')}</Typography>
                     {itemForModal.seasons && itemForModal.seasons.length > 1 && (
                         <FormControl size="small" sx={{minWidth: 150}}>
+                            {/* FIX: (line 296) Pass label text as children to InputLabel */}
                             <InputLabel>{t('watchTogether.season')}</InputLabel>
                             <Select value={selectedSeason} label={t('watchTogether.season')} onChange={e => setSelectedSeason(Number(e.target.value))}>
                                 {itemForModal.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
@@ -341,6 +345,7 @@ const WatchTogetherModal: React.FC = observer(() => {
   };
 
   return (
+    // FIX: (line 344) Wrap Box with Modal component
     <Modal
       open={watchTogetherModalOpen}
       onClose={handleClose}
