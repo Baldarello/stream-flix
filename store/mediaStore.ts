@@ -1,4 +1,5 @@
 
+
 import {makeAutoObservable, runInAction, computed, observable} from 'mobx';
 import Dexie from 'dexie';
 import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types';
@@ -12,7 +13,7 @@ import {
     getTrending,
     searchShow
 } from '../services/apiCall';
-import {websocketService} from '../services/websocketService.js';
+import {websocketService}from '../services/websocketService.js';
 import * as driveService from '../services/googleDriveService';
 import {db} from '../services/db';
 import { isSmartTV as detectSmartTV } from '../utils/device';
@@ -482,8 +483,9 @@ class MediaStore {
         this.isSmartTVPairingVisible = true;
         this.isProfileDrawerOpen = false;
         db.preferences.put({ key: 'isConfiguredAsSlave', value: true });
-        // Manually send registration message, as websocket might already be connected
-        websocketService.sendMessage({ type: 'quix-register-slave' });
+        // Manually send registration message, using existing ID if available
+        const payload = this.slaveId ? { slaveId: this.slaveId } : {};
+        websocketService.sendMessage({ type: 'quix-register-slave', payload });
     };
     exitSmartTVPairingMode = () => { 
         this.isSmartTVPairingVisible = false; 
@@ -654,7 +656,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -670,6 +672,7 @@ class MediaStore {
             db.preferences.get('remoteMasterForSlaveId'),
             db.preferences.get('isConfiguredAsSlave'),
             db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
+            db.preferences.get('selfSlaveId'),
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -702,6 +705,9 @@ class MediaStore {
             if (isConfiguredAsSlave?.value) {
                 this.isSmartTV = true;
                 this.isSmartTVPairingVisible = true;
+                if (selfSlaveId?.value) {
+                    this.slaveId = selfSlaveId.value;
+                }
             }
             this.knownSlaves = knownSlaves;
         });
@@ -1836,7 +1842,8 @@ class MediaStore {
     addDebugMessage = (message: string) => { if (this.debugMessages.length > 100) { this.debugMessages.shift(); } this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`); };
     initRemoteSession = () => {
         if (this.isSmartTV) {
-            websocketService.sendMessage({ type: 'quix-register-slave' });
+            const payload = this.slaveId ? { slaveId: this.slaveId } : {};
+            websocketService.sendMessage({ type: 'quix-register-slave', payload });
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.

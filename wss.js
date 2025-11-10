@@ -37,13 +37,13 @@ function handleDisconnect(ws) {
             console.log(`Master ${ws.clientId} disconnected from slave ${ws.remoteSlaveId}`);
         }
     }
-    if (remoteSessions.has(ws.clientId)) { // If the client was a slave
-        const session = remoteSessions.get(ws.clientId);
+    if (ws.slaveId && remoteSessions.has(ws.slaveId)) { // If the client was a slave
+        const session = remoteSessions.get(ws.slaveId);
         if (session.masterWs && session.masterWs.readyState === session.masterWs.OPEN) {
             session.masterWs.send(JSON.stringify({ type: 'quix-error', payload: { message: 'The TV has disconnected.' } }));
         }
-        remoteSessions.delete(ws.clientId);
-        console.log(`Slave ${ws.clientId} session deleted.`);
+        remoteSessions.delete(ws.slaveId);
+        console.log(`Slave ${ws.slaveId} session deleted.`);
     }
 
     // Clean up "Watch Together" rooms
@@ -197,9 +197,13 @@ const webSocketRouter = (wss) => {
 
                     // --- Remote Control Cases ---
                     case 'quix-register-slave': {
-                        remoteSessions.set(ws.clientId, { slaveWs: ws, masterWs: null });
-                        ws.send(JSON.stringify({ type: 'quix-slave-registered', payload: { slaveId: ws.clientId } }));
-                        console.log(`Slave registered: ${ws.clientId}`);
+                        const persistentId = payload?.slaveId || ws.clientId;
+                        ws.slaveId = persistentId; // Tag the websocket connection with its persistent slave ID
+
+                        remoteSessions.set(persistentId, { slaveWs: ws, masterWs: null });
+
+                        ws.send(JSON.stringify({ type: 'quix-slave-registered', payload: { slaveId: persistentId } }));
+                        console.log(`Slave registered with ID: ${persistentId}`);
                         break;
                     }
                     case 'quix-register-master': {
