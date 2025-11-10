@@ -189,8 +189,8 @@ class MediaStore {
     }
 
     @computed get currentSelectedItem(): MediaItem | null {
-        // If remote master is playing, we don't want a selected item showing on the master UI
-        if (this.isRemoteMaster && this.remoteSlaveState?.nowPlayingItem) return null;
+        // Removed the condition `if (this.isRemoteMaster && this.remoteSlaveState?.nowPlayingItem) return null;`
+        // The master device should still show the detail view even if the slave is playing.
         return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
     }
 
@@ -550,8 +550,8 @@ class MediaStore {
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
-        if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) {
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id > 0);
+        if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) { // Adjusted logic to find actual next, not just > 0
             return season.episodes[currentEpisodeIndex + 1];
         }
         return null;
@@ -563,8 +563,8 @@ class MediaStore {
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id > 0);
-        if (currentEpisodeIndex > 0) {
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id); // Find the current episode's index
+        if (currentEpisodeIndex > 0) { // If it's not the first episode
             return season.episodes[currentEpisodeIndex - 1];
         }
         return null;
