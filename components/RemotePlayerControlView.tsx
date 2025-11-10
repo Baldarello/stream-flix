@@ -6,8 +6,8 @@ import { mediaStore } from '../store/mediaStore';
 import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider, InputAdornment, Tooltip } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
-import FastForwardIcon from '@mui/icons-material/FastForward';
-import FastRewindIcon from '@mui/icons-material/FastRewind';
+import Replay10 from '@mui/icons-material/Replay10';
+import Forward10 from '@mui/icons-material/Forward10';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CloseIcon from '@mui/icons-material/Close';
@@ -263,42 +263,42 @@ const RemotePlayerControlView = observer(() => {
 
             <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 {/* Progress Bar */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(currentTime)}</Typography>
                     <Slider
                         className="video-player-slider"
                         aria-label="progress"
                         value={progress}
                         onChangeCommitted={handleSeek}
-                    />
+                    /> <Box sx={{ display: 'flex', alignItems: 'center',justifyContent:"space-between",flexDirection:"row", gap: 2, mb: 4 }}>
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(currentTime)}</Typography>
+
                     <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(duration)}</Typography>
                 </Box>
                 
                 {/* Main Controls */}
-                <Stack direction="row" spacing={{xs: 2, sm: 4}} sx={{ justifyContent: 'center', alignItems: 'center', mb: 5 }}>
+                <Stack direction="row" spacing={{xs: 2, sm: 4}} gap={"0.25rem"} sx={{ justifyContent: 'center', alignItems: 'center', mb: 5 }}>
                     {isEpisode && (
-                         <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode} aria-label={t('remote.player.previousEpisode')} sx={{ transform: 'scale(1.5)' }}>
+                         <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode} aria-label={t('remote.player.previousEpisode')} sx={{  }}>
                             <SkipPreviousIcon fontSize="large" />
                         </IconButton>
                     )}
-                    <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{ transform: 'scale(1.5)' }}>
-                        <FastRewindIcon fontSize="large" />
+                    <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{  }}>
+                        <Replay10 fontSize="large" />
                     </IconButton>
                     <IconButton
                         onClick={handleTogglePlay}
                         aria-label={isPlaying ? t('remote.player.pause') : t('remote.player.play')}
                         sx={{
-                            bgcolor: 'white', color: 'black', transform: 'scale(2.2)',
+                            bgcolor: 'white', color: 'black', transform:"scale(1.5)",
                             '&:hover': { bgcolor: 'grey.300' }
                         }}
                     >
                         {isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
                     </IconButton>
-                    <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{ transform: 'scale(1.5)' }}>
-                        <FastForwardIcon fontSize="large" />
+                    <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{  }}>
+                        <Forward10 fontSize="large" />
                     </IconButton>
                     {isEpisode && (
-                        <IconButton onClick={handlePlayNext} disabled={!remoteNextEpisode} aria-label={t('remote.player.nextEpisode')} sx={{ transform: 'scale(1.5)' }}>
+                        <IconButton onClick={handlePlayNext} disabled={!remoteNextEpisode} aria-label={t('remote.player.nextEpisode')} sx={{  }}>
                             <SkipNextIcon fontSize="large" />
                         </IconButton>
                     )}
@@ -310,7 +310,7 @@ const RemotePlayerControlView = observer(() => {
                         variant="contained"
                         color="inherit"
                         onClick={handleSkipIntro}
-                        disabled={!isIntroSkippable}
+                        // disabled={!isIntroSkippable}
                         sx={{ 
                             bgcolor: 'rgba(255, 255, 255, 0.8)', 
                             color: 'black', 
