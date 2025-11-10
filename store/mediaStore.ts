@@ -1749,7 +1749,15 @@ class MediaStore {
     
     // Websocket and remote control methods
     addDebugMessage = (message: string) => { if (this.debugMessages.length > 100) { this.debugMessages.shift(); } this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`); };
-    initRemoteSession = () => { if (this.isSmartTV) { websocketService.sendMessage({ type: 'quix-register-slave' }); } };
+    initRemoteSession = () => {
+        if (this.isSmartTV) {
+            websocketService.sendMessage({ type: 'quix-register-slave' });
+        } else if (this.isRemoteMaster && this.slaveId) {
+            // When the WebSocket connects (or reconnects), if this client is a master,
+            // it needs to re-register with its slave to re-establish the control session.
+            websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId: this.slaveId } });
+        }
+    };
     handleIncomingMessage = (message: any) => { runInAction(() => {
         const { type, payload } = message;
         this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);

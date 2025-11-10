@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider } from '@mui/material';
+import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider, InputAdornment } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FastForwardIcon from '@mui/icons-material/FastForward';
@@ -157,7 +157,10 @@ const RemotePlayerControlView = observer(() => {
                         value={introDuration}
                         onChange={handleIntroDurationChange}
                         onFocus={(event) => event.target.select()}
-                        InputProps={{ inputProps: { min: 0 } }}
+                        InputProps={{
+                            endAdornment: <InputAdornment position="end">sec</InputAdornment>,
+                            inputProps: { min: 0 }
+                        }}
                     />
 
                     {remoteFullItem?.seasons && (
@@ -294,16 +297,23 @@ const RemotePlayerControlView = observer(() => {
 
                 {/* Secondary Controls */}
                 <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center', mt: 4, height: '48px' /* Reserve space for buttons */ }}>
-                    {isIntroSkippable && (
-                        <Button 
-                            variant="contained" 
-                            color="inherit" 
-                            onClick={handleSkipIntro}
-                            sx={{ bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black', '&:hover': { bgcolor: 'white' } }}
-                        >
-                            {t('remote.player.skipIntro')}
-                        </Button>
-                    )}
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        onClick={handleSkipIntro}
+                        disabled={!isIntroSkippable}
+                        sx={{ 
+                            bgcolor: 'rgba(255, 255, 255, 0.8)', 
+                            color: 'black', 
+                            '&:hover': { bgcolor: 'white' },
+                            '&.Mui-disabled': {
+                                bgcolor: 'rgba(128, 128, 128, 0.5)',
+                                color: 'rgba(255, 255, 255, 0.5)'
+                            }
+                        }}
+                    >
+                        {t('remote.player.skipIntro')}
+                    </Button>
                      {isSeries && (
                         <Button 
                             variant="outlined" 
