@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore, ThemeName } from './store/mediaStore';
 import { Box, CircularProgress, Alert, Container, Typography, colors } from '@mui/material';
 import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
@@ -13,7 +12,7 @@ import DetailView from './components/DetailView';
 import VideoPlayer from './components/VideoPlayer';
 import GridView from './components/GridView';
 import SmartTVScreen from './components/SmartTVScreen';
-import RemoteControlView from './components/RemoteControlView';
+import RemotePlayerControlView from './components/RemotePlayerControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
 import WatchTogetherModal from './components/WatchTogetherModal';
@@ -90,35 +89,36 @@ const AppContent: React.FC = observer(() => {
     loading,
     error,
     heroContent,
-    selectedItem,
     nowPlayingItem,
-    activeView,
-    topSeries,
-    allMovies,
-    popularAnime,
-    myListItems,
     isRemoteMaster,
+    remoteSlaveState,
     isSmartTVPairingVisible,
     isSearchActive,
     searchResults,
     searchQuery,
     isSearching,
     isQRScannerOpen,
+    topSeries,
+    allMovies,
+    popularAnime,
+    myListItems,
+    currentActiveView,   // <-- Using computed property
+    currentSelectedItem, // <-- Using computed property
   } = mediaStore;
 
   useEffect(() => {
-    const shouldLockScroll = !!selectedItem || !!nowPlayingItem || isSmartTVPairingVisible || isRemoteMaster;
+    // Determine if scroll should be locked based on *current* UI state
+    const shouldLockScroll = !!currentSelectedItem || !!nowPlayingItem || isSmartTVPairingVisible || (isRemoteMaster && !!remoteSlaveState?.nowPlayingItem);
     if (shouldLockScroll) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     
-    // Cleanup function to restore scroll on unmount, just in case.
     return () => {
       document.body.style.overflow = '';
     };
-  }, [selectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster]);
+  }, [currentSelectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster, remoteSlaveState?.nowPlayingItem]);
 
   if (loading) {
     return (
@@ -136,9 +136,14 @@ const AppContent: React.FC = observer(() => {
     );
   }
 
-  if (isRemoteMaster) return <><RemoteControlView /> <NotificationSnackbar /><DebugOverlay /></>;
-  if (nowPlayingItem) return <><VideoPlayer /> <LinkSelectionModal /><NotificationSnackbar /><DebugOverlay /></>;
+  // Smart TV pairing mode always takes precedence
   if (isSmartTVPairingVisible) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
+  
+  // If remote master, and slave is playing, show the remote player controls
+  if (isRemoteMaster && remoteSlaveState?.nowPlayingItem) return <><RemotePlayerControlView /> <NotificationSnackbar /><DebugOverlay /></>;
+  
+  // If local client is playing, show local video player
+  if (nowPlayingItem) return <><VideoPlayer /> <LinkSelectionModal /><NotificationSnackbar /><DebugOverlay /></>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {
@@ -160,7 +165,8 @@ const AppContent: React.FC = observer(() => {
       return renderSearchView();
     }
 
-    switch (activeView) {
+    // Use currentActiveView for rendering decisions
+    switch (currentActiveView) {
       case 'Home':
         return (
           <>
@@ -177,7 +183,6 @@ const AppContent: React.FC = observer(() => {
                   const isContinueWatching = row.titleKey === 'misc.continueWatching';
                   const handleCardClick = (item: MediaItem) => {
                     if (isContinueWatching) {
-                      // The item is a PlayableItem here, safe to cast.
                       mediaStore.startPlayback(item as PlayableItem);
                     } else {
                       mediaStore.selectMedia(item);
@@ -211,7 +216,7 @@ const AppContent: React.FC = observer(() => {
       <Box sx={{ color: 'text.primary' }}>
         <Header />
         <main>{renderMainContent()}</main>
-        {selectedItem && <DetailView />}
+        {currentSelectedItem && <DetailView />} {/* Use currentSelectedItem */}
         <Footer />
         <ProfileDrawer />
         {isQRScannerOpen && <QRScanner />}
@@ -272,8 +277,15 @@ const App: React.FC = () => {
         // Case 2: User navigates BACK from the detail view.
         // We check if a detail view should be open. If not, but we have one selected,
         // it means we need to close it. We also ensure we are not currently playing a video.
-        if (!state.detailViewOpen && mediaStore.selectedItem && !mediaStore.nowPlayingItem) {
-            mediaStore._closeDetailWithoutHistory();
+        // For remote master, we check currentSelectedItem, for slave/local, we check selectedItem.
+        if (!state.detailViewOpen && mediaStore.currentSelectedItem && !mediaStore.nowPlayingItem) {
+            // Check if it's a remote master clearing its UI state
+            if (mediaStore.isRemoteMaster) {
+                mediaStore.clearMasterUiSelection();
+                // We don't push history for remote master's UI. The popstate should only be local.
+            } else {
+                mediaStore._closeDetailWithoutHistory();
+            }
         }
     };
 

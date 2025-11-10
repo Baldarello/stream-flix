@@ -1,6 +1,5 @@
-import {makeAutoObservable, runInAction} from 'mobx';
+import {makeAutoObservable, runInAction, computed, observable} from 'mobx';
 import Dexie from 'dexie';
-// FIX: Replace deprecated EpisodeLink with MediaLink
 import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
@@ -13,9 +12,9 @@ import {
     searchShow
 } from '../services/apiCall';
 import {websocketService} from '../services/websocketService.js';
+import * as driveService from '../services/googleDriveService';
 import {db} from '../services/db';
 import { isSmartTV as detectSmartTV } from '../utils/device';
-import * as driveService from '../services/googleDriveService';
 import { it } from '../locales/it';
 import { en } from '../locales/en';
 
@@ -55,14 +54,14 @@ class MediaStore {
     popularAnime: MediaItem[] = [];
     loading = true;
     error: string | null = null;
-    selectedItem: MediaItem | null = null;
+    @observable selectedItem: MediaItem | null = null; // Local selected item for non-remote master
     private playbackOriginItem: MediaItem | null = null;
     isDetailLoading = false;
     myList: number[] = [];
     isPlaying = false;
     nowPlayingItem: PlayableItem | null = null;
     nowPlayingShowDetails: MediaItem | null = null; // Full details for the show currently playing
-    activeView: ActiveView = 'Home';
+    @observable activeView: ActiveView = 'Home'; // Local active view for non-remote master
     viewingHistory: ViewingHistoryItem[] = [];
     cachedItems: Map<number, MediaItem> = new Map();
     episodeProgress: Map<number, EpisodeProgress> = new Map();
@@ -101,12 +100,16 @@ class MediaStore {
     slaveId: string | null = null;
     isRemoteMasterConnected = false;
     remoteSlaveState: RemoteSlaveState | null = null;
-    remoteSelectedItem: MediaItem | null = null;
+    remoteSelectedItem: MediaItem | null = null; // This is the item selected *on the slave* (remote TV)
     isRemoteDetailLoading = false;
     remoteAction: { type: string; payload?: any; id: number } | null = null;
     remoteFullItem: MediaItem | null = null;
     isRemoteFullItemLoading = false;
     isIntroSkippableOnSlave = false;
+
+    // UI states for the Master remote when it's controlling a TV
+    @observable _masterUiActiveView: ActiveView = 'Home'; // The active view on the MASTER device
+    @observable _masterUiSelectedItem: MediaItem | null = null; // The selected item on the MASTER device
 
 
     // FIX: Rename episodeLinks state to mediaLinks and use MediaLink type
@@ -181,7 +184,23 @@ class MediaStore {
         websocketService.events.on('debug', this.addDebugMessage);
     }
 
+    @computed get currentActiveView(): ActiveView {
+        return this.isRemoteMaster ? this._masterUiActiveView : this.activeView;
+    }
+
+    @computed get currentSelectedItem(): MediaItem | null {
+        // If remote master is playing, we don't want a selected item showing on the master UI
+        if (this.isRemoteMaster && this.remoteSlaveState?.nowPlayingItem) return null;
+        return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
+    }
+
     startPlayback = async (item: PlayableItem) => {
+        // If we are a remote master, send play command to slave instead of playing locally
+        if (this.isRemoteMaster) {
+            this.playRemoteItem(item); // This already handles link resolution and sending command
+            return;
+        }
+
         // --- Step 1: Ensure we have a single, playable URL ---
         if (!item.video_url) {
             const mediaId = item.id;
@@ -415,12 +434,19 @@ class MediaStore {
             this._closeDetailWithoutHistory();
         }
     };
+    
     setActiveView = (view: ActiveView) => { 
-        this.activeView = view; 
+        if (this.isRemoteMaster) {
+            this._masterUiActiveView = view;
+        } else {
+            this.activeView = view; 
+        }
+
         if (view === 'Serie TV') this.setActiveTheme('SerieTV');
         else if (view === 'Film') this.setActiveTheme('Film');
         else if (view === 'Anime') this.setActiveTheme('Anime');
     };
+
     setActiveTheme = (theme: ThemeName) => { 
         this.activeTheme = theme; 
         db.preferences.put({ key: 'activeTheme', value: theme });
@@ -468,7 +494,14 @@ class MediaStore {
     openEpisodesDrawer = () => { this.isEpisodesDrawerOpen = true; };
     closeEpisodesDrawer = () => { this.isEpisodesDrawerOpen = false; };
     setIntroSkippableOnSlave = (isSkippable: boolean) => { this.isIntroSkippableOnSlave = isSkippable; };
-    clearRemoteSelectedItem = () => { this.remoteSelectedItem = null; };
+    clearRemoteSelectedItem = () => {
+        this.clearMasterUiSelection(); // Clear master's UI selected item
+        this.sendRemoteCommand({ command: 'clear_selection' }); // Also tell slave to clear its selection (detail view)
+    };
+    clearMasterUiSelection = () => {
+        this._masterUiSelectedItem = null;
+        this.isDetailLoading = false; // Also clear the loading state for master's detail
+    };
     setExpandedLinkAccordionId = (id: number | false) => { this.expandedLinkAccordionId = id; };
     
     // Getters
@@ -530,7 +563,7 @@ class MediaStore {
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id > 0);
         if (currentEpisodeIndex > 0) {
             return season.episodes[currentEpisodeIndex - 1];
         }
@@ -654,6 +687,38 @@ class MediaStore {
     }
 
     selectMedia = async (item: MediaItem, context: 'detailView' | 'watchTogether' | 'remoteControl' | 'cacheOnly' = 'detailView') => {
+        if (this.isRemoteMaster && context !== 'remoteControl' && context !== 'cacheOnly') {
+            // When acting as a remote master, clicking an item should display its details locally
+            // AND send a command to the slave to select the item (which will show its details on the TV).
+            runInAction(() => {
+                this._masterUiSelectedItem = item;
+                this.isDetailLoading = true; // Start loading for master's UI
+            });
+
+            // Send command to slave to select the item
+            this.sendRemoteCommand({ command: 'select_item', item: item });
+
+            // Fetch details for the master's display
+            try {
+                let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
+                fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
+                runInAction(() => {
+                    if (this._masterUiSelectedItem?.id === item.id) { // Ensure it's still the same item
+                        this._masterUiSelectedItem = fullItemDetails;
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to load details for remote master UI", error);
+                this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
+            } finally {
+                runInAction(() => {
+                    this.isDetailLoading = false;
+                });
+            }
+            return; // Remote master handles selection differently, so return here.
+        }
+
+        // --- Original local selectMedia logic continues below ---
         // 1. Set initial state based on context
         switch(context) {
             case 'detailView':
@@ -683,41 +748,7 @@ class MediaStore {
         
         try {
             let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
-    
-            const needsApiFetch = fullItemDetails.media_type === 'tv' && 
-                                  (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
-    
-            if (needsApiFetch) {
-                const apiDetails = await getSeriesDetails(item.id);
-                const seasonsWithEpisodes = await Promise.all(
-                    apiDetails.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
-                        const episodesWithLinks = await Promise.all(episodes.map(async ep => {
-                            const links = await this.getLinksForMedia(ep.id);
-                            return { ...ep, video_urls: links, video_url: links[0]?.url };
-                        }));
-                        return { ...season, episodes: episodesWithLinks };
-                    }) || []
-                );
-                fullItemDetails = { ...apiDetails, seasons: seasonsWithEpisodes };
-            } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
-                // If we didn't fetch from API, the item is from cache, but we still ensure links are fresh from our DB.
-                const seasonsWithFreshLinks = await Promise.all(
-                    fullItemDetails.seasons.map(async (season) => {
-                        const episodesWithLinks = await Promise.all(season.episodes.map(async ep => {
-                            const links = await this.getLinksForMedia(ep.id);
-                            return { ...ep, video_urls: links, video_url: links[0]?.url };
-                        }));
-                        return { ...season, episodes: episodesWithLinks };
-                    })
-                );
-                // Create a new object to ensure MobX detects the change.
-                fullItemDetails = { ...fullItemDetails, seasons: seasonsWithFreshLinks };
-            } else if (fullItemDetails.media_type === 'movie') {
-                // Also refresh links for movies just in case.
-                const links = await this.getLinksForMedia(item.id);
-                fullItemDetails = { ...fullItemDetails, video_urls: links, video_url: links[0]?.url };
-            }
+            fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
     
             // Dexie/IndexedDB cannot serialize MobX proxies. We must convert the object
             // to a plain JavaScript object before saving to prevent an error.
@@ -1025,7 +1056,8 @@ class MediaStore {
 
     clearLinksForSeason = async (seasonNumber: number, showId: number) => {
         const show = this.cachedItems.get(showId);
-        const season = show?.seasons?.find(s => s.season_number === seasonNumber);
+        if (!show) return;
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
         if (!season) return;
 
         const episodeIds = season.episodes.map(ep => ep.id);
@@ -1041,7 +1073,8 @@ class MediaStore {
 
     clearLinksForDomain = async (showId: number, seasonNumber: number, origin: string) => {
         const show = this.cachedItems.get(showId);
-        const season = show?.seasons?.find(s => s.season_number === seasonNumber);
+        if (!show) return;
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
         if (!season) return;
 
         const episodeIds = season.episodes.map(ep => ep.id);
@@ -1146,6 +1179,9 @@ class MediaStore {
     };
 
     setRemoteSelectedItem = (item: MediaItem) => {
+        // This is called by the RemoteControlView (now acting as master's home)
+        // when a card is clicked. It will call `selectMedia` on the master which
+        // handles displaying it locally and sending command to slave.
         this.selectMedia(item, 'remoteControl');
     };
 
@@ -1284,6 +1320,14 @@ class MediaStore {
                 this.stopPlayback();
                 this.sendSlaveStatusUpdate();
                 return; // Exit after handling
+            case 'select_item': // Slave receives command to select an item
+                this.selectMedia(item, 'detailView');
+                this.sendSlaveStatusUpdate();
+                return;
+            case 'clear_selection': // Slave receives command to clear selected item
+                this.closeDetail();
+                this.sendSlaveStatusUpdate();
+                return;
         }
     
         // All subsequent commands require a video element
@@ -1483,6 +1527,46 @@ class MediaStore {
     };
     
     // Private helpers
+    private async _fetchAndCacheMediaDetails(itemId: number, initialItem: MediaItem): Promise<MediaItem> {
+        let fullItemDetails = initialItem;
+        const needsApiFetch = fullItemDetails.media_type === 'tv' &&
+                              (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
+
+        if (needsApiFetch) {
+            const apiDetails = await getSeriesDetails(itemId);
+            const seasonsWithEpisodes = await Promise.all(
+                apiDetails.seasons?.map(async (season) => {
+                    const episodes = await getSeriesEpisodes(itemId, season.season_number);
+                    const episodesWithLinks = await Promise.all(episodes.map(async ep => {
+                        const links = await this.getLinksForMedia(ep.id);
+                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                    }));
+                    return { ...season, episodes: episodesWithLinks };
+                }) || []
+            );
+            fullItemDetails = { ...apiDetails, seasons: seasonsWithEpisodes };
+        } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
+            const seasonsWithFreshLinks = await Promise.all(
+                fullItemDetails.seasons.map(async (season) => {
+                    const episodesWithLinks = await Promise.all(season.episodes.map(async ep => {
+                        const links = await this.getLinksForMedia(ep.id);
+                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                    }));
+                    return { ...season, episodes: episodesWithLinks };
+                })
+            );
+            fullItemDetails = { ...fullItemDetails, seasons: seasonsWithFreshLinks };
+        } else if (fullItemDetails.media_type === 'movie') {
+            const links = await this.getLinksForMedia(itemId);
+            fullItemDetails = { ...fullItemDetails, video_urls: links, video_url: links[0]?.url };
+        }
+
+        await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
+        runInAction(() => {
+            this.cachedItems.set(itemId, fullItemDetails);
+        });
+        return fullItemDetails;
+    }
 // FIX: Modified findEpisodeById to return an object that is structurally compatible with MediaItem for use in ContentRow/Card components.
     private findEpisodeById(episodeId: number): (Episode & { show_id: number, show_title: string, backdrop_path: string, season_number: number, poster_path: string, title: string, media_type: 'tv', name: string }) | null {
         for (const show of this.cachedItems.values()) {
@@ -1577,6 +1661,10 @@ class MediaStore {
             // Also update the item being linked in the modal.
             if (this.linkingEpisodesForItem?.id === showId) {
                 this.linkingEpisodesForItem = updatedShow;
+            }
+            // Also update the master UI selected item if it's this show
+            if (this._masterUiSelectedItem?.id === showId) {
+                this._masterUiSelectedItem = updatedShow;
             }
         });
     }
