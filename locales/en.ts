@@ -177,7 +177,10 @@ export const en = {
   "qrScanner": {
     "close": "Close scanner",
     "title": "Point your camera at the QR Code on the TV",
-    "error": "Invalid QR code. Make sure you are scanning the code shown on the TV."
+    "error": "Invalid QR code. Make sure you are scanning the code shown on the TV.",
+    "or": "OR",
+    "enterCode": "Enter TV Code",
+    "connect": "Connect"
   },
   "smartTV": {
     "connected": "Remote Connected!",
@@ -186,7 +189,8 @@ export const en = {
     "qrAlt": "QR Code for remote control",
     "instructions": "1. Open the camera on your phone.\n2. Point it at the QR code to connect.",
     "initializing": "Initializing device...",
-    "browseOnTV": "Browse the catalog directly on the TV"
+    "browseOnTV": "Browse the catalog directly on the TV",
+    "orEnterCode": "Or enter the code manually:"
   },
   "watchTogether": {
     "joinRoomTitle": "Join Room",

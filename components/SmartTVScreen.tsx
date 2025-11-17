@@ -41,6 +41,14 @@ const SmartTVScreen: React.FC = observer(() => {
                     <Typography variant="body1" sx={{ mt: 3, color: 'text.secondary', whiteSpace: 'pre-line' }}>
                         {t('smartTV.instructions')}
                     </Typography>
+                    <Typography variant="body1" sx={{ mt: 4, color: 'text.secondary' }}>
+                        {t('smartTV.orEnterCode')}
+                    </Typography>
+                    <Paper elevation={4} sx={{ p: '4px 20px', display: 'inline-block', mt: 1, bgcolor: 'rgba(255,255,255,0.1)' }}>
+                        <Typography variant="h5" component="p" sx={{ fontFamily: 'monospace', letterSpacing: '0.2rem' }}>
+                            {slaveId}
+                        </Typography>
+                    </Paper>
                 </Box>
             );
         }

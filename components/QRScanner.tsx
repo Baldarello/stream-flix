@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Modal, Box, IconButton, Typography, Alert } from '@mui/material';
+import { Modal, Box, IconButton, Typography, Alert, TextField, Stack, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { useTranslations } from '../hooks/useTranslations';
@@ -12,6 +12,7 @@ const QRScanner: React.FC = observer(() => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;
     const { t } = useTranslations();
     const [scanError, setScanError] = useState<string | null>(null);
+    const [manualCode, setManualCode] = useState('');
     const scannerInstanceRef = useRef<Html5QrcodeScanner | null>(null);
 
     // Using a callback ref is a more robust way to handle refs for DOM nodes that
@@ -83,6 +84,12 @@ const QRScanner: React.FC = observer(() => {
         setScanError(null);
         closeQRScanner();
     };
+    
+    const handleManualConnect = () => {
+        if (manualCode.trim()) {
+            mediaStore.connectAsRemoteMaster(manualCode.trim());
+        }
+    };
 
     return (
         // FIX: (line 87) Wrap Box with Modal component
@@ -127,6 +134,36 @@ const QRScanner: React.FC = observer(() => {
                         }
                     }} 
                 />
+                
+                <Typography variant="body1" sx={{ color: 'white', my: 2, zIndex: 1, fontWeight: 'bold' }}>
+                    {t('qrScanner.or')}
+                </Typography>
+
+                <Stack direction="row" spacing={1} sx={{ zIndex: 1, width: 'min(90vw, 450px)' }}>
+                    <TextField
+                        label={t('qrScanner.enterCode')}
+                        variant="outlined"
+                        value={manualCode}
+                        onChange={(e) => setManualCode(e.target.value)}
+                        fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+                                '&:hover fieldset': { borderColor: 'white' },
+                            },
+                            '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+                            '& .MuiInputBase-input': { color: 'white' }
+                        }}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={handleManualConnect}
+                        disabled={!manualCode.trim()}
+                        sx={{ px: 3 }}
+                    >
+                        {t('qrScanner.connect')}
+                    </Button>
+                </Stack>
 
                 {scanError && (
                     <Alert severity="error" sx={{ position: 'absolute', bottom: '10%', zIndex: 2 }}>

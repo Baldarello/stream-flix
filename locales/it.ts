@@ -177,7 +177,10 @@ export const it = {
   "qrScanner": {
     "close": "Chiudi scanner",
     "title": "Inquadra il QR Code sulla TV",
-    "error": "Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV."
+    "error": "Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.",
+    "or": "OPPURE",
+    "enterCode": "Inserisci Codice TV",
+    "connect": "Connetti"
   },
   "smartTV": {
     "connected": "Telecomando Connesso!",
@@ -186,7 +189,8 @@ export const it = {
     "qrAlt": "QR Code per il controllo remoto",
     "instructions": "1. Apri la fotocamera sul tuo telefono.\n2. Inquadra il codice QR per connetterti.",
     "initializing": "Inizializzazione del dispositivo...",
-    "browseOnTV": "Sfoglia il catalogo direttamente sulla TV"
+    "browseOnTV": "Sfoglia il catalogo direttamente sulla TV",
+    "orEnterCode": "Oppure inserisci manualmente il codice:"
   },
   "watchTogether": {
     "joinRoomTitle": "Unisciti alla stanza",
