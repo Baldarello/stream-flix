@@ -100,6 +100,7 @@ class MediaStore {
     isSmartTVPairingVisible = false;
     isRemoteMaster = false;
     slaveId: string | null = null;
+    slaveShortCode: string | null = null;
     isRemoteMasterConnected = false;
     remoteSlaveState: RemoteSlaveState | null = null;
     remoteSelectedItem: MediaItem | null = null; // This is the item selected *on the slave* (remote TV)
@@ -1858,6 +1859,7 @@ class MediaStore {
         switch (type) {
             case 'quix-slave-registered': 
                 this.slaveId = payload.slaveId;
+                this.slaveShortCode = payload.shortCode;
                 if (this.isSmartTV) {
                     db.preferences.put({ key: 'selfSlaveId', value: payload.slaveId });
                 }

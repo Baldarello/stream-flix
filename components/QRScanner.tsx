@@ -87,7 +87,7 @@ const QRScanner: React.FC = observer(() => {
     
     const handleManualConnect = () => {
         if (manualCode.trim()) {
-            mediaStore.connectAsRemoteMaster(manualCode.trim());
+            mediaStore.connectAsRemoteMaster(manualCode.trim().toUpperCase());
         }
     };
 
@@ -144,7 +144,7 @@ const QRScanner: React.FC = observer(() => {
                         label={t('qrScanner.enterCode')}
                         variant="outlined"
                         value={manualCode}
-                        onChange={(e) => setManualCode(e.target.value)}
+                        onChange={(e) => setManualCode(e.target.value.toUpperCase())}
                         fullWidth
                         sx={{
                             '& .MuiOutlinedInput-root': {
@@ -153,6 +153,9 @@ const QRScanner: React.FC = observer(() => {
                             },
                             '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
                             '& .MuiInputBase-input': { color: 'white' }
+                        }}
+                        inputProps={{
+                            maxLength: 5,
                         }}
                     />
                     <Button

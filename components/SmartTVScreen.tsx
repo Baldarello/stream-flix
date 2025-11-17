@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -7,7 +8,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useTranslations } from '../hooks/useTranslations';
 
 const SmartTVScreen: React.FC = observer(() => {
-    const { slaveId, isRemoteMasterConnected } = mediaStore;
+    const { slaveId, isRemoteMasterConnected, slaveShortCode } = mediaStore;
     const { t } = useTranslations();
 
     const renderContent = () => {
@@ -46,7 +47,7 @@ const SmartTVScreen: React.FC = observer(() => {
                     </Typography>
                     <Paper elevation={4} sx={{ p: '4px 20px', display: 'inline-block', mt: 1, bgcolor: 'rgba(255,255,255,0.1)' }}>
                         <Typography variant="h5" component="p" sx={{ fontFamily: 'monospace', letterSpacing: '0.2rem' }}>
-                            {slaveId}
+                            {slaveShortCode || '...'}
                         </Typography>
                     </Paper>
                 </Box>
