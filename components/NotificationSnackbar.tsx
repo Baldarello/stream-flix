@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Snackbar, Alert, Button } from '@mui/material';
@@ -49,7 +50,7 @@ export const NotificationSnackbar: React.FC = observer(() => {
                 onClose={handleClose}
                 severity={snackbarMessage?.severity || 'info'}
                 variant="filled"
-                sx={{ width: '100%' }}
+                sx={{ width: '100%', color: 'white' }}
                 action={action}
             >
                 {messageText}

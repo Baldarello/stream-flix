@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a a default one.
 import { mediaStore } from '../store/mediaStore';
 import { Modal, Box, Typography, Button, TextField, Stack, IconButton, List, ListItem, ListItemText, CircularProgress, Tooltip, Alert, FormControl, InputLabel, Select, MenuItem, ListItemButton, Card, CardMedia } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -33,12 +34,16 @@ const WatchTogetherModal: React.FC = observer(() => {
       changeWatchTogetherMedia, joinRoomIdFromUrl, setJoinRoomIdFromUrl, changeRoomCode,
       watchTogetherSelectedItem
   } = mediaStore;
+  // In the modal, the source of truth for the content can either be the globally selected item (when creating a room)
+  // or the specific item for the watch together session (when joining or after the room is created).
+  const itemForModal = roomId ? watchTogetherSelectedItem : selectedItem;
   const { t } = useTranslations();
   
   const [inputRoomId, setInputRoomId] = useState('');
   const [username, setUsername] = useState('');
   const [copied, setCopied] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState(selectedItem?.seasons?.[0]?.season_number ?? 1);
+  // FIX: Add type guard to safely access 'seasons' property.
+  const [selectedSeason, setSelectedSeason] = useState((itemForModal && 'seasons' in itemForModal && itemForModal.seasons?.[0]?.season_number) || 1);
   const [isChangingContent, setIsChangingContent] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MediaItem[]>([]);
@@ -51,15 +56,17 @@ const WatchTogetherModal: React.FC = observer(() => {
   }, [joinRoomIdFromUrl]);
   
   useEffect(() => {
-      if (selectedItem?.seasons && selectedItem.seasons.length > 0) {
-          const seasonExists = selectedItem.seasons.some(s => s.season_number === selectedSeason);
+      // FIX: Add a type guard to ensure 'seasons' exists on itemForModal before accessing it.
+      if (itemForModal && 'seasons' in itemForModal && itemForModal.seasons && itemForModal.seasons.length > 0) {
+          const seasonExists = itemForModal.seasons.some(s => s.season_number === selectedSeason);
           if (!seasonExists) {
-              setSelectedSeason(selectedItem.seasons[0].season_number);
+              setSelectedSeason(itemForModal.seasons[0].season_number);
           }
-      } else if (selectedItem) {
+      } else if (itemForModal) {
           setSelectedSeason(1);
       }
-  }, [selectedItem?.id, selectedItem?.seasons]);
+  // FIX: The dependency should be on the item's ID to reset season when content changes.
+  }, [itemForModal?.id]);
   
   useEffect(() => {
     const searchDebounce = setTimeout(async () => {
@@ -99,12 +106,13 @@ const WatchTogetherModal: React.FC = observer(() => {
   };
 
   const handleSelectEpisode = (episode: Episode) => {
-    if (!selectedItem || !currentSeason) return;
+    // FIX: Add a type guard to ensure itemForModal is a MediaItem before accessing its properties.
+    if (!itemForModal || !('seasons' in itemForModal) || !currentSeason) return;
     const itemToPlay: PlayableItem = {
       ...episode,
-      show_id: selectedItem.id,
-      show_title: selectedItem.title || selectedItem.name || '',
-      backdrop_path: selectedItem.backdrop_path,
+      show_id: itemForModal.id,
+      show_title: itemForModal.title || itemForModal.name || '',
+      backdrop_path: itemForModal.backdrop_path,
       season_number: currentSeason.season_number,
     };
     changeWatchTogetherMedia(itemToPlay);
@@ -117,10 +125,14 @@ const WatchTogetherModal: React.FC = observer(() => {
       setSearchResults([]);
   }
 
-  const currentSeason = selectedItem?.seasons?.find(s => s.season_number === selectedSeason);
+  // FIX: Add a type guard to safely access the 'seasons' property.
+  const currentSeason = (itemForModal && 'seasons' in itemForModal && itemForModal.seasons)
+    ? itemForModal.seasons.find(s => s.season_number === selectedSeason)
+    : undefined;
 
   const renderInitialView = () => {
-    const isTvShow = selectedItem?.media_type === 'tv';
+    // FIX: Add a type guard to safely access the 'media_type' property.
+    const isTvShow = itemForModal && 'media_type' in itemForModal && itemForModal.media_type === 'tv';
     const isJoiningViaLink = !!joinRoomIdFromUrl;
     
     // The staged item for playback can be a movie or an episode.
@@ -151,16 +163,17 @@ const WatchTogetherModal: React.FC = observer(() => {
         
         {!isJoiningViaLink && (
             <>
-                {isTvShow && selectedItem && (
+                {isTvShow && itemForModal && (
                     <React.Fragment>
                         <Typography variant="subtitle1" fontWeight="bold">{t('watchTogether.selectEpisode')}</Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Typography variant="body1">{t('watchTogether.episodes')}</Typography>
-                            {selectedItem.seasons && selectedItem.seasons.length > 1 && (
+                            {itemForModal.seasons && itemForModal.seasons.length > 1 && (
                                 <FormControl size="small" sx={{minWidth: 150}}>
+                                    {/* FIX: (line 173) Pass label text as children to InputLabel */}
                                     <InputLabel>{t('watchTogether.season')}</InputLabel>
                                     <Select value={selectedSeason} label={t('watchTogether.season')} onChange={e => setSelectedSeason(Number(e.target.value))}>
-                                        {selectedItem.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
+                                        {itemForModal.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             )}
@@ -231,27 +244,43 @@ const WatchTogetherModal: React.FC = observer(() => {
   );
 
   const renderRoomView = () => {
-    if (!selectedItem || !watchTogetherSelectedItem) {
+    if (!itemForModal) {
         return <Box sx={{textAlign: 'center', p: 4}}><CircularProgress /><Typography sx={{mt:2}}>Sincronizzazione contenuti...</Typography></Box>
     }
     
+    // FIX: Safely determine the title for the room based on the item type (Movie/Show vs Episode).
+    let roomTitle = '';
+    if (itemForModal) {
+      // By checking for 'episode_number', we can reliably distinguish Episodes from MediaItems within the PlayableItem union type.
+      if ('episode_number' in itemForModal) {
+        // This is an Episode with show context from PlayableItem.
+        roomTitle = itemForModal.show_title;
+        // FIX: Added 'else if' to create a stronger type guard, resolving an error where '.title' might be accessed on an Episode type.
+      } else if ('title' in itemForModal) {
+        // If it's not an episode, it's a MediaItem.
+        roomTitle = itemForModal.title || itemForModal.name || '';
+      }
+    }
+
     if (isChangingContent && isHost) {
         return renderChangeContentView();
     }
     
     return (
         <Stack spacing={2} sx={{ overflow: 'hidden', flex: 1 }}>
-          <Typography variant="h6" component="h2" noWrap>{t('watchTogether.roomTitle', { title: selectedItem.title || selectedItem.name })}</Typography>
+          <Typography variant="h6" component="h2" noWrap>{t('watchTogether.roomTitle', { title: roomTitle })}</Typography>
           
           <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'rgba(255,255,255,0.1)', p: 1, borderRadius: 1 }}>
             <Typography variant="h5" component="p" sx={{ flexGrow: 1, textAlign: 'center', letterSpacing: '0.2rem', fontFamily: 'monospace' }}>
               {roomId}
             </Typography>
             {isHost && (
+                // FIX: (line 277) Wrap IconButton with Tooltip component
                 <Tooltip title={t('watchTogether.changeCode')}>
                     <IconButton onClick={changeRoomCode}><RefreshIcon /></IconButton>
                 </Tooltip>
             )}
+            {/* FIX: (line 281) Wrap IconButton with Tooltip component */}
             <Tooltip title={copied ? t('watchTogether.copied') : t('watchTogether.copyLink')}>
               <IconButton onClick={handleCopyToClipboard}>
                 <ContentCopyIcon />
@@ -260,15 +289,17 @@ const WatchTogetherModal: React.FC = observer(() => {
           </Box>
           
           {/* Episode List for Host */}
-          {isHost && selectedItem.media_type === 'tv' && (
+          {/* FIX: Add a type guard to safely access the 'media_type' property. */}
+          {isHost && 'media_type' in itemForModal && itemForModal.media_type === 'tv' && (
               <>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body1" fontWeight="bold">{t('watchTogether.episodes')}</Typography>
-                    {selectedItem.seasons && selectedItem.seasons.length > 1 && (
+                    {itemForModal.seasons && itemForModal.seasons.length > 1 && (
                         <FormControl size="small" sx={{minWidth: 150}}>
+                            {/* FIX: (line 296) Pass label text as children to InputLabel */}
                             <InputLabel>{t('watchTogether.season')}</InputLabel>
                             <Select value={selectedSeason} label={t('watchTogether.season')} onChange={e => setSelectedSeason(Number(e.target.value))}>
-                                {selectedItem.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
+                                {itemForModal.seasons.map(s => <MenuItem key={s.id} value={s.season_number}>{s.name}</MenuItem>)}
                             </Select>
                         </FormControl>
                     )}
@@ -295,7 +326,7 @@ const WatchTogetherModal: React.FC = observer(() => {
               ))}
             </List>
           </Box>
-          {isHost && (
+          {isHost && watchTogetherSelectedItem && (
             <Stack direction="row" spacing={2}>
               <Button variant="outlined" fullWidth onClick={() => setIsChangingContent(true)}>{t('watchTogether.changeContent')}</Button>
               <Button variant="contained" fullWidth color="primary" onClick={() => mediaStore.startPlayback(watchTogetherSelectedItem)}>
@@ -314,6 +345,7 @@ const WatchTogetherModal: React.FC = observer(() => {
   };
 
   return (
+    // FIX: (line 344) Wrap Box with Modal component
     <Modal
       open={watchTogetherModalOpen}
       onClose={handleClose}

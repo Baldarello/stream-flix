@@ -12,18 +12,21 @@ import DetailView from './components/DetailView';
 import VideoPlayer from './components/VideoPlayer';
 import GridView from './components/GridView';
 import SmartTVScreen from './components/SmartTVScreen';
-import RemoteControlView from './components/RemoteControlView';
+import RemotePlayerControlView from './components/RemotePlayerControlView';
 import ProfileDrawer from './components/ProfileDrawer';
 import QRScanner from './components/QRScanner';
 import WatchTogetherModal from './components/WatchTogetherModal';
 import { NotificationSnackbar } from './components/NotificationSnackbar';
 import DebugOverlay from './components/DebugOverlay';
 import LinkSelectionModal from './components/LinkSelectionModal';
+import LinkMovieModal from './components/LinkMovieModal';
 import ShareLibraryModal from './components/ShareLibraryModal';
 import ImportLibraryModal from './components/ImportLibraryModal';
 import RevisionsModal from './components/RevisionsModal';
 import { useTranslations } from './hooks/useTranslations';
 import { initGoogleAuth } from './services/googleAuthService';
+import { websocketService } from './services/websocketService.js';
+import type { MediaItem, PlayableItem } from './types';
 
 const baseThemeOptions: ThemeOptions = {
     typography: {
@@ -87,35 +90,36 @@ const AppContent: React.FC = observer(() => {
     loading,
     error,
     heroContent,
-    selectedItem,
     nowPlayingItem,
-    activeView,
-    topSeries,
-    allMovies,
-    popularAnime,
-    myListItems,
     isRemoteMaster,
+    remoteSlaveState,
     isSmartTVPairingVisible,
     isSearchActive,
     searchResults,
     searchQuery,
     isSearching,
     isQRScannerOpen,
+    topSeries,
+    allMovies,
+    popularAnime,
+    myListItems,
+    currentActiveView,   // <-- Using computed property
+    currentSelectedItem, // <-- Using computed property
   } = mediaStore;
 
   useEffect(() => {
-    const shouldLockScroll = !!selectedItem || !!nowPlayingItem || isSmartTVPairingVisible || isRemoteMaster;
+    // Determine if scroll should be locked based on *current* UI state
+    const shouldLockScroll = !!currentSelectedItem || !!nowPlayingItem || isSmartTVPairingVisible || (isRemoteMaster && !!remoteSlaveState?.nowPlayingItem);
     if (shouldLockScroll) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     
-    // Cleanup function to restore scroll on unmount, just in case.
     return () => {
       document.body.style.overflow = '';
     };
-  }, [selectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster]);
+  }, [currentSelectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster, remoteSlaveState?.nowPlayingItem]);
 
   if (loading) {
     return (
@@ -133,9 +137,14 @@ const AppContent: React.FC = observer(() => {
     );
   }
 
-  if (isRemoteMaster) return <><RemoteControlView /> <NotificationSnackbar /><DebugOverlay /></>;
-  if (nowPlayingItem) return <><VideoPlayer /> <NotificationSnackbar /><DebugOverlay /></>;
+  // Smart TV pairing mode always takes precedence
   if (isSmartTVPairingVisible) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
+  
+  // If remote master, and slave is playing, show the remote player controls
+  if (isRemoteMaster && remoteSlaveState?.nowPlayingItem) return <><RemotePlayerControlView /> <NotificationSnackbar /><DebugOverlay /></>;
+  
+  // If local client is playing, show local video player
+  if (nowPlayingItem) return <><VideoPlayer /> <LinkSelectionModal /><NotificationSnackbar /><DebugOverlay /></>;
 
   const renderSearchView = () => {
     if (isSearching && searchQuery) {
@@ -157,27 +166,41 @@ const AppContent: React.FC = observer(() => {
       return renderSearchView();
     }
 
-    switch (activeView) {
+    // Use currentActiveView for rendering decisions
+    switch (currentActiveView) {
       case 'Home':
         return (
           <>
             {heroContent && (
               <Hero
                 item={heroContent}
-                onMoreInfoClick={() => mediaStore.selectMedia(heroContent)}
+                onMoreInfoClick={() => mediaStore.selectMedia(heroContent, 'detailView')}
                 onPlayClick={() => mediaStore.startPlayback(heroContent)}
               />
             )}
             <Container maxWidth={false} sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
-                {mediaStore.homePageRows.map(row => (
+                {mediaStore.homePageRows.map(row => {
+                  const isContinueWatching = row.titleKey === 'misc.continueWatching';
+                  const handleCardClick = (item: MediaItem) => {
+                    if (isContinueWatching) {
+                      mediaStore.startPlayback(item as PlayableItem);
+                    } else {
+                      mediaStore.selectMedia(item);
+                    }
+                  };
+
+                  return (
                     <ContentRow
                         key={row.titleKey}
                         title={t(row.titleKey)}
                         items={row.items}
-                        onCardClick={item => mediaStore.selectMedia(item)}
+                        onCardClick={handleCardClick}
+                        isContinueWatching={isContinueWatching}
+                        isReorderable={row.titleKey === 'misc.myList'}
                     />
-                ))}
+                  );
+                })}
               </Box>
             </Container>
           </>
@@ -194,13 +217,14 @@ const AppContent: React.FC = observer(() => {
       <Box sx={{ color: 'text.primary' }}>
         <Header />
         <main>{renderMainContent()}</main>
-        {selectedItem && <DetailView />}
+        {currentSelectedItem && <DetailView />} {/* Use currentSelectedItem */}
         <Footer />
         <ProfileDrawer />
         {isQRScannerOpen && <QRScanner />}
         <WatchTogetherModal />
         <NotificationSnackbar />
         <LinkSelectionModal />
+        <LinkMovieModal />
         <ShareLibraryModal />
         <ImportLibraryModal />
         <RevisionsModal />
@@ -216,7 +240,7 @@ const App: React.FC = () => {
         await initGoogleAuth();
         await mediaStore.loadPersistedData();
         mediaStore.fetchAllData();
-        
+
         const params = new URLSearchParams(window.location.search);
         
         // Handle Watch Together room ID from URL
@@ -228,10 +252,9 @@ const App: React.FC = () => {
         }
         
         // Handle Library Import from URL
-        const importData = params.get('importData');
-        if (importData) {
-            const fullUrl = window.location.href; // The URL contains the full param
-            mediaStore.setImportUrl(fullUrl);
+        const importUrl = params.get('importFromUrl');
+        if (importUrl) {
+            mediaStore.setImportUrl(importUrl);
             mediaStore.openImportModal();
             // Clean the URL in the browser bar
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -241,6 +264,40 @@ const App: React.FC = () => {
   }, []);
   
   useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+        // This event is triggered by the browser's back/forward buttons.
+        const state = event.state || {}; // Handle initial null state
+
+        // Case 1: User navigates BACK from the video player.
+        // We check if a player should be open. If not, but we have a playing item,
+        // it means we need to close it.
+        if (!state.playerOpen && mediaStore.nowPlayingItem) {
+            mediaStore._stopPlaybackWithoutHistory();
+        }
+        
+        // Case 2: User navigates BACK from the detail view.
+        // We check if a detail view should be open. If not, but we have one selected,
+        // it means we need to close it. We also ensure we are not currently playing a video.
+        // For remote master, we check currentSelectedItem, for slave/local, we check selectedItem.
+        if (!state.detailViewOpen && mediaStore.currentSelectedItem && !mediaStore.nowPlayingItem) {
+            // Check if it's a remote master clearing its UI state
+            if (mediaStore.isRemoteMaster) {
+                mediaStore.clearMasterUiSelection();
+                // We don't push history for remote master's UI. The popstate should only be local.
+            } else {
+                mediaStore._closeDetailWithoutHistory();
+            }
+        }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+        window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
     // Dynamically update body background based on theme
     const themeClassMap: Record<ThemeName, string> = {
       'SerieTV': 'theme-serietv',
@@ -249,6 +306,18 @@ const App: React.FC = () => {
     };
     document.body.className = themeClassMap[activeTheme] || 'theme-serietv';
   }, [activeTheme]);
+  
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+            websocketService.connect();
+        }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const dynamicTheme = createTheme({
     palette: {

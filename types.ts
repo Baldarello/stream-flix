@@ -1,8 +1,10 @@
-export interface EpisodeLink {
+export interface MediaLink {
     id?: number; // Auto-incrementing primary key from Dexie
-    episodeId: number;
+    mediaId: number;
     url: string;
     label: string;
+    language: string; // e.g., 'ITA', 'ENG', 'JPN'
+    type: 'sub' | 'dub'; // Subtitled or Dubbed
 }
 
 export interface Episode {
@@ -12,7 +14,7 @@ export interface Episode {
   overview: string;
   still_path: string; // URL to an image
   video_url?: string; // The first available URL for convenience
-  video_urls?: EpisodeLink[]; // Array of all available links
+  video_urls?: MediaLink[]; // Array of all available links
   intro_start_s?: number; // Start time of intro in seconds
   intro_end_s?: number;   // End time of intro in seconds
 }
@@ -37,6 +39,8 @@ export interface MediaItem {
   first_air_date?: string; // For TV series
   media_type: 'movie' | 'tv';
   seasons?: Season[];
+  video_url?: string;
+  video_urls?: MediaLink[];
 }
 
 export type PlayableItem = (MediaItem | (Episode & {
@@ -81,6 +85,8 @@ export interface SharedEpisodeLink {
   episodeNumber: number;
   url: string;
   label: string;
+  language: string;
+  type: 'sub' | 'dub';
 }
 
 export interface SharedShowData {
@@ -105,6 +111,12 @@ export interface Revision {
     // Client-side properties for UI display
     description?: string;
     icon?: 'add' | 'update' | 'delete' | 'unknown';
+}
+
+export interface ShowFilterPreference {
+  showId: number; // Primary key
+  language?: string;
+  type?: 'sub' | 'dub';
 }
 
 export interface PreferredSource {

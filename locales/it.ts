@@ -1,3 +1,4 @@
+
 export const it = {
   "header": {
     "home": "Home",
@@ -18,7 +19,8 @@ export const it = {
   "card": {
     "detailsFor": "Vedi dettagli per {title}",
     "removeFromList": "Rimuovi dalla mia lista",
-    "addToList": "Aggiungi alla mia lista"
+    "addToList": "Aggiungi alla mia lista",
+    "removeFromContinueWatching": "Rimuovi da Continua a guardare"
   },
   "detail": {
     "close": "Chiudi dettaglio",
@@ -29,11 +31,15 @@ export const it = {
     "addToList": "Aggiungi alla mia lista",
     "watchTogether": "Guarda Insieme",
     "episodes": "Episodi",
-    "linkEpisodesTooltip": "Collega file video per la stagione",
+    "linkEpisodesTooltip": "Collega file video",
     "introDuration": "Durata Intro",
     "season": "Stagione",
     "scrollEpisodesLeft": "scorri episodi a sinistra",
-    "scrollEpisodesRight": "scorri episodi a destra"
+    "scrollEpisodesRight": "scorri episodi a destra",
+    "markAsWatched": "Segna come visto",
+    "markAsUnwatched": "Segna come non visto",
+    "filterLanguage": "Lingua",
+    "filterType": "Tipo"
   },
   "gridView": {
     "myListTitle": "La mia lista",
@@ -68,6 +74,19 @@ export const it = {
     "title": "Episodi",
     "season": "Stagione {number}"
   },
+  "linkMovieModal": {
+    "title": "Collega Video per {title}",
+    "addLink": "Aggiungi Link",
+    "url": "URL",
+    "label": "Etichetta (opzionale)",
+    "add": "Aggiungi",
+    "noLinks": "Nessun link video associato a questo film.",
+    "deleteLink": "Elimina Link",
+    "language": "Lingua",
+    "type": "Tipo",
+    "sub": "Sottotitolato",
+    "dub": "Doppiato"
+  },
   "linkEpisodesModal": {
     "title": "Collega Episodi per {name}",
     "selectSeason": "Seleziona la stagione",
@@ -86,9 +105,18 @@ export const it = {
       "paddingHelper": "Es. 2 per '01', 3 per '001'",
       "listInfo": "Incolla un elenco di link, uno per riga. Il numero di link deve corrispondere al numero di episodi ({count}).",
       "listLinks": "Lista di link",
-      "jsonInfo": "Incolla un array JSON di stringhe (link) o di oggetti (es. {\"url\": \"...\", \"label\": \"...\"}).",
+      "jsonInfo": "Incolla un array JSON di stringhe (link) o di oggetti (es. {\"url\": \"...\", \"label\": \"...\", \"language\": \"ENG\", \"type\": \"dub\"}).",
       "jsonArray": "Array JSON",
-      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]"
+      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]",
+      "advancedConfig": "Configurazione avanzata",
+      "startEpisode": "Da episodio",
+      "endEpisode": "A episodio",
+      "startNumberPlaceholder": "Numero partenza per [@EP]",
+      "endNumberPlaceholder": "Numero fine per [@EP]",
+      "language": "Lingua",
+      "type": "Tipo",
+      "sub": "Sottotitolato",
+      "dub": "Doppiato"
     },
     "manage": {
       "deleteAllSeasonLinks": "Elimina tutti i link per questa stagione",
@@ -102,7 +130,12 @@ export const it = {
       "newDomain": "Nuovo Dominio/Origine",
       "update": "Aggiorna",
       "setAsPreferred": "Imposta come fonte preferita",
-      "removePreferred": "Rimuovi preferenza"
+      "removePreferred": "Rimuovi preferenza",
+      "editLink": "Modifica Link",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "deleteAllFromDomainTooltip": "Elimina tutti i link da questo dominio",
+      "deleteAllFromDomainConfirm": "Sei sicuro di voler eliminare tutti i {count} link da {domain}?"
     }
   },
   "linkSelectionModal": {
@@ -128,12 +161,26 @@ export const it = {
     "library": "Libreria",
     "share": "Condividi Libreria",
     "import": "Importa Libreria",
-    "history": "Cronologia Modifiche"
+    "history": "Cronologia Modifiche",
+    "playbackPreferences": "Preferenze di Riproduzione",
+    "preferredLabelsDesc": "Dai priorità ai link con queste etichette durante la selezione automatica.",
+    "noLabelsFound": "Nessuna etichetta trovata",
+    "noLabelsFoundDesc": "Aggiungi link con etichette per gestirle qui.",
+    "savedDevices": "Dispositivi TV Salvati",
+    "noSavedDevices": "Nessun dispositivo TV salvato.",
+    "connect": "Connetti",
+    "editName": "Modifica Nome",
+    "forgetDevice": "Dimentica Dispositivo",
+    "save": "Salva",
+    "cancel": "Annulla"
   },
   "qrScanner": {
     "close": "Chiudi scanner",
     "title": "Inquadra il QR Code sulla TV",
-    "error": "Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV."
+    "error": "Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.",
+    "or": "OPPURE",
+    "enterCode": "Inserisci Codice TV",
+    "connect": "Connetti"
   },
   "smartTV": {
     "connected": "Telecomando Connesso!",
@@ -142,7 +189,8 @@ export const it = {
     "qrAlt": "QR Code per il controllo remoto",
     "instructions": "1. Apri la fotocamera sul tuo telefono.\n2. Inquadra il codice QR per connetterti.",
     "initializing": "Inizializzazione del dispositivo...",
-    "browseOnTV": "Sfoglia il catalogo direttamente sulla TV"
+    "browseOnTV": "Sfoglia il catalogo direttamente sulla TV",
+    "orEnterCode": "Oppure inserisci manualmente il codice:"
   },
   "watchTogether": {
     "joinRoomTitle": "Unisciti alla stanza",
@@ -196,7 +244,10 @@ export const it = {
       "pause": "pausa",
       "skipIntro": "Salta Intro",
       "episodes": "Episodi",
-      "introDuration": "Durata Intro (sec)"
+      "introDuration": "Durata Intro (sec)",
+      "nextEpisode": "prossimo episodio",
+      "previousEpisode": "episodio precedente",
+      "disconnect": "Disconnetti"
     }
   },
   "misc": {
@@ -224,7 +275,8 @@ export const it = {
     "pasteLink": "Incolla un link di condivisione per aggiungere i contenuti alla tua libreria.",
     "linkPlaceholder": "https://...",
     "import": "Importa",
-    "importing": "Importazione in corso..."
+    "importing": "Importazione in corso...",
+    "loginRequired": "Devi aver effettuato l'accesso con Google per condividere la tua libreria."
   },
   "revisions": {
     "title": "Cronologia Modifiche",
@@ -234,14 +286,17 @@ export const it = {
     "loading": "Caricamento cronologia...",
     "showRawData": "Mostra Dati Grezzi",
     "hideRawData": "Nascondi Dati Grezzi",
+    "errors": {
+      "missingOldObject": "Impossibile ripristinare: i dati della vecchia versione non sono disponibili nella cronologia."
+    },
     "descriptions": {
         "myList": {
             "add": "Aggiunto '{name}' alla tua lista",
             "remove": "Rimosso '{name}' dalla tua lista"
         },
         "cachedItems": {
-            "add": "Messo in cache '{name}' per accesso offline",
-            "update": "Aggiornati dati in cache per '{name}'",
+            "add": "Messo in cache '{name}'",
+            "update": "Aggiornati dati cache per '{name}'",
             "remove": "Rimosso '{name}' dalla cache"
         },
         "episodeLinks": {
@@ -254,7 +309,7 @@ export const it = {
             "remove": "Rimossa durata intro per '{show}'"
         },
         "viewingHistory": {
-            "add": "Visto episodio '{show}' S{s}E{e}"
+            "add": "Visto episodio: {show} S{s}E{e}"
         },
         "unknown": "Azione '{type}' sulla tabella '{table}'"
     }
@@ -263,10 +318,12 @@ export const it = {
     "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
     "tvReady": "Dispositivo TV pronto. Scansiona il QR code per connetterti.",
     "connectedToTV": "Connesso alla TV con successo!",
+    "disconnectedFromTV": "Disconnesso dalla TV.",
     "remoteConnected": "Telecomando connesso!",
+    "reconnectingAsRemote": "Riconnessione come telecomando...",
     "failedToLoadSeriesDetails": "Impossibile caricare i dettagli della serie.",
     "noPlayableEpisodes": "Nessun episodio riproducibile trovato per questa serie.",
-    "noVideoLinks": "Nessun link video trovato per questo episodio.",
+    "noVideoLinks": "Nessun link video trovato per questo contenuto.",
     "linkCountMismatch": "Il numero di link ({linkCount}) non corrisponde al numero di episodi ({episodeCount}).",
     "processingError": "Errore nell'elaborazione dei dati: {error}",
     "linksAddedSuccess": "{count} link aggiunti con successo!",
@@ -293,10 +350,26 @@ export const it = {
     "importInvalidFile": "File di importazione non valido o corrotto.",
     "importInvalidLink": "Link di condivisione non valido.",
     "importInProgress": "Importazione della libreria in corso...",
-    "importSuccess": "{showCount} show e {linkCount} link importati con successo! L'app verrà ricaricata.",
+    "importSuccess": "{showCount} show e {linkCount} link importati e aggiunti a 'La mia lista'! L'app verrà ricaricata.",
     "importError": "Errore durante l'importazione: {error}",
     "revertSuccess": "Modifica annullata con successo.",
     "revertError": "Impossibile annullare la modifica: {error}",
-    "preferredSourceSet": "Fonte preferita impostata con successo."
+    "preferredSourceSet": "Fonte preferita impostata con successo.",
+    "syncChecking": "Verifica dei dati nel cloud...",
+    "syncError": "Errore di sincronizzazione con il cloud.",
+    "noBackupFoundCreating": "Nessun backup cloud trovato. Creazione in corso...",
+    "restoringFromCloud": "Dati più recenti trovati nel cloud. Ripristino in corso...",
+    "shareLinkCreateError": "Creazione del link di condivisione non riuscita: {error}",
+    "syncUpToDate": "I tuoi dati sono già aggiornati.",
+    "removedFromContinueWatching": "Rimosso da 'Continua a guardare'.",
+    "removeFromContinueWatchingError": "Errore durante la rimozione da 'Continua a guardare'.",
+    "markedAsWatched": "Episodio segnato come visto.",
+    "markedAsUnwatched": "Episodio segnato come non visto.",
+    "invalidEpisodeRange": "Intervallo episodi non valido.",
+    "episodeNumberRangeMismatch": "L'intervallo di episodi ({epRange}) e l'intervallo di numerazione ({numRange}) devono avere la stessa lunghezza.",
+    "preferredLabelSet": "Etichetta '{label}' impostata come preferita.",
+    "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'.",
+    "linkUpdatedSuccess": "Link aggiornato con successo.",
+    "linksFromDomainDeletedSuccess": "{count} link da {domain} eliminati con successo."
   }
 }

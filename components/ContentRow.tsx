@@ -1,3 +1,5 @@
+
+
 import React, { useRef, useState, useEffect } from 'react';
 import type { MediaItem } from '../types';
 import { Card } from './Card';
@@ -6,19 +8,27 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { observer } from 'mobx-react-lite';
 import { useTranslations } from '../hooks/useTranslations';
+import { mediaStore } from '../store/mediaStore';
 
 interface ContentRowProps {
   title: string;
   items: MediaItem[];
   onCardClick: (item: MediaItem) => void;
+  isContinueWatching?: boolean;
+  isReorderable?: boolean;
 }
 
-export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick }) => {
+export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick, isContinueWatching, isReorderable = false }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const { t } = useTranslations();
+  
+  // State for Drag and Drop
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const checkScrollability = () => {
     const el = scrollContainerRef.current;
@@ -63,6 +73,33 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
     }
   };
 
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.dataTransfer.setData("itemIndex", index.toString());
+    setDraggedIndex(index);
+    setIsDragging(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (index !== draggedIndex) {
+      setDropTargetIndex(index);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null) return;
+    mediaStore.reorderMyList(draggedIndex, dropIndex);
+    handleDragEnd();
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDropTargetIndex(null);
+    setIsDragging(false);
+  };
+
   const scrollButtonStyles = {
     position: 'absolute',
     top: 0,
@@ -88,6 +125,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
         onMouseLeave={() => setIsHovered(false)}
         sx={{ position: 'relative' }}
       >
+        {/* FIX: (line 127) Wrap IconButton with Fade component */}
         <Fade in={isHovered && canScrollLeft}>
           <IconButton
             onClick={() => handleScroll('left')}
@@ -103,7 +141,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
 
         <Box
           ref={scrollContainerRef}
-          className="filmstrip-container"
+          className={`filmstrip-container ${isDragging ? 'is-dragging' : ''}`}
           sx={{
             display: 'flex',
             overflowX: 'auto',
@@ -123,23 +161,40 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, o
             '&:hover .media-card:hover': {
                 opacity: 1,
             },
-            '& .media-card:hover ~ .media-card': {
+            '&:hover .dnd-wrapper:hover ~ .dnd-wrapper': {
                 transform: 'translateX(60px)',
             }
           }}
         >
           {items.map((item, index) => (
-            <Card 
-                key={item.id} 
-                item={item} 
-                onClick={() => onCardClick(item)} 
-                displayMode="row"
-                className="media-card"
-                style={{ zIndex: items.length - index }}
-            />
+            <div
+              key={item.id}
+              className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''}`}
+              draggable={isReorderable}
+              onDragStart={(e) => isReorderable && handleDragStart(e, index)}
+              onDragOver={(e) => isReorderable && handleDragOver(e, index)}
+              onDrop={(e) => isReorderable && handleDrop(e, index)}
+              onDragEnd={() => isReorderable && handleDragEnd()}
+              onDragLeave={() => isReorderable && setDropTargetIndex(null)}
+              style={{
+                marginLeft: index === 0 ? 0 : '-40px',
+                transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+              }}
+            >
+              <Card 
+                  item={item} 
+                  onClick={() => onCardClick(item)} 
+                  displayMode="row"
+                  className="media-card"
+                  style={{ zIndex: items.length - index }}
+                  isContinueWatching={isContinueWatching}
+                  isReorderable={isReorderable}
+              />
+            </div>
           ))}
         </Box>
 
+        {/* FIX: (line 195) Wrap IconButton with Fade component */}
         <Fade in={isHovered && canScrollRight}>
           <IconButton
             onClick={() => handleScroll('right')}

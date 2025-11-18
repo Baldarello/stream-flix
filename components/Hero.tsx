@@ -5,6 +5,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslations } from '../hooks/useTranslations';
 import { observer } from 'mobx-react-lite';
+// FIX: mediaStore is now a named export, not a default one.
 import { mediaStore } from '../store/mediaStore';
 
 interface HeroProps {
@@ -52,7 +53,7 @@ export const Hero: React.FC<HeroProps> = observer(({ item, onMoreInfoClick, onPl
           content: '""',
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(to top, var(--background-gradient-end) 10%, transparent 50%), radial-gradient(circle at 30% 50%, transparent 20%, var(--background-gradient-end) 80%)',
+          background: 'linear-gradient(to right, rgba(20, 20, 20, 0.9) 30%, transparent 70%), linear-gradient(to top, rgba(20, 20, 20, 1) 10%, transparent 50%)',
         }
       }}
     >

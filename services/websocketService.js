@@ -34,6 +34,9 @@ class WebSocketService {
     }
 
     connect() {
+        if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
+            return; // Don't try to connect if already open or connecting
+        }
         console.log('Attempting to connect to WebSocket server...');
         this.events.emit('debug', 'Tentativo di connessione...');
         this.ws = new WebSocket(WEBSOCKET_URL);

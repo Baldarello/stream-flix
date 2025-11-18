@@ -1,5 +1,8 @@
-import {makeAutoObservable, runInAction} from 'mobx';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, EpisodeLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource} from '../types';
+
+
+import {makeAutoObservable, runInAction, computed, observable} from 'mobx';
+import Dexie from 'dexie';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -10,10 +13,10 @@ import {
     getTrending,
     searchShow
 } from '../services/apiCall';
-import {websocketService} from '../services/websocketService.js';
+import {websocketService}from '../services/websocketService.js';
+import * as driveService from '../services/googleDriveService';
 import {db} from '../services/db';
 import { isSmartTV as detectSmartTV } from '../utils/device';
-import * as driveService from '../services/googleDriveService';
 import { it } from '../locales/it';
 import { en } from '../locales/en';
 
@@ -28,9 +31,23 @@ type RemoteSlaveState = {
     isPlaying: boolean;
     nowPlayingItem: PlayableItem | null;
     isIntroSkippable?: boolean;
+    currentTime?: number;
+    duration?: number;
 }
 
 const allTranslations = { it, en };
+
+// FIX: Add translation helper functions for use within the store.
+const getNestedValue = (obj: any, path: string): string | undefined => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+};
+
+const interpolate = (str: string, values: Record<string, any>): string => {
+    return str.replace(/\{(\w+)\}/g, (placeholder, key) => {
+        return values[key] !== undefined ? String(values[key]) : placeholder;
+    });
+}
+
 
 class MediaStore {
     trending: MediaItem[] = [];
@@ -39,17 +56,21 @@ class MediaStore {
     popularAnime: MediaItem[] = [];
     loading = true;
     error: string | null = null;
-    selectedItem: MediaItem | null = null;
+    @observable selectedItem: MediaItem | null = null; // Local selected item for non-remote master
+    private playbackOriginItem: MediaItem | null = null;
     isDetailLoading = false;
     myList: number[] = [];
     isPlaying = false;
     nowPlayingItem: PlayableItem | null = null;
     nowPlayingShowDetails: MediaItem | null = null; // Full details for the show currently playing
-    activeView: ActiveView = 'Home';
+    @observable activeView: ActiveView = 'Home'; // Local active view for non-remote master
     viewingHistory: ViewingHistoryItem[] = [];
     cachedItems: Map<number, MediaItem> = new Map();
     episodeProgress: Map<number, EpisodeProgress> = new Map();
     preferredSources: Map<number, string> = new Map();
+    preferredLabels: string[] = [];
+    selectedSeasons: Map<number, number> = new Map();
+    showFilterPreferences: Map<number, { language?: string; type?: 'sub' | 'dub'; }> = new Map();
 
     // Search State
     searchQuery = '';
@@ -79,23 +100,35 @@ class MediaStore {
     isSmartTVPairingVisible = false;
     isRemoteMaster = false;
     slaveId: string | null = null;
+    slaveShortCode: string | null = null;
     isRemoteMasterConnected = false;
     remoteSlaveState: RemoteSlaveState | null = null;
-    remoteSelectedItem: MediaItem | null = null;
+    remoteSelectedItem: MediaItem | null = null; // This is the item selected *on the slave* (remote TV)
     isRemoteDetailLoading = false;
     remoteAction: { type: string; payload?: any; id: number } | null = null;
     remoteFullItem: MediaItem | null = null;
     isRemoteFullItemLoading = false;
     isIntroSkippableOnSlave = false;
+    @observable knownSlaves: { id: string; name: string; lastSeen: number; }[] = [];
+
+    // UI states for the Master remote when it's controlling a TV
+    @observable _masterUiActiveView: ActiveView = 'Home'; // The active view on the MASTER device
+    @observable _masterUiSelectedItem: MediaItem | null = null; // The selected item on the MASTER device
 
 
+    // FIX: Rename episodeLinks state to mediaLinks and use MediaLink type
+    mediaLinks: Map<number, MediaLink[]> = new Map();
     // Episode Linking State
-    episodeLinks: Map<number, EpisodeLink[]> = new Map();
     isLinkEpisodesModalOpen = false;
     linkingEpisodesForItem: MediaItem | null = null;
+    // FIX: Add state for movie linking modal
+    isLinkMovieModalOpen = false;
+    linkingMovieItem: MediaItem | null = null;
     isLinkSelectionModalOpen = false;
     itemForLinkSelection: PlayableItem | null = null;
-    linksForSelection: EpisodeLink[] = [];
+    // FIX: Use MediaLink type for linksForSelection
+    linksForSelection: MediaLink[] = [];
+    linkSelectionContext: 'local' | 'remote' = 'local';
     expandedLinkAccordionId: number | false = false;
 
     // Player Episode Drawer State
@@ -115,7 +148,7 @@ class MediaStore {
     isRevisionsModalOpen = false;
     isRevisionsLoading = false;
     revisions: Revision[] = [];
-    private episodeContextMap: Map<number, { showName: string, epNum: number, sNum: number, epName: string }> = new Map();
+    private episodeContextMap: Map<number, { show: string | undefined; s: number; e: number; epName: string; }> = new Map();
 
 
     // Custom Intro Durations
@@ -128,12 +161,13 @@ class MediaStore {
     snackbarMessage: { message: string, severity: AlertColor, action?: { label: string, onClick: () => void }, isTranslationKey?: boolean, translationValues?: Record<string, any> } | null = null;
 
     // Debug Mode State
+    isDebugModeActive = false;
     debugMessages: string[] = [];
 
     // Google Auth & Sync State
     googleUser: GoogleUser | null = null;
-    isBackingUp = false;
-    isRestoring = false;
+    isSyncing = false;
+    private backupDebounceTimer: number | null = null;
     
     // Translation State
     language: Language = 'it';
@@ -145,1737 +179,1733 @@ class MediaStore {
 
     constructor() {
         makeAutoObservable(this);
-        this.isSmartTV = detectSmartTV();
-        if (this.isSmartTV) {
-            this.isSmartTVPairingVisible = true;
+        // isSmartTV is now determined on app load based on DB preference.
+        // We still run the detector for first-time use.
+        if (detectSmartTV()) {
+            this.isSmartTV = true;
         }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
         websocketService.events.on('debug', this.addDebugMessage);
     }
 
+    @computed get currentActiveView(): ActiveView {
+        return this.isRemoteMaster ? this._masterUiActiveView : this.activeView;
+    }
+
+    @computed get currentSelectedItem(): MediaItem | null {
+        // The master device should still show the detail view even if the slave is playing.
+        return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
+    }
+
+    startPlayback = async (item: PlayableItem) => {
+        // If we are a remote master, send play command to slave instead of playing locally
+        if (this.isRemoteMaster) {
+            this.playRemoteItem(item); // This already handles link resolution and sending command
+            return;
+        }
+
+        // --- Step 1: Ensure we have a single, playable URL ---
+        if (!item.video_url) {
+            const mediaId = item.id;
+            let allLinks: MediaLink[] = item.video_urls || await this.getLinksForMedia(mediaId);
+            item.video_urls = allLinks;
+    
+            if (allLinks.length === 0) {
+                this.showSnackbar("notifications.noVideoLinks", "warning", true);
+                return; // Can't play, so exit.
+            }
+            
+            // Determine the pool of links to choose from.
+            let candidateLinks: MediaLink[] = allLinks;
+            const showId = 'show_id' in item ? item.show_id : item.id;
+            const preferredOrigin = this.preferredSources.get(showId);
+
+            if (preferredOrigin) {
+                const linksFromPreferred = allLinks.filter(l => {
+                    try {
+                        // Compare origins for a more robust match than startsWith
+                        return new URL(l.url).origin === preferredOrigin;
+                    } catch {
+                        return false;
+                    }
+                });
+
+                if (linksFromPreferred.length > 0) {
+                    candidateLinks = linksFromPreferred;
+                }
+            }
+
+            // Now, from the candidate links, select one to play.
+            if (candidateLinks.length === 1) {
+                item.video_url = candidateLinks[0].url;
+            } else { // candidateLinks.length > 1
+                // There are multiple candidates. Try to select based on preferred labels.
+                const preferredLabels = this.preferredLabels;
+                let bestLink: MediaLink | undefined = undefined;
+
+                if (preferredLabels.length > 0) {
+                    bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
+                }
+
+                if (bestLink) {
+                    item.video_url = bestLink.url;
+                } else {
+                    // More than one link, and no preferred label match, so we must ask the user.
+                    this.linksForSelection = candidateLinks;
+                    this.itemForLinkSelection = item;
+                    this.linkSelectionContext = 'local';
+                    this.isLinkSelectionModalOpen = true;
+                    return;
+                }
+            }
+        }
+    
+        // --- Step 2: If we have a URL, start playback ---
+        if (item.video_url) {
+            runInAction(() => {
+                if (this.selectedItem) {
+                    this.playbackOriginItem = this.selectedItem;
+                    // Close detail view without affecting history, as we will push a new state for the player.
+                    this._closeDetailWithoutHistory();
+                } else {
+                    // Ensure playbackOriginItem is cleared if we start playing from a non-detail view.
+                    this.playbackOriginItem = null;
+                }
+
+                // Push a new history state for the video player.
+                // Replace state if another player is somehow already open.
+                if (window.history.state?.playerOpen) {
+                    window.history.replaceState({ playerOpen: true, itemId: item.id }, '', window.location.href);
+                } else {
+                    window.history.pushState({ playerOpen: true, itemId: item.id }, '', window.location.href);
+                }
+
+                this.nowPlayingItem = item;
+    
+                if ('show_id' in item) {
+                    this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
+                } else {
+                    this.nowPlayingShowDetails = null; // It's a movie
+                }
+            });
+        }
+    }
+
+    _stopPlaybackWithoutHistory = () => {
+        if (this.playbackOriginItem) {
+            this.selectedItem = this.playbackOriginItem;
+            this.playbackOriginItem = null;
+        }
+        this.nowPlayingItem = null;
+        this.nowPlayingShowDetails = null;
+        this.isPlaying = false;
+    }
+
+    stopPlayback = () => {
+        // This is called by UI elements (e.g., the back button in the player).
+        // It uses the History API to navigate back, which triggers the popstate
+        // event, ensuring the UI state and browser history remain synchronized.
+        if (window.history.state?.playerOpen) {
+            window.history.back();
+        } else {
+            // Fallback in case the history state is not what we expect.
+            this._stopPlaybackWithoutHistory();
+        }
+    }
+
+    synchronizeWithDrive = async () => {
+        if (!this.isLoggedIn || !this.googleUser?.accessToken) {
+            return;
+        }
+        this.isSyncing = true;
+        try {
+            this.showSnackbar('notifications.syncChecking', 'info', true);
+            const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
+            const lastSyncFileId = (await db.preferences.get('lastSyncFileId'))?.value;
+
+            if (remoteFile) {
+                // If the latest remote file is the same one we last synced with, do nothing.
+                if (remoteFile.id === lastSyncFileId) {
+                    this.showSnackbar('notifications.syncUpToDate', 'success', true);
+                    return; // Exit early
+                }
+                
+                // A newer remote file exists, restore it.
+                this.showSnackbar('notifications.restoringFromCloud', 'info', true);
+                const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
+                await db.importData(data);
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
+                this.showSnackbar('notifications.restoreComplete', 'success', true);
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                // No remote backup exists. Create one from local DB.
+                this.showSnackbar('notifications.noBackupFoundCreating', 'info', true);
+                const newFile = await this.backupToDrive(false);
+                if (newFile) {
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
+                }
+            }
+        } catch (error) {
+            console.error("Error during initial sync:", error);
+            this.showSnackbar('notifications.syncError', 'error', true);
+        } finally {
+            runInAction(() => {
+                this.isSyncing = false;
+            });
+        }
+    };
+
+    backupToDrive = async (showNotification = true): Promise<driveService.DriveFile | undefined> => {
+        if (!this.isLoggedIn || !this.googleUser?.accessToken) {
+            if (showNotification) this.showSnackbar('notifications.loginRequired', 'warning', true);
+            return;
+        }
+        if (showNotification) this.showSnackbar('notifications.backupInProgress', 'info', true);
+        this.isSyncing = true;
+        try {
+            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
+            const data: { [key: string]: any[] } = {};
+            for (const tableName of tablesToBackup) {
+                if ((db as any)[tableName]) {
+                    data[tableName] = await (db as any)[tableName].toArray();
+                }
+            }
+            
+            const newFile = await driveService.writeBackupFile(this.googleUser.accessToken, data);
+            await driveService.deleteOldBackups(this.googleUser.accessToken);
+            
+            if (showNotification) this.showSnackbar('notifications.backupComplete', 'success', true);
+            return newFile;
+        } catch (error) {
+            console.error('Failed to backup to drive:', error);
+            if (showNotification) this.showSnackbar('notifications.backupSaveError', 'error', true);
+            return undefined;
+        } finally {
+            runInAction(() => {
+                this.isSyncing = false;
+            });
+        }
+    };
+
+    restoreFromDrive = async () => {
+        if (!this.isLoggedIn || !this.googleUser?.accessToken) {
+            this.showSnackbar('notifications.loginRequired', 'warning', true);
+            return;
+        }
+        this.showSnackbar('notifications.restoreInProgress', 'info', true);
+        this.isSyncing = true;
+        try {
+            const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
+            if (remoteFile) {
+                const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
+                await db.importData(data);
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
+                this.showSnackbar('notifications.restoreComplete', 'success', true);
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                this.showSnackbar('notifications.noBackupFound', 'warning', true);
+            }
+        } catch (error) {
+            console.error("Error during restore:", error);
+            this.showSnackbar('notifications.restoreError', 'error', true, { error: (error as Error).message });
+        } finally {
+            runInAction(() => {
+                this.isSyncing = false;
+            });
+        }
+    };
+
     showSnackbar = (message: string, severity: AlertColor = 'info', isTranslationKey = false, translationValues?: Record<string, any>) => {
         this.snackbarMessage = { message, severity, isTranslationKey, translationValues };
     }
 
-    showSnackbarWithAction = (message: string, severity: AlertColor, actionLabel: string, onActionClick: () => void) => {
-        this.snackbarMessage = { message, severity, action: { label: actionLabel, onClick: onActionClick }, isTranslationKey: true };
-    }
-
-    hideSnackbar = () => {
-        this.snackbarMessage = null;
-    }
-
-    addDebugMessage = (message: string) => {
-        const timestamp = new Date().toLocaleTimeString('it-IT');
-        const fullMessage = `[${timestamp}] ${message}`;
-        runInAction(() => {
-            this.debugMessages.push(fullMessage);
-            if (this.debugMessages.length > 50) {
-                this.debugMessages.shift();
-            }
-        });
-    }
-
-    loadPersistedData = async () => {
-        try {
-            const [
-                myListFromDb,
-                viewingHistoryFromDb,
-                cachedItemsFromDb,
-                episodeLinksFromDb,
-                introDurationsFromDb,
-                themePreference,
-                languagePreference,
-                episodeProgressFromDb,
-                preferredSourcesFromDb,
-            ] = await Promise.all([
-                db.myList.toArray(),
-                db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray(),
-                db.cachedItems.toArray(),
-                db.episodeLinks.toArray(),
-                db.showIntroDurations.toArray(),
-                db.preferences.get('activeTheme'),
-                db.preferences.get('language'),
-                db.episodeProgress.toArray(),
-                db.preferredSources.toArray(),
-            ]);
-
-            runInAction(() => {
-                this.myList = myListFromDb.map(item => item.id);
-                this.viewingHistory = viewingHistoryFromDb;
-                this.cachedItems = new Map(cachedItemsFromDb.map(item => [item.id, item]));
-
-                const linksMap = new Map<number, EpisodeLink[]>();
-                episodeLinksFromDb.forEach(link => {
-                    if (!linksMap.has(link.episodeId)) {
-                        linksMap.set(link.episodeId, []);
-                    }
-                    linksMap.get(link.episodeId)!.push(link);
-                });
-                this.episodeLinks = linksMap;
-                
-                this.showIntroDurations = new Map(introDurationsFromDb.map(item => [item.id, item.duration]));
-                
-                this.episodeProgress = new Map(episodeProgressFromDb.map(p => [p.episodeId, p]));
-
-                this.preferredSources = new Map(preferredSourcesFromDb.map(p => [p.showId, p.origin]));
-
-                if (themePreference) {
-                    this.activeTheme = themePreference.value;
-                }
-                if (languagePreference) {
-                    this.language = languagePreference.value;
-                }
-            });
-        } catch (error) {
-            console.error("Failed to load persisted data from Dexie.", error);
-        }
-    }
+    // --- START OF IMPLEMENTED METHODS ---
+    hideSnackbar = () => { this.snackbarMessage = null; };
     
-    setLanguage = async (lang: Language) => {
-        if (this.language === lang) return;
-        this.language = lang;
-        try {
-            await db.preferences.put({ key: 'language', value: lang });
-        } catch (error) {
-            console.error("Failed to save language preference", error);
-        }
-    }
-
-
-    setActiveTheme = async (theme: ThemeName) => {
-        this.activeTheme = theme;
-        try {
-            await db.preferences.put({ key: 'activeTheme', value: theme });
-        } catch (error) {
-            console.error("Failed to save theme preference", error);
-        }
-    }
-
-    initRemoteSession = () => {
-        const params = new URLSearchParams(window.location.search);
-        const remoteForId = params.get('remote_for');
-
-        if (remoteForId) {
-            runInAction(() => {
-                this.isRemoteMaster = true;
-                this.slaveId = remoteForId;
-            });
-            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: remoteForId}});
-        } else if (this.isSmartTV) {
-            websocketService.sendMessage({type: 'quix-register-slave'});
-        }
-    }
-
-    transferHost = (newHostId: string) => {
-        if (this.roomId && this.isHost) {
-            websocketService.sendMessage({
-                type: 'quix-transfer-host',
-                payload: {roomId: this.roomId, newHostId}
-            });
-        }
-    }
-
-    addPlaybackListener = (listener: (state: PlaybackState) => void) => {
-        this.playbackListeners.push(listener);
-        return () => {
-            this.playbackListeners = this.playbackListeners.filter(l => l !== listener);
-        };
-    }
-
-    handleIncomingMessage = (message: any) => {
-        runInAction(() => {
-            if (message.type === 'connected' && message.payload?.clientId) {
-                this.myClientId = message.payload.clientId;
-            }
-
-            switch (message.type) {
-                case 'quix-room-update': {
-                    this.roomId = message.payload.roomId;
-                    this.hostId = message.payload.hostId;
-                    this.isHost = message.payload.isHost;
-                    this.participants = message.payload.participants;
-                    this.chatHistory = message.payload.chatHistory ?? [];
-                    this.watchTogetherError = null;
-
-                    this.playbackState = message.payload.playbackState;
-                    const newMedia = message.payload.selectedMedia;
-                    this.watchTogetherSelectedItem = newMedia;
-
-                    // FIX: Prevent host from being sent to player on room creation.
-                    // If the user just created the room and is the host, we keep them in the modal.
-                    if (this.isCreatingRoom && this.isHost) {
-                        this.showSnackbar('notifications.roomCreated', 'success', true);
-                        this.isCreatingRoom = false; // Reset the flag
-                        return; // Exit here to prevent setting nowPlayingItem
-                    }
-                    
-                    if (newMedia) {
-                        this.nowPlayingItem = newMedia;
-                        this.isPlaying = this.playbackState.status === 'playing';
-                        
-                        let showIdToLoad: number | null = null;
-                        let mediaType: 'tv' | 'movie' = 'movie';
-
-                        if ('show_id' in newMedia) {
-                            showIdToLoad = newMedia.show_id;
-                            mediaType = 'tv';
-                        } else {
-                            showIdToLoad = newMedia.id;
-                            mediaType = newMedia.media_type;
-                        }
-                        
-                        if (this.selectedItem?.id !== showIdToLoad) {
-                            const partialItem: MediaItem = { id: showIdToLoad, media_type: mediaType } as MediaItem;
-                            this.selectMedia(partialItem);
-                        }
-                    }
-                    break;
-                }
-                case 'quix-playback-update':
-                    if (this.roomId) {
-                        this.playbackState = message.payload.playbackState;
-                        this.isPlaying = this.playbackState.status === 'playing';
-                        if (this.isPlaying && !this.nowPlayingItem) {
-                            this.nowPlayingItem = this.watchTogetherSelectedItem;
-                        }
-                        this.playbackListeners.forEach(l => l(this.playbackState));
-                    }
-                    break;
-                case 'quix-error':
-                    this.watchTogetherError = message.payload.message;
-                    this.username = null; // force user to re-enter username
-                    break;
-
-                // Remote Control Messages
-                case 'quix-slave-registered':
-                    this.slaveId = message.payload.slaveId;
-                    this.showSnackbar('notifications.tvReady', 'info', true);
-                    break;
-                case 'quix-master-connected':
-                    this.isRemoteMasterConnected = true;
-                    this.isSmartTVPairingVisible = false; // Hide QR code screen on TV
-                    if (this.isRemoteMaster) {
-                        this.showSnackbar('notifications.connectedToTV', 'success', true);
-                    } else if (this.isSmartTV) {
-                        this.showSnackbar('notifications.remoteConnected', 'success', true);
-                    }
-                    break;
-                case 'quix-remote-command-received':
-                    this.handleRemoteCommand(message.payload);
-                    break;
-                case 'quix-slave-status-update':
-                    if (this.isRemoteMaster) {
-                        this.remoteSlaveState = message.payload;
-                    }
-                    break;
-            }
-        });
-    };
-
-    private handleRemoteCommand(payload: { command: string, item?: PlayableItem }) {
-        if (this.isSmartTV) {
-            switch (payload.command) {
-                case 'select_media':
-                    if (payload.item) this.startPlayback(payload.item);
-                    break;
-                case 'play':
-                    if (this.nowPlayingItem && !this.isPlaying) {
-                        this.isPlaying = true; // this will trigger the video player to play
-                    }
-                    break;
-                case 'pause':
-                    if (this.nowPlayingItem && this.isPlaying) {
-                        this.isPlaying = false; // this will trigger the video player to pause
-                    }
-                    break;
-                case 'seek_forward':
-                    this.remoteAction = { type: 'seek', payload: 10, id: Date.now() };
-                    break;
-                case 'seek_backward':
-                     this.remoteAction = { type: 'seek', payload: -10, id: Date.now() };
-                    break;
-                case 'toggle_fullscreen':
-                    this.remoteAction = { type: 'fullscreen', id: Date.now() };
-                    break;
-                case 'skip_intro':
-                    this.remoteAction = { type: 'skip_intro', id: Date.now() };
-                    break;
-                case 'stop':
-                    this.stopPlayback();
-                    break;
-            }
-        }
-    }
-    
-    clearRemoteAction = () => {
-        this.remoteAction = null;
-    };
-
-    sendSlaveStatusUpdate = () => {
-        if (this.isSmartTV && this.isRemoteMasterConnected) {
-            let itemToSend: PlayableItem | null = this.nowPlayingItem;
-            if (itemToSend && 'seasons' in itemToSend) {
-                // Don't send bulky season data over the wire
-                const { seasons, ...rest } = itemToSend;
-                itemToSend = rest as MediaItem;
-            }
-            websocketService.sendMessage({
-                type: 'quix-slave-status-update',
-                payload: {
-                    slaveId: this.slaveId,
-                    isPlaying: this.isPlaying,
-                    nowPlayingItem: itemToSend,
-                    isIntroSkippable: this.isIntroSkippableOnSlave,
-                }
-            });
-        }
-    }
-
-    sendRemoteCommand = (payload: { command: string, item?: PlayableItem }) => {
-        if (this.isRemoteMaster && this.slaveId) {
-            websocketService.sendMessage({
-                type: 'quix-remote-command',
-                payload: {
-                    ...payload,
-                    slaveId: this.slaveId
-                }
-            })
-        }
-    }
-
-    playRemoteItem = (item: PlayableItem) => {
-        this.sendRemoteCommand({ command: 'select_media', item });
-        
-        // Optimistically update state for immediate UI transition
-        if (!this.remoteSlaveState) {
-            this.remoteSlaveState = { isPlaying: true, nowPlayingItem: item };
-        } else {
-            this.remoteSlaveState.isPlaying = true;
-            this.remoteSlaveState.nowPlayingItem = item;
-        }
-        
-        // Clear the detail view item to allow the player view to take over
-        this.remoteSelectedItem = null;
-    }
-    
-    stopRemotePlayback = () => {
-        this.sendRemoteCommand({ command: 'stop' });
-        if (this.remoteSlaveState) {
-            this.remoteSlaveState.nowPlayingItem = null;
-            this.remoteSlaveState.isPlaying = false;
-        }
-        this.remoteFullItem = null;
-    }
-
-    fetchRemoteFullItem = async () => {
-        const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
-
-        if (nowPlaying && 'show_id' in nowPlaying) {
-            const showId = nowPlaying.show_id;
-
-            // Avoid refetching if we already have it and it's fully loaded with seasons
-            if (this.remoteFullItem?.id === showId && this.remoteFullItem.seasons && this.remoteFullItem.seasons.length > 0) {
-                return;
-            }
-
-            this.isRemoteFullItemLoading = true;
-            try {
-                const seriesDetails = await getSeriesDetails(showId);
-                const seasonsWithEpisodes = await Promise.all(
-                    seriesDetails.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(showId, season.season_number);
-                        return { ...season, episodes };
-                    }) ?? []
-                );
-                const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
-                
-                // Apply locally stored video links
-                this.applyEpisodeLinksToMedia([fullItem]);
-                
-                runInAction(() => {
-                    this.remoteFullItem = fullItem;
-                });
-            } catch (error) {
-                console.error("Failed to fetch full details for remote player", error);
-                runInAction(() => {
-                    this.remoteFullItem = null;
-                });
-            } finally {
-                runInAction(() => {
-                    this.isRemoteFullItemLoading = false;
-                });
-            }
-        } else if (nowPlaying && 'media_type' in nowPlaying) {
-            runInAction(() => {
-                this.remoteFullItem = nowPlaying as MediaItem;
-            });
-        } else {
-            runInAction(() => {
-                this.remoteFullItem = null;
-            });
-        }
-    }
-
-    setRemoteSelectedItem = async (item: MediaItem) => {
-        this.remoteSelectedItem = item;
-        if (item.media_type === 'tv') {
-            this.isRemoteDetailLoading = true;
-            try {
-                const seriesDetails = await getSeriesDetails(item.id);
-                const seasonsWithEpisodes = await Promise.all(
-                    seriesDetails.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
-                        return { ...season, episodes };
-                    }) ?? []
-                );
-                runInAction(() => {
-                    const fullItem = { ...seriesDetails, seasons: seasonsWithEpisodes };
-                    this.applyEpisodeLinksToMedia([fullItem]);
-                    this.remoteSelectedItem = fullItem;
-                });
-            } catch (error) {
-                console.error("Failed to fetch series details for remote", error);
-            } finally {
-                runInAction(() => {
-                    this.isRemoteDetailLoading = false;
-                });
-            }
-        }
-    }
-
-    clearRemoteSelectedItem = () => {
-        this.remoteSelectedItem = null;
-    }
-
-    setJoinRoomIdFromUrl = (roomId: string) => {
-        this.joinRoomIdFromUrl = roomId;
-    }
-
-    openWatchTogetherModal = (item: MediaItem | null) => {
-        if (item) {
-            this.selectedItem = item;
-            this.watchTogetherSelectedItem = item;
-        }
-        this.watchTogetherModalOpen = true;
-    };
-
-    closeWatchTogetherModal = () => {
-        if (this.roomId) {
-            this.leaveRoom();
-        } else {
-            // Only reset if not in a room, otherwise leaveRoom handles it
-            this.resetWatchTogetherState();
-        }
-    };
-
-    private resetWatchTogetherState = () => {
-        this.roomId = null;
-        this.hostId = null;
-        this.isHost = false;
-        this.participants = [];
-        this.watchTogetherModalOpen = false;
-        this.username = null;
-        this.watchTogetherError = null;
-        this.chatHistory = [];
-        this.joinRoomIdFromUrl = null;
-        this.watchTogetherSelectedItem = null;
-    };
-
-    createRoom = (username: string) => {
-        if (this.watchTogetherSelectedItem && username.trim()) {
-            this.username = username.trim();
-            this.watchTogetherError = null;
-            this.isCreatingRoom = true; // Set flag to prevent immediate player transition for host
-            const plainMediaObject = JSON.parse(JSON.stringify(this.watchTogetherSelectedItem));
-            websocketService.sendMessage({
-                type: 'quix-create-room',
-                payload: {media: plainMediaObject, username: this.username}
-            });
-        }
-    };
-
-    joinRoom = (roomId: string, username: string) => {
-        if (roomId.trim() && username.trim()) {
-            this.username = username.trim();
-            this.watchTogetherError = null;
-            websocketService.sendMessage({
-                type: 'quix-join-room',
-                payload: {roomId: roomId.trim().toUpperCase(), username: this.username}
-            });
-        }
-    };
-    
-    changeWatchTogetherMedia = (item: PlayableItem) => {
-        // This action can now be called before a room exists to "stage" the media,
-        // or by the host inside a room to change the media for everyone.
-        this.watchTogetherSelectedItem = item;
-
-        if (this.roomId && this.isHost) {
-            websocketService.sendMessage({
-                type: 'quix-select-media',
-                payload: { roomId: this.roomId, media: JSON.parse(JSON.stringify(item)) }
-            });
-        }
-    }
-    
-    changeRoomCode = () => {
-        if (this.roomId && this.isHost) {
-            websocketService.sendMessage({
-                type: 'quix-change-room-code',
-                payload: { roomId: this.roomId }
-            });
-        }
-    }
-
-    leaveRoom = () => {
-        if (this.roomId) {
-            websocketService.sendMessage({type: 'quix-leave-room', payload: {roomId: this.roomId}});
-        }
-        this.resetWatchTogetherState();
-    };
-
-    sendPlaybackControl = (state: PlaybackState) => {
-        if (this.roomId && this.isHost) {
-            websocketService.sendMessage({
-                type: 'quix-playback-control',
-                payload: {roomId: this.roomId, playbackState: state}
-            });
-        }
-    }
-
-    sendChatMessage = (message: { text?: string, image?: string }) => {
-        if (this.roomId && (message.text?.trim() || message.image)) {
-            websocketService.sendMessage({
-                type: 'quix-chat-message',
-                payload: {roomId: this.roomId, message}
-            });
-        }
-    }
-
-    toggleMyList = async (item: MediaItem) => {
-        const itemId = item.id;
-        const isInList = this.myList.includes(itemId);
-
-        try {
-            if (isInList) {
-                await db.myList.delete(itemId);
-                await db.cachedItems.delete(itemId);
-                runInAction(() => {
-                    this.myList = this.myList.filter(id => id !== itemId);
-                    this.cachedItems.delete(itemId);
-                });
-            } else {
-                const plainItem = JSON.parse(JSON.stringify(item));
-                await db.myList.put({id: itemId});
-                await db.cachedItems.put(plainItem);
-                runInAction(() => {
-                    this.myList.push(itemId);
-                    this.cachedItems.set(itemId, item);
-                });
-            }
-        } catch (error) {
-            console.error("Failed to toggle My List in DB", error);
-        }
-    }
-
-    addViewingHistoryEntry = async (showId: number, episodeId: number) => {
-        const newEntry = {showId, episodeId, watchedAt: Date.now()};
-
-        try {
-            await db.viewingHistory.where({episodeId}).delete();
-            await db.viewingHistory.put(newEntry);
-
-            const historyFromDb = await db.viewingHistory.orderBy('watchedAt').reverse().limit(100).toArray();
-
-            runInAction(() => {
-                this.viewingHistory = historyFromDb;
-            });
-        } catch (error) {
-            console.error("Failed to update viewing history in DB", error);
-        }
-    }
-
-    updateEpisodeProgress = async (payload: { episodeId: number; currentTime: number; duration: number }) => {
-        const { episodeId, currentTime, duration } = payload;
-        if (!episodeId || !duration || isNaN(duration)) return;
-    
-        const progressPercent = currentTime / duration;
-        const watched = progressPercent >= 0.8;
-    
-        const newProgress: EpisodeProgress = {
-            episodeId,
-            currentTime,
-            duration,
-            watched,
-        };
-    
-        await db.episodeProgress.put(newProgress);
-    
-        runInAction(() => {
-            this.episodeProgress.set(episodeId, newProgress);
-        });
-    };
-
-    setShowIntroDuration = async (showId: number, duration: number) => {
-        try {
-            if (duration >= 0) {
-                await db.showIntroDurations.put({id: showId, duration});
-                runInAction(() => {
-                    this.showIntroDurations.set(showId, duration);
-                });
-            } else {
-                await db.showIntroDurations.delete(showId);
-                runInAction(() => {
-                    this.showIntroDurations.delete(showId);
-                });
-            }
-        } catch (error) {
-            console.error("Failed to set intro duration in DB", error);
-        }
-    }
-    
-    setPreferredSource = async (showId: number, origin: string) => {
-        const currentPreference = this.preferredSources.get(showId);
-
-        try {
-            if (currentPreference === origin) {
-                // If clicking the same one, unset it
-                await db.preferredSources.delete(showId);
-                runInAction(() => {
-                    this.preferredSources.delete(showId);
-                });
-            } else {
-                // Set a new preference
-                const pref: PreferredSource = { showId, origin };
-                await db.preferredSources.put(pref);
-                runInAction(() => {
-                    this.preferredSources.set(showId, origin);
-                });
-                 this.showSnackbar('notifications.preferredSourceSet', 'success', true);
-            }
-        } catch (error) {
-            console.error("Failed to set preferred source", error);
-            this.showSnackbar('notifications.processingError', 'error', true);
-        }
-    };
-
-    setIntroSkippableOnSlave = (isSkippable: boolean) => {
-        if (this.isIntroSkippableOnSlave !== isSkippable) {
-            this.isIntroSkippableOnSlave = isSkippable;
-            this.sendSlaveStatusUpdate();
-        }
-    }
-
-    setActiveView = (view: ActiveView) => {
-        if (this.activeView !== view) {
-            this.selectedItem = null;
-        }
-        this.activeView = view;
-        window.scrollTo(0, 0);
-
-        let newTheme: ThemeName | null = null;
-        switch (view) {
-            case 'Serie TV':
-                newTheme = 'SerieTV';
-                break;
-            case 'Film':
-                newTheme = 'Film';
-                break;
-            case 'Anime':
-                newTheme = 'Anime';
-                break;
-        }
-
-        if (newTheme) {
-            this.setActiveTheme(newTheme);
-        }
-    }
-
-    toggleSearch = (isActive: boolean) => {
-        this.isSearchActive = isActive;
-        if (!isActive) {
-            this.searchQuery = '';
-            this.searchResults = [];
-        } else {
-            this.selectedItem = null;
-        }
-    }
-
-    setSearchQuery = (query: string) => {
-        this.searchQuery = query;
-        this.isSearching = true;
-
-        if (this.searchDebounceTimer) {
-            clearTimeout(this.searchDebounceTimer);
-        }
-
-        if (!query.trim()) {
-            this.searchResults = [];
-            this.isSearching = false;
-            return;
-        }
-
-        this.searchDebounceTimer = window.setTimeout(async () => {
-            try {
-                const results = await searchShow(this.searchQuery);
-                runInAction(() => {
-                    this.searchResults = results;
-                    this.isSearching = false;
-                });
-            } catch (error) {
-                console.error("Failed to search for shows", error);
-                runInAction(() => {
-                    this.isSearching = false;
-                });
-            }
-        }, 500);
-    }
-
-
-    applyEpisodeLinksToMedia = (items: MediaItem[]) => {
-        items.forEach(item => {
-            if (item.media_type === 'tv' && item.seasons) {
-                item.seasons.forEach(season => {
-                    season.episodes.forEach(episode => {
-                        const links = this.episodeLinks.get(episode.id);
-                        if (links && links.length > 0) {
-                            episode.video_urls = links;
-                            episode.video_url = links[0].url; // For convenience and backward compatibility
-                        } else {
-                            episode.video_urls = [];
-                            episode.video_url = undefined;
-                        }
-                    });
-                });
-            }
-        });
-    };
-
-    selectMedia = async (item: MediaItem) => {
-        this.isSearchActive = false;
-        this.searchQuery = '';
-        this.searchResults = [];
-        this.selectedItem = item;
-        window.scrollTo(0, 0);
-
-        if (item.media_type === 'tv') {
-            this.isDetailLoading = true;
-            try {
-                const seriesDetails = await getSeriesDetails(item.id);
-                const seasonsWithEpisodes = await Promise.all(
-                    seriesDetails.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(item.id, season.season_number);
-                        return {...season, episodes};
-                    }) ?? []
-                );
-                runInAction(() => {
-                    const fullDetails = {...seriesDetails, seasons: seasonsWithEpisodes};
-                    this.applyEpisodeLinksToMedia([fullDetails]);
-                    this.selectedItem = fullDetails;
-                });
-            } catch (error) {
-                console.error("Failed to fetch series details and episodes", error);
-            } finally {
-                runInAction(() => {
-                    this.isDetailLoading = false;
-                });
-            }
-        }
-    }
+    // This is called by the popstate event handler to close the detail view
+    // without further manipulating the browser history.
+    _closeDetailWithoutHistory = () => { this.selectedItem = null; };
 
     closeDetail = () => {
-        this.selectedItem = null;
-    }
-
-    openLinkSelectionModal = (item: PlayableItem, links: EpisodeLink[]) => {
-        this.itemForLinkSelection = item;
-        this.linksForSelection = links;
-        this.isLinkSelectionModalOpen = true;
-    }
-
-    closeLinkSelectionModal = () => {
-        this.isLinkSelectionModalOpen = false;
-        this.itemForLinkSelection = null;
-        this.linksForSelection = [];
-    }
-
-    startPlayback = async (item: PlayableItem) => {
-        runInAction(() => { this.isDetailLoading = true; });
-        try {
-            let episodeToPlay: (Episode & { show_id: number; show_title: string; backdrop_path: string; season_number: number; startTime?: number; video_url?: string; intro_end_s?: number }) | null = null;
-            let showForContext: MediaItem | null = null;
-    
-            // Phase 1: Determine the exact episode and load full show context
-            if ('episode_number' in item) {
-                episodeToPlay = item;
-                if (this.nowPlayingShowDetails?.id !== item.show_id) {
-                    const fullShow = await getSeriesDetails(item.show_id);
-                    const seasons = await Promise.all(fullShow.seasons?.map(async s => ({ ...s, episodes: await getSeriesEpisodes(item.show_id, s.season_number) })) ?? []);
-                    showForContext = { ...fullShow, seasons };
-                    this.applyEpisodeLinksToMedia([showForContext]);
-                } else {
-                    showForContext = this.nowPlayingShowDetails;
-                }
-            } else if (item.media_type === 'tv') {
-                const details = (item.seasons && item.seasons.every(s => s.episodes.length > 0)) ? item : await getSeriesDetails(item.id);
-                const seasons = await Promise.all(details.seasons?.map(async s => ({ ...s, episodes: await getSeriesEpisodes(item.id, s.season_number) })) ?? []);
-                showForContext = { ...details, seasons };
-                this.applyEpisodeLinksToMedia([showForContext]);
-                const allEpisodes = showForContext.seasons?.flatMap(s => s.episodes.map(e => ({ ...e, show_id: showForContext!.id, show_title: showForContext!.name || showForContext!.title, backdrop_path: showForContext!.backdrop_path, season_number: s.season_number }))) || [];
-                const inProgress = allEpisodes.find(ep => { const p = this.episodeProgress.get(ep.id); return p && !p.watched; });
-                if (inProgress) {
-                    episodeToPlay = { ...inProgress, startTime: this.episodeProgress.get(inProgress.id)!.currentTime };
-                } else {
-                    episodeToPlay = allEpisodes.find(ep => !this.episodeProgress.get(ep.id)?.watched) || allEpisodes[0] || null;
-                }
-            } else { // It's a movie
-                this.nowPlayingItem = item;
-                this.isPlaying = true;
-                this.nowPlayingShowDetails = null;
-                return;
-            }
-    
-            if (!episodeToPlay) {
-                this.showSnackbar("notifications.noPlayableEpisodes", "warning", true);
-                return;
-            }
-    
-            // BUG FIX: Calculate and add intro_end_s
-            const introDuration = this.showIntroDurations.get(episodeToPlay.show_id) ?? 80;
-            if (episodeToPlay.intro_start_s) {
-                episodeToPlay.intro_end_s = episodeToPlay.intro_start_s + introDuration;
-            }
-    
-            // Phase 2: Handle link selection (with preferred source logic)
-            const allLinks = episodeToPlay.video_urls || [];
-            let linksToConsider = allLinks;
-            const preferredOrigin = this.preferredSources.get(episodeToPlay.show_id);
-    
-            if (preferredOrigin) {
-                const preferredLinks = allLinks.filter(link => {
-                    try { return new URL(link.url).origin === preferredOrigin; } catch { return false; }
-                });
-                if (preferredLinks.length > 0) {
-                    linksToConsider = preferredLinks;
-                }
-            }
-    
-            const isPlayingFromSelection = 'episode_number' in item && item.video_url;
-            if (linksToConsider.length > 1 && !isPlayingFromSelection) {
-                this.openLinkSelectionModal(episodeToPlay, linksToConsider);
-                return;
-            }
-    
-            const urlToPlay = isPlayingFromSelection ? item.video_url : linksToConsider[0]?.url;
-            if (!urlToPlay) {
-                this.showSnackbar("notifications.noVideoLinks", "warning", true);
-                return;
-            }
-    
-            // Phase 3: Set state and play
-            runInAction(() => {
-                if (this.roomId && this.isHost) {
-                    this.changeWatchTogetherMedia(episodeToPlay!);
-                    this.sendPlaybackControl({ status: 'playing', time: episodeToPlay!.startTime || 0 });
-                }
-                this.addViewingHistoryEntry(episodeToPlay!.show_id, episodeToPlay!.id);
-                this.nowPlayingShowDetails = showForContext;
-                
-                let startTime = episodeToPlay!.startTime || 0;
-                if (!startTime) {
-                    const progress = this.episodeProgress.get(episodeToPlay!.id);
-                    if (progress && !progress.watched) startTime = progress.currentTime;
-                }
-                
-                this.nowPlayingItem = { ...episodeToPlay!, video_url: urlToPlay, startTime };
-                this.isPlaying = true;
-                this.watchTogetherModalOpen = false;
-                this.closeLinkSelectionModal();
-            });
-    
-        } catch (e) {
-            console.error("Error during playback start:", e);
-            this.showSnackbar("notifications.failedToLoadSeriesDetails", "error", true);
-        } finally {
-            runInAction(() => { this.isDetailLoading = false; });
-        }
-    }
-
-    stopPlayback = () => {
-        if (this.roomId) {
-            this.leaveRoom();
-        }
-        this.isPlaying = false;
-        this.nowPlayingItem = null;
-        this.nowPlayingShowDetails = null;
-        this.sendSlaveStatusUpdate();
-        this.closeEpisodesDrawer();
-    }
-
-    openLinkEpisodesModal = (item: MediaItem) => {
-        this.linkingEpisodesForItem = item;
-        this.isLinkEpisodesModalOpen = true;
-        this.expandedLinkAccordionId = false;
-    };
-
-    closeLinkEpisodesModal = () => {
-        this.isLinkEpisodesModalOpen = false;
-        // Do not nullify linkingEpisodesForItem here, modal might need it while closing
-    };
-
-    setExpandedLinkAccordionId = (panelId: number | false) => {
-        this.expandedLinkAccordionId = panelId;
-    }
-
-    setEpisodeLinksForSeason = async (payload: {
-        seasonNumber: number;
-        method: 'pattern' | 'list' | 'json';
-        data: any
-    }) => {
-        const { seasonNumber, method, data } = payload;
-        const item = this.linkingEpisodesForItem;
-
-        if (!item || !item.seasons) return;
-
-        const season = item.seasons.find(s => s.season_number === seasonNumber);
-        if (!season) return;
-
-        let urls: (string | undefined)[] = [];
-        let labels: (string | undefined)[] = [];
-
-        try {
-            switch (method) {
-                case 'pattern':
-                    const { pattern, padding, label } = data;
-                    urls = season.episodes.map(ep =>
-                        pattern.replace(/\[@EP\]/g, String(ep.episode_number).padStart(padding, '0'))
-                    );
-                    labels = season.episodes.map(ep =>
-                        label.replace(/\[@EP\]/g, String(ep.episode_number).padStart(padding, '0'))
-                    );
-                    break;
-                case 'list':
-                    urls = data.list.split('\n').filter((line: string) => line.trim() !== '');
-                    if (urls.length !== season.episodes.length) {
-                        this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: urls.length, episodeCount: season.episodes.length });
-                        return;
-                    }
-                    break;
-                case 'json':
-                    const parsed = JSON.parse(data.json);
-                    if (!Array.isArray(parsed)) throw new Error("JSON must be an array.");
-                    urls = parsed.map(entry => typeof entry === 'string' ? entry : entry.url);
-                    labels = parsed.map(entry => typeof entry === 'string' ? '' : entry.label);
-                    break;
-            }
-        } catch (e) {
-            this.showSnackbar('notifications.processingError', "error", true, { error: (e as Error).message });
-            return;
-        }
-
-        const linksToSave: Omit<EpisodeLink, 'id'>[] = [];
-        season.episodes.forEach((episode, index) => {
-            if (urls[index]) {
-                linksToSave.push({
-                    episodeId: episode.id,
-                    url: urls[index] as string,
-                    label: labels[index] || urls[index] as string,
-                });
-            }
-        });
-
-        try {
-            const episodeIds = season.episodes.map(ep => ep.id);
-            
-            // By removing the deletion of existing links, this function now appends
-            // new links instead of replacing them. This allows multiple sources for episodes.
-
-            if (linksToSave.length > 0) {
-                await db.episodeLinks.bulkAdd(linksToSave);
-                this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToSave.length });
-            }
-
-            // Refresh local state from DB to ensure consistency
-            const allLinksForSeason = await db.episodeLinks.where('episodeId').anyOf(episodeIds).toArray();
-            runInAction(() => {
-                // Clear old state for the entire season before re-populating.
-                episodeIds.forEach(epId => this.episodeLinks.delete(epId));
-                
-                const grouped = allLinksForSeason.reduce((acc, link) => {
-                    const epId = link.episodeId;
-                    if (!acc[epId]) acc[epId] = [];
-                    acc[epId].push(link);
-                    return acc;
-                }, {} as Record<number, EpisodeLink[]>);
-                
-                for (const epIdStr in grouped) {
-                    this.episodeLinks.set(parseInt(epIdStr), grouped[epIdStr]);
-                }
-                
-                if (this.linkingEpisodesForItem) {
-                    this.applyEpisodeLinksToMedia([this.linkingEpisodesForItem]);
-                    this.linkingEpisodesForItem = { ...this.linkingEpisodesForItem }; // Mobx trigger
-                    if (this.selectedItem?.id === this.linkingEpisodesForItem.id) {
-                        this.selectedItem = this.linkingEpisodesForItem;
-                    }
-                }
-            });
-
-        } catch (error) {
-            console.error("Failed to save episode links to DB", error);
-            this.showSnackbar("notifications.savingLinksError", 'error', true);
-        }
-    };
-    
-    deleteEpisodeLink = async (linkId: number) => {
-        const link = await db.episodeLinks.get(linkId);
-        if (!link) return;
-
-        await db.episodeLinks.delete(linkId);
-        runInAction(() => {
-            const episodeLinks = this.episodeLinks.get(link.episodeId);
-            if (episodeLinks) {
-                const updatedLinks = episodeLinks.filter(l => l.id !== linkId);
-                if (updatedLinks.length > 0) {
-                    this.episodeLinks.set(link.episodeId, updatedLinks);
-                } else {
-                    this.episodeLinks.delete(link.episodeId);
-                }
-                
-                // Force a refresh of the selected item if it's open
-                if (this.selectedItem) {
-                    this.applyEpisodeLinksToMedia([this.selectedItem]);
-                    this.selectedItem = {...this.selectedItem}; // Trigger mobx update
-                }
-            }
-        });
-    }
-
-    clearLinksForSeason = async (seasonNumber: number, showId: number) => {
-        const item = this.linkingEpisodesForItem?.id === showId ? this.linkingEpisodesForItem : this.allItems.find(i => i.id === showId);
-        const season = item?.seasons?.find(s => s.season_number === seasonNumber);
-        if (!season) return;
-
-        const episodeIds = season.episodes.map(e => e.id);
-        const linksToDelete = await db.episodeLinks.where('episodeId').anyOf(episodeIds).toArray();
-        const linkIdsToDelete = linksToDelete.map(l => l.id!);
-
-        if (linkIdsToDelete.length > 0) {
-            await db.episodeLinks.bulkDelete(linkIdsToDelete);
-            runInAction(() => {
-                episodeIds.forEach(epId => this.episodeLinks.delete(epId));
-                if (this.selectedItem) {
-                    this.applyEpisodeLinksToMedia([this.selectedItem]);
-                    this.selectedItem = {...this.selectedItem};
-                }
-            });
-            this.showSnackbar("notifications.allSeasonLinksDeleted", "success", true, { count: linkIdsToDelete.length, season: seasonNumber });
+        // This is called by UI elements (e.g., the 'X' button).
+        // It uses the History API to navigate back, which triggers the popstate
+        // event, ensuring the UI state and browser history remain synchronized.
+        if (window.history.state?.detailViewOpen) {
+            window.history.back();
         } else {
-            this.showSnackbar("notifications.noLinksToDelete", "info", true, { season: seasonNumber });
+            // Fallback in case the history state is not what we expect.
+            this._closeDetailWithoutHistory();
         }
-    }
-
-    updateLinksDomain = async (payload: {
-        links: EpisodeLink[];
-        newDomain: string;
-    }) => {
-        const { links, newDomain } = payload;
-        if (!links || links.length === 0 || !newDomain.trim()) {
-            this.showSnackbar('notifications.processingError', 'error', true, { error: 'Dati per aggiornamento non validi.' });
-            return;
-        }
-
-        try {
-            const validatedNewUrl = new URL(newDomain); // This will throw if the new domain is not a valid URL structure.
-
-            const updatedLinks = links.map(link => {
-                try {
-                    const oldUrl = new URL(link.url);
-                    const newUrl = `${validatedNewUrl.origin}${oldUrl.pathname}${oldUrl.search}${oldUrl.hash}`;
-                    // Also update the label if it contains the old domain
-                    const newLabel = link.label.includes(oldUrl.origin)
-                        ? link.label.replace(oldUrl.origin, validatedNewUrl.origin)
-                        : link.label;
-                    return { ...link, url: newUrl, label: newLabel };
-                } catch (e) {
-                    console.warn(`Skipping invalid URL for update: ${link.url}`);
-                    return null;
-                }
-            }).filter((l): l is EpisodeLink => l !== null);
-
-
-            if (updatedLinks.length > 0) {
-                await db.episodeLinks.bulkPut(updatedLinks);
-
-                runInAction(() => {
-                    updatedLinks.forEach(updatedLink => {
-                        const episodeLinks = this.episodeLinks.get(updatedLink.episodeId);
-                        if (episodeLinks) {
-                            const linkIndex = episodeLinks.findIndex(l => l.id === updatedLink.id);
-                            if (linkIndex !== -1) {
-                                episodeLinks.splice(linkIndex, 1, updatedLink);
-                            }
-                        }
-                    });
-
-                    if (this.linkingEpisodesForItem) {
-                        this.applyEpisodeLinksToMedia([this.linkingEpisodesForItem]);
-                        this.linkingEpisodesForItem = { ...this.linkingEpisodesForItem };
-                        if (this.selectedItem?.id === this.linkingEpisodesForItem.id) {
-                            this.selectedItem = this.linkingEpisodesForItem;
-                        }
-                    }
-                });
-                
-                this.showSnackbar('notifications.linksUpdated', 'success', true, { count: updatedLinks.length });
-            }
-
-        } catch (error) {
-            this.showSnackbar('notifications.domainUpdateError', 'error', true, { error: (error as Error).message });
-        }
-    }
-
-    // --- Library Sharing Actions ---
-    openShareModal = () => { this.isShareModalOpen = true; }
-    closeShareModal = () => { this.isShareModalOpen = false; }
-    openImportModal = () => { this.isImportModalOpen = true; }
-    closeImportModal = () => { 
-        this.isImportModalOpen = false; 
-        this.importUrl = null;
-    }
-    setImportUrl = (url: string) => { this.importUrl = url; }
+    };
     
-    get shareableShows(): MediaItem[] {
-        // Find all show IDs that have at least one episode link
-        const showIdsWithLinks = new Set<number>();
-        this.allItems.forEach(item => {
-            if (item.media_type === 'tv' && item.seasons) {
-                for (const season of item.seasons) {
-                    for (const episode of season.episodes) {
-                        if (this.episodeLinks.has(episode.id)) {
-                            showIdsWithLinks.add(item.id);
-                            return; // Go to next show
-                        }
-                    }
-                }
-            }
-        });
-
-        // Return the full MediaItem objects for those IDs
-        return this.allItems.filter(item => showIdsWithLinks.has(item.id));
-    }
-
-    generateShareableData = (showIds: number[]): SharedLibraryData => {
-        const showsToShare: SharedShowData[] = [];
-
-        showIds.forEach(id => {
-            const show = this.allItems.find(item => item.id === id);
-            if (!show || show.media_type !== 'tv' || !show.seasons) return;
-
-            const sharedLinks: SharedEpisodeLink[] = [];
-            show.seasons.forEach(season => {
-                season.episodes.forEach(episode => {
-                    const links = this.episodeLinks.get(episode.id);
-                    if (links) {
-                        links.forEach(link => {
-                            sharedLinks.push({
-                                seasonNumber: season.season_number,
-                                episodeNumber: episode.episode_number,
-                                url: link.url,
-                                label: link.label,
-                            });
-                        });
-                    }
-                });
-            });
-            
-            if (sharedLinks.length > 0) {
-                 showsToShare.push({
-                    tmdbId: show.id,
-                    links: sharedLinks
-                 });
-            }
-        });
-
-        return { version: 1, shows: showsToShare };
-    }
-    
-    importSharedLibrary = async (data: SharedLibraryData) => {
-        if (!data || data.version !== 1 || !Array.isArray(data.shows)) {
-            this.showSnackbar("notifications.importInvalidFile", "error", true);
-            return;
+    setActiveView = (view: ActiveView) => { 
+        if (this.isRemoteMaster) {
+            this._masterUiActiveView = view;
+        } else {
+            this.activeView = view; 
         }
 
-        runInAction(() => { this.isImportingLibrary = true; });
-        this.showSnackbar("notifications.importInProgress", "info", true);
+        if (view === 'Serie TV') this.setActiveTheme('SerieTV');
+        else if (view === 'Film') this.setActiveTheme('Film');
+        else if (view === 'Anime') this.setActiveTheme('Anime');
+    };
 
-        try {
-            const allNewLinks: Omit<EpisodeLink, 'id'>[] = [];
-            const showsToCache: MediaItem[] = [];
-            const showsToMyList: { id: number }[] = [];
-            let totalLinksImported = 0;
-
-            for (const sharedShow of data.shows) {
-                // 1. Fetch fresh show data from TMDB
-                const fullShow = await getSeriesDetails(sharedShow.tmdbId);
-                const seasonsWithEpisodes = await Promise.all(
-                    fullShow.seasons?.map(async (season) => {
-                        const episodes = await getSeriesEpisodes(fullShow.id, season.season_number);
-                        return { ...season, episodes };
-                    }) ?? []
-                );
-                const showWithData = { ...fullShow, seasons: seasonsWithEpisodes };
-                
-                showsToCache.push(showWithData);
-                showsToMyList.push({ id: showWithData.id });
-
-                // 2. Create a map for easy lookup: "S1-E1" -> episodeId
-                const episodeIdMap = new Map<string, number>();
-                showWithData.seasons?.forEach(s => {
-                    s.episodes.forEach(e => {
-                        episodeIdMap.set(`S${s.season_number}-E${e.episode_number}`, e.id);
+    setActiveTheme = (theme: ThemeName) => { 
+        this.activeTheme = theme; 
+        db.preferences.put({ key: 'activeTheme', value: theme });
+    };
+    setSearchQuery = (query: string) => { 
+        this.searchQuery = query;
+         if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+            this.searchDebounceTimer = window.setTimeout(async () => {
+                if (this.searchQuery.trim()) {
+                    runInAction(() => { this.isSearching = true; });
+                    const results = await searchShow(this.searchQuery);
+                    runInAction(() => {
+                        this.searchResults = results;
+                        this.isSearching = false;
                     });
-                });
-                
-                // 3. Map shared links to new episode IDs
-                sharedShow.links.forEach(link => {
-                    const key = `S${link.seasonNumber}-E${link.episodeNumber}`;
-                    const episodeId = episodeIdMap.get(key);
-                    if (episodeId) {
-                        allNewLinks.push({
-                            episodeId: episodeId,
-                            url: link.url,
-                            label: link.label
-                        });
-                    }
-                });
-                totalLinksImported += sharedShow.links.length;
-            }
-
-            // 4. Bulk insert everything into the database
-            if (allNewLinks.length > 0) {
-                await db.episodeLinks.bulkAdd(allNewLinks);
-            }
-            if (showsToCache.length > 0) {
-                await db.cachedItems.bulkPut(showsToCache);
-            }
-            if (showsToMyList.length > 0) {
-                 await db.myList.bulkPut(showsToMyList);
-            }
-
-            this.showSnackbar("notifications.importSuccess", "success", true, { showCount: data.shows.length, linkCount: totalLinksImported });
-            
-            // Reload the app to reflect all changes
-            setTimeout(() => window.location.reload(), 2000);
-
-        } catch (error) {
-            console.error("Failed to import library:", error);
-            this.showSnackbar("notifications.importError", "error", true, { error: (error as Error).message });
-        } finally {
-             runInAction(() => { this.isImportingLibrary = false; });
-        }
-    }
-
-
-    prepareUserDataBackup = async () => {
-        try {
-            const [
-                myList,
-                viewingHistory,
-                cachedItems,
-                episodeLinks,
-                showIntroDurations,
-                preferences,
-                revisions,
-                episodeProgress,
-                preferredSources,
-            ] = await Promise.all([
-                db.myList.toArray(),
-                db.viewingHistory.toArray(),
-                db.cachedItems.toArray(),
-                db.episodeLinks.toArray(),
-                db.showIntroDurations.toArray(),
-                db.preferences.toArray(),
-                db.revisions.toArray(),
-                db.episodeProgress.toArray(),
-                db.preferredSources.toArray(),
-            ]);
-
-            const backupData = {
-                data: {
-                    myList,
-                    viewingHistory,
-                    cachedItems,
-                    episodeLinks,
-                    showIntroDurations,
-                    preferences,
-                    revisions,
-                    episodeProgress,
-                    preferredSources,
+                } else {
+                    runInAction(() => {
+                        this.searchResults = [];
+                    });
                 }
-            };
-            
-            return backupData;
-        } catch (error) {
-            console.error("Failed to prepare user data backup:", error);
-            this.showSnackbar("notifications.backupError", "error", true);
-            return null;
-        }
-    }
-
-
-    openEpisodesDrawer = () => {
-        this.isEpisodesDrawerOpen = true;
-    }
-    closeEpisodesDrawer = () => {
-        this.isEpisodesDrawerOpen = false;
-    }
-
-    toggleProfileDrawer = (isOpen: boolean) => {
-        this.isProfileDrawerOpen = isOpen;
-    }
-
-    openQRScanner = () => {
-        this.isProfileDrawerOpen = false;
-        this.isQRScannerOpen = true;
-    }
-
-    closeQRScanner = () => {
-        this.isQRScannerOpen = false;
-    }
-
-    connectAsRemoteMaster = (slaveId: string) => {
-        runInAction(() => {
-            this.isRemoteMaster = true;
-            this.slaveId = slaveId;
-            this.closeQRScanner();
-        });
-        websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
-    }
-
+            }, 300);
+    };
+    toggleSearch = (isActive: boolean) => { this.isSearchActive = isActive; if (!isActive) { this.searchQuery = ''; this.searchResults = []; } };
+    setJoinRoomIdFromUrl = (roomId: string | null) => { this.joinRoomIdFromUrl = roomId; };
+    setImportUrl = (url: string | null) => { this.importUrl = url; };
+    toggleProfileDrawer = (isOpen: boolean) => { this.isProfileDrawerOpen = isOpen; };
+    openQRScanner = () => { this.isQRScannerOpen = true; this.isProfileDrawerOpen = false; };
+    closeQRScanner = () => { this.isQRScannerOpen = false; };
     enableSmartTVMode = () => {
-        runInAction(() => {
-            this.isSmartTV = true;
-            this.isSmartTVPairingVisible = true;
-            this.isProfileDrawerOpen = false;
-        });
-        websocketService.sendMessage({ type: 'quix-register-slave' });
-    }
-
-    exitSmartTVPairingMode = () => {
-        this.isSmartTVPairingVisible = false;
-    }
+        this.isSmartTV = true; // Mark this client as acting as a TV
+        this.isSmartTVPairingVisible = true;
+        this.isProfileDrawerOpen = false;
+        db.preferences.put({ key: 'isConfiguredAsSlave', value: true });
+        // Manually send registration message, using existing ID if available
+        const payload = this.slaveId ? { slaveId: this.slaveId } : {};
+        websocketService.sendMessage({ type: 'quix-register-slave', payload });
+    };
+    exitSmartTVPairingMode = () => { 
+        this.isSmartTVPairingVisible = false; 
+        db.preferences.delete('isConfiguredAsSlave');
+    };
+    setLanguage = (lang: Language) => { this.language = lang; db.preferences.put({ key: 'language', value: lang }); };
+    openShareModal = () => { this.isShareModalOpen = true; };
+    closeShareModal = () => { this.isShareModalOpen = false; };
+    openImportModal = () => { this.isImportModalOpen = true; };
+    closeImportModal = () => { this.isImportModalOpen = false; if (this.importUrl) this.importUrl = null; };
+    openRevisionsModal = () => { this.isRevisionsModalOpen = true; this.fetchRevisions(); };
+    closeRevisionsModal = () => { this.isRevisionsModalOpen = false; };
+    closeLinkSelectionModal = () => { this.isLinkSelectionModalOpen = false; this.itemForLinkSelection = null; this.linkSelectionContext = 'local'; };
+    openEpisodesDrawer = () => { this.isEpisodesDrawerOpen = true; };
+    closeEpisodesDrawer = () => { this.isEpisodesDrawerOpen = false; };
+    setIntroSkippableOnSlave = (isSkippable: boolean) => { this.isIntroSkippableOnSlave = isSkippable; };
+    clearRemoteSelectedItem = () => {
+        this.clearMasterUiSelection(); // Clear master's UI selected item
+        this.sendRemoteCommand({ command: 'clear_selection' }); // Also tell slave to clear its selection (detail view)
+    };
+    clearMasterUiSelection = () => {
+        this._masterUiSelectedItem = null;
+        this.isDetailLoading = false; // Also clear the loading state for master's detail
+    };
+    setExpandedLinkAccordionId = (id: number | false) => { this.expandedLinkAccordionId = id; };
     
-    get isLoggedIn(): boolean {
-        return this.googleUser !== null;
-    }
-
-    setGoogleUser = async (user: GoogleUser | null) => {
-        this.googleUser = user;
-        if (user) {
-            this.showSnackbar('notifications.welcomeUser', 'success', true, { name: user.name });
-            // After user is set, check for a backup
-            await this.checkForRemoteBackup();
-        } else {
-             this.showSnackbar("notifications.logoutSuccess", "info", true);
-        }
-    }
-
-    checkForRemoteBackup = async () => {
-        if (!this.googleUser) return;
-        try {
-            const backupFile = await driveService.findBackupFile(this.googleUser.accessToken);
-            if (backupFile) {
-                this.showSnackbarWithAction("notifications.backupFound", "info", "notifications.restore", () => {
-                    this.restoreFromDrive();
-                });
-            }
-        } catch (error) {
-            console.error("Failed to check for remote backup:", error);
-            // Don't bother the user with an error here, it's a background check.
-        }
-    }
-
-    backupToDrive = async () => {
-        if (!this.googleUser) {
-            this.showSnackbar("notifications.loginRequired", "warning", true);
-            return;
-        }
-
-        this.isBackingUp = true;
-        this.showSnackbar("notifications.backupInProgress", "info", true);
-        try {
-            const backupData = await this.prepareUserDataBackup();
-            if (!backupData || !backupData.data) throw new Error("Could not prepare backup data.");
-            
-            const existingFile = await driveService.findBackupFile(this.googleUser.accessToken);
-            await driveService.writeBackupFile(this.googleUser.accessToken, backupData.data, existingFile?.id || null);
-
-            this.showSnackbar("notifications.backupComplete", "success", true);
-        } catch (error) {
-            console.error("Failed to backup to Google Drive:", error);
-            this.showSnackbar("notifications.backupSaveError", "error", true);
-        } finally {
-            runInAction(() => {
-              this.isBackingUp = false;
-            });
-        }
-    }
-
-    restoreFromDrive = async () => {
-        if (!this.googleUser) {
-            this.showSnackbar("notifications.loginRequired", "warning", true);
-            return;
-        }
-        
-        this.isRestoring = true;
-        this.showSnackbar("notifications.restoreInProgress", "info", true);
-        try {
-            const backupFile = await driveService.findBackupFile(this.googleUser.accessToken);
-            if (!backupFile) {
-                this.showSnackbar("notifications.noBackupFound", "warning", true);
-                return;
-            }
-
-            const backupData = await driveService.readBackupFile(this.googleUser.accessToken, backupFile.id);
-            await db.importData(backupData);
-
-            this.showSnackbar("notifications.restoreComplete", "success", true);
-            
-            // Reload the app to reflect changes from the DB
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-
-        } catch (error) {
-            console.error("Failed to restore from Google Drive:", error);
-            this.showSnackbar("notifications.restoreError", "error", true, { error: (error as Error).message });
-        } finally {
-            runInAction(() => {
-              this.isRestoring = false;
-            });
-        }
-    }
-
-    // --- Revisions Actions ---
-    openRevisionsModal = () => {
-        this.fetchRevisions();
-        this.isRevisionsModalOpen = true;
-    }
-    closeRevisionsModal = () => {
-        this.isRevisionsModalOpen = false;
-        this.revisions = []; // Clear data on close
-    }
-
-    private buildContextMaps = () => {
-        this.episodeContextMap.clear();
-        
-        const itemsForContext = new Map<number, MediaItem>();
-        
-        // Add all items from the allItems getter
-        this.allItems.forEach(item => itemsForContext.set(item.id, item));
-        
-        // Add the currently selected item if it exists and is a TV show
-        if (this.selectedItem && this.selectedItem.media_type === 'tv') {
-            itemsForContext.set(this.selectedItem.id, this.selectedItem);
-        }
-
-        itemsForContext.forEach(show => {
-            if (show.seasons) {
-                show.seasons.forEach(season => {
-                    season.episodes.forEach(episode => {
-                        this.episodeContextMap.set(episode.id, {
-                            showName: show.name || show.title,
-                            epNum: episode.episode_number,
-                            sNum: season.season_number,
-                            epName: episode.name,
-                        });
-                    });
-                });
-            }
-        });
-    }
-
-    fetchRevisions = async () => {
-        this.isRevisionsLoading = true;
-        this.buildContextMaps();
-
-        try {
-            const revs = await db.revisions.orderBy('timestamp').reverse().limit(100).toArray();
-            
-            const processedRevs = revs.map(rev => {
-                let description = `Azione sconosciuta`;
-                let icon: Revision['icon'] = 'unknown';
-
-                const data = rev.type === 1 ? rev.obj : (rev.oldObj || rev.obj);
-
-                switch (rev.table) {
-                    case 'myList': {
-                        const show = this.cachedItems.get(rev.key);
-                        const name = show?.name || show?.title || `ID ${rev.key}`;
-                        if (rev.type === 1) { // Add
-                            description = this.translations.revisions.descriptions.myList.add.replace('{name}', name);
-                            icon = 'add';
-                        } else { // Delete
-                            description = this.translations.revisions.descriptions.myList.remove.replace('{name}', name);
-                            icon = 'delete';
-                        }
-                        break;
-                    }
-                    case 'cachedItems': {
-                        const name = data?.name || data?.title || `ID ${rev.key}`;
-                        if (rev.type === 1) {
-                            description = this.translations.revisions.descriptions.cachedItems.add.replace('{name}', name);
-                            icon = 'add';
-                        } else if (rev.type === 2) {
-                            description = this.translations.revisions.descriptions.cachedItems.update.replace('{name}', name);
-                            icon = 'update';
-                        } else {
-                            description = this.translations.revisions.descriptions.cachedItems.remove.replace('{name}', name);
-                            icon = 'delete';
-                        }
-                        break;
-                    }
-                    case 'episodeLinks': {
-                        const context = this.episodeContextMap.get(data?.episodeId);
-                        const showName = context?.showName || 'Show sconosciuto';
-                        const seasonNum = context?.sNum || '?';
-                        const epNum = context?.epNum || '?';
-                        
-                        if (rev.type === 1) { // Add
-                           description = this.translations.revisions.descriptions.episodeLinks.add.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
-                           icon = 'add';
-                        } else if (rev.type === 2) { // Update
-                           description = this.translations.revisions.descriptions.episodeLinks.update.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
-                           icon = 'update';
-                        } else { // Delete
-                           description = this.translations.revisions.descriptions.episodeLinks.remove.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
-                           icon = 'delete';
-                        }
-                        break;
-                    }
-                     case 'showIntroDurations': {
-                        const show = this.allItems.find(item => item.id === rev.key);
-                        const name = show?.name || show?.title || `ID ${rev.key}`;
-                        if (rev.type === 1 || rev.type === 2) { // Set/Update
-                           description = this.translations.revisions.descriptions.showIntroDurations.set.replace('{show}', name).replace('{duration}', data.duration);
-                           icon = 'update';
-                        } else { // Delete
-                           description = this.translations.revisions.descriptions.showIntroDurations.remove.replace('{show}', name);
-                           icon = 'delete';
-                        }
-                        break;
-                    }
-                    case 'viewingHistory': {
-                         const context = this.episodeContextMap.get(data?.episodeId);
-                         const showName = context?.showName || 'Show sconosciuto';
-                         const seasonNum = context?.sNum || '?';
-                         const epNum = context?.epNum || '?';
-                         if (rev.type === 1) {
-                            description = this.translations.revisions.descriptions.viewingHistory.add.replace('{show}', showName).replace('{s}', String(seasonNum)).replace('{e}', String(epNum));
-                            icon = 'add';
-                         }
-                         break;
-                    }
-                    default:
-                        description = this.translations.revisions.descriptions.unknown.replace('{table}', rev.table).replace('{type}', String(rev.type));
-                        break;
-                }
-                return { ...rev, description, icon };
-            });
-
-            runInAction(() => {
-                this.revisions = processedRevs;
-            });
-
-        } catch (error) {
-            console.error("Failed to fetch revisions:", error);
-        } finally {
-            runInAction(() => {
-                this.isRevisionsLoading = false;
-            });
-        }
-    }
-    
-    revertRevision = async (revision: Revision) => {
-        const { table, type, key, oldObj, obj } = revision;
-        try {
-            const tableInstance = (db as any)[table];
-            if (!tableInstance) throw new Error(`Table ${table} not found in DB`);
-
-            if (type === 1) { // Revert CREATE by deleting
-                await tableInstance.delete(key);
-            } else if (type === 2) { // Revert UPDATE by putting back old object
-                 if (oldObj) {
-                    await tableInstance.put(oldObj);
-                } else {
-                    throw new Error(`Cannot revert update because the previous state (oldObj) is missing.`);
-                }
-            } else if (type === 3) { // Revert DELETE by putting back the deleted object
-                const objectToRestore = oldObj || obj;
-                if (objectToRestore) {
-                    await tableInstance.put(objectToRestore);
-                } else {
-                    throw new Error(`Cannot revert delete because the object to restore is missing.`);
+    // Getters
+    get isLoggedIn() { return !!this.googleUser; }
+    get allUniqueLabels(): string[] {
+        const labels = new Set<string>();
+        for (const links of this.mediaLinks.values()) {
+            for (const link of links) {
+                if (link.label) {
+                    labels.add(link.label);
                 }
             }
-            this.showSnackbar('notifications.revertSuccess', 'success', true);
-            this.fetchRevisions(); // Refresh the list
-            this.loadPersistedData(); // Reload core app data
-        } catch (e) {
-            console.error("Failed to revert revision:", e);
-            this.showSnackbar('notifications.revertError', 'error', true, { error: (e as Error).message });
         }
+        return Array.from(labels).sort();
     }
-
-
-    get isDebugModeActive(): boolean {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('debug') === 'true';
-    }
-
-    get heroContent(): MediaItem | undefined {
+    get heroContent() {
         switch (this.activeTheme) {
-            case 'Anime':
-                return this.popularAnime[0] || this.trending[0];
             case 'Film':
-                return this.latestMovies[0] || this.trending.find(i => i.media_type === 'movie') || this.trending[0];
+                return this.latestMovies.length > 0 ? this.latestMovies[0] : this.trending[0];
+            case 'Anime':
+                return this.popularAnime.length > 0 ? this.popularAnime[0] : this.trending[0];
             case 'SerieTV':
-                return this.topSeries[0] || this.trending.find(i => i.media_type === 'tv') || this.trending[0];
             default:
-                return this.trending[0];
+                return this.topSeries.length > 0 ? this.topSeries[0] : this.trending[0];
         }
     }
-
-    get homePageRows(): { titleKey: string, items: MediaItem[] }[] {
-        const allRows: ({ titleKey: string, items: MediaItem[], type?: ThemeName, condition?: boolean })[] = [
-            { titleKey: "misc.continueWatching", items: this.continueWatchingItems, condition: this.continueWatchingItems.length > 0 },
-            { titleKey: "misc.myList", items: this.myListItems, condition: this.myListItems.length > 0 },
-            { titleKey: "misc.latestReleases", items: this.latestMovies, type: 'Film' },
-            { titleKey: "misc.topRated", items: this.trending },
-            { titleKey: "misc.popularSeries", items: this.topSeries, type: 'SerieTV' },
-            { titleKey: "misc.mustWatchAnime", items: this.popularAnime, type: 'Anime' },
-        ];
+    get allMovies() { return [...this.latestMovies].sort((a,b) => (b.release_date || '').localeCompare(a.release_date || '')); }
+    get currentShow() { return this.nowPlayingShowDetails; }
+    get currentSeasonEpisodes() {
+        if (!this.nowPlayingItem || !('season_number' in this.nowPlayingItem) || !this.nowPlayingShowDetails?.seasons) return [];
+        const season = this.nowPlayingShowDetails.seasons.find(s => s.season_number === (this.nowPlayingItem as any).season_number);
+        return season?.episodes || [];
+    }
+    get nextEpisode() {
+        if (!this.nowPlayingItem || !('episode_number' in this.nowPlayingItem)) return null;
+        const currentEpisodeIndex = this.currentSeasonEpisodes.findIndex(ep => ep.id === this.nowPlayingItem.id);
+        if (currentEpisodeIndex > -1 && currentEpisodeIndex < this.currentSeasonEpisodes.length - 1) {
+            return this.currentSeasonEpisodes[currentEpisodeIndex + 1];
+        }
+        return null;
+    }
+    get remoteNextEpisode() {
+        const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
+        if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
         
-        const visibleRows = allRows.filter(row => row.condition !== false && row.items.length > 0);
+        const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
+        if (!season?.episodes) return null;
 
-        const priorityRow = visibleRows.find(row => row.type === this.activeTheme);
-        const otherRows = visibleRows.filter(row => row.type !== this.activeTheme);
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) {
+            return season.episodes[currentEpisodeIndex + 1];
+        }
+        return null;
+    }
+    get remotePreviousEpisode() {
+        const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
+        if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
         
-        if (priorityRow) {
-            const topRows = otherRows.filter(r => r.titleKey === 'misc.continueWatching' || r.titleKey === 'misc.myList');
-            const bottomRows = otherRows.filter(r => r.titleKey !== 'misc.continueWatching' && r.titleKey !== 'misc.myList');
-            return [...topRows, priorityRow, ...bottomRows];
+        const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
+        if (!season?.episodes) return null;
+
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id); // Find the current episode's index
+        if (currentEpisodeIndex > 0) { // If it's not the first episode
+            return season.episodes[currentEpisodeIndex - 1];
         }
-
-        return visibleRows;
+        return null;
     }
+    get myListItems() { return this.myList.map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item); }
+    get continueWatchingItems(): PlayableItem[] {
+        const sortedProgress = Array.from(this.episodeProgress.values())
+            .filter(p => !p.watched && p.currentTime > 0)
+            .sort((a, b) => b.currentTime - a.currentTime); // This is not perfect, needs last watched timestamp
 
-    get continueWatchingItems(): MediaItem[] {
-        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-
-        const recentHistory = this.viewingHistory.filter(h => h.watchedAt > thirtyDaysAgo);
-
-        const uniqueShowIds: number[] = [];
-        for (const item of recentHistory) {
-            if (!uniqueShowIds.includes(item.showId)) {
-                uniqueShowIds.push(item.showId);
-            }
-        }
-
-        return uniqueShowIds
-            .map(showId => this.allItems.find(item => item.id === showId))
-            .filter((item): item is MediaItem => !!item && item.media_type === 'tv');
+        return sortedProgress.map(p => {
+            const ep = this.findEpisodeById(p.episodeId);
+            if (!ep) return null;
+            return { ...ep, startTime: p.currentTime };
+// FIX: A type predicate's type must be assignable to its parameter's type. Removed the predicate and added a cast.
+        }).filter(item => !!item) as PlayableItem[];
     }
-
-    get currentShow(): MediaItem | undefined {
-        const nowPlayingItem = this.nowPlayingItem;
-        if (!nowPlayingItem || !('show_id' in nowPlayingItem)) {
-            return undefined;
-        }
-        // Prioritize the fully-loaded show details for the player.
-        if (this.nowPlayingShowDetails && this.nowPlayingShowDetails.id === nowPlayingItem.show_id) {
-            return this.nowPlayingShowDetails;
-        }
-        // Fallback for safety, though nowPlayingShowDetails should be set.
-        return this.allItems.find(item => item.id === nowPlayingItem.show_id);
-    }
-
-    get currentSeasonEpisodes(): Episode[] {
-        const nowPlayingItem = this.nowPlayingItem;
-        if (nowPlayingItem && 'episode_number' in nowPlayingItem && this.currentShow) {
-            const season = this.currentShow.seasons?.find(s => s.season_number === nowPlayingItem.season_number);
-            return season?.episodes ?? [];
-        }
-        return [];
-    }
-
-    get nextEpisode(): Episode | undefined {
-        if (this.nowPlayingItem && 'episode_number' in this.nowPlayingItem) {
-            const currentEpisodeNumber = this.nowPlayingItem.episode_number;
-            const nextEpisode = this.currentSeasonEpisodes.find(ep => ep.episode_number === currentEpisodeNumber + 1);
-            return nextEpisode;
-        }
-        return undefined;
-    }
-
-    get allMovies(): MediaItem[] {
-        const all = [...this.latestMovies, ...this.trending.filter(i => i.media_type === 'movie')];
-        return Array.from(new Map(all.map(item => [item.id, item])).values());
-    }
-
-    get allItems(): MediaItem[] {
-        const all = [
-            ...this.trending,
-            ...this.latestMovies,
-            ...this.topSeries,
-            ...this.popularAnime,
-            ...Array.from(this.cachedItems.values())
+    get homePageRows() {
+        const rows = [
+            ...(this.continueWatchingItems.length > 0 ? [{ titleKey: 'misc.continueWatching', items: this.continueWatchingItems as MediaItem[] }] : []),
+            ...(this.myListItems.length > 0 ? [{ titleKey: 'misc.myList', items: this.myListItems }] : []),
         ];
-        return Array.from(new Map(all.map(item => [item.id, item])).values());
-    }
 
-    get myListItems(): MediaItem[] {
-        return this.allItems.filter(item => this.myList.includes(item.id));
+        switch (this.activeTheme) {
+            case 'Film':
+                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                rows.push({ titleKey: 'misc.topRated', items: this.trending });
+                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
+                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                break;
+            case 'Anime':
+                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                rows.push({ titleKey: 'misc.topRated', items: this.trending });
+                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
+                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                break;
+            case 'SerieTV':
+            default:
+                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
+                rows.push({ titleKey: 'misc.topRated', items: this.trending });
+                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                break;
+        }
+        
+        return rows;
+    }
+    get shareableShows() {
+        return Array.from(this.cachedItems.values()).filter(item => item.media_type === 'tv' && this.hasLinks(item.id));
     }
 
     fetchAllData = async () => {
         this.loading = true;
-        this.error = null;
         try {
-
-            const [
-                trendingData,
-                latestMoviesData,
-                topSeriesData,
-                popularAnimeData,
-            ] = await Promise.all([
+            const [trending, latestMovies, topSeries, popularAnime] = await Promise.all([
                 getTrending(),
                 getLatestMovies(),
                 getTopRatedSeries(),
                 getPopularAnime(),
             ]);
-
             runInAction(() => {
-                this.trending = trendingData;
-                this.latestMovies = latestMoviesData;
-                this.topSeries = topSeriesData;
-                this.popularAnime = popularAnimeData;
+                this.trending = trending;
+                this.latestMovies = latestMovies;
+                this.topSeries = topSeries;
+                this.popularAnime = popularAnime;
+                [...trending, ...latestMovies, ...topSeries, ...popularAnime].forEach(item => {
+                    if (!this.cachedItems.has(item.id)) {
+                        this.cachedItems.set(item.id, item);
+                        db.cachedItems.put(item).catch(console.error);
+                    }
+                });
+                this.loading = false;
             });
-
-        } catch (err) {
+        } catch (error) {
+            console.error('Failed to fetch initial data:', error);
             runInAction(() => {
-                this.error = 'Failed to fetch data. Please try again later.';
-                console.error(err);
-            });
-        } finally {
-            runInAction(() => {
+                this.error = 'Failed to load content.';
                 this.loading = false;
             });
         }
     }
-}
 
+    loadPersistedData = async () => {
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId] = await Promise.all([
+            db.myList.orderBy('order').toArray(),
+            db.cachedItems.toArray(),
+            db.mediaLinks.toArray(),
+            db.showIntroDurations.toArray(),
+            db.preferences.get('language'),
+            db.episodeProgress.toArray(),
+            db.preferredSources.toArray(),
+            db.preferences.get('username'),
+            db.preferences.get('activeTheme'),
+            db.selectedSeasons.toArray(),
+            db.preferences.get('preferredLabels'),
+            db.showFilterPreferences.toArray(),
+            db.preferences.get('remoteMasterForSlaveId'),
+            db.preferences.get('isConfiguredAsSlave'),
+            db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
+            db.preferences.get('selfSlaveId'),
+        ]);
+        runInAction(() => {
+            this.myList = myListItems.map(item => item.id);
+            this.cachedItems = new Map(cachedItems.map(item => [item.id, item]));
+            
+            const linksMap = new Map<number, MediaLink[]>();
+            mediaLinks.forEach(link => {
+                const links = linksMap.get(link.mediaId) || [];
+                links.push(link);
+                linksMap.set(link.mediaId, links);
+            });
+            this.mediaLinks = linksMap;
+            
+            this.showIntroDurations = new Map(introDurations.map(item => [item.id, item.duration]));
+            if (language?.value) this.language = language.value;
+            if (activeTheme?.value) this.activeTheme = activeTheme.value;
+            this.episodeProgress = new Map(progress.map(p => [p.episodeId, p]));
+            this.preferredSources = new Map(preferredSources.map(p => [p.showId, p.origin]));
+            this.selectedSeasons = new Map(selectedSeasons.map(s => [s.showId, s.seasonNumber]));
+            if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
+            if (username?.value) this.username = username.value;
+            this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, { language: p.language, type: p.type }]));
+            
+            if (remoteMasterSlaveId?.value) {
+                this.isRemoteMaster = true;
+                this.slaveId = remoteMasterSlaveId.value;
+                this.showSnackbar('notifications.reconnectingAsRemote', 'info', true);
+            }
+
+            if (isConfiguredAsSlave?.value) {
+                this.isSmartTV = true;
+                this.isSmartTVPairingVisible = true;
+                if (selfSlaveId?.value) {
+                    this.slaveId = selfSlaveId.value;
+                }
+            }
+            this.knownSlaves = knownSlaves;
+        });
+    }
+
+    selectMedia = async (item: MediaItem, context: 'detailView' | 'watchTogether' | 'remoteControl' | 'cacheOnly' = 'detailView') => {
+        if (this.isRemoteMaster && context !== 'remoteControl' && context !== 'cacheOnly') {
+            // When acting as a remote master, clicking an item should display its details locally
+            // AND send a command to the slave to select the item (which will show its details on the TV).
+            runInAction(() => {
+                this._masterUiSelectedItem = item;
+                this.isDetailLoading = true; // Start loading for master's UI
+            });
+
+            // Send command to slave to select the item
+            this.sendRemoteCommand({ command: 'select_item', item: item });
+
+            // Fetch details for the master's display
+            try {
+                let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
+                fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
+                runInAction(() => {
+                    if (this._masterUiSelectedItem?.id === item.id) { // Ensure it's still the same item
+                        this._masterUiSelectedItem = fullItemDetails;
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to load details for remote master UI", error);
+                this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
+            } finally {
+                runInAction(() => {
+                    this.isDetailLoading = false;
+                });
+            }
+            return; // Remote master handles selection differently, so return here.
+        }
+
+        // --- Original local selectMedia logic continues below ---
+        // 1. Set initial state based on context
+        switch(context) {
+            case 'detailView':
+                // If another detail view is already open, replace the history state. Otherwise, push a new one.
+                // This ensures the back button always exits the detail view, instead of going to a previous detail view.
+                if (this.selectedItem) {
+                    window.history.replaceState({ detailViewOpen: true, itemId: item.id }, '', window.location.href);
+                } else {
+                    window.history.pushState({ detailViewOpen: true, itemId: item.id }, '', window.location.href);
+                }
+                this.selectedItem = item;
+                this.isDetailLoading = true;
+                break;
+            case 'watchTogether':
+                this.watchTogetherSelectedItem = item;
+                if (this.watchTogetherSelectedItem?.id !== item.id) {
+                    this.nowPlayingItem = null;
+                }
+                break;
+            case 'remoteControl':
+                this.remoteSelectedItem = item;
+                this.isRemoteDetailLoading = true;
+                break;
+            case 'cacheOnly':
+                break;
+        }
+        
+        try {
+            let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
+            fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
+    
+            // Dexie/IndexedDB cannot serialize MobX proxies. We must convert the object
+            // to a plain JavaScript object before saving to prevent an error.
+            await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
+            runInAction(() => {
+                this.cachedItems.set(item.id, fullItemDetails!);
+                // 2. Update the correct state property with full details
+                switch(context) {
+                    case 'detailView':
+                        if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
+                        break;
+                    case 'watchTogether':
+                        if (this.watchTogetherSelectedItem?.id === item.id) this.watchTogetherSelectedItem = fullItemDetails;
+                        if (this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
+                            this.startPlayback(fullItemDetails!);
+                        }
+                        break;
+                    case 'remoteControl':
+                        if (this.remoteSelectedItem?.id === item.id) this.remoteSelectedItem = fullItemDetails;
+                        break;
+                    case 'cacheOnly':
+                        break;
+                }
+            });
+            
+        } catch (error) {
+            console.error("Failed to load details", error);
+            this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
+        } finally {
+            runInAction(() => {
+                // 3. Reset loading flags
+                if (context === 'detailView') this.isDetailLoading = false;
+                if (context === 'remoteControl') this.isRemoteDetailLoading = false;
+            });
+        }
+    }
+
+    toggleMyList = (item: MediaItem) => {
+        const itemId = item.id;
+        if (this.myList.includes(itemId)) {
+            this.myList = this.myList.filter(id => id !== itemId);
+            db.myList.delete(itemId);
+        } else {
+            this.myList.push(itemId);
+            db.myList.put({ id: itemId, order: this.myList.length });
+            if (!this.cachedItems.has(itemId)) {
+                this.cachedItems.set(itemId, item);
+                db.cachedItems.put(item);
+            }
+        }
+    }
+
+    reorderMyList = async (dragIndex: number, dropIndex: number) => {
+        const reorderedList = [...this.myList];
+        const [draggedItem] = reorderedList.splice(dragIndex, 1);
+        reorderedList.splice(dropIndex, 0, draggedItem);
+        
+        runInAction(() => {
+            this.myList = reorderedList;
+        });
+        
+        const itemsToUpdate = this.myList.map((id, index) => ({ id, order: index }));
+        await db.myList.bulkPut(itemsToUpdate);
+    }
+    
+    removeFromContinueWatching = async (episodeId: number) => {
+        try {
+            await db.episodeProgress.delete(episodeId);
+            runInAction(() => {
+                this.episodeProgress.delete(episodeId);
+                this.showSnackbar('notifications.removedFromContinueWatching', 'success', true);
+            });
+        } catch (error) {
+            console.error('Failed to remove from continue watching list:', error);
+            this.showSnackbar('notifications.removeFromContinueWatchingError', 'error', true);
+        }
+    }
+
+    updateEpisodeProgress = (progress: { episodeId: number; currentTime: number; duration: number; }) => {
+        const { episodeId, currentTime, duration } = progress;
+        if (duration > 0) {
+            const watched = currentTime / duration > 0.9;
+            const existing = this.episodeProgress.get(episodeId);
+            if (!existing || existing.currentTime < currentTime || watched !== existing.watched) {
+                const newProgress = { episodeId, currentTime, duration, watched };
+                this.episodeProgress.set(episodeId, newProgress);
+                db.episodeProgress.put(newProgress);
+            }
+        }
+    }
+    
+    toggleEpisodeWatchedStatus = async (episodeId: number) => {
+        const existingProgress = this.episodeProgress.get(episodeId);
+    
+        if (existingProgress?.watched) {
+            // Mark as unwatched
+            const newProgress: EpisodeProgress = {
+                episodeId,
+                duration: existingProgress.duration,
+                currentTime: 0,
+                watched: false,
+            };
+            this.episodeProgress.set(episodeId, newProgress);
+            await db.episodeProgress.put(newProgress);
+            this.showSnackbar('notifications.markedAsUnwatched', 'info', true);
+        } else {
+            // Mark as watched
+            const newProgress: EpisodeProgress = {
+                episodeId,
+                duration: existingProgress?.duration || 1,
+                currentTime: existingProgress?.duration || 1,
+                watched: true,
+            };
+            this.episodeProgress.set(episodeId, newProgress);
+            await db.episodeProgress.put(newProgress);
+            this.showSnackbar('notifications.markedAsWatched', 'success', true);
+        }
+    }
+    
+    setShowIntroDuration = (showId: number, duration: number) => {
+        this.showIntroDurations.set(showId, duration);
+        db.showIntroDurations.put({ id: showId, duration });
+    }
+    
+    setSelectedSeasonForShow = (showId: number, seasonNumber: number) => {
+        this.selectedSeasons.set(showId, seasonNumber);
+        db.selectedSeasons.put({ showId, seasonNumber });
+    }
+
+    setShowFilterPreference = (showId: number, preference: { language?: string; type?: 'sub' | 'dub'; }) => {
+        const currentPrefs = this.showFilterPreferences.get(showId) || {};
+        const newPrefs = { ...currentPrefs, ...preference };
+        this.showFilterPreferences.set(showId, newPrefs);
+        db.showFilterPreferences.put({ showId, ...newPrefs });
+    }
+
+    togglePreferredLabel = async (label: string) => {
+        const isPreferred = this.preferredLabels.includes(label);
+        if (isPreferred) {
+            this.preferredLabels = this.preferredLabels.filter(l => l !== label);
+        } else {
+            this.preferredLabels.push(label);
+        }
+        await db.preferences.put({ key: 'preferredLabels', value: this.preferredLabels });
+        this.showSnackbar(isPreferred ? 'notifications.preferredLabelRemoved' : 'notifications.preferredLabelSet', 'success', true, { label });
+    }
+
+    openLinkEpisodesModal = (item: MediaItem) => { this.linkingEpisodesForItem = item; this.isLinkEpisodesModalOpen = true; };
+    closeLinkEpisodesModal = () => { this.isLinkEpisodesModalOpen = false; this.linkingEpisodesForItem = null; };
+    openLinkMovieModal = (item: MediaItem) => { this.linkingMovieItem = item; this.isLinkMovieModalOpen = true; };
+    closeLinkMovieModal = () => { this.isLinkMovieModalOpen = false; this.linkingMovieItem = null; };
+
+    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; seasonName: string; }): Promise<boolean> => {
+        const { seasonNumber, method, data, language, type, seasonName } = payload;
+        const show = this.linkingEpisodesForItem;
+        if (!show) return false;
+
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        if (!season) return false;
+
+        let linksToAdd: Omit<MediaLink, 'id'>[] = [];
+        try {
+            switch (method) {
+                case 'pattern': {
+                    const startEpisode = data.start || 1;
+                    const endEpisode = data.end || season.episode_count;
+                    const safeEndEpisode = Math.min(endEpisode, season.episode_count);
+
+                    // The counter for the [@EP] placeholder, which can be different from the actual episode number
+                    let currentNumber = data.startNum ?? startEpisode;
+
+                    for (let i = startEpisode; i <= safeEndEpisode; i++) {
+                        // 'i' is the episode number we are targeting in the season
+                        // 'currentNumber' is the number to put in the URL
+                        const epNum = String(currentNumber).padStart(data.padding, '0');
+                        const ep = season.episodes.find(e => e.episode_number === i);
+                        if (ep) {
+                            linksToAdd.push({
+                                mediaId: ep.id,
+                                url: data.pattern.replace(/\[@EP\]/g, epNum),
+                                label: data.label.replace(/\[@EP\]/g, epNum) || seasonName,
+                                language,
+                                type,
+                            });
+                            currentNumber++; // Increment the placeholder number for the next episode in the range
+                        }
+                    }
+                    break;
+                }
+                case 'list': {
+                    const urls = data.list.split('\n').filter((u: string) => u.trim());
+                    if (urls.length !== season.episode_count) {
+                        this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: urls.length, episodeCount: season.episode_count });
+                        return false;
+                    }
+                    season.episodes.forEach((ep, index) => {
+                        linksToAdd.push({ mediaId: ep.id, url: urls[index], label: new URL(urls[index]).hostname, language, type });
+                    });
+                    break;
+                }
+                case 'json': {
+                    const parsedJson = JSON.parse(data.json);
+                    if (!Array.isArray(parsedJson)) throw new Error('JSON must be an array.');
+                    if (parsedJson.length !== season.episode_count) {
+                       this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: parsedJson.length, episodeCount: season.episode_count });
+                       return false;
+                    }
+                    season.episodes.forEach((ep, index) => {
+                        const item = parsedJson[index];
+                        if (typeof item === 'string') {
+                            linksToAdd.push({ mediaId: ep.id, url: item, label: new URL(item).hostname, language, type });
+                        } else if (typeof item === 'object' && item.url) {
+                            linksToAdd.push({
+                                mediaId: ep.id,
+                                url: item.url,
+                                label: item.label || new URL(item.url).hostname,
+                                language: item.language || language,
+                                type: item.type || type
+                            });
+                        }
+                    });
+                    break;
+                }
+            }
+
+            // Automatically set the first source as preferred if none is set for this show
+            if (linksToAdd.length > 0 && !this.preferredSources.has(show.id)) {
+                try {
+                    const firstUrl = new URL(linksToAdd[0].url);
+                    await this.setPreferredSource(show.id, firstUrl.origin);
+                } catch (e) {
+                    console.warn("Could not determine origin from the first link to set as preferred source", e);
+                }
+            }
+
+            await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
+            await this.refreshLinksForShow(show.id);
+            this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToAdd.length });
+            return true;
+
+        } catch (error) {
+            console.error(error);
+            this.showSnackbar('notifications.processingError', 'error', true, { error: (error as Error).message });
+            return false;
+        }
+    }
+    
+    addLinksToMedia = async (mediaId: number, links: { url: string, label: string, language: string, type: 'sub' | 'dub' }[]) => {
+        try {
+            const linksToAdd: Omit<MediaLink, 'id'>[] = links.map(link => ({
+                mediaId,
+                url: link.url,
+                label: link.label || new URL(link.url).hostname,
+                language: link.language,
+                type: link.type,
+            }));
+            
+            // Automatically set the first source as preferred if none is set
+            if (linksToAdd.length > 0 && !this.preferredSources.has(mediaId)) {
+                try {
+                    const firstUrl = new URL(linksToAdd[0].url);
+                    await this.setPreferredSource(mediaId, firstUrl.origin);
+                } catch (e) {
+                    console.warn("Could not determine origin from the first link to set as preferred source", e);
+                }
+            }
+            
+            await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
+            await this.refreshLinksForMediaId(mediaId);
+        } catch (error) {
+            console.error('Error saving links:', error);
+            this.showSnackbar('notifications.savingLinksError', 'error', true);
+        }
+    }
+    
+    deleteMediaLink = async (linkId: number) => {
+        // FIX: Cast `db` to `Dexie` to call the `transaction` method, resolving a TypeScript error where the method was not found on the extended `QuixDB` class.
+        const mediaId = await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
+            const link = await db.mediaLinks.get(linkId);
+            if(link) {
+                await db.mediaLinks.delete(linkId);
+                return link.mediaId;
+            }
+            return null;
+        });
+    
+        if (mediaId) {
+            await this.refreshLinksForMediaId(mediaId);
+        }
+    }
+
+    updateMediaLink = async (linkId: number, updates: Partial<Omit<MediaLink, 'id' | 'mediaId'>>) => {
+        try {
+            const link = await db.mediaLinks.get(linkId);
+            if (link) {
+                await db.mediaLinks.update(linkId, updates);
+                await this.refreshLinksForMediaId(link.mediaId);
+                this.showSnackbar('notifications.linkUpdatedSuccess', 'success', true);
+            }
+        } catch (error) {
+            console.error('Error updating media link:', error);
+            this.showSnackbar('notifications.processingError', 'error', true, { error: (error as Error).message });
+        }
+    }
+
+    clearLinksForSeason = async (seasonNumber: number, showId: number) => {
+        const show = this.cachedItems.get(showId);
+        if (!show) return;
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        if (!season) return;
+
+        const episodeIds = season.episodes.map(ep => ep.id);
+        const linksToDelete = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
+        if (linksToDelete.length > 0) {
+            await db.mediaLinks.bulkDelete(linksToDelete.map(l => l.id!));
+            await this.refreshLinksForShow(showId);
+            this.showSnackbar('notifications.allSeasonLinksDeleted', 'success', true, { count: linksToDelete.length, season: seasonNumber });
+        } else {
+             this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
+        }
+    }
+
+    clearLinksForDomain = async (showId: number, seasonNumber: number, origin: string) => {
+        const show = this.cachedItems.get(showId);
+        if (!show) return;
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        if (!season) return;
+
+        const episodeIds = season.episodes.map(ep => ep.id);
+        const allLinks = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
+        
+        const linksToDelete = allLinks.filter(link => {
+            try {
+                return new URL(link.url).origin === origin;
+            } catch {
+                return false;
+            }
+        });
+
+        if (linksToDelete.length > 0) {
+            const linkIdsToDelete = linksToDelete.map(l => l.id!);
+            await db.mediaLinks.bulkDelete(linkIdsToDelete);
+            await this.refreshLinksForShow(showId);
+            this.showSnackbar('notifications.linksFromDomainDeletedSuccess', 'success', true, { count: linksToDelete.length, domain: origin });
+        } else {
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
+        }
+    }
+    
+    updateLinksDomain = async (payload: { links: MediaLink[], newDomain: string }) => {
+        const { links, newDomain } = payload;
+        try {
+            const updatedLinks = links.map(link => {
+                const url = new URL(link.url);
+                const newUrl = new URL(url.pathname + url.search, newDomain);
+                return { ...link, url: newUrl.toString() };
+            });
+            await db.mediaLinks.bulkPut(updatedLinks);
+            if (this.linkingEpisodesForItem) {
+                await this.refreshLinksForShow(this.linkingEpisodesForItem.id);
+            }
+            this.showSnackbar('notifications.linksUpdated', 'success', true, { count: updatedLinks.length });
+        } catch (error) {
+            this.showSnackbar('notifications.domainUpdateError', 'error', true, { error: (error as Error).message });
+        }
+    }
+    
+    setPreferredSource = async (showId: number, origin: string) => {
+        const current = this.preferredSources.get(showId);
+        if (current === origin) { // If clicking the same one, unset it
+            this.preferredSources.delete(showId);
+            await db.preferredSources.delete(showId);
+        } else {
+            this.preferredSources.set(showId, origin);
+            await db.preferredSources.put({ showId, origin });
+            this.showSnackbar('notifications.preferredSourceSet', 'success', true);
+        }
+    }
+    
+    openWatchTogetherModal = (item: MediaItem | PlayableItem | null) => {
+        this.watchTogetherError = null;
+        if (item) {
+            this.selectMedia(item as MediaItem, 'watchTogether');
+        }
+        this.watchTogetherModalOpen = true;
+    };
+    
+    closeWatchTogetherModal = () => {
+        this.watchTogetherModalOpen = false;
+        if (this.roomId) {
+            websocketService.sendMessage({ type: 'quix-leave-room' });
+            this.roomId = null;
+        }
+    };
+    
+    createRoom = (username: string) => {
+        this.username = username;
+        db.preferences.put({ key: 'username', value: username });
+        if(this.watchTogetherSelectedItem) {
+            websocketService.sendMessage({ type: 'quix-create-room', payload: { username, media: this.watchTogetherSelectedItem }});
+        }
+    };
+
+    joinRoom = (roomId: string, username: string) => {
+        this.username = username;
+        db.preferences.put({ key: 'username', value: username });
+        websocketService.sendMessage({ type: 'quix-join-room', payload: { roomId: roomId.toUpperCase(), username } });
+    };
+
+    changeWatchTogetherMedia = (item: PlayableItem) => {
+        this.watchTogetherSelectedItem = item;
+        if (this.isHost) {
+            websocketService.sendMessage({ type: 'quix-select-media', payload: { media: item }});
+        }
+    };
+    
+    changeRoomCode = () => { websocketService.sendMessage({ type: 'quix-change-room-code' }); };
+
+    connectAsRemoteMaster = (slaveId: string) => {
+        runInAction(async () => {
+            websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
+            this.isRemoteMaster = true;
+            this.slaveId = slaveId;
+            db.preferences.put({ key: 'remoteMasterForSlaveId', value: slaveId });
+
+            const existingSlave = await db.knownSlaves.get(slaveId);
+            const slaveData = {
+                id: slaveId,
+                name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
+                lastSeen: Date.now()
+            };
+            await db.knownSlaves.put(slaveData);
+            
+            const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+            runInAction(() => {
+                this.knownSlaves = updatedSlaves;
+            });
+
+            this.isQRScannerOpen = false;
+            this.showSnackbar('notifications.connectedToTV', 'success', true);
+        });
+    };
+    
+    disconnectRemoteMaster = () => {
+        runInAction(() => {
+            this.isRemoteMaster = false;
+            this.slaveId = null;
+            this.remoteSlaveState = null;
+            this._masterUiActiveView = 'Home';
+            this._masterUiSelectedItem = null;
+            db.preferences.delete('remoteMasterForSlaveId');
+            this.showSnackbar('notifications.disconnectedFromTV', 'info', true);
+        });
+    }
+
+    reconnectToSlave = (slaveId: string) => {
+        this.connectAsRemoteMaster(slaveId);
+    };
+
+    updateSlaveName = async (slaveId: string, name: string) => {
+        await db.knownSlaves.update(slaveId, { name });
+        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+        runInAction(() => {
+            this.knownSlaves = updatedSlaves;
+        });
+    };
+
+    forgetSlave = async (slaveId: string) => {
+        if (this.isRemoteMaster && this.slaveId === slaveId) {
+            this.disconnectRemoteMaster();
+        }
+        await db.knownSlaves.delete(slaveId);
+        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+        runInAction(() => {
+            this.knownSlaves = updatedSlaves;
+        });
+    };
+
+    setRemoteSelectedItem = (item: MediaItem) => {
+        // This is called by the RemoteControlView (now acting as master's home)
+        // when a card is clicked. It will call `selectMedia` on the master which
+        // handles displaying it locally and sending command to slave.
+        this.selectMedia(item, 'remoteControl');
+    };
+
+    private sendPlayCommandAndOptimisticallyUpdate = (item: PlayableItem) => {
+        this.sendRemoteCommand({ command: 'play_item', item });
+        runInAction(() => {
+            this.remoteSlaveState = {
+                ...(this.remoteSlaveState ?? {}),
+                isPlaying: true,
+                nowPlayingItem: item,
+                currentTime: item.startTime ?? 0,
+                duration: this.remoteSlaveState?.nowPlayingItem?.id === item.id ? this.remoteSlaveState.duration : 0,
+            };
+        });
+    };
+
+    playRemoteItem = async (item: PlayableItem) => {
+        // This method is called by the Master remote.
+        // It needs to resolve the video URL before sending the command to the Slave.
+        if (item.video_url) {
+            this.sendPlayCommandAndOptimisticallyUpdate(item);
+            this.closeLinkSelectionModal();
+            return;
+        }
+
+        // --- Resolve URL ---
+        const mediaId = 'episode_number' in item ? item.id : item.id;
+        const allLinks = item.video_urls || await this.getLinksForMedia(mediaId);
+    
+        if (allLinks.length === 0) {
+            this.showSnackbar("notifications.noVideoLinks", "warning", true);
+            return;
+        }
+
+        let candidateLinks: MediaLink[] = allLinks;
+        const showId = 'show_id' in item ? item.show_id : item.id;
+        const preferredOrigin = this.preferredSources.get(showId);
+
+        if (preferredOrigin) {
+             const linksFromPreferred = allLinks.filter(l => {
+                try {
+                    return new URL(l.url).origin === preferredOrigin;
+                } catch {
+                    return false;
+                }
+            });
+            if (linksFromPreferred.length > 0) {
+                candidateLinks = linksFromPreferred;
+            }
+        }
+    
+        if (candidateLinks.length === 1) {
+            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: candidateLinks[0].url });
+            return;
+        }
+        
+        // More than one candidate, try preferred labels.
+        const preferredLabels = this.preferredLabels;
+        let bestLink: MediaLink | undefined = undefined;
+
+        if (preferredLabels.length > 0) {
+            bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
+        }
+    
+        if (bestLink) {
+            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: bestLink.url });
+        } else {
+            // More than one link, no preferred label, must ask user.
+            runInAction(() => {
+                this.linksForSelection = candidateLinks;
+                this.itemForLinkSelection = item;
+                this.linkSelectionContext = 'remote'; // Set context for modal
+                this.isLinkSelectionModalOpen = true;
+            });
+        }
+    }
+
+    sendRemoteCommand = (payload: any) => {
+        // FIX: Cannot find name 'remoteSessions'. Logic rewritten to correctly send command from master to slave.
+        // A remote control (master) sends commands to its connected TV (slave).
+        if (this.isRemoteMaster && this.slaveId) {
+            websocketService.sendMessage({ type: 'quix-remote-command', payload: { ...payload, slaveId: this.slaveId } });
+        }
+    };
+    
+    sendSlaveStatusUpdate = () => {
+        if(this.isSmartTV && this.slaveId) {
+            const video = document.querySelector('video');
+            websocketService.sendMessage({
+                type: 'quix-slave-status-update',
+                payload: {
+                    slaveId: this.slaveId,
+                    isPlaying: this.isPlaying,
+                    nowPlayingItem: this.nowPlayingItem,
+                    isIntroSkippable: this.isIntroSkippableOnSlave,
+                    currentTime: video?.currentTime,
+                    duration: video?.duration
+                }
+            });
+        }
+    };
+
+    stopRemotePlayback = () => {
+        this.sendRemoteCommand({ command: 'stop' });
+    };
+
+    fetchRemoteFullItem = async () => {
+        if (!this.remoteSlaveState?.nowPlayingItem) return;
+        const item = this.remoteSlaveState.nowPlayingItem;
+        const showId = 'show_id' in item ? item.show_id : item.id;
+
+        this.isRemoteFullItemLoading = true;
+        try {
+            const fullDetails = await getSeriesDetails(showId);
+            const seasonsWithEpisodes = await Promise.all(
+                fullDetails.seasons?.map(async (season) => {
+                    const episodes = await getSeriesEpisodes(showId, season.season_number);
+                    const episodesWithLinks = await Promise.all(episodes.map(async ep => {
+                        const links = await this.getLinksForMedia(ep.id);
+                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                    }));
+                    return { ...season, episodes: episodesWithLinks };
+                }) || []
+            );
+            runInAction(() => {
+                this.remoteFullItem = { ...fullDetails, seasons: seasonsWithEpisodes };
+            });
+        } catch (error) {
+            console.error("Failed to fetch full remote item details", error);
+        } finally {
+            runInAction(() => {
+                this.isRemoteFullItemLoading = false;
+            });
+        }
+    };
+    
+    handleRemoteCommand = (payload: any) => {
+        const { command, item, time } = payload;
+    
+        // Commands that do NOT require an existing video element
+        switch (command) {
+            case 'play_item':
+                this.startPlayback(item);
+                this.sendSlaveStatusUpdate();
+                return; // Exit after handling
+            case 'stop':
+                this.stopPlayback();
+                this.sendSlaveStatusUpdate();
+                return; // Exit after handling
+            case 'select_item': // Slave receives command to select an item
+                this.selectMedia(item, 'detailView');
+                this.sendSlaveStatusUpdate();
+                return;
+            case 'clear_selection': // Slave receives command to clear selected item
+                this.closeDetail();
+                this.sendSlaveStatusUpdate();
+                return;
+            case 'request_status':
+                this.sendSlaveStatusUpdate();
+                return;
+        }
+    
+        // All subsequent commands require a video element
+        const video = document.querySelector('video');
+        if (!video) return;
+    
+        switch (command) {
+            case 'play':
+                if (this.nowPlayingItem) this.isPlaying = true;
+                video.play();
+                break;
+            case 'pause':
+                if (this.nowPlayingItem) this.isPlaying = false;
+                video.pause();
+                break;
+            case 'seek_forward':
+                video.currentTime += 10;
+                break;
+            case 'seek_backward':
+                video.currentTime -= 10;
+                break;
+            case 'seek_to':
+                video.currentTime = time;
+                break;
+            case 'skip_intro':
+                if (this.nowPlayingItem && 'intro_end_s' in this.nowPlayingItem && this.nowPlayingItem.intro_end_s) {
+                    video.currentTime = this.nowPlayingItem.intro_end_s;
+                }
+                break;
+        }
+        this.sendSlaveStatusUpdate();
+    };
+
+    generateShareableData = async (showIds: number[]): Promise<SharedLibraryData> => {
+        const shows: SharedShowData[] = [];
+        for (const showId of showIds) {
+            // Ensure full details are loaded, as the cached item might be partial.
+            const cachedShow = this.cachedItems.get(showId);
+            const needsFetch = !cachedShow || !cachedShow.seasons || cachedShow.seasons.some(s => s.episodes.length === 0);
+            if (needsFetch) {
+                // selectMedia with 'cacheOnly' will fetch from API and update the cache.
+                await this.selectMedia({ id: showId, media_type: 'tv' } as MediaItem, 'cacheOnly');
+            }
+            
+            const show = this.cachedItems.get(showId); // Get the updated item
+            if (!show || !show.seasons) continue;
+
+            const links: SharedEpisodeLink[] = [];
+            for (const season of show.seasons) {
+                for (const episode of season.episodes) {
+                    const episodeLinks = this.mediaLinks.get(episode.id) || [];
+                    episodeLinks.forEach(link => {
+                        links.push({
+                            seasonNumber: season.season_number,
+                            episodeNumber: episode.episode_number,
+                            url: link.url,
+                            label: link.label,
+                            language: link.language,
+                            type: link.type,
+                        });
+                    });
+                }
+            }
+            if (links.length > 0) {
+                shows.push({ tmdbId: showId, links });
+            }
+        }
+        return { version: 1, shows };
+    }
+
+    importSharedLibrary = async (data: SharedLibraryData) => {
+        this.isImportingLibrary = true;
+        try {
+            let totalLinksAdded = 0;
+            const showIdsToAddToMyList: number[] = [];
+
+            for (const showData of data.shows) {
+                showIdsToAddToMyList.push(showData.tmdbId);
+
+                // Ensure show details are in cache
+                if (!this.cachedItems.has(showData.tmdbId)) {
+                    await this.selectMedia({ id: showData.tmdbId, media_type: 'tv' } as MediaItem, 'cacheOnly');
+                }
+                const show = this.cachedItems.get(showData.tmdbId);
+                if (!show || !show.seasons) continue;
+
+                // Prevent duplicate links
+                const allEpisodeIds = show.seasons.flatMap(s => s.episodes.map(e => e.id));
+                if (allEpisodeIds.length === 0) continue;
+
+                const existingLinks = await db.mediaLinks.where('mediaId').anyOf(allEpisodeIds).toArray();
+                const existingLinkSet = new Set(existingLinks.map(l => `${l.mediaId}|${l.url}`));
+                
+                const linksToAdd: Omit<MediaLink, "id">[] = [];
+                for (const link of showData.links) {
+                    const episode = show.seasons
+                        .find(s => s.season_number === link.seasonNumber)?.episodes
+                        .find(e => e.episode_number === link.episodeNumber);
+                    if (episode) {
+                        const linkIdentifier = `${episode.id}|${link.url}`;
+                        if (!existingLinkSet.has(linkIdentifier)) {
+                            linksToAdd.push({
+                                mediaId: episode.id,
+                                url: link.url,
+                                label: link.label,
+                                language: link.language,
+                                type: link.type
+                            });
+                            existingLinkSet.add(linkIdentifier); // Avoid adding duplicates from within the same import file
+                        }
+                    }
+                }
+                if (linksToAdd.length > 0) {
+                    await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
+                    totalLinksAdded += linksToAdd.length;
+                }
+            }
+
+            // Add imported shows to "My List"
+            if (showIdsToAddToMyList.length > 0) {
+                const itemsToAddToMyList = showIdsToAddToMyList
+                    .filter(id => !this.myList.includes(id)) // Filter out duplicates
+                    .map((id, index) => ({ id, order: this.myList.length + index }));
+                
+                if (itemsToAddToMyList.length > 0) {
+                    await db.myList.bulkAdd(itemsToAddToMyList);
+                    runInAction(() => {
+                        this.myList.push(...itemsToAddToMyList.map(item => item.id));
+                    });
+                }
+            }
+
+            this.showSnackbar('notifications.importSuccess', 'success', true, { showCount: data.shows.length, linkCount: totalLinksAdded });
+            setTimeout(() => window.location.reload(), 3000);
+        } catch (error) {
+            this.showSnackbar('notifications.importError', 'error', true, { error: (error as Error).message });
+            this.isImportingLibrary = false;
+        }
+    }
+
+    fetchRevisions = async () => {
+        this.isRevisionsLoading = true;
+        const revs = await db.revisions.orderBy('timestamp').reverse().limit(100).toArray();
+        await this.enrichRevisionsWithContext(revs);
+        runInAction(() => {
+            this.revisions = revs;
+            this.isRevisionsLoading = false;
+        });
+    }
+    
+    revertRevision = async (revision: Revision) => {
+        try {
+            const table = (db as any)[revision.table];
+            if (!table) throw new Error(`Table ${revision.table} not found.`);
+    
+            switch (revision.type) {
+                case 1: // Revert create -> delete
+                    await table.delete(revision.key);
+                    break;
+                case 2: // Revert update
+                case 3: // Revert delete
+                    if (!revision.oldObj) {
+                        throw new Error(this.t('revisions.errors.missingOldObject'));
+                    }
+                    await table.put(revision.oldObj);
+                    break;
+            }
+            // Remove the revision itself
+            if(revision.id) await db.revisions.delete(revision.id);
+            this.showSnackbar('notifications.revertSuccess', 'success', true);
+            // Reload the page after 1.5 seconds to ensure all state is consistent
+            setTimeout(() => window.location.reload(), 1500);
+        } catch(error) {
+            this.showSnackbar('notifications.revertError', 'error', true, { error: (error as Error).message });
+        }
+    }
+
+    triggerDebouncedBackup = () => {
+        if (this.backupDebounceTimer) clearTimeout(this.backupDebounceTimer);
+        this.backupDebounceTimer = window.setTimeout(async () => {
+            if (this.isLoggedIn) {
+                const newFile = await this.backupToDrive();
+                if (newFile) {
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
+                }
+            }
+        }, 30000); // 30-second debounce
+    };
+
+    setGoogleUser = async (user: GoogleUser | null) => { 
+        this.googleUser = user;
+        if(user) {
+            this.showSnackbar('notifications.welcomeUser', 'success', true, { name: user.name });
+        } else {
+            this.showSnackbar('notifications.logoutSuccess', 'info', true);
+        }
+    };
+    
+    // Private helpers
+    private async _fetchAndCacheMediaDetails(itemId: number, initialItem: MediaItem): Promise<MediaItem> {
+        let fullItemDetails = initialItem;
+        const needsApiFetch = fullItemDetails.media_type === 'tv' &&
+                              (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
+
+        if (needsApiFetch) {
+            const apiDetails = await getSeriesDetails(itemId);
+            const seasonsWithEpisodes = await Promise.all(
+                apiDetails.seasons?.map(async (season) => {
+                    const episodes = await getSeriesEpisodes(itemId, season.season_number);
+                    const episodesWithLinks = await Promise.all(episodes.map(async ep => {
+                        const links = await this.getLinksForMedia(ep.id);
+                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                    }));
+                    return { ...season, episodes: episodesWithLinks };
+                }) || []
+            );
+            fullItemDetails = { ...apiDetails, seasons: seasonsWithEpisodes };
+        } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
+            const seasonsWithFreshLinks = await Promise.all(
+                fullItemDetails.seasons.map(async (season) => {
+                    const episodesWithLinks = await Promise.all(season.episodes.map(async ep => {
+                        const links = await this.getLinksForMedia(ep.id);
+                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                    }));
+                    return { ...season, episodes: episodesWithLinks };
+                })
+            );
+            fullItemDetails = { ...fullItemDetails, seasons: seasonsWithFreshLinks };
+        } else if (fullItemDetails.media_type === 'movie') {
+            const links = await this.getLinksForMedia(itemId);
+            fullItemDetails = { ...fullItemDetails, video_urls: links, video_url: links[0]?.url };
+        }
+
+        await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
+        runInAction(() => {
+            this.cachedItems.set(itemId, fullItemDetails);
+        });
+        return fullItemDetails;
+    }
+// FIX: Modified findEpisodeById to return an object that is structurally compatible with MediaItem for use in ContentRow/Card components.
+    private findEpisodeById(episodeId: number): (Episode & { show_id: number, show_title: string, backdrop_path: string, season_number: number, poster_path: string, title: string, media_type: 'tv', name: string }) | null {
+        for (const show of this.cachedItems.values()) {
+            if (show.seasons) {
+                for (const season of show.seasons) {
+                    const episode = season.episodes.find(ep => ep.id === episodeId);
+                    if (episode) {
+                        return { 
+                            ...episode, 
+                            show_id: show.id, 
+                            show_title: show.name || show.title, 
+                            backdrop_path: show.backdrop_path, 
+                            season_number: season.season_number,
+                            // Make it MediaItem-like for Card component
+                            poster_path: episode.still_path || show.poster_path,
+                            title: episode.name,
+                            media_type: 'tv',
+                            name: episode.name,
+                        };
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private hasLinks(showId: number): boolean {
+        const item = this.cachedItems.get(showId);
+        if (!item || !item.seasons) return false;
+        return item.seasons.some(s => s.episodes.some(ep => this.mediaLinks.has(ep.id)));
+    }
+
+    private async getLinksForMedia(mediaId: number): Promise<MediaLink[]> {
+        let links = this.mediaLinks.get(mediaId);
+        if(!links) {
+            links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
+            this.mediaLinks.set(mediaId, links);
+        }
+        return links;
+    }
+
+    private async refreshLinksForMediaId(mediaId: number) {
+        const links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
+        runInAction(() => {
+            this.mediaLinks.set(mediaId, links);
+            // This is complex because we don't know which show this episode belongs to without searching.
+            // A full refresh of the selected item is safer.
+            if (this.linkingEpisodesForItem) this.refreshLinksForShow(this.linkingEpisodesForItem.id);
+
+            // Also refresh the movie item if it's the one being linked
+            if (this.linkingMovieItem?.id === mediaId) {
+                // By creating a new object, we ensure MobX detects the change and re-renders the observer component.
+                this.linkingMovieItem = { ...this.linkingMovieItem, video_urls: links };
+            }
+        });
+    }
+
+    private async refreshLinksForShow(showId: number) {
+        const show = this.cachedItems.get(showId);
+        if (!show || !show.seasons) return;
+
+        // Create new season and episode objects to ensure MobX detects changes
+        const updatedSeasons = await Promise.all(
+            show.seasons.map(async (season) => {
+                const updatedEpisodes = await Promise.all(
+                    season.episodes.map(async (episode) => {
+                        const links = await db.mediaLinks.where('mediaId').equals(episode.id).toArray();
+                        runInAction(() => {
+                            this.mediaLinks.set(episode.id, links);
+                        });
+                        // Create a new episode object with updated links
+                        return { ...episode, video_urls: links, video_url: links[0]?.url };
+                    })
+                );
+                // Create a new season object with updated episodes
+                return { ...season, episodes: updatedEpisodes };
+            })
+        );
+        
+        // Create a new show object with the updated seasons
+        const updatedShow = { ...show, seasons: updatedSeasons };
+        
+        runInAction(() => {
+            // Update the main cache
+            this.cachedItems.set(showId, updatedShow);
+
+            // If this show is the currently selected item in the detail view, update it to trigger a re-render.
+            if (this.selectedItem?.id === showId) {
+                this.selectedItem = updatedShow;
+            }
+
+            // Also update the item being linked in the modal.
+            if (this.linkingEpisodesForItem?.id === showId) {
+                this.linkingEpisodesForItem = updatedShow;
+            }
+            // Also update the master UI selected item if it's this show
+            if (this._masterUiSelectedItem?.id === showId) {
+                this._masterUiSelectedItem = updatedShow;
+            }
+        });
+    }
+
+    // FIX: Add private translation method for use inside the store.
+    private t = (key: string, values?: Record<string, any>): string => {
+        const translatedString = getNestedValue(this.translations, key);
+        if (translatedString) {
+            return values ? interpolate(translatedString, values) : translatedString;
+        }
+        console.warn(`[Translation] Missing key: "${key}" for language: "${this.language}"`);
+        return key;
+    }
+
+    private async enrichRevisionsWithContext(revs: Revision[]) {
+        for (const rev of revs) {
+            rev.icon = rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'delete';
+            const obj = rev.obj || rev.oldObj;
+            if (!obj) {
+                rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                continue;
+            }
+
+            try {
+                switch(rev.table) {
+                    case 'myList':
+                        const myListItem = this.cachedItems.get(obj.id);
+                        rev.description = this.t('revisions.descriptions.myList.' + (rev.type === 1 ? 'add' : 'remove'), { name: myListItem?.name || myListItem?.title || obj.id });
+                        break;
+                    case 'cachedItems':
+                        rev.description = this.t('revisions.descriptions.cachedItems.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), { name: obj.name || obj.title });
+                        break;
+                    case 'mediaLinks':
+                         const context = await this.findEpisodeContext(obj.mediaId);
+                         if (context) {
+                             rev.description = this.t('revisions.descriptions.episodeLinks.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), context);
+                         } else {
+                            rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                         }
+                        break;
+                    case 'showIntroDurations':
+                        const show = this.cachedItems.get(obj.id);
+                        rev.description = this.t('revisions.descriptions.showIntroDurations.' + (rev.type === 1 || rev.type === 2 ? 'set' : 'remove'), { show: show?.name || obj.id, duration: obj.duration });
+                        break;
+                    case 'viewingHistory':
+                        const vhContext = await this.findEpisodeContext(obj.episodeId);
+                        if (vhContext) {
+                            rev.description = this.t('revisions.descriptions.viewingHistory.add', vhContext);
+                        } else {
+                            rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                        }
+                        break;
+                    default:
+                        rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                        break;
+                }
+            } catch (e) { console.warn("Error enriching revision", e); }
+        }
+    }
+
+    private async findEpisodeContext(episodeId: number): Promise<{ show: string | undefined; s: number; e: number; epName: string; } | null> {
+        if(this.episodeContextMap.has(episodeId)) return this.episodeContextMap.get(episodeId) || null;
+        
+        for (const show of this.cachedItems.values()) {
+            if (show.seasons) {
+                for (const season of show.seasons) {
+                    const episode = season.episodes.find(ep => ep.id === episodeId);
+                    if (episode) {
+                        const context = { 
+                            show: show.name || show.title,
+                            s: season.season_number,
+                            e: episode.episode_number,
+                            epName: episode.name,
+                        };
+                        this.episodeContextMap.set(episodeId, context);
+                        return context;
+                    }
+                }
+            }
+        }
+        return null; // Should fetch if not found, but this is for UI display, so fail silently.
+    }
+    
+    // Websocket and remote control methods
+    addDebugMessage = (message: string) => { if (this.debugMessages.length > 100) { this.debugMessages.shift(); } this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`); };
+    initRemoteSession = () => {
+        if (this.isSmartTV) {
+            const payload = this.slaveId ? { slaveId: this.slaveId } : {};
+            websocketService.sendMessage({ type: 'quix-register-slave', payload });
+        } else if (this.isRemoteMaster && this.slaveId) {
+            // When the WebSocket connects (or reconnects), if this client is a master,
+            // it needs to re-register with its slave to re-establish the control session.
+            websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId: this.slaveId } });
+            // Request the current status from the slave to sync the UI
+            this.sendRemoteCommand({ command: 'request_status' });
+        }
+    };
+    handleIncomingMessage = (message: any) => { runInAction(() => {
+        const { type, payload } = message;
+        this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
+        switch (type) {
+            case 'quix-slave-registered': 
+                this.slaveId = payload.slaveId;
+                this.slaveShortCode = payload.shortCode;
+                if (this.isSmartTV) {
+                    db.preferences.put({ key: 'selfSlaveId', value: payload.slaveId });
+                }
+                this.showSnackbar('notifications.tvReady', 'info', true); 
+                break;
+            case 'quix-master-connected':
+                this.isRemoteMasterConnected = true;
+                if (this.isSmartTV) {
+                    this.isSmartTVPairingVisible = false;
+                }
+                this.showSnackbar('notifications.remoteConnected', 'success', true);
+                break;
+            case 'quix-room-update':
+                this.roomId = payload.roomId;
+                this.hostId = payload.hostId;
+                this.participants = payload.participants;
+                this.playbackState = payload.playbackState;
+                this.chatHistory = payload.chatHistory;
+                this.isHost = payload.isHost;
+                this.myClientId = websocketService.clientId;
+                if (payload.selectedMedia) {
+                    const existing = this.cachedItems.get(payload.selectedMedia.id);
+                    if (existing) {
+                        this.watchTogetherSelectedItem = payload.selectedMedia;
+                        this.selectMedia(existing, 'watchTogether');
+                    } else { // If not cached, fetch it
+                        this.selectMedia(payload.selectedMedia, 'watchTogether');
+                    }
+                }
+                break;
+            case 'quix-playback-update': 
+                this.playbackState = payload.playbackState; 
+                this.playbackListeners.forEach(l => l(this.playbackState)); 
+                // If we are in a room, not the host, and not currently playing, this update means the host has started playback.
+                if (this.roomId && !this.isHost && !this.nowPlayingItem && this.watchTogetherSelectedItem && payload.playbackState.status === 'playing') {
+                    this.startPlayback(this.watchTogetherSelectedItem);
+                }
+                break;
+            case 'quix-error': this.watchTogetherError = payload.message; break;
+            case 'quix-remote-command-received': this.handleRemoteCommand(payload); break;
+            case 'quix-slave-status-update': this.remoteSlaveState = payload; break;
+        }
+    }); };
+    sendPlaybackControl = (state: PlaybackState) => { if (this.roomId) { websocketService.sendMessage({ type: 'quix-playback-control', payload: { playbackState: state } }); } };
+    addPlaybackListener = (listener: (state: PlaybackState) => void) => { this.playbackListeners.push(listener); return () => { this.playbackListeners = this.playbackListeners.filter(l => l !== listener); }; };
+    sendChatMessage = (message: { text?: string; image?: string; }) => { websocketService.sendMessage({ type: 'quix-chat-message', payload: { message } }); };
+    transferHost = (newHostId: string) => { websocketService.sendMessage({ type: 'quix-transfer-host', payload: { newHostId } }); };
+}
 export const mediaStore = new MediaStore();

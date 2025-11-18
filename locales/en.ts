@@ -1,3 +1,4 @@
+
 export const en = {
   "header": {
     "home": "Home",
@@ -18,7 +19,8 @@ export const en = {
   "card": {
     "detailsFor": "View details for {title}",
     "removeFromList": "Remove from My List",
-    "addToList": "Add to My List"
+    "addToList": "Add to My List",
+    "removeFromContinueWatching": "Remove from Continue Watching"
   },
   "detail": {
     "close": "Close detail",
@@ -29,11 +31,15 @@ export const en = {
     "addToList": "Add to My List",
     "watchTogether": "Watch Together",
     "episodes": "Episodes",
-    "linkEpisodesTooltip": "Link video files for the season",
+    "linkEpisodesTooltip": "Link video files",
     "introDuration": "Intro Duration",
     "season": "Season",
     "scrollEpisodesLeft": "scroll episodes left",
-    "scrollEpisodesRight": "scroll episodes right"
+    "scrollEpisodesRight": "scroll episodes right",
+    "markAsWatched": "Mark as watched",
+    "markAsUnwatched": "Mark as unwatched",
+    "filterLanguage": "Language",
+    "filterType": "Type"
   },
   "gridView": {
     "myListTitle": "My List",
@@ -68,6 +74,19 @@ export const en = {
     "title": "Episodes",
     "season": "Season {number}"
   },
+  "linkMovieModal": {
+    "title": "Link Videos for {title}",
+    "addLink": "Add Link",
+    "url": "URL",
+    "label": "Label (optional)",
+    "add": "Add",
+    "noLinks": "No video links associated with this movie.",
+    "deleteLink": "Delete Link",
+    "language": "Language",
+    "type": "Type",
+    "sub": "Subtitled",
+    "dub": "Dubbed"
+  },
   "linkEpisodesModal": {
     "title": "Link Episodes for {name}",
     "selectSeason": "Select season",
@@ -86,9 +105,18 @@ export const en = {
       "paddingHelper": "E.g., 2 for '01', 3 for '001'",
       "listInfo": "Paste a list of links, one per line. The number of links must match the number of episodes ({count}).",
       "listLinks": "List of links",
-      "jsonInfo": "Paste a JSON array of strings (links) or objects (e.g., {\"url\": \"...\", \"label\": \"...\"}).",
+      "jsonInfo": "Paste a JSON array of strings (links) or objects (e.g., {\"url\": \"...\", \"label\": \"...\", \"language\": \"ENG\", \"type\": \"dub\"}).",
       "jsonArray": "JSON Array",
-      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]"
+      "jsonPlaceholder": "[ \"http://link1.mp4\", \"http://link2.mp4\" ]",
+      "advancedConfig": "Advanced configuration",
+      "startEpisode": "From episode",
+      "endEpisode": "To episode",
+      "startNumberPlaceholder": "Start number for [@EP]",
+      "endNumberPlaceholder": "End number for [@EP]",
+      "language": "Language",
+      "type": "Type",
+      "sub": "Subtitled",
+      "dub": "Dubbed"
     },
     "manage": {
       "deleteAllSeasonLinks": "Delete all links for this season",
@@ -102,7 +130,12 @@ export const en = {
       "newDomain": "New Domain/Origin",
       "update": "Update",
       "setAsPreferred": "Set as preferred source",
-      "removePreferred": "Remove preference"
+      "removePreferred": "Remove preference",
+      "editLink": "Edit Link",
+      "save": "Save",
+      "cancel": "Cancel",
+      "deleteAllFromDomainTooltip": "Delete all links from this domain",
+      "deleteAllFromDomainConfirm": "Are you sure you want to delete all {count} links from {domain}?"
     }
   },
   "linkSelectionModal": {
@@ -128,12 +161,26 @@ export const en = {
     "library": "Library",
     "share": "Share Library",
     "import": "Import Library",
-    "history": "Change History"
+    "history": "Change History",
+    "playbackPreferences": "Playback Preferences",
+    "preferredLabelsDesc": "Prioritize links with these labels during auto-selection.",
+    "noLabelsFound": "No labels found",
+    "noLabelsFoundDesc": "Add links with labels to manage them here.",
+    "savedDevices": "Saved TV Devices",
+    "noSavedDevices": "No saved TV devices found.",
+    "connect": "Connect",
+    "editName": "Edit Name",
+    "forgetDevice": "Forget Device",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "qrScanner": {
     "close": "Close scanner",
     "title": "Point your camera at the QR Code on the TV",
-    "error": "Invalid QR code. Make sure you are scanning the code shown on the TV."
+    "error": "Invalid QR code. Make sure you are scanning the code shown on the TV.",
+    "or": "OR",
+    "enterCode": "Enter TV Code",
+    "connect": "Connect"
   },
   "smartTV": {
     "connected": "Remote Connected!",
@@ -142,7 +189,8 @@ export const en = {
     "qrAlt": "QR Code for remote control",
     "instructions": "1. Open the camera on your phone.\n2. Point it at the QR code to connect.",
     "initializing": "Initializing device...",
-    "browseOnTV": "Browse the catalog directly on the TV"
+    "browseOnTV": "Browse the catalog directly on the TV",
+    "orEnterCode": "Or enter the code manually:"
   },
   "watchTogether": {
     "joinRoomTitle": "Join Room",
@@ -196,7 +244,10 @@ export const en = {
       "pause": "pause",
       "skipIntro": "Skip Intro",
       "episodes": "Episodes",
-      "introDuration": "Intro Duration (sec)"
+      "introDuration": "Intro Duration (sec)",
+      "nextEpisode": "next episode",
+      "previousEpisode": "previous episode",
+      "disconnect": "Disconnect"
     }
   },
   "misc": {
@@ -224,7 +275,8 @@ export const en = {
     "pasteLink": "Paste a share link to add content to your library.",
     "linkPlaceholder": "https://...",
     "import": "Import",
-    "importing": "Importing..."
+    "importing": "Importing...",
+    "loginRequired": "You must be logged in with Google to share your library."
   },
   "revisions": {
     "title": "Change History",
@@ -234,13 +286,16 @@ export const en = {
     "loading": "Loading history...",
     "showRawData": "Show Raw Data",
     "hideRawData": "Hide Raw Data",
+    "errors": {
+      "missingOldObject": "Cannot revert: old object data is missing from revision history."
+    },
     "descriptions": {
         "myList": {
             "add": "Added '{name}' to your list",
             "remove": "Removed '{name}' from your list"
         },
         "cachedItems": {
-            "add": "Cached '{name}' for offline access",
+            "add": "Cached '{name}'",
             "update": "Updated cached data for '{name}'",
             "remove": "Removed '{name}' from cache"
         },
@@ -254,7 +309,7 @@ export const en = {
             "remove": "Removed custom intro duration for '{show}'"
         },
         "viewingHistory": {
-            "add": "Watched episode '{show}' S{s}E{e}"
+            "add": "Watched episode: {show} S{s}E{e}"
         },
         "unknown": "Action '{type}' on table '{table}'"
     }
@@ -263,10 +318,12 @@ export const en = {
     "roomCreated": "Room created! Share the code to invite friends.",
     "tvReady": "TV device ready. Scan the QR code to connect.",
     "connectedToTV": "Successfully connected to the TV!",
+    "disconnectedFromTV": "Disconnected from the TV.",
     "remoteConnected": "Remote connected!",
+    "reconnectingAsRemote": "Reconnecting as remote control...",
     "failedToLoadSeriesDetails": "Could not load series details.",
     "noPlayableEpisodes": "No playable episodes found for this series.",
-    "noVideoLinks": "No video links found for this episode.",
+    "noVideoLinks": "No video links found for this content.",
     "linkCountMismatch": "The number of links ({linkCount}) does not match the number of episodes ({episodeCount}).",
     "processingError": "Error processing data: {error}",
     "linksAddedSuccess": "{count} links added successfully!",
@@ -293,10 +350,26 @@ export const en = {
     "importInvalidFile": "Import file is invalid or corrupt.",
     "importInvalidLink": "The provided share link is not valid.",
     "importInProgress": "Importing library...",
-    "importSuccess": "Imported {showCount} shows and {linkCount} links successfully! The app will now reload.",
+    "importSuccess": "Imported {showCount} shows and {linkCount} links successfully and added to 'My List'! The app will now reload.",
     "importError": "Failed to import library: {error}",
     "revertSuccess": "Change successfully reverted.",
     "revertError": "Failed to revert change: {error}",
-    "preferredSourceSet": "Preferred source set successfully."
+    "preferredSourceSet": "Preferred source set successfully.",
+    "syncChecking": "Checking for cloud data...",
+    "syncError": "Error syncing with cloud.",
+    "noBackupFoundCreating": "No cloud backup found. Creating one now...",
+    "restoringFromCloud": "Newer data found in the cloud. Restoring now...",
+    "shareLinkCreateError": "Failed to create share link: {error}",
+    "syncUpToDate": "Your data is already up to date.",
+    "removedFromContinueWatching": "Removed from 'Continue Watching'.",
+    "removeFromContinueWatchingError": "Error removing from 'Continue Watching'.",
+    "markedAsWatched": "Episode marked as watched.",
+    "markedAsUnwatched": "Episode marked as unwatched.",
+    "invalidEpisodeRange": "Invalid episode range.",
+    "episodeNumberRangeMismatch": "The episode range ({epRange}) and the numbering range ({numRange}) must have the same length.",
+    "preferredLabelSet": "Label '{label}' set as preferred.",
+    "preferredLabelRemoved": "Preference removed for label '{label}'.",
+    "linkUpdatedSuccess": "Link updated successfully.",
+    "linksFromDomainDeletedSuccess": "{count} links from {domain} deleted successfully."
   }
 }

@@ -48,7 +48,7 @@ export const Header: React.FC = observer(() => {
         case 'Film': return 'var(--glow-film-color)';
         case 'Anime': return 'var(--glow-anime-color)';
         case 'SerieTV':
-        default: return 'var(--glow-seriestv-color)';
+        default: return 'var(--glow-serietv-color)';
     }
   }
 
@@ -92,7 +92,6 @@ export const Header: React.FC = observer(() => {
           >
             Quix
           </Typography>
-          {/* FIX: (line 95) Wrap Box with Grow component */}
           <Grow in={!isSearchActive}>
               <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
               {navKeys.map((item) => (
@@ -136,7 +135,6 @@ export const Header: React.FC = observer(() => {
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexGrow: isSearchActive ? 1 : 0, ml: 2 }}>
-           {/* FIX: (line 138) Wrap TextField with Grow component */}
            <Grow in={isSearchActive}>
               <TextField
                   fullWidth
@@ -161,7 +159,6 @@ export const Header: React.FC = observer(() => {
           <IconButton color="inherit" onClick={() => toggleSearch(!isSearchActive)}>
               {isSearchActive ? <CloseIcon /> : <SearchIcon />}
           </IconButton>
-          {/* FIX: (line 162) Wrap Box with Fade component */}
           <Fade in={!isSearchActive}>
               <Box sx={{ display: isSearchActive ? 'none' : 'flex', alignItems: 'center', gap: 1 }}>
                   <IconButton color="inherit">

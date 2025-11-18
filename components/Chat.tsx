@@ -1,3 +1,5 @@
+
+
 import React, { useState, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
@@ -73,6 +75,7 @@ const Chat: React.FC = observer(() => {
                       key={p.id}
                       secondaryAction={
                           isHost && p.id !== myClientId ? (
+                              // FIX: (line 77) Wrap IconButton with Tooltip component
                               <Tooltip title={t('chat.makeHost')}>
                                   <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => transferHost(p.id)}>
                                       <SwapHorizIcon />

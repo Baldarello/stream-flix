@@ -1,3 +1,4 @@
+
 import { mediaStore } from '../store/mediaStore';
 
 // Helper function to navigate a nested object with a dot-separated string

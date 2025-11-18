@@ -1,3 +1,4 @@
+
 import { mediaStore } from '../store/mediaStore';
 import type { GoogleUser } from '../types';
 
@@ -27,8 +28,8 @@ const tryRestoringSession = async () => {
     });
 
     if (response.ok) {
-      // Token is valid, restore the session
-      mediaStore.setGoogleUser(user);
+      // Token is valid, set user. Sync will be triggered from the main App component.
+      await mediaStore.setGoogleUser(user);
     } else {
       // Token is invalid/expired
       throw new Error("Token validation failed.");
@@ -42,6 +43,12 @@ const tryRestoringSession = async () => {
 
 
 export const initGoogleAuth = async () => {
+  // If the client ID is not configured, skip all Google authentication logic.
+  if (!GOOGLE_CLIENT_ID) {
+    console.warn("Google Client ID is not configured. Skipping Google Auth initialization.");
+    return;
+  }
+  
   if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
     // Wait a moment for the GSI script to load from index.html
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -51,19 +58,14 @@ export const initGoogleAuth = async () => {
     }
   }
   
-  if (!GOOGLE_CLIENT_ID) {
-    console.error("Google Client ID is not configured. Please set process.env.GOOGLE_CLIENT_ID.");
-    return;
-  }
-  
-  // Attempt to restore session before initializing the client for new logins
+  // Attempt to restore session before initializing the client for new logins.
   await tryRestoringSession();
 
 
   try {
     tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.appdata',
+        scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
             // Fetch user profile after getting the token
@@ -84,7 +86,8 @@ export const initGoogleAuth = async () => {
               // Persist session to localStorage
               localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
               
-              mediaStore.setGoogleUser(user);
+              await mediaStore.setGoogleUser(user);
+              await mediaStore.synchronizeWithDrive();
               
             } catch (error) {
                 console.error("Error fetching user profile:", error);

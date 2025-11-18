@@ -1,8 +1,17 @@
 const rooms = new Map(); // roomId -> { id, hostId, players: Map<clientId, {id, ws, name}>, gameState }
 const remoteSessions = new Map(); // slaveId -> { slaveWs, masterWs }
+const shortCodeToSlaveId = new Map(); // shortCode -> slaveId
 
 function generateUniqueId(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
+function generateShortCode() {
+    let code;
+    do {
+        code = Math.random().toString(36).substring(2, 7).toUpperCase();
+    } while (shortCodeToSlaveId.has(code)); // Ensure uniqueness
+    return code;
 }
 
 // Broadcasts the entire, consistent state of a room to all its players.
@@ -37,13 +46,16 @@ function handleDisconnect(ws) {
             console.log(`Master ${ws.clientId} disconnected from slave ${ws.remoteSlaveId}`);
         }
     }
-    if (remoteSessions.has(ws.clientId)) { // If the client was a slave
-        const session = remoteSessions.get(ws.clientId);
+    if (ws.slaveId && remoteSessions.has(ws.slaveId)) { // If the client was a slave
+        const session = remoteSessions.get(ws.slaveId);
         if (session.masterWs && session.masterWs.readyState === session.masterWs.OPEN) {
             session.masterWs.send(JSON.stringify({ type: 'quix-error', payload: { message: 'The TV has disconnected.' } }));
         }
-        remoteSessions.delete(ws.clientId);
-        console.log(`Slave ${ws.clientId} session deleted.`);
+        remoteSessions.delete(ws.slaveId);
+        if (ws.shortCode) {
+            shortCodeToSlaveId.delete(ws.shortCode);
+        }
+        console.log(`Slave ${ws.slaveId} session deleted.`);
     }
 
     // Clean up "Watch Together" rooms
@@ -197,21 +209,34 @@ const webSocketRouter = (wss) => {
 
                     // --- Remote Control Cases ---
                     case 'quix-register-slave': {
-                        remoteSessions.set(ws.clientId, { slaveWs: ws, masterWs: null });
-                        ws.send(JSON.stringify({ type: 'quix-slave-registered', payload: { slaveId: ws.clientId } }));
-                        console.log(`Slave registered: ${ws.clientId}`);
+                        const persistentId = payload?.slaveId || ws.clientId;
+                        ws.slaveId = persistentId; // Tag the websocket connection with its persistent slave ID
+
+                        const shortCode = generateShortCode();
+                        shortCodeToSlaveId.set(shortCode, persistentId);
+                        ws.shortCode = shortCode;
+
+                        remoteSessions.set(persistentId, { slaveWs: ws, masterWs: null });
+
+                        ws.send(JSON.stringify({ type: 'quix-slave-registered', payload: { slaveId: persistentId, shortCode } }));
+                        console.log(`Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
                         break;
                     }
                     case 'quix-register-master': {
-                        const session = remoteSessions.get(payload.slaveId);
+                        let fullSlaveId = payload.slaveId;
+                        if (fullSlaveId && shortCodeToSlaveId.has(fullSlaveId.toUpperCase())) {
+                            fullSlaveId = shortCodeToSlaveId.get(fullSlaveId.toUpperCase());
+                        }
+
+                        const session = remoteSessions.get(fullSlaveId);
                         if (session) {
                             session.masterWs = ws;
-                            ws.remoteSlaveId = payload.slaveId;
+                            ws.remoteSlaveId = fullSlaveId;
                             ws.send(JSON.stringify({ type: 'quix-master-connected' }));
                             if (session.slaveWs?.readyState === ws.OPEN) {
                                 session.slaveWs.send(JSON.stringify({ type: 'quix-master-connected' }));
                             }
-                            console.log(`Master ${ws.clientId} connected to slave ${payload.slaveId}`);
+                            console.log(`Master ${ws.clientId} connected to slave ${fullSlaveId}`);
                         }
                         break;
                     }

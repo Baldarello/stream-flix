@@ -1,19 +1,42 @@
+
+
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField } from '@mui/material';
+import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider, InputAdornment, Tooltip } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
-import FastForwardIcon from '@mui/icons-material/FastForward';
-import FastRewindIcon from '@mui/icons-material/FastRewind';
+import Replay10 from '@mui/icons-material/Replay10';
+import Forward10 from '@mui/icons-material/Forward10';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import CloseIcon from '@mui/icons-material/Close';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
+import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import type { Episode, PlayableItem } from '../types';
 import { useTranslations } from '../hooks/useTranslations';
 
+const formatTime = (timeInSeconds: number) => {
+    if (isNaN(timeInSeconds) || timeInSeconds < 0) {
+        return '00:00';
+    }
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+
+    if (hours > 0) {
+        return `${hours}:${formattedMinutes}:${formattedSeconds}`;
+    }
+    return `${formattedMinutes}:${formattedSeconds}`;
+};
+
+
 const RemotePlayerControlView = observer(() => {
-    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading } = mediaStore;
+    const { remoteSlaveState, sendRemoteCommand, stopRemotePlayback, remoteFullItem, isRemoteFullItemLoading, remoteNextEpisode, remotePreviousEpisode, playRemoteItem, disconnectRemoteMaster } = mediaStore;
     const { t } = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
@@ -42,7 +65,6 @@ const RemotePlayerControlView = observer(() => {
     }
     
     const isPlaying = remoteSlaveState?.isPlaying ?? false;
-    const isIntroSkippable = remoteSlaveState?.isIntroSkippable ?? false;
     const isEpisode = 'episode_number' in nowPlayingItem;
     
     const title = isEpisode ? nowPlayingItem.show_title : (nowPlayingItem.title || nowPlayingItem.name);
@@ -52,6 +74,35 @@ const RemotePlayerControlView = observer(() => {
     const handleSeekForward = () => sendRemoteCommand({ command: 'seek_forward' });
     const handleSeekBackward = () => sendRemoteCommand({ command: 'seek_backward' });
     const handleSkipIntro = () => sendRemoteCommand({ command: 'skip_intro' });
+
+    const handlePlayNext = () => {
+        if (remoteNextEpisode && remoteFullItem && isEpisode && 'season_number' in nowPlayingItem) {
+            playRemoteItem({
+                ...remoteNextEpisode,
+                show_id: remoteFullItem.id,
+                show_title: remoteFullItem.title || remoteFullItem.name || '',
+                backdrop_path: remoteFullItem.backdrop_path,
+                season_number: nowPlayingItem.season_number,
+            });
+        }
+    };
+
+    const handlePlayPrevious = () => {
+        if (remotePreviousEpisode && remoteFullItem && isEpisode && 'season_number' in nowPlayingItem) {
+            playRemoteItem({
+                ...remotePreviousEpisode,
+                show_id: remoteFullItem.id,
+                show_title: remoteFullItem.title || remoteFullItem.name || '',
+                backdrop_path: remoteFullItem.backdrop_path,
+                season_number: nowPlayingItem.season_number,
+            });
+        }
+    };
+
+    const handleSeek = (event: Event, newValue: number | number[]) => {
+        const newTime = ((newValue as number) / 100) * (remoteSlaveState?.duration || 0);
+        sendRemoteCommand({ command: 'seek_to', time: newTime });
+    };
     
     const handleSelectEpisode = (episode: Episode) => {
         if (!remoteFullItem || !selectedSeason) return;
@@ -107,11 +158,15 @@ const RemotePlayerControlView = observer(() => {
                         value={introDuration}
                         onChange={handleIntroDurationChange}
                         onFocus={(event) => event.target.select()}
-                        InputProps={{ inputProps: { min: 0 } }}
+                        InputProps={{
+                            endAdornment: <InputAdornment position="end">sec</InputAdornment>,
+                            inputProps: { min: 0 }
+                        }}
                     />
 
                     {remoteFullItem?.seasons && (
                         <FormControl fullWidth margin="normal" size="small">
+                           {/* FIX: (line 170) Pass label text as children to InputLabel */}
                            <InputLabel>{t('remote.detail.season')}</InputLabel>
                            <Select
                                value={selectedSeason || ''}
@@ -152,6 +207,10 @@ const RemotePlayerControlView = observer(() => {
         );
     };
 
+    const currentTime = remoteSlaveState?.currentTime || 0;
+    const duration = remoteSlaveState?.duration || 0;
+    const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
     return (
         <Box sx={{ bgcolor: 'background.default', color: 'text.primary', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             <AppBar position="sticky" sx={{ bgcolor: 'background.paper' }}>
@@ -159,9 +218,15 @@ const RemotePlayerControlView = observer(() => {
                     <IconButton edge="start" color="inherit" onClick={stopRemotePlayback} aria-label={t('remote.player.back')}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap>
+                    <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
                         {t('remote.player.title')}
                     </Typography>
+                    {/* FIX: (line 224) Wrap IconButton with Tooltip component */}
+                    <Tooltip title={t('remote.player.disconnect')}>
+                        <IconButton color="inherit" onClick={disconnectRemoteMaster}>
+                            <PowerSettingsNewIcon />
+                        </IconButton>
+                    </Tooltip>
                 </Toolbar>
             </AppBar>
 
@@ -196,40 +261,62 @@ const RemotePlayerControlView = observer(() => {
             </Box>
 
             <Box sx={{ p: { xs: 2, sm: 3 }, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                {/* Progress Bar */}
+                    <Slider
+                        className="video-player-slider"
+                        aria-label="progress"
+                        value={progress}
+                        onChangeCommitted={handleSeek}
+                    /> <Box sx={{ display: 'flex', alignItems: 'center',justifyContent:"space-between",flexDirection:"row", gap: 2, mb: 4 }}>
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(currentTime)}</Typography>
+
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{formatTime(duration)}</Typography>
+                </Box>
+                
                 {/* Main Controls */}
-                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
-                <Stack direction="row" spacing={3} sx={{ justifyContent: 'center', alignItems: 'center', mb: 3 }}>
-                    <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{ transform: 'scale(1.5)' }}>
-                        <FastRewindIcon fontSize="large" />
+                <Stack direction="row" spacing={{xs: 2, sm: 4}} gap={"0.25rem"} sx={{ justifyContent: 'center', alignItems: 'center', mb: 5 }}>
+                    {isEpisode && (
+                         <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode} aria-label={t('remote.player.previousEpisode')} sx={{  }}>
+                            <SkipPreviousIcon fontSize="large" />
+                        </IconButton>
+                    )}
+                    <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{  }}>
+                        <Replay10 fontSize="large" />
                     </IconButton>
                     <IconButton
                         onClick={handleTogglePlay}
                         aria-label={isPlaying ? t('remote.player.pause') : t('remote.player.play')}
                         sx={{
-                            bgcolor: 'white', color: 'black', transform: 'scale(2.2)',
+                            bgcolor: 'white', color: 'black', transform:"scale(1.5)",
                             '&:hover': { bgcolor: 'grey.300' }
                         }}
                     >
                         {isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
                     </IconButton>
-                    <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{ transform: 'scale(1.5)' }}>
-                        <FastForwardIcon fontSize="large" />
+                    <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{  }}>
+                        <Forward10 fontSize="large" />
                     </IconButton>
+                    {isEpisode && (
+                        <IconButton onClick={handlePlayNext} disabled={!remoteNextEpisode} aria-label={t('remote.player.nextEpisode')} sx={{  }}>
+                            <SkipNextIcon fontSize="large" />
+                        </IconButton>
+                    )}
                 </Stack>
 
                 {/* Secondary Controls */}
-                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                 <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center', mt: 4, height: '48px' /* Reserve space for buttons */ }}>
-                    {isIntroSkippable && (
-                        <Button 
-                            variant="contained" 
-                            color="inherit" 
-                            onClick={handleSkipIntro}
-                            sx={{ bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black', '&:hover': { bgcolor: 'white' } }}
-                        >
-                            {t('remote.player.skipIntro')}
-                        </Button>
-                    )}
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        onClick={handleSkipIntro}
+                        sx={{ 
+                            bgcolor: 'rgba(255, 255, 255, 0.8)', 
+                            color: 'black', 
+                            '&:hover': { bgcolor: 'white' },
+                        }}
+                    >
+                        {t('remote.player.skipIntro')}
+                    </Button>
                      {isSeries && (
                         <Button 
                             variant="outlined" 
