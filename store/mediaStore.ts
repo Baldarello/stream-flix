@@ -111,6 +111,10 @@ class MediaStore {
     isIntroSkippableOnSlave = false;
     @observable knownSlaves: { id: string; name: string; lastSeen: number; }[] = [];
 
+    // Media Sync State
+    isMediaSyncModalOpen = false;
+    mediaSyncTargetSlaveId: string | null = null;
+
     // UI states for the Master remote when it's controlling a TV
     @observable _masterUiActiveView: ActiveView = 'Home'; // The active view on the MASTER device
     @observable _masterUiSelectedItem: MediaItem | null = null; // The selected item on the MASTER device
@@ -491,6 +495,14 @@ class MediaStore {
     exitSmartTVPairingMode = () => { 
         this.isSmartTVPairingVisible = false; 
         db.preferences.delete('isConfiguredAsSlave');
+    };
+    openMediaSyncModal = (slaveId: string) => {
+        this.mediaSyncTargetSlaveId = slaveId;
+        this.isMediaSyncModalOpen = true;
+    };
+    closeMediaSyncModal = () => {
+        this.isMediaSyncModalOpen = false;
+        this.mediaSyncTargetSlaveId = null;
     };
     setLanguage = (lang: Language) => { this.language = lang; db.preferences.put({ key: 'language', value: lang }); };
     openShareModal = () => { this.isShareModalOpen = true; };
@@ -1396,7 +1408,7 @@ class MediaStore {
     };
     
     handleRemoteCommand = (payload: any) => {
-        const { command, item, time } = payload;
+        const { command, item, time, slaveId } = payload;
     
         // Commands that do NOT require an existing video element
         switch (command) {
@@ -1418,6 +1430,12 @@ class MediaStore {
                 return;
             case 'request_status':
                 this.sendSlaveStatusUpdate();
+                return;
+            case 'request-media-sync':
+                // Slave is requesting the master to show the media sync modal
+                if (slaveId) {
+                    this.openMediaSyncModal(slaveId);
+                }
                 return;
         }
     

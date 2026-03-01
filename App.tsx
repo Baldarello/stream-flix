@@ -23,6 +23,7 @@ import LinkMovieModal from './components/LinkMovieModal';
 import ShareLibraryModal from './components/ShareLibraryModal';
 import ImportLibraryModal from './components/ImportLibraryModal';
 import RevisionsModal from './components/RevisionsModal';
+import MediaSyncModal from './components/MediaSyncModal';
 import { useTranslations } from './hooks/useTranslations';
 import { initGoogleAuth } from './services/googleAuthService';
 import { websocketService } from './services/websocketService.js';
@@ -228,6 +229,11 @@ const AppContent: React.FC = observer(() => {
         <ShareLibraryModal />
         <ImportLibraryModal />
         <RevisionsModal />
+        <MediaSyncModal 
+          open={mediaStore.isMediaSyncModalOpen} 
+          onClose={() => mediaStore.closeMediaSyncModal()}
+          slaveId={mediaStore.mediaSyncTargetSlaveId || ''}
+        />
       </Box>
   );
 });

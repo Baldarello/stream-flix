@@ -1,6 +1,7 @@
 const rooms = new Map(); // roomId -> { id, hostId, players: Map<clientId, {id, ws, name}>, gameState }
 const remoteSessions = new Map(); // slaveId -> { slaveWs, masterWs }
 const shortCodeToSlaveId = new Map(); // shortCode -> slaveId
+const mediaSyncProgress = new Map(); // syncId -> { total: number, completed: number, status: 'pending' | 'in_progress' | 'completed' | 'failed' }
 
 function generateUniqueId(prefix = 'id') {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -19,18 +20,18 @@ function broadcastRoomState(roomId) {
     const room = rooms.get(roomId);
     if (!room) return;
 
-    room.players.forEach(({ ws: clientWs }, clientId) => {
+    room.players.forEach(({ws: clientWs}, clientId) => {
         const payload = {
             roomId: room.id,
             hostId: room.hostId,
-            participants: Array.from(room.players.values()).map(p => ({ id: p.id, name: p.name })),
+            participants: Array.from(room.players.values()).map(p => ({id: p.id, name: p.name})),
             selectedMedia: room.gameState.selectedMedia,
             playbackState: room.gameState.playbackState,
             chatHistory: room.gameState.chatHistory,
             isHost: clientId === room.hostId,
         };
         if (clientWs.readyState === clientWs.OPEN) {
-            clientWs.send(JSON.stringify({ type: 'quix-room-update', payload }));
+            clientWs.send(JSON.stringify({type: 'quix-room-update', payload}));
         }
     });
 }
@@ -49,13 +50,28 @@ function handleDisconnect(ws) {
     if (ws.slaveId && remoteSessions.has(ws.slaveId)) { // If the client was a slave
         const session = remoteSessions.get(ws.slaveId);
         if (session.masterWs && session.masterWs.readyState === session.masterWs.OPEN) {
-            session.masterWs.send(JSON.stringify({ type: 'quix-error', payload: { message: 'The TV has disconnected.' } }));
+            session.masterWs.send(JSON.stringify({type: 'quix-error', payload: {message: 'The TV has disconnected.'}}));
+        }
+        // Clean up any pending sync operations for this slave
+        for (const [syncId, progress] of mediaSyncProgress.entries()) {
+            if (progress.status === 'in_progress') {
+                progress.status = 'failed';
+            }
         }
         remoteSessions.delete(ws.slaveId);
         if (ws.shortCode) {
             shortCodeToSlaveId.delete(ws.shortCode);
         }
         console.log(`Slave ${ws.slaveId} session deleted.`);
+    }
+
+    // Clean up master-side sync progress when master disconnects
+    if (ws.remoteSlaveId) {
+        for (const [syncId, progress] of mediaSyncProgress.entries()) {
+            if (progress.status === 'in_progress') {
+                progress.status = 'failed';
+            }
+        }
     }
 
     // Clean up "Watch Together" rooms
@@ -80,7 +96,9 @@ function handleDisconnect(ws) {
 }
 
 
-function heartbeat() { this.isAlive = true; }
+function heartbeat() {
+    this.isAlive = true;
+}
 
 const webSocketRouter = (wss) => {
     wss.on('connection', (ws) => {
@@ -89,13 +107,13 @@ const webSocketRouter = (wss) => {
 
         // Assign a unique ID and notify the client immediately
         ws.clientId = generateUniqueId('client');
-        ws.send(JSON.stringify({ type: 'connected', payload: { clientId: ws.clientId } }));
+        ws.send(JSON.stringify({type: 'connected', payload: {clientId: ws.clientId}}));
         console.log(`Client connected: ${ws.clientId}`);
 
         ws.on('message', (message) => {
             try {
                 const parsedMessage = JSON.parse(message);
-                const { type, payload } = parsedMessage;
+                const {type, payload} = parsedMessage;
 
                 const room = ws.roomId ? rooms.get(ws.roomId) : null;
                 const isHost = room && ws.clientId === room.hostId;
@@ -104,17 +122,20 @@ const webSocketRouter = (wss) => {
                     // --- Watch Together Cases ---
                     case 'quix-create-room': {
                         if (!payload?.username?.trim() || !payload.media) {
-                            return ws.send(JSON.stringify({ type: 'quix-error', payload: { message: 'Username and media selection are required.' } }));
+                            return ws.send(JSON.stringify({
+                                type: 'quix-error',
+                                payload: {message: 'Username and media selection are required.'}
+                            }));
                         }
                         const roomId = generateUniqueId('room').toUpperCase().substring(5, 11);
                         ws.roomId = roomId;
                         const newRoom = {
                             id: roomId,
                             hostId: ws.clientId,
-                            players: new Map([[ws.clientId, { id: ws.clientId, ws, name: payload.username }]]),
+                            players: new Map([[ws.clientId, {id: ws.clientId, ws, name: payload.username}]]),
                             gameState: {
                                 selectedMedia: payload.media,
-                                playbackState: { status: 'paused', time: 0 },
+                                playbackState: {status: 'paused', time: 0},
                                 chatHistory: [],
                             },
                         };
@@ -124,20 +145,26 @@ const webSocketRouter = (wss) => {
                         break;
                     }
                     case 'quix-join-room': {
-                        const { roomId, username } = payload;
+                        const {roomId, username} = payload;
                         if (!roomId || !username?.trim()) {
-                            return ws.send(JSON.stringify({ type: 'quix-error', payload: { message: 'Room ID and username are required.' } }));
+                            return ws.send(JSON.stringify({
+                                type: 'quix-error',
+                                payload: {message: 'Room ID and username are required.'}
+                            }));
                         }
                         const roomToJoin = rooms.get(roomId);
                         if (!roomToJoin) {
-                            return ws.send(JSON.stringify({ type: 'quix-error', payload: { message: 'Room not found.' } }));
+                            return ws.send(JSON.stringify({type: 'quix-error', payload: {message: 'Room not found.'}}));
                         }
                         const nameTaken = Array.from(roomToJoin.players.values()).some(p => p.name.toLowerCase() === username.toLowerCase());
                         if (nameTaken) {
-                            return ws.send(JSON.stringify({ type: 'quix-error', payload: { message: 'That name is already taken in this room.' } }));
+                            return ws.send(JSON.stringify({
+                                type: 'quix-error',
+                                payload: {message: 'That name is already taken in this room.'}
+                            }));
                         }
                         ws.roomId = roomId;
-                        roomToJoin.players.set(ws.clientId, { id: ws.clientId, ws, name: username });
+                        roomToJoin.players.set(ws.clientId, {id: ws.clientId, ws, name: username});
                         console.log(`User ${username} (${ws.clientId}) joined room ${roomId}`);
                         broadcastRoomState(roomId);
                         break;
@@ -158,7 +185,7 @@ const webSocketRouter = (wss) => {
                         if (isHost && room) {
                             const oldRoomId = ws.roomId;
                             const newRoomId = generateUniqueId('room').toUpperCase().substring(5, 11);
-                            
+
                             room.id = newRoomId;
                             room.players.forEach(player => {
                                 player.ws.roomId = newRoomId;
@@ -175,8 +202,11 @@ const webSocketRouter = (wss) => {
                     case 'quix-playback-control': {
                         if (isHost && room && payload.playbackState) {
                             room.gameState.playbackState = payload.playbackState;
-                            const updateMessage = JSON.stringify({ type: 'quix-playback-update', payload: { playbackState: room.gameState.playbackState } });
-                            room.players.forEach(({ ws: client }) => {
+                            const updateMessage = JSON.stringify({
+                                type: 'quix-playback-update',
+                                payload: {playbackState: room.gameState.playbackState}
+                            });
+                            room.players.forEach(({ws: client}) => {
                                 if (client.readyState === client.OPEN) client.send(updateMessage);
                             });
                         }
@@ -216,9 +246,12 @@ const webSocketRouter = (wss) => {
                         shortCodeToSlaveId.set(shortCode, persistentId);
                         ws.shortCode = shortCode;
 
-                        remoteSessions.set(persistentId, { slaveWs: ws, masterWs: null });
+                        remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
 
-                        ws.send(JSON.stringify({ type: 'quix-slave-registered', payload: { slaveId: persistentId, shortCode } }));
+                        ws.send(JSON.stringify({
+                            type: 'quix-slave-registered',
+                            payload: {slaveId: persistentId, shortCode}
+                        }));
                         console.log(`Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
                         break;
                     }
@@ -232,9 +265,9 @@ const webSocketRouter = (wss) => {
                         if (session) {
                             session.masterWs = ws;
                             ws.remoteSlaveId = fullSlaveId;
-                            ws.send(JSON.stringify({ type: 'quix-master-connected' }));
+                            ws.send(JSON.stringify({type: 'quix-master-connected'}));
                             if (session.slaveWs?.readyState === ws.OPEN) {
-                                session.slaveWs.send(JSON.stringify({ type: 'quix-master-connected' }));
+                                session.slaveWs.send(JSON.stringify({type: 'quix-master-connected'}));
                             }
                             console.log(`Master ${ws.clientId} connected to slave ${fullSlaveId}`);
                         }
@@ -245,14 +278,128 @@ const webSocketRouter = (wss) => {
                         if (session?.slaveWs && session.slaveWs.readyState === ws.OPEN) {
                             // The server just forwards the command; the slave client interprets it.
                             // This supports play, pause, seek_forward, seek_backward, stop, select_media etc.
-                            session.slaveWs.send(JSON.stringify({ type: 'quix-remote-command-received', payload: payload }));
+                            session.slaveWs.send(JSON.stringify({
+                                type: 'quix-remote-command-received',
+                                payload: payload
+                            }));
                         }
                         break;
                     }
                     case 'quix-slave-status-update': {
                         const session = remoteSessions.get(payload.slaveId);
                         if (session?.masterWs && session.masterWs.readyState === ws.OPEN) {
-                            session.masterWs.send(JSON.stringify({ type: 'quix-slave-status-update', payload: payload }));
+                            session.masterWs.send(JSON.stringify({type: 'quix-slave-status-update', payload: payload}));
+                        }
+                        break;
+                    }
+
+                    // --- Media Sync Cases ---
+                    case 'quix-request-media-list': {
+                        // Master requests the list of available media from the slave
+                        const session = remoteSessions.get(payload.slaveId);
+                        if (session?.slaveWs && session.slaveWs.readyState === ws.OPEN) {
+                            session.slaveWs.send(JSON.stringify({
+                                type: 'quix-media-list-request',
+                                payload: {requestId: payload.requestId}
+                            }));
+                        }
+                        break;
+                    }
+                    case 'quix-media-list-response': {
+                        // Slave responds with its available media list
+                        const session = remoteSessions.get(payload.slaveId);
+                        if (session?.masterWs && session.masterWs.readyState === ws.OPEN) {
+                            session.masterWs.send(JSON.stringify({type: 'quix-media-list-response', payload: payload}));
+                        }
+                        break;
+                    }
+                    case 'quix-sync-media-request': {
+                        // Master requests to sync specific media to the slave
+                        const syncId = generateUniqueId('sync');
+                        const session = remoteSessions.get(payload.slaveId);
+
+                        if (session?.slaveWs && session.slaveWs.readyState === ws.OPEN) {
+                            // Initialize sync progress
+                            mediaSyncProgress.set(syncId, {
+                                total: payload.mediaItems.length,
+                                completed: 0,
+                                status: 'in_progress'
+                            });
+
+                            // Send sync request to slave with syncId
+                            session.slaveWs.send(JSON.stringify({
+                                type: 'quix-sync-media-request',
+                                payload: {
+                                    syncId,
+                                    mediaItems: payload.mediaItems
+                                }
+                            }));
+
+                            // Confirm sync started to master
+                            ws.send(JSON.stringify({
+                                type: 'quix-sync-started',
+                                payload: {
+                                    syncId,
+                                    totalItems: payload.mediaItems.length
+                                }
+                            }));
+
+                            console.log(`Media sync initiated: ${syncId} for ${payload.mediaItems.length} items to slave ${payload.slaveId}`);
+                        }
+                        break;
+                    }
+                    case 'quix-sync-progress-update': {
+                        // Slave reports sync progress
+                        const session = remoteSessions.get(payload.slaveId);
+                        if (session?.masterWs && session.masterWs.readyState === ws.OPEN) {
+                            // Update local progress tracking
+                            if (mediaSyncProgress.has(payload.syncId)) {
+                                const progress = mediaSyncProgress.get(payload.syncId);
+                                progress.completed = payload.completed;
+                                progress.status = payload.completed >= payload.total ? 'completed' : 'in_progress';
+                            }
+
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-sync-progress-update',
+                                payload: payload
+                            }));
+                        }
+                        break;
+                    }
+                    case 'quix-sync-completed': {
+                        // Slave confirms sync completion
+                        const session = remoteSessions.get(payload.slaveId);
+                        if (session?.masterWs && session.masterWs.readyState === ws.OPEN) {
+                            if (mediaSyncProgress.has(payload.syncId)) {
+                                const progress = mediaSyncProgress.get(payload.syncId);
+                                progress.status = 'completed';
+                                progress.completed = progress.total;
+                            }
+
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-sync-completed',
+                                payload: payload
+                            }));
+
+                            console.log(`Media sync completed: ${payload.syncId}`);
+                        }
+                        break;
+                    }
+                    case 'quix-sync-error': {
+                        // Slave reports sync error
+                        const session = remoteSessions.get(payload.slaveId);
+                        if (session?.masterWs && session.masterWs.readyState === ws.OPEN) {
+                            if (mediaSyncProgress.has(payload.syncId)) {
+                                const progress = mediaSyncProgress.get(payload.syncId);
+                                progress.status = 'failed';
+                            }
+
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-sync-error',
+                                payload: payload
+                            }));
+
+                            console.error(`Media sync error: ${payload.syncId} - ${payload.error}`);
                         }
                         break;
                     }

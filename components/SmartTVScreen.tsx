@@ -1,15 +1,30 @@
 
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../store/mediaStore';
 import { Box, Typography, CircularProgress, Paper, Button } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useTranslations } from '../hooks/useTranslations';
+import { websocketService } from '../services/websocketService.js';
 
 const SmartTVScreen: React.FC = observer(() => {
     const { slaveId, isRemoteMasterConnected, slaveShortCode } = mediaStore;
     const { t } = useTranslations();
+
+    // When master connects, notify the master to show the media sync modal
+    useEffect(() => {
+        if (isRemoteMasterConnected && slaveId) {
+            // Send a message to the master requesting media sync
+            websocketService.sendMessage({
+                type: 'quix-remote-command',
+                payload: {
+                    slaveId: slaveId,
+                    command: 'request-media-sync',
+                },
+            });
+        }
+    }, [isRemoteMasterConnected, slaveId]);
 
     const renderContent = () => {
         if (isRemoteMasterConnected) {
