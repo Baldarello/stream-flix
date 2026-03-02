@@ -142,7 +142,15 @@ const AppContent: React.FC = observer(() => {
   if (isSmartTVPairingVisible) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
   
   // If remote master, and slave is playing, show the remote player controls
-  if (isRemoteMaster && remoteSlaveState?.nowPlayingItem) return <><RemotePlayerControlView /> <NotificationSnackbar /><DebugOverlay /></>;
+  if (isRemoteMaster && remoteSlaveState?.nowPlayingItem) return <>
+    <RemotePlayerControlView />
+    <MediaSyncModal
+      open={mediaStore.isMediaSyncModalOpen}
+      onClose={() => mediaStore.closeMediaSyncModal()}
+      slaveId={mediaStore.mediaSyncTargetSlaveId || ''}
+    />
+    <NotificationSnackbar /><DebugOverlay />
+  </>;
   
   // If local client is playing, show local video player
   if (nowPlayingItem) return <><VideoPlayer /> <LinkSelectionModal /><NotificationSnackbar /><DebugOverlay /></>;

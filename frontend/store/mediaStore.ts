@@ -1354,29 +1354,30 @@ class MediaStore {
         websocketService.sendMessage({type: 'quix-change-room-code'});
     };
 
-    connectAsRemoteMaster = (slaveId: string) => {
-        runInAction(async () => {
-            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId}});
+    connectAsRemoteMaster = async (slaveId: string) => {
+        runInAction(() => {
             this.isRemoteMaster = true;
             this.slaveId = slaveId;
-            db.preferences.put({key: 'remoteMasterForSlaveId', value: slaveId});
-
-            const existingSlave = await db.knownSlaves.get(slaveId);
-            const slaveData = {
-                id: slaveId,
-                name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
-                lastSeen: Date.now()
-            };
-            await db.knownSlaves.put(slaveData);
-
-            const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
-            runInAction(() => {
-                this.knownSlaves = updatedSlaves;
-            });
-
             this.isQRScannerOpen = false;
-            this.showSnackbar('notifications.connectedToTV', 'success', true);
+            db.preferences.put({key: 'remoteMasterForSlaveId', value: slaveId});
         });
+
+        websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId}});
+
+        const existingSlave = await db.knownSlaves.get(slaveId);
+        const slaveData = {
+            id: slaveId,
+            name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
+            lastSeen: Date.now()
+        };
+        await db.knownSlaves.put(slaveData);
+
+        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+        runInAction(() => {
+            this.knownSlaves = updatedSlaves;
+        });
+
+        this.showSnackbar('notifications.connectedToTV', 'success', true);
     };
 
     disconnectRemoteMaster = () => {
@@ -2068,7 +2069,13 @@ class MediaStore {
                 case 'quix-master-connected':
                     this.isRemoteMasterConnected = true;
                     if (this.isSmartTV) {
+                        // Slave side: hide the pairing screen
                         this.isSmartTVPairingVisible = false;
+                    } else {
+                        // Master side: open the media sync modal
+                        if (this.slaveId) {
+                            this.openMediaSyncModal(this.slaveId);
+                        }
                     }
                     this.showSnackbar('notifications.remoteConnected', 'success', true);
                     break;
@@ -2146,9 +2153,14 @@ class MediaStore {
             const {db} = await import('../services/db.ts');
             // Save each media item to cachedItems
             await db.cachedItems.bulkPut(mediaItems);
-            // Add each item to myList
-            for (const item of mediaItems) {
-                await db.myList.put({id: item.id});
+            // Add each item to myList with order field for proper ordering
+            for (let i = 0; i < mediaItems.length; i++) {
+                await db.myList.put({id: mediaItems[i].id, order: Date.now() + i});
+                // Send progress update back to master
+                websocketService.sendMessage({
+                    type: 'quix-sync-progress-update',
+                    payload: {completed: i + 1, total: mediaItems.length}
+                });
             }
             this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
             // Send completion notification back to master

@@ -503,13 +503,12 @@ export function createWebSocketRouter() {
                 case 'quix-sync-completed': {
                     // Slave sends sync completed - forward to master
                     const wsData = getWSData(ws);
-                    if (wsData.remoteSlaveId) {
-                        const session = remoteSessions.get(wsData.remoteSlaveId);
+                    // This message comes FROM the slave, so use wsData.slaveId
+                    if (wsData.slaveId) {
+                        const session = remoteSessions.get(wsData.slaveId);
                         if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-                            session.masterWs.send(JSON.stringify({
-                                type: 'quix-sync-completed',
-                                payload
-                            }));
+                            session.masterWs.send(JSON.stringify({type: 'quix-sync-completed', payload}));
+                            console.log(`Sync completed forwarded to master for slave ${wsData.slaveId}`);
                         }
                     }
                     break;
@@ -518,13 +517,24 @@ export function createWebSocketRouter() {
                 case 'quix-sync-error': {
                     // Slave sends sync error - forward to master
                     const wsData = getWSData(ws);
-                    if (wsData.remoteSlaveId) {
-                        const session = remoteSessions.get(wsData.remoteSlaveId);
+                    // This message comes FROM the slave, so use wsData.slaveId
+                    if (wsData.slaveId) {
+                        const session = remoteSessions.get(wsData.slaveId);
                         if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-                            session.masterWs.send(JSON.stringify({
-                                type: 'quix-sync-error',
-                                payload
-                            }));
+                            session.masterWs.send(JSON.stringify({type: 'quix-sync-error', payload}));
+                        }
+                    }
+                    break;
+                }
+
+                case 'quix-sync-progress-update': {
+                    // Slave sends progress updates - forward to master
+                    const wsData = getWSData(ws);
+                    // This message comes FROM the slave, forward to master
+                    if (wsData.slaveId) {
+                        const session = remoteSessions.get(wsData.slaveId);
+                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                            session.masterWs.send(JSON.stringify({type: 'quix-sync-progress-update', payload}));
                         }
                     }
                     break;
