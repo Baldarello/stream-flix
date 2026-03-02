@@ -5,7 +5,7 @@
 
 // Note: Using 'any' for WebSocket types to avoid complex TypeScript type
 // instantiation issues with ElysiaWS. The runtime behavior is unchanged.
-import type { ElysiaWS } from '@elysiajs/websocket';
+import type {ElysiaWS} from '@elysiajs/websocket';
 
 // ============================================================================
 // TypeScript Interfaces
@@ -77,8 +77,8 @@ function generateShortCode(): string {
 function broadcastToRoom(roomId: string, data: string, excludeClient?: any): void {
     const room = rooms.get(roomId);
     if (!room) return;
-    
-    room.players.forEach(({ ws: client }) => {
+
+    room.players.forEach(({ws: client}) => {
         if (client !== excludeClient && (client as any).raw?.readyState === 1) {
             (client as any).send(data);
         }
@@ -89,18 +89,18 @@ function broadcastRoomState(roomId: string): void {
     const room = rooms.get(roomId);
     if (!room) return;
 
-    room.players.forEach(({ ws: clientWs }, clientId) => {
+    room.players.forEach(({ws: clientWs}, clientId) => {
         const payload = {
             roomId: room.id,
             hostId: room.hostId,
-            participants: Array.from(room.players.values()).map(p => ({ id: p.id, name: p.name })),
+            participants: Array.from(room.players.values()).map(p => ({id: p.id, name: p.name})),
             selectedMedia: room.gameState?.selectedMedia,
             playbackState: room.gameState?.playbackState,
             chatHistory: room.gameState?.chatHistory,
             isHost: clientId === room.hostId,
         };
         if ((clientWs as any).raw?.readyState === 1) {
-            (clientWs as any).send(JSON.stringify({ type: 'quix-room-update', payload }));
+            (clientWs as any).send(JSON.stringify({type: 'quix-room-update', payload}));
         }
     });
 }
@@ -130,7 +130,7 @@ function sendError(ws: any, message: string): void {
     try {
         ws.send(JSON.stringify({
             type: 'quix-error',
-            payload: { message }
+            payload: {message}
         }));
     } catch {
         // Ignore send errors during cleanup
@@ -153,11 +153,16 @@ function handleDisconnectQuix(ws: any): void {
             console.log(`Master disconnected from slave ${wsData.remoteSlaveId}`);
         }
     }
-    
+
     if (wsData.slaveId && remoteSessions.has(wsData.slaveId)) {
         const session = remoteSessions.get(wsData.slaveId);
-        if (session?.masterWs && (session.masterWs as unknown as { raw: { readyState: number } }).raw.readyState === 1) {
-            (session.masterWs as unknown as { send: (data: string) => void }).send(JSON.stringify({ type: 'quix-error', payload: { message: 'The TV has disconnected.' } }));
+        if (session?.masterWs && (session.masterWs as unknown as {
+            raw: { readyState: number }
+        }).raw.readyState === 1) {
+            (session.masterWs as unknown as { send: (data: string) => void }).send(JSON.stringify({
+                type: 'quix-error',
+                payload: {message: 'The TV has disconnected.'}
+            }));
         }
         for (const [, progress] of mediaSyncProgress.entries()) {
             if (progress.status === 'in_progress') {
@@ -182,7 +187,7 @@ function handleDisconnectQuix(ws: any): void {
     if (wsData.roomId && rooms.has(wsData.roomId)) {
         const room = rooms.get(wsData.roomId);
         if (!room) return;
-        
+
         const wasHost = wsData.userName === room.hostId;
         room.players.delete(wsData.userName!);
 
@@ -208,7 +213,7 @@ function handleDisconnectQuix(ws: any): void {
 // ============================================================================
 
 export function createWebSocketRouter() {
-    return function(ws: any, message: unknown): void {
+    return function (ws: any, message: unknown): void {
         // Initialize userName if not set
         const wsData = getWSData(ws);
         if (!wsData.userName) {
@@ -218,7 +223,7 @@ export function createWebSocketRouter() {
         try {
             // Handle message parsing
             let parsedMessage: { type: string; payload?: unknown };
-            
+
             if (typeof message === 'string') {
                 parsedMessage = JSON.parse(message);
             } else if (typeof message === 'object' && message !== null) {
@@ -227,7 +232,7 @@ export function createWebSocketRouter() {
                 return sendError(ws, 'Invalid message format');
             }
 
-            const { type, payload } = parsedMessage;
+            const {type, payload} = parsedMessage;
             const room = wsData.roomId ? rooms.get(wsData.roomId) : null;
             const isHost = room && wsData.userName === room.hostId;
 
@@ -244,10 +249,10 @@ export function createWebSocketRouter() {
                     const newRoom: Room = {
                         id: roomId,
                         hostId: wsData.userName!,
-                        players: new Map([[wsData.userName!, { id: wsData.userName!, ws, name: typedPayload.username }]]),
+                        players: new Map([[wsData.userName!, {id: wsData.userName!, ws, name: typedPayload.username}]]),
                         gameState: {
                             selectedMedia: typedPayload.media,
-                            playbackState: { status: 'paused', time: 0 },
+                            playbackState: {status: 'paused', time: 0},
                             chatHistory: [],
                         },
                     };
@@ -256,7 +261,7 @@ export function createWebSocketRouter() {
                     broadcastRoomState(roomId);
                     break;
                 }
-                    
+
                 case 'quix-join-room': {
                     const typedPayload = payload as { roomId?: string; username?: string };
                     const roomId = typedPayload?.roomId;
@@ -277,17 +282,17 @@ export function createWebSocketRouter() {
                     }
 
                     setWSData(ws, 'roomId', roomId);
-                    roomToJoin.players.set(wsData.userName!, { id: wsData.userName!, ws, name: username });
+                    roomToJoin.players.set(wsData.userName!, {id: wsData.userName!, ws, name: username});
                     console.log(`User ${username} (${wsData.userName}) joined room ${roomId}`);
                     broadcastRoomState(roomId);
                     break;
                 }
-                    
+
                 case 'quix-leave-room': {
                     if (room) handleDisconnectQuix(ws);
                     break;
                 }
-                    
+
                 case 'quix-playback-control': {
                     const typedPayload = payload as { playbackState?: unknown };
                     if (isHost && room && typedPayload?.playbackState) {
@@ -295,19 +300,19 @@ export function createWebSocketRouter() {
                         room.gameState.playbackState = typedPayload.playbackState;
                         const updateMessage = JSON.stringify({
                             type: 'quix-playback-update',
-                            payload: { playbackState: room.gameState.playbackState }
+                            payload: {playbackState: room.gameState.playbackState}
                         });
-                        room.players.forEach(({ ws: client }) => {
+                        room.players.forEach(({ws: client}) => {
                             if (client.raw.readyState === 1) client.send(updateMessage);
                         });
                     }
                     break;
                 }
-                    
+
                 case 'quix-chat-message': {
                     const typedPayload = payload as { message?: { text?: string; image?: string } };
                     if (room && typedPayload?.message) {
-                        room.gameState = room.gameState || { chatHistory: [] };
+                        room.gameState = room.gameState || {chatHistory: []};
                         const sender = room.players.get(wsData.userName!);
                         const chatMessage = {
                             id: generateId('msg'),
@@ -322,7 +327,7 @@ export function createWebSocketRouter() {
                     }
                     break;
                 }
-                    
+
                 case 'quix-transfer-host': {
                     const typedPayload = payload as { newHostId?: string };
                     const newHostId = typedPayload?.newHostId;
@@ -333,7 +338,7 @@ export function createWebSocketRouter() {
                     }
                     break;
                 }
-                    
+
                 case 'quix-kick-player': {
                     const typedPayload = payload as { playerId?: string };
                     const playerId = typedPayload?.playerId;
@@ -342,35 +347,35 @@ export function createWebSocketRouter() {
                         if (targetPlayer && targetPlayer.ws !== ws) {
                             (targetPlayer.ws as any).send(JSON.stringify({
                                 type: 'quix-error',
-                                payload: { message: 'You have been kicked by the host.' }
+                                payload: {message: 'You have been kicked by the host.'}
                             }));
                             handleDisconnectQuix(targetPlayer.ws);
                         }
                     }
                     break;
                 }
-                    
+
                 case 'quix-register-slave': {
                     const typedPayload = payload as { slaveId?: string };
                     const persistentId = typedPayload?.slaveId || wsData.userName;
                     if (!persistentId) return;
-                    
+
                     setWSData(ws, 'slaveId', persistentId);
 
                     const shortCode = generateShortCode();
                     shortCodeToSlaveId.set(shortCode, persistentId);
                     setWSData(ws, 'shortCode', shortCode);
 
-                    remoteSessions.set(persistentId, { slaveWs: ws, masterWs: null });
+                    remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
 
                     ws.send(JSON.stringify({
                         type: 'quix-slave-registered',
-                        payload: { slaveId: persistentId, shortCode }
+                        payload: {slaveId: persistentId, shortCode}
                     }));
                     console.log(`Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
                     break;
                 }
-                    
+
                 case 'quix-register-master': {
                     let fullSlaveId = (payload as { slaveId?: string })?.slaveId;
                     if (fullSlaveId && shortCodeToSlaveId.has(fullSlaveId.toUpperCase())) {
@@ -382,42 +387,45 @@ export function createWebSocketRouter() {
                     if (session) {
                         session.masterWs = ws;
                         setWSData(ws, 'remoteSlaveId', fullSlaveId);
-                        ws.send(JSON.stringify({ type: 'quix-master-connected' }));
+                        ws.send(JSON.stringify({type: 'quix-master-connected'}));
                         if (session.slaveWs?.raw.readyState === 1) {
-                            session.slaveWs.send(JSON.stringify({ type: 'quix-master-connected' }));
+                            session.slaveWs.send(JSON.stringify({type: 'quix-master-connected'}));
                         }
                         console.log(`Master connected to slave ${fullSlaveId}`);
                     }
                     break;
                 }
-                    
+
                 case 'quix-remote-command': {
-                    const typedPayload = payload as { slaveId?: string };
+                    const typedPayload = payload as { slaveId?: string; command?: string };
                     const slaveId = typedPayload?.slaveId;
+                    const command = typedPayload?.command;
+
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
                         if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                            // Forward the command to the master
                             session.masterWs.send(JSON.stringify({
                                 type: 'quix-remote-command-received',
-                                payload
+                                payload: typedPayload
                             }));
                         }
                     }
                     break;
                 }
-                    
+
                 case 'quix-slave-status-update': {
                     const typedPayload = payload as { slaveId?: string };
                     const slaveId = typedPayload?.slaveId;
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
                         if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-                            session.masterWs.send(JSON.stringify({ type: 'quix-slave-status-update', payload }));
+                            session.masterWs.send(JSON.stringify({type: 'quix-slave-status-update', payload}));
                         }
                     }
                     break;
                 }
-                    
+
                 case 'quix-select-media': {
                     const typedPayload = payload as { media?: unknown };
                     if (isHost && room && typedPayload?.media) {
@@ -428,7 +436,7 @@ export function createWebSocketRouter() {
                     }
                     break;
                 }
-                    
+
                 case 'quix-change-room-code': {
                     if (isHost && room) {
                         const oldRoomId = wsData.roomId!;
@@ -447,7 +455,70 @@ export function createWebSocketRouter() {
                     }
                     break;
                 }
-                    
+
+                case 'ping': {
+                    // Respond with pong to keep connection alive
+                    ws.send(JSON.stringify({type: 'pong'}));
+                    break;
+                }
+
+                case 'quix-sync-media-request': {
+                    // Master sends media sync request to slave
+                    const typedPayload = payload as { slaveId?: string; mediaItems?: unknown[] };
+                    const slaveId = typedPayload?.slaveId;
+                    if (slaveId) {
+                        const session = remoteSessions.get(slaveId);
+                        if (session?.slaveWs && session.slaveWs.raw.readyState === 1) {
+                            session.slaveWs.send(JSON.stringify({
+                                type: 'quix-sync-media-request',
+                                payload: typedPayload
+                            }));
+                            console.log(`Media sync request forwarded to slave ${slaveId}`);
+                        } else {
+                            ws.send(JSON.stringify({
+                                type: 'quix-sync-error',
+                                payload: {error: 'Slave not connected'}
+                            }));
+                        }
+                    }
+                    break;
+                }
+
+                case 'quix-sync-completed': {
+                    // Slave sends sync completed - forward to master
+                    const wsData = getWSData(ws);
+                    if (wsData.remoteSlaveId) {
+                        const session = remoteSessions.get(wsData.remoteSlaveId);
+                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-sync-completed',
+                                payload
+                            }));
+                        }
+                    }
+                    break;
+                }
+
+                case 'quix-sync-error': {
+                    // Slave sends sync error - forward to master
+                    const wsData = getWSData(ws);
+                    if (wsData.remoteSlaveId) {
+                        const session = remoteSessions.get(wsData.remoteSlaveId);
+                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-sync-error',
+                                payload
+                            }));
+                        }
+                    }
+                    break;
+                }
+
+                case 'pong': {
+                    // Client responding to server ping - no action needed, connection is alive
+                    break;
+                }
+
                 default:
                     console.warn(`Unknown message type: ${type}`);
             }
@@ -464,7 +535,7 @@ export function createWebSocketRouter() {
 
 export function handleWSClose(ws: ElysiaWS): void {
     const wsData = getWSData(ws);
-    
+
     if (wsData.slaveId) {
         handleDisconnectQuix(ws);
     } else {
@@ -480,7 +551,7 @@ export function handleWSClose(ws: ElysiaWS): void {
         room.players.delete(wsData.userName!);
         console.log(`Client ${playerInfo?.name || wsData.userName} disconnected from room ${wsData.roomId}.`);
 
-        broadcastToRoom(wsData.roomId!, JSON.stringify({ type: 'user-left', payload: { user: wsData.userName } }));
+        broadcastToRoom(wsData.roomId!, JSON.stringify({type: 'user-left', payload: {user: wsData.userName}}));
 
         if (room.players.size === 0) {
             rooms.delete(wsData.roomId!);
@@ -496,9 +567,9 @@ export function handleWSClose(ws: ElysiaWS): void {
                 if (lastState && Array.isArray((lastState as Record<string, unknown>).players)) {
                     const updatedPlayers = ((lastState as Record<string, unknown>).players as Record<string, unknown>[])
                         .filter((p: Record<string, unknown>) => p.id !== wsData.userName)
-                        .map((p: Record<string, unknown>) => ({ ...p, isHost: p.id === newHostId }));
+                        .map((p: Record<string, unknown>) => ({...p, isHost: p.id === newHostId}));
 
-                    room.gameState = { ...lastState, players: updatedPlayers };
+                    room.gameState = {...lastState, players: updatedPlayers};
 
                     const updateMessage = JSON.stringify({
                         type: 'game-state-update',
@@ -515,4 +586,4 @@ export function handleWSClose(ws: ElysiaWS): void {
 // Exports
 // ============================================================================
 
-export { rooms, remoteSessions, mediaSyncProgress };
+export {rooms, remoteSessions, mediaSyncProgress};

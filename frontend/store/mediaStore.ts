@@ -1919,11 +1919,43 @@ class MediaStore {
             case 'quix-error': this.watchTogetherError = payload.message; break;
             case 'quix-remote-command-received': this.handleRemoteCommand(payload); break;
             case 'quix-slave-status-update': this.remoteSlaveState = payload; break;
+            case 'quix-sync-media-request':
+                // Master sent media items to sync to slave
+                if (payload?.mediaItems && Array.isArray(payload.mediaItems)) {
+                    this.syncMediaFromMaster(payload.mediaItems);
+                }
+                break;
+            case 'quix-sync-completed':
+                // Sync completed notification
+                this.showSnackbar('notifications.syncCompleted', 'success', true);
+                break;
+            case 'quix-sync-error':
+                this.showSnackbar(payload?.error || 'Sync failed', 'error', true);
+                break;
         }
     }); };
     sendPlaybackControl = (state: PlaybackState) => { if (this.roomId) { websocketService.sendMessage({ type: 'quix-playback-control', payload: { playbackState: state } }); } };
     addPlaybackListener = (listener: (state: PlaybackState) => void) => { this.playbackListeners.push(listener); return () => { this.playbackListeners = this.playbackListeners.filter(l => l !== listener); }; };
     sendChatMessage = (message: { text?: string; image?: string; }) => { websocketService.sendMessage({ type: 'quix-chat-message', payload: { message } }); };
+    
+    // Sync media items from master to slave
+    syncMediaFromMaster = async (mediaItems: any[]) => {
+        try {
+            const { db } = await import('../services/db.ts');
+            // Save each media item to cachedItems
+            await db.cachedItems.bulkPut(mediaItems);
+            // Add each item to myList
+            for (const item of mediaItems) {
+                await db.myList.put({ id: item.id });
+            }
+            this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
+            // Send completion notification back to master
+            websocketService.sendMessage({ type: 'quix-sync-completed' });
+        } catch (error) {
+            console.error('Error syncing media from master:', error);
+            websocketService.sendMessage({ type: 'quix-sync-error', payload: { error: 'Failed to sync media' } });
+        }
+    };
     transferHost = (newHostId: string) => { websocketService.sendMessage({ type: 'quix-transfer-host', payload: { newHostId } }); };
 }
 export const mediaStore = new MediaStore();
