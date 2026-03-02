@@ -5,7 +5,6 @@
 
 // Note: Using 'any' for WebSocket types to avoid complex TypeScript type
 // instantiation issues with ElysiaWS. The runtime behavior is unchanged.
-import type {ElysiaWS} from '@elysiajs/websocket';
 
 // ============================================================================
 // TypeScript Interfaces
@@ -74,16 +73,6 @@ function generateShortCode(): string {
     return code;
 }
 
-function broadcastToRoom(roomId: string, data: string, excludeClient?: any): void {
-    const room = rooms.get(roomId);
-    if (!room) return;
-
-    room.players.forEach(({ws: client}) => {
-        if (client !== excludeClient && (client as any).raw?.readyState === 1) {
-            (client as any).send(data);
-        }
-    });
-}
 
 function broadcastRoomState(roomId: string): void {
     const room = rooms.get(roomId);
@@ -164,7 +153,7 @@ function handleDisconnectQuix(ws: any): void {
                 payload: {message: 'The TV has disconnected.'}
             }));
         }
-        for (const [, progress] of mediaSyncProgress.entries()) {
+        for (const [, progress] of Array.from(mediaSyncProgress.entries())) {
             if (progress.status === 'in_progress') {
                 progress.status = 'failed';
             }
@@ -177,7 +166,7 @@ function handleDisconnectQuix(ws: any): void {
     }
 
     if (wsData.remoteSlaveId) {
-        for (const [, progress] of mediaSyncProgress.entries()) {
+        for (const [, progress] of Array.from(mediaSyncProgress.entries())) {
             if (progress.status === 'in_progress') {
                 progress.status = 'failed';
             }
@@ -555,58 +544,7 @@ export function createWebSocketRouter() {
     };
 }
 
-// ============================================================================
-// WebSocket Close Handler
-// ============================================================================
 
-export function handleWSClose(ws: ElysiaWS): void {
-    const wsData = getWSData(ws);
-
-    if (wsData.slaveId) {
-        handleDisconnectQuix(ws);
-    } else {
-        if (!wsData.roomId || !rooms.has(wsData.roomId)) {
-            console.log(`Client ${wsData.userName} disconnected (not in a room).`);
-            return;
-        }
-
-        const room = rooms.get(wsData.roomId)!;
-        const playerInfo = room.players.get(wsData.userName!);
-        const wasHost = wsData.userName === room.hostId;
-
-        room.players.delete(wsData.userName!);
-        console.log(`Client ${playerInfo?.name || wsData.userName} disconnected from room ${wsData.roomId}.`);
-
-        broadcastToRoom(wsData.roomId!, JSON.stringify({type: 'user-left', payload: {user: wsData.userName}}));
-
-        if (room.players.size === 0) {
-            rooms.delete(wsData.roomId!);
-            console.log(`Room ${wsData.roomId} is empty, deleted.`);
-        } else if (wasHost) {
-            const newHostResult = room.players.keys().next();
-            const newHostId = newHostResult.value;
-            if (newHostId) {
-                room.hostId = newHostId;
-                console.log(`Host disconnected. New host for room ${wsData.roomId} is ${newHostId}.`);
-
-                const lastState = room.gameState;
-                if (lastState && Array.isArray((lastState as Record<string, unknown>).players)) {
-                    const updatedPlayers = ((lastState as Record<string, unknown>).players as Record<string, unknown>[])
-                        .filter((p: Record<string, unknown>) => p.id !== wsData.userName)
-                        .map((p: Record<string, unknown>) => ({...p, isHost: p.id === newHostId}));
-
-                    room.gameState = {...lastState, players: updatedPlayers};
-
-                    const updateMessage = JSON.stringify({
-                        type: 'game-state-update',
-                        payload: room.gameState
-                    });
-                    broadcastToRoom(wsData.roomId!, updateMessage);
-                }
-            }
-        }
-    }
-}
 
 // ============================================================================
 // Exports

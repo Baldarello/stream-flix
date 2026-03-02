@@ -80,17 +80,16 @@ const app = new Elysia({
                 method: request.method,
                 headers: {
                     'Host': 'localhost:5173',
-                    ...Object.fromEntries(
-                        Array.from(request.headers.entries()).filter(
-                            ([key]) => !['host', 'connection'].includes(key.toLowerCase())
-                        )
-                    ),
                 },
                 body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined,
             });
 
             set.status = response.status;
-            set.headers = Object.fromEntries(response.headers.entries());
+            const headers: Record<string, string> = {};
+            response.headers.forEach((value, key) => {
+                headers[key] = value;
+            });
+            set.headers = headers;
 
             return await response.text();
         } catch (error) {
@@ -129,7 +128,7 @@ const heartbeatInterval = setInterval(() => {
     })?.ws;
     if (!wsServer?.clients) return;
 
-    for (const ws of wsServer.clients) {
+    for (const ws of Array.from(wsServer.clients)) {
         if (ws.isAlive === false) {
             console.log('Terminating dead WebSocket connection');
             ws.terminate?.();
