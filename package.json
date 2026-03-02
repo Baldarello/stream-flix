@@ -15,8 +15,8 @@
     "build:frontend": "vite build",
     "build:backend": "npm run build --workspace=backend",
     "docker:build": "docker build -t stream-flix:latest .",
-    "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
+    "docker:up": "docker-compose --profile prod up -d",
+    "docker:down": "docker-compose --profile prod down",
     "docker:dev": "docker-compose --profile dev up -d"
   }
 

@@ -1,19 +1,26 @@
 # Backend Development Dockerfile
-FROM node:20-alpine
+FROM oven/bun:1.2-alpine
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S streamflix -u 1001 -G nodejs
 
 WORKDIR /app/backend
 
-# Copy backend package files
-COPY backend/package.json backend/package-lock.json* ./
+# Copy backend package files and lockfile
+COPY backend/package.json backend/bun.lock* ./
 
 # Install dependencies
-RUN npm ci
+RUN bun install --frozen-lockfile
 
 # Copy backend source
 COPY backend .
 
+# Switch to non-root user
+USER streamflix
+
 # Expose ElysiaJS port
 EXPOSE 3000
 
-# Start with tsx watch for development
-CMD ["npm", "run", "dev"]
+# Start with bun for development (hot-reload via Bun's built-in watch)
+CMD ["bun", "run", "src/index.ts"]
