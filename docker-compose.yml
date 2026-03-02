@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Frontend development service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - VITE_WS_URL=ws://localhost:3000/ws
+      - VITE_API_URL=http://localhost:3000
+    command: npm run dev
+    profiles:
+      - dev
+
+  # Backend development service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - WS_HEARTBEAT_INTERVAL=30000
+      - WS_HEARTBEAT_TIMEOUT=60000
+    command: npm run dev --prefix backend
+    profiles:
+      - dev
+
+  # Production service (combined frontend + backend)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - WS_HEARTBEAT_INTERVAL=30000
+      - WS_HEARTBEAT_TIMEOUT=60000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    name: stream-flix-network
