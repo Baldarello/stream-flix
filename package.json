@@ -1,33 +1,23 @@
-
 {
-  "name": "quix",
+  "name": "stream-flix",
   "private": true,
-  "version": "0.0.1",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "Stream-Flix - Video streaming with watch together functionality",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "@mui/material": "7.2.0",
-    "@mui/icons-material": "7.2.0",
-    "@emotion/react": "11.14.0",
-    "@emotion/styled": "11.14.1",
-    "axios": "1.6.8",
-    "mobx": "6.13.1",
-    "mobx-react-lite": "4.0.7",
-    "react-dom": "^18.2.0",
-    "react-router": "^6.25.1",
-    "dexie": "4.0.1-beta.2",
-    "html5-qrcode": "^2.3.8",
-    "dexie-observable": "^4.0.1-beta.2"
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "install:be": "cd backend && bun install ",
+    "install:fe": "cd frontend && bun install",
+    "dev:be": "cd backend && bun run dev",
+    "dev:fe": "cd frontend && bun run dev",
+    "build:frontend": "vite build",
+    "build:backend": "npm run build --workspace=backend",
+    "docker:build": "docker build -t stream-flix:latest .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:dev": "docker-compose --profile dev up -d"
   }
+
 }
