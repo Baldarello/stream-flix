@@ -35,7 +35,6 @@ interface MediaSyncItem {
     name?: string;
     media_type: 'movie' | 'tv';
     poster_path: string;
-    estimatedSize: number; // in MB
     selected: boolean;
 }
 
@@ -88,90 +87,71 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         setSyncError(null);
 
         try {
-            // Get media from various sources - movies, series, anime
-            const allMedia: MediaSyncItem[] = [];
+            const {db} = await import('../services/db.ts');
 
-            // Add movies
-            if (mediaStore.latestMovies) {
-                mediaStore.latestMovies.forEach((item: MediaItem) => {
-                    allMedia.push({
+            // 1. Load IDs from db.myList
+            const listItems = await db.myList.toArray();
+            const ids = listItems.map((item: { id: number }) => item.id);
+
+            // 2. Fetch full MediaItem objects from db.cachedItems
+            const cachedItems: MediaItem[] = await db.cachedItems.where('id').anyOf(ids).toArray();
+
+            // 3. Filter to only items that have at least one configured link
+            const itemsWithLinks: MediaSyncItem[] = [];
+
+            for (const item of cachedItems) {
+                let hasLink = false;
+
+                if (item.media_type === 'movie') {
+                    // Check in-memory store first
+                    if (mediaStore.mediaLinks.size > 0) {
+                        hasLink = mediaStore.mediaLinks.has(item.id);
+                    } else {
+                        // Fall back to DB check
+                        const count = await db.mediaLinks.where('mediaId').equals(item.id).count();
+                        hasLink = count > 0;
+                    }
+                } else if (item.media_type === 'tv') {
+                    // Check if any episode in any season has a link
+                    if (item.seasons && item.seasons.length > 0) {
+                        outer: for (const season of item.seasons) {
+                            for (const episode of season.episodes) {
+                                if (mediaStore.mediaLinks.size > 0) {
+                                    if (mediaStore.mediaLinks.has(episode.id)) {
+                                        hasLink = true;
+                                        break outer;
+                                    }
+                                } else {
+                                    // Fall back to DB check
+                                    const count = await db.mediaLinks.where('mediaId').equals(episode.id).count();
+                                    if (count > 0) {
+                                        hasLink = true;
+                                        break outer;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (hasLink) {
+                    itemsWithLinks.push({
                         id: item.id,
                         title: item.title || item.name || 'Unknown',
                         name: item.name,
                         media_type: item.media_type,
                         poster_path: item.poster_path || '',
-                        estimatedSize: Math.floor(Math.random() * 500) + 100, // Random size for demo
-                        selected: false,
-                    });
-                });
-            }
-
-            // Add series
-            if (mediaStore.topSeries) {
-                mediaStore.topSeries.forEach((item: MediaItem) => {
-                    allMedia.push({
-                        id: item.id,
-                        title: item.title || item.name || 'Unknown',
-                        name: item.name,
-                        media_type: item.media_type,
-                        poster_path: item.poster_path || '',
-                        estimatedSize: Math.floor(Math.random() * 1000) + 200,
-                        selected: false,
-                    });
-                });
-            }
-
-            // Add anime
-            if (mediaStore.popularAnime) {
-                mediaStore.popularAnime.forEach((item: MediaItem) => {
-                    allMedia.push({
-                        id: item.id,
-                        title: item.title || item.name || 'Unknown',
-                        name: item.name,
-                        media_type: item.media_type,
-                        poster_path: item.poster_path || '',
-                        estimatedSize: Math.floor(Math.random() * 800) + 150,
-                        selected: false,
-                    });
-                });
-            }
-
-            // Add items from myList
-            const myListItems = await getMyListItems();
-            myListItems.forEach((item) => {
-                if (!allMedia.find(m => m.id === item.id)) {
-                    allMedia.push({
-                        id: item.id,
-                        title: item.title || item.name || 'Unknown',
-                        name: item.name,
-                        media_type: item.media_type,
-                        poster_path: item.poster_path || '',
-                        estimatedSize: Math.floor(Math.random() * 600) + 100,
                         selected: false,
                     });
                 }
-            });
+            }
 
-            setMediaItems(allMedia);
+            setMediaItems(itemsWithLinks);
         } catch (error) {
             console.error('Error loading media:', error);
             setSyncError('Failed to load media library');
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    // Helper to get myList items from IndexedDB
-    const getMyListItems = async (): Promise<MediaItem[]> => {
-        try {
-            const {db} = await import('../services/db.ts');
-            const listItems = await db.myList.toArray();
-            // Fetch actual MediaItems from cachedItems using the IDs from myList
-            const ids = listItems.map(item => item.id);
-            const mediaItems = await db.cachedItems.where('id').anyOf(ids).toArray();
-            return mediaItems;
-        } catch {
-            return [];
         }
     };
 
@@ -186,26 +166,51 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
     };
 
     const selectedItems = useMemo(() => mediaItems.filter(item => item.selected), [mediaItems]);
-    const totalSize = useMemo(() => selectedItems.reduce((sum, item) => sum + item.estimatedSize, 0), [selectedItems]);
 
-    const handleStartSync = () => {
+    const handleStartSync = async () => {
         if (selectedItems.length === 0) return;
 
         setSyncProgress({current: 0, total: selectedItems.length});
         setSyncComplete(false);
         setSyncError(null);
 
+        const {db} = await import('../services/db.ts');
+
+        // Build the full payload: for each selected item, include the MediaItem + all its links
+        const itemsWithLinks = await Promise.all(
+            selectedItems.map(async (item) => {
+                // Get the full cached MediaItem
+                const fullItem = await db.cachedItems.get(item.id);
+
+                // Get all links for this item
+                let links: any[] = [];
+                if (item.media_type === 'movie') {
+                    links = await db.mediaLinks.where('mediaId').equals(item.id).toArray();
+                } else {
+                    // For TV shows, get links for all episodes
+                    if (fullItem?.seasons) {
+                        for (const season of fullItem.seasons) {
+                            for (const episode of season.episodes) {
+                                const epLinks = await db.mediaLinks.where('mediaId').equals(episode.id).toArray();
+                                links.push(...epLinks);
+                            }
+                        }
+                    }
+                }
+
+                return {
+                    mediaItem: fullItem || item,
+                    links,
+                };
+            })
+        );
+
         // Send sync request to the slave via WebSocket
         websocketService.sendMessage({
             type: 'quix-sync-media-request',
             payload: {
                 slaveId: slaveId,
-                mediaItems: selectedItems.map(item => ({
-                    id: item.id,
-                    title: item.title,
-                    media_type: item.media_type,
-                    poster_path: item.poster_path,
-                })),
+                mediaItems: itemsWithLinks,
             },
         });
     };
@@ -214,13 +219,6 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         if (!syncProgress) {
             onClose();
         }
-    };
-
-    const formatSize = (mb: number): string => {
-        if (mb >= 1000) {
-            return `${(mb / 1000).toFixed(1)} GB`;
-        }
-        return `${mb} MB`;
     };
 
     const getMediaTypeIcon = (type: 'movie' | 'tv') => {
@@ -321,9 +319,6 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
                                 <Typography variant="body2" color="text.secondary">
                                     {selectedItems.length} selezionati
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    Dimensione totale: {formatSize(totalSize)}
-                                </Typography>
                             </Box>
                         </Box>
 
@@ -373,9 +368,6 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
                                                 size="small"
                                                 sx={{height: 20, fontSize: '0.7rem'}}
                                             />
-                                            <Typography variant="caption" color="text.secondary">
-                                                {formatSize(item.estimatedSize)}
-                                            </Typography>
                                         </Box>
                                         <FormControlLabel
                                             control={
@@ -416,7 +408,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
                         disabled={selectedItems.length === 0}
                         startIcon={<CloudSyncIcon/>}
                     >
-                        Sync ({selectedItems.length}) - {formatSize(totalSize)}
+                        Sync ({selectedItems.length})
                     </Button>
                 </DialogActions>
             )}

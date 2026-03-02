@@ -2151,20 +2151,35 @@ class MediaStore {
     syncMediaFromMaster = async (mediaItems: any[]) => {
         try {
             const {db} = await import('../services/db.ts');
-            // Save each media item to cachedItems
-            await db.cachedItems.bulkPut(mediaItems);
-            // Add each item to myList with order field for proper ordering
+
             for (let i = 0; i < mediaItems.length; i++) {
-                await db.myList.put({id: mediaItems[i].id, order: Date.now() + i});
+                const {mediaItem, links} = mediaItems[i];
+
+                // Save the full media item metadata
+                await db.cachedItems.put(mediaItem);
+
+                // Add to myList
+                await db.myList.put({id: mediaItem.id, order: Date.now() + i});
+
+                // Save all links (strip the id field to let IndexedDB auto-assign)
+                if (links && links.length > 0) {
+                    const linksToSave = links.map(({id: _id, ...link}: any) => link);
+                    await db.mediaLinks.bulkPut(linksToSave);
+                }
+
                 // Send progress update back to master
                 websocketService.sendMessage({
                     type: 'quix-sync-progress-update',
                     payload: {completed: i + 1, total: mediaItems.length}
                 });
             }
+
             this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
-            // Send completion notification back to master
             websocketService.sendMessage({type: 'quix-sync-completed'});
+
+            // Reload the local data so the slave's UI reflects the new content
+            await this.loadPersistedData();
+
         } catch (error) {
             console.error('Error syncing media from master:', error);
             websocketService.sendMessage({type: 'quix-sync-error', payload: {error: 'Failed to sync media'}});
