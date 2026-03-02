@@ -45,7 +45,7 @@ COPY backend/package.json backend/bun.lock* ./
 RUN bun install --frozen-lockfile --production
 
 # Stage 4: Production runtime
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
