@@ -1,10 +1,8 @@
-import { readFileSync, existsSync } from 'fs';
-import { Elysia } from 'elysia';
-import { cors } from '@elysiajs/cors';
-import { staticPlugin } from '@elysiajs/static';
-import { createWebSocketRouter } from './wss.js';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import {Elysia} from 'elysia';
+import {cors} from '@elysiajs/cors';
+import {createWebSocketRouter} from './wss.js';
+import {fileURLToPath} from 'url';
+import {dirname} from 'path';
 
 // Get __dirname equivalent in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -18,28 +16,12 @@ const PORT = parseInt(process.env.PORT || '3000');
 const WS_HEARTBEAT_INTERVAL = parseInt(process.env.WS_HEARTBEAT_INTERVAL || '30000');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Path to the frontend dist directory (root/frontend/dist)
-const DIST_PATH = join(__dirname, '..', '..', 'frontend', 'dist');
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
-function validateFrontendBuild(): void {
-    const frontendIndexPath = join(DIST_PATH, 'index.html');
-    if (!existsSync(frontendIndexPath)) {
-        console.warn(`\n⚠️  WARNING: Frontend build not found at ${DIST_PATH}`);
-        console.warn('   The frontend needs to be built before starting the server.');
-        console.warn('   Run: cd frontend && npm run build\n');
-    }
-}
+// Path to the frontend dev server (Vite dev server)
+const FRONTEND_DEV_URL = process.env.FRONTEND_DEV_URL || 'http://localhost:5173';
 
 // ============================================================================
 // Main Application
 // ============================================================================
-
-// Validate frontend build exists at startup
-validateFrontendBuild();
 
 // Create Elysia app with proper configuration
 const app = new Elysia({
@@ -54,15 +36,6 @@ const app = new Elysia({
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
-    }))
-    // Serve static files from the frontend dist directory
-    .use(staticPlugin({
-        assets: DIST_PATH,
-        prefix: '/',
-        indexHTML: false,
-        headers: {
-            'Cache-Control': 'public, max-age=31536000',
-        },
     }))
     // Health check endpoint
     .get('/health', () => ({
@@ -86,11 +59,11 @@ const app = new Elysia({
         open(ws: unknown) {
             const socket = ws as { id: string; send: (data: string) => void };
             console.log(`WebSocket client connected: ${socket.id}`);
-            
+
             // Send welcome message
             socket.send(JSON.stringify({
                 type: 'connected',
-                payload: { message: 'Connected to Stream-Flix WebSocket server' }
+                payload: {message: 'Connected to Stream-Flix WebSocket server'}
             }));
         },
         close(ws: unknown) {
@@ -102,57 +75,52 @@ const app = new Elysia({
             console.error(`WebSocket error for ${socket.id}`);
         },
     })
-    // Serve index.html for root path
-    .get('/', async ({ set }) => {
-        const indexPath = join(DIST_PATH, 'index.html');
+    // Proxy all other requests to frontend dev server
+    .get('/*', async ({request, set}) => {
         try {
-            if (!existsSync(indexPath)) {
-                set.status = 404;
-                return 'Frontend not found. Please build the frontend first.';
-            }
-            const indexContent = readFileSync(indexPath, 'utf-8');
-            set.headers['Content-Type'] = 'text/html';
-            return indexContent;
+            const url = new URL(request.url);
+            const targetUrl = `${FRONTEND_DEV_URL}${url.pathname}${url.search}`;
+
+            const response = await fetch(targetUrl, {
+                method: request.method,
+                headers: {
+                    'Host': 'localhost:5173',
+                    ...Object.fromEntries(
+                        Array.from(request.headers.entries()).filter(
+                            ([key]) => !['host', 'connection'].includes(key.toLowerCase())
+                        )
+                    ),
+                },
+                body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined,
+            });
+
+            set.status = response.status;
+            set.headers = Object.fromEntries(response.headers.entries());
+
+            return await response.text();
         } catch (error) {
-            console.error('Error reading index.html:', error);
-            set.status = 404;
-            return 'Frontend not found. Please build the frontend first.';
-        }
-    })
-    // Catch-all route for SPA
-    .get('/*', async ({ set }) => {
-        const indexPath = join(DIST_PATH, 'index.html');
-        try {
-            if (!existsSync(indexPath)) {
-                set.status = 404;
-                return 'Frontend not found. Please build the frontend first.';
-            }
-            const indexContent = readFileSync(indexPath, 'utf-8');
-            set.headers['Content-Type'] = 'text/html';
-            return indexContent;
-        } catch (error) {
-            console.error('Error reading index.html:', error);
-            set.status = 404;
-            return 'Frontend not found. Please build the frontend first.';
+            console.error('Proxy error:', error);
+            set.status = 502;
+            return 'Frontend dev server not available. Make sure Vite is running on port 5173.';
         }
     })
     // Global error handler
-    .onError(({ code, error, set }) => {
+    .onError(({code, error, set}) => {
         console.error(`[Elysia Error] Code: ${code}, Error:`, error);
-        
+
         switch (code) {
             case 'NOT_FOUND':
                 set.status = 404;
-                return { error: 'Resource not found', code: 'NOT_FOUND' };
+                return {error: 'Resource not found', code: 'NOT_FOUND'};
             case 'VALIDATION':
                 set.status = 400;
-                return { error: 'Invalid input', code: 'VALIDATION' };
+                return {error: 'Invalid input', code: 'VALIDATION'};
             case 'INTERNAL_SERVER_ERROR':
                 set.status = 500;
-                return { error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' };
+                return {error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR'};
             default:
                 set.status = 500;
-                return { error: 'An unexpected error occurred', code };
+                return {error: 'An unexpected error occurred', code};
         }
     });
 
@@ -161,7 +129,9 @@ const app = new Elysia({
 // ============================================================================
 
 const heartbeatInterval = setInterval(() => {
-    const wsServer = (app.server as unknown as { ws?: { clients: Iterable<{ isAlive?: boolean; terminate?: () => void }> } })?.ws;
+    const wsServer = (app.server as unknown as {
+        ws?: { clients: Iterable<{ isAlive?: boolean; terminate?: () => void }> }
+    })?.ws;
     if (!wsServer?.clients) return;
 
     for (const ws of wsServer.clients) {
@@ -204,4 +174,4 @@ app.listen(PORT, () => {
     `);
 });
 
-export { app };
+export {app};
