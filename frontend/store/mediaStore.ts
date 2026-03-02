@@ -2,7 +2,7 @@
 
 import {makeAutoObservable, runInAction, computed, observable} from 'mobx';
 import Dexie from 'dexie';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../../types.ts';
+import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types.ts';
 import type { AlertColor } from '@mui/material';
 import {
     getLatestMovies,
@@ -16,9 +16,9 @@ import {
 import {websocketService}from '../services/websocketService.js';
 import * as driveService from '../services/googleDriveService';
 import {db} from '../services/db';
-import { isSmartTV as detectSmartTV } from '@/frontend/utils/device.ts';
-import { it } from '@/frontend/locales/it.ts';
-import { en } from '@/frontend/locales/en.ts';
+import { isSmartTV as detectSmartTV } from '../utils/device.ts';
+import { it } from '../locales/it.ts';
+import { en } from '../locales/en.ts';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
 export type ThemeName = 'SerieTV' | 'Film' | 'Anime';

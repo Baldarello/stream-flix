@@ -1,12 +1,12 @@
 import React from 'react';
-import type { MediaItem } from '../../types.ts';
+import type { MediaItem } from '../types.ts';
 import { Box, Typography, Button, Stack } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 
 interface HeroProps {
   item: MediaItem;

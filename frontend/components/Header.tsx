@@ -5,8 +5,8 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
-import { mediaStore, ActiveView } from '@/frontend/store/mediaStore.ts';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { mediaStore, ActiveView } from '../store/mediaStore.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveView }[] = [
     { key: 'home', view: 'Home'},

@@ -1,14 +1,14 @@
 
 
 import React, { useRef, useState, useEffect } from 'react';
-import type { MediaItem } from '../../types.ts';
+import type { MediaItem } from '../types.ts';
 import { Card } from './Card.tsx';
 import { Box, Typography, IconButton, Fade } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { observer } from 'mobx-react-lite';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 
 interface ContentRowProps {
   title: string;

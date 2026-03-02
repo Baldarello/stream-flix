@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Box, Typography, Button, IconButton, Tooltip, Paper, List, Accordion, AccordionSummary, AccordionDetails, Stack, ListItemText, TextField, Chip, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -12,8 +12,8 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import type { MediaLink, MediaItem, Season } from '../../types.ts';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import type { MediaLink, MediaItem, Season } from '../types.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 interface ManageLinksViewProps {
     currentSeason: Season;

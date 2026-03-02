@@ -1,5 +1,5 @@
 
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 
 // Helper function to navigate a nested object with a dot-separated string
 const getNestedValue = (obj: any, path: string): string | undefined => {

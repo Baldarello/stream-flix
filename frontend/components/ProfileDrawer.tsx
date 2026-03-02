@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore, ThemeName, Language } from '@/frontend/store/mediaStore.ts';
+import { mediaStore, ThemeName, Language } from '../store/mediaStore.ts';
 import { Drawer, Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Typography, IconButton, ToggleButtonGroup, ToggleButton, colors, Avatar, ListItemAvatar, CircularProgress, Stack, TextField, Tooltip } from '@mui/material';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -21,8 +21,8 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
-import { handleSignIn, handleSignOut } from '../../services/googleAuthService.ts';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { handleSignIn, handleSignOut } from '../services/googleAuthService.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 const ProfileDrawer: React.FC = observer(() => {
     const { 

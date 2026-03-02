@@ -25,9 +25,9 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
 import SyncIcon from '@mui/icons-material/Sync';
-import {mediaStore} from '@/frontend/store/mediaStore.ts';
-import {websocketService} from '../../services/websocketService.js';
-import type {MediaItem} from '../../types.ts';
+import {mediaStore} from '../store/mediaStore.ts';
+import {websocketService} from '../services/websocketService';
+import type {MediaItem} from '../types.ts';
 
 interface MediaSyncItem {
     id: number;
@@ -164,9 +164,12 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
     // Helper to get myList items from IndexedDB
     const getMyListItems = async (): Promise<MediaItem[]> => {
         try {
-            const {db} = await import('../../services/db.ts');
+            const {db} = await import('../services/db.ts');
             const listItems = await db.myList.toArray();
-            return listItems;
+            // Fetch actual MediaItems from cachedItems using the IDs from myList
+            const ids = listItems.map(item => item.id);
+            const mediaItems = await db.cachedItems.where('id').anyOf(ids).toArray();
+            return mediaItems;
         } catch {
             return [];
         }

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Box, Typography } from '@mui/material';
 
 const DebugOverlay: React.FC = () => {

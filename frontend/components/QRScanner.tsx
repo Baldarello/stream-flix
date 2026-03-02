@@ -2,11 +2,11 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Modal, Box, IconButton, Typography, Alert, TextField, Stack, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 const QRScanner: React.FC = observer(() => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;

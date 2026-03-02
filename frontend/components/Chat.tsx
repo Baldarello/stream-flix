@@ -2,12 +2,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Box, Typography, TextField, IconButton, List, ListItem, ListItemText, Avatar, Paper, Divider, Chip, Tooltip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {

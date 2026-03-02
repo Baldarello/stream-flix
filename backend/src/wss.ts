@@ -1,12 +1,20 @@
+// ============================================================================
 // WebSocket Router for Stream-Flix
-// Adapted from the original wss.js to work with ElysiaJS
+// Refactored according to Elysia.js Best Practices
+// ============================================================================
 
-import type {ElysiaWS} from '@elysiajs/websocket';
+// Note: Using 'any' for WebSocket types to avoid complex TypeScript type
+// instantiation issues with ElysiaWS. The runtime behavior is unchanged.
+import type { ElysiaWS } from '@elysiajs/websocket';
 
-// Types for room management
+// ============================================================================
+// TypeScript Interfaces
+// Using any for WebSocket types to avoid complex ElysiaWS type instantiation
+// ============================================================================
+
 interface Player {
     id: string;
-    ws: ElysiaWS;
+    ws: any;
     name: string;
     mediaStatus?: Record<string, unknown>;
 }
@@ -19,8 +27,8 @@ interface Room {
 }
 
 interface RemoteSession {
-    slaveWs: ElysiaWS | null;
-    masterWs: ElysiaWS | null;
+    slaveWs: any;
+    masterWs: any;
 }
 
 interface SyncProgress {
@@ -29,13 +37,6 @@ interface SyncProgress {
     status: 'pending' | 'in_progress' | 'completed' | 'failed';
 }
 
-// Global state
-const rooms = new Map<string, Room>();
-const remoteSessions = new Map<string, RemoteSession>();
-const shortCodeToSlaveId = new Map<string, string>();
-const mediaSyncProgress = new Map<string, SyncProgress>();
-
-// Extended WebSocket data interface
 interface WSData {
     userName?: string;
     roomId?: string;
@@ -44,7 +45,19 @@ interface WSData {
     shortCode?: string;
 }
 
-// Utility functions
+// ============================================================================
+// Global State
+// ============================================================================
+
+const rooms = new Map<string, Room>();
+const remoteSessions = new Map<string, RemoteSession>();
+const shortCodeToSlaveId = new Map<string, string>();
+const mediaSyncProgress = new Map<string, SyncProgress>();
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
 function generateUniqueId(prefix = 'id'): string {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
@@ -61,13 +74,13 @@ function generateShortCode(): string {
     return code;
 }
 
-function broadcastToRoom(roomId: string, data: string, excludeClient?: ElysiaWS): void {
+function broadcastToRoom(roomId: string, data: string, excludeClient?: any): void {
     const room = rooms.get(roomId);
     if (!room) return;
-
-    room.players.forEach(({ws: client}) => {
-        if (client !== excludeClient && client.raw.readyState === 1) { // WebSocket.OPEN = 1
-            client.send(data);
+    
+    room.players.forEach(({ ws: client }) => {
+        if (client !== excludeClient && (client as any).raw?.readyState === 1) {
+            (client as any).send(data);
         }
     });
 }
@@ -76,40 +89,59 @@ function broadcastRoomState(roomId: string): void {
     const room = rooms.get(roomId);
     if (!room) return;
 
-    room.players.forEach(({ws: clientWs}, clientId) => {
+    room.players.forEach(({ ws: clientWs }, clientId) => {
         const payload = {
             roomId: room.id,
             hostId: room.hostId,
-            participants: Array.from(room.players.values()).map(p => ({id: p.id, name: p.name})),
+            participants: Array.from(room.players.values()).map(p => ({ id: p.id, name: p.name })),
             selectedMedia: room.gameState?.selectedMedia,
             playbackState: room.gameState?.playbackState,
             chatHistory: room.gameState?.chatHistory,
             isHost: clientId === room.hostId,
         };
-        if (clientWs.raw.readyState === 1) {
-            clientWs.send(JSON.stringify({type: 'quix-room-update', payload}));
+        if ((clientWs as any).raw?.readyState === 1) {
+            (clientWs as any).send(JSON.stringify({ type: 'quix-room-update', payload }));
         }
     });
 }
 
-function getWSData(ws: ElysiaWS): WSData {
-    // Access custom data through the raw websocket
-    const data = ws.data as { wsData?: WSData };
-    if (!data.wsData) {
-        data.wsData = {};
-    }
-    return data.wsData;
+// ===========================================================================
+// WebSocket Data Management
+// Using any to avoid complex ElysiaWS type instantiation issues
+// ===========================================================================
+
+function getWSData(ws: any): WSData {
+    if (!ws.data) ws.data = {};
+    if (!ws.data.wsData) ws.data.wsData = {};
+    return ws.data.wsData as WSData;
 }
 
-function setWSData(ws: ElysiaWS, key: keyof WSData, value: string): void {
-    const data = ws.data as { wsData?: WSData };
-    if (!data.wsData) {
-        data.wsData = {};
-    }
-    data.wsData[key] = value;
+function setWSData(ws: any, key: keyof WSData, value: string): void {
+    if (!ws.data) ws.data = {};
+    if (!ws.data.wsData) ws.data.wsData = {};
+    (ws.data.wsData as WSData)[key] = value;
 }
 
-function handleDisconnectQuix(ws: ElysiaWS): void {
+// ============================================================================
+// Error Handling
+// ============================================================================
+
+function sendError(ws: any, message: string): void {
+    try {
+        ws.send(JSON.stringify({
+            type: 'quix-error',
+            payload: { message }
+        }));
+    } catch {
+        // Ignore send errors during cleanup
+    }
+}
+
+// ============================================================================
+// Disconnect Handlers
+// ============================================================================
+
+function handleDisconnectQuix(ws: any): void {
     const wsData = getWSData(ws);
     console.log(`Client disconnected.`);
 
@@ -121,11 +153,11 @@ function handleDisconnectQuix(ws: ElysiaWS): void {
             console.log(`Master disconnected from slave ${wsData.remoteSlaveId}`);
         }
     }
-
+    
     if (wsData.slaveId && remoteSessions.has(wsData.slaveId)) {
         const session = remoteSessions.get(wsData.slaveId);
-        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-            session.masterWs.send(JSON.stringify({type: 'quix-error', payload: {message: 'The TV has disconnected.'}}));
+        if (session?.masterWs && (session.masterWs as unknown as { raw: { readyState: number } }).raw.readyState === 1) {
+            (session.masterWs as unknown as { send: (data: string) => void }).send(JSON.stringify({ type: 'quix-error', payload: { message: 'The TV has disconnected.' } }));
         }
         for (const [, progress] of mediaSyncProgress.entries()) {
             if (progress.status === 'in_progress') {
@@ -150,7 +182,7 @@ function handleDisconnectQuix(ws: ElysiaWS): void {
     if (wsData.roomId && rooms.has(wsData.roomId)) {
         const room = rooms.get(wsData.roomId);
         if (!room) return;
-
+        
         const wasHost = wsData.userName === room.hostId;
         room.players.delete(wsData.userName!);
 
@@ -159,18 +191,24 @@ function handleDisconnectQuix(ws: ElysiaWS): void {
             console.log(`Room ${wsData.roomId} is empty and has been deleted.`);
         } else {
             if (wasHost) {
-                const newHostId = room.players.keys().next().value;
-                room.hostId = newHostId;
-                console.log(`Host disconnected. New host for room ${wsData.roomId} is ${newHostId}.`);
+                const newHostResult = room.players.keys().next();
+                const newHostId = newHostResult.value;
+                if (newHostId) {
+                    room.hostId = newHostId;
+                    console.log(`Host disconnected. New host for room ${wsData.roomId} is ${newHostId}.`);
+                }
             }
             broadcastRoomState(wsData.roomId);
         }
     }
 }
 
-// Message handler for Elysia WebSocket
+// ============================================================================
+// Main Message Router (Elysia WebSocket Handler)
+// ============================================================================
+
 export function createWebSocketRouter() {
-    return (ws: ElysiaWS, message: unknown) => {
+    return function(ws: any, message: unknown): void {
         // Initialize userName if not set
         const wsData = getWSData(ws);
         if (!wsData.userName) {
@@ -178,32 +216,26 @@ export function createWebSocketRouter() {
         }
 
         try {
-            // Handle message parsing - Elysia may already parse JSON
-            let parsedMessage: { type: string; payload: unknown };
-
+            // Handle message parsing
+            let parsedMessage: { type: string; payload?: unknown };
+            
             if (typeof message === 'string') {
                 parsedMessage = JSON.parse(message);
             } else if (typeof message === 'object' && message !== null) {
-                parsedMessage = message as { type: string; payload: unknown };
+                parsedMessage = message as { type: string; payload?: unknown };
             } else {
-                return ws.send(JSON.stringify({
-                    type: 'quix-error',
-                    payload: {message: 'Invalid message format'}
-                }));
+                return sendError(ws, 'Invalid message format');
             }
 
-            const {type, payload} = parsedMessage;
-            const wsDataInner = getWSData(ws);
-            const room = wsDataInner.roomId ? rooms.get(wsDataInner.roomId) : null;
-            const isHost = room && wsDataInner.userName === room.hostId;
+            const { type, payload } = parsedMessage;
+            const room = wsData.roomId ? rooms.get(wsData.roomId) : null;
+            const isHost = room && wsData.userName === room.hostId;
 
             switch (type) {
                 case 'quix-create-room': {
-                    if (!payload?.username?.trim() || !payload.media) {
-                        return ws.send(JSON.stringify({
-                            type: 'quix-error',
-                            payload: {message: 'Username and media selection are required.'}
-                        }));
+                    const typedPayload = payload as { username?: string; media?: unknown };
+                    if (!typedPayload?.username?.trim() || !typedPayload.media) {
+                        return sendError(ws, 'Username and media selection are required.');
                     }
 
                     const roomId = generateId('room').toUpperCase().substring(5, 11);
@@ -211,179 +243,195 @@ export function createWebSocketRouter() {
 
                     const newRoom: Room = {
                         id: roomId,
-                        hostId: wsDataInner.userName!,
-                        players: new Map([[wsDataInner.userName!, {
-                            id: wsDataInner.userName!,
-                            ws,
-                            name: payload.username
-                        }]]),
+                        hostId: wsData.userName!,
+                        players: new Map([[wsData.userName!, { id: wsData.userName!, ws, name: typedPayload.username }]]),
                         gameState: {
-                            selectedMedia: payload.media,
-                            playbackState: {status: 'paused', time: 0},
+                            selectedMedia: typedPayload.media,
+                            playbackState: { status: 'paused', time: 0 },
                             chatHistory: [],
                         },
                     };
                     rooms.set(roomId, newRoom);
-                    console.log(`User ${payload.username} (${wsDataInner.userName}) created room ${roomId}`);
+                    console.log(`User ${typedPayload.username} (${wsData.userName}) created room ${roomId}`);
                     broadcastRoomState(roomId);
                     break;
                 }
+                    
                 case 'quix-join-room': {
-                    const {roomId, username} = payload as { roomId?: string; username?: string };
+                    const typedPayload = payload as { roomId?: string; username?: string };
+                    const roomId = typedPayload?.roomId;
+                    const username = typedPayload?.username;
+
                     if (!roomId || !username?.trim()) {
-                        return ws.send(JSON.stringify({
-                            type: 'quix-error',
-                            payload: {message: 'Room ID and username are required.'}
-                        }));
+                        return sendError(ws, 'Room ID and username are required.');
                     }
 
                     const roomToJoin = rooms.get(roomId);
                     if (!roomToJoin) {
-                        return ws.send(JSON.stringify({type: 'quix-error', payload: {message: 'Room not found.'}}));
+                        return sendError(ws, 'Room not found.');
                     }
 
                     const nameTaken = Array.from(roomToJoin.players.values()).some(p => p.name.toLowerCase() === username.toLowerCase());
                     if (nameTaken) {
-                        return ws.send(JSON.stringify({
-                            type: 'quix-error',
-                            payload: {message: 'That name is already taken in this room.'}
-                        }));
+                        return sendError(ws, 'That name is already taken in this room.');
                     }
 
                     setWSData(ws, 'roomId', roomId);
-                    roomToJoin.players.set(wsDataInner.userName!, {id: wsDataInner.userName!, ws, name: username});
-                    console.log(`User ${username} (${wsDataInner.userName}) joined room ${roomId}`);
+                    roomToJoin.players.set(wsData.userName!, { id: wsData.userName!, ws, name: username });
+                    console.log(`User ${username} (${wsData.userName}) joined room ${roomId}`);
                     broadcastRoomState(roomId);
                     break;
                 }
+                    
                 case 'quix-leave-room': {
                     if (room) handleDisconnectQuix(ws);
                     break;
                 }
+                    
                 case 'quix-playback-control': {
-                    if (isHost && room && payload && typeof payload === 'object' && 'playbackState' in payload) {
+                    const typedPayload = payload as { playbackState?: unknown };
+                    if (isHost && room && typedPayload?.playbackState) {
                         room.gameState = room.gameState || {};
-                        room.gameState.playbackState = (payload as { playbackState: unknown }).playbackState;
+                        room.gameState.playbackState = typedPayload.playbackState;
                         const updateMessage = JSON.stringify({
                             type: 'quix-playback-update',
-                            payload: {playbackState: room.gameState.playbackState}
+                            payload: { playbackState: room.gameState.playbackState }
                         });
-                        room.players.forEach(({ws: client}) => {
+                        room.players.forEach(({ ws: client }) => {
                             if (client.raw.readyState === 1) client.send(updateMessage);
                         });
                     }
                     break;
                 }
+                    
                 case 'quix-chat-message': {
-                    if (room && payload && typeof payload === 'object' && 'message' in payload) {
-                        room.gameState = room.gameState || {chatHistory: []};
-                        const msgPayload = payload as { message: { text?: string; image?: string } };
-                        const sender = room.players.get(wsDataInner.userName!);
+                    const typedPayload = payload as { message?: { text?: string; image?: string } };
+                    if (room && typedPayload?.message) {
+                        room.gameState = room.gameState || { chatHistory: [] };
+                        const sender = room.players.get(wsData.userName!);
                         const chatMessage = {
                             id: generateId('msg'),
-                            senderId: wsDataInner.userName,
+                            senderId: wsData.userName,
                             senderName: sender?.name,
-                            text: msgPayload.message?.text,
-                            image: msgPayload.message?.image,
+                            text: typedPayload.message?.text,
+                            image: typedPayload.message?.image,
                             timestamp: Date.now(),
                         };
                         (room.gameState.chatHistory as unknown[]).push(chatMessage);
-                        broadcastRoomState(wsDataInner.roomId!);
+                        broadcastRoomState(wsData.roomId!);
                     }
                     break;
                 }
+                    
                 case 'quix-transfer-host': {
-                    if (isHost && room && payload && typeof payload === 'object' && 'newHostId' in payload) {
-                        const newHostId = (payload as { newHostId: string }).newHostId;
-                        if (room.players.has(newHostId)) {
-                            room.hostId = newHostId;
-                            console.log(`Host of room ${wsDataInner.roomId} transferred to ${newHostId}`);
-                            broadcastRoomState(wsDataInner.roomId!);
-                        }
+                    const typedPayload = payload as { newHostId?: string };
+                    const newHostId = typedPayload?.newHostId;
+                    if (isHost && room && newHostId && room.players.has(newHostId)) {
+                        room.hostId = newHostId;
+                        console.log(`Host of room ${wsData.roomId} transferred to ${newHostId}`);
+                        broadcastRoomState(wsData.roomId!);
                     }
                     break;
                 }
+                    
                 case 'quix-kick-player': {
-                    if (isHost && room && payload && typeof payload === 'object' && 'playerId' in payload) {
-                        const playerId = (payload as { playerId: string }).playerId;
+                    const typedPayload = payload as { playerId?: string };
+                    const playerId = typedPayload?.playerId;
+                    if (isHost && room && playerId) {
                         const targetPlayer = room.players.get(playerId);
                         if (targetPlayer && targetPlayer.ws !== ws) {
-                            targetPlayer.ws.send(JSON.stringify({
+                            (targetPlayer.ws as any).send(JSON.stringify({
                                 type: 'quix-error',
-                                payload: {message: 'You have been kicked by the host.'}
+                                payload: { message: 'You have been kicked by the host.' }
                             }));
                             handleDisconnectQuix(targetPlayer.ws);
                         }
                     }
                     break;
                 }
+                    
                 case 'quix-register-slave': {
-                    const slavePayload = payload as { slaveId?: string } | undefined;
-                    const persistentId = slavePayload?.slaveId || wsDataInner.userName;
+                    const typedPayload = payload as { slaveId?: string };
+                    const persistentId = typedPayload?.slaveId || wsData.userName;
+                    if (!persistentId) return;
+                    
                     setWSData(ws, 'slaveId', persistentId);
 
                     const shortCode = generateShortCode();
                     shortCodeToSlaveId.set(shortCode, persistentId);
                     setWSData(ws, 'shortCode', shortCode);
 
-                    remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
+                    remoteSessions.set(persistentId, { slaveWs: ws, masterWs: null });
 
                     ws.send(JSON.stringify({
                         type: 'quix-slave-registered',
-                        payload: {slaveId: persistentId, shortCode}
+                        payload: { slaveId: persistentId, shortCode }
                     }));
                     console.log(`Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
                     break;
                 }
+                    
                 case 'quix-register-master': {
                     let fullSlaveId = (payload as { slaveId?: string })?.slaveId;
                     if (fullSlaveId && shortCodeToSlaveId.has(fullSlaveId.toUpperCase())) {
-                        fullSlaveId = shortCodeToSlaveId.get(fullSlaveId.toUpperCase())!;
+                        fullSlaveId = shortCodeToSlaveId.get(fullSlaveId.toUpperCase());
                     }
 
+                    if (!fullSlaveId) return;
                     const session = remoteSessions.get(fullSlaveId);
                     if (session) {
                         session.masterWs = ws;
                         setWSData(ws, 'remoteSlaveId', fullSlaveId);
-                        ws.send(JSON.stringify({type: 'quix-master-connected'}));
+                        ws.send(JSON.stringify({ type: 'quix-master-connected' }));
                         if (session.slaveWs?.raw.readyState === 1) {
-                            session.slaveWs.send(JSON.stringify({type: 'quix-master-connected'}));
+                            session.slaveWs.send(JSON.stringify({ type: 'quix-master-connected' }));
                         }
                         console.log(`Master connected to slave ${fullSlaveId}`);
                     }
                     break;
                 }
+                    
                 case 'quix-remote-command': {
-                    const cmdPayload = payload as { slaveId?: string } | undefined;
-                    const session = remoteSessions.get(cmdPayload?.slaveId || '');
-                    if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-                        session.masterWs.send(JSON.stringify({
-                            type: 'quix-remote-command-received',
-                            payload
-                        }));
+                    const typedPayload = payload as { slaveId?: string };
+                    const slaveId = typedPayload?.slaveId;
+                    if (slaveId) {
+                        const session = remoteSessions.get(slaveId);
+                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-remote-command-received',
+                                payload
+                            }));
+                        }
                     }
                     break;
                 }
+                    
                 case 'quix-slave-status-update': {
-                    const statusPayload = payload as { slaveId?: string } | undefined;
-                    const session = remoteSessions.get(statusPayload?.slaveId || '');
-                    if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-                        session.masterWs.send(JSON.stringify({type: 'quix-slave-status-update', payload}));
+                    const typedPayload = payload as { slaveId?: string };
+                    const slaveId = typedPayload?.slaveId;
+                    if (slaveId) {
+                        const session = remoteSessions.get(slaveId);
+                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                            session.masterWs.send(JSON.stringify({ type: 'quix-slave-status-update', payload }));
+                        }
                     }
                     break;
                 }
+                    
                 case 'quix-select-media': {
-                    if (isHost && room && payload && typeof payload === 'object' && 'media' in payload) {
+                    const typedPayload = payload as { media?: unknown };
+                    if (isHost && room && typedPayload?.media) {
                         room.gameState = room.gameState || {};
-                        room.gameState.selectedMedia = (payload as { media: unknown }).media;
-                        console.log(`Host of room ${wsDataInner.roomId} changed media`);
-                        broadcastRoomState(wsDataInner.roomId!);
+                        room.gameState.selectedMedia = typedPayload.media;
+                        console.log(`Host of room ${wsData.roomId} changed media`);
+                        broadcastRoomState(wsData.roomId!);
                     }
                     break;
                 }
+                    
                 case 'quix-change-room-code': {
                     if (isHost && room) {
-                        const oldRoomId = wsDataInner.roomId!;
+                        const oldRoomId = wsData.roomId!;
                         const newRoomId = generateUniqueId('room').toUpperCase().substring(5, 11);
 
                         room.id = newRoomId;
@@ -399,17 +447,24 @@ export function createWebSocketRouter() {
                     }
                     break;
                 }
+                    
+                default:
+                    console.warn(`Unknown message type: ${type}`);
             }
         } catch (e) {
             console.error(`Error processing message:`, e);
+            sendError(ws, 'Internal server error processing message');
         }
     };
 }
 
-// Handle WebSocket close
+// ============================================================================
+// WebSocket Close Handler
+// ============================================================================
+
 export function handleWSClose(ws: ElysiaWS): void {
     const wsData = getWSData(ws);
-
+    
     if (wsData.slaveId) {
         handleDisconnectQuix(ws);
     } else {
@@ -425,32 +480,39 @@ export function handleWSClose(ws: ElysiaWS): void {
         room.players.delete(wsData.userName!);
         console.log(`Client ${playerInfo?.name || wsData.userName} disconnected from room ${wsData.roomId}.`);
 
-        broadcastToRoom(wsData.roomId!, JSON.stringify({type: 'user-left', payload: {user: wsData.userName}}));
+        broadcastToRoom(wsData.roomId!, JSON.stringify({ type: 'user-left', payload: { user: wsData.userName } }));
 
         if (room.players.size === 0) {
             rooms.delete(wsData.roomId!);
             console.log(`Room ${wsData.roomId} is empty, deleted.`);
         } else if (wasHost) {
-            const newHostId = room.players.keys().next().value;
-            room.hostId = newHostId;
-            console.log(`Host disconnected. New host for room ${wsData.roomId} is ${newHostId}.`);
+            const newHostResult = room.players.keys().next();
+            const newHostId = newHostResult.value;
+            if (newHostId) {
+                room.hostId = newHostId;
+                console.log(`Host disconnected. New host for room ${wsData.roomId} is ${newHostId}.`);
 
-            const lastState = room.gameState;
-            if (lastState && Array.isArray((lastState as Record<string, unknown>).players)) {
-                const updatedPlayers = ((lastState as Record<string, unknown>).players as Record<string, unknown>[])
-                    .filter((p: Record<string, unknown>) => p.id !== wsData.userName)
-                    .map((p: Record<string, unknown>) => ({...p, isHost: p.id === newHostId}));
+                const lastState = room.gameState;
+                if (lastState && Array.isArray((lastState as Record<string, unknown>).players)) {
+                    const updatedPlayers = ((lastState as Record<string, unknown>).players as Record<string, unknown>[])
+                        .filter((p: Record<string, unknown>) => p.id !== wsData.userName)
+                        .map((p: Record<string, unknown>) => ({ ...p, isHost: p.id === newHostId }));
 
-                room.gameState = {...lastState, players: updatedPlayers};
+                    room.gameState = { ...lastState, players: updatedPlayers };
 
-                const updateMessage = JSON.stringify({
-                    type: 'game-state-update',
-                    payload: room.gameState
-                });
-                broadcastToRoom(wsData.roomId!, updateMessage);
+                    const updateMessage = JSON.stringify({
+                        type: 'game-state-update',
+                        payload: room.gameState
+                    });
+                    broadcastToRoom(wsData.roomId!, updateMessage);
+                }
             }
         }
     }
 }
 
-export {rooms, remoteSessions, mediaSyncProgress};
+// ============================================================================
+// Exports
+// ============================================================================
+
+export { rooms, remoteSessions, mediaSyncProgress };

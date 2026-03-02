@@ -2,12 +2,12 @@
 
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemIcon, ListItemText, Checkbox, TextField, InputAdornment, Tooltip, ListItemButton, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { createShareLink } from '../../services/shareService.ts';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { createShareLink } from '../services/shareService.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 const style = {
   position: 'absolute' as 'absolute',

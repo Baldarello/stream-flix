@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Box, IconButton, Typography, AppBar, Toolbar, Tooltip, Button, Fade, Slider, Stack, Popover, List, ListItemButton, ListItemText } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chat from './Chat.tsx';
@@ -16,7 +16,7 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import DownloadIcon from '@mui/icons-material/Download';
 import ShutterSpeedIcon from '@mui/icons-material/ShutterSpeed';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
 
 const formatTime = (timeInSeconds: number) => {
     const hours = Math.floor(timeInSeconds / 3600);

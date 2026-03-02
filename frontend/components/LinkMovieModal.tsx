@@ -2,15 +2,15 @@
 
 import React, { useState, useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import { mediaStore } from '@/frontend/store/mediaStore.ts';
+import { mediaStore } from '../store/mediaStore.ts';
 import { Modal, Box, Typography, Button, IconButton, List, ListItem, ListItemText, TextField, Stack, Paper, Tooltip, Autocomplete, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
-import { useTranslations } from '@/frontend/hooks/useTranslations.ts';
-import type { MediaLink } from '../../types.ts';
+import { useTranslations } from '../hooks/useTranslations.ts';
+import type { MediaLink } from '../types.ts';
 
 const style = {
   position: 'absolute' as 'absolute',
