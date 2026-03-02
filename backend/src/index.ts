@@ -1,8 +1,6 @@
 import {Elysia} from 'elysia';
 import {cors} from '@elysiajs/cors';
 import {createWebSocketRouter} from './wss.js';
-import {fileURLToPath} from 'url';
-import {dirname} from 'path';
 
 
 // ============================================================================
