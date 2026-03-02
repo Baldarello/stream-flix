@@ -84,11 +84,10 @@ const GridView: React.FC<GridViewProps> = observer(({title, items}) => {
                 {items.length > 0 ? (
                     <Grid container spacing={2}>
                         {items.map((mediaItem, index) => (
-                            // FIX: Removed the `item` and breakpoint props (`xs`, `sm`, etc.) from the Grid item to resolve a TypeScript error.
-                            // The `Card` component has its own responsive width, so the Grid container will handle wrapping correctly.
+                            // FIX: Updated Grid props for MUI v7 compatibility
+                            // Using size prop instead of individual breakpoint props, and removed deprecated `item` prop
                             <Grid
-                                item
-                                xs={6} sm={4} md={3} lg={2}
+                                size={{xs: 6, sm: 4, md: 3, lg: 2}}
                                 key={mediaItem.id}
                                 draggable={isMyList}
                                 onDragStart={(e) => isMyList && handleDragStart(e, index)}

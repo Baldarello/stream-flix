@@ -138,7 +138,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
 
             // Add items from myList
             const myListItems = await getMyListItems();
-            myListItems.forEach((item: MediaItem) => {
+            myListItems.forEach((item) => {
                 if (!allMedia.find(m => m.id === item.id)) {
                     allMedia.push({
                         id: item.id,
