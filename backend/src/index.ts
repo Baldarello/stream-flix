@@ -1,6 +1,10 @@
 import {Elysia} from 'elysia';
 import {cors} from '@elysiajs/cors';
+import {staticPlugin} from '@elysiajs/static';
 import {createWebSocketRouter} from './wss.js';
+import {readFileSync, existsSync} from 'fs';
+import {join, dirname} from 'path';
+import {fileURLToPath} from 'url';
 
 
 // ============================================================================
@@ -12,11 +16,19 @@ const WS_HEARTBEAT_INTERVAL = parseInt(process.env.WS_HEARTBEAT_INTERVAL || '300
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Path to the frontend dev server (Vite dev server)
-const FRONTEND_DEV_URL = process.env.FRONTEND_DEV_URL || 'http://localhost:5173';
+const FRONTEND_DEV_URL = process.env.FRONTEND_DEV_URL || 'http://localhost:3000';
 
 // ============================================================================
 // Main Application
 // ============================================================================
+
+// Determine the frontend static path (for production)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PUBLIC_PATH = join(__dirname, '..', 'public');
+const isProduction = NODE_ENV === 'production';
+
+console.log(`Starting in ${NODE_ENV} mode`);
+console.log(`Public path: ${PUBLIC_PATH}`);
 
 // Create Elysia app with proper configuration
 const app = new Elysia({
@@ -69,9 +81,33 @@ const app = new Elysia({
             const socket = ws as { id: string };
             console.error(`WebSocket error for ${socket.id}`);
         },
-    })
-    // Proxy all other requests to frontend dev server
-    .get('/*', async ({request, set}) => {
+    });
+
+// Handle frontend requests based on environment
+if (isProduction) {
+    // In production: serve static files from ./public
+    console.log('Using static file serving for production');
+    
+    app.use(staticPlugin({
+        assets: PUBLIC_PATH,
+        prefix: '/',
+    }));
+    
+    // Fallback to index.html for SPA routing
+    app.get('/*', async ({set}) => {
+        const indexPath = join(PUBLIC_PATH, 'index.html');
+        if (existsSync(indexPath)) {
+            set.headers['Content-Type'] = 'text/html';
+            return readFileSync(indexPath, 'utf-8');
+        }
+        set.status = 404;
+        return 'Not Found';
+    });
+} else {
+    // In development: proxy all requests to frontend dev server
+    console.log(`Proxying to frontend dev server at ${FRONTEND_DEV_URL}`);
+    
+    app.get('/*', async ({request, set}) => {
         try {
             const url = new URL(request.url);
             const targetUrl = `${FRONTEND_DEV_URL}${url.pathname}${url.search}`;
@@ -79,7 +115,7 @@ const app = new Elysia({
             const response = await fetch(targetUrl, {
                 method: request.method,
                 headers: {
-                    'Host': 'localhost:5173',
+                    'Host': 'localhost:3000',
                 },
                 body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined,
             });
@@ -95,28 +131,30 @@ const app = new Elysia({
         } catch (error) {
             console.error('Proxy error:', error);
             set.status = 502;
-            return 'Frontend dev server not available. Make sure Vite is running on port 5173.';
-        }
-    })
-    // Global error handler
-    .onError(({code, error, set}) => {
-        console.error(`[Elysia Error] Code: ${code}, Error:`, error);
-
-        switch (code) {
-            case 'NOT_FOUND':
-                set.status = 404;
-                return {error: 'Resource not found', code: 'NOT_FOUND'};
-            case 'VALIDATION':
-                set.status = 400;
-                return {error: 'Invalid input', code: 'VALIDATION'};
-            case 'INTERNAL_SERVER_ERROR':
-                set.status = 500;
-                return {error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR'};
-            default:
-                set.status = 500;
-                return {error: 'An unexpected error occurred', code};
+            return 'Frontend dev server not available. Make sure Vite is running on port 3000.';
         }
     });
+}
+
+// Global error handler
+app.onError(({code, error, set}) => {
+    console.error(`[Elysia Error] Code: ${code}, Error:`, error);
+
+    switch (code) {
+        case 'NOT_FOUND':
+            set.status = 404;
+            return {error: 'Resource not found', code: 'NOT_FOUND'};
+        case 'VALIDATION':
+            set.status = 400;
+            return {error: 'Invalid input', code: 'VALIDATION'};
+        case 'INTERNAL_SERVER_ERROR':
+            set.status = 500;
+            return {error: 'Internal server error', code: 'INTERNAL_SERVER_ERROR'};
+        default:
+            set.status = 500;
+            return {error: 'An unexpected error occurred', code};
+    }
+});
 
 // ============================================================================
 // Heartbeat Mechanism

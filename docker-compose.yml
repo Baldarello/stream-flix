@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "5173:5173"
+      - "3000:3000"
     volumes:
       - ./frontend:/app/frontend
       - /app/frontend/node_modules
@@ -29,8 +29,11 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - FRONTEND_DEV_URL=http://frontend:3000
       - WS_HEARTBEAT_INTERVAL=30000
       - WS_HEARTBEAT_TIMEOUT=60000
+    depends_on:
+      - frontend
     command: bun run src/index.ts
     profiles:
       - dev

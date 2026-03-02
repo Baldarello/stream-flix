@@ -19,6 +19,10 @@ export default defineConfig(({ mode }) => {
             alias: {
                 '@': fileURLToPath(new URL('./components', import.meta.url)),
             }
+        },
+        server: {
+            port: 3000,
+            strictPort: true,
         }
     };
 });
