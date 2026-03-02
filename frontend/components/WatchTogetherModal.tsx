@@ -1,16 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect, useState} from 'react';
+import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a a default one.
-import { mediaStore } from '../store/mediaStore.ts';
-import { Modal, Box, Typography, Button, TextField, Stack, IconButton, List, ListItem, ListItemText, CircularProgress, Tooltip, Alert, FormControl, InputLabel, Select, MenuItem, ListItemButton, Card, CardMedia } from '@mui/material';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+    Alert,
+    Box,
+    Button,
+    CardMedia,
+    CircularProgress,
+    FormControl,
+    IconButton,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    MenuItem,
+    Modal,
+    Select,
+    Stack,
+    TextField,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import GroupIcon from '@mui/icons-material/Group';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import type { Episode, MediaItem, PlayableItem } from '../types.ts';
-import { searchShow } from '../services/apiCall.tsx';
+import type {Episode, MediaItem, PlayableItem} from '../types.ts';
+import {searchShow} from '../services/apiCall.tsx';
 import SearchIcon from '@mui/icons-material/Search';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const style = {
   position: 'absolute' as 'absolute',

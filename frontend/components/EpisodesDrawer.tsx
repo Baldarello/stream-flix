@@ -1,14 +1,26 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
+import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
-import { mediaStore } from '../store/mediaStore.ts';
-import { Drawer, Box, List, ListItem, ListItemButton, ListItemText, Typography, IconButton, Toolbar, CardMedia, LinearProgress } from '@mui/material';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+    Box,
+    CardMedia,
+    Drawer,
+    IconButton,
+    LinearProgress,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    Toolbar,
+    Typography
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import type { Episode } from '../types.ts';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import type {Episode} from '../types.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const EpisodesDrawer: React.FC = observer(() => {
     const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress, showFilterPreferences } = mediaStore;

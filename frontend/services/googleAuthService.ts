@@ -1,6 +1,5 @@
-
-import { mediaStore } from '../store/mediaStore';
-import type { GoogleUser } from '../types';
+import {mediaStore} from '../store/mediaStore';
+import type {GoogleUser} from '../types';
 
 // This Client ID should be defined in a .env file for your project
 // You can get one from the Google Cloud Console: https://console.cloud.google.com/apis/credentials

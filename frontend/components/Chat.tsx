@@ -1,13 +1,24 @@
-
-
-import React, { useState, useRef, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Box, Typography, TextField, IconButton, List, ListItem, ListItemText, Avatar, Paper, Divider, Chip, Tooltip } from '@mui/material';
+import React, {useEffect, useRef, useState} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+  Avatar,
+  Box,
+  Chip,
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {

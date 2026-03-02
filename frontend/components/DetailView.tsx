@@ -1,8 +1,28 @@
-import React, { useMemo, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect, useMemo} from 'react';
+import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
-import { mediaStore } from '../store/mediaStore.ts';
-import { Box, Typography, Button, IconButton, Stack, Select, MenuItem, FormControl, InputLabel, Card, CardMedia, Tooltip, CircularProgress, TextField, InputAdornment, List, ListItem, ListItemButton, ListItemText, LinearProgress } from '@mui/material';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+    Box,
+    Button,
+    CardMedia,
+    CircularProgress,
+    FormControl,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    LinearProgress,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    MenuItem,
+    Select,
+    Stack,
+    TextField,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
@@ -13,8 +33,8 @@ import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LinkEpisodesModal from './LinkEpisodesModal.tsx';
-import type { Episode } from '../types.ts';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import type {Episode} from '../types.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const DetailView: React.FC = observer(() => {
   const { 

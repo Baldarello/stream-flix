@@ -1,13 +1,11 @@
-
-
-import React, { useState, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Modal, Box, Typography, Button, IconButton, TextField, CircularProgress, Alert } from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {Alert, Box, Button, CircularProgress, IconButton, Modal, TextField, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { parseDataFromLink } from '../services/shareService.ts';
-import { useTranslations } from '../hooks/useTranslations.ts';
-import { runInAction } from 'mobx';
+import {parseDataFromLink} from '../services/shareService.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
+import {runInAction} from 'mobx';
 
 const style = {
   position: 'absolute' as 'absolute',

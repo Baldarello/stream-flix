@@ -1,12 +1,23 @@
-import React, { useRef, useEffect } from 'react';
-import { AppBar, Toolbar, Typography, Box, Button, IconButton, useScrollTrigger, Slide, TextField, InputAdornment, Grow, Fade } from '@mui/material';
+import React, {useEffect, useRef} from 'react';
+import {
+    AppBar,
+    Box,
+    Button,
+    Fade,
+    Grow,
+    IconButton,
+    InputAdornment,
+    TextField,
+    Toolbar,
+    Typography
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CloseIcon from '@mui/icons-material/Close';
-import { observer } from 'mobx-react-lite';
-import { mediaStore, ActiveView } from '../store/mediaStore.ts';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {observer} from 'mobx-react-lite';
+import {ActiveView, mediaStore} from '../store/mediaStore.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveView }[] = [
     { key: 'home', view: 'Home'},

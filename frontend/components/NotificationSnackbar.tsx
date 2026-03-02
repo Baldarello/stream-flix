@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Snackbar, Alert, Button } from '@mui/material';
-import { mediaStore } from '../store/mediaStore.ts';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {observer} from 'mobx-react-lite';
+import {Alert, Button, Snackbar} from '@mui/material';
+import {mediaStore} from '../store/mediaStore.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 export const NotificationSnackbar: React.FC = observer(() => {
     const { snackbarMessage, hideSnackbar } = mediaStore;

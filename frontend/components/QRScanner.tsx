@@ -1,12 +1,10 @@
-
-
-import React, { useState, useRef, useCallback } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Modal, Box, IconButton, Typography, Alert, TextField, Stack, Button } from '@mui/material';
+import React, {useCallback, useRef, useState} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {Alert, Box, Button, IconButton, Modal, Stack, TextField, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {Html5QrcodeScanner} from 'html5-qrcode';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const QRScanner: React.FC = observer(() => {
     const { isQRScannerOpen, closeQRScanner } = mediaStore;

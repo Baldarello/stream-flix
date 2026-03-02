@@ -1,12 +1,10 @@
-
-
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Box, Typography, CircularProgress, Paper, Button } from '@mui/material';
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {Box, Button, CircularProgress, Paper, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { useTranslations } from '../hooks/useTranslations.ts';
-import { websocketService } from '../services/websocketService.js';
+import {useTranslations} from '../hooks/useTranslations.ts';
+import {websocketService} from '../services/websocketService.js';
 
 const SmartTVScreen: React.FC = observer(() => {
     const { slaveId, isRemoteMasterConnected, slaveShortCode } = mediaStore;

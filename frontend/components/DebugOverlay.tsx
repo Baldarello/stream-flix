@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Box, Typography } from '@mui/material';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {Box, Typography} from '@mui/material';
 
 const DebugOverlay: React.FC = () => {
     const { isDebugModeActive, debugMessages } = mediaStore;

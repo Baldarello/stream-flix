@@ -403,12 +403,28 @@ export function createWebSocketRouter() {
 
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
-                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
-                            // Forward the command to the master
-                            session.masterWs.send(JSON.stringify({
-                                type: 'quix-remote-command-received',
-                                payload: typedPayload
-                            }));
+                        console.log(`[quix-remote-command] Received command '${command}' for slave ${slaveId}, master connected: ${!!session?.masterWs}, slave connected: ${!!session?.slaveWs}`);
+
+                        if (session) {
+                            // Forward the command to the slave (TV), NOT to the master
+                            if (session.slaveWs?.raw.readyState === 1) {
+                                console.log(`[quix-remote-command] Forwarding command to slave (TV)`);
+                                session.slaveWs.send(JSON.stringify({
+                                    type: 'quix-remote-command',
+                                    payload: typedPayload
+                                }));
+                            } else {
+                                console.log(`[quix-remote-command] Slave not connected, cannot forward command`);
+                            }
+
+                            // Send acknowledgment ONLY to the master (phone/remote), not back to itself
+                            if (session.masterWs?.raw.readyState === 1) {
+                                console.log(`[quix-remote-command] Sending acknowledgment to master`);
+                                session.masterWs.send(JSON.stringify({
+                                    type: 'quix-remote-command-received',
+                                    payload: typedPayload
+                                }));
+                            }
                         }
                     }
                     break;

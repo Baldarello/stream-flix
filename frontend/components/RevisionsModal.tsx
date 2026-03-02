@@ -1,17 +1,27 @@
-
-
-import React, { useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Modal, Box, Typography, IconButton, List, Accordion, AccordionSummary, AccordionDetails, Button, CircularProgress, Tooltip } from '@mui/material';
+import React, {useState} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    CircularProgress,
+    IconButton,
+    List,
+    Modal,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import UndoIcon from '@mui/icons-material/Undo';
-import { useTranslations } from '../hooks/useTranslations.ts';
-import type { Revision } from '../types.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
+import type {Revision} from '../types.ts';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const style = {

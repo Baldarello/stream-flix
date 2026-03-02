@@ -1,15 +1,32 @@
-
-
-import React, { useState, useEffect, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Modal, Box, Typography, Button, TextField, Stack, IconButton, Select, MenuItem, FormControl, InputLabel, Tabs, Tab, Alert, FormControlLabel, Switch, Autocomplete, CircularProgress } from '@mui/material';
+import React, {useEffect, useRef, useState} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+    Alert,
+    Autocomplete,
+    Box,
+    Button,
+    CircularProgress,
+    FormControl,
+    FormControlLabel,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Modal,
+    Select,
+    Stack,
+    Switch,
+    Tab,
+    Tabs,
+    TextField,
+    Typography
+} from '@mui/material';
 // FIX: `SelectChangeEvent` is imported from '@mui/material/Select' instead of '@mui/material'.
-import { SelectChangeEvent } from '@mui/material/Select';
+import {SelectChangeEvent} from '@mui/material/Select';
 // FIX: Imported CloseIcon to resolve the "Cannot find name" error.
 import CloseIcon from '@mui/icons-material/Close';
 import ManageLinksView from './ManageLinksView.tsx';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 
 const style = {

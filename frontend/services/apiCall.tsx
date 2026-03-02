@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { MediaItem, Season, Episode } from '../types';
+import type {Episode, MediaItem, Season} from '../types';
 
 // The API key must be obtained exclusively from the environment variable process.env.API_KEY
 // Assuming this is available in the execution environment.

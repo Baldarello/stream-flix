@@ -1,16 +1,14 @@
-
-
 import React from 'react';
-import type { MediaItem } from '../types.ts';
-import { Card as MuiCard, CardMedia, Typography, Box, CardActionArea, IconButton, Tooltip } from '@mui/material';
-import { observer } from 'mobx-react-lite';
+import type {MediaItem} from '../types.ts';
+import {Box, Card as MuiCard, CardActionArea, CardMedia, IconButton, Tooltip, Typography} from '@mui/material';
+import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
-import { mediaStore } from '../store/mediaStore.ts';
+import {mediaStore} from '../store/mediaStore.ts';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import TheatersIcon from '@mui/icons-material/Theaters';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 interface CardProps {
   item: MediaItem;

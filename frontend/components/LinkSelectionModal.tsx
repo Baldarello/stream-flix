@@ -1,13 +1,11 @@
-
-
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Modal, Box, Typography, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {Box, IconButton, List, ListItem, ListItemButton, ListItemText, Modal, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import type { MediaLink } from '../types.ts';
+import type {MediaLink} from '../types.ts';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const style = {
   position: 'absolute' as 'absolute',

@@ -1,9 +1,30 @@
-
-
-import React, { useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../store/mediaStore.ts';
-import { Box, Typography, IconButton, Stack, CircularProgress, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, FormControl, Select, MenuItem, InputLabel, Button, Drawer, Divider, TextField, Slider, InputAdornment, Tooltip } from '@mui/material';
+import React, {useEffect, useState} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../store/mediaStore.ts';
+import {
+    AppBar,
+    Box,
+    Button,
+    CircularProgress,
+    Divider,
+    Drawer,
+    FormControl,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    MenuItem,
+    Select,
+    Slider,
+    Stack,
+    TextField,
+    Toolbar,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import Replay10 from '@mui/icons-material/Replay10';
@@ -14,8 +35,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
-import type { Episode, PlayableItem } from '../types.ts';
-import { useTranslations } from '../hooks/useTranslations.ts';
+import type {Episode, PlayableItem} from '../types.ts';
+import {useTranslations} from '../hooks/useTranslations.ts';
 
 const formatTime = (timeInSeconds: number) => {
     if (isNaN(timeInSeconds) || timeInSeconds < 0) {

@@ -1,8 +1,14 @@
-
 import 'dexie-observable/api';
 // FIX: Import the 'DbEvents' type from dexie to correctly type the event handling.
-import Dexie, { type Table, type DbEvents } from 'dexie';
-import type { ViewingHistoryItem, MediaItem, MediaLink, EpisodeProgress, PreferredSource, ShowFilterPreference } from '../types';
+import Dexie, {type DbEvents, type Table} from 'dexie';
+import type {
+    EpisodeProgress,
+    MediaItem,
+    MediaLink,
+    PreferredSource,
+    ShowFilterPreference,
+    ViewingHistoryItem
+} from '../types';
 import dexieObservable from 'dexie-observable';
 
 // Define the structure of the data we're storing

@@ -1,9 +1,20 @@
-
-
-import {makeAutoObservable, runInAction, computed, observable} from 'mobx';
+import {computed, makeAutoObservable, observable, runInAction} from 'mobx';
 import Dexie from 'dexie';
-import type {ChatMessage, Episode, MediaItem, PlayableItem, ViewingHistoryItem, GoogleUser, MediaLink, SharedLibraryData, SharedShowData, SharedEpisodeLink, Revision, EpisodeProgress, PreferredSource, ShowFilterPreference} from '../types.ts';
-import type { AlertColor } from '@mui/material';
+import type {
+    ChatMessage,
+    Episode,
+    EpisodeProgress,
+    GoogleUser,
+    MediaItem,
+    MediaLink,
+    PlayableItem,
+    Revision,
+    SharedEpisodeLink,
+    SharedLibraryData,
+    SharedShowData,
+    ViewingHistoryItem
+} from '../types.ts';
+import type {AlertColor} from '@mui/material';
 import {
     getLatestMovies,
     getPopularAnime,
@@ -13,12 +24,12 @@ import {
     getTrending,
     searchShow
 } from '../services/apiCall';
-import {websocketService}from '../services/websocketService.js';
+import {websocketService} from '../services/websocketService.js';
 import * as driveService from '../services/googleDriveService';
 import {db} from '../services/db';
-import { isSmartTV as detectSmartTV } from '../utils/device.ts';
-import { it } from '../locales/it.ts';
-import { en } from '../locales/en.ts';
+import {isSmartTV as detectSmartTV} from '../utils/device.ts';
+import {it} from '../locales/it.ts';
+import {en} from '../locales/en.ts';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
 export type ThemeName = 'SerieTV' | 'Film' | 'Anime';
@@ -35,11 +46,11 @@ type RemoteSlaveState = {
     duration?: number;
 }
 
-const allTranslations = { it, en };
+const allTranslations = {it, en};
 
 // FIX: Add translation helper functions for use within the store.
 const getNestedValue = (obj: any, path: string): string | undefined => {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
 };
 
 const interpolate = (str: string, values: Record<string, any>): string => {
@@ -141,7 +152,7 @@ class MediaStore {
     // Profile Drawer & QR Scanner State
     isProfileDrawerOpen = false;
     isQRScannerOpen = false;
-    
+
     // Library Sharing State
     isShareModalOpen = false;
     isImportModalOpen = false;
@@ -152,7 +163,12 @@ class MediaStore {
     isRevisionsModalOpen = false;
     isRevisionsLoading = false;
     revisions: Revision[] = [];
-    private episodeContextMap: Map<number, { show: string | undefined; s: number; e: number; epName: string; }> = new Map();
+    private episodeContextMap: Map<number, {
+        show: string | undefined;
+        s: number;
+        e: number;
+        epName: string;
+    }> = new Map();
 
 
     // Custom Intro Durations
@@ -162,7 +178,13 @@ class MediaStore {
     activeTheme: ThemeName = 'SerieTV';
 
     // Snackbar State
-    snackbarMessage: { message: string, severity: AlertColor, action?: { label: string, onClick: () => void }, isTranslationKey?: boolean, translationValues?: Record<string, any> } | null = null;
+    snackbarMessage: {
+        message: string,
+        severity: AlertColor,
+        action?: { label: string, onClick: () => void },
+        isTranslationKey?: boolean,
+        translationValues?: Record<string, any>
+    } | null = null;
 
     // Debug Mode State
     isDebugModeActive = false;
@@ -172,10 +194,10 @@ class MediaStore {
     googleUser: GoogleUser | null = null;
     isSyncing = false;
     private backupDebounceTimer: number | null = null;
-    
+
     // Translation State
     language: Language = 'it';
-    
+
     get translations() {
         return allTranslations[this.language];
     }
@@ -214,12 +236,12 @@ class MediaStore {
             const mediaId = item.id;
             let allLinks: MediaLink[] = item.video_urls || await this.getLinksForMedia(mediaId);
             item.video_urls = allLinks;
-    
+
             if (allLinks.length === 0) {
                 this.showSnackbar("notifications.noVideoLinks", "warning", true);
                 return; // Can't play, so exit.
             }
-            
+
             // Determine the pool of links to choose from.
             let candidateLinks: MediaLink[] = allLinks;
             const showId = 'show_id' in item ? item.show_id : item.id;
@@ -264,7 +286,7 @@ class MediaStore {
                 }
             }
         }
-    
+
         // --- Step 2: If we have a URL, start playback ---
         if (item.video_url) {
             runInAction(() => {
@@ -280,13 +302,13 @@ class MediaStore {
                 // Push a new history state for the video player.
                 // Replace state if another player is somehow already open.
                 if (window.history.state?.playerOpen) {
-                    window.history.replaceState({ playerOpen: true, itemId: item.id }, '', window.location.href);
+                    window.history.replaceState({playerOpen: true, itemId: item.id}, '', window.location.href);
                 } else {
-                    window.history.pushState({ playerOpen: true, itemId: item.id }, '', window.location.href);
+                    window.history.pushState({playerOpen: true, itemId: item.id}, '', window.location.href);
                 }
 
                 this.nowPlayingItem = item;
-    
+
                 if ('show_id' in item) {
                     this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
                 } else {
@@ -334,12 +356,12 @@ class MediaStore {
                     this.showSnackbar('notifications.syncUpToDate', 'success', true);
                     return; // Exit early
                 }
-                
+
                 // A newer remote file exists, restore it.
                 this.showSnackbar('notifications.restoringFromCloud', 'info', true);
                 const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
                 await db.importData(data);
-                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
+                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 setTimeout(() => window.location.reload(), 2000);
             } else {
@@ -347,7 +369,7 @@ class MediaStore {
                 this.showSnackbar('notifications.noBackupFoundCreating', 'info', true);
                 const newFile = await this.backupToDrive(false);
                 if (newFile) {
-                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
+                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
                 }
             }
         } catch (error) {
@@ -375,10 +397,10 @@ class MediaStore {
                     data[tableName] = await (db as any)[tableName].toArray();
                 }
             }
-            
+
             const newFile = await driveService.writeBackupFile(this.googleUser.accessToken, data);
             await driveService.deleteOldBackups(this.googleUser.accessToken);
-            
+
             if (showNotification) this.showSnackbar('notifications.backupComplete', 'success', true);
             return newFile;
         } catch (error) {
@@ -404,7 +426,7 @@ class MediaStore {
             if (remoteFile) {
                 const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
                 await db.importData(data);
-                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
+                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 setTimeout(() => window.location.reload(), 2000);
             } else {
@@ -412,7 +434,7 @@ class MediaStore {
             }
         } catch (error) {
             console.error("Error during restore:", error);
-            this.showSnackbar('notifications.restoreError', 'error', true, { error: (error as Error).message });
+            this.showSnackbar('notifications.restoreError', 'error', true, {error: (error as Error).message});
         } finally {
             runInAction(() => {
                 this.isSyncing = false;
@@ -421,15 +443,19 @@ class MediaStore {
     };
 
     showSnackbar = (message: string, severity: AlertColor = 'info', isTranslationKey = false, translationValues?: Record<string, any>) => {
-        this.snackbarMessage = { message, severity, isTranslationKey, translationValues };
+        this.snackbarMessage = {message, severity, isTranslationKey, translationValues};
     }
 
     // --- START OF IMPLEMENTED METHODS ---
-    hideSnackbar = () => { this.snackbarMessage = null; };
-    
+    hideSnackbar = () => {
+        this.snackbarMessage = null;
+    };
+
     // This is called by the popstate event handler to close the detail view
     // without further manipulating the browser history.
-    _closeDetailWithoutHistory = () => { this.selectedItem = null; };
+    _closeDetailWithoutHistory = () => {
+        this.selectedItem = null;
+    };
 
     closeDetail = () => {
         // This is called by UI elements (e.g., the 'X' button).
@@ -442,12 +468,12 @@ class MediaStore {
             this._closeDetailWithoutHistory();
         }
     };
-    
-    setActiveView = (view: ActiveView) => { 
+
+    setActiveView = (view: ActiveView) => {
         if (this.isRemoteMaster) {
             this._masterUiActiveView = view;
         } else {
-            this.activeView = view; 
+            this.activeView = view;
         }
 
         if (view === 'Serie TV') this.setActiveTheme('SerieTV');
@@ -455,45 +481,64 @@ class MediaStore {
         else if (view === 'Anime') this.setActiveTheme('Anime');
     };
 
-    setActiveTheme = (theme: ThemeName) => { 
-        this.activeTheme = theme; 
-        db.preferences.put({ key: 'activeTheme', value: theme });
+    setActiveTheme = (theme: ThemeName) => {
+        this.activeTheme = theme;
+        db.preferences.put({key: 'activeTheme', value: theme});
     };
-    setSearchQuery = (query: string) => { 
+    setSearchQuery = (query: string) => {
         this.searchQuery = query;
-         if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
-            this.searchDebounceTimer = window.setTimeout(async () => {
-                if (this.searchQuery.trim()) {
-                    runInAction(() => { this.isSearching = true; });
-                    const results = await searchShow(this.searchQuery);
-                    runInAction(() => {
-                        this.searchResults = results;
-                        this.isSearching = false;
-                    });
-                } else {
-                    runInAction(() => {
-                        this.searchResults = [];
-                    });
-                }
-            }, 300);
+        if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+        this.searchDebounceTimer = window.setTimeout(async () => {
+            if (this.searchQuery.trim()) {
+                runInAction(() => {
+                    this.isSearching = true;
+                });
+                const results = await searchShow(this.searchQuery);
+                runInAction(() => {
+                    this.searchResults = results;
+                    this.isSearching = false;
+                });
+            } else {
+                runInAction(() => {
+                    this.searchResults = [];
+                });
+            }
+        }, 300);
     };
-    toggleSearch = (isActive: boolean) => { this.isSearchActive = isActive; if (!isActive) { this.searchQuery = ''; this.searchResults = []; } };
-    setJoinRoomIdFromUrl = (roomId: string | null) => { this.joinRoomIdFromUrl = roomId; };
-    setImportUrl = (url: string | null) => { this.importUrl = url; };
-    toggleProfileDrawer = (isOpen: boolean) => { this.isProfileDrawerOpen = isOpen; };
-    openQRScanner = () => { this.isQRScannerOpen = true; this.isProfileDrawerOpen = false; };
-    closeQRScanner = () => { this.isQRScannerOpen = false; };
+    toggleSearch = (isActive: boolean) => {
+        this.isSearchActive = isActive;
+        if (!isActive) {
+            this.searchQuery = '';
+            this.searchResults = [];
+        }
+    };
+    setJoinRoomIdFromUrl = (roomId: string | null) => {
+        this.joinRoomIdFromUrl = roomId;
+    };
+    setImportUrl = (url: string | null) => {
+        this.importUrl = url;
+    };
+    toggleProfileDrawer = (isOpen: boolean) => {
+        this.isProfileDrawerOpen = isOpen;
+    };
+    openQRScanner = () => {
+        this.isQRScannerOpen = true;
+        this.isProfileDrawerOpen = false;
+    };
+    closeQRScanner = () => {
+        this.isQRScannerOpen = false;
+    };
     enableSmartTVMode = () => {
         this.isSmartTV = true; // Mark this client as acting as a TV
         this.isSmartTVPairingVisible = true;
         this.isProfileDrawerOpen = false;
-        db.preferences.put({ key: 'isConfiguredAsSlave', value: true });
+        db.preferences.put({key: 'isConfiguredAsSlave', value: true});
         // Manually send registration message, using existing ID if available
-        const payload = this.slaveId ? { slaveId: this.slaveId } : {};
-        websocketService.sendMessage({ type: 'quix-register-slave', payload });
+        const payload = this.slaveId ? {slaveId: this.slaveId} : {};
+        websocketService.sendMessage({type: 'quix-register-slave', payload});
     };
-    exitSmartTVPairingMode = () => { 
-        this.isSmartTVPairingVisible = false; 
+    exitSmartTVPairingMode = () => {
+        this.isSmartTVPairingVisible = false;
         db.preferences.delete('isConfiguredAsSlave');
     };
     openMediaSyncModal = (slaveId: string) => {
@@ -504,29 +549,61 @@ class MediaStore {
         this.isMediaSyncModalOpen = false;
         this.mediaSyncTargetSlaveId = null;
     };
-    setLanguage = (lang: Language) => { this.language = lang; db.preferences.put({ key: 'language', value: lang }); };
-    openShareModal = () => { this.isShareModalOpen = true; };
-    closeShareModal = () => { this.isShareModalOpen = false; };
-    openImportModal = () => { this.isImportModalOpen = true; };
-    closeImportModal = () => { this.isImportModalOpen = false; if (this.importUrl) this.importUrl = null; };
-    openRevisionsModal = () => { this.isRevisionsModalOpen = true; this.fetchRevisions(); };
-    closeRevisionsModal = () => { this.isRevisionsModalOpen = false; };
-    closeLinkSelectionModal = () => { this.isLinkSelectionModalOpen = false; this.itemForLinkSelection = null; this.linkSelectionContext = 'local'; };
-    openEpisodesDrawer = () => { this.isEpisodesDrawerOpen = true; };
-    closeEpisodesDrawer = () => { this.isEpisodesDrawerOpen = false; };
-    setIntroSkippableOnSlave = (isSkippable: boolean) => { this.isIntroSkippableOnSlave = isSkippable; };
+    setLanguage = (lang: Language) => {
+        this.language = lang;
+        db.preferences.put({key: 'language', value: lang});
+    };
+    openShareModal = () => {
+        this.isShareModalOpen = true;
+    };
+    closeShareModal = () => {
+        this.isShareModalOpen = false;
+    };
+    openImportModal = () => {
+        this.isImportModalOpen = true;
+    };
+    closeImportModal = () => {
+        this.isImportModalOpen = false;
+        if (this.importUrl) this.importUrl = null;
+    };
+    openRevisionsModal = () => {
+        this.isRevisionsModalOpen = true;
+        this.fetchRevisions();
+    };
+    closeRevisionsModal = () => {
+        this.isRevisionsModalOpen = false;
+    };
+    closeLinkSelectionModal = () => {
+        this.isLinkSelectionModalOpen = false;
+        this.itemForLinkSelection = null;
+        this.linkSelectionContext = 'local';
+    };
+    openEpisodesDrawer = () => {
+        this.isEpisodesDrawerOpen = true;
+    };
+    closeEpisodesDrawer = () => {
+        this.isEpisodesDrawerOpen = false;
+    };
+    setIntroSkippableOnSlave = (isSkippable: boolean) => {
+        this.isIntroSkippableOnSlave = isSkippable;
+    };
     clearRemoteSelectedItem = () => {
         this.clearMasterUiSelection(); // Clear master's UI selected item
-        this.sendRemoteCommand({ command: 'clear_selection' }); // Also tell slave to clear its selection (detail view)
+        this.sendRemoteCommand({command: 'clear_selection'}); // Also tell slave to clear its selection (detail view)
     };
     clearMasterUiSelection = () => {
         this._masterUiSelectedItem = null;
         this.isDetailLoading = false; // Also clear the loading state for master's detail
     };
-    setExpandedLinkAccordionId = (id: number | false) => { this.expandedLinkAccordionId = id; };
-    
+    setExpandedLinkAccordionId = (id: number | false) => {
+        this.expandedLinkAccordionId = id;
+    };
+
     // Getters
-    get isLoggedIn() { return !!this.googleUser; }
+    get isLoggedIn() {
+        return !!this.googleUser;
+    }
+
     get allUniqueLabels(): string[] {
         const labels = new Set<string>();
         for (const links of this.mediaLinks.values()) {
@@ -538,6 +615,7 @@ class MediaStore {
         }
         return Array.from(labels).sort();
     }
+
     get heroContent() {
         switch (this.activeTheme) {
             case 'Film':
@@ -549,13 +627,21 @@ class MediaStore {
                 return this.topSeries.length > 0 ? this.topSeries[0] : this.trending[0];
         }
     }
-    get allMovies() { return [...this.latestMovies].sort((a,b) => (b.release_date || '').localeCompare(a.release_date || '')); }
-    get currentShow() { return this.nowPlayingShowDetails; }
+
+    get allMovies() {
+        return [...this.latestMovies].sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
+    }
+
+    get currentShow() {
+        return this.nowPlayingShowDetails;
+    }
+
     get currentSeasonEpisodes() {
         if (!this.nowPlayingItem || !('season_number' in this.nowPlayingItem) || !this.nowPlayingShowDetails?.seasons) return [];
         const season = this.nowPlayingShowDetails.seasons.find(s => s.season_number === (this.nowPlayingItem as any).season_number);
         return season?.episodes || [];
     }
+
     get nextEpisode() {
         if (!this.nowPlayingItem || !('episode_number' in this.nowPlayingItem)) return null;
         const currentEpisodeIndex = this.currentSeasonEpisodes.findIndex(ep => ep.id === this.nowPlayingItem.id);
@@ -564,10 +650,11 @@ class MediaStore {
         }
         return null;
     }
+
     get remoteNextEpisode() {
         const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
         if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
-        
+
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
@@ -577,10 +664,11 @@ class MediaStore {
         }
         return null;
     }
+
     get remotePreviousEpisode() {
         const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
         if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
-        
+
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
@@ -590,7 +678,11 @@ class MediaStore {
         }
         return null;
     }
-    get myListItems() { return this.myList.map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item); }
+
+    get myListItems() {
+        return this.myList.map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item);
+    }
+
     get continueWatchingItems(): PlayableItem[] {
         const sortedProgress = Array.from(this.episodeProgress.values())
             .filter(p => !p.watched && p.currentTime > 0)
@@ -599,40 +691,45 @@ class MediaStore {
         return sortedProgress.map(p => {
             const ep = this.findEpisodeById(p.episodeId);
             if (!ep) return null;
-            return { ...ep, startTime: p.currentTime };
+            return {...ep, startTime: p.currentTime};
 // FIX: A type predicate's type must be assignable to its parameter's type. Removed the predicate and added a cast.
         }).filter(item => !!item) as PlayableItem[];
     }
+
     get homePageRows() {
         const rows = [
-            ...(this.continueWatchingItems.length > 0 ? [{ titleKey: 'misc.continueWatching', items: this.continueWatchingItems as MediaItem[] }] : []),
-            ...(this.myListItems.length > 0 ? [{ titleKey: 'misc.myList', items: this.myListItems }] : []),
+            ...(this.continueWatchingItems.length > 0 ? [{
+                titleKey: 'misc.continueWatching',
+                items: this.continueWatchingItems as MediaItem[]
+            }] : []),
+            ...(this.myListItems.length > 0 ? [{titleKey: 'misc.myList', items: this.myListItems}] : []),
         ];
 
         switch (this.activeTheme) {
             case 'Film':
-                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
-                rows.push({ titleKey: 'misc.topRated', items: this.trending });
-                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
-                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
+                rows.push({titleKey: 'misc.topRated', items: this.trending});
+                rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
+                rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
                 break;
             case 'Anime':
-                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
-                rows.push({ titleKey: 'misc.topRated', items: this.trending });
-                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
-                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
+                rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
+                rows.push({titleKey: 'misc.topRated', items: this.trending});
+                rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
+                rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
                 break;
             case 'SerieTV':
             default:
-                rows.push({ titleKey: 'misc.popularSeries', items: this.topSeries });
-                rows.push({ titleKey: 'misc.topRated', items: this.trending });
-                rows.push({ titleKey: 'misc.latestReleases', items: this.latestMovies });
-                rows.push({ titleKey: 'misc.mustWatchAnime', items: this.popularAnime });
+                rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
+                rows.push({titleKey: 'misc.topRated', items: this.trending});
+                rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
+                rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
                 break;
         }
-        
+
         return rows;
     }
+
     get shareableShows() {
         return Array.from(this.cachedItems.values()).filter(item => item.media_type === 'tv' && this.hasLinks(item.id));
     }
@@ -690,7 +787,7 @@ class MediaStore {
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
             this.cachedItems = new Map(cachedItems.map(item => [item.id, item]));
-            
+
             const linksMap = new Map<number, MediaLink[]>();
             mediaLinks.forEach(link => {
                 const links = linksMap.get(link.mediaId) || [];
@@ -698,7 +795,7 @@ class MediaStore {
                 linksMap.set(link.mediaId, links);
             });
             this.mediaLinks = linksMap;
-            
+
             this.showIntroDurations = new Map(introDurations.map(item => [item.id, item.duration]));
             if (language?.value) this.language = language.value;
             if (activeTheme?.value) this.activeTheme = activeTheme.value;
@@ -707,8 +804,11 @@ class MediaStore {
             this.selectedSeasons = new Map(selectedSeasons.map(s => [s.showId, s.seasonNumber]));
             if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
             if (username?.value) this.username = username.value;
-            this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, { language: p.language, type: p.type }]));
-            
+            this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, {
+                language: p.language,
+                type: p.type
+            }]));
+
             if (remoteMasterSlaveId?.value) {
                 this.isRemoteMaster = true;
                 this.slaveId = remoteMasterSlaveId.value;
@@ -736,7 +836,7 @@ class MediaStore {
             });
 
             // Send command to slave to select the item
-            this.sendRemoteCommand({ command: 'select_item', item: item });
+            this.sendRemoteCommand({command: 'select_item', item: item});
 
             // Fetch details for the master's display
             try {
@@ -760,14 +860,14 @@ class MediaStore {
 
         // --- Original local selectMedia logic continues below ---
         // 1. Set initial state based on context
-        switch(context) {
+        switch (context) {
             case 'detailView':
                 // If another detail view is already open, replace the history state. Otherwise, push a new one.
                 // This ensures the back button always exits the detail view, instead of going to a previous detail view.
                 if (this.selectedItem) {
-                    window.history.replaceState({ detailViewOpen: true, itemId: item.id }, '', window.location.href);
+                    window.history.replaceState({detailViewOpen: true, itemId: item.id}, '', window.location.href);
                 } else {
-                    window.history.pushState({ detailViewOpen: true, itemId: item.id }, '', window.location.href);
+                    window.history.pushState({detailViewOpen: true, itemId: item.id}, '', window.location.href);
                 }
                 this.selectedItem = item;
                 this.isDetailLoading = true;
@@ -785,18 +885,18 @@ class MediaStore {
             case 'cacheOnly':
                 break;
         }
-        
+
         try {
             let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
             fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
-    
+
             // Dexie/IndexedDB cannot serialize MobX proxies. We must convert the object
             // to a plain JavaScript object before saving to prevent an error.
             await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
             runInAction(() => {
                 this.cachedItems.set(item.id, fullItemDetails!);
                 // 2. Update the correct state property with full details
-                switch(context) {
+                switch (context) {
                     case 'detailView':
                         if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
                         break;
@@ -813,7 +913,7 @@ class MediaStore {
                         break;
                 }
             });
-            
+
         } catch (error) {
             console.error("Failed to load details", error);
             this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
@@ -833,7 +933,7 @@ class MediaStore {
             db.myList.delete(itemId);
         } else {
             this.myList.push(itemId);
-            db.myList.put({ id: itemId, order: this.myList.length });
+            db.myList.put({id: itemId, order: this.myList.length});
             if (!this.cachedItems.has(itemId)) {
                 this.cachedItems.set(itemId, item);
                 db.cachedItems.put(item);
@@ -845,15 +945,15 @@ class MediaStore {
         const reorderedList = [...this.myList];
         const [draggedItem] = reorderedList.splice(dragIndex, 1);
         reorderedList.splice(dropIndex, 0, draggedItem);
-        
+
         runInAction(() => {
             this.myList = reorderedList;
         });
-        
-        const itemsToUpdate = this.myList.map((id, index) => ({ id, order: index }));
+
+        const itemsToUpdate = this.myList.map((id, index) => ({id, order: index}));
         await db.myList.bulkPut(itemsToUpdate);
     }
-    
+
     removeFromContinueWatching = async (episodeId: number) => {
         try {
             await db.episodeProgress.delete(episodeId);
@@ -868,21 +968,21 @@ class MediaStore {
     }
 
     updateEpisodeProgress = (progress: { episodeId: number; currentTime: number; duration: number; }) => {
-        const { episodeId, currentTime, duration } = progress;
+        const {episodeId, currentTime, duration} = progress;
         if (duration > 0) {
             const watched = currentTime / duration > 0.9;
             const existing = this.episodeProgress.get(episodeId);
             if (!existing || existing.currentTime < currentTime || watched !== existing.watched) {
-                const newProgress = { episodeId, currentTime, duration, watched };
+                const newProgress = {episodeId, currentTime, duration, watched};
                 this.episodeProgress.set(episodeId, newProgress);
                 db.episodeProgress.put(newProgress);
             }
         }
     }
-    
+
     toggleEpisodeWatchedStatus = async (episodeId: number) => {
         const existingProgress = this.episodeProgress.get(episodeId);
-    
+
         if (existingProgress?.watched) {
             // Mark as unwatched
             const newProgress: EpisodeProgress = {
@@ -907,22 +1007,22 @@ class MediaStore {
             this.showSnackbar('notifications.markedAsWatched', 'success', true);
         }
     }
-    
+
     setShowIntroDuration = (showId: number, duration: number) => {
         this.showIntroDurations.set(showId, duration);
-        db.showIntroDurations.put({ id: showId, duration });
+        db.showIntroDurations.put({id: showId, duration});
     }
-    
+
     setSelectedSeasonForShow = (showId: number, seasonNumber: number) => {
         this.selectedSeasons.set(showId, seasonNumber);
-        db.selectedSeasons.put({ showId, seasonNumber });
+        db.selectedSeasons.put({showId, seasonNumber});
     }
 
     setShowFilterPreference = (showId: number, preference: { language?: string; type?: 'sub' | 'dub'; }) => {
         const currentPrefs = this.showFilterPreferences.get(showId) || {};
-        const newPrefs = { ...currentPrefs, ...preference };
+        const newPrefs = {...currentPrefs, ...preference};
         this.showFilterPreferences.set(showId, newPrefs);
-        db.showFilterPreferences.put({ showId, ...newPrefs });
+        db.showFilterPreferences.put({showId, ...newPrefs});
     }
 
     togglePreferredLabel = async (label: string) => {
@@ -932,17 +1032,36 @@ class MediaStore {
         } else {
             this.preferredLabels.push(label);
         }
-        await db.preferences.put({ key: 'preferredLabels', value: this.preferredLabels });
-        this.showSnackbar(isPreferred ? 'notifications.preferredLabelRemoved' : 'notifications.preferredLabelSet', 'success', true, { label });
+        await db.preferences.put({key: 'preferredLabels', value: this.preferredLabels});
+        this.showSnackbar(isPreferred ? 'notifications.preferredLabelRemoved' : 'notifications.preferredLabelSet', 'success', true, {label});
     }
 
-    openLinkEpisodesModal = (item: MediaItem) => { this.linkingEpisodesForItem = item; this.isLinkEpisodesModalOpen = true; };
-    closeLinkEpisodesModal = () => { this.isLinkEpisodesModalOpen = false; this.linkingEpisodesForItem = null; };
-    openLinkMovieModal = (item: MediaItem) => { this.linkingMovieItem = item; this.isLinkMovieModalOpen = true; };
-    closeLinkMovieModal = () => { this.isLinkMovieModalOpen = false; this.linkingMovieItem = null; };
+    openLinkEpisodesModal = (item: MediaItem) => {
+        this.linkingEpisodesForItem = item;
+        this.isLinkEpisodesModalOpen = true;
+    };
+    closeLinkEpisodesModal = () => {
+        this.isLinkEpisodesModalOpen = false;
+        this.linkingEpisodesForItem = null;
+    };
+    openLinkMovieModal = (item: MediaItem) => {
+        this.linkingMovieItem = item;
+        this.isLinkMovieModalOpen = true;
+    };
+    closeLinkMovieModal = () => {
+        this.isLinkMovieModalOpen = false;
+        this.linkingMovieItem = null;
+    };
 
-    setEpisodeLinksForSeason = async (payload: { seasonNumber: number; method: string; data: any; language: string; type: 'sub' | 'dub'; seasonName: string; }): Promise<boolean> => {
-        const { seasonNumber, method, data, language, type, seasonName } = payload;
+    setEpisodeLinksForSeason = async (payload: {
+        seasonNumber: number;
+        method: string;
+        data: any;
+        language: string;
+        type: 'sub' | 'dub';
+        seasonName: string;
+    }): Promise<boolean> => {
+        const {seasonNumber, method, data, language, type, seasonName} = payload;
         const show = this.linkingEpisodesForItem;
         if (!show) return false;
 
@@ -981,11 +1100,20 @@ class MediaStore {
                 case 'list': {
                     const urls = data.list.split('\n').filter((u: string) => u.trim());
                     if (urls.length !== season.episode_count) {
-                        this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: urls.length, episodeCount: season.episode_count });
+                        this.showSnackbar('notifications.linkCountMismatch', 'error', true, {
+                            linkCount: urls.length,
+                            episodeCount: season.episode_count
+                        });
                         return false;
                     }
                     season.episodes.forEach((ep, index) => {
-                        linksToAdd.push({ mediaId: ep.id, url: urls[index], label: new URL(urls[index]).hostname, language, type });
+                        linksToAdd.push({
+                            mediaId: ep.id,
+                            url: urls[index],
+                            label: new URL(urls[index]).hostname,
+                            language,
+                            type
+                        });
                     });
                     break;
                 }
@@ -993,13 +1121,16 @@ class MediaStore {
                     const parsedJson = JSON.parse(data.json);
                     if (!Array.isArray(parsedJson)) throw new Error('JSON must be an array.');
                     if (parsedJson.length !== season.episode_count) {
-                       this.showSnackbar('notifications.linkCountMismatch', 'error', true, { linkCount: parsedJson.length, episodeCount: season.episode_count });
-                       return false;
+                        this.showSnackbar('notifications.linkCountMismatch', 'error', true, {
+                            linkCount: parsedJson.length,
+                            episodeCount: season.episode_count
+                        });
+                        return false;
                     }
                     season.episodes.forEach((ep, index) => {
                         const item = parsedJson[index];
                         if (typeof item === 'string') {
-                            linksToAdd.push({ mediaId: ep.id, url: item, label: new URL(item).hostname, language, type });
+                            linksToAdd.push({mediaId: ep.id, url: item, label: new URL(item).hostname, language, type});
                         } else if (typeof item === 'object' && item.url) {
                             linksToAdd.push({
                                 mediaId: ep.id,
@@ -1026,17 +1157,22 @@ class MediaStore {
 
             await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
             await this.refreshLinksForShow(show.id);
-            this.showSnackbar('notifications.linksAddedSuccess', 'success', true, { count: linksToAdd.length });
+            this.showSnackbar('notifications.linksAddedSuccess', 'success', true, {count: linksToAdd.length});
             return true;
 
         } catch (error) {
             console.error(error);
-            this.showSnackbar('notifications.processingError', 'error', true, { error: (error as Error).message });
+            this.showSnackbar('notifications.processingError', 'error', true, {error: (error as Error).message});
             return false;
         }
     }
-    
-    addLinksToMedia = async (mediaId: number, links: { url: string, label: string, language: string, type: 'sub' | 'dub' }[]) => {
+
+    addLinksToMedia = async (mediaId: number, links: {
+        url: string,
+        label: string,
+        language: string,
+        type: 'sub' | 'dub'
+    }[]) => {
         try {
             const linksToAdd: Omit<MediaLink, 'id'>[] = links.map(link => ({
                 mediaId,
@@ -1045,7 +1181,7 @@ class MediaStore {
                 language: link.language,
                 type: link.type,
             }));
-            
+
             // Automatically set the first source as preferred if none is set
             if (linksToAdd.length > 0 && !this.preferredSources.has(mediaId)) {
                 try {
@@ -1055,7 +1191,7 @@ class MediaStore {
                     console.warn("Could not determine origin from the first link to set as preferred source", e);
                 }
             }
-            
+
             await db.mediaLinks.bulkAdd(linksToAdd as MediaLink[]);
             await this.refreshLinksForMediaId(mediaId);
         } catch (error) {
@@ -1063,18 +1199,18 @@ class MediaStore {
             this.showSnackbar('notifications.savingLinksError', 'error', true);
         }
     }
-    
+
     deleteMediaLink = async (linkId: number) => {
         // FIX: Cast `db` to `Dexie` to call the `transaction` method, resolving a TypeScript error where the method was not found on the extended `QuixDB` class.
         const mediaId = await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
             const link = await db.mediaLinks.get(linkId);
-            if(link) {
+            if (link) {
                 await db.mediaLinks.delete(linkId);
                 return link.mediaId;
             }
             return null;
         });
-    
+
         if (mediaId) {
             await this.refreshLinksForMediaId(mediaId);
         }
@@ -1090,7 +1226,7 @@ class MediaStore {
             }
         } catch (error) {
             console.error('Error updating media link:', error);
-            this.showSnackbar('notifications.processingError', 'error', true, { error: (error as Error).message });
+            this.showSnackbar('notifications.processingError', 'error', true, {error: (error as Error).message});
         }
     }
 
@@ -1105,9 +1241,12 @@ class MediaStore {
         if (linksToDelete.length > 0) {
             await db.mediaLinks.bulkDelete(linksToDelete.map(l => l.id!));
             await this.refreshLinksForShow(showId);
-            this.showSnackbar('notifications.allSeasonLinksDeleted', 'success', true, { count: linksToDelete.length, season: seasonNumber });
+            this.showSnackbar('notifications.allSeasonLinksDeleted', 'success', true, {
+                count: linksToDelete.length,
+                season: seasonNumber
+            });
         } else {
-             this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
         }
     }
 
@@ -1119,7 +1258,7 @@ class MediaStore {
 
         const episodeIds = season.episodes.map(ep => ep.id);
         const allLinks = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
-        
+
         const linksToDelete = allLinks.filter(link => {
             try {
                 return new URL(link.url).origin === origin;
@@ -1132,30 +1271,33 @@ class MediaStore {
             const linkIdsToDelete = linksToDelete.map(l => l.id!);
             await db.mediaLinks.bulkDelete(linkIdsToDelete);
             await this.refreshLinksForShow(showId);
-            this.showSnackbar('notifications.linksFromDomainDeletedSuccess', 'success', true, { count: linksToDelete.length, domain: origin });
+            this.showSnackbar('notifications.linksFromDomainDeletedSuccess', 'success', true, {
+                count: linksToDelete.length,
+                domain: origin
+            });
         } else {
-            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
         }
     }
-    
+
     updateLinksDomain = async (payload: { links: MediaLink[], newDomain: string }) => {
-        const { links, newDomain } = payload;
+        const {links, newDomain} = payload;
         try {
             const updatedLinks = links.map(link => {
                 const url = new URL(link.url);
                 const newUrl = new URL(url.pathname + url.search, newDomain);
-                return { ...link, url: newUrl.toString() };
+                return {...link, url: newUrl.toString()};
             });
             await db.mediaLinks.bulkPut(updatedLinks);
             if (this.linkingEpisodesForItem) {
                 await this.refreshLinksForShow(this.linkingEpisodesForItem.id);
             }
-            this.showSnackbar('notifications.linksUpdated', 'success', true, { count: updatedLinks.length });
+            this.showSnackbar('notifications.linksUpdated', 'success', true, {count: updatedLinks.length});
         } catch (error) {
-            this.showSnackbar('notifications.domainUpdateError', 'error', true, { error: (error as Error).message });
+            this.showSnackbar('notifications.domainUpdateError', 'error', true, {error: (error as Error).message});
         }
     }
-    
+
     setPreferredSource = async (showId: number, origin: string) => {
         const current = this.preferredSources.get(showId);
         if (current === origin) { // If clicking the same one, unset it
@@ -1163,11 +1305,11 @@ class MediaStore {
             await db.preferredSources.delete(showId);
         } else {
             this.preferredSources.set(showId, origin);
-            await db.preferredSources.put({ showId, origin });
+            await db.preferredSources.put({showId, origin});
             this.showSnackbar('notifications.preferredSourceSet', 'success', true);
         }
     }
-    
+
     openWatchTogetherModal = (item: MediaItem | PlayableItem | null) => {
         this.watchTogetherError = null;
         if (item) {
@@ -1175,44 +1317,49 @@ class MediaStore {
         }
         this.watchTogetherModalOpen = true;
     };
-    
+
     closeWatchTogetherModal = () => {
         this.watchTogetherModalOpen = false;
         if (this.roomId) {
-            websocketService.sendMessage({ type: 'quix-leave-room' });
+            websocketService.sendMessage({type: 'quix-leave-room'});
             this.roomId = null;
         }
     };
-    
+
     createRoom = (username: string) => {
         this.username = username;
-        db.preferences.put({ key: 'username', value: username });
-        if(this.watchTogetherSelectedItem) {
-            websocketService.sendMessage({ type: 'quix-create-room', payload: { username, media: this.watchTogetherSelectedItem }});
+        db.preferences.put({key: 'username', value: username});
+        if (this.watchTogetherSelectedItem) {
+            websocketService.sendMessage({
+                type: 'quix-create-room',
+                payload: {username, media: this.watchTogetherSelectedItem}
+            });
         }
     };
 
     joinRoom = (roomId: string, username: string) => {
         this.username = username;
-        db.preferences.put({ key: 'username', value: username });
-        websocketService.sendMessage({ type: 'quix-join-room', payload: { roomId: roomId.toUpperCase(), username } });
+        db.preferences.put({key: 'username', value: username});
+        websocketService.sendMessage({type: 'quix-join-room', payload: {roomId: roomId.toUpperCase(), username}});
     };
 
     changeWatchTogetherMedia = (item: PlayableItem) => {
         this.watchTogetherSelectedItem = item;
         if (this.isHost) {
-            websocketService.sendMessage({ type: 'quix-select-media', payload: { media: item }});
+            websocketService.sendMessage({type: 'quix-select-media', payload: {media: item}});
         }
     };
-    
-    changeRoomCode = () => { websocketService.sendMessage({ type: 'quix-change-room-code' }); };
+
+    changeRoomCode = () => {
+        websocketService.sendMessage({type: 'quix-change-room-code'});
+    };
 
     connectAsRemoteMaster = (slaveId: string) => {
         runInAction(async () => {
-            websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId } });
+            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId}});
             this.isRemoteMaster = true;
             this.slaveId = slaveId;
-            db.preferences.put({ key: 'remoteMasterForSlaveId', value: slaveId });
+            db.preferences.put({key: 'remoteMasterForSlaveId', value: slaveId});
 
             const existingSlave = await db.knownSlaves.get(slaveId);
             const slaveData = {
@@ -1221,7 +1368,7 @@ class MediaStore {
                 lastSeen: Date.now()
             };
             await db.knownSlaves.put(slaveData);
-            
+
             const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
             runInAction(() => {
                 this.knownSlaves = updatedSlaves;
@@ -1231,7 +1378,7 @@ class MediaStore {
             this.showSnackbar('notifications.connectedToTV', 'success', true);
         });
     };
-    
+
     disconnectRemoteMaster = () => {
         runInAction(() => {
             this.isRemoteMaster = false;
@@ -1249,7 +1396,7 @@ class MediaStore {
     };
 
     updateSlaveName = async (slaveId: string, name: string) => {
-        await db.knownSlaves.update(slaveId, { name });
+        await db.knownSlaves.update(slaveId, {name});
         const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
         runInAction(() => {
             this.knownSlaves = updatedSlaves;
@@ -1275,7 +1422,7 @@ class MediaStore {
     };
 
     private sendPlayCommandAndOptimisticallyUpdate = (item: PlayableItem) => {
-        this.sendRemoteCommand({ command: 'play_item', item });
+        this.sendRemoteCommand({command: 'play_item', item});
         runInAction(() => {
             this.remoteSlaveState = {
                 ...(this.remoteSlaveState ?? {}),
@@ -1299,7 +1446,7 @@ class MediaStore {
         // --- Resolve URL ---
         const mediaId = 'episode_number' in item ? item.id : item.id;
         const allLinks = item.video_urls || await this.getLinksForMedia(mediaId);
-    
+
         if (allLinks.length === 0) {
             this.showSnackbar("notifications.noVideoLinks", "warning", true);
             return;
@@ -1310,7 +1457,7 @@ class MediaStore {
         const preferredOrigin = this.preferredSources.get(showId);
 
         if (preferredOrigin) {
-             const linksFromPreferred = allLinks.filter(l => {
+            const linksFromPreferred = allLinks.filter(l => {
                 try {
                     return new URL(l.url).origin === preferredOrigin;
                 } catch {
@@ -1321,12 +1468,12 @@ class MediaStore {
                 candidateLinks = linksFromPreferred;
             }
         }
-    
+
         if (candidateLinks.length === 1) {
-            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: candidateLinks[0].url });
+            this.sendPlayCommandAndOptimisticallyUpdate({...item, video_url: candidateLinks[0].url});
             return;
         }
-        
+
         // More than one candidate, try preferred labels.
         const preferredLabels = this.preferredLabels;
         let bestLink: MediaLink | undefined = undefined;
@@ -1334,9 +1481,9 @@ class MediaStore {
         if (preferredLabels.length > 0) {
             bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
         }
-    
+
         if (bestLink) {
-            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: bestLink.url });
+            this.sendPlayCommandAndOptimisticallyUpdate({...item, video_url: bestLink.url});
         } else {
             // More than one link, no preferred label, must ask user.
             runInAction(() => {
@@ -1352,12 +1499,12 @@ class MediaStore {
         // FIX: Cannot find name 'remoteSessions'. Logic rewritten to correctly send command from master to slave.
         // A remote control (master) sends commands to its connected TV (slave).
         if (this.isRemoteMaster && this.slaveId) {
-            websocketService.sendMessage({ type: 'quix-remote-command', payload: { ...payload, slaveId: this.slaveId } });
+            websocketService.sendMessage({type: 'quix-remote-command', payload: {...payload, slaveId: this.slaveId}});
         }
     };
-    
+
     sendSlaveStatusUpdate = () => {
-        if(this.isSmartTV && this.slaveId) {
+        if (this.isSmartTV && this.slaveId) {
             const video = document.querySelector('video');
             websocketService.sendMessage({
                 type: 'quix-slave-status-update',
@@ -1374,7 +1521,7 @@ class MediaStore {
     };
 
     stopRemotePlayback = () => {
-        this.sendRemoteCommand({ command: 'stop' });
+        this.sendRemoteCommand({command: 'stop'});
     };
 
     fetchRemoteFullItem = async () => {
@@ -1390,13 +1537,13 @@ class MediaStore {
                     const episodes = await getSeriesEpisodes(showId, season.season_number);
                     const episodesWithLinks = await Promise.all(episodes.map(async ep => {
                         const links = await this.getLinksForMedia(ep.id);
-                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                        return {...ep, video_urls: links, video_url: links[0]?.url};
                     }));
-                    return { ...season, episodes: episodesWithLinks };
+                    return {...season, episodes: episodesWithLinks};
                 }) || []
             );
             runInAction(() => {
-                this.remoteFullItem = { ...fullDetails, seasons: seasonsWithEpisodes };
+                this.remoteFullItem = {...fullDetails, seasons: seasonsWithEpisodes};
             });
         } catch (error) {
             console.error("Failed to fetch full remote item details", error);
@@ -1406,10 +1553,10 @@ class MediaStore {
             });
         }
     };
-    
+
     handleRemoteCommand = (payload: any) => {
-        const { command, item, time, slaveId } = payload;
-    
+        const {command, item, time, slaveId} = payload;
+
         // Commands that do NOT require an existing video element
         switch (command) {
             case 'play_item':
@@ -1438,11 +1585,11 @@ class MediaStore {
                 }
                 return;
         }
-    
+
         // All subsequent commands require a video element
         const video = document.querySelector('video');
         if (!video) return;
-    
+
         switch (command) {
             case 'play':
                 if (this.nowPlayingItem) this.isPlaying = true;
@@ -1478,9 +1625,9 @@ class MediaStore {
             const needsFetch = !cachedShow || !cachedShow.seasons || cachedShow.seasons.some(s => s.episodes.length === 0);
             if (needsFetch) {
                 // selectMedia with 'cacheOnly' will fetch from API and update the cache.
-                await this.selectMedia({ id: showId, media_type: 'tv' } as MediaItem, 'cacheOnly');
+                await this.selectMedia({id: showId, media_type: 'tv'} as MediaItem, 'cacheOnly');
             }
-            
+
             const show = this.cachedItems.get(showId); // Get the updated item
             if (!show || !show.seasons) continue;
 
@@ -1501,10 +1648,10 @@ class MediaStore {
                 }
             }
             if (links.length > 0) {
-                shows.push({ tmdbId: showId, links });
+                shows.push({tmdbId: showId, links});
             }
         }
-        return { version: 1, shows };
+        return {version: 1, shows};
     }
 
     importSharedLibrary = async (data: SharedLibraryData) => {
@@ -1518,7 +1665,7 @@ class MediaStore {
 
                 // Ensure show details are in cache
                 if (!this.cachedItems.has(showData.tmdbId)) {
-                    await this.selectMedia({ id: showData.tmdbId, media_type: 'tv' } as MediaItem, 'cacheOnly');
+                    await this.selectMedia({id: showData.tmdbId, media_type: 'tv'} as MediaItem, 'cacheOnly');
                 }
                 const show = this.cachedItems.get(showData.tmdbId);
                 if (!show || !show.seasons) continue;
@@ -1529,7 +1676,7 @@ class MediaStore {
 
                 const existingLinks = await db.mediaLinks.where('mediaId').anyOf(allEpisodeIds).toArray();
                 const existingLinkSet = new Set(existingLinks.map(l => `${l.mediaId}|${l.url}`));
-                
+
                 const linksToAdd: Omit<MediaLink, "id">[] = [];
                 for (const link of showData.links) {
                     const episode = show.seasons
@@ -1559,8 +1706,8 @@ class MediaStore {
             if (showIdsToAddToMyList.length > 0) {
                 const itemsToAddToMyList = showIdsToAddToMyList
                     .filter(id => !this.myList.includes(id)) // Filter out duplicates
-                    .map((id, index) => ({ id, order: this.myList.length + index }));
-                
+                    .map((id, index) => ({id, order: this.myList.length + index}));
+
                 if (itemsToAddToMyList.length > 0) {
                     await db.myList.bulkAdd(itemsToAddToMyList);
                     runInAction(() => {
@@ -1569,10 +1716,13 @@ class MediaStore {
                 }
             }
 
-            this.showSnackbar('notifications.importSuccess', 'success', true, { showCount: data.shows.length, linkCount: totalLinksAdded });
+            this.showSnackbar('notifications.importSuccess', 'success', true, {
+                showCount: data.shows.length,
+                linkCount: totalLinksAdded
+            });
             setTimeout(() => window.location.reload(), 3000);
         } catch (error) {
-            this.showSnackbar('notifications.importError', 'error', true, { error: (error as Error).message });
+            this.showSnackbar('notifications.importError', 'error', true, {error: (error as Error).message});
             this.isImportingLibrary = false;
         }
     }
@@ -1586,12 +1736,12 @@ class MediaStore {
             this.isRevisionsLoading = false;
         });
     }
-    
+
     revertRevision = async (revision: Revision) => {
         try {
             const table = (db as any)[revision.table];
             if (!table) throw new Error(`Table ${revision.table} not found.`);
-    
+
             switch (revision.type) {
                 case 1: // Revert create -> delete
                     await table.delete(revision.key);
@@ -1605,12 +1755,12 @@ class MediaStore {
                     break;
             }
             // Remove the revision itself
-            if(revision.id) await db.revisions.delete(revision.id);
+            if (revision.id) await db.revisions.delete(revision.id);
             this.showSnackbar('notifications.revertSuccess', 'success', true);
             // Reload the page after 1.5 seconds to ensure all state is consistent
             setTimeout(() => window.location.reload(), 1500);
-        } catch(error) {
-            this.showSnackbar('notifications.revertError', 'error', true, { error: (error as Error).message });
+        } catch (error) {
+            this.showSnackbar('notifications.revertError', 'error', true, {error: (error as Error).message});
         }
     }
 
@@ -1620,26 +1770,26 @@ class MediaStore {
             if (this.isLoggedIn) {
                 const newFile = await this.backupToDrive();
                 if (newFile) {
-                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
+                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
                 }
             }
         }, 30000); // 30-second debounce
     };
 
-    setGoogleUser = async (user: GoogleUser | null) => { 
+    setGoogleUser = async (user: GoogleUser | null) => {
         this.googleUser = user;
-        if(user) {
-            this.showSnackbar('notifications.welcomeUser', 'success', true, { name: user.name });
+        if (user) {
+            this.showSnackbar('notifications.welcomeUser', 'success', true, {name: user.name});
         } else {
             this.showSnackbar('notifications.logoutSuccess', 'info', true);
         }
     };
-    
+
     // Private helpers
     private async _fetchAndCacheMediaDetails(itemId: number, initialItem: MediaItem): Promise<MediaItem> {
         let fullItemDetails = initialItem;
         const needsApiFetch = fullItemDetails.media_type === 'tv' &&
-                              (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
+            (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
 
         if (needsApiFetch) {
             const apiDetails = await getSeriesDetails(itemId);
@@ -1648,26 +1798,26 @@ class MediaStore {
                     const episodes = await getSeriesEpisodes(itemId, season.season_number);
                     const episodesWithLinks = await Promise.all(episodes.map(async ep => {
                         const links = await this.getLinksForMedia(ep.id);
-                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                        return {...ep, video_urls: links, video_url: links[0]?.url};
                     }));
-                    return { ...season, episodes: episodesWithLinks };
+                    return {...season, episodes: episodesWithLinks};
                 }) || []
             );
-            fullItemDetails = { ...apiDetails, seasons: seasonsWithEpisodes };
+            fullItemDetails = {...apiDetails, seasons: seasonsWithEpisodes};
         } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
             const seasonsWithFreshLinks = await Promise.all(
                 fullItemDetails.seasons.map(async (season) => {
                     const episodesWithLinks = await Promise.all(season.episodes.map(async ep => {
                         const links = await this.getLinksForMedia(ep.id);
-                        return { ...ep, video_urls: links, video_url: links[0]?.url };
+                        return {...ep, video_urls: links, video_url: links[0]?.url};
                     }));
-                    return { ...season, episodes: episodesWithLinks };
+                    return {...season, episodes: episodesWithLinks};
                 })
             );
-            fullItemDetails = { ...fullItemDetails, seasons: seasonsWithFreshLinks };
+            fullItemDetails = {...fullItemDetails, seasons: seasonsWithFreshLinks};
         } else if (fullItemDetails.media_type === 'movie') {
             const links = await this.getLinksForMedia(itemId);
-            fullItemDetails = { ...fullItemDetails, video_urls: links, video_url: links[0]?.url };
+            fullItemDetails = {...fullItemDetails, video_urls: links, video_url: links[0]?.url};
         }
 
         await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
@@ -1676,18 +1826,28 @@ class MediaStore {
         });
         return fullItemDetails;
     }
+
 // FIX: Modified findEpisodeById to return an object that is structurally compatible with MediaItem for use in ContentRow/Card components.
-    private findEpisodeById(episodeId: number): (Episode & { show_id: number, show_title: string, backdrop_path: string, season_number: number, poster_path: string, title: string, media_type: 'tv', name: string }) | null {
+    private findEpisodeById(episodeId: number): (Episode & {
+        show_id: number,
+        show_title: string,
+        backdrop_path: string,
+        season_number: number,
+        poster_path: string,
+        title: string,
+        media_type: 'tv',
+        name: string
+    }) | null {
         for (const show of this.cachedItems.values()) {
             if (show.seasons) {
                 for (const season of show.seasons) {
                     const episode = season.episodes.find(ep => ep.id === episodeId);
                     if (episode) {
-                        return { 
-                            ...episode, 
-                            show_id: show.id, 
-                            show_title: show.name || show.title, 
-                            backdrop_path: show.backdrop_path, 
+                        return {
+                            ...episode,
+                            show_id: show.id,
+                            show_title: show.name || show.title,
+                            backdrop_path: show.backdrop_path,
                             season_number: season.season_number,
                             // Make it MediaItem-like for Card component
                             poster_path: episode.still_path || show.poster_path,
@@ -1710,7 +1870,7 @@ class MediaStore {
 
     private async getLinksForMedia(mediaId: number): Promise<MediaLink[]> {
         let links = this.mediaLinks.get(mediaId);
-        if(!links) {
+        if (!links) {
             links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
             this.mediaLinks.set(mediaId, links);
         }
@@ -1728,7 +1888,7 @@ class MediaStore {
             // Also refresh the movie item if it's the one being linked
             if (this.linkingMovieItem?.id === mediaId) {
                 // By creating a new object, we ensure MobX detects the change and re-renders the observer component.
-                this.linkingMovieItem = { ...this.linkingMovieItem, video_urls: links };
+                this.linkingMovieItem = {...this.linkingMovieItem, video_urls: links};
             }
         });
     }
@@ -1747,17 +1907,17 @@ class MediaStore {
                             this.mediaLinks.set(episode.id, links);
                         });
                         // Create a new episode object with updated links
-                        return { ...episode, video_urls: links, video_url: links[0]?.url };
+                        return {...episode, video_urls: links, video_url: links[0]?.url};
                     })
                 );
                 // Create a new season object with updated episodes
-                return { ...season, episodes: updatedEpisodes };
+                return {...season, episodes: updatedEpisodes};
             })
         );
-        
+
         // Create a new show object with the updated seasons
-        const updatedShow = { ...show, seasons: updatedSeasons };
-        
+        const updatedShow = {...show, seasons: updatedSeasons};
+
         runInAction(() => {
             // Update the main cache
             this.cachedItems.set(showId, updatedShow);
@@ -1793,56 +1953,72 @@ class MediaStore {
             rev.icon = rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'delete';
             const obj = rev.obj || rev.oldObj;
             if (!obj) {
-                rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                rev.description = this.t('revisions.descriptions.unknown', {type: rev.type, table: rev.table});
                 continue;
             }
 
             try {
-                switch(rev.table) {
+                switch (rev.table) {
                     case 'myList':
                         const myListItem = this.cachedItems.get(obj.id);
-                        rev.description = this.t('revisions.descriptions.myList.' + (rev.type === 1 ? 'add' : 'remove'), { name: myListItem?.name || myListItem?.title || obj.id });
+                        rev.description = this.t('revisions.descriptions.myList.' + (rev.type === 1 ? 'add' : 'remove'), {name: myListItem?.name || myListItem?.title || obj.id});
                         break;
                     case 'cachedItems':
-                        rev.description = this.t('revisions.descriptions.cachedItems.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), { name: obj.name || obj.title });
+                        rev.description = this.t('revisions.descriptions.cachedItems.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), {name: obj.name || obj.title});
                         break;
                     case 'mediaLinks':
-                         const context = await this.findEpisodeContext(obj.mediaId);
-                         if (context) {
-                             rev.description = this.t('revisions.descriptions.episodeLinks.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), context);
-                         } else {
-                            rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
-                         }
+                        const context = await this.findEpisodeContext(obj.mediaId);
+                        if (context) {
+                            rev.description = this.t('revisions.descriptions.episodeLinks.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), context);
+                        } else {
+                            rev.description = this.t('revisions.descriptions.unknown', {
+                                type: rev.type,
+                                table: rev.table
+                            });
+                        }
                         break;
                     case 'showIntroDurations':
                         const show = this.cachedItems.get(obj.id);
-                        rev.description = this.t('revisions.descriptions.showIntroDurations.' + (rev.type === 1 || rev.type === 2 ? 'set' : 'remove'), { show: show?.name || obj.id, duration: obj.duration });
+                        rev.description = this.t('revisions.descriptions.showIntroDurations.' + (rev.type === 1 || rev.type === 2 ? 'set' : 'remove'), {
+                            show: show?.name || obj.id,
+                            duration: obj.duration
+                        });
                         break;
                     case 'viewingHistory':
                         const vhContext = await this.findEpisodeContext(obj.episodeId);
                         if (vhContext) {
                             rev.description = this.t('revisions.descriptions.viewingHistory.add', vhContext);
                         } else {
-                            rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                            rev.description = this.t('revisions.descriptions.unknown', {
+                                type: rev.type,
+                                table: rev.table
+                            });
                         }
                         break;
                     default:
-                        rev.description = this.t('revisions.descriptions.unknown', { type: rev.type, table: rev.table });
+                        rev.description = this.t('revisions.descriptions.unknown', {type: rev.type, table: rev.table});
                         break;
                 }
-            } catch (e) { console.warn("Error enriching revision", e); }
+            } catch (e) {
+                console.warn("Error enriching revision", e);
+            }
         }
     }
 
-    private async findEpisodeContext(episodeId: number): Promise<{ show: string | undefined; s: number; e: number; epName: string; } | null> {
-        if(this.episodeContextMap.has(episodeId)) return this.episodeContextMap.get(episodeId) || null;
-        
+    private async findEpisodeContext(episodeId: number): Promise<{
+        show: string | undefined;
+        s: number;
+        e: number;
+        epName: string;
+    } | null> {
+        if (this.episodeContextMap.has(episodeId)) return this.episodeContextMap.get(episodeId) || null;
+
         for (const show of this.cachedItems.values()) {
             if (show.seasons) {
                 for (const season of show.seasons) {
                     const episode = season.episodes.find(ep => ep.id === episodeId);
                     if (episode) {
-                        const context = { 
+                        const context = {
                             show: show.name || show.title,
                             s: season.season_number,
                             e: episode.episode_number,
@@ -1856,106 +2032,135 @@ class MediaStore {
         }
         return null; // Should fetch if not found, but this is for UI display, so fail silently.
     }
-    
+
     // Websocket and remote control methods
-    addDebugMessage = (message: string) => { if (this.debugMessages.length > 100) { this.debugMessages.shift(); } this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`); };
+    addDebugMessage = (message: string) => {
+        if (this.debugMessages.length > 100) {
+            this.debugMessages.shift();
+        }
+        this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+    };
     initRemoteSession = () => {
         if (this.isSmartTV) {
-            const payload = this.slaveId ? { slaveId: this.slaveId } : {};
-            websocketService.sendMessage({ type: 'quix-register-slave', payload });
+            const payload = this.slaveId ? {slaveId: this.slaveId} : {};
+            websocketService.sendMessage({type: 'quix-register-slave', payload});
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.
-            websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId: this.slaveId } });
+            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
             // Request the current status from the slave to sync the UI
-            this.sendRemoteCommand({ command: 'request_status' });
+            this.sendRemoteCommand({command: 'request_status'});
         }
     };
-    handleIncomingMessage = (message: any) => { runInAction(() => {
-        const { type, payload } = message;
-        this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
-        switch (type) {
-            case 'quix-slave-registered': 
-                this.slaveId = payload.slaveId;
-                this.slaveShortCode = payload.shortCode;
-                if (this.isSmartTV) {
-                    db.preferences.put({ key: 'selfSlaveId', value: payload.slaveId });
-                }
-                this.showSnackbar('notifications.tvReady', 'info', true); 
-                break;
-            case 'quix-master-connected':
-                this.isRemoteMasterConnected = true;
-                if (this.isSmartTV) {
-                    this.isSmartTVPairingVisible = false;
-                }
-                this.showSnackbar('notifications.remoteConnected', 'success', true);
-                break;
-            case 'quix-room-update':
-                this.roomId = payload.roomId;
-                this.hostId = payload.hostId;
-                this.participants = payload.participants;
-                this.playbackState = payload.playbackState;
-                this.chatHistory = payload.chatHistory;
-                this.isHost = payload.isHost;
-                this.myClientId = websocketService.clientId;
-                if (payload.selectedMedia) {
-                    const existing = this.cachedItems.get(payload.selectedMedia.id);
-                    if (existing) {
-                        this.watchTogetherSelectedItem = payload.selectedMedia;
-                        this.selectMedia(existing, 'watchTogether');
-                    } else { // If not cached, fetch it
-                        this.selectMedia(payload.selectedMedia, 'watchTogether');
+    handleIncomingMessage = (message: any) => {
+        runInAction(() => {
+            const {type, payload} = message;
+            this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
+            switch (type) {
+                case 'quix-slave-registered':
+                    this.slaveId = payload.slaveId;
+                    this.slaveShortCode = payload.shortCode;
+                    if (this.isSmartTV) {
+                        db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
                     }
-                }
-                break;
-            case 'quix-playback-update': 
-                this.playbackState = payload.playbackState; 
-                this.playbackListeners.forEach(l => l(this.playbackState)); 
-                // If we are in a room, not the host, and not currently playing, this update means the host has started playback.
-                if (this.roomId && !this.isHost && !this.nowPlayingItem && this.watchTogetherSelectedItem && payload.playbackState.status === 'playing') {
-                    this.startPlayback(this.watchTogetherSelectedItem);
-                }
-                break;
-            case 'quix-error': this.watchTogetherError = payload.message; break;
-            case 'quix-remote-command-received': this.handleRemoteCommand(payload); break;
-            case 'quix-slave-status-update': this.remoteSlaveState = payload; break;
-            case 'quix-sync-media-request':
-                // Master sent media items to sync to slave
-                if (payload?.mediaItems && Array.isArray(payload.mediaItems)) {
-                    this.syncMediaFromMaster(payload.mediaItems);
-                }
-                break;
-            case 'quix-sync-completed':
-                // Sync completed notification
-                this.showSnackbar('notifications.syncCompleted', 'success', true);
-                break;
-            case 'quix-sync-error':
-                this.showSnackbar(payload?.error || 'Sync failed', 'error', true);
-                break;
+                    this.showSnackbar('notifications.tvReady', 'info', true);
+                    break;
+                case 'quix-master-connected':
+                    this.isRemoteMasterConnected = true;
+                    if (this.isSmartTV) {
+                        this.isSmartTVPairingVisible = false;
+                    }
+                    this.showSnackbar('notifications.remoteConnected', 'success', true);
+                    break;
+                case 'quix-room-update':
+                    this.roomId = payload.roomId;
+                    this.hostId = payload.hostId;
+                    this.participants = payload.participants;
+                    this.playbackState = payload.playbackState;
+                    this.chatHistory = payload.chatHistory;
+                    this.isHost = payload.isHost;
+                    this.myClientId = websocketService.clientId;
+                    if (payload.selectedMedia) {
+                        const existing = this.cachedItems.get(payload.selectedMedia.id);
+                        if (existing) {
+                            this.watchTogetherSelectedItem = payload.selectedMedia;
+                            this.selectMedia(existing, 'watchTogether');
+                        } else { // If not cached, fetch it
+                            this.selectMedia(payload.selectedMedia, 'watchTogether');
+                        }
+                    }
+                    break;
+                case 'quix-playback-update':
+                    this.playbackState = payload.playbackState;
+                    this.playbackListeners.forEach(l => l(this.playbackState));
+                    // If we are in a room, not the host, and not currently playing, this update means the host has started playback.
+                    if (this.roomId && !this.isHost && !this.nowPlayingItem && this.watchTogetherSelectedItem && payload.playbackState.status === 'playing') {
+                        this.startPlayback(this.watchTogetherSelectedItem);
+                    }
+                    break;
+                case 'quix-remote-command':
+                    this.handleRemoteCommand(payload);
+                    break;
+                case 'quix-remote-command-received':
+                    // This is just an acknowledgment from the backend - update UI state only, don't execute command
+                    console.log('[mediaStore] Remote command received by backend:', payload);
+                    // Could add UI feedback here like setting a flag to show "command sent" status
+                    break;
+                case 'quix-slave-status-update':
+                    this.remoteSlaveState = payload;
+                    break;
+                case 'quix-sync-media-request':
+                    // Master sent media items to sync to slave
+                    if (payload?.mediaItems && Array.isArray(payload.mediaItems)) {
+                        this.syncMediaFromMaster(payload.mediaItems);
+                    }
+                    break;
+                case 'quix-sync-completed':
+                    // Sync completed notification
+                    this.showSnackbar('notifications.syncCompleted', 'success', true);
+                    break;
+                case 'quix-sync-error':
+                    this.showSnackbar(payload?.error || 'Sync failed', 'error', true);
+                    break;
+            }
+        });
+    };
+    sendPlaybackControl = (state: PlaybackState) => {
+        if (this.roomId) {
+            websocketService.sendMessage({type: 'quix-playback-control', payload: {playbackState: state}});
         }
-    }); };
-    sendPlaybackControl = (state: PlaybackState) => { if (this.roomId) { websocketService.sendMessage({ type: 'quix-playback-control', payload: { playbackState: state } }); } };
-    addPlaybackListener = (listener: (state: PlaybackState) => void) => { this.playbackListeners.push(listener); return () => { this.playbackListeners = this.playbackListeners.filter(l => l !== listener); }; };
-    sendChatMessage = (message: { text?: string; image?: string; }) => { websocketService.sendMessage({ type: 'quix-chat-message', payload: { message } }); };
-    
+    };
+    addPlaybackListener = (listener: (state: PlaybackState) => void) => {
+        this.playbackListeners.push(listener);
+        return () => {
+            this.playbackListeners = this.playbackListeners.filter(l => l !== listener);
+        };
+    };
+    sendChatMessage = (message: { text?: string; image?: string; }) => {
+        websocketService.sendMessage({type: 'quix-chat-message', payload: {message}});
+    };
+
     // Sync media items from master to slave
     syncMediaFromMaster = async (mediaItems: any[]) => {
         try {
-            const { db } = await import('../services/db.ts');
+            const {db} = await import('../services/db.ts');
             // Save each media item to cachedItems
             await db.cachedItems.bulkPut(mediaItems);
             // Add each item to myList
             for (const item of mediaItems) {
-                await db.myList.put({ id: item.id });
+                await db.myList.put({id: item.id});
             }
             this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
             // Send completion notification back to master
-            websocketService.sendMessage({ type: 'quix-sync-completed' });
+            websocketService.sendMessage({type: 'quix-sync-completed'});
         } catch (error) {
             console.error('Error syncing media from master:', error);
-            websocketService.sendMessage({ type: 'quix-sync-error', payload: { error: 'Failed to sync media' } });
+            websocketService.sendMessage({type: 'quix-sync-error', payload: {error: 'Failed to sync media'}});
         }
     };
-    transferHost = (newHostId: string) => { websocketService.sendMessage({ type: 'quix-transfer-host', payload: { newHostId } }); };
+    transferHost = (newHostId: string) => {
+        websocketService.sendMessage({type: 'quix-transfer-host', payload: {newHostId}});
+    };
 }
+
 export const mediaStore = new MediaStore();

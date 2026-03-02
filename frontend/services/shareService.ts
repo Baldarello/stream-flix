@@ -1,5 +1,4 @@
-
-import type { SharedLibraryData } from '../types';
+import type {SharedLibraryData} from '../types';
 import * as driveService from './googleDriveService';
 
 /**

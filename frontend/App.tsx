@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore, ThemeName } from './store/mediaStore.ts';
-import { Box, CircularProgress, Alert, Container, Typography, colors } from '@mui/material';
-import { ThemeProvider, createTheme, ThemeOptions } from '@mui/material/styles';
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore, ThemeName} from './store/mediaStore.ts';
+import {Alert, Box, CircularProgress, colors, Container, Typography} from '@mui/material';
+import {createTheme, ThemeOptions, ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Header } from './components/Header.tsx';
-import { Hero } from './components/Hero.tsx';
-import { ContentRow } from './components/ContentRow.tsx';
-import { Footer } from './components/Footer.tsx';
+import {Header} from './components/Header.tsx';
+import {Hero} from './components/Hero.tsx';
+import {ContentRow} from './components/ContentRow.tsx';
+import {Footer} from './components/Footer.tsx';
 import DetailView from './components/DetailView.tsx';
 import VideoPlayer from './components/VideoPlayer.tsx';
 import GridView from './components/GridView.tsx';
@@ -16,7 +16,7 @@ import RemotePlayerControlView from './components/RemotePlayerControlView.tsx';
 import ProfileDrawer from './components/ProfileDrawer.tsx';
 import QRScanner from './components/QRScanner.tsx';
 import WatchTogetherModal from './components/WatchTogetherModal.tsx';
-import { NotificationSnackbar } from './components/NotificationSnackbar.tsx';
+import {NotificationSnackbar} from './components/NotificationSnackbar.tsx';
 import DebugOverlay from './components/DebugOverlay.tsx';
 import LinkSelectionModal from './components/LinkSelectionModal.tsx';
 import LinkMovieModal from './components/LinkMovieModal.tsx';
@@ -24,10 +24,10 @@ import ShareLibraryModal from './components/ShareLibraryModal.tsx';
 import ImportLibraryModal from './components/ImportLibraryModal.tsx';
 import RevisionsModal from './components/RevisionsModal.tsx';
 import MediaSyncModal from './components/MediaSyncModal.tsx';
-import { useTranslations } from './hooks/useTranslations.ts';
-import { initGoogleAuth } from './services/googleAuthService';
-import { websocketService } from './services/websocketService.js';
-import type { MediaItem, PlayableItem } from './types.ts';
+import {useTranslations} from './hooks/useTranslations.ts';
+import {initGoogleAuth} from './services/googleAuthService';
+import {websocketService} from './services/websocketService.js';
+import type {MediaItem, PlayableItem} from './types.ts';
 
 const baseThemeOptions: ThemeOptions = {
     typography: {
