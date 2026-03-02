@@ -45,7 +45,7 @@ COPY backend/package.json backend/bun.lock* ./
 RUN bun install --frozen-lockfile --production
 
 # Stage 4: Production runtime
-FROM node:22-alpine AS production
+FROM oven/bun:1.2-alpine AS production
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
@@ -59,7 +59,7 @@ COPY --from=backend-builder /app/backend/dist ./dist
 # Copy production node_modules
 COPY --from=backend-deps /app/backend/node_modules ./node_modules
 
-# Copy backend package.json (needed by Node.js for "type": "module")
+# Copy backend package.json (needed by Bun for "type": "module")
 COPY backend/package.json ./package.json
 
 # Copy built frontend static assets (served by @elysiajs/static)
@@ -79,5 +79,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Start the application with Bun
+CMD ["bun", "run", "dist/index.js"]
