@@ -8,8 +8,7 @@
     "frontend"
   ],
   "scripts": {
-    "install:be": "cd backend && bun install ",
-    "install:fe": "cd frontend && bun install",
+    "install:all": "bun i",
     "dev:be": "cd backend && bun run dev",
     "dev:fe": "cd frontend && bun run dev",
     "build:frontend": "vite build",

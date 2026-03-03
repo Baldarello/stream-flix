@@ -30,10 +30,6 @@ RUN bun install --frozen-lockfile --production
 # Stage 3: Production runtime
 FROM oven/bun:1 AS production
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S streamflix -u 1001 -G nodejs
-
 WORKDIR /app
 
 # Copy backend source files (Bun can run TypeScript directly)
@@ -52,15 +48,15 @@ COPY --from=frontend-builder /app/frontend/dist ./public
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Switch to non-root user before exposing ports
-USER streamflix
 
 # Expose port
 EXPOSE 3000
 
+COPY health-check.js ./
+
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=2s --retries=5 \
+    CMD bun ./health-check.js || exit 1
 
 # Start the application with Bun (run TypeScript directly)
 CMD ["bun", "run", "src/index.ts"]
