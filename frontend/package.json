@@ -1,8 +1,8 @@
 {
-  "name": "stream-flix",
+  "name": "quix",
   "private": true,
   "version": "1.0.0",
-  "description": "Stream-Flix - Video streaming with watch together functionality",
+  "description": "Quix - Video streaming with watch together functionality",
   "type": "module",
   "scripts": {
     "dev": "vite",

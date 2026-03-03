@@ -1,5 +1,5 @@
 // ============================================================================
-// WebSocket Router for Stream-Flix
+// WebSocket Router for Quix
 // Refactored according to Elysia.js Best Practices
 // ============================================================================
 

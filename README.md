@@ -1,6 +1,6 @@
-# Stream-Flix
+# Quix
 
-Stream-Flix is a modern personal streaming platform that allows users to watch movies, TV series, and anime with an intuitive Netflix-like interface. The application features real-time synchronization for watch-together experiences, Smart TV remote control capabilities, and Google Drive integration for media library management.
+Quix is a modern personal streaming platform that allows users to watch movies, TV series, and anime with an intuitive Netflix-like interface. The application features real-time synchronization for watch-together experiences, Smart TV remote control capabilities, and Google Drive integration for media library management.
 
 ## Table of Contents
 
@@ -47,7 +47,7 @@ Stream-Flix is a modern personal streaming platform that allows users to watch m
 
 ## Architecture
 
-Stream-Flix follows a client-server architecture with real-time WebSocket communication:
+Quix follows a client-server architecture with real-time WebSocket communication:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -104,7 +104,7 @@ Stream-Flix follows a client-server architecture with real-time WebSocket commun
 ## Project Structure
 
 ```
-stream-flix/
+quix/
 ├── backend/
 │   ├── src/
 │   │   ├── index.ts       # Main server entry point
@@ -214,7 +214,7 @@ Builds and starts the production containers.
 **Manual Docker Build:**
 ```bash
 bun run docker:build
-docker run -p 3000:3000 stream-flix:latest
+docker run -p 3000:3000 quix:latest
 ```
 
 ## Configuration

@@ -53,7 +53,7 @@ const app = new Elysia({
     }))
     // API info endpoint
     .get('/api', () => ({
-        name: 'Stream-Flix API',
+        name: 'Quix API',
         version: '1.0.0',
         endpoints: {
             websocket: `ws://localhost:${PORT}/ws`,
@@ -70,7 +70,7 @@ const app = new Elysia({
             // Send welcome message
             socket.send(JSON.stringify({
                 type: 'connected',
-                payload: {message: 'Connected to Stream-Flix WebSocket server'}
+                payload: {message: 'Connected to Quix WebSocket server'}
             }));
         },
         close(ws: unknown) {
@@ -197,7 +197,7 @@ process.on('SIGTERM', cleanup);
 app.listen(PORT, () => {
     console.log(`
  ╔══════════════════════════════════════════════════════════════╗
- ║                    Stream-Flix Backend                       ║
+ ║                    Quix Backend                       ║
  ╠══════════════════════════════════════════════════════════════╣
  ║  Server running on: http://localhost:${PORT}                   ║
  ║  WebSocket:       ws://localhost:${PORT}/ws                    ║

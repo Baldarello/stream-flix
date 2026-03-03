@@ -1,7 +1,7 @@
 {
-  "name": "stream-flix-backend",
+  "name": "quix-backend",
   "version": "1.0.0",
-  "description": "Stream-Flix Backend with ElysiaJS",
+  "description": "Quix Backend with ElysiaJS",
   "type": "module",
   "scripts": {
     "dev": "bun run src/index.ts",

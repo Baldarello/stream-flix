@@ -1,8 +1,8 @@
 {
-  "name": "stream-flix",
+  "name": "quix",
   "private": true,
-  "version": "1.0.0",
-  "description": "Stream-Flix - Video streaming with watch together functionality",
+  "version": "3.0.0",
+  "description": "Quix - Video streaming with watch together functionality",
   "workspaces": [
     "backend",
     "frontend"
@@ -11,12 +11,8 @@
     "install:all": "bun i",
     "dev:be": "cd backend && bun run dev",
     "dev:fe": "cd frontend && bun run dev",
-    "build:frontend": "vite build",
-    "build:backend": "npm run build --workspace=backend",
-    "docker:build": "docker build -t stream-flix:latest .",
-    "docker:up": "docker-compose --profile prod up -d",
-    "docker:down": "docker-compose --profile prod down",
-    "docker:dev": "docker-compose --profile dev up -d"
+    "docker:build": "docker build -t quix:latest .",
+    "docker:start": "docker run --name quix-local -p 3000:3000 quix:latest"
   }
 
 }

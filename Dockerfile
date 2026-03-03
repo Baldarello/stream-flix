@@ -1,4 +1,4 @@
-# Stream-Flix Monorepo Dockerfile
+# Quix Monorepo Dockerfile
 # Multi-stage build for production
 
 # Stage 1: Build frontend
