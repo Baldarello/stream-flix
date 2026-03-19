@@ -206,6 +206,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         );
 
         // Send sync request to the slave via WebSocket
+        console.log(`[MediaSyncModal] Sending quix-sync-media-request with slaveId='${slaveId}'`);
         websocketService.sendMessage({
             type: 'quix-sync-media-request',
             payload: {

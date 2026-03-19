@@ -435,9 +435,10 @@ export function createWebSocketRouter() {
                         }
                         session.masterWs = ws;
                         setWSData(ws, 'remoteSlaveId', fullSlaveId);
-                        ws.send(JSON.stringify({type: 'quix-master-connected'}));
+                        // FIX: Include resolved slaveId in quix-master-connected so master uses correct ID
+                        ws.send(JSON.stringify({type: 'quix-master-connected', payload: {slaveId: fullSlaveId}}));
                         if (session && isConnectionOpen(session.slaveWs)) {
-                            session.slaveWs.send(JSON.stringify({type: 'quix-master-connected'}));
+                            session.slaveWs.send(JSON.stringify({type: 'quix-master-connected', payload: {slaveId: fullSlaveId}}));
                         }
                         console.log(`[WebSocket] Master connected to slave ${fullSlaveId}`);
                     } else {
@@ -455,8 +456,20 @@ export function createWebSocketRouter() {
                     const slaveId = typedPayload?.slaveId;
                     const command = typedPayload?.command;
 
+                    // DEBUG: Log all active sessions
+                    console.log(`[DEBUG] quix-remote-command: Received slaveId='${slaveId}', command='${command}'`);
+                    console.log(`[DEBUG] Active remoteSessions (${remoteSessions.size}):`);
+                    for (const [key, session] of remoteSessions.entries()) {
+                        console.log(`  - ${key}: slaveWs=${isConnectionOpen(session.slaveWs)}, masterWs=${isConnectionOpen(session.masterWs)}`);
+                    }
+
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
+                        console.log(`[DEBUG] Session lookup for '${slaveId}': ${session ? 'found' : 'NOT found'}`);
+                        if (session) {
+                            console.log(`[DEBUG] Session state: slaveWs=${isConnectionOpen(session.slaveWs)}, masterWs=${isConnectionOpen(session.masterWs)}`);
+                        }
+                        
                         console.log(`[WebSocket] quix-remote-command: Received command '${command}' for slave ${slaveId}, master connected: ${!!session?.masterWs}, slave connected: ${!!session?.slaveWs}`);
 
                         if (session) {
@@ -536,8 +549,21 @@ export function createWebSocketRouter() {
                     // Master sends media sync request to slave
                     const typedPayload = payload as { slaveId?: string; mediaItems?: unknown[] };
                     const slaveId = typedPayload?.slaveId;
+                    
+                    // DEBUG: Log all active sessions
+                    console.log(`[DEBUG] quix-sync-media-request: Received slaveId='${slaveId}'`);
+                    console.log(`[DEBUG] Active remoteSessions (${remoteSessions.size}):`);
+                    for (const [key, session] of remoteSessions.entries()) {
+                        console.log(`  - ${key}: slaveWs=${isConnectionOpen(session.slaveWs)}, masterWs=${isConnectionOpen(session.masterWs)}`);
+                    }
+                    
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
+                        console.log(`[DEBUG] Session lookup for '${slaveId}': ${session ? 'found' : 'NOT found'}`);
+                        if (session) {
+                            console.log(`[DEBUG] Session state: slaveWs=${isConnectionOpen(session.slaveWs)}, masterWs=${isConnectionOpen(session.masterWs)}`);
+                        }
+                        
                         if (session && isConnectionOpen(session.slaveWs)) {
                             session.slaveWs.send(JSON.stringify({
                                 type: 'quix-sync-media-request',

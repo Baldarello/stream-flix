@@ -542,6 +542,7 @@ class MediaStore {
         db.preferences.delete('isConfiguredAsSlave');
     };
     openMediaSyncModal = (slaveId: string) => {
+        console.log(`[mediaStore] openMediaSyncModal: slaveId='${slaveId}', current slaveId='${this.slaveId}'`);
         this.mediaSyncTargetSlaveId = slaveId;
         this.isMediaSyncModalOpen = true;
     };
@@ -1516,7 +1517,10 @@ class MediaStore {
         // FIX: Cannot find name 'remoteSessions'. Logic rewritten to correctly send command from master to slave.
         // A remote control (master) sends commands to its connected TV (slave).
         if (this.isRemoteMaster && this.slaveId) {
+            console.log(`[mediaStore] sendRemoteCommand: isRemoteMaster=${this.isRemoteMaster}, slaveId='${this.slaveId}', payload=`, payload);
             websocketService.sendMessage({type: 'quix-remote-command', payload: {...payload, slaveId: this.slaveId}});
+        } else {
+            console.log(`[mediaStore] sendRemoteCommand: NOT sending - isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
         }
     };
 
@@ -2085,13 +2089,23 @@ class MediaStore {
                     this.showSnackbar('notifications.tvReady', 'info', true);
                     break;
                 case 'quix-master-connected':
+                    console.log(`[mediaStore] quix-master-connected: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, payload=${JSON.stringify(payload)}`);
                     this.isRemoteMasterConnected = true;
+                    
+                    // FIX: Update slaveId if provided in payload (backend resolves shortCode to full ID)
+                    // This ensures master uses the correct slaveId that matches backend's remoteSessions key
+                    if (payload?.slaveId && this.isRemoteMaster) {
+                        console.log(`[mediaStore] quix-master-connected: Updating slaveId from '${this.slaveId}' to '${payload.slaveId}'`);
+                        this.slaveId = payload.slaveId;
+                    }
+                    
                     if (this.isSmartTV) {
                         // Slave side: hide the pairing screen
                         this.isSmartTVPairingVisible = false;
                     } else {
                         // Master side: open the media sync modal
                         if (this.slaveId) {
+                            console.log(`[mediaStore] quix-master-connected: Opening sync modal with slaveId=${this.slaveId}`);
                             this.openMediaSyncModal(this.slaveId);
                         }
                     }
