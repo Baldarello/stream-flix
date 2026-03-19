@@ -442,6 +442,10 @@ export function createWebSocketRouter() {
                         console.log(`[WebSocket] Master connected to slave ${fullSlaveId}`);
                     } else {
                         console.warn(`[WebSocket] Master registration failed: no session found for slave ${fullSlaveId}`);
+                        ws.send(JSON.stringify({
+                            type: 'quix-master-connection-status',
+                            payload: {status: 'slave-not-found', slaveId: fullSlaveId}
+                        }));
                     }
                     break;
                 }

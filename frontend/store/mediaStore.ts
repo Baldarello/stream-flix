@@ -2101,6 +2101,8 @@ class MediaStore {
                     // Handle connection status when master tries to reconnect with shortCode
                     if (payload.status === 'slave-busy') {
                         this.showSnackbar('notifications.slaveBusy', 'warning', true);
+                    } else if (payload.status === 'slave-not-found') {
+                        this.showSnackbar('notifications.slaveNotFound', 'error', true);
                     } else if (payload.slaveId && payload.shortCode) {
                         // Backend resolved shortCode to slaveId - update knownSlaves with both
                         this.updateSlaveShortCode(payload.slaveId, payload.shortCode);

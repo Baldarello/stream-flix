@@ -321,7 +321,9 @@ export const it = {
     "disconnectedFromTV": "Disconnesso dalla TV.",
     "remoteConnected": "Telecomando connesso!",
     "slaveBusy": "La TV è attualmente connessa a un altro dispositivo. Disconnettila prima.",
+    "slaveNotFound": "Dispositivo non trovato. Assicurati che la TV sia accesa e pronta per la connessione.",
     "reconnectingAsRemote": "Riconnessione come telecomando...",
+
     "failedToLoadSeriesDetails": "Impossibile caricare i dettagli della serie.",
     "noPlayableEpisodes": "Nessun episodio riproducibile trovato per questa serie.",
     "noVideoLinks": "Nessun link video trovato per questo contenuto.",

@@ -321,7 +321,9 @@ export const en = {
     "disconnectedFromTV": "Disconnected from the TV.",
     "remoteConnected": "Remote connected!",
     "slaveBusy": "TV is currently connected to another device. Please disconnect first.",
+    "slaveNotFound": "Device not found. Make sure the TV is turned on and ready to connect.",
     "reconnectingAsRemote": "Reconnecting as remote control...",
+
     "failedToLoadSeriesDetails": "Could not load series details.",
     "noPlayableEpisodes": "No playable episodes found for this series.",
     "noVideoLinks": "No video links found for this content.",
