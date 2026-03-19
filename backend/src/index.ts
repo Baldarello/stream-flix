@@ -11,7 +11,7 @@ import {fileURLToPath} from 'url';
 // Environment Configuration
 // ============================================================================
 
-const PORT = parseInt(process.env.PORT || '3000');
+const PORT = parseInt(process.env.PORT || '3011');
 const WS_HEARTBEAT_INTERVAL = parseInt(process.env.WS_HEARTBEAT_INTERVAL || '30000');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 

@@ -57,6 +57,19 @@ const mediaSyncProgress = new Map<string, SyncProgress>();
 // Utility Functions
 // ============================================================================
 
+// Helper function to safely check if WebSocket connection is open
+// Uses standard WebSocket API instead of internal Elysia properties
+function isConnectionOpen(ws: any): boolean {
+    if (!ws) return false;
+    try {
+        // Standard WebSocket readyState: 0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED
+        const readyState = ws.raw?.readyState ?? ws.readyState;
+        return readyState === 1; // WebSocket.OPEN
+    } catch {
+        return false;
+    }
+}
+
 function generateUniqueId(prefix = 'id'): string {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
@@ -88,7 +101,7 @@ function broadcastRoomState(roomId: string): void {
             chatHistory: room.gameState?.chatHistory,
             isHost: clientId === room.hostId,
         };
-        if ((clientWs as any).raw?.readyState === 1) {
+        if (isConnectionOpen(clientWs)) {
             (clientWs as any).send(JSON.stringify({type: 'quix-room-update', payload}));
         }
     });
@@ -116,6 +129,10 @@ function setWSData(ws: any, key: keyof WSData, value: string): void {
 // ============================================================================
 
 function sendError(ws: any, message: string): void {
+    if (!isConnectionOpen(ws)) {
+        console.warn(`[WebSocket] sendError: Connection not open, skipping send`);
+        return;
+    }
     try {
         ws.send(JSON.stringify({
             type: 'quix-error',
@@ -132,26 +149,29 @@ function sendError(ws: any, message: string): void {
 
 function handleDisconnectQuix(ws: any): void {
     const wsData = getWSData(ws);
-    console.log(`Client disconnected.`);
+    console.log(`[WebSocket] Client disconnected. userName: ${wsData.userName}, slaveId: ${wsData.slaveId}, remoteSlaveId: ${wsData.remoteSlaveId}`);
 
-    // Clean up remote control sessions
+    // Clean up remote control sessions when master disconnects
     if (wsData.remoteSlaveId) {
         const session = remoteSessions.get(wsData.remoteSlaveId);
         if (session) {
             session.masterWs = null;
-            console.log(`Master disconnected from slave ${wsData.remoteSlaveId}`);
+            console.log(`[WebSocket] Master disconnected from slave ${wsData.remoteSlaveId}`);
         }
     }
 
+    // Clean up when slave disconnects - also clear master's remoteSlaveId
     if (wsData.slaveId && remoteSessions.has(wsData.slaveId)) {
         const session = remoteSessions.get(wsData.slaveId);
-        if (session?.masterWs && (session.masterWs as unknown as {
-            raw: { readyState: number }
-        }).raw.readyState === 1) {
+        // Notify master that slave has disconnected
+        if (session?.masterWs && isConnectionOpen(session.masterWs)) {
             (session.masterWs as unknown as { send: (data: string) => void }).send(JSON.stringify({
                 type: 'quix-error',
                 payload: {message: 'The TV has disconnected.'}
             }));
+            // Clear the master's remoteSlaveId since slave is gone
+            setWSData(session.masterWs, 'remoteSlaveId', '');
+            console.log(`[WebSocket] Cleared master's remoteSlaveId for slave ${wsData.slaveId}`);
         }
         for (const [, progress] of Array.from(mediaSyncProgress.entries())) {
             if (progress.status === 'in_progress') {
@@ -162,7 +182,7 @@ function handleDisconnectQuix(ws: any): void {
         if (wsData.shortCode) {
             shortCodeToSlaveId.delete(wsData.shortCode);
         }
-        console.log(`Slave ${wsData.slaveId} session deleted.`);
+        console.log(`[WebSocket] Slave ${wsData.slaveId} session deleted.`);
     }
 
     if (wsData.remoteSlaveId) {
@@ -203,10 +223,11 @@ function handleDisconnectQuix(ws: any): void {
 
 export function createWebSocketRouter() {
     return function (ws: any, message: unknown): void {
-        // Initialize userName if not set
+        // Initialize userName if not set - this is when a new client connects
         const wsData = getWSData(ws);
         if (!wsData.userName) {
             wsData.userName = generateId('player');
+            console.log(`[WebSocket] New client connected. Assigned ID: ${wsData.userName}, Connection open: ${isConnectionOpen(ws)}`);
         }
 
         try {
@@ -224,6 +245,8 @@ export function createWebSocketRouter() {
             const {type, payload} = parsedMessage;
             const room = wsData.roomId ? rooms.get(wsData.roomId) : null;
             const isHost = room && wsData.userName === room.hostId;
+
+            console.log(`[WebSocket] Message received: type=${type}, userName=${wsData.userName}, slaveId=${wsData.slaveId}, remoteSlaveId=${wsData.remoteSlaveId}`);
 
             switch (type) {
                 case 'quix-create-room': {
@@ -292,7 +315,7 @@ export function createWebSocketRouter() {
                             payload: {playbackState: room.gameState.playbackState}
                         });
                         room.players.forEach(({ws: client}) => {
-                            if (client.raw.readyState === 1) client.send(updateMessage);
+                            if (isConnectionOpen(client)) client.send(updateMessage);
                         });
                     }
                     break;
@@ -361,26 +384,42 @@ export function createWebSocketRouter() {
                         type: 'quix-slave-registered',
                         payload: {slaveId: persistentId, shortCode}
                     }));
-                    console.log(`Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
+                    console.log(`[WebSocket] Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
                     break;
                 }
 
                 case 'quix-register-master': {
-                    let fullSlaveId = (payload as { slaveId?: string })?.slaveId;
-                    if (fullSlaveId && shortCodeToSlaveId.has(fullSlaveId.toUpperCase())) {
-                        fullSlaveId = shortCodeToSlaveId.get(fullSlaveId.toUpperCase());
+                    const typedPayload = payload as { slaveId?: string };
+                    let fullSlaveId = typedPayload?.slaveId;
+
+                    // Check if slaveId is already a full ID (contains hyphen) before doing shortCode lookup
+                    // Full IDs have format like: slaveId_<timestamp>_<random>
+                    if (fullSlaveId) {
+                        const hasHyphen = fullSlaveId.includes('-');
+                        console.log(`[WebSocket] Master registration - slaveId: ${fullSlaveId}, isFullId: ${hasHyphen}`);
+
+                        if (!hasHyphen && shortCodeToSlaveId.has(fullSlaveId.toUpperCase())) {
+                            fullSlaveId = shortCodeToSlaveId.get(fullSlaveId.toUpperCase()) || fullSlaveId;
+                            console.log(`[WebSocket] Resolved short code to full ID: ${fullSlaveId}`);
+                        }
                     }
 
-                    if (!fullSlaveId) return;
+                    if (!fullSlaveId) {
+                        console.warn(`[WebSocket] Master registration failed: no slaveId provided`);
+                        return;
+                    }
+
                     const session = remoteSessions.get(fullSlaveId);
                     if (session) {
                         session.masterWs = ws;
                         setWSData(ws, 'remoteSlaveId', fullSlaveId);
                         ws.send(JSON.stringify({type: 'quix-master-connected'}));
-                        if (session.slaveWs?.raw.readyState === 1) {
+                        if (session && isConnectionOpen(session.slaveWs)) {
                             session.slaveWs.send(JSON.stringify({type: 'quix-master-connected'}));
                         }
-                        console.log(`Master connected to slave ${fullSlaveId}`);
+                        console.log(`[WebSocket] Master connected to slave ${fullSlaveId}`);
+                    } else {
+                        console.warn(`[WebSocket] Master registration failed: no session found for slave ${fullSlaveId}`);
                     }
                     break;
                 }
@@ -392,23 +431,23 @@ export function createWebSocketRouter() {
 
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
-                        console.log(`[quix-remote-command] Received command '${command}' for slave ${slaveId}, master connected: ${!!session?.masterWs}, slave connected: ${!!session?.slaveWs}`);
+                        console.log(`[WebSocket] quix-remote-command: Received command '${command}' for slave ${slaveId}, master connected: ${!!session?.masterWs}, slave connected: ${!!session?.slaveWs}`);
 
                         if (session) {
                             // Forward the command to the slave (TV), NOT to the master
-                            if (session.slaveWs?.raw.readyState === 1) {
-                                console.log(`[quix-remote-command] Forwarding command to slave (TV)`);
+                            if (isConnectionOpen(session.slaveWs)) {
+                                console.log(`[WebSocket] quix-remote-command: Forwarding command to slave (TV)`);
                                 session.slaveWs.send(JSON.stringify({
                                     type: 'quix-remote-command',
                                     payload: typedPayload
                                 }));
                             } else {
-                                console.log(`[quix-remote-command] Slave not connected, cannot forward command`);
+                                console.log(`[WebSocket] quix-remote-command: Slave not connected, cannot forward command`);
                             }
 
                             // Send acknowledgment ONLY to the master (phone/remote), not back to itself
-                            if (session.masterWs?.raw.readyState === 1) {
-                                console.log(`[quix-remote-command] Sending acknowledgment to master`);
+                            if (isConnectionOpen(session.masterWs)) {
+                                console.log(`[WebSocket] quix-remote-command: Sending acknowledgment to master`);
                                 session.masterWs.send(JSON.stringify({
                                     type: 'quix-remote-command-received',
                                     payload: typedPayload
@@ -424,7 +463,7 @@ export function createWebSocketRouter() {
                     const slaveId = typedPayload?.slaveId;
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
-                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                        if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-slave-status-update', payload}));
                         }
                     }
@@ -473,17 +512,18 @@ export function createWebSocketRouter() {
                     const slaveId = typedPayload?.slaveId;
                     if (slaveId) {
                         const session = remoteSessions.get(slaveId);
-                        if (session?.slaveWs && session.slaveWs.raw.readyState === 1) {
+                        if (session && isConnectionOpen(session.slaveWs)) {
                             session.slaveWs.send(JSON.stringify({
                                 type: 'quix-sync-media-request',
                                 payload: typedPayload
                             }));
-                            console.log(`Media sync request forwarded to slave ${slaveId}`);
+                            console.log(`[WebSocket] quix-sync-media-request: Forwarded to slave ${slaveId}`);
                         } else {
                             ws.send(JSON.stringify({
                                 type: 'quix-sync-error',
                                 payload: {error: 'Slave not connected'}
                             }));
+                            console.log(`[WebSocket] quix-sync-media-request: Slave ${slaveId} not connected`);
                         }
                     }
                     break;
@@ -495,9 +535,9 @@ export function createWebSocketRouter() {
                     // This message comes FROM the slave, so use wsData.slaveId
                     if (wsData.slaveId) {
                         const session = remoteSessions.get(wsData.slaveId);
-                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                        if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-sync-completed', payload}));
-                            console.log(`Sync completed forwarded to master for slave ${wsData.slaveId}`);
+                            console.log(`[WebSocket] quix-sync-completed: Forwarded to master for slave ${wsData.slaveId}`);
                         }
                     }
                     break;
@@ -509,7 +549,7 @@ export function createWebSocketRouter() {
                     // This message comes FROM the slave, so use wsData.slaveId
                     if (wsData.slaveId) {
                         const session = remoteSessions.get(wsData.slaveId);
-                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                        if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-sync-error', payload}));
                         }
                     }
@@ -522,7 +562,7 @@ export function createWebSocketRouter() {
                     // This message comes FROM the slave, forward to master
                     if (wsData.slaveId) {
                         const session = remoteSessions.get(wsData.slaveId);
-                        if (session?.masterWs && session.masterWs.raw.readyState === 1) {
+                        if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-sync-progress-update', payload}));
                         }
                     }

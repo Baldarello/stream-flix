@@ -1,7 +1,11 @@
 // This service manages the WebSocket connection to the live server.
 
 // Get WebSocket URL from environment or use production default
-const WEBSOCKET_URL = import.meta.env?.VITE_WS_URL || 'ws://localhost:3000/ws';
+const WEBSOCKET_URL = import.meta.env?.VITE_WS_URL || 'ws://localhost:3011/ws';
+
+// Diagnostic logging for WebSocket URL
+console.log(`[WebSocket] Initializing with URL: ${WEBSOCKET_URL}`);
+console.log(`[WebSocket] Environment VITE_WS_URL: ${import.meta.env?.VITE_WS_URL || 'not set'}`);
 
 class EventEmitter {
     constructor() {
@@ -49,7 +53,7 @@ class WebSocketService {
         if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
             return; // Don't try to connect if already open or connecting
         }
-        console.log('Attempting to connect to WebSocket server...');
+        console.log(`[WebSocket] Attempting to connect to ${WEBSOCKET_URL}...`);
         this.events.emit('debug', 'Tentativo di connessione...');
         this.ws = new WebSocket(WEBSOCKET_URL);
 
