@@ -58,6 +58,7 @@ export interface KnownSlave {
   id: string; // slaveId
   name: string;
   lastSeen: number; // timestamp
+  shortCode?: string; // Short code for reconnection
 }
 
 

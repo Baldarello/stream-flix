@@ -374,11 +374,24 @@ export function createWebSocketRouter() {
 
                     setWSData(ws, 'slaveId', persistentId);
 
-                    const shortCode = generateShortCode();
+                    // FIX: Check if slave already has a shortCode and reuse it
+                    // This ensures saved shortCodes remain valid on slave reconnection
+                    let shortCode = wsData.shortCode;
+                    if (!shortCode) {
+                        // Only generate new if this is a fresh registration
+                        shortCode = generateShortCode();
+                    }
                     shortCodeToSlaveId.set(shortCode, persistentId);
                     setWSData(ws, 'shortCode', shortCode);
 
-                    remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
+                    // Preserve existing master connection if slave is reconnecting
+                    const existingSession = remoteSessions.get(persistentId);
+                    if (existingSession) {
+                        existingSession.slaveWs = ws; // Update WebSocket reference
+                        // Keep existing masterWs if still connected
+                    } else {
+                        remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
+                    }
 
                     ws.send(JSON.stringify({
                         type: 'quix-slave-registered',
@@ -411,6 +424,15 @@ export function createWebSocketRouter() {
 
                     const session = remoteSessions.get(fullSlaveId);
                     if (session) {
+                        // Check if a master is already connected - don't silently overwrite
+                        if (session.masterWs && isConnectionOpen(session.masterWs)) {
+                            console.warn(`[WebSocket] Master registration failed: slave ${fullSlaveId} already has a master connected`);
+                            ws.send(JSON.stringify({
+                                type: 'quix-master-connection-status',
+                                payload: {status: 'slave-busy', slaveId: fullSlaveId}
+                            }));
+                            return;
+                        }
                         session.masterWs = ws;
                         setWSData(ws, 'remoteSlaveId', fullSlaveId);
                         ws.send(JSON.stringify({type: 'quix-master-connected'}));

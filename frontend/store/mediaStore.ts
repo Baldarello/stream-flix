@@ -766,7 +766,7 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId] = await Promise.all([
+        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId, selfShortCode] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -783,6 +783,7 @@ class MediaStore {
             db.preferences.get('isConfiguredAsSlave'),
             db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
             db.preferences.get('selfSlaveId'),
+            db.preferences.get('selfShortCode'), // NEW - load shortCode for slave persistence
         ]);
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
@@ -820,6 +821,9 @@ class MediaStore {
                 this.isSmartTVPairingVisible = true;
                 if (selfSlaveId?.value) {
                     this.slaveId = selfSlaveId.value;
+                }
+                if (selfShortCode?.value) {
+                    this.slaveShortCode = selfShortCode.value;
                 }
             }
             this.knownSlaves = knownSlaves;
@@ -1355,6 +1359,8 @@ class MediaStore {
     };
 
     connectAsRemoteMaster = async (slaveId: string) => {
+        const existingSlave = await db.knownSlaves.get(slaveId);
+        
         runInAction(() => {
             this.isRemoteMaster = true;
             this.slaveId = slaveId;
@@ -1362,13 +1368,15 @@ class MediaStore {
             db.preferences.put({key: 'remoteMasterForSlaveId', value: slaveId});
         });
 
-        websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId}});
+        // Prefer shortCode for reconnection if available, otherwise use full slaveId
+        const shortCode = existingSlave?.shortCode;
+        websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: shortCode || slaveId}});
 
-        const existingSlave = await db.knownSlaves.get(slaveId);
         const slaveData = {
             id: slaveId,
             name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
-            lastSeen: Date.now()
+            lastSeen: Date.now(),
+            shortCode: shortCode // Preserve existing shortCode
         };
         await db.knownSlaves.put(slaveData);
 
@@ -1398,6 +1406,14 @@ class MediaStore {
 
     updateSlaveName = async (slaveId: string, name: string) => {
         await db.knownSlaves.update(slaveId, {name});
+        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+        runInAction(() => {
+            this.knownSlaves = updatedSlaves;
+        });
+    };
+
+    updateSlaveShortCode = async (slaveId: string, shortCode: string) => {
+        await db.knownSlaves.update(slaveId, {shortCode});
         const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
         runInAction(() => {
             this.knownSlaves = updatedSlaves;
@@ -2062,7 +2078,9 @@ class MediaStore {
                     this.slaveId = payload.slaveId;
                     this.slaveShortCode = payload.shortCode;
                     if (this.isSmartTV) {
+                        // Store BOTH slaveId AND shortCode for persistence
                         db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
+                        db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
                     }
                     this.showSnackbar('notifications.tvReady', 'info', true);
                     break;
@@ -2078,6 +2096,15 @@ class MediaStore {
                         }
                     }
                     this.showSnackbar('notifications.remoteConnected', 'success', true);
+                    break;
+                case 'quix-master-connection-status':
+                    // Handle connection status when master tries to reconnect with shortCode
+                    if (payload.status === 'slave-busy') {
+                        this.showSnackbar('notifications.slaveBusy', 'warning', true);
+                    } else if (payload.slaveId && payload.shortCode) {
+                        // Backend resolved shortCode to slaveId - update knownSlaves with both
+                        this.updateSlaveShortCode(payload.slaveId, payload.shortCode);
+                    }
                     break;
                 case 'quix-room-update':
                     this.roomId = payload.roomId;

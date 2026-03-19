@@ -316,7 +316,7 @@ const ProfileDrawer: React.FC = observer(() => {
                             ) : (
                                 <ListItemButton onClick={() => reconnectToSlave(slave.id)}>
                                     <ListItemIcon><TvIcon /></ListItemIcon>
-                                    <ListItemText primary={slave.name} secondary={`ID: ${slave.id.substring(7, 13)}`} />
+                                    <ListItemText primary={slave.name} secondary={`ID: ${slave.id.substring(7, 13)}${slave.shortCode ? ` | Code: ${slave.shortCode}` : ''}`} />
                                 </ListItemButton>
                             )}
                         </ListItem>
