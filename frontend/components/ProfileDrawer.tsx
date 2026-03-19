@@ -78,7 +78,7 @@ const ProfileDrawer: React.FC = observer(() => {
         }
     };
 
-    const handleStartEdit = (slave: { id: string, name: string }) => {
+    const handleStartEdit = (slave: { id: string, name: string, shortCode?: string }) => {
         setEditingSlaveId(slave.id);
         setEditedName(slave.name);
     };
