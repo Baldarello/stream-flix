@@ -34,21 +34,32 @@ export const parseDataFromLink = async (link: string): Promise<SharedLibraryData
       console.warn("Link does not contain a valid import URL.");
       return null;
     }
-    
-    // Prepend a CORS proxy to the Google Drive URL to bypass browser restrictions.
-    // The previous proxy (cors.eu.org) was being blocked by Google Drive, resulting in a 403 error.
-    // This new proxy is an alternative to bypass CORS issues. The target URL must be encoded.
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(dataUrl)}`;
 
-    const response = await fetch(proxyUrl);
+    // Extract the Google Drive file ID from the URL
+    const fileId = extractFileIdFromUrl(dataUrl);
+    if (!fileId) {
+      console.warn("Could not extract file ID from Google Drive URL.");
+      return null;
+    }
+
+    // Call the Google Apps Script to fetch the file content from Google Drive
+    const scriptUrl = import.meta.env.VITE_GOOGLE_APPS_SCRIPT_URL;
+    if (!scriptUrl) {
+      console.error("Google Apps Script URL is not configured. Please set VITE_GOOGLE_APPS_SCRIPT_URL in your .env file.");
+      return null;
+    }
+
+    const response = await fetch(`${scriptUrl}?action=getFile&fileId=${fileId}`);
     if (!response.ok) {
-        // Provide a more specific error if the proxy itself fails
-        if (response.status === 404 && response.url.includes('corsproxy.io')) {
-             throw new Error(`Failed to fetch from proxy. The original URL might be invalid or unreachable.`);
-        }
-        throw new Error(`Failed to fetch library from URL. Status: ${response.status}`);
+      throw new Error(`Failed to fetch library from Google Apps Script. Status: ${response.status}`);
     }
     const data = await response.json();
+
+    // Check for error response from the Apps Script
+    if (data.error) {
+      console.error("Google Apps Script returned an error:", data.error);
+      return null;
+    }
 
     // Basic validation to ensure the fetched data has the correct structure.
     if (data && data.version === 1 && Array.isArray(data.shows)) {
@@ -61,3 +72,37 @@ export const parseDataFromLink = async (link: string): Promise<SharedLibraryData
     return null;
   }
 };
+
+/**
+ * Extracts the Google Drive file ID from a Google Drive URL.
+ * Supports URLs in the format:
+ * - https://drive.google.com/uc?export=download&id=FILE_ID
+ * - https://drive.google.com/file/d/FILE_ID/view
+ * - https://drive.google.com/open?id=FILE_ID
+ * @param driveUrl The Google Drive URL.
+ * @returns The file ID if found, otherwise null.
+ */
+function extractFileIdFromUrl(driveUrl: string): string | null {
+  try {
+    const url = new URL(driveUrl);
+    // Check for 'id' query parameter (e.g., uc?export=download&id=FILE_ID)
+    const idParam = url.searchParams.get('id');
+    if (idParam) {
+      return idParam;
+    }
+    // Check for 'id' path parameter (e.g., /file/d/FILE_ID/view or /open?id=FILE_ID)
+    const pathMatch = url.pathname.match(/\/\/drive\.google\.com\/.*?\/(?:file\/d|open|uc)\??.*id=([^&\/]+)/);
+    if (pathMatch) {
+      return pathMatch[1];
+    }
+    // Fallback: check path segments for known patterns
+    const segments = url.pathname.split('/').filter(Boolean);
+    const idIndex = segments.indexOf('d');
+    if (idIndex !== -1 && segments[idIndex + 1]) {
+      return segments[idIndex + 1];
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
