@@ -8,6 +8,11 @@ import {
     Button,
     CardMedia,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     FormControl,
     IconButton,
     InputLabel,
@@ -27,6 +32,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import GroupIcon from '@mui/icons-material/Group';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import type {Episode, MediaItem, PlayableItem} from '../types.ts';
 import {searchShow} from '../services/apiCall.tsx';
 import SearchIcon from '@mui/icons-material/Search';
@@ -59,6 +65,24 @@ const WatchTogetherModal: React.FC = observer(() => {
   const itemForModal = roomId ? watchTogetherSelectedItem : selectedItem;
   const { t } = useTranslations();
   
+  const handleTransferHostClick = (participant: { id: string; name: string }) => {
+    setTransferTargetParticipant(participant);
+    setTransferConfirmOpen(true);
+  };
+  
+  const handleConfirmTransfer = () => {
+    if (transferTargetParticipant) {
+      mediaStore.transferHost(transferTargetParticipant.id);
+    }
+    setTransferConfirmOpen(false);
+    setTransferTargetParticipant(null);
+  };
+  
+  const handleCancelTransfer = () => {
+    setTransferConfirmOpen(false);
+    setTransferTargetParticipant(null);
+  };
+  
   const [inputRoomId, setInputRoomId] = useState('');
   const [username, setUsername] = useState('');
   const [copied, setCopied] = useState(false);
@@ -68,6 +92,10 @@ const WatchTogetherModal: React.FC = observer(() => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<MediaItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  
+  // Host transfer confirmation modal state
+  const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
+  const [transferTargetParticipant, setTransferTargetParticipant] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (joinRoomIdFromUrl) {
@@ -340,7 +368,19 @@ const WatchTogetherModal: React.FC = observer(() => {
             </Typography>
             <List dense sx={{ maxHeight: 150, overflow: 'auto' }}>
               {participants.map((p) => (
-                <ListItem key={p.id}>
+                <ListItem
+                  key={p.id}
+                  secondaryAction={
+                    isHost && p.id !== mediaStore.myClientId ? (
+                      <Tooltip title={t('chat.makeHost')}>
+                        <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => handleTransferHostClick({ id: p.id, name: p.name })}>
+                          <SwapHorizIcon />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null
+                  }
+                  sx={{ pr: isHost && p.id !== mediaStore.myClientId ? 8 : 2 }}
+                >
                   <ListItemText primary={p.name} secondary={p.id === hostId ? t('watchTogether.host') : ''} />
                 </ListItem>
               ))}
@@ -365,7 +405,7 @@ const WatchTogetherModal: React.FC = observer(() => {
   };
 
   return (
-    // FIX: (line 344) Wrap Box with Modal component
+   <> // FIX: (line 344) Wrap Box with Modal component
     <Modal
       open={watchTogetherModalOpen}
       onClose={handleClose}
@@ -382,6 +422,28 @@ const WatchTogetherModal: React.FC = observer(() => {
         {roomId ? renderRoomView() : renderInitialView()}
       </Box>
     </Modal>
+    <Dialog
+      open={transferConfirmOpen}
+      onClose={handleCancelTransfer}
+      aria-labelledby="transfer-host-dialog-title"
+    >
+      <DialogTitle id="transfer-host-dialog-title">
+        {t('watchTogether.transferHostTitle') || 'Transfer Host'}
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {t('watchTogether.transferHostConfirm', { name: transferTargetParticipant?.name })}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancelTransfer} color="primary">
+          {t('watchTogether.cancel')}
+        </Button>
+        <Button onClick={handleConfirmTransfer} color="primary" variant="contained" autoFocus>
+          {t('watchTogether.confirm')}
+        </Button>
+      </DialogActions>
+    </Dialog></>
   );
 });
 

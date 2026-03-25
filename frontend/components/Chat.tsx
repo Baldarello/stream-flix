@@ -20,6 +20,31 @@ import ImageIcon from '@mui/icons-material/Image';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
+const MAX_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB max
+
+const compressImage = (base64: string, maxWidth = 800): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.onerror = () => resolve(base64);
+    img.src = base64;
+  });
+};
+
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -50,17 +75,58 @@ const Chat: React.FC = observer(() => {
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      try {
-        const base64Image = await fileToBase64(file);
-        sendChatMessage({ image: base64Image });
-      } catch (error) {
-        console.error("Error converting image to base64:", error);
+      await processAndSendImage(file);
+    }
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const processAndSendImage = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      console.error('Selected file is not an image');
+      return;
+    }
+    
+    if (file.size > MAX_IMAGE_SIZE) {
+      console.error('Image size exceeds 1MB limit');
+      return;
+    }
+    
+    try {
+      let base64Image = await fileToBase64(file);
+      
+      // Compress if image is large
+      if (file.size > 500 * 1024) {
+        base64Image = await compressImage(base64Image);
+      }
+      
+      sendChatMessage({ image: base64Image });
+    } catch (error) {
+      console.error('Error processing image:', error);
+    }
+  };
+
+  const handlePaste = async (event: ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        event.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          await processAndSendImage(file);
+        }
+        break;
       }
     }
   };
 
   return (
     <Box
+      onPaste={handlePaste}
       sx={{
         width: 360,
         borderLeft: '1px solid rgba(255, 255, 255, 0.12)',

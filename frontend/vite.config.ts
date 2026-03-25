@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
             'process.env.APP_VERSION': JSON.stringify(process.env.npm_package_version ?? '1.0.0'),
             'process.env.GOOGLE_CLIENT_ID': JSON.stringify(env.GOOGLE_CLIENT_ID ?? ''),
             'process.env.API_KEY': JSON.stringify(env.API_KEY ?? ''),
+            'process.env.TND_TURN_URL': JSON.stringify(env.TND_TURN_URL ?? ''),
         },
         resolve: {
             alias: {

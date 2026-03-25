@@ -215,7 +215,10 @@ export const en = {
     "waitingForHost": "Waiting for the host to start...",
     "changeContentTitle": "Change Content",
     "searchPlaceholder": "Search for movies or TV series",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "transferHostTitle": "Transfer Host",
+    "transferHostConfirm": "Are you sure you want to transfer host to {name}?",
+    "confirm": "Confirm"
   },
   "chat": {
     "title": "Room Chat",

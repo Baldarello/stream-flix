@@ -241,12 +241,27 @@ const VideoPlayer: React.FC = observer(() => {
             const video = videoRef.current;
             if (!video) return;
 
+            // In Watch Together mode, only host can control playback
+            const isWatchTogetherNonHost = !!roomId && !isHost;
+
             switch (e.key.toLowerCase()) {
-                case ' ': e.preventDefault(); handleTogglePlay(); break;
+                case ' ': 
+                    e.preventDefault(); 
+                    // Non-hosts in Watch Together cannot control playback
+                    if (!isWatchTogetherNonHost) handleTogglePlay(); 
+                    break;
                 case 'f': e.preventDefault(); handleToggleFullScreen(); break;
                 case 'm': e.preventDefault(); handleToggleMute(); break;
-                case 'arrowright': e.preventDefault(); video.currentTime = Math.min(video.duration, video.currentTime + 5); break;
-                case 'arrowleft': e.preventDefault(); video.currentTime = Math.max(0, video.currentTime - 5); break;
+                case 'arrowright': 
+                    e.preventDefault(); 
+                    // Non-hosts in Watch Together cannot seek
+                    if (!isWatchTogetherNonHost) video.currentTime = Math.min(video.duration, video.currentTime + 5); 
+                    break;
+                case 'arrowleft': 
+                    e.preventDefault(); 
+                    // Non-hosts in Watch Together cannot seek
+                    if (!isWatchTogetherNonHost) video.currentTime = Math.max(0, video.currentTime - 5); 
+                    break;
                 case 'arrowup': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); break;
                 case 'arrowdown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); break;
                 case '>': case '.': e.preventDefault();
@@ -263,7 +278,7 @@ const VideoPlayer: React.FC = observer(() => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleSpeedChange]);
+    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleSpeedChange, roomId, isHost]);
     
     // Player state management and event listeners
     useEffect(() => {
@@ -309,7 +324,7 @@ const VideoPlayer: React.FC = observer(() => {
 
   if (!nowPlayingItem) return null;
   
-  const handleSeek = (event: Event, newValue: number | number[]) => { if (videoRef.current) videoRef.current.currentTime = (newValue as number / 100) * playerState.duration; };
+  const handleSeek = (event: Event, newValue: number | number[]) => { if (videoRef.current && isHost) videoRef.current.currentTime = (newValue as number / 100) * playerState.duration; };
   const handleVolumeChange = (event: Event, newValue: number | number[]) => { if(videoRef.current) videoRef.current.volume = newValue as number; };
 
   const isEpisode = 'episode_number' in nowPlayingItem;
@@ -367,7 +382,7 @@ const VideoPlayer: React.FC = observer(() => {
           ref={videoRef}
           src={videoSrc}
           autoPlay
-          onClick={handleTogglePlay}
+          onClick={() => { if (!roomId || isHost) handleTogglePlay(); }}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
         {/* FIX: (line 358) Wrap Box with Fade component */}
@@ -394,12 +409,13 @@ const VideoPlayer: React.FC = observer(() => {
                     value={isNaN(playerState.progress) ? 0 : playerState.progress}
                     onChange={handleSeek}
                     sx={{ color: themeColor }}
+                    disabled={!!roomId && !isHost}
                 />
                 {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                 <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
                     {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                     <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                        <IconButton onClick={handleTogglePlay} color="inherit">
+                        <IconButton onClick={handleTogglePlay} color="inherit" disabled={!!roomId && !isHost}>
                             {playerState.isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
                         </IconButton>
                         <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)} color="inherit">

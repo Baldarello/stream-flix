@@ -215,7 +215,10 @@ export const it = {
     "waitingForHost": "In attesa che l'host inizi...",
     "changeContentTitle": "Cambia Contenuto",
     "searchPlaceholder": "Cerca film o serie tv",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "transferHostTitle": "Trasferisci Host",
+    "transferHostConfirm": "Sei sicuro di voler trasferire lo host a {name}?",
+    "confirm": "Conferma"
   },
   "chat": {
     "title": "Chat della stanza",
