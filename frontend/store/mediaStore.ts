@@ -2170,9 +2170,12 @@ class MediaStore {
                     }
                     break;
                 case 'quix-room-update':
+                    console.log(`[DEBUG] quix-room-update received: roomId=${payload.roomId}, participants count=${payload.participants?.length}, myClientId=${websocketService.clientId}`);
+                    console.log(`[DEBUG] quix-room-update participants:`, payload.participants);
                     this.roomId = payload.roomId;
                     this.hostId = payload.hostId;
-                    this.participants = payload.participants;
+                    // Create a new array reference to ensure MobX properly detects the change
+                    this.participants = payload.participants ? [...payload.participants] : [];
                     this.playbackState = payload.playbackState;
                     this.chatHistory = payload.chatHistory;
                     this.isHost = payload.isHost;
@@ -2292,11 +2295,19 @@ class MediaStore {
 
     changeName = (participantId: string, newName: string) => {
         // Optimistically update local participant state for immediate UI feedback
-        const participantIndex = this.participants.findIndex(p => p.id === participantId);
-        if (participantIndex !== -1) {
-            this.participants[participantIndex] = { ...this.participants[participantIndex], name: newName };
+        // Create a new array to ensure MobX properly detects the change
+        const updatedParticipants = this.participants.map(p => 
+            p.id === participantId ? { ...p, name: newName } : p
+        );
+        const participantExists = updatedParticipants.some(p => p.id === participantId && p.name === newName);
+        if (participantExists) {
+            this.participants = updatedParticipants;
+            console.log(`[DEBUG] changeName: Optimistically updated local participant ${participantId} to "${newName}"`);
+        } else {
+            console.log(`[DEBUG] changeName: Participant ${participantId} not found in local participants`);
         }
         // Send to server for broadcast to all room members
+        console.log(`[DEBUG] changeName: Sending quix-change-name message for participantId=${participantId}, name=${newName}`);
         websocketService.sendMessage({type: 'quix-change-name', payload: {participantId, name: newName}});
     };
 }

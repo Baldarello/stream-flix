@@ -104,6 +104,7 @@ class WebSocketService {
         this.ws.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
+                console.log(`[WebSocket] Received message: type=${message.type}`);
 
                 // Handle ping from server (for heartbeat)
                 if (message.type === 'ping') {
@@ -113,7 +114,7 @@ class WebSocketService {
 
                 // Handle the 'connected' message from the server to get our unique ID
                 if (message.type === 'connected' && message.payload?.clientId) {
-                    console.log(`Received client ID: ${message.payload.clientId}`);
+                    console.log(`[WebSocket] Received client ID: ${message.payload.clientId}`);
                     this.setClientId(message.payload.clientId);
                 }
 
@@ -121,6 +122,11 @@ class WebSocketService {
                 if (message.type === 'quix-slave-not-connected') {
                     console.log('[WebSocket] Slave not connected:', message.payload);
                     this.events.emit('slave-not-connected', message.payload);
+                }
+
+                // Debug log for quix-room-update
+                if (message.type === 'quix-room-update') {
+                    console.log(`[WebSocket] quix-room-update payload:`, message.payload);
                 }
 
                 this.events.emit('message', message);
@@ -157,6 +163,7 @@ class WebSocketService {
 
     sendMessage(message) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            console.log(`[WebSocket] Sending message: type=${message.type}, payload=`, message.payload);
             this.ws.send(JSON.stringify(message));
         } else {
             console.warn('WebSocket is not connected. Message not sent:', message);

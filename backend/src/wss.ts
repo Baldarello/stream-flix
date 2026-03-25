@@ -389,13 +389,27 @@ export function createWebSocketRouter() {
                     const typedPayload = payload as { participantId?: string; name?: string };
                     const participantId = typedPayload?.participantId;
                     const newName = typedPayload?.name;
-                    if (room && participantId && newName && room.players.has(participantId)) {
-                        const player = room.players.get(participantId);
-                        if (player && player.ws === ws) {
-                            player.name = newName;
-                            console.log(`Player ${participantId} changed name to "${newName}" in room ${wsData.roomId}`);
-                            broadcastRoomState(wsData.roomId!);
-                        }
+                    console.log(`[DEBUG] quix-change-name received: participantId=${participantId}, newName=${newName}, wsData.roomId=${wsData.roomId}, room=${!!room}`);
+                    if (!room) {
+                        console.log(`[DEBUG] quix-change-name: room is null/undefined, wsData.roomId=${wsData.roomId}`);
+                        break;
+                    }
+                    if (!participantId || !newName) {
+                        console.log(`[DEBUG] quix-change-name: missing participantId or newName`);
+                        break;
+                    }
+                    if (!room.players.has(participantId)) {
+                        console.log(`[DEBUG] quix-change-name: participantId not found in room.players. Available keys: ${Array.from(room.players.keys()).join(', ')}`);
+                        break;
+                    }
+                    const player = room.players.get(participantId);
+                    console.log(`[DEBUG] quix-change-name: player found, player.ws === ws: ${player?.ws === ws}`);
+                    if (player && player.ws === ws) {
+                        player.name = newName;
+                        console.log(`[DEBUG] quix-change-name: Player ${participantId} changed name to "${newName}" in room ${wsData.roomId}. Broadcasting to ${room.players.size} players.`);
+                        broadcastRoomState(wsData.roomId!);
+                    } else if (player) {
+                        console.log(`[DEBUG] quix-change-name: Security check failed - player.ws !== ws`);
                     }
                     break;
                 }
