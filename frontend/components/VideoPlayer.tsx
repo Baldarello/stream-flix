@@ -328,7 +328,14 @@ const VideoPlayer: React.FC = observer(() => {
 
   if (!nowPlayingItem) return null;
   
-  const handleSeek = (event: Event, newValue: number | number[]) => { if (videoRef.current && isHost) videoRef.current.currentTime = (newValue as number / 100) * playerState.duration; };
+  const handleSeek = (event: Event, newValue: number | number[]) => { 
+      if (videoRef.current && isHost) {
+          const newTime = (newValue as number / 100) * playerState.duration;
+          videoRef.current.currentTime = newTime;
+          // Send playback control to sync with other clients in Watch Together
+          sendPlaybackControl({ status: videoRef.current.paused ? 'paused' : 'playing', time: newTime });
+      }
+  };
   const handleVolumeChange = (event: Event, newValue: number | number[]) => { if(videoRef.current) videoRef.current.volume = newValue as number; };
 
   const isEpisode = 'episode_number' in nowPlayingItem;

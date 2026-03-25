@@ -44,10 +44,12 @@ const EpisodesDrawer: React.FC = observer(() => {
             return langMatch && typeMatch;
         });
         
+        // Extract video_url from the first filtered link for Watch Together sync
+        const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] : null;
         const episodeToPlay = {
             ...episode,
             video_urls: filteredLinks,
-            video_url: undefined, // Let startPlayback decide
+            video_url: firstFilteredLink?.url, // Use first filtered link's URL
             show_id: currentShow.id,
             show_title: currentShow.title || currentShow.name || '',
             backdrop_path: currentShow.backdrop_path,
@@ -55,9 +57,11 @@ const EpisodesDrawer: React.FC = observer(() => {
         };
         
         // If we're in Watch Together mode and are the host, use changeWatchTogetherMedia
-        // to broadcast the episode change to all clients
+        // to broadcast the episode change to all clients, then start playback
         if (roomId && isHost) {
             changeWatchTogetherMedia(episodeToPlay);
+            // Host also needs to start playback locally
+            mediaStore.startPlayback(episodeToPlay);
         } else {
             mediaStore.startPlayback(episodeToPlay);
         }

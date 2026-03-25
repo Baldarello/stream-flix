@@ -1357,7 +1357,12 @@ class MediaStore {
     changeWatchTogetherMedia = (item: PlayableItem) => {
         this.watchTogetherSelectedItem = item;
         if (this.isHost) {
-            websocketService.sendMessage({type: 'quix-select-media', payload: {media: item}});
+            // Ensure video_url is set from video_urls for WebSocket broadcast
+            const mediaToSend = {...item};
+            if (!mediaToSend.video_url && (mediaToSend as any).video_urls?.length > 0) {
+                mediaToSend.video_url = (mediaToSend as any).video_urls[0].url;
+            }
+            websocketService.sendMessage({type: 'quix-select-media', payload: {media: mediaToSend}});
         }
     };
 
@@ -2182,11 +2187,26 @@ class MediaStore {
                     this.myClientId = websocketService.clientId;
                     if (payload.selectedMedia) {
                         const existing = this.cachedItems.get(payload.selectedMedia.id);
+                        // For non-hosts, episode change should trigger playback
+                        const isNonHost = !this.isHost;
+                        const hasNewEpisode = this.watchTogetherSelectedItem?.id !== (payload.selectedMedia as any)?.id;
+                        
+                        // Set watchTogetherSelectedItem from the payload's episode (which has video_urls)
+                        this.watchTogetherSelectedItem = payload.selectedMedia as PlayableItem;
+                        
                         if (existing) {
-                            this.watchTogetherSelectedItem = payload.selectedMedia;
                             this.selectMedia(existing, 'watchTogether');
                         } else { // If not cached, fetch it
                             this.selectMedia(payload.selectedMedia, 'watchTogether');
+                        }
+                        
+                        // For non-hosts, if the episode changed, start playback with the video_url from video_urls
+                        if (isNonHost && hasNewEpisode && (payload.selectedMedia as any)?.video_urls?.length > 0) {
+                            const episodeWithUrl = {
+                                ...(payload.selectedMedia as any),
+                                video_url: (payload.selectedMedia as any).video_urls[0].url
+                            };
+                            this.startPlayback(episodeWithUrl);
                         }
                     }
                     break;
