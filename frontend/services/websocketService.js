@@ -3,6 +3,28 @@
 // Get WebSocket URL from environment or use production default
 const WEBSOCKET_URL = import.meta.env?.VITE_WS_URL || 'ws://localhost:3011/ws';
 
+// Parse TURN/STUN servers configuration from environment
+// This is used for WebRTC connections and WebSocket-over-TURN tunneling in restrictive networks
+const TURN_ENV_URL = import.meta.env?.VITE_TND_TURN_URL;
+let ICE_SERVERS = [];
+
+try {
+    if (TURN_ENV_URL) {
+        ICE_SERVERS = JSON.parse(TURN_ENV_URL);
+        console.log(`[WebSocket] ICE servers loaded: ${ICE_SERVERS.length} server(s) configured`);
+        // Log server URLs for diagnostics (without credentials)
+        ICE_SERVERS.forEach((server, index) => {
+            const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+            console.log(`[WebSocket] ICE server ${index + 1}: ${urls.join(', ')}`);
+        });
+    } else {
+        console.log('[WebSocket] No VITE_TND_TURN_URL configured, ICE servers not available');
+    }
+} catch (error) {
+    console.error('[WebSocket] Error parsing VITE_TND_TURN_URL:', error);
+    ICE_SERVERS = [];
+}
+
 // Diagnostic logging for WebSocket URL
 console.log(`[WebSocket] Initializing with URL: ${WEBSOCKET_URL}`);
 console.log(`[WebSocket] Environment VITE_WS_URL: ${import.meta.env?.VITE_WS_URL || 'not set'}`);
@@ -47,6 +69,15 @@ class WebSocketService {
 
     get clientId() {
         return this._clientId;
+    }
+
+    /**
+     * Returns the configured ICE servers for TURN/STUN.
+     * These can be used for WebRTC connections or WebSocket-over-TURN tunneling.
+     * @returns {Array} Array of ICE server configurations
+     */
+    getIceServers() {
+        return ICE_SERVERS;
     }
 
     connect() {
