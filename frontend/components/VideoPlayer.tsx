@@ -265,12 +265,16 @@ const VideoPlayer: React.FC = observer(() => {
                 case 'arrowup': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); break;
                 case 'arrowdown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); break;
                 case '>': case '.': e.preventDefault();
-                    const nextIndex = playbackRates.indexOf(playerState.playbackRate) + 1;
-                    if (nextIndex < playbackRates.length) handleSpeedChange(playbackRates[nextIndex]);
+                    if (!isWatchTogetherNonHost) {
+                        const nextIndex = playbackRates.indexOf(playerState.playbackRate) + 1;
+                        if (nextIndex < playbackRates.length) handleSpeedChange(playbackRates[nextIndex]);
+                    }
                     break;
                 case '<': case ',': e.preventDefault();
-                    const prevIndex = playbackRates.indexOf(playerState.playbackRate) - 1;
-                    if (prevIndex >= 0) handleSpeedChange(playbackRates[prevIndex]);
+                    if (!isWatchTogetherNonHost) {
+                        const prevIndex = playbackRates.indexOf(playerState.playbackRate) - 1;
+                        if (prevIndex >= 0) handleSpeedChange(playbackRates[prevIndex]);
+                    }
                     break;
                 default: break;
             }
@@ -395,9 +399,9 @@ const VideoPlayer: React.FC = observer(() => {
                     <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}><ArrowBackIcon/></IconButton>
                     <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
                     {/* FIX: (line 366) Wrap IconButton with Tooltip component */}
-                    {mediaStore.nextEpisode && <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit" onClick={handleNextEpisode}><SkipNextIcon/></IconButton></Tooltip>}
+                    {mediaStore.nextEpisode && <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit" onClick={handleNextEpisode} disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
                     {/* FIX: (line 367) Wrap IconButton with Tooltip component */}
-                    {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer}><ListAltIcon/></IconButton></Tooltip>}
+                    {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer} disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
                 </Toolbar>
             </AppBar>
             
@@ -456,6 +460,7 @@ const VideoPlayer: React.FC = observer(() => {
                             variant="text"
                             startIcon={<ShutterSpeedIcon />}
                             sx={{ fontFamily: 'monospace', textTransform: 'none', p: '4px 8px', minWidth: '48px' }}
+                            disabled={!!roomId && !isHost}
                         >
                            {playerState.playbackRate.toFixed(2)}x
                         </Button>
