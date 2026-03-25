@@ -70,7 +70,9 @@ const RemotePlayerControlView = observer(() => {
         disconnectRemoteMaster,
         isRemoteMasterConnected,
         slaveId,
-        openQRScanner
+        openQRScanner,
+        isReconnecting,
+        masterReconnectAttempts
     } = mediaStore;
     const {t} = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
@@ -122,6 +124,14 @@ const RemotePlayerControlView = observer(() => {
                 <Typography color="text.secondary" textAlign="center">
                     {t('remote.player.connectionLostDesc') || 'The TV has disconnected. Scan the QR code to reconnect.'}
                 </Typography>
+                {isReconnecting && (
+                    <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1}}>
+                        <CircularProgress size={24}/>
+                        <Typography variant="body2" color="text.secondary">
+                            Reconnecting... ({masterReconnectAttempts}/12)
+                        </Typography>
+                    </Box>
+                )}
                 <Button variant="contained" color="primary" onClick={openQRScanner} size="large">
                     {t('remote.player.reconnect') || 'Reconnect'}
                 </Button>

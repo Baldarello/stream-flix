@@ -113,6 +113,10 @@ class MediaStore {
     slaveId: string | null = null;
     slaveShortCode: string | null = null;
     isRemoteMasterConnected = false;
+    // Master reconnection state for automatic reconnection after slave disconnect
+    masterReconnectAttempts = 0;
+    masterReconnectTimer: number | null = null;
+    isReconnecting = false; // UI indicator for reconnection state
     remoteSlaveState: RemoteSlaveState | null = null;
     remoteSelectedItem: MediaItem | null = null; // This is the item selected *on the slave* (remote TV)
     isRemoteDetailLoading = false;
@@ -533,8 +537,10 @@ class MediaStore {
         this.isSmartTVPairingVisible = true;
         this.isProfileDrawerOpen = false;
         db.preferences.put({key: 'isConfiguredAsSlave', value: true});
-        // Manually send registration message, using existing ID if available
-        const payload = this.slaveId ? {slaveId: this.slaveId} : {};
+        // Manually send registration message, using existing ID and shortCode if available
+        const payload: { slaveId?: string; shortCode?: string } = {};
+        if (this.slaveId) payload.slaveId = this.slaveId;
+        if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
         websocketService.sendMessage({type: 'quix-register-slave', payload});
     };
     exitSmartTVPairingMode = () => {
@@ -1361,7 +1367,7 @@ class MediaStore {
 
     connectAsRemoteMaster = async (slaveId: string) => {
         const existingSlave = await db.knownSlaves.get(slaveId);
-        
+
         runInAction(() => {
             this.isRemoteMaster = true;
             this.slaveId = slaveId;
@@ -1539,6 +1545,44 @@ class MediaStore {
                 }
             });
         }
+    };
+
+    // Master reconnection methods for automatic reconnection after slave disconnect
+    handleSlaveDisconnected = () => {
+        this.isRemoteMasterConnected = false;
+        this.remoteSlaveState = null;
+        this.startMasterReconnectTimer();
+        this.openQRScanner();
+        this.showSnackbar('notifications.slaveDisconnected', 'warning', true);
+    };
+
+    startMasterReconnectTimer = () => {
+        if (this.masterReconnectTimer) {
+            clearInterval(this.masterReconnectTimer);
+        }
+        this.masterReconnectAttempts = 0;
+        this.isReconnecting = true;
+
+        this.masterReconnectTimer = window.setInterval(() => {
+            if (!this.isRemoteMasterConnected && this.slaveId && this.masterReconnectAttempts < 12) {
+                websocketService.sendMessage({
+                    type: 'quix-register-master',
+                    payload: {slaveId: this.slaveId}
+                });
+                this.masterReconnectAttempts++;
+                console.log(`[mediaStore] Master reconnection attempt ${this.masterReconnectAttempts}/12`);
+            } else if (this.masterReconnectAttempts >= 12 || this.isRemoteMasterConnected) {
+                this.stopMasterReconnectTimer();
+            }
+        }, 5000); // Retry every 5 seconds, max 12 attempts (60 seconds)
+    };
+
+    stopMasterReconnectTimer = () => {
+        if (this.masterReconnectTimer) {
+            clearInterval(this.masterReconnectTimer);
+            this.masterReconnectTimer = null;
+        }
+        this.isReconnecting = false;
     };
 
     stopRemotePlayback = () => {
@@ -2063,7 +2107,10 @@ class MediaStore {
     };
     initRemoteSession = () => {
         if (this.isSmartTV) {
-            const payload = this.slaveId ? {slaveId: this.slaveId} : {};
+            // Send both slaveId and shortCode for proper reconnection
+            const payload: { slaveId?: string; shortCode?: string } = {};
+            if (this.slaveId) payload.slaveId = this.slaveId;
+            if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
             websocketService.sendMessage({type: 'quix-register-slave', payload});
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
@@ -2091,14 +2138,14 @@ class MediaStore {
                 case 'quix-master-connected':
                     console.log(`[mediaStore] quix-master-connected: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, payload=${JSON.stringify(payload)}`);
                     this.isRemoteMasterConnected = true;
-                    
+
                     // FIX: Update slaveId if provided in payload (backend resolves shortCode to full ID)
                     // This ensures master uses the correct slaveId that matches backend's remoteSessions key
                     if (payload?.slaveId && this.isRemoteMaster) {
                         console.log(`[mediaStore] quix-master-connected: Updating slaveId from '${this.slaveId}' to '${payload.slaveId}'`);
                         this.slaveId = payload.slaveId;
                     }
-                    
+
                     if (this.isSmartTV) {
                         // Slave side: hide the pairing screen
                         this.isSmartTVPairingVisible = false;
@@ -2175,11 +2222,7 @@ class MediaStore {
                 case 'quix-slave-disconnected':
                     // Slave (TV) disconnected from master - master should show reconnection UI
                     console.log('[mediaStore] Slave disconnected');
-                    this.isRemoteMasterConnected = false;
-                    this.remoteSlaveState = null;
-                    // Open QR scanner for reconnection
-                    this.openQRScanner();
-                    this.showSnackbar('notifications.slaveDisconnected', 'warning', true);
+                    this.handleSlaveDisconnected();
                     break;
                 case 'quix-master-disconnected':
                     // Master (phone) disconnected from slave - slave should show QR code again

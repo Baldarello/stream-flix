@@ -51,7 +51,21 @@ interface WSData {
 const rooms = new Map<string, Room>();
 const remoteSessions = new Map<string, RemoteSession>();
 const shortCodeToSlaveId = new Map<string, string>();
+const shortCodeExpiry = new Map<string, number>(); // shortCode -> expiry timestamp
+const SHORT_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL for shortCodes after slave disconnect
 const mediaSyncProgress = new Map<string, SyncProgress>();
+
+// ShortCode cleanup interval - removes expired shortCodes
+setInterval(() => {
+    const now = Date.now();
+    for (const [code, expiry] of shortCodeExpiry.entries()) {
+        if (now > expiry) {
+            shortCodeToSlaveId.delete(code);
+            shortCodeExpiry.delete(code);
+            console.log(`[WebSocket] Cleaned up expired shortCode: ${code}`);
+        }
+    }
+}, 60000); // Check every minute
 
 // ============================================================================
 // Utility Functions
@@ -186,19 +200,16 @@ function handleDisconnectQuix(ws: any): void {
             }
         }
         remoteSessions.delete(wsData.slaveId);
+        // FIX: Preserve shortCode with TTL instead of deleting immediately
+        // This allows master to reconnect within the TTL window
         if (wsData.shortCode) {
-            shortCodeToSlaveId.delete(wsData.shortCode);
+            shortCodeExpiry.set(wsData.shortCode, Date.now() + SHORT_CODE_TTL_MS);
+            console.log(`[WebSocket] Preserved shortCode ${wsData.shortCode} with TTL ${SHORT_CODE_TTL_MS}ms for slave ${wsData.slaveId}`);
         }
         console.log(`[WebSocket] Slave ${wsData.slaveId} session deleted.`);
     }
 
-    if (wsData.remoteSlaveId) {
-        for (const [, progress] of Array.from(mediaSyncProgress.entries())) {
-            if (progress.status === 'in_progress') {
-                progress.status = 'failed';
-            }
-        }
-    }
+    // FIX: Removed redundant remoteSlaveId check - already handled in master disconnect section above
 
     if (wsData.roomId && rooms.has(wsData.roomId)) {
         const room = rooms.get(wsData.roomId);
@@ -375,15 +386,16 @@ export function createWebSocketRouter() {
                 }
 
                 case 'quix-register-slave': {
-                    const typedPayload = payload as { slaveId?: string };
+                    const typedPayload = payload as { slaveId?: string; shortCode?: string };
+                    // Use the slaveId from payload if provided (for reconnection), otherwise use userName (new connection)
                     const persistentId = typedPayload?.slaveId || wsData.userName;
                     if (!persistentId) return;
 
                     setWSData(ws, 'slaveId', persistentId);
 
-                    // FIX: Check if slave already has a shortCode and reuse it
+                    // FIX: Check if slave sends shortCode in payload (for reconnection)
                     // This ensures saved shortCodes remain valid on slave reconnection
-                    let shortCode = wsData.shortCode;
+                    let shortCode = typedPayload?.shortCode || wsData.shortCode;
                     if (!shortCode) {
                         // Only generate new if this is a fresh registration
                         shortCode = generateShortCode();
@@ -393,11 +405,15 @@ export function createWebSocketRouter() {
 
                     // Preserve existing master connection if slave is reconnecting
                     const existingSession = remoteSessions.get(persistentId);
+                    // DEBUG: Log session state
+                    console.log(`[DEBUG] quix-register-slave: persistentId=${persistentId}, existingSession=${!!existingSession}`);
                     if (existingSession) {
                         existingSession.slaveWs = ws; // Update WebSocket reference
+                        console.log(`[DEBUG] quix-register-slave: Updated existing session, masterWs=${isConnectionOpen(existingSession.masterWs)}`);
                         // Keep existing masterWs if still connected
                     } else {
                         remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
+                        console.log(`[DEBUG] quix-register-slave: Created new session`);
                     }
 
                     ws.send(JSON.stringify({
@@ -431,6 +447,21 @@ export function createWebSocketRouter() {
 
                     const session = remoteSessions.get(fullSlaveId);
                     if (session) {
+                        // Check if slave is actually connected
+                        if (!isConnectionOpen(session.slaveWs)) {
+                            console.warn(`[WebSocket] Master registration failed: slave ${fullSlaveId} is not connected (readyState=${session.slaveWs?.raw?.readyState ?? session.slaveWs?.readyState})`);
+                            // Clean up stale session
+                            remoteSessions.delete(fullSlaveId);
+                            ws.send(JSON.stringify({
+                                type: 'quix-master-connection-status',
+                                payload: {
+                                    status: 'slave-not-found',
+                                    slaveId: fullSlaveId,
+                                    message: 'TV is not connected. Please check the TV and try again.'
+                                }
+                            }));
+                            return;
+                        }
                         // Check if a master is already connected - don't silently overwrite
                         if (session.masterWs && isConnectionOpen(session.masterWs)) {
                             console.warn(`[WebSocket] Master registration failed: slave ${fullSlaveId} already has a master connected`);
@@ -444,11 +475,18 @@ export function createWebSocketRouter() {
                         setWSData(ws, 'remoteSlaveId', fullSlaveId);
                         // FIX: Include resolved slaveId in quix-master-connected so master uses correct ID
                         ws.send(JSON.stringify({type: 'quix-master-connected', payload: {slaveId: fullSlaveId}}));
+                        // DEBUG: Check slave connection state before notifying slave
+                        const slaveReadyState = session.slaveWs?.raw?.readyState ?? session.slaveWs?.readyState;
+                        const slaveOpen = isConnectionOpen(session.slaveWs);
+                        console.log(`[DEBUG] quix-register-master: slaveWs=${session.slaveWs}, readyState=${slaveReadyState}, isOpen=${slaveOpen}`);
                         if (session && isConnectionOpen(session.slaveWs)) {
                             session.slaveWs.send(JSON.stringify({
                                 type: 'quix-master-connected',
                                 payload: {slaveId: fullSlaveId}
                             }));
+                            console.log(`[WebSocket] Sent quix-master-connected to slave ${fullSlaveId}`);
+                        } else {
+                            console.log(`[WebSocket] quix-register-master: NOT sending to slave - connection not open`);
                         }
                         console.log(`[WebSocket] Master connected to slave ${fullSlaveId}`);
                     } else {
