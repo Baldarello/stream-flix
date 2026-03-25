@@ -30,6 +30,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
 import GroupIcon from '@mui/icons-material/Group';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
@@ -65,24 +66,6 @@ const WatchTogetherModal: React.FC = observer(() => {
   const itemForModal = roomId ? watchTogetherSelectedItem : selectedItem;
   const { t } = useTranslations();
   
-  const handleTransferHostClick = (participant: { id: string; name: string }) => {
-    setTransferTargetParticipant(participant);
-    setTransferConfirmOpen(true);
-  };
-  
-  const handleConfirmTransfer = () => {
-    if (transferTargetParticipant) {
-      mediaStore.transferHost(transferTargetParticipant.id);
-    }
-    setTransferConfirmOpen(false);
-    setTransferTargetParticipant(null);
-  };
-  
-  const handleCancelTransfer = () => {
-    setTransferConfirmOpen(false);
-    setTransferTargetParticipant(null);
-  };
-  
   const [inputRoomId, setInputRoomId] = useState('');
   const [username, setUsername] = useState('');
   const [copied, setCopied] = useState(false);
@@ -96,6 +79,50 @@ const WatchTogetherModal: React.FC = observer(() => {
   // Host transfer confirmation modal state
   const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
   const [transferTargetParticipant, setTransferTargetParticipant] = useState<{ id: string; name: string } | null>(null);
+
+  // Name edit dialog state
+  const [nameEditOpen, setNameEditOpen] = useState(false);
+  const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState<{ id: string; name: string } | null>(null);
+  const [newName, setNewName] = useState('');
+
+  const handleTransferHostClick = (participant: { id: string; name: string }) => {
+    setTransferTargetParticipant(participant);
+    setTransferConfirmOpen(true);
+  };
+
+  const handleConfirmTransfer = () => {
+    if (transferTargetParticipant) {
+      mediaStore.transferHost(transferTargetParticipant.id);
+    }
+    setTransferConfirmOpen(false);
+    setTransferTargetParticipant(null);
+  };
+
+  const handleCancelTransfer = () => {
+    setTransferConfirmOpen(false);
+    setTransferTargetParticipant(null);
+  };
+
+  const handleNameChangeClick = (participant: { id: string; name: string }) => {
+    setNameEditTargetParticipant(participant);
+    setNewName(participant.name);
+    setNameEditOpen(true);
+  };
+
+  const handleConfirmNameChange = () => {
+    if (nameEditTargetParticipant && newName.trim()) {
+      mediaStore.changeName(nameEditTargetParticipant.id, newName.trim());
+    }
+    setNameEditOpen(false);
+    setNameEditTargetParticipant(null);
+    setNewName('');
+  };
+
+  const handleCancelNameChange = () => {
+    setNameEditOpen(false);
+    setNameEditTargetParticipant(null);
+    setNewName('');
+  };
 
   useEffect(() => {
     if (joinRoomIdFromUrl) {
@@ -371,15 +398,23 @@ const WatchTogetherModal: React.FC = observer(() => {
                 <ListItem
                   key={p.id}
                   secondaryAction={
-                    isHost && p.id !== mediaStore.myClientId ? (
-                      <Tooltip title={t('chat.makeHost')}>
-                        <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => handleTransferHostClick({ id: p.id, name: p.name })}>
-                          <SwapHorizIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      {p.id === mediaStore.myClientId ? (
+                        <Tooltip title={t('profile.changeName') || 'Change name'}>
+                          <IconButton edge="end" aria-label={t('profile.changeName') || 'Change name'} size="small" onClick={() => handleNameChangeClick({ id: p.id, name: p.name })}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      ) : isHost && p.id !== mediaStore.myClientId ? (
+                        <Tooltip title={t('chat.makeHost')}>
+                          <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => handleTransferHostClick({ id: p.id, name: p.name })}>
+                            <SwapHorizIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                    </Box>
                   }
-                  sx={{ pr: isHost && p.id !== mediaStore.myClientId ? 8 : 2 }}
+                  sx={{ pr: (p.id === mediaStore.myClientId) || (isHost && p.id !== mediaStore.myClientId) ? 10 : 2 }}
                 >
                   <ListItemText primary={p.name} secondary={p.id === hostId ? t('watchTogether.host') : ''} />
                 </ListItem>
@@ -443,7 +478,41 @@ const WatchTogetherModal: React.FC = observer(() => {
           {t('watchTogether.confirm')}
         </Button>
       </DialogActions>
-    </Dialog></>
+    </Dialog>
+    <Dialog
+      open={nameEditOpen}
+      onClose={handleCancelNameChange}
+      aria-labelledby="name-edit-dialog-title"
+    >
+      <DialogTitle id="name-edit-dialog-title">
+        {t('profile.changeName') || 'Change Name'}
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label={t('watchTogether.yourName') || 'Your name'}
+          type="text"
+          fullWidth
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && newName.trim()) {
+              handleConfirmNameChange();
+            }
+          }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancelNameChange} color="primary">
+          {t('watchTogether.cancel')}
+        </Button>
+        <Button onClick={handleConfirmNameChange} color="primary" variant="contained" disabled={!newName.trim()} autoFocus>
+          {t('watchTogether.confirm')}
+        </Button>
+      </DialogActions>
+    </Dialog>
+       </>
   );
 });
 

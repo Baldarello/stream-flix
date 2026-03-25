@@ -385,6 +385,21 @@ export function createWebSocketRouter() {
                     break;
                 }
 
+                case 'quix-change-name': {
+                    const typedPayload = payload as { participantId?: string; name?: string };
+                    const participantId = typedPayload?.participantId;
+                    const newName = typedPayload?.name;
+                    if (room && participantId && newName && room.players.has(participantId)) {
+                        const player = room.players.get(participantId);
+                        if (player && player.ws === ws) {
+                            player.name = newName;
+                            console.log(`Player ${participantId} changed name to "${newName}" in room ${wsData.roomId}`);
+                            broadcastRoomState(wsData.roomId!);
+                        }
+                    }
+                    break;
+                }
+
                 case 'quix-register-slave': {
                     const typedPayload = payload as { slaveId?: string; shortCode?: string };
                     // Use the slaveId from payload if provided (for reconnection), otherwise use userName (new connection)

@@ -2289,6 +2289,10 @@ class MediaStore {
     transferHost = (newHostId: string) => {
         websocketService.sendMessage({type: 'quix-transfer-host', payload: {newHostId}});
     };
+
+    changeName = (participantId: string, newName: string) => {
+        websocketService.sendMessage({type: 'quix-change-name', payload: {participantId, name: newName}});
+    };
 }
 
 export const mediaStore = new MediaStore();
