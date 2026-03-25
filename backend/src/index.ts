@@ -64,13 +64,24 @@ const app = new Elysia({
     .ws('/ws', {
         message: createWebSocketRouter(),
         open(ws: unknown) {
-            const socket = ws as { id: string; send: (data: string) => void };
+            const socket = ws as { id: string; send: (data: string) => void; data?: any };
             console.log(`WebSocket client connected: ${socket.id}`);
 
-            // Send welcome message
+            // Generate client ID immediately
+            const clientId = `player_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+            
+            // Initialize socket data structure (same pattern as wss.ts)
+            if (!socket.data) socket.data = {};
+            if (!socket.data.wsData) socket.data.wsData = {};
+            socket.data.wsData.userName = clientId;
+            
+            // Include clientId in the connected message
             socket.send(JSON.stringify({
                 type: 'connected',
-                payload: {message: 'Connected to Quix WebSocket server'}
+                payload: { 
+                    message: 'Connected to Quix WebSocket server',
+                    clientId: clientId
+                }
             }));
         },
         close(ws: unknown) {

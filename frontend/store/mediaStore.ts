@@ -2291,6 +2291,12 @@ class MediaStore {
     };
 
     changeName = (participantId: string, newName: string) => {
+        // Optimistically update local participant state for immediate UI feedback
+        const participantIndex = this.participants.findIndex(p => p.id === participantId);
+        if (participantIndex !== -1) {
+            this.participants[participantIndex] = { ...this.participants[participantIndex], name: newName };
+        }
+        // Send to server for broadcast to all room members
         websocketService.sendMessage({type: 'quix-change-name', payload: {participantId, name: newName}});
     };
 }

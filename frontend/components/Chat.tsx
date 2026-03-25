@@ -4,7 +4,13 @@ import {mediaStore} from '../store/mediaStore.ts';
 import {
   Avatar,
   Box,
+  Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   List,
@@ -18,6 +24,7 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import EditIcon from '@mui/icons-material/Edit';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
 const MAX_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB max
@@ -55,11 +62,59 @@ const fileToBase64 = (file: File): Promise<string> => {
 };
 
 const Chat: React.FC = observer(() => {
-  const { chatHistory, sendChatMessage, participants, hostId, isHost, myClientId, transferHost } = mediaStore;
+  const { chatHistory, sendChatMessage, participants, hostId, isHost, myClientId, transferHost, changeName } = mediaStore;
   const { t } = useTranslations();
   const [text, setText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Host transfer confirmation modal state
+  const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
+  const [transferTargetParticipant, setTransferTargetParticipant] = useState<{ id: string; name: string } | null>(null);
+
+  // Name edit dialog state
+  const [nameEditOpen, setNameEditOpen] = useState(false);
+  const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState<{ id: string; name: string } | null>(null);
+  const [newName, setNewName] = useState('');
+
+  const handleTransferHostClick = (participant: { id: string; name: string }) => {
+    setTransferTargetParticipant(participant);
+    setTransferConfirmOpen(true);
+  };
+
+  const handleConfirmTransfer = () => {
+    if (transferTargetParticipant) {
+      transferHost(transferTargetParticipant.id);
+    }
+    setTransferConfirmOpen(false);
+    setTransferTargetParticipant(null);
+  };
+
+  const handleCancelTransfer = () => {
+    setTransferConfirmOpen(false);
+    setTransferTargetParticipant(null);
+  };
+
+  const handleNameChangeClick = (participant: { id: string; name: string }) => {
+    setNameEditTargetParticipant(participant);
+    setNewName(participant.name);
+    setNameEditOpen(true);
+  };
+
+  const handleConfirmNameChange = () => {
+    if (nameEditTargetParticipant && newName.trim()) {
+      changeName(nameEditTargetParticipant.id, newName.trim());
+    }
+    setNameEditOpen(false);
+    setNameEditTargetParticipant(null);
+    setNewName('');
+  };
+
+  const handleCancelNameChange = () => {
+    setNameEditOpen(false);
+    setNameEditTargetParticipant(null);
+    setNewName('');
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -151,16 +206,23 @@ const Chat: React.FC = observer(() => {
                   <ListItem
                       key={p.id}
                       secondaryAction={
-                          isHost && p.id !== myClientId ? (
-                              // FIX: (line 77) Wrap IconButton with Tooltip component
-                              <Tooltip title={t('chat.makeHost')}>
-                                  <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => transferHost(p.id)}>
-                                      <SwapHorizIcon />
-                                  </IconButton>
-                              </Tooltip>
-                          ) : null
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {p.id === myClientId ? (
+                            <Tooltip title={t('profile.changeName') || 'Change name'}>
+                              <IconButton edge="end" aria-label={t('profile.changeName') || 'Change name'} size="small" onClick={() => handleNameChangeClick({ id: p.id, name: p.name })}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          ) : isHost && p.id !== myClientId ? (
+                            <Tooltip title={t('chat.makeHost')}>
+                              <IconButton edge="end" aria-label={t('chat.makeHost')} onClick={() => handleTransferHostClick({ id: p.id, name: p.name })}>
+                                <SwapHorizIcon />
+                              </IconButton>
+                            </Tooltip>
+                          ) : null}
+                        </Box>
                       }
-                      sx={{ pr: isHost && p.id !== myClientId ? 8 : 2 }}
+                      sx={{ pr: (p.id === myClientId) || (isHost && p.id !== myClientId) ? 10 : 2 }}
                   >
                       <ListItemText 
                           primary={p.name} 
@@ -249,6 +311,63 @@ const Chat: React.FC = observer(() => {
           <SendIcon />
         </IconButton>
       </Box>
+      {/* Host Transfer Confirmation Dialog */}
+      <Dialog
+        open={transferConfirmOpen}
+        onClose={handleCancelTransfer}
+        aria-labelledby="transfer-host-dialog-title"
+      >
+        <DialogTitle id="transfer-host-dialog-title">
+          {t('watchTogether.transferHostTitle') || 'Transfer Host'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t('watchTogether.transferHostConfirm', { name: transferTargetParticipant?.name })}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelTransfer} color="primary">
+            {t('watchTogether.cancel')}
+          </Button>
+          <Button onClick={handleConfirmTransfer} color="primary" variant="contained" autoFocus>
+            {t('watchTogether.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Name Edit Dialog */}
+      <Dialog
+        open={nameEditOpen}
+        onClose={handleCancelNameChange}
+        aria-labelledby="name-edit-dialog-title"
+      >
+        <DialogTitle id="name-edit-dialog-title">
+          {t('profile.changeName') || 'Change Name'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label={t('watchTogether.yourName') || 'Your name'}
+            type="text"
+            fullWidth
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newName.trim()) {
+                handleConfirmNameChange();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelNameChange} color="primary">
+            {t('watchTogether.cancel')}
+          </Button>
+          <Button onClick={handleConfirmNameChange} color="primary" variant="contained" disabled={!newName.trim()} autoFocus>
+            {t('watchTogether.confirm')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 });
