@@ -276,51 +276,57 @@ const ProfileDrawer: React.FC = observer(() => {
                         <ListItemText secondary={t('profileDrawer.noSavedDevices')} sx={{ pl: 2 }} />
                     </ListItem>
                 ) : (
-                    knownSlaves.map(slave => (
-                        <ListItem 
-                            key={slave.id}
-                            secondaryAction={ editingSlaveId !== slave.id ? (
-                                <>
-                                    <Tooltip title={t('profileDrawer.editName')}>
-                                        <IconButton edge="end" onClick={() => handleStartEdit(slave)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title={t('profileDrawer.forgetDevice')}>
-                                        <IconButton edge="end" onClick={() => forgetSlave(slave.id)} sx={{ ml: 0.5 }}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </>
-                            ) : null}
-                            disablePadding
-                        >
-                            {editingSlaveId === slave.id ? (
-                                <Stack direction="row" spacing={1} alignItems="center" sx={{ width: '100%', px: 2, py: 1 }}>
-                                    <TextField
-                                        value={editedName}
-                                        onChange={(e) => setEditedName(e.target.value)}
-                                        size="small"
-                                        variant="standard"
-                                        autoFocus
-                                        fullWidth
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
-                                    />
-                                    <Tooltip title={t('profileDrawer.save')}>
-                                        <IconButton onClick={handleSaveEdit} size="small"><CheckIcon /></IconButton>
-                                    </Tooltip>
-                                    <Tooltip title={t('profileDrawer.cancel')}>
-                                        <IconButton onClick={handleCancelEdit} size="small"><CloseIcon /></IconButton>
-                                    </Tooltip>
-                                </Stack>
-                            ) : (
-                                <ListItemButton onClick={() => reconnectToSlave(slave.id)}>
-                                    <ListItemIcon><TvIcon /></ListItemIcon>
-                                    <ListItemText primary={slave.name} secondary={`ID: ${slave.id.substring(7, 13)}${slave.shortCode ? ` | Code: ${slave.shortCode}` : ''}`} />
-                                </ListItemButton>
-                            )}
-                        </ListItem>
-                    ))
+                    knownSlaves.map(slave => {
+                       console.log("slave",slave)
+                        return (
+                            <ListItem
+                                key={slave.id}
+                                secondaryAction={editingSlaveId !== slave.id ? (
+                                    <>
+                                        <Tooltip title={t('profileDrawer.editName')}>
+                                            <IconButton edge="end" onClick={() => handleStartEdit(slave)}>
+                                                <EditIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={t('profileDrawer.forgetDevice')}>
+                                            <IconButton edge="end" onClick={() => forgetSlave(slave.id)} sx={{ml: 0.5}}>
+                                                <DeleteIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                    </>
+                                ) : null}
+                                disablePadding
+                            >
+                                {editingSlaveId === slave.id ? (
+                                    <Stack direction="row" spacing={1} alignItems="center"
+                                           sx={{width: '100%', px: 2, py: 1}}>
+                                        <TextField
+                                            value={editedName}
+                                            onChange={(e) => setEditedName(e.target.value)}
+                                            size="small"
+                                            variant="standard"
+                                            autoFocus
+                                            fullWidth
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
+                                        />
+                                        <Tooltip title={t('profileDrawer.save')}>
+                                            <IconButton onClick={handleSaveEdit} size="small"><CheckIcon/></IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={t('profileDrawer.cancel')}>
+                                            <IconButton onClick={handleCancelEdit}
+                                                        size="small"><CloseIcon/></IconButton>
+                                        </Tooltip>
+                                    </Stack>
+                                ) : (
+                                    <ListItemButton onClick={() => reconnectToSlave(slave.id)}>
+                                        <ListItemIcon><TvIcon/></ListItemIcon>
+                                        <ListItemText primary={slave.name}
+                                                      secondary={`ID: ${slave.id}`}/>
+                                    </ListItemButton>
+                                )}
+                            </ListItem>
+                        )
+                    })
                 )}
             </List>
             <Divider />

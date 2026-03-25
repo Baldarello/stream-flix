@@ -65,7 +65,7 @@ class WebSocketService {
             // Client ID is now null until the server assigns one.
             this._clientId = null;
             this.events.emit('open');
-            
+
             // Start heartbeat
             this.startHeartbeat();
         };
@@ -76,7 +76,7 @@ class WebSocketService {
 
                 // Handle ping from server (for heartbeat)
                 if (message.type === 'ping') {
-                    this.sendMessage({ type: 'pong' });
+                    this.sendMessage({type: 'pong'});
                     return;
                 }
 
@@ -84,6 +84,12 @@ class WebSocketService {
                 if (message.type === 'connected' && message.payload?.clientId) {
                     console.log(`Received client ID: ${message.payload.clientId}`);
                     this.setClientId(message.payload.clientId);
+                }
+
+                // Handle slave not connected error
+                if (message.type === 'quix-slave-not-connected') {
+                    console.log('[WebSocket] Slave not connected:', message.payload);
+                    this.events.emit('slave-not-connected', message.payload);
                 }
 
                 this.events.emit('message', message);
@@ -98,7 +104,7 @@ class WebSocketService {
             this.isConnected = false;
             this.stopHeartbeat();
             this.ws = null;
-            
+
             // Exponential backoff for reconnection
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 const delay = Math.min(this.reconnectInterval * Math.pow(2, this.reconnectAttempts), 30000);
@@ -133,12 +139,12 @@ class WebSocketService {
     startHeartbeat() {
         // Clear any existing heartbeat
         this.stopHeartbeat();
-        
+
         // Send periodic pings to the server
         this.heartbeatInterval = setInterval(() => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                this.sendMessage({ type: 'ping' });
-                
+                this.sendMessage({type: 'ping'});
+
                 // Set a timeout to detect if we don't get a response
                 this.pingTimeout = setTimeout(() => {
                     console.warn('No pong received from server, connection may be dead');
@@ -146,7 +152,7 @@ class WebSocketService {
                 }, this.heartbeatTimeout);
             }
         }, 30000); // Send ping every 30 seconds
-        
+
         console.log('Heartbeat started');
     }
 

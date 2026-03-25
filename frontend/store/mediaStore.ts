@@ -2172,6 +2172,21 @@ class MediaStore {
                 case 'quix-sync-error':
                     this.showSnackbar(payload?.error || 'Sync failed', 'error', true);
                     break;
+                case 'quix-slave-disconnected':
+                    // Slave (TV) disconnected from master - master should show reconnection UI
+                    console.log('[mediaStore] Slave disconnected');
+                    this.isRemoteMasterConnected = false;
+                    this.remoteSlaveState = null;
+                    // Open QR scanner for reconnection
+                    this.openQRScanner();
+                    this.showSnackbar('notifications.slaveDisconnected', 'warning', true);
+                    break;
+                case 'quix-master-disconnected':
+                    // Master (phone) disconnected from slave - slave should show QR code again
+                    console.log('[mediaStore] Master disconnected');
+                    this.isRemoteMasterConnected = false;
+                    this.showSnackbar('notifications.masterDisconnected', 'info', true);
+                    break;
             }
         });
     };

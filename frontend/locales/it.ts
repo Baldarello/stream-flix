@@ -238,6 +238,10 @@ export const it = {
       "title": "Telecomando",
       "back": "indietro",
       "nowPlaying": "In riproduzione sulla TV",
+      "connectionLost": "Connessione Persa",
+      "connectionLostDesc": "La TV si è disconnessa. Scansiona il codice QR per riconnetterti.",
+      "reconnect": "Riconnetti",
+      "noContent": "Nessun contenuto in riproduzione.",
       "seekBackward": "indietro 10 secondi",
       "seekForward": "avanti 10 secondi",
       "play": "play",
@@ -322,7 +326,10 @@ export const it = {
     "remoteConnected": "Telecomando connesso!",
     "slaveBusy": "La TV è attualmente connessa a un altro dispositivo. Disconnettila prima.",
     "slaveNotFound": "Dispositivo non trovato. Assicurati che la TV sia accesa e pronta per la connessione.",
+    "slaveDisconnected": "TV disconnessa. Scansiona il codice QR per riconnetterti.",
+    "masterDisconnected": "Telecomando disconnesso.",
     "reconnectingAsRemote": "Riconnessione come telecomando...",
+
 
     "failedToLoadSeriesDetails": "Impossibile caricare i dettagli della serie.",
     "noPlayableEpisodes": "Nessun episodio riproducibile trovato per questa serie.",
