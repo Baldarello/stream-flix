@@ -226,7 +226,11 @@ export const it = {
     "makeHost": "Rendi Host",
     "sentImageAlt": "Immagine inviata",
     "uploadImage": "upload image",
-    "placeholder": "Scrivi un messaggio..."
+    "placeholder": "Scrivi un messaggio...",
+    "imageTooLarge": "L'immagine supera il limite di 5MB",
+    "imageAttached": "Immagine allegata",
+    "previewAlt": "Anteprima immagine",
+    "removeImage": "Rimuovi immagine"
   },
   "remote": {
     "title": "Telecomando Quix",

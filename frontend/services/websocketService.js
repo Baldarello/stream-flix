@@ -129,6 +129,17 @@ class WebSocketService {
                     console.log(`[WebSocket] quix-room-update payload:`, message.payload);
                 }
 
+                // Log incoming chat messages with image info
+                if (message.type === 'quix-room-update' && message.payload?.chatHistory) {
+                    const lastMsg = message.payload.chatHistory[message.payload.chatHistory.length - 1];
+                    if (lastMsg) {
+                        const hasText = !!lastMsg.text;
+                        const hasImage = !!lastMsg.image;
+                        const imageSize = lastMsg.image ? Math.round(lastMsg.image.length * 0.75) : 0;
+                        console.log(`[WebSocket] Chat message received: hasText=${hasText}, hasImage=${hasImage}, imageSize=~${(imageSize / 1024).toFixed(1)}KB`);
+                    }
+                }
+
                 this.events.emit('message', message);
             } catch (error) {
                 console.error('Error parsing incoming WebSocket message:', error);
@@ -163,7 +174,17 @@ class WebSocketService {
 
     sendMessage(message) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            console.log(`[WebSocket] Sending message: type=${message.type}, payload=`, message.payload);
+            // Log message info, but handle large payloads (like images) gracefully
+            const messageType = message.type;
+            if (messageType === 'quix-chat-message' && message.payload?.message) {
+                const { text, image } = message.payload.message;
+                const hasText = !!text;
+                const hasImage = !!image;
+                const imageSize = image ? Math.round(image.length * 0.75) : 0; // Estimate original size from base64
+                console.log(`[WebSocket] Sending message: type=${messageType}, hasText=${hasText}, hasImage=${hasImage}, imageSize=~${(imageSize / 1024).toFixed(1)}KB`);
+            } else {
+                console.log(`[WebSocket] Sending message: type=${messageType}`);
+            }
             this.ws.send(JSON.stringify(message));
         } else {
             console.warn('WebSocket is not connected. Message not sent:', message);

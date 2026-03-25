@@ -23,7 +23,7 @@ import type {Episode} from '../types.ts';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
 const EpisodesDrawer: React.FC = observer(() => {
-    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress, showFilterPreferences } = mediaStore;
+    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress, showFilterPreferences, roomId, isHost, changeWatchTogetherMedia } = mediaStore;
     const { t } = useTranslations();
 
     if (!currentShow || !nowPlayingItem || !('episode_number' in nowPlayingItem)) {
@@ -44,7 +44,7 @@ const EpisodesDrawer: React.FC = observer(() => {
             return langMatch && typeMatch;
         });
         
-        mediaStore.startPlayback({
+        const episodeToPlay = {
             ...episode,
             video_urls: filteredLinks,
             video_url: undefined, // Let startPlayback decide
@@ -52,7 +52,15 @@ const EpisodesDrawer: React.FC = observer(() => {
             show_title: currentShow.title || currentShow.name || '',
             backdrop_path: currentShow.backdrop_path,
             season_number: seasonNumber,
-        });
+        };
+        
+        // If we're in Watch Together mode and are the host, use changeWatchTogetherMedia
+        // to broadcast the episode change to all clients
+        if (roomId && isHost) {
+            changeWatchTogetherMedia(episodeToPlay);
+        } else {
+            mediaStore.startPlayback(episodeToPlay);
+        }
         
         closeEpisodesDrawer();
     };

@@ -226,7 +226,11 @@ export const en = {
     "makeHost": "Make Host",
     "sentImageAlt": "Sent image",
     "uploadImage": "upload image",
-    "placeholder": "Write a message..."
+    "placeholder": "Write a message...",
+    "imageTooLarge": "Image size exceeds 5MB limit",
+    "imageAttached": "Image attached",
+    "previewAlt": "Image preview",
+    "removeImage": "Remove image"
   },
   "remote": {
     "title": "Quix Remote",

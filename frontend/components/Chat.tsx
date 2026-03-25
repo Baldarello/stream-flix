@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, ChangeEvent} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {
@@ -25,9 +25,10 @@ import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
-const MAX_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB max
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB max
 
 const compressImage = (base64: string, maxWidth = 800): Promise<string> => {
   return new Promise((resolve) => {
@@ -65,6 +66,7 @@ const Chat: React.FC = observer(() => {
   const { chatHistory, sendChatMessage, participants, hostId, isHost, myClientId, transferHost, changeName } = mediaStore;
   const { t } = useTranslations();
   const [text, setText] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -121,10 +123,21 @@ const Chat: React.FC = observer(() => {
   }, [chatHistory]);
 
   const handleSendMessage = () => {
-    if (text.trim()) {
-      sendChatMessage({ text });
+    const hasText = text.trim();
+    const hasImage = selectedImage !== null;
+    
+    if (hasText || hasImage) {
+      sendChatMessage({ 
+        text: hasText ? text : undefined, 
+        image: hasImage ? selectedImage : undefined 
+      });
       setText('');
+      setSelectedImage(null);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,19 +158,21 @@ const Chat: React.FC = observer(() => {
     }
     
     if (file.size > MAX_IMAGE_SIZE) {
-      console.error('Image size exceeds 1MB limit');
+      console.error('Image size exceeds 5MB limit');
+      alert(t('chat.imageTooLarge') || `Image size exceeds 5MB limit`);
       return;
     }
     
     try {
       let base64Image = await fileToBase64(file);
       
-      // Compress if image is large
+      // Compress if image is large (only for full-size images)
       if (file.size > 500 * 1024) {
         base64Image = await compressImage(base64Image);
       }
       
-      sendChatMessage({ image: base64Image });
+      // Store for preview instead of sending immediately
+      setSelectedImage(base64Image);
     } catch (error) {
       console.error('Error processing image:', error);
     }
@@ -286,7 +301,7 @@ const Chat: React.FC = observer(() => {
         <div ref={messagesEndRef} />
       </List>
       <Divider />
-      <Box sx={{ p: 1, bgcolor: '#202020', display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ p: 1, bgcolor: '#202020', display: 'flex', alignItems: 'center', position: 'relative' }}>
         <input
           type="file"
           accept="image/*"
@@ -307,10 +322,47 @@ const Chat: React.FC = observer(() => {
           onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
           InputProps={{ disableUnderline: true }}
         />
-        <IconButton onClick={handleSendMessage} color="primary" disabled={!text.trim()}>
+        <IconButton onClick={handleSendMessage} color="primary" disabled={!text.trim() && !selectedImage}>
           <SendIcon />
         </IconButton>
       </Box>
+      {/* Image Preview Section */}
+      {selectedImage && (
+        <Box 
+          sx={{ 
+            position: 'absolute',
+            bottom: 70,
+            left: 16,
+            right: 16,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            p: 1,
+            boxShadow: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            zIndex: 1
+          }}
+        >
+          <Box
+            component="img"
+            src={selectedImage}
+            alt={t('chat.previewAlt') || 'Image preview'}
+            sx={{
+              width: 60,
+              height: 60,
+              objectFit: 'cover',
+              borderRadius: 1
+            }}
+          />
+          <Typography variant="caption" sx={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {t('chat.imageAttached') || 'Image attached'}
+          </Typography>
+          <IconButton size="small" onClick={handleRemoveImage} aria-label={t('chat.removeImage')}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
       {/* Host Transfer Confirmation Dialog */}
       <Dialog
         open={transferConfirmOpen}
