@@ -14,6 +14,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import TvIcon from '@mui/icons-material/Tv';
 import CloseIcon from '@mui/icons-material/Close';
 import {observer} from 'mobx-react-lite';
 import {ActiveView, mediaStore} from '../store/mediaStore.ts';
@@ -177,6 +178,9 @@ export const Header: React.FC = observer(() => {
               <Box sx={{ display: isSearchActive ? 'none' : 'flex', alignItems: 'center', gap: 1 }}>
                   <IconButton color="inherit">
                       <NotificationsIcon />
+                  </IconButton>
+                  <IconButton color="inherit" onClick={() => mediaStore.enableSmartTVMode()}>
+                      <TvIcon />
                   </IconButton>
                   <IconButton color="inherit" onClick={() => mediaStore.toggleProfileDrawer(true)}>
                       <AccountCircleIcon />

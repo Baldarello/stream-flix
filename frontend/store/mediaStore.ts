@@ -124,6 +124,7 @@ class MediaStore {
     remoteFullItem: MediaItem | null = null;
     isRemoteFullItemLoading = false;
     isIntroSkippableOnSlave = false;
+    shouldAutoFullscreen = false; // Trigger for auto-fullscreen on slave when playback starts
     @observable knownSlaves: { id: string; name: string; lastSeen: number; }[] = [];
 
     // Media Sync State
@@ -545,6 +546,7 @@ class MediaStore {
     };
     exitSmartTVPairingMode = () => {
         this.isSmartTVPairingVisible = false;
+        this.isSmartTV = false; // Reset Smart TV mode state
         db.preferences.delete('isConfiguredAsSlave');
     };
     openMediaSyncModal = (slaveId: string) => {
@@ -1552,6 +1554,14 @@ class MediaStore {
         }
     };
 
+    // Trigger auto-fullscreen on slave when playback starts from master
+    triggerAutoFullscreen = () => {
+        // Only trigger if not already in fullscreen mode
+        if (!document.fullscreenElement) {
+            this.shouldAutoFullscreen = true;
+        }
+    };
+
     // Master reconnection methods for automatic reconnection after slave disconnect
     handleSlaveDisconnected = () => {
         this.isRemoteMasterConnected = false;
@@ -1632,6 +1642,7 @@ class MediaStore {
             case 'play_item':
                 this.startPlayback(item);
                 this.sendSlaveStatusUpdate();
+                this.triggerAutoFullscreen(); // Auto-fullscreen when playback starts
                 return; // Exit after handling
             case 'stop':
                 this.stopPlayback();
@@ -1664,6 +1675,7 @@ class MediaStore {
             case 'play':
                 if (this.nowPlayingItem) this.isPlaying = true;
                 video.play();
+                this.triggerAutoFullscreen(); // Auto-fullscreen when playback starts
                 break;
             case 'pause':
                 if (this.nowPlayingItem) this.isPlaying = false;
@@ -2289,6 +2301,12 @@ class MediaStore {
                 if (links && links.length > 0) {
                     const linksToSave = links.map(({id: _id, ...link}: any) => link);
                     await db.mediaLinks.bulkPut(linksToSave);
+
+                    // FIX: Clear the in-memory mediaLinks cache for these media IDs to prevent stale data
+                    // When playRemoteItem() later calls getLinksForMedia(), it won't get stale empty caches
+                    for (const link of linksToSave) {
+                        this.mediaLinks.delete(link.mediaId);
+                    }
                 }
 
                 // Send progress update back to master

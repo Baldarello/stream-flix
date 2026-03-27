@@ -50,7 +50,7 @@ const formatTime = (timeInSeconds: number) => {
 const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 const VideoPlayer: React.FC = observer(() => {
-  const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate, setIntroSkippableOnSlave, activeTheme } = mediaStore;
+  const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate, setIntroSkippableOnSlave, activeTheme, shouldAutoFullscreen } = mediaStore;
   const { t } = useTranslations();
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -226,6 +226,25 @@ const VideoPlayer: React.FC = observer(() => {
             playerContainer.removeEventListener('mouseleave', () => {});
         };
     }, [playerState.isPlaying]);
+
+    // Effect for auto-fullscreen on slave when playback starts from master
+    useEffect(() => {
+        if (shouldAutoFullscreen && isSmartTV) {
+            // Small delay to ensure video is ready
+            const timer = setTimeout(async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await playerContainerRef.current?.requestFullscreen();
+                    }
+                } catch (e) {
+                    console.error('Auto-fullscreen failed:', e);
+                }
+                // Reset the trigger
+                mediaStore.shouldAutoFullscreen = false;
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [shouldAutoFullscreen, isSmartTV]);
     
     const handleTogglePlay = useCallback(() => { if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause(); }, []);
     const handleToggleMute = useCallback(() => { if(videoRef.current) videoRef.current.muted = !videoRef.current.muted; }, []);

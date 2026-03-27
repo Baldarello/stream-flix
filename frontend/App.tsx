@@ -138,8 +138,9 @@ const AppContent: React.FC = observer(() => {
     );
   }
 
-  // Smart TV pairing mode always takes precedence
-  if (isSmartTVPairingVisible) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
+  // Smart TV pairing mode always takes precedence, unless we're playing content
+  // When nowPlayingItem is set (e.g., slave receiving playback from master), show VideoPlayer instead
+  if (isSmartTVPairingVisible && !nowPlayingItem) return <><SmartTVScreen /> <NotificationSnackbar /><DebugOverlay /></>;
   
   // If remote master, and slave is playing, show the remote player controls
   if (isRemoteMaster && remoteSlaveState?.nowPlayingItem) return <>

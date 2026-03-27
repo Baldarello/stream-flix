@@ -6,20 +6,32 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
 const SmartTVScreen: React.FC = observer(() => {
-    const { slaveId, isRemoteMasterConnected, slaveShortCode } = mediaStore;
-    const { t } = useTranslations();
+    const {slaveId, isRemoteMasterConnected, slaveShortCode} = mediaStore;
+    const {t} = useTranslations();
 
     const renderContent = () => {
         if (isRemoteMasterConnected) {
-             return (
-                <Box sx={{ textAlign: 'center', color: 'success.main' }}>
-                    <CheckCircleOutlineIcon sx={{ fontSize: 80, mb: 2 }} />
+            return (
+                <Box sx={{textAlign: 'center', color: 'success.main'}}>
+                    <CheckCircleOutlineIcon sx={{fontSize: 80, mb: 2}}/>
                     <Typography variant="h4" component="h1" fontWeight="bold">
                         {t('smartTV.connected')}
                     </Typography>
                     <Typography color="text.secondary">
                         {t('smartTV.connectedSubtitle')}
                     </Typography>
+                    <Button
+                        variant="outlined"
+                        onClick={() => mediaStore.exitSmartTVPairingMode()}
+                        sx={{
+                            mt: 10,
+                            borderColor: 'rgba(255,255,255,0.7)',
+                            color: 'white',
+                            '&:hover': {borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)'}
+                        }}
+                    >
+                        {t('smartTV.browseOnTV')}
+                    </Button>
                 </Box>
             );
         }
@@ -30,21 +42,22 @@ const SmartTVScreen: React.FC = observer(() => {
             const remoteUrl = `${baseUrl}/?remote_for=${slaveId}`;
             const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
             return (
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 3 }}>
+                <Box sx={{textAlign: 'center'}}>
+                    <Typography variant="h4" component="h1" fontWeight="bold" sx={{mb: 3}}>
                         {t('smartTV.connectTitle')}
                     </Typography>
-                    <Paper elevation={8} sx={{ p: 3, display: 'inline-block', background: 'white' }}>
-                        <img src={qrCodeUrl} alt={t('smartTV.qrAlt')} width="250" height="250" />
+                    <Paper elevation={8} sx={{p: 3, display: 'inline-block', background: 'white'}}>
+                        <img src={qrCodeUrl} alt={t('smartTV.qrAlt')} width="250" height="250"/>
                     </Paper>
-                    <Typography variant="body1" sx={{ mt: 3, color: 'text.secondary', whiteSpace: 'pre-line' }}>
+                    <Typography variant="body1" sx={{mt: 3, color: 'text.secondary', whiteSpace: 'pre-line'}}>
                         {t('smartTV.instructions')}
                     </Typography>
-                    <Typography variant="body1" sx={{ mt: 4, color: 'text.secondary' }}>
+                    <Typography variant="body1" sx={{mt: 4, color: 'text.secondary'}}>
                         {t('smartTV.orEnterCode')}
                     </Typography>
-                    <Paper elevation={4} sx={{ p: '4px 20px', display: 'inline-block', mt: 1, bgcolor: 'rgba(255,255,255,0.1)' }}>
-                        <Typography variant="h5" component="p" sx={{ fontFamily: 'monospace', letterSpacing: '0.2rem' }}>
+                    <Paper elevation={4}
+                           sx={{p: '4px 20px', display: 'inline-block', mt: 1, bgcolor: 'rgba(255,255,255,0.1)'}}>
+                        <Typography variant="h5" component="p" sx={{fontFamily: 'monospace', letterSpacing: '0.2rem'}}>
                             {slaveShortCode || '...'}
                         </Typography>
                     </Paper>
@@ -53,8 +66,8 @@ const SmartTVScreen: React.FC = observer(() => {
         }
 
         return (
-            <Box sx={{ textAlign: 'center' }}>
-                <CircularProgress sx={{ mb: 2 }} />
+            <Box sx={{textAlign: 'center'}}>
+                <CircularProgress sx={{mb: 2}}/>
                 <Typography variant="h6">{t('smartTV.initializing')}</Typography>
             </Box>
         );
@@ -82,7 +95,7 @@ const SmartTVScreen: React.FC = observer(() => {
                         bottom: 40,
                         borderColor: 'rgba(255,255,255,0.7)',
                         color: 'white',
-                        '&:hover': { borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)' }
+                        '&:hover': {borderColor: 'white', bgcolor: 'rgba(255,255,255,0.1)'}
                     }}
                 >
                     {t('smartTV.browseOnTV')}
