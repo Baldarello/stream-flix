@@ -50,99 +50,122 @@ const formatTime = (timeInSeconds: number) => {
 const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 const VideoPlayer: React.FC = observer(() => {
-  const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback, isSmartTV, isPlaying, sendSlaveStatusUpdate, setIntroSkippableOnSlave, activeTheme, shouldAutoFullscreen } = mediaStore;
-  const { t } = useTranslations();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const playerContainerRef = useRef<HTMLDivElement>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [showSkipIntro, setShowSkipIntro] = useState(false);
-  const [isUiVisible, setIsUiVisible] = useState(true);
-  const uiTimeoutRef = useRef<number | null>(null);
-  const lastHostUpdateTimeRef = useRef(0);
-  const isSeekingRef = useRef(false);
-  
-  const [playerState, setPlayerState] = useState({
-      isPlaying: false,
-      progress: 0,
-      volume: 1,
-      isMuted: false,
-      duration: 0,
-      currentTime: 0,
-      isFullScreen: false,
-      playbackRate: 1,
-  });
-  const [volumeAnchorEl, setVolumeAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [speedAnchorEl, setSpeedAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const {
+        nowPlayingItem,
+        roomId,
+        isHost,
+        sendPlaybackControl,
+        stopPlayback,
+        isSmartTV,
+        isPlaying,
+        sendSlaveStatusUpdate,
+        setIntroSkippableOnSlave,
+        activeTheme,
+        shouldAutoFullscreen
+    } = mediaStore;
+    const {t} = useTranslations();
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const playerContainerRef = useRef<HTMLDivElement>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [showSkipIntro, setShowSkipIntro] = useState(false);
+    const [isUiVisible, setIsUiVisible] = useState(true);
+    const uiTimeoutRef = useRef<number | null>(null);
+    const lastHostUpdateTimeRef = useRef(0);
+    const isSeekingRef = useRef(false);
 
-  // Effect for Watch Together Synchronization
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement || !roomId) return;
-
-    if (!isHost) {
-        const { playbackState } = mediaStore;
-        const initialSync = () => {
-             if (!videoRef.current) return;
-             if (Math.abs(videoRef.current.currentTime - playbackState.time) > 1.5) {
-                videoRef.current.currentTime = playbackState.time;
-             }
-             if (playbackState.status === 'playing' && videoRef.current.paused) {
-                 videoRef.current.play().catch(e => console.error("Sync play failed", e));
-             } else if (playbackState.status === 'paused' && !videoRef.current.paused) {
-                 videoRef.current.pause();
-             }
-        };
-        if (videoElement.readyState >= videoElement.HAVE_METADATA) initialSync();
-        else videoElement.addEventListener('loadedmetadata', initialSync, { once: true });
-    }
-
-    const handlePlay = () => isHost && !isSyncing && sendPlaybackControl({ status: 'playing', time: videoElement.currentTime });
-    const handlePause = () => isHost && !isSyncing && !isSeekingRef.current && sendPlaybackControl({ status: 'paused', time: videoElement.currentTime });
-    const handleSeeking = () => { if(isHost && !isSyncing) isSeekingRef.current = true; };
-    const handleSeeked = () => {
-        if(isHost && !isSyncing) {
-            isSeekingRef.current = false;
-            sendPlaybackControl({ status: videoElement.paused ? 'paused' : 'playing', time: videoElement.currentTime });
-        }
-    };
-    const handleTimeUpdate = () => {
-        const now = Date.now();
-        if(isHost && !isSyncing && !isSeekingRef.current && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
-            lastHostUpdateTimeRef.current = now;
-            sendPlaybackControl({ status: 'playing', time: videoElement.currentTime });
-        }
-    }
-
-    if (isHost) {
-      videoElement.addEventListener('play', handlePlay);
-      videoElement.addEventListener('pause', handlePause);
-      videoElement.addEventListener('seeking', handleSeeking);
-      videoElement.addEventListener('seeked', handleSeeked);
-      videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    }
-    
-    const disposer = mediaStore.addPlaybackListener((state) => {
-        if (!isHost && videoElement) {
-            setIsSyncing(true);
-            if (Math.abs(videoElement.currentTime - state.time) > 1.5) videoElement.currentTime = state.time;
-            if (state.status === 'playing' && videoElement.paused) videoElement.play().catch(console.error);
-            else if (state.status === 'paused' && !videoElement.paused) videoElement.pause();
-            setTimeout(() => setIsSyncing(false), 200);
-        }
+    const [playerState, setPlayerState] = useState({
+        isPlaying: false,
+        progress: 0,
+        volume: 1,
+        isMuted: false,
+        duration: 0,
+        currentTime: 0,
+        isFullScreen: false,
+        playbackRate: 1,
     });
+    const [volumeAnchorEl, setVolumeAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [speedAnchorEl, setSpeedAnchorEl] = useState<HTMLButtonElement | null>(null);
 
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener('play', handlePlay);
-        videoElement.removeEventListener('pause', handlePause);
-        videoElement.removeEventListener('seeking', handleSeeking);
-        videoElement.removeEventListener('seeked', handleSeeked);
-        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      }
-      if (disposer) disposer();
-    };
-  }, [isHost, sendPlaybackControl, roomId]);
-  
+    // Effect for Watch Together Synchronization
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        if (!videoElement || !roomId) return;
+
+        if (!isHost) {
+            const {playbackState} = mediaStore;
+            const initialSync = () => {
+                if (!videoRef.current) return;
+                if (Math.abs(videoRef.current.currentTime - playbackState.time) > 1.5) {
+                    videoRef.current.currentTime = playbackState.time;
+                }
+                if (playbackState.status === 'playing' && videoRef.current.paused) {
+                    videoRef.current.play().catch(e => console.error("Sync play failed", e));
+                } else if (playbackState.status === 'paused' && !videoRef.current.paused) {
+                    videoRef.current.pause();
+                }
+            };
+            if (videoElement.readyState >= videoElement.HAVE_METADATA) initialSync();
+            else videoElement.addEventListener('loadedmetadata', initialSync, {once: true});
+        }
+
+        const handlePlay = () => isHost && !isSyncing && sendPlaybackControl({
+            status: 'playing',
+            time: videoElement.currentTime
+        });
+        const handlePause = () => isHost && !isSyncing && !isSeekingRef.current && sendPlaybackControl({
+            status: 'paused',
+            time: videoElement.currentTime
+        });
+        const handleSeeking = () => {
+            if (isHost && !isSyncing) isSeekingRef.current = true;
+        };
+        const handleSeeked = () => {
+            if (isHost && !isSyncing) {
+                isSeekingRef.current = false;
+                sendPlaybackControl({
+                    status: videoElement.paused ? 'paused' : 'playing',
+                    time: videoElement.currentTime
+                });
+            }
+        };
+        const handleTimeUpdate = () => {
+            const now = Date.now();
+            if (isHost && !isSyncing && !isSeekingRef.current && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
+                lastHostUpdateTimeRef.current = now;
+                sendPlaybackControl({status: 'playing', time: videoElement.currentTime});
+            }
+        }
+
+        if (isHost) {
+            videoElement.addEventListener('play', handlePlay);
+            videoElement.addEventListener('pause', handlePause);
+            videoElement.addEventListener('seeking', handleSeeking);
+            videoElement.addEventListener('seeked', handleSeeked);
+            videoElement.addEventListener('timeupdate', handleTimeUpdate);
+        }
+
+        const disposer = mediaStore.addPlaybackListener((state) => {
+            if (!isHost && videoElement) {
+                setIsSyncing(true);
+                if (Math.abs(videoElement.currentTime - state.time) > 1.5) videoElement.currentTime = state.time;
+                if (state.status === 'playing' && videoElement.paused) videoElement.play().catch(console.error);
+                else if (state.status === 'paused' && !videoElement.paused) videoElement.pause();
+                setTimeout(() => setIsSyncing(false), 200);
+            }
+        });
+
+        return () => {
+            if (videoElement) {
+                videoElement.removeEventListener('play', handlePlay);
+                videoElement.removeEventListener('pause', handlePause);
+                videoElement.removeEventListener('seeking', handleSeeking);
+                videoElement.removeEventListener('seeked', handleSeeked);
+                videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+            }
+            if (disposer) disposer();
+        };
+    }, [isHost, sendPlaybackControl, roomId]);
+
     // Effect for resuming playback from startTime
     useEffect(() => {
         const video = videoRef.current;
@@ -154,25 +177,31 @@ const VideoPlayer: React.FC = observer(() => {
                 }
             };
             if (video.readyState >= 1) handleMetadata();
-            else video.addEventListener('loadedmetadata', handleMetadata, { once: true });
+            else video.addEventListener('loadedmetadata', handleMetadata, {once: true});
             return () => video.removeEventListener('loadedmetadata', handleMetadata);
         }
     }, [nowPlayingItem?.id, nowPlayingItem?.startTime]);
-  
+
     // Effect for saving progress
     useEffect(() => {
         const video = videoRef.current;
         if (!video || !nowPlayingItem || !('episode_number' in nowPlayingItem)) return;
-    
+
         const episodeId = nowPlayingItem.id;
         const saveProgress = () => {
             if (video && video.duration > 0 && !video.seeking) {
-                mediaStore.updateEpisodeProgress({ episodeId, currentTime: video.currentTime, duration: video.duration });
+                mediaStore.updateEpisodeProgress({episodeId, currentTime: video.currentTime, duration: video.duration});
             }
         };
         const interval = setInterval(saveProgress, 5000); // Save every 5 seconds
         video.addEventListener('pause', saveProgress);
-        return () => { clearInterval(interval); if (video) { video.removeEventListener('pause', saveProgress); saveProgress(); } };
+        return () => {
+            clearInterval(interval);
+            if (video) {
+                video.removeEventListener('pause', saveProgress);
+                saveProgress();
+            }
+        };
     }, [nowPlayingItem?.id]);
 
     // Effect for periodic Smart TV status updates
@@ -185,28 +214,30 @@ const VideoPlayer: React.FC = observer(() => {
         }
     }, [isSmartTV, playerState.isPlaying, sendSlaveStatusUpdate]);
 
-  // Effect for "Skip Intro" button visibility
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement || !nowPlayingItem || !('intro_start_s' in nowPlayingItem) || !nowPlayingItem.intro_start_s) {
-        if(showSkipIntro) setShowSkipIntro(false);
-        if (isSmartTV) setIntroSkippableOnSlave(false);
-        return;
-    }
-    const handleTimeUpdate = () => {
-        const currentTime = videoElement.currentTime;
-        const introStart = nowPlayingItem.intro_start_s ?? -1;
-        const introEnd = nowPlayingItem.intro_end_s ?? -1;
-        const isSkippable = currentTime >= introStart && currentTime < introEnd;
-        if (isSkippable !== showSkipIntro) {
-            setShowSkipIntro(isSkippable);
-            if (isSmartTV) setIntroSkippableOnSlave(isSkippable);
+    // Effect for "Skip Intro" button visibility
+    useEffect(() => {
+        const videoElement = videoRef.current;
+        if (!videoElement || !nowPlayingItem || !('intro_start_s' in nowPlayingItem) || !nowPlayingItem.intro_start_s) {
+            if (showSkipIntro) setShowSkipIntro(false);
+            if (isSmartTV) setIntroSkippableOnSlave(false);
+            return;
         }
-    };
-    videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    return () => { if(videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate); };
-  }, [nowPlayingItem?.id, showSkipIntro, isSmartTV, setIntroSkippableOnSlave, nowPlayingItem]);
-  
+        const handleTimeUpdate = () => {
+            const currentTime = videoElement.currentTime;
+            const introStart = nowPlayingItem.intro_start_s ?? -1;
+            const introEnd = nowPlayingItem.intro_end_s ?? -1;
+            const isSkippable = currentTime >= introStart && currentTime < introEnd;
+            if (isSkippable !== showSkipIntro) {
+                setShowSkipIntro(isSkippable);
+                if (isSmartTV) setIntroSkippableOnSlave(isSkippable);
+            }
+        };
+        videoElement.addEventListener('timeupdate', handleTimeUpdate);
+        return () => {
+            if (videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        };
+    }, [nowPlayingItem?.id, showSkipIntro, isSmartTV, setIntroSkippableOnSlave, nowPlayingItem]);
+
     // Effect to manage UI visibility
     useEffect(() => {
         const playerContainer = playerContainerRef.current;
@@ -214,16 +245,25 @@ const VideoPlayer: React.FC = observer(() => {
         const showAndThenHideUi = () => {
             setIsUiVisible(true);
             if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
-            uiTimeoutRef.current = window.setTimeout(() => { if (!videoRef.current?.paused) setIsUiVisible(false); }, 3000);
+            uiTimeoutRef.current = window.setTimeout(() => {
+                if (!videoRef.current?.paused) setIsUiVisible(false);
+            }, 3000);
         };
-        const showUiPermanently = () => { if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current); setIsUiVisible(true); };
+        const showUiPermanently = () => {
+            if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
+            setIsUiVisible(true);
+        };
         playerContainer.addEventListener('mousemove', showAndThenHideUi);
-        playerContainer.addEventListener('mouseleave', () => { if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current); if(!videoRef.current?.paused) setIsUiVisible(false); });
+        playerContainer.addEventListener('mouseleave', () => {
+            if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
+            if (!videoRef.current?.paused) setIsUiVisible(false);
+        });
         showAndThenHideUi();
         return () => {
             if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
             playerContainer.removeEventListener('mousemove', showAndThenHideUi);
-            playerContainer.removeEventListener('mouseleave', () => {});
+            playerContainer.removeEventListener('mouseleave', () => {
+            });
         };
     }, [playerState.isPlaying]);
 
@@ -245,11 +285,20 @@ const VideoPlayer: React.FC = observer(() => {
             return () => clearTimeout(timer);
         }
     }, [shouldAutoFullscreen, isSmartTV]);
-    
-    const handleTogglePlay = useCallback(() => { if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause(); }, []);
-    const handleToggleMute = useCallback(() => { if(videoRef.current) videoRef.current.muted = !videoRef.current.muted; }, []);
-    const handleToggleFullScreen = useCallback(() => { if(!document.fullscreenElement) playerContainerRef.current?.requestFullscreen(); else document.exitFullscreen(); }, []);
-    const handleSpeedChange = useCallback((rate: number) => { if (videoRef.current) videoRef.current.playbackRate = rate; setSpeedAnchorEl(null); }, []);
+
+    const handleTogglePlay = useCallback(() => {
+        if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
+    }, []);
+    const handleToggleMute = useCallback(() => {
+        if (videoRef.current) videoRef.current.muted = !videoRef.current.muted;
+    }, []);
+    const handleToggleFullScreen = useCallback(() => {
+        if (!document.fullscreenElement) playerContainerRef.current?.requestFullscreen(); else document.exitFullscreen();
+    }, []);
+    const handleSpeedChange = useCallback((rate: number) => {
+        if (videoRef.current) videoRef.current.playbackRate = rate;
+        setSpeedAnchorEl(null);
+    }, []);
 
     // Effect for Keyboard Shortcuts
     useEffect(() => {
@@ -264,45 +313,62 @@ const VideoPlayer: React.FC = observer(() => {
             const isWatchTogetherNonHost = !!roomId && !isHost;
 
             switch (e.key.toLowerCase()) {
-                case ' ': 
-                    e.preventDefault(); 
+                case ' ':
+                    e.preventDefault();
                     // Non-hosts in Watch Together cannot control playback
-                    if (!isWatchTogetherNonHost) handleTogglePlay(); 
+                    if (!isWatchTogetherNonHost) handleTogglePlay();
                     break;
-                case 'f': e.preventDefault(); handleToggleFullScreen(); break;
-                case 'm': e.preventDefault(); handleToggleMute(); break;
-                case 'arrowright': 
-                    e.preventDefault(); 
+                case 'f':
+                    e.preventDefault();
+                    handleToggleFullScreen();
+                    break;
+                case 'm':
+                    e.preventDefault();
+                    handleToggleMute();
+                    break;
+                case 'arrowright':
+                    e.preventDefault();
                     // Non-hosts in Watch Together cannot seek
-                    if (!isWatchTogetherNonHost) video.currentTime = Math.min(video.duration, video.currentTime + 5); 
+                    if (!isWatchTogetherNonHost) video.currentTime = Math.min(video.duration, video.currentTime + 5);
                     break;
-                case 'arrowleft': 
-                    e.preventDefault(); 
+                case 'arrowleft':
+                    e.preventDefault();
                     // Non-hosts in Watch Together cannot seek
-                    if (!isWatchTogetherNonHost) video.currentTime = Math.max(0, video.currentTime - 5); 
+                    if (!isWatchTogetherNonHost) video.currentTime = Math.max(0, video.currentTime - 5);
                     break;
-                case 'arrowup': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); break;
-                case 'arrowdown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); break;
-                case '>': case '.': e.preventDefault();
+                case 'arrowup':
+                    e.preventDefault();
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    break;
+                case 'arrowdown':
+                    e.preventDefault();
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    break;
+                case '>':
+                case '.':
+                    e.preventDefault();
                     if (!isWatchTogetherNonHost) {
                         const nextIndex = playbackRates.indexOf(playerState.playbackRate) + 1;
                         if (nextIndex < playbackRates.length) handleSpeedChange(playbackRates[nextIndex]);
                     }
                     break;
-                case '<': case ',': e.preventDefault();
+                case '<':
+                case ',':
+                    e.preventDefault();
                     if (!isWatchTogetherNonHost) {
                         const prevIndex = playbackRates.indexOf(playerState.playbackRate) - 1;
                         if (prevIndex >= 0) handleSpeedChange(playbackRates[prevIndex]);
                     }
                     break;
-                default: break;
+                default:
+                    break;
             }
         };
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleSpeedChange, roomId, isHost]);
-    
+
     // Player state management and event listeners
     useEffect(() => {
         const video = videoRef.current;
@@ -322,7 +388,7 @@ const VideoPlayer: React.FC = observer(() => {
         const onPlay = () => setPlayerState(p => ({...p, isPlaying: true}));
         const onPause = () => setPlayerState(p => ({...p, isPlaying: false}));
         const onFsChange = () => setPlayerState(p => ({...p, isFullScreen: !!document.fullscreenElement}));
-        
+
         video.addEventListener('timeupdate', updateState);
         video.addEventListener('durationchange', updateState);
         video.addEventListener('volumechange', updateState);
@@ -345,33 +411,35 @@ const VideoPlayer: React.FC = observer(() => {
     }, [nowPlayingItem?.id]);
 
 
-  if (!nowPlayingItem) return null;
-  
-  const handleSeek = (event: Event, newValue: number | number[]) => { 
-      if (videoRef.current && isHost) {
-          const newTime = (newValue as number / 100) * playerState.duration;
-          videoRef.current.currentTime = newTime;
-          // Send playback control to sync with other clients in Watch Together
-          sendPlaybackControl({ status: videoRef.current.paused ? 'paused' : 'playing', time: newTime });
-      }
-  };
-  const handleVolumeChange = (event: Event, newValue: number | number[]) => { if(videoRef.current) videoRef.current.volume = newValue as number; };
+    if (!nowPlayingItem) return null;
 
-  const isEpisode = 'episode_number' in nowPlayingItem;
-  let videoSrc = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-  let title: string;
+    const handleSeek = (event: Event, newValue: number | number[]) => {
+        if (videoRef.current && isHost) {
+            const newTime = (newValue as number / 100) * playerState.duration;
+            videoRef.current.currentTime = newTime;
+            // Send playback control to sync with other clients in Watch Together
+            sendPlaybackControl({status: videoRef.current.paused ? 'paused' : 'playing', time: newTime});
+        }
+    };
+    const handleVolumeChange = (event: Event, newValue: number | number[]) => {
+        if (videoRef.current) videoRef.current.volume = newValue as number;
+    };
 
-  if (isEpisode) {
-      videoSrc = nowPlayingItem.video_url || videoSrc;
-      const S = String(nowPlayingItem.season_number).padStart(2,'0');
-      const E = String(nowPlayingItem.episode_number).padStart(2,'0');
-      title = `${nowPlayingItem.show_title} - S${S}E${E}: ${nowPlayingItem.name}`;
-  } else {
-      videoSrc = nowPlayingItem.video_url || videoSrc;
-      title = nowPlayingItem.title || nowPlayingItem.name || 'Video';
-  }
-  
-  const handleDownload = () => {
+    const isEpisode = 'episode_number' in nowPlayingItem;
+    let videoSrc = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    let title: string;
+
+    if (isEpisode) {
+        videoSrc = nowPlayingItem.video_url || videoSrc;
+        const S = String(nowPlayingItem.season_number).padStart(2, '0');
+        const E = String(nowPlayingItem.episode_number).padStart(2, '0');
+        title = `${nowPlayingItem.show_title} - S${S}E${E}: ${nowPlayingItem.name}`;
+    } else {
+        videoSrc = nowPlayingItem.video_url || videoSrc;
+        title = nowPlayingItem.title || nowPlayingItem.name || 'Video';
+    }
+
+    const handleDownload = () => {
         if (!videoSrc) return;
         const safeTitle = title.replace(/[<>:"/\\|?*]+/g, '_');
         const fileExtension = videoSrc.split('.').pop()?.split('?')[0] || 'mp4';
@@ -383,162 +451,275 @@ const VideoPlayer: React.FC = observer(() => {
         document.body.removeChild(link);
     };
 
-  const handleNextEpisode = () => {
-      const nextEp = mediaStore.nextEpisode;
-      if (nextEp && mediaStore.currentShow && 'episode_number' in nowPlayingItem) {
-          mediaStore.startPlayback({
-              ...nextEp,
-              show_id: mediaStore.currentShow.id,
-              show_title: mediaStore.currentShow.title || mediaStore.currentShow.name || '',
-              backdrop_path: mediaStore.currentShow.backdrop_path,
-              season_number: nowPlayingItem.season_number,
-          });
-      }
-  };
+    const handleNextEpisode = () => {
+        const nextEp = mediaStore.nextEpisode;
+        if (nextEp && mediaStore.currentShow && 'episode_number' in nowPlayingItem) {
+            mediaStore.startPlayback({
+                ...nextEp,
+                show_id: mediaStore.currentShow.id,
+                show_title: mediaStore.currentShow.title || mediaStore.currentShow.name || '',
+                backdrop_path: mediaStore.currentShow.backdrop_path,
+                season_number: nowPlayingItem.season_number,
+            });
+        }
+    };
 
-  const skipIntro = () => {
-      if (videoRef.current && 'intro_end_s' in nowPlayingItem && nowPlayingItem.intro_end_s) {
-          videoRef.current.currentTime = nowPlayingItem.intro_end_s;
-          setShowSkipIntro(false);
-      }
-  };
-  
-  const themeColor = { SerieTV: 'var(--glow-seriestv-color)', Film: 'var(--glow-film-color)', Anime: 'var(--glow-anime-color)' }[activeTheme];
+    const skipIntro = () => {
+        if (videoRef.current && 'intro_end_s' in nowPlayingItem && nowPlayingItem.intro_end_s) {
+            videoRef.current.currentTime = nowPlayingItem.intro_end_s;
+            setShowSkipIntro(false);
+        }
+    };
 
-  return (
-    <Box ref={playerContainerRef} sx={{ position: 'relative', width: '100vw', height: '100dvh', bgcolor: 'black', display: 'flex', flexDirection: 'row', cursor: isUiVisible ? 'default' : 'none' }}>
-      <Box sx={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <video
-          ref={videoRef}
-          src={videoSrc}
-          autoPlay
-          onClick={() => { if (!roomId || isHost) handleTogglePlay(); }}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-        />
-        {/* FIX: (line 358) Wrap Box with Fade component */}
-        <Fade in={isUiVisible} timeout={500}>
-          <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)', pointerEvents: 'none' }}>
-            
-            {/* Top Bar */}
-            <AppBar position="static" sx={{ bgcolor: 'transparent', boxShadow: 'none', pointerEvents: 'auto', paddingTop: 'env(safe-area-inset-top)' }}>
-                <Toolbar>
-                    <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')} onClick={stopPlayback}><ArrowBackIcon/></IconButton>
-                    <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
-                    {/* FIX: (line 366) Wrap IconButton with Tooltip component */}
-                    {mediaStore.nextEpisode && <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit" onClick={handleNextEpisode} disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
-                    {/* FIX: (line 367) Wrap IconButton with Tooltip component */}
-                    {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit" onClick={mediaStore.openEpisodesDrawer} disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
-                </Toolbar>
-            </AppBar>
-            
-            {/* Bottom Controls */}
-            <Box sx={{ px: 2, pt: 2, pb: 'calc(1rem + env(safe-area-inset-bottom))', pointerEvents: 'auto' }}>
-                 <Slider
-                    className="video-player-slider"
-                    aria-label="progress"
-                    value={isNaN(playerState.progress) ? 0 : playerState.progress}
-                    onChange={handleSeek}
-                    sx={{ color: themeColor }}
-                    disabled={!!roomId && !isHost}
+    const themeColor = {
+        SerieTV: 'var(--glow-seriestv-color)',
+        Film: 'var(--glow-film-color)',
+        Anime: 'var(--glow-anime-color)'
+    }[activeTheme];
+
+    return (
+        <Box ref={playerContainerRef} sx={{
+            position: 'relative',
+            width: '100vw',
+            height: '100dvh',
+            bgcolor: 'black',
+            display: 'flex',
+            flexDirection: 'row',
+            cursor: isUiVisible ? 'default' : 'none'
+        }}>
+            <Box sx={{flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <video
+                    ref={videoRef}
+                    src={videoSrc}
+                    autoPlay
+                    onClick={() => {
+                        if (!roomId || isHost) handleTogglePlay();
+                    }}
+                    style={{width: '100%', height: '100%', objectFit: 'contain'}}
                 />
-                {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
-                <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
-                    <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                        <IconButton onClick={handleTogglePlay} color="inherit" disabled={!!roomId && !isHost}>
-                            {playerState.isPlaying ? <PauseIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
-                        </IconButton>
-                        <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)} color="inherit">
-                            {playerState.isMuted || playerState.volume === 0 ? <VolumeOffIcon /> : <VolumeUpIcon />}
-                        </IconButton>
-                         <Popover
-                            open={Boolean(volumeAnchorEl)}
-                            anchorEl={volumeAnchorEl}
-                            onClose={() => setVolumeAnchorEl(null)}
-                            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                            transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                            PaperProps={{ sx: { bgcolor: 'rgba(30,30,30,0.8)', backdropFilter: 'blur(5px)', p: 2, borderRadius: 2, backgroundImage: 'none' } }}
-                        >
+                {/* FIX: (line 358) Wrap Box with Fade component */}
+                <Fade in={isUiVisible} timeout={500}>
+                    <Box sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)',
+                        pointerEvents: 'none'
+                    }}>
+
+                        {/* Top Bar */}
+                        <AppBar position="static" sx={{
+                            bgcolor: 'transparent',
+                            boxShadow: 'none',
+                            pointerEvents: 'auto',
+                            paddingTop: 'env(safe-area-inset-top)'
+                        }}>
+                            <Toolbar>
+                                <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')}
+                                            onClick={stopPlayback}><ArrowBackIcon/></IconButton>
+                                <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
+                                {/* FIX: (line 366) Wrap IconButton with Tooltip component */}
+                                {mediaStore.nextEpisode &&
+                                    <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit"
+                                                                                              onClick={handleNextEpisode}
+                                                                                              disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
+                                {/* FIX: (line 367) Wrap IconButton with Tooltip component */}
+                                {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit"
+                                                                                                        onClick={mediaStore.openEpisodesDrawer}
+                                                                                                        disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
+                            </Toolbar>
+                        </AppBar>
+
+                        {/* Bottom Controls */}
+                        <Box sx={{px: 2, pt: 2, pb: 'calc(1rem + env(safe-area-inset-bottom))', pointerEvents: 'auto'}}>
                             <Slider
                                 className="video-player-slider"
-                                sx={{ height: 100, color: themeColor }}
-                                orientation="vertical"
-                                value={playerState.isMuted ? 0 : playerState.volume}
-                                onChange={handleVolumeChange}
-                                min={0}
-                                max={1}
-                                step={0.01}
+                                aria-label="progress"
+                                value={isNaN(playerState.progress) ? 0 : playerState.progress}
+                                onChange={handleSeek}
+                                sx={{color: themeColor}}
+                                disabled={!!roomId && !isHost}
                             />
-                        </Popover>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                            {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
-                        </Typography>
-                    </Stack>
-                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
-                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                        {/* FIX: (line 415) Wrap IconButton with Tooltip component */}
-                        <Tooltip title={t('videoPlayer.downloadVideo')}>
-                            <IconButton onClick={handleDownload} color="inherit"><DownloadIcon /></IconButton>
-                        </Tooltip>
-                        <Button
-                            onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
-                            color="inherit"
-                            variant="text"
-                            startIcon={<ShutterSpeedIcon />}
-                            sx={{ fontFamily: 'monospace', textTransform: 'none', p: '4px 8px', minWidth: '48px' }}
-                            disabled={!!roomId && !isHost}
-                        >
-                           {playerState.playbackRate.toFixed(2)}x
-                        </Button>
-                        <Popover
-                            open={Boolean(speedAnchorEl)}
-                            anchorEl={speedAnchorEl}
-                            onClose={() => setSpeedAnchorEl(null)}
-                            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                            transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                            PaperProps={{ sx: { bgcolor: 'rgba(30,30,30,0.8)', backdropFilter: 'blur(5px)', backgroundImage: 'none' } }}
-                        >
-                           <List dense>
-                                {playbackRates.map(rate => (
-                                    <ListItemButton key={rate} onClick={() => handleSpeedChange(rate)} selected={playerState.playbackRate === rate}>
-                                        <ListItemText primary={`${rate}x`} />
-                                    </ListItemButton>
-                                ))}
-                           </List>
-                        </Popover>
-                        <IconButton onClick={handleToggleFullScreen} color="inherit">
-                            {playerState.isFullScreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-                        </IconButton>
-                    </Stack>
-                </Stack>
-            </Box>
-          </Box>
-        </Fade>
+                            {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
+                            <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center'}}>
+                                {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                                <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
+                                    <IconButton onClick={handleTogglePlay} color="inherit"
+                                                disabled={!!roomId && !isHost}>
+                                        {playerState.isPlaying ? <PauseIcon fontSize="large"/> :
+                                            <PlayArrowIcon fontSize="large"/>}
+                                    </IconButton>
+                                    <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)} color="inherit">
+                                        {playerState.isMuted || playerState.volume === 0 ? <VolumeOffIcon/> :
+                                            <VolumeUpIcon/>}
+                                    </IconButton>
+                                    <Popover
+                                        open={Boolean(volumeAnchorEl)}
+                                        anchorEl={volumeAnchorEl}
+                                        onClose={() => setVolumeAnchorEl(null)}
+                                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                        transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                                        PaperProps={{
+                                            sx: {
+                                                bgcolor: 'rgba(30,30,30,0.8)',
+                                                backdropFilter: 'blur(5px)',
+                                                p: 2,
+                                                borderRadius: 2,
+                                                backgroundImage: 'none'
+                                            }
+                                        }}
+                                    >
+                                        <Slider
+                                            className="video-player-slider"
+                                            sx={{height: 100, color: themeColor}}
+                                            orientation="vertical"
+                                            value={playerState.isMuted ? 0 : playerState.volume}
+                                            onChange={handleVolumeChange}
+                                            min={0}
+                                            max={1}
+                                            step={0.01}
+                                        />
+                                    </Popover>
+                                    <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+                                        {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
+                                    </Typography>
+                                </Stack>
+                                {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
+                                <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
+                                    {/* FIX: (line 415) Wrap IconButton with Tooltip component */}
+                                    <Tooltip title={t('videoPlayer.downloadVideo')}>
+                                        <IconButton onClick={handleDownload}
+                                                    color="inherit"><DownloadIcon/></IconButton>
+                                    </Tooltip>
+                                    <Button
+                                        onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
+                                        color="inherit"
+                                        variant="text"
+                                        startIcon={<ShutterSpeedIcon/>}
+                                        sx={{
+                                            fontFamily: 'monospace',
+                                            textTransform: 'none',
+                                            p: '4px 8px',
+                                            minWidth: '48px'
+                                        }}
+                                        disabled={!!roomId && !isHost}
+                                    >
+                                        {playerState.playbackRate.toFixed(2)}x
+                                    </Button>
+                                    <Popover
+                                        open={Boolean(speedAnchorEl)}
+                                        anchorEl={speedAnchorEl}
+                                        onClose={() => setSpeedAnchorEl(null)}
+                                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                        transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                                        PaperProps={{
+                                            sx: {
+                                                bgcolor: 'rgba(30,30,30,0.8)',
+                                                backdropFilter: 'blur(5px)',
+                                                backgroundImage: 'none'
+                                            }
+                                        }}
+                                    >
+                                        <List dense>
+                                            {playbackRates.map(rate => (
+                                                <ListItemButton key={rate} onClick={() => handleSpeedChange(rate)}
+                                                                selected={playerState.playbackRate === rate}>
+                                                    <ListItemText primary={`${rate}x`}/>
+                                                </ListItemButton>
+                                            ))}
+                                        </List>
+                                    </Popover>
+                                    <IconButton onClick={handleToggleFullScreen} color="inherit">
+                                        {playerState.isFullScreen ? <FullscreenExitIcon/> : <FullscreenIcon/>}
+                                    </IconButton>
+                                </Stack>
+                            </Stack>
+                        </Box>
 
-        {showSkipIntro && (
-            // FIX: (line 453) Wrap Button with Fade component
-            <Fade in={showSkipIntro && isUiVisible} timeout={500}>
-              <Button 
-                  variant="contained" 
-                  onClick={skipIntro}
-                  sx={{
-                      position: 'absolute',
-                      bottom: { xs: '80px', md: '100px' },
-                      right: '20px',
-                      zIndex: 2,
-                      bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black',
-                      '&:hover': { bgcolor: 'white' },
-                  }}
-              >
-                  {t('videoPlayer.skipIntro')}
-              </Button>
-            </Fade>
-        )}
-      </Box>
-      {roomId && <Chat />}
-      {isEpisode && <EpisodesDrawer />}
-    </Box>
-  );
+                        {/* Slave (Smart TV) Overlay Buttons */}
+                        {isSmartTV && (
+                            <Fade in={isUiVisible} timeout={500}>
+                                <Box sx={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pointerEvents: 'none'
+                                }}>
+                                    <Box sx={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        width: '50%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        pointerEvents: 'auto'
+                                    }}>
+                                        <IconButton onClick={handleToggleFullScreen} sx={{
+                                            bgcolor: 'rgba(0,0,0,0.6)',
+                                            '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+                                            width: 80,
+                                            height: 80
+                                        }}>
+                                            {playerState.isFullScreen ?
+                                                <FullscreenExitIcon sx={{fontSize: 48, color: 'white'}}/> :
+                                                <FullscreenIcon sx={{fontSize: 48, color: 'white'}}/>}
+                                        </IconButton>
+                                    </Box>
+                                    <Box sx={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        width: '50%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        pointerEvents: 'auto'
+                                    }}>
+                                        <IconButton onClick={handleTogglePlay} sx={{
+                                            bgcolor: 'rgba(0,0,0,0.6)',
+                                            '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+                                            width: 80,
+                                            height: 80
+                                        }}>
+                                            {playerState.isPlaying ? <PauseIcon sx={{fontSize: 48, color: 'white'}}/> :
+                                                <PlayArrowIcon sx={{fontSize: 48, color: 'white'}}/>}
+                                        </IconButton>
+                                    </Box>
+                                </Box>
+                            </Fade>
+                        )}
+                    </Box>
+                </Fade>
+
+                {showSkipIntro && (
+                    // FIX: (line 453) Wrap Button with Fade component
+                    <Fade in={showSkipIntro && isUiVisible} timeout={500}>
+                        <Button
+                            variant="contained"
+                            onClick={skipIntro}
+                            sx={{
+                                position: 'absolute',
+                                bottom: {xs: '80px', md: '100px'},
+                                right: '20px',
+                                zIndex: 2,
+                                bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black',
+                                '&:hover': {bgcolor: 'white'},
+                            }}
+                        >
+                            {t('videoPlayer.skipIntro')}
+                        </Button>
+                    </Fade>
+                )}
+            </Box>
+            {roomId && <Chat/>}
+            {isEpisode && <EpisodesDrawer/>}
+        </Box>
+    );
 });
 
 export default VideoPlayer;
