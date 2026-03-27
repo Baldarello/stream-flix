@@ -316,7 +316,17 @@ const RemotePlayerControlView = observer(() => {
         }}>
             <AppBar position="sticky" sx={{bgcolor: 'background.paper'}}>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={stopRemotePlayback}
+                    <IconButton edge="start" color="inherit" onClick={() => {
+                        stopRemotePlayback();
+                        // Navigate to series list by clearing nowPlayingItem
+                        if (mediaStore.remoteSlaveState) {
+                            mediaStore.remoteSlaveState = {
+                                ...mediaStore.remoteSlaveState,
+                                nowPlayingItem: null
+                            };
+                        }
+                        mediaStore.setActiveView('Serie TV');
+                    }}
                                 aria-label={t('remote.player.back')}>
                         <ArrowBackIcon/>
                     </IconButton>
