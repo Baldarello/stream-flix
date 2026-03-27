@@ -440,7 +440,7 @@ const WatchTogetherModal: React.FC = observer(() => {
   };
 
   return (
-   <> // FIX: (line 344) Wrap Box with Modal component
+   <>
     <Modal
       open={watchTogetherModalOpen}
       onClose={handleClose}
