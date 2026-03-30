@@ -113,6 +113,8 @@ class MediaStore {
     slaveId: string | null = null;
     slaveShortCode: string | null = null;
     isRemoteMasterConnected = false;
+    // Flag to track if initial data has been loaded (needed for proper slave reconnection)
+    hasLoadedInitialData = false;
     // Master reconnection state for automatic reconnection after slave disconnect
     masterReconnectAttempts = 0;
     masterReconnectTimer: number | null = null;
@@ -844,6 +846,20 @@ class MediaStore {
                 }
             }
             this.knownSlaves = knownSlaves;
+            
+            // Mark that initial data has been loaded - this allows initRemoteSession to proceed
+            this.hasLoadedInitialData = true;
+            console.log(`[mediaStore] fetchAllData: initial data loaded, hasLoadedInitialData=true, isSmartTV=${this.isSmartTV}, isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
+            
+            // Now that data is loaded, trigger initRemoteSession to register as slave or master
+            if (this.isSmartTV && this.slaveId) {
+                console.log(`[mediaStore] fetchAllData: calling initRemoteSession for slave`);
+                this.initRemoteSession();
+            } else if (this.isRemoteMaster && this.slaveId) {
+                // Master also needs to re-register when data is loaded
+                console.log(`[mediaStore] fetchAllData: calling initRemoteSession for master`);
+                this.initRemoteSession();
+            }
         });
     }
 
@@ -2140,11 +2156,19 @@ class MediaStore {
         this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`);
     };
     initRemoteSession = () => {
+        // For slave: only register after initial data has been loaded (to ensure slaveId is available)
         if (this.isSmartTV) {
+            // Wait for fetchAllData to complete before registering as slave
+            // This ensures we have the persisted slaveId available
+            if (!this.hasLoadedInitialData) {
+                console.log(`[mediaStore] initRemoteSession: waiting for initial data to load before registering slave`);
+                return;
+            }
             // Send both slaveId and shortCode for proper reconnection
             const payload: { slaveId?: string; shortCode?: string } = {};
             if (this.slaveId) payload.slaveId = this.slaveId;
             if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
+            console.log(`[mediaStore] initRemoteSession: registering slave with slaveId=${this.slaveId}, shortCode=${this.slaveShortCode}`);
             websocketService.sendMessage({type: 'quix-register-slave', payload});
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,

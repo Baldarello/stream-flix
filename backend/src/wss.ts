@@ -191,9 +191,10 @@ function handleDisconnectQuix(ws: any): void {
         if (intentionallyDisconnectingSlaves.has(wsData.slaveId)) {
             intentionallyDisconnectingSlaves.delete(wsData.slaveId);
             // Just clear the slaveWs but keep the session intact for reconnection
+            // Do NOT delete the shortCode mapping - it's needed for reconnection
             session.slaveWs = null;
-            console.log(`[WebSocket] Slave ${wsData.slaveId} disconnected intentionally, session preserved for reconnection`);
-            // Don't delete the session or notify the master - the slave will reconnect
+            console.log(`[WebSocket] Slave ${wsData.slaveId} disconnected intentionally, session preserved for reconnection (shortCode=${wsData.shortCode})`);
+            // Don't notify the master - the slave will reconnect
             return;
         }
         
