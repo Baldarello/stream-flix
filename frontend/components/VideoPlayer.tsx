@@ -1,54 +1,21 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {
-    AppBar,
-    Box,
-    Button,
-    Fade,
-    IconButton,
-    List,
-    ListItemButton,
-    ListItemText,
-    Popover,
-    Slider,
-    Stack,
-    Toolbar,
-    Tooltip,
-    Typography
-} from '@mui/material';
+import {AppBar, Box, Button, Fade, IconButton, Toolbar, Tooltip, Typography} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chat from './Chat.tsx';
 import EpisodesDrawer from './EpisodesDrawer.tsx';
+import VideoControls from './VideoControls.tsx';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
-import DownloadIcon from '@mui/icons-material/Download';
-import ShutterSpeedIcon from '@mui/icons-material/ShutterSpeed';
 import Replay10Icon from '@mui/icons-material/Replay10';
 import Forward10Icon from '@mui/icons-material/Forward10';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
-const formatTime = (timeInSeconds: number) => {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(seconds).padStart(2, '0');
-
-    if (hours > 0) {
-        return `${hours}:${formattedMinutes}:${formattedSeconds}`;
-    }
-    return `${formattedMinutes}:${formattedSeconds}`;
-};
-
-const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 const VideoPlayer: React.FC = observer(() => {
     const {
@@ -60,7 +27,6 @@ const VideoPlayer: React.FC = observer(() => {
         isSmartTV,
         sendSlaveStatusUpdate,
         setIntroSkippableOnSlave,
-        activeTheme,
         shouldAutoFullscreen
     } = mediaStore;
     const {t} = useTranslations();
@@ -83,8 +49,7 @@ const VideoPlayer: React.FC = observer(() => {
         isFullScreen: false,
         playbackRate: 1,
     });
-    const [volumeAnchorEl, setVolumeAnchorEl] = useState<HTMLButtonElement | null>(null);
-    const [speedAnchorEl, setSpeedAnchorEl] = useState<HTMLButtonElement | null>(null);
+
 
     // Effect for Watch Together Synchronization
     useEffect(() => {
@@ -295,10 +260,7 @@ const VideoPlayer: React.FC = observer(() => {
     const handleToggleFullScreen = useCallback(() => {
         if (!document.fullscreenElement) playerContainerRef.current?.requestFullscreen(); else document.exitFullscreen();
     }, []);
-    const handleSpeedChange = useCallback((rate: number) => {
-        if (videoRef.current) videoRef.current.playbackRate = rate;
-        setSpeedAnchorEl(null);
-    }, []);
+
 
     const handleRewind10 = useCallback(() => {
         if (videoRef.current) {
@@ -369,22 +331,6 @@ const VideoPlayer: React.FC = observer(() => {
                     e.preventDefault();
                     video.volume = Math.max(0, video.volume - 0.1);
                     break;
-                case '>':
-                case '.':
-                    e.preventDefault();
-                    if (!isWatchTogetherNonHost) {
-                        const nextIndex = playbackRates.indexOf(playerState.playbackRate) + 1;
-                        if (nextIndex < playbackRates.length) handleSpeedChange(playbackRates[nextIndex]);
-                    }
-                    break;
-                case '<':
-                case ',':
-                    e.preventDefault();
-                    if (!isWatchTogetherNonHost) {
-                        const prevIndex = playbackRates.indexOf(playerState.playbackRate) - 1;
-                        if (prevIndex >= 0) handleSpeedChange(playbackRates[prevIndex]);
-                    }
-                    break;
                 case 'j':
                     e.preventDefault();
                     if (!isWatchTogetherNonHost) handleRewind10();
@@ -404,7 +350,7 @@ const VideoPlayer: React.FC = observer(() => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleSpeedChange, handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
+    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, , handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
 
     // Player state management and event listeners
     useEffect(() => {
@@ -508,12 +454,6 @@ const VideoPlayer: React.FC = observer(() => {
         }
     };
 
-    const themeColor = {
-        SerieTV: 'var(--glow-seriestv-color)',
-        Film: 'var(--glow-film-color)',
-        Anime: 'var(--glow-anime-color)'
-    }[activeTheme];
-
     return (
         <Box ref={playerContainerRef} sx={{
             position: 'relative',
@@ -572,56 +512,41 @@ const VideoPlayer: React.FC = observer(() => {
                         {/* Smart TV: Bottom Controls always visible (no Fade) */}
                         {isSmartTV && (
                             <VideoControls
-                                {...{
-                                    playerState,
-                                    handleSeek,
-                                    videoRef,
-                                    roomId,
-                                    isHost,
-                                    themeColor,
-                                    handleRewind10,
-                                    handleTogglePlay,
-                                    handleForward10,
-                                    handleSkipIntro,
-                                    setVolumeAnchorEl,
-                                    volumeAnchorEl,
-                                    handleVolumeChange,
-                                    handleDownload,
-                                    setSpeedAnchorEl,
-                                    speedAnchorEl,
-                                    handleToggleFullScreen,
-                                    handleSpeedChange,
-                                    t
-                                }}
+                                playerState={playerState}
+                                handleSeek={handleSeek}
+                                videoRef={videoRef}
+                                handleRewind10={handleRewind10}
+                                handleTogglePlay={handleTogglePlay}
+                                handleForward10={handleForward10}
+                                handleSkipIntro={handleSkipIntro}
+                                handleVolumeChange={handleVolumeChange}
+                                handleDownload={handleDownload}
+                                handleToggleFullScreen={handleToggleFullScreen}
                             />
                         )}
 
                         {/* Non-Smart TV: Bottom Controls with Fade */}
                         {!isSmartTV && (
                             <Fade in={isUiVisible} timeout={500}>
-                                <VideoControls
-                                    {...{
-                                        playerState,
-                                        handleSeek,
-                                        videoRef,
-                                        roomId,
-                                        isHost,
-                                        themeColor,
-                                        handleRewind10,
-                                        handleTogglePlay,
-                                        handleForward10,
-                                        handleSkipIntro,
-                                        setVolumeAnchorEl,
-                                        volumeAnchorEl,
-                                        handleVolumeChange,
-                                        handleDownload,
-                                        setSpeedAnchorEl,
-                                        speedAnchorEl,
-                                        handleToggleFullScreen,
-                                        handleSpeedChange,
-                                        t
-                                    }}
-                                />
+                                <Box sx={{
+                                    px: 2,
+                                    pt: 2,
+                                    pb: 'calc(1rem + env(safe-area-inset-bottom))',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <VideoControls
+                                        playerState={playerState}
+                                        handleSeek={handleSeek}
+                                        videoRef={videoRef}
+                                        handleRewind10={handleRewind10}
+                                        handleTogglePlay={handleTogglePlay}
+                                        handleForward10={handleForward10}
+                                        handleSkipIntro={handleSkipIntro}
+                                        handleVolumeChange={handleVolumeChange}
+                                        handleDownload={handleDownload}
+                                        handleToggleFullScreen={handleToggleFullScreen}
+                                    />
+                                </Box>
                             </Fade>
                         )}
 
@@ -760,162 +685,5 @@ const VideoPlayer: React.FC = observer(() => {
         </Box>
     );
 });
-
-const VideoControls = ({
-                           playerState,
-                           handleSeek,
-                           videoRef,
-                           roomId,
-                           isHost,
-                           themeColor,
-                           handleRewind10,
-                           handleTogglePlay,
-                           handleForward10,
-                           handleSkipIntro,
-                           setVolumeAnchorEl,
-                           volumeAnchorEl,
-                           handleVolumeChange,
-                           handleDownload,
-                           setSpeedAnchorEl,
-                           speedAnchorEl,
-                           handleToggleFullScreen,
-                           handleSpeedChange,
-                           t
-                       }) => {
-    return <Box sx={{
-        px: 2,
-        pt: 2,
-        pb: 'calc(1rem + env(safe-area-inset-bottom))',
-        pointerEvents: 'auto'
-    }}>
-        <Slider
-            className="video-player-slider"
-            aria-label="progress"
-            value={isNaN(playerState.progress) ? 0 : playerState.progress}
-            onChange={handleSeek}
-            onChangeCommitted={(_, value) => {
-                if (videoRef.current && (!roomId || isHost)) {
-                    const newTime = ((value as number) / 100) * playerState.duration;
-                    videoRef.current.currentTime = newTime;
-                }
-            }}
-            sx={{color: themeColor}}
-            disabled={!!roomId && !isHost }
-            disableSwap={true}
-        />
-        <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center'}}>
-            <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
-                <Tooltip title={t('videoPlayer.skipBack10') || 'Rewind 10s'}>
-                    <IconButton onClick={handleRewind10} color="inherit"
-                                disabled={!!roomId && !isHost }
-                    >
-                        <Replay10Icon fontSize="large"/>
-                    </IconButton>
-                </Tooltip>
-                <IconButton onClick={handleTogglePlay} color="inherit"
-                            disabled={!!roomId && !isHost }>
-                    {playerState.isPlaying ? <PauseIcon fontSize="large"/> :
-                        <PlayArrowIcon fontSize="large"/>}
-                </IconButton>
-                <Tooltip title={t('videoPlayer.forward10') || 'Forward 10s'}>
-                    <IconButton onClick={handleForward10} color="inherit"
-                                disabled={!!roomId && !isHost }>
-                        <Forward10Icon fontSize="large"/>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title={t('videoPlayer.skipIntro') || 'Skip Intro/Credits'}>
-                    <IconButton onClick={handleSkipIntro} color="inherit"
-                                disabled={!!roomId && !isHost }>
-                        <SkipNextIcon fontSize="large"/>
-                    </IconButton>
-                </Tooltip>
-                <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)}
-                            color="inherit">
-                    {playerState.isMuted || playerState.volume === 0 ? <VolumeOffIcon/> :
-                        <VolumeUpIcon/>}
-                </IconButton>
-                <Popover
-                    open={Boolean(volumeAnchorEl)}
-                    anchorEl={volumeAnchorEl}
-                    onClose={() => setVolumeAnchorEl(null)}
-                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                    transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                    PaperProps={{
-                        sx: {
-                            bgcolor: 'rgba(30,30,30,0.8)',
-                            backdropFilter: 'blur(5px)',
-                            p: 2,
-                            borderRadius: 2,
-                            backgroundImage: 'none'
-                        }
-                    }}
-                >
-                    <Slider
-                        className="video-player-slider"
-                        sx={{height: 100, color: themeColor}}
-                        orientation="vertical"
-                        value={playerState.isMuted ? 0 : playerState.volume}
-                        onChange={handleVolumeChange}
-                        min={0}
-                        max={1}
-                        step={0.01}
-                    />
-                </Popover>
-                <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
-                    {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
-                </Typography>
-            </Stack>
-            <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
-                <Tooltip title={t('videoPlayer.downloadVideo')}>
-                    <IconButton onClick={handleDownload}
-                                color="inherit"><DownloadIcon/></IconButton>
-                </Tooltip>
-                <Button
-                    onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
-                    color="inherit"
-                    variant="text"
-                    startIcon={<ShutterSpeedIcon/>}
-                    sx={{
-                        fontFamily: 'monospace',
-                        textTransform: 'none',
-                        p: '4px 8px',
-                        minWidth: '48px'
-                    }}
-                    disabled={!!roomId && !isHost }
-                >
-                    {playerState.playbackRate.toFixed(2)}x
-                </Button>
-                <Popover
-                    open={Boolean(speedAnchorEl)}
-                    anchorEl={speedAnchorEl}
-                    onClose={() => setSpeedAnchorEl(null)}
-                    anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                    transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                    PaperProps={{
-                        sx: {
-                            bgcolor: 'rgba(30,30,30,0.8)',
-                            backdropFilter: 'blur(5px)',
-                            backgroundImage: 'none'
-                        }
-                    }}
-                >
-                    <List dense>
-                        {playbackRates.map(rate => (
-                            <ListItemButton key={rate}
-                                            onClick={() => handleSpeedChange(rate)}
-                                            selected={playerState.playbackRate === rate}>
-                                <ListItemText primary={`${rate}x`}/>
-                            </ListItemButton>
-                        ))}
-                    </List>
-                </Popover>
-                <IconButton onClick={handleToggleFullScreen} color="inherit">
-                    {playerState.isFullScreen ? <FullscreenExitIcon/> : <FullscreenIcon/>}
-                </IconButton>
-            </Stack>
-        </Stack>
-    </Box>
-}
-
 
 export default VideoPlayer;
