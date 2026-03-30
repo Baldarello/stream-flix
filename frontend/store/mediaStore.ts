@@ -1763,7 +1763,7 @@ class MediaStore {
             case 'play':
                 if (this.nowPlayingItem) this.isPlaying = true;
                 video.play();
-                this.triggerAutoFullscreen(); // Auto-fullscreen when playback starts
+                // this.triggerAutoFullscreen(); // Auto-fullscreen when playback starts
                 break;
             case 'pause':
                 if (this.nowPlayingItem) this.isPlaying = false;
