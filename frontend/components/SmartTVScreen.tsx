@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {Box, Button, CircularProgress, Paper, Typography} from '@mui/material';
@@ -10,24 +10,34 @@ const SmartTVScreen: React.FC = observer(() => {
     const {slaveId, isRemoteMasterConnected, slaveShortCode, isSmartTV} = mediaStore;
     const {t} = useTranslations();
 
+    // Track if we've already sent the disconnecting message to avoid duplicates
+    const hasSentDisconnecting = useRef(false);
+
     // Send disconnecting message before page unload to preserve session for reconnection
     useEffect(() => {
         if (!isSmartTV || !slaveId) return;
 
         const handleBeforeUnload = () => {
-            // Use sendBeacon for reliable delivery even during page unload
-            if (websocketService.ws && websocketService.ws.readyState === WebSocket.OPEN) {
+            // Only send once to avoid duplicate messages
+            if (hasSentDisconnecting.current) return;
+            hasSentDisconnecting.current = true;
+
+            // Close the WebSocket to ensure the server properly handles the disconnect
+            // This is critical for the session to be preserved for reconnection
+            if (websocketService.ws) {
                 websocketService.sendMessage({type: 'quix-slave-disconnecting'});
+                // Close with a delay to ensure the message is sent
+                setTimeout(() => {
+                    if (websocketService.ws && websocketService.ws.readyState === WebSocket.OPEN) {
+                        websocketService.ws.close(1000, 'Intentional disconnect for reload');
+                    }
+                }, 100);
             }
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
-            // Also send on component unmount (e.g., when switching modes)
-            if (websocketService.ws && websocketService.ws.readyState === WebSocket.OPEN) {
-                websocketService.sendMessage({type: 'quix-slave-disconnecting'});
-            }
         };
     }, [isSmartTV, slaveId]);
 

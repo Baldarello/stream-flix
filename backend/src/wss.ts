@@ -445,6 +445,17 @@ export function createWebSocketRouter() {
                     // DEBUG: Log session state
                     console.log(`[DEBUG] quix-register-slave: persistentId=${persistentId}, existingSession=${!!existingSession}`);
                     if (existingSession) {
+                        // Check if there's an old WebSocket that needs to be closed
+                        // This handles the case where the slave reloads but the old WebSocket is still open
+                        if (existingSession.slaveWs && existingSession.slaveWs !== ws && isConnectionOpen(existingSession.slaveWs)) {
+                            console.log(`[DEBUG] quix-register-slave: Closing old WebSocket for same slave`);
+                            // Close the old WebSocket - the slave has reconnected with a new WebSocket
+                            try {
+                                existingSession.slaveWs.close(1000, 'Closed due to slave reconnection');
+                            } catch (e) {
+                                console.log(`[DEBUG] Error closing old WebSocket: ${e}`);
+                            }
+                        }
                         existingSession.slaveWs = ws; // Update WebSocket reference
                         console.log(`[DEBUG] quix-register-slave: Updated existing session, masterWs=${isConnectionOpen(existingSession.masterWs)}`);
                         // Keep existing masterWs if still connected
