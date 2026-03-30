@@ -44,13 +44,13 @@ import {handleSignIn, handleSignOut} from '../services/googleAuthService.ts';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
 const ProfileDrawer: React.FC = observer(() => {
-    const { 
+    const {
         isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
         isLoggedIn, googleUser, isSyncing, backupToDrive, restoreFromDrive, language, setLanguage,
         openShareModal, openImportModal, openRevisionsModal, knownSlaves, reconnectToSlave,
         updateSlaveName, forgetSlave
     } = mediaStore;
-    const { t } = useTranslations();
+    const {t} = useTranslations();
     const [editingSlaveId, setEditingSlaveId] = useState<string | null>(null);
     const [editedName, setEditedName] = useState('');
 
@@ -68,7 +68,7 @@ const ProfileDrawer: React.FC = observer(() => {
             toggleProfileDrawer(false); // Close the drawer
         }
     };
-    
+
     const handleLanguageChange = (
         event: React.MouseEvent<HTMLElement>,
         newLang: Language | null,
@@ -102,44 +102,44 @@ const ProfileDrawer: React.FC = observer(() => {
     };
 
     const drawerContent = (
-        <Box sx={{ width: { xs: '70vw', sm: 300 } }} role="presentation">
-            <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <Typography variant="h6">{t('profileDrawer.profile')}</Typography>
-                 <IconButton onClick={() => toggleProfileDrawer(false)}>
-                     <CloseIcon />
-                 </IconButton>
+        <Box sx={{width: {xs: '70vw', sm: 300}}} role="presentation">
+            <Box sx={{p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Typography variant="h6">{t('profileDrawer.profile')}</Typography>
+                <IconButton onClick={() => toggleProfileDrawer(false)}>
+                    <CloseIcon/>
+                </IconButton>
             </Box>
-            <Divider />
+            <Divider/>
 
             {isLoggedIn && googleUser ? (
                 <List>
                     <ListItem>
                         <ListItemAvatar>
-                            <Avatar alt={googleUser.name} src={googleUser.picture} />
+                            <Avatar alt={googleUser.name} src={googleUser.picture}/>
                         </ListItemAvatar>
-                        <ListItemText primary={googleUser.name} secondary={googleUser.email} />
+                        <ListItemText primary={googleUser.name} secondary={googleUser.email}/>
                     </ListItem>
                 </List>
             ) : null}
 
-            <Box sx={{ p: 2 }}>
+            <Box sx={{p: 2}}>
                 <Typography variant="overline" color="text.secondary">{t('profileDrawer.language')}</Typography>
-                 <ToggleButtonGroup
+                <ToggleButtonGroup
                     value={language}
                     exclusive
                     onChange={handleLanguageChange}
                     aria-label="language"
                     fullWidth
-                    sx={{ mt: 1 }}
+                    sx={{mt: 1}}
                 >
                     <ToggleButton value="it" aria-label="italiano">IT</ToggleButton>
                     <ToggleButton value="en" aria-label="english">EN</ToggleButton>
                 </ToggleButtonGroup>
             </Box>
-            <Divider />
+            <Divider/>
 
 
-            <Box sx={{ p: 2 }}>
+            <Box sx={{p: 2}}>
                 <Typography variant="overline" color="text.secondary">{t('profileDrawer.siteStyle')}</Typography>
                 <ToggleButtonGroup
                     value={mediaStore.activeTheme}
@@ -148,7 +148,14 @@ const ProfileDrawer: React.FC = observer(() => {
                     aria-label="site theme"
                     fullWidth
                     orientation="vertical"
-                    sx={{ mt: 1, '& .MuiToggleButtonGroup-grouped': { border: 0, '&:not(:first-of-type)': { borderRadius: '4px' }, '&:first-of-type': { borderRadius: '4px' } } }}
+                    sx={{
+                        mt: 1,
+                        '& .MuiToggleButtonGroup-grouped': {
+                            border: 0,
+                            '&:not(:first-of-type)': {borderRadius: '4px'},
+                            '&:first-of-type': {borderRadius: '4px'}
+                        }
+                    }}
                 >
                     <ToggleButton
                         value="SerieTV"
@@ -162,11 +169,12 @@ const ProfileDrawer: React.FC = observer(() => {
                             },
                         }}
                     >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <LiveTvIcon />
-                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>{t('profileDrawer.theme.series')}</Typography>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                            <LiveTvIcon/>
+                            <Typography component="span"
+                                        sx={{fontWeight: 'inherit'}}>{t('profileDrawer.theme.series')}</Typography>
                         </Box>
-                        <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.SerieTV }} />
+                        <Box sx={{width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.SerieTV}}/>
                     </ToggleButton>
                     <ToggleButton
                         value="Film"
@@ -180,11 +188,12 @@ const ProfileDrawer: React.FC = observer(() => {
                             },
                         }}
                     >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <LocalMoviesIcon />
-                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>{t('profileDrawer.theme.movies')}</Typography>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                            <LocalMoviesIcon/>
+                            <Typography component="span"
+                                        sx={{fontWeight: 'inherit'}}>{t('profileDrawer.theme.movies')}</Typography>
                         </Box>
-                        <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Film }} />
+                        <Box sx={{width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Film}}/>
                     </ToggleButton>
                     <ToggleButton
                         value="Anime"
@@ -198,93 +207,110 @@ const ProfileDrawer: React.FC = observer(() => {
                             },
                         }}
                     >
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <AnimationIcon />
-                            <Typography component="span" sx={{ fontWeight: 'inherit' }}>{t('profileDrawer.theme.anime')}</Typography>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
+                            <AnimationIcon/>
+                            <Typography component="span"
+                                        sx={{fontWeight: 'inherit'}}>{t('profileDrawer.theme.anime')}</Typography>
                         </Box>
-                        <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Anime }} />
+                        <Box sx={{width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Anime}}/>
                     </ToggleButton>
                 </ToggleButtonGroup>
             </Box>
-            <Divider />
+            <Divider/>
             <List>
-                 {isLoggedIn ? (
+                {isLoggedIn ? (
                     <>
                         <ListItem disablePadding>
                             <ListItemButton onClick={() => backupToDrive()} disabled={isSyncing}>
-                                <ListItemIcon>{isSyncing ? <CircularProgress size={24} /> : <CloudUploadIcon />}</ListItemIcon>
-                                <ListItemText primary={t('profileDrawer.backup')} />
+                                <ListItemIcon>{isSyncing ? <CircularProgress size={24}/> :
+                                    <CloudUploadIcon/>}</ListItemIcon>
+                                <ListItemText primary={t('profileDrawer.backup')}/>
                             </ListItemButton>
                         </ListItem>
                         <ListItem disablePadding>
                             <ListItemButton onClick={() => restoreFromDrive()} disabled={isSyncing}>
-                                <ListItemIcon>{isSyncing ? <CircularProgress size={24} /> : <CloudDownloadIcon />}</ListItemIcon>
-                                <ListItemText primary={t('profileDrawer.restore')} />
+                                <ListItemIcon>{isSyncing ? <CircularProgress size={24}/> :
+                                    <CloudDownloadIcon/>}</ListItemIcon>
+                                <ListItemText primary={t('profileDrawer.restore')}/>
                             </ListItemButton>
                         </ListItem>
                         <ListItem disablePadding>
                             <ListItemButton onClick={handleSignOut}>
-                                <ListItemIcon><LogoutIcon /></ListItemIcon>
-                                <ListItemText primary={t('profileDrawer.logout')} />
+                                <ListItemIcon><LogoutIcon/></ListItemIcon>
+                                <ListItemText primary={t('profileDrawer.logout')}/>
                             </ListItemButton>
                         </ListItem>
                     </>
                 ) : (
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleSignIn}>
-                            <ListItemIcon><GoogleIcon /></ListItemIcon>
-                            <ListItemText primary={t('profileDrawer.login')} />
+                            <ListItemIcon><GoogleIcon/></ListItemIcon>
+                            <ListItemText primary={t('profileDrawer.login')}/>
                         </ListItemButton>
                     </ListItem>
                 )}
             </List>
-            <Divider />
-             <Box sx={{ p: 2, pb: 0 }}>
-                <Typography variant="overline" color="text.secondary">{t('profileDrawer.playbackPreferences')}</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>{t('profileDrawer.preferredLabelsDesc')}</Typography>
-                <Box sx={{ maxHeight: '20vh', overflowY: 'auto', mt: 1, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+            <Divider/>
+            <Box sx={{p: 2, pb: 0}}>
+                <Typography variant="overline"
+                            color="text.secondary">{t('profileDrawer.playbackPreferences')}</Typography>
+                <Typography variant="body2" color="text.secondary"
+                            sx={{mt: 1}}>{t('profileDrawer.preferredLabelsDesc')}</Typography>
+                <Box sx={{
+                    maxHeight: '20vh',
+                    overflowY: 'auto',
+                    mt: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: 1
+                }}>
                     <List dense disablePadding>
                         {mediaStore.allUniqueLabels.length > 0 ? mediaStore.allUniqueLabels.map(label => (
                             <ListItem
                                 key={label}
                                 secondaryAction={
-                                    <IconButton edge="end" onClick={() => mediaStore.togglePreferredLabel(label)} aria-label={`Toggle preference for ${label}`}>
-                                        {mediaStore.preferredLabels.includes(label) ? <StarIcon color="warning" /> : <StarBorderIcon />}
+                                    <IconButton edge="end" onClick={() => mediaStore.togglePreferredLabel(label)}
+                                                aria-label={`Toggle preference for ${label}`}>
+                                        {mediaStore.preferredLabels.includes(label) ? <StarIcon color="warning"/> :
+                                            <StarBorderIcon/>}
                                     </IconButton>
                                 }
                                 disablePadding
                             >
                                 <ListItemButton dense onClick={() => mediaStore.togglePreferredLabel(label)}>
-                                    <ListItemText primary={label} />
+                                    <ListItemText primary={label}/>
                                 </ListItemButton>
                             </ListItem>
                         )) : (
                             <ListItem>
-                                <ListItemText primary={t('profileDrawer.noLabelsFound')} secondary={t('profileDrawer.noLabelsFoundDesc')} />
+                                <ListItemText primary={t('profileDrawer.noLabelsFound')}
+                                              secondary={t('profileDrawer.noLabelsFoundDesc')}/>
                             </ListItem>
                         )}
                     </List>
                 </Box>
             </Box>
-            <Divider sx={{ my: 1 }}/>
-            <Box sx={{ px: 2, pt: 1 }}>
+            <Divider sx={{my: 1}}/>
+            <Box sx={{px: 2, pt: 1}}>
                 <Typography variant="overline" color="text.secondary">{t('profileDrawer.savedDevices')}</Typography>
             </Box>
             <List dense>
                 {knownSlaves.length === 0 ? (
                     <ListItem>
-                        <ListItemText secondary={t('profileDrawer.noSavedDevices')} sx={{ pl: 2 }} />
+                        <ListItemText secondary={t('profileDrawer.noSavedDevices')} sx={{pl: 2}}/>
                     </ListItem>
                 ) : (
                     knownSlaves.map(slave => {
-                       console.log("slave",slave)
+                        console.log("slave", slave)
+                        const isOnline = slave.isOnline ?? false;
                         return (
                             <ListItem
                                 key={slave.id}
                                 secondaryAction={editingSlaveId !== slave.id ? (
                                     <>
                                         <Tooltip title={t('profileDrawer.editName')}>
-                                            <IconButton edge="end" onClick={() => handleStartEdit(slave)}>
+                                            <IconButton edge="end" onClick={() => handleStartEdit(slave)}
+                                                        disabled={!isOnline}>
                                                 <EditIcon/>
                                             </IconButton>
                                         </Tooltip>
@@ -318,10 +344,27 @@ const ProfileDrawer: React.FC = observer(() => {
                                         </Tooltip>
                                     </Stack>
                                 ) : (
-                                    <ListItemButton onClick={() => reconnectToSlave(slave.id)}>
-                                        <ListItemIcon><TvIcon/></ListItemIcon>
-                                        <ListItemText primary={slave.name}
-                                                      secondary={`ID: ${slave.id}`}/>
+                                    <ListItemButton onClick={() => reconnectToSlave(slave.id)} disabled={!isOnline}>
+                                        <ListItemIcon>
+                                            <Box sx={{position: 'relative'}}>
+                                                <TvIcon/>
+                                                <Box sx={{
+                                                    position: 'absolute',
+                                                    top: -2,
+                                                    right: -2,
+                                                    width: 10,
+                                                    height: 10,
+                                                    borderRadius: '50%',
+                                                    bgcolor: isOnline ? 'success.main' : 'text.disabled',
+                                                    border: '2px solid',
+                                                    borderColor: 'background.paper',
+                                                }}/>
+                                            </Box>
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={slave.name}
+                                            secondary={isOnline ? t('profileDrawer.online') : t('profileDrawer.offline')}
+                                        />
                                     </ListItemButton>
                                 )}
                             </ListItem>
@@ -329,40 +372,40 @@ const ProfileDrawer: React.FC = observer(() => {
                     })
                 )}
             </List>
-            <Divider />
+            <Divider/>
             <List>
-                 <ListItem disablePadding>
+                <ListItem disablePadding>
                     <ListItemButton onClick={handleScanQRCode}>
-                        <ListItemIcon><QrCodeScannerIcon /></ListItemIcon>
-                        <ListItemText primary={t('profileDrawer.scanQR')} />
+                        <ListItemIcon><QrCodeScannerIcon/></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.scanQR')}/>
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton onClick={enableSmartTVMode}>
-                        <ListItemIcon><TvIcon /></ListItemIcon>
-                        <ListItemText primary={t('profileDrawer.showQR')} />
+                        <ListItemIcon><TvIcon/></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.showQR')}/>
                     </ListItemButton>
                 </ListItem>
-                <Divider sx={{ my: 1 }} />
+                <Divider sx={{my: 1}}/>
                 <ListItem>
                     <Typography variant="overline" color="text.secondary">{t('profileDrawer.library')}</Typography>
                 </ListItem>
-                 <ListItem disablePadding>
+                <ListItem disablePadding>
                     <ListItemButton onClick={() => openShareModal()}>
-                        <ListItemIcon><ShareIcon /></ListItemIcon>
-                        <ListItemText primary={t('profileDrawer.share')} />
+                        <ListItemIcon><ShareIcon/></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.share')}/>
                     </ListItemButton>
                 </ListItem>
-                 <ListItem disablePadding>
+                <ListItem disablePadding>
                     <ListItemButton onClick={() => openImportModal()}>
-                        <ListItemIcon><FileUploadIcon /></ListItemIcon>
-                        <ListItemText primary={t('profileDrawer.import')} />
+                        <ListItemIcon><FileUploadIcon/></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.import')}/>
                     </ListItemButton>
                 </ListItem>
-                 <ListItem disablePadding>
+                <ListItem disablePadding>
                     <ListItemButton onClick={() => openRevisionsModal()}>
-                        <ListItemIcon><HistoryIcon /></ListItemIcon>
-                        <ListItemText primary={t('profileDrawer.history')} />
+                        <ListItemIcon><HistoryIcon/></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.history')}/>
                     </ListItemButton>
                 </ListItem>
             </List>

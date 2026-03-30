@@ -153,6 +153,9 @@ class WebSocketService {
             this.stopHeartbeat();
             this.ws = null;
 
+            // Mark all slaves as offline
+            this.events.emit('slaves-offline');
+
             // Exponential backoff for reconnection
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 const delay = Math.min(this.reconnectInterval * Math.pow(2, this.reconnectAttempts), 30000);

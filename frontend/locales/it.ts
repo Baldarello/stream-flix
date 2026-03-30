@@ -172,7 +172,9 @@ export const it = {
     "editName": "Modifica Nome",
     "forgetDevice": "Dimentica Dispositivo",
     "save": "Salva",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "online": "Online",
+    "offline": "Offline"
   },
   "qrScanner": {
     "close": "Chiudi scanner",

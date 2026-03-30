@@ -125,7 +125,7 @@ class MediaStore {
     isRemoteFullItemLoading = false;
     isIntroSkippableOnSlave = false;
     shouldAutoFullscreen = false; // Trigger for auto-fullscreen on slave when playback starts
-    @observable knownSlaves: { id: string; name: string; lastSeen: number; }[] = [];
+    @observable knownSlaves: { id: string; name: string; lastSeen: number; isOnline?: boolean }[] = [];
 
     // Media Sync State
     isMediaSyncModalOpen = false;
@@ -180,7 +180,7 @@ class MediaStore {
     showIntroDurations: Map<number, number> = new Map();
 
     // Theme state
-    activeTheme: ThemeName = 'SerieTV';
+    activeTheme: ThemeName = 'Anime';
 
     // Snackbar State
     snackbarMessage: {
@@ -218,7 +218,15 @@ class MediaStore {
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
         websocketService.events.on('debug', this.addDebugMessage);
+        websocketService.events.on('slaves-offline', this.handleSlavesOffline);
     }
+
+    handleSlavesOffline = () => {
+        // Mark all known slaves as offline when WebSocket disconnects
+        this.knownSlaves.forEach(slave => {
+            slave.isOnline = false;
+        });
+    };
 
     @computed get currentActiveView(): ActiveView {
         return this.isRemoteMaster ? this._masterUiActiveView : this.activeView;
@@ -1445,6 +1453,15 @@ class MediaStore {
         });
     };
 
+    setSlaveOnlineStatus = (slaveId: string, isOnline: boolean) => {
+        runInAction(() => {
+            const slave = this.knownSlaves.find(s => s.id === slaveId);
+            if (slave) {
+                slave.isOnline = isOnline;
+            }
+        });
+    };
+
     setRemoteSelectedItem = (item: MediaItem) => {
         // This is called by the RemoteControlView (now acting as master's home)
         // when a card is clicked. It will call `selectMedia` on the master which
@@ -2156,6 +2173,11 @@ class MediaStore {
                     console.log(`[mediaStore] quix-master-connected: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, payload=${JSON.stringify(payload)}`);
                     this.isRemoteMasterConnected = true;
 
+                    // Mark slave as online
+                    if (this.slaveId) {
+                        this.setSlaveOnlineStatus(this.slaveId, true);
+                    }
+
                     // FIX: Update slaveId if provided in payload (backend resolves shortCode to full ID)
                     // This ensures master uses the correct slaveId that matches backend's remoteSessions key
                     if (payload?.slaveId && this.isRemoteMaster) {
@@ -2202,16 +2224,16 @@ class MediaStore {
                         // For non-hosts, episode change should trigger playback
                         const isNonHost = !this.isHost;
                         const hasNewEpisode = this.watchTogetherSelectedItem?.id !== (payload.selectedMedia as any)?.id;
-                        
+
                         // Set watchTogetherSelectedItem from the payload's episode (which has video_urls)
                         this.watchTogetherSelectedItem = payload.selectedMedia as PlayableItem;
-                        
+
                         if (existing) {
                             this.selectMedia(existing, 'watchTogether');
                         } else { // If not cached, fetch it
                             this.selectMedia(payload.selectedMedia, 'watchTogether');
                         }
-                        
+
                         // For non-hosts, if the episode changed, start playback with the video_url from video_urls
                         if (isNonHost && hasNewEpisode && (payload.selectedMedia as any)?.video_urls?.length > 0) {
                             const episodeWithUrl = {
@@ -2257,12 +2279,20 @@ class MediaStore {
                 case 'quix-slave-disconnected':
                     // Slave (TV) disconnected from master - master should show reconnection UI
                     console.log('[mediaStore] Slave disconnected');
+                    // Mark slave as offline
+                    if (this.slaveId) {
+                        this.setSlaveOnlineStatus(this.slaveId, false);
+                    }
                     this.handleSlaveDisconnected();
                     break;
                 case 'quix-master-disconnected':
                     // Master (phone) disconnected from slave - slave should show QR code again
                     console.log('[mediaStore] Master disconnected');
                     this.isRemoteMasterConnected = false;
+                    // Mark all slaves as offline since this client (slave) is no longer connected to master
+                    this.knownSlaves.forEach(slave => {
+                        slave.isOnline = false;
+                    });
                     this.showSnackbar('notifications.masterDisconnected', 'info', true);
                     break;
             }
@@ -2334,8 +2364,8 @@ class MediaStore {
     changeName = (participantId: string, newName: string) => {
         // Optimistically update local participant state for immediate UI feedback
         // Create a new array to ensure MobX properly detects the change
-        const updatedParticipants = this.participants.map(p => 
-            p.id === participantId ? { ...p, name: newName } : p
+        const updatedParticipants = this.participants.map(p =>
+            p.id === participantId ? {...p, name: newName} : p
         );
         const participantExists = updatedParticipants.some(p => p.id === participantId && p.name === newName);
         if (participantExists) {
