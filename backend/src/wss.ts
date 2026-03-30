@@ -54,6 +54,8 @@ const shortCodeToSlaveId = new Map<string, string>();
 const shortCodeExpiry = new Map<string, number>(); // shortCode -> expiry timestamp
 const SHORT_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL for shortCodes after slave disconnect
 const mediaSyncProgress = new Map<string, SyncProgress>();
+// Track slaves that are intentionally disconnecting (for reload) - preserve session for reconnection
+const intentionallyDisconnectingSlaves = new Set<string>();
 
 // ShortCode cleanup interval - removes expired shortCodes
 setInterval(() => {
@@ -184,7 +186,18 @@ function handleDisconnectQuix(ws: any): void {
     // Clean up when slave disconnects - also clear master's remoteSlaveId
     if (wsData.slaveId && remoteSessions.has(wsData.slaveId)) {
         const session = remoteSessions.get(wsData.slaveId);
-        // Notify master that slave has disconnected
+        
+        // Check if slave is intentionally disconnecting (for reload) - preserve session
+        if (intentionallyDisconnectingSlaves.has(wsData.slaveId)) {
+            intentionallyDisconnectingSlaves.delete(wsData.slaveId);
+            // Just clear the slaveWs but keep the session intact for reconnection
+            session.slaveWs = null;
+            console.log(`[WebSocket] Slave ${wsData.slaveId} disconnected intentionally, session preserved for reconnection`);
+            // Don't delete the session or notify the master - the slave will reconnect
+            return;
+        }
+        
+        // Notify master that slave has disconnected (unintentionally)
         if (session?.masterWs && isConnectionOpen(session.masterWs)) {
             (session.masterWs as unknown as { send: (data: string) => void }).send(JSON.stringify({
                 type: 'quix-slave-disconnected',
@@ -435,6 +448,15 @@ export function createWebSocketRouter() {
                         existingSession.slaveWs = ws; // Update WebSocket reference
                         console.log(`[DEBUG] quix-register-slave: Updated existing session, masterWs=${isConnectionOpen(existingSession.masterWs)}`);
                         // Keep existing masterWs if still connected
+
+                        // Notify the master that the slave reconnected (in case master was trying to reconnect)
+                        if (existingSession.masterWs && isConnectionOpen(existingSession.masterWs)) {
+                            existingSession.masterWs.send(JSON.stringify({
+                                type: 'quix-slave-reconnected',
+                                payload: { slaveId: persistentId, shortCode }
+                            }));
+                            console.log(`[WebSocket] Notified master about slave reconnection: ${persistentId}`);
+                        }
                     } else {
                         remoteSessions.set(persistentId, {slaveWs: ws, masterWs: null});
                         console.log(`[DEBUG] quix-register-slave: Created new session`);
@@ -445,6 +467,22 @@ export function createWebSocketRouter() {
                         payload: {slaveId: persistentId, shortCode}
                     }));
                     console.log(`[WebSocket] Slave registered with ID: ${persistentId} and short code: ${shortCode}`);
+                    break;
+                }
+
+                case 'quix-slave-disconnecting': {
+                    // Slave is about to reload/disconnect intentionally - preserve session for reconnection
+                    const slaveId = wsData.slaveId;
+                    if (slaveId) {
+                        intentionallyDisconnectingSlaves.add(slaveId);
+                        const session = remoteSessions.get(slaveId);
+                        if (session) {
+                            // Mark slave as disconnecting but PRESERVE the session and master connection
+                            // The session will be reused when the slave reconnects
+                            session.slaveWs = null; // Clear WebSocket but keep session
+                            console.log(`[WebSocket] Slave ${slaveId} disconnecting intentionally, session preserved for reconnection`);
+                        }
+                    }
                     break;
                 }
 
@@ -473,6 +511,21 @@ export function createWebSocketRouter() {
                     if (session) {
                         // Check if slave is actually connected
                         if (!isConnectionOpen(session.slaveWs)) {
+                            // Check if slave is intentionally disconnecting (for reload) - don't delete session
+                            if (intentionallyDisconnectingSlaves.has(fullSlaveId)) {
+                                console.log(`[WebSocket] Master registration: slave ${fullSlaveId} is intentionally disconnecting, waiting for reconnection`);
+                                // Don't delete session - slave will reconnect soon
+                                // Notify master to keep trying
+                                ws.send(JSON.stringify({
+                                    type: 'quix-master-connection-status',
+                                    payload: {
+                                        status: 'slave-reconnecting',
+                                        slaveId: fullSlaveId,
+                                        message: 'TV is reconnecting. Please wait...'
+                                    }
+                                }));
+                                return;
+                            }
                             console.warn(`[WebSocket] Master registration failed: slave ${fullSlaveId} is not connected (readyState=${session.slaveWs?.raw?.readyState ?? session.slaveWs?.readyState})`);
                             // Clean up stale session
                             remoteSessions.delete(fullSlaveId);

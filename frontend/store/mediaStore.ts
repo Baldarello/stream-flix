@@ -2203,9 +2203,24 @@ class MediaStore {
                         this.showSnackbar('notifications.slaveBusy', 'warning', true);
                     } else if (payload.status === 'slave-not-found') {
                         this.showSnackbar('notifications.slaveNotFound', 'error', true);
+                    } else if (payload.status === 'slave-reconnecting') {
+                        // Slave is intentionally disconnecting (reloading), keep trying
+                        this.showSnackbar('notifications.slaveReconnecting', 'info', true);
+                        // Don't stop the reconnect timer - keep trying
+                        console.log(`[mediaStore] Slave is reconnecting, continuing to wait...`);
                     } else if (payload.slaveId && payload.shortCode) {
                         // Backend resolved shortCode to slaveId - update knownSlaves with both
                         this.updateSlaveShortCode(payload.slaveId, payload.shortCode);
+                    }
+                    break;
+                case 'quix-slave-reconnected':
+                    // Slave has reconnected after intentional disconnect (reload)
+                    // Immediately try to register as master
+                    console.log(`[mediaStore] Slave reconnected: ${payload.slaveId}, attempting to reconnect...`);
+                    if (this.isRemoteMaster && this.slaveId) {
+                        websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
+                        // Request current status to sync UI
+                        this.sendRemoteCommand({command: 'request_status'});
                     }
                     break;
                 case 'quix-room-update':

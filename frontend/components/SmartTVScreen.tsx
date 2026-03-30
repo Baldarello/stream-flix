@@ -1,13 +1,35 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {Box, Button, CircularProgress, Paper, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {useTranslations} from '../hooks/useTranslations.ts';
+import {websocketService} from '../services/websocketService.js';
 
 const SmartTVScreen: React.FC = observer(() => {
-    const {slaveId, isRemoteMasterConnected, slaveShortCode} = mediaStore;
+    const {slaveId, isRemoteMasterConnected, slaveShortCode, isSmartTV} = mediaStore;
     const {t} = useTranslations();
+
+    // Send disconnecting message before page unload to preserve session for reconnection
+    useEffect(() => {
+        if (!isSmartTV || !slaveId) return;
+
+        const handleBeforeUnload = () => {
+            // Use sendBeacon for reliable delivery even during page unload
+            if (websocketService.ws && websocketService.ws.readyState === WebSocket.OPEN) {
+                websocketService.sendMessage({type: 'quix-slave-disconnecting'});
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            // Also send on component unmount (e.g., when switching modes)
+            if (websocketService.ws && websocketService.ws.readyState === WebSocket.OPEN) {
+                websocketService.sendMessage({type: 'quix-slave-disconnecting'});
+            }
+        };
+    }, [isSmartTV, slaveId]);
 
     const renderContent = () => {
         if (isRemoteMasterConnected) {

@@ -335,6 +335,7 @@ export const it = {
     "remoteConnected": "Telecomando connesso!",
     "slaveBusy": "La TV è attualmente connessa a un altro dispositivo. Disconnettila prima.",
     "slaveNotFound": "Dispositivo non trovato. Assicurati che la TV sia accesa e pronta per la connessione.",
+    "slaveReconnecting": "La TV si sta riconnettendo. Attendi...",
     "slaveDisconnected": "TV disconnessa. Scansiona il codice QR per riconnetterti.",
     "masterDisconnected": "Telecomando disconnesso.",
     "reconnectingAsRemote": "Riconnessione come telecomando...",
