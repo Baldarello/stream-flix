@@ -31,6 +31,8 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import DownloadIcon from '@mui/icons-material/Download';
 import ShutterSpeedIcon from '@mui/icons-material/ShutterSpeed';
+import Replay10Icon from '@mui/icons-material/Replay10';
+import Forward10Icon from '@mui/icons-material/Forward10';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
 const formatTime = (timeInSeconds: number) => {
@@ -300,6 +302,31 @@ const VideoPlayer: React.FC = observer(() => {
         setSpeedAnchorEl(null);
     }, []);
 
+    const handleRewind10 = useCallback(() => {
+        if (videoRef.current) {
+            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+        }
+    }, []);
+
+    const handleForward10 = useCallback(() => {
+        if (videoRef.current) {
+            videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 10);
+        }
+    }, []);
+
+    const handleSkipIntro = useCallback(() => {
+        if (videoRef.current && nowPlayingItem) {
+            let skipDuration = 0;
+            if ('intro_end_s' in nowPlayingItem && nowPlayingItem.intro_end_s && nowPlayingItem.intro_end_s > nowPlayingItem.intro_start_s) {
+                skipDuration = nowPlayingItem.intro_end_s - videoRef.current.currentTime;
+            } else {
+                const showId = 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : nowPlayingItem.id;
+                skipDuration = mediaStore.showIntroDurations.get(showId) || 80;
+            }
+            videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + skipDuration);
+        }
+    }, [nowPlayingItem]);
+
     // Effect for Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -360,6 +387,18 @@ const VideoPlayer: React.FC = observer(() => {
                         if (prevIndex >= 0) handleSpeedChange(playbackRates[prevIndex]);
                     }
                     break;
+                case 'j':
+                    e.preventDefault();
+                    if (!isWatchTogetherNonHost) handleRewind10();
+                    break;
+                case 'l':
+                    e.preventDefault();
+                    if (!isWatchTogetherNonHost) handleForward10();
+                    break;
+                case 'n':
+                    e.preventDefault();
+                    if (!isWatchTogetherNonHost) handleSkipIntro();
+                    break;
                 default:
                     break;
             }
@@ -367,7 +406,7 @@ const VideoPlayer: React.FC = observer(() => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleSpeedChange, roomId, isHost]);
+    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleSpeedChange, handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
 
     // Player state management and event listeners
     useEffect(() => {
@@ -532,113 +571,267 @@ const VideoPlayer: React.FC = observer(() => {
                             </Toolbar>
                         </AppBar>
 
-                        {/* Bottom Controls */}
-                        <Box sx={{px: 2, pt: 2, pb: 'calc(1rem + env(safe-area-inset-bottom))', pointerEvents: 'auto'}}>
-                            <Slider
-                                className="video-player-slider"
-                                aria-label="progress"
-                                value={isNaN(playerState.progress) ? 0 : playerState.progress}
-                                onChange={handleSeek}
-                                sx={{color: themeColor}}
-                                disabled={!!roomId && !isHost}
-                            />
-                            {/* FIX: The `justifyContent` and `alignItems` props are system props and should be passed inside the `sx` object. */}
-                            <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center'}}>
-                                {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
-                                <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
-                                    <IconButton onClick={handleTogglePlay} color="inherit"
-                                                disabled={!!roomId && !isHost}>
-                                        {playerState.isPlaying ? <PauseIcon fontSize="large"/> :
-                                            <PlayArrowIcon fontSize="large"/>}
-                                    </IconButton>
-                                    <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)} color="inherit">
-                                        {playerState.isMuted || playerState.volume === 0 ? <VolumeOffIcon/> :
-                                            <VolumeUpIcon/>}
-                                    </IconButton>
-                                    <Popover
-                                        open={Boolean(volumeAnchorEl)}
-                                        anchorEl={volumeAnchorEl}
-                                        onClose={() => setVolumeAnchorEl(null)}
-                                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                                        transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                                        PaperProps={{
-                                            sx: {
-                                                bgcolor: 'rgba(30,30,30,0.8)',
-                                                backdropFilter: 'blur(5px)',
-                                                p: 2,
-                                                borderRadius: 2,
-                                                backgroundImage: 'none'
-                                            }
-                                        }}
-                                    >
-                                        <Slider
-                                            className="video-player-slider"
-                                            sx={{height: 100, color: themeColor}}
-                                            orientation="vertical"
-                                            value={playerState.isMuted ? 0 : playerState.volume}
-                                            onChange={handleVolumeChange}
-                                            min={0}
-                                            max={1}
-                                            step={0.01}
-                                        />
-                                    </Popover>
-                                    <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
-                                        {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
-                                    </Typography>
+                        {/* Smart TV: Bottom Controls always visible (no Fade) */}
+                        {isSmartTV && (
+                            <Box sx={{
+                                px: 2,
+                                pt: 2,
+                                pb: 'calc(1rem + env(safe-area-inset-bottom))',
+                                pointerEvents: 'auto'
+                            }}>
+                                <Slider
+                                    className="video-player-slider"
+                                    aria-label="progress"
+                                    value={isNaN(playerState.progress) ? 0 : playerState.progress}
+                                    onChange={handleSeek}
+                                    sx={{color: themeColor}}
+                                    disabled={!!roomId && !isHost}
+                                    disableSwap={true}
+                                />
+                                <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center'}}>
+                                    <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
+                                        <Tooltip title={t('videoPlayer.skipBack10') || 'Rewind 10s'}>
+                                            <IconButton onClick={handleRewind10} color="inherit"
+                                                        disabled={!!roomId && !isHost}>
+                                                <Replay10Icon fontSize="large"/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <IconButton onClick={handleTogglePlay} color="inherit"
+                                                    disabled={!!roomId && !isHost}>
+                                            {playerState.isPlaying ? <PauseIcon fontSize="large"/> :
+                                                <PlayArrowIcon fontSize="large"/>}
+                                        </IconButton>
+                                        <Tooltip title={t('videoPlayer.forward10') || 'Forward 10s'}>
+                                            <IconButton onClick={handleForward10} color="inherit"
+                                                        disabled={!!roomId && !isHost}>
+                                                <Forward10Icon fontSize="large"/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title={t('videoPlayer.skipIntro') || 'Skip Intro/Credits'}>
+                                            <IconButton onClick={handleSkipIntro} color="inherit"
+                                                        disabled={!!roomId && !isHost}>
+                                                <SkipNextIcon fontSize="large"/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)} color="inherit">
+                                            {playerState.isMuted || playerState.volume === 0 ? <VolumeOffIcon/> :
+                                                <VolumeUpIcon/>}
+                                        </IconButton>
+                                        <Popover
+                                            open={Boolean(volumeAnchorEl)}
+                                            anchorEl={volumeAnchorEl}
+                                            onClose={() => setVolumeAnchorEl(null)}
+                                            anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                            transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                                            PaperProps={{
+                                                sx: {
+                                                    bgcolor: 'rgba(30,30,30,0.8)',
+                                                    backdropFilter: 'blur(5px)',
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    backgroundImage: 'none'
+                                                }
+                                            }}
+                                        >
+                                            <Slider
+                                                className="video-player-slider"
+                                                sx={{height: 100, color: themeColor}}
+                                                orientation="vertical"
+                                                value={playerState.isMuted ? 0 : playerState.volume}
+                                                onChange={handleVolumeChange}
+                                                min={0}
+                                                max={1}
+                                                step={0.01}
+                                            />
+                                        </Popover>
+                                        <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+                                            {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
+                                        </Typography>
+                                    </Stack>
+                                    <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
+                                        <Tooltip title={t('videoPlayer.downloadVideo')}>
+                                            <IconButton onClick={handleDownload}
+                                                        color="inherit"><DownloadIcon/></IconButton>
+                                        </Tooltip>
+                                        <Button
+                                            onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
+                                            color="inherit"
+                                            variant="text"
+                                            startIcon={<ShutterSpeedIcon/>}
+                                            sx={{
+                                                fontFamily: 'monospace',
+                                                textTransform: 'none',
+                                                p: '4px 8px',
+                                                minWidth: '48px'
+                                            }}
+                                            disabled={!!roomId && !isHost}
+                                        >
+                                            {playerState.playbackRate.toFixed(2)}x
+                                        </Button>
+                                        <Popover
+                                            open={Boolean(speedAnchorEl)}
+                                            anchorEl={speedAnchorEl}
+                                            onClose={() => setSpeedAnchorEl(null)}
+                                            anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                            transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                                            PaperProps={{
+                                                sx: {
+                                                    bgcolor: 'rgba(30,30,30,0.8)',
+                                                    backdropFilter: 'blur(5px)',
+                                                    backgroundImage: 'none'
+                                                }
+                                            }}
+                                        >
+                                            <List dense>
+                                                {playbackRates.map(rate => (
+                                                    <ListItemButton key={rate} onClick={() => handleSpeedChange(rate)}
+                                                                    selected={playerState.playbackRate === rate}>
+                                                        <ListItemText primary={`${rate}x`}/>
+                                                    </ListItemButton>
+                                                ))}
+                                            </List>
+                                        </Popover>
+                                        <IconButton onClick={handleToggleFullScreen} color="inherit">
+                                            {playerState.isFullScreen ? <FullscreenExitIcon/> : <FullscreenIcon/>}
+                                        </IconButton>
+                                    </Stack>
                                 </Stack>
-                                {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
-                                <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
-                                    {/* FIX: (line 415) Wrap IconButton with Tooltip component */}
-                                    <Tooltip title={t('videoPlayer.downloadVideo')}>
-                                        <IconButton onClick={handleDownload}
-                                                    color="inherit"><DownloadIcon/></IconButton>
-                                    </Tooltip>
-                                    <Button
-                                        onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
-                                        color="inherit"
-                                        variant="text"
-                                        startIcon={<ShutterSpeedIcon/>}
-                                        sx={{
-                                            fontFamily: 'monospace',
-                                            textTransform: 'none',
-                                            p: '4px 8px',
-                                            minWidth: '48px'
-                                        }}
-                                        disabled={!!roomId && !isHost}
-                                    >
-                                        {playerState.playbackRate.toFixed(2)}x
-                                    </Button>
-                                    <Popover
-                                        open={Boolean(speedAnchorEl)}
-                                        anchorEl={speedAnchorEl}
-                                        onClose={() => setSpeedAnchorEl(null)}
-                                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                                        transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                                        PaperProps={{
-                                            sx: {
-                                                bgcolor: 'rgba(30,30,30,0.8)',
-                                                backdropFilter: 'blur(5px)',
-                                                backgroundImage: 'none'
-                                            }
-                                        }}
-                                    >
-                                        <List dense>
-                                            {playbackRates.map(rate => (
-                                                <ListItemButton key={rate} onClick={() => handleSpeedChange(rate)}
-                                                                selected={playerState.playbackRate === rate}>
-                                                    <ListItemText primary={`${rate}x`}/>
-                                                </ListItemButton>
-                                            ))}
-                                        </List>
-                                    </Popover>
-                                    <IconButton onClick={handleToggleFullScreen} color="inherit">
-                                        {playerState.isFullScreen ? <FullscreenExitIcon/> : <FullscreenIcon/>}
-                                    </IconButton>
-                                </Stack>
-                            </Stack>
-                        </Box>
+                            </Box>
+                        )}
 
-                        {/* Slave (Smart TV) Overlay Buttons */}
+                        {/* Non-Smart TV: Bottom Controls with Fade */}
+                        {!isSmartTV && (
+                            <Fade in={isUiVisible} timeout={500}>
+                                <Box sx={{
+                                    px: 2,
+                                    pt: 2,
+                                    pb: 'calc(1rem + env(safe-area-inset-bottom))',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <Slider
+                                        className="video-player-slider"
+                                        aria-label="progress"
+                                        value={isNaN(playerState.progress) ? 0 : playerState.progress}
+                                        onChange={handleSeek}
+                                        sx={{color: themeColor}}
+                                        disabled={!!roomId && !isHost}
+                                        disableSwap={true}
+                                    />
+                                    <Stack direction="row" sx={{justifyContent: 'space-between', alignItems: 'center'}}>
+                                        <Stack direction="row" spacing={2} sx={{alignItems: 'center'}}>
+                                            <Tooltip title={t('videoPlayer.skipBack10') || 'Rewind 10s'}>
+                                                <IconButton onClick={handleRewind10} color="inherit"
+                                                            disabled={!!roomId && !isHost}>
+                                                    <Replay10Icon fontSize="large"/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <IconButton onClick={handleTogglePlay} color="inherit"
+                                                        disabled={!!roomId && !isHost}>
+                                                {playerState.isPlaying ? <PauseIcon fontSize="large"/> :
+                                                    <PlayArrowIcon fontSize="large"/>}
+                                            </IconButton>
+                                            <Tooltip title={t('videoPlayer.forward10') || 'Forward 10s'}>
+                                                <IconButton onClick={handleForward10} color="inherit"
+                                                            disabled={!!roomId && !isHost}>
+                                                    <Forward10Icon fontSize="large"/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip title={t('videoPlayer.skipIntro') || 'Skip Intro/Credits'}>
+                                                <IconButton onClick={handleSkipIntro} color="inherit"
+                                                            disabled={!!roomId && !isHost}>
+                                                    <SkipNextIcon fontSize="large"/>
+                                                </IconButton>
+                                            </Tooltip>
+                                            <IconButton onClick={(e) => setVolumeAnchorEl(e.currentTarget)}
+                                                        color="inherit">
+                                                {playerState.isMuted || playerState.volume === 0 ? <VolumeOffIcon/> :
+                                                    <VolumeUpIcon/>}
+                                            </IconButton>
+                                            <Popover
+                                                open={Boolean(volumeAnchorEl)}
+                                                anchorEl={volumeAnchorEl}
+                                                onClose={() => setVolumeAnchorEl(null)}
+                                                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                                transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                                                PaperProps={{
+                                                    sx: {
+                                                        bgcolor: 'rgba(30,30,30,0.8)',
+                                                        backdropFilter: 'blur(5px)',
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        backgroundImage: 'none'
+                                                    }
+                                                }}
+                                            >
+                                                <Slider
+                                                    className="video-player-slider"
+                                                    sx={{height: 100, color: themeColor}}
+                                                    orientation="vertical"
+                                                    value={playerState.isMuted ? 0 : playerState.volume}
+                                                    onChange={handleVolumeChange}
+                                                    min={0}
+                                                    max={1}
+                                                    step={0.01}
+                                                />
+                                            </Popover>
+                                            <Typography variant="body2" sx={{fontFamily: 'monospace'}}>
+                                                {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
+                                            </Typography>
+                                        </Stack>
+                                        <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
+                                            <Tooltip title={t('videoPlayer.downloadVideo')}>
+                                                <IconButton onClick={handleDownload}
+                                                            color="inherit"><DownloadIcon/></IconButton>
+                                            </Tooltip>
+                                            <Button
+                                                onClick={(e) => setSpeedAnchorEl(e.currentTarget)}
+                                                color="inherit"
+                                                variant="text"
+                                                startIcon={<ShutterSpeedIcon/>}
+                                                sx={{
+                                                    fontFamily: 'monospace',
+                                                    textTransform: 'none',
+                                                    p: '4px 8px',
+                                                    minWidth: '48px'
+                                                }}
+                                                disabled={!!roomId && !isHost}
+                                            >
+                                                {playerState.playbackRate.toFixed(2)}x
+                                            </Button>
+                                            <Popover
+                                                open={Boolean(speedAnchorEl)}
+                                                anchorEl={speedAnchorEl}
+                                                onClose={() => setSpeedAnchorEl(null)}
+                                                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                                                transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                                                PaperProps={{
+                                                    sx: {
+                                                        bgcolor: 'rgba(30,30,30,0.8)',
+                                                        backdropFilter: 'blur(5px)',
+                                                        backgroundImage: 'none'
+                                                    }
+                                                }}
+                                            >
+                                                <List dense>
+                                                    {playbackRates.map(rate => (
+                                                        <ListItemButton key={rate}
+                                                                        onClick={() => handleSpeedChange(rate)}
+                                                                        selected={playerState.playbackRate === rate}>
+                                                            <ListItemText primary={`${rate}x`}/>
+                                                        </ListItemButton>
+                                                    ))}
+                                                </List>
+                                            </Popover>
+                                            <IconButton onClick={handleToggleFullScreen} color="inherit">
+                                                {playerState.isFullScreen ? <FullscreenExitIcon/> : <FullscreenIcon/>}
+                                            </IconButton>
+                                        </Stack>
+                                    </Stack>
+                                </Box>
+                            </Fade>
+                        )}
+
+                        {/* Slave (Smart TV) Overlay: Play/Pause button only - fullscreen is in bottom bar */}
                         {isSmartTV && (
                             <Fade in={isUiVisible} timeout={500}>
                                 <Box sx={{
@@ -649,27 +842,6 @@ const VideoPlayer: React.FC = observer(() => {
                                     justifyContent: 'center',
                                     pointerEvents: 'none'
                                 }}>
-                                    <Box sx={{
-                                        position: 'absolute',
-                                        left: 0,
-                                        width: '50%',
-                                        height: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        pointerEvents: 'auto'
-                                    }}>
-                                        <IconButton onClick={handleToggleFullScreen} sx={{
-                                            bgcolor: 'rgba(0,0,0,0.6)',
-                                            '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
-                                            width: 80,
-                                            height: 80
-                                        }}>
-                                            {playerState.isFullScreen ?
-                                                <FullscreenExitIcon sx={{fontSize: 48, color: 'white'}}/> :
-                                                <FullscreenIcon sx={{fontSize: 48, color: 'white'}}/>}
-                                        </IconButton>
-                                    </Box>
                                     <Box sx={{
                                         position: 'absolute',
                                         right: 0,
