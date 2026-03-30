@@ -1596,11 +1596,13 @@ class MediaStore {
     };
 
     // Master reconnection methods for automatic reconnection after slave disconnect
-    handleSlaveDisconnected = () => {
+    handleSlaveDisconnected = (shouldOpenQRScanner = true) => {
         this.isRemoteMasterConnected = false;
         this.remoteSlaveState = null;
         this.startMasterReconnectTimer();
-        this.openQRScanner();
+        if (shouldOpenQRScanner) {
+            this.openQRScanner();
+        }
         this.showSnackbar('notifications.slaveDisconnected', 'warning', true);
     };
 
@@ -2320,12 +2322,12 @@ class MediaStore {
                     break;
                 case 'quix-slave-disconnected':
                     // Slave (TV) disconnected from master - master should show reconnection UI
-                    console.log('[mediaStore] Slave disconnected');
+                    console.log('[mediaStore] Slave disconnected, willReconnect:', payload?.willReconnect);
                     // Mark slave as offline
                     if (this.slaveId) {
                         this.setSlaveOnlineStatus(this.slaveId, false);
                     }
-                    this.handleSlaveDisconnected();
+                    this.handleSlaveDisconnected(payload?.willReconnect !== true);
                     break;
                 case 'quix-master-disconnected':
                     // Master (phone) disconnected from slave - slave should show QR code again

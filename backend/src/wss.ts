@@ -186,35 +186,35 @@ function handleDisconnectQuix(ws: any): void {
     // Clean up when slave disconnects - also clear master's remoteSlaveId
     if (wsData.slaveId && remoteSessions.has(wsData.slaveId)) {
         const session = remoteSessions.get(wsData.slaveId);
-        
-        // Check if slave is intentionally disconnecting (for reload) - preserve session
-        if (intentionallyDisconnectingSlaves.has(wsData.slaveId)) {
-            intentionallyDisconnectingSlaves.delete(wsData.slaveId);
-            // Just clear the slaveWs but keep the session intact for reconnection
-            // Do NOT delete the shortCode mapping - it's needed for reconnection
-            session.slaveWs = null;
-            console.log(`[WebSocket] Slave ${wsData.slaveId} disconnected intentionally, session preserved for reconnection (shortCode=${wsData.shortCode})`);
-            // Don't notify the master - the slave will reconnect
-            return;
-        }
-        
-        // Notify master that slave has disconnected (unintentionally)
+
+        // FIX: Always preserve session if there's an active master connected
+        // This handles both intentional disconnects (page reload) and unexpected disconnects
+        // The slave can reconnect using the same shortCode and re-link to this session
         if (session?.masterWs && isConnectionOpen(session.masterWs)) {
+            // Preserve session: just clear slaveWs but keep masterWs and shortCode mapping
+            session.slaveWs = null;
+
+            // Notify master that slave is temporarily disconnected but will reconnect
             (session.masterWs as unknown as { send: (data: string) => void }).send(JSON.stringify({
                 type: 'quix-slave-disconnected',
-                payload: {}
+                payload: {willReconnect: true, slaveId: wsData.slaveId}
             }));
-            // Clear the master's remoteSlaveId since slave is gone
-            setWSData(session.masterWs, 'remoteSlaveId', '');
-            console.log(`[WebSocket] Cleared master's remoteSlaveId for slave ${wsData.slaveId}`);
+
+            // DO NOT clear remoteSlaveId on master - this helps master know to retry
+            // DO NOT delete the session - slave will reconnect
+            // DO NOT update shortCodeToSlaveId mapping - shortCode still valid
+            console.log(`[WebSocket] Slave ${wsData.slaveId} disconnected, session preserved for reconnection (master still connected)`);
+            return;
         }
+
+        // No active master - safe to delete session and shortCode
         for (const [, progress] of Array.from(mediaSyncProgress.entries())) {
             if (progress.status === 'in_progress') {
                 progress.status = 'failed';
             }
         }
         remoteSessions.delete(wsData.slaveId);
-        // FIX: Preserve shortCode with TTL instead of deleting immediately
+        // Preserve shortCode with TTL instead of deleting immediately
         // This allows master to reconnect within the TTL window
         if (wsData.shortCode) {
             shortCodeExpiry.set(wsData.shortCode, Date.now() + SHORT_CODE_TTL_MS);
@@ -425,15 +425,32 @@ export function createWebSocketRouter() {
 
                 case 'quix-register-slave': {
                     const typedPayload = payload as { slaveId?: string; shortCode?: string };
-                    // Use the slaveId from payload if provided (for reconnection), otherwise use userName (new connection)
-                    const persistentId = typedPayload?.slaveId || wsData.userName;
+
+                    // FIX: If slave provides shortCode, first check if there's a preserved session
+                    // This handles reconnection after page refresh
+                    let persistentId = typedPayload?.slaveId || wsData.userName;
+                    let shortCode = typedPayload?.shortCode || wsData.shortCode;
+
+                    // If shortCode is provided, check if it maps to an existing session
+                    if (typedPayload?.shortCode) {
+                        const existingSlaveId = shortCodeToSlaveId.get(typedPayload.shortCode.toUpperCase());
+                        if (existingSlaveId && remoteSessions.has(existingSlaveId)) {
+                            const existingSession = remoteSessions.get(existingSlaveId);
+                            // If there's a preserved session (slaveWs = null) with an active master
+                            if (existingSession && existingSession.slaveWs === null &&
+                                existingSession.masterWs && isConnectionOpen(existingSession.masterWs)) {
+                                // Re-link to the preserved session using the OLD slaveId
+                                persistentId = existingSlaveId;
+                                shortCode = typedPayload.shortCode.toUpperCase();
+                                console.log(`[WebSocket] Slave reconnected to preserved session: ${persistentId}`);
+                            }
+                        }
+                    }
+
                     if (!persistentId) return;
 
                     setWSData(ws, 'slaveId', persistentId);
 
-                    // FIX: Check if slave sends shortCode in payload (for reconnection)
-                    // This ensures saved shortCodes remain valid on slave reconnection
-                    let shortCode = typedPayload?.shortCode || wsData.shortCode;
                     if (!shortCode) {
                         // Only generate new if this is a fresh registration
                         shortCode = generateShortCode();
@@ -465,7 +482,7 @@ export function createWebSocketRouter() {
                         if (existingSession.masterWs && isConnectionOpen(existingSession.masterWs)) {
                             existingSession.masterWs.send(JSON.stringify({
                                 type: 'quix-slave-reconnected',
-                                payload: { slaveId: persistentId, shortCode }
+                                payload: {slaveId: persistentId, shortCode}
                             }));
                             console.log(`[WebSocket] Notified master about slave reconnection: ${persistentId}`);
                         }
