@@ -67,7 +67,9 @@ export const en = {
         "episodeList": "Episode List",
         "skipIntro": "Skip Intro",
         "playbackSpeed": "Playback Speed",
-        "downloadVideo": "Download Video"
+        "downloadVideo": "Download Video",
+        "skipBack10": "Rewind 10s",
+        "forward10": "Forward 10s"
     },
     "episodesDrawer": {
         "title": "Episodes",

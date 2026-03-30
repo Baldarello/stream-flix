@@ -737,13 +737,12 @@ class MediaStore {
     get continueWatchingItems(): PlayableItem[] {
         const sortedProgress = Array.from(this.episodeProgress.values())
             .filter(p => !p.watched && p.currentTime > 0)
-            .sort((a, b) => b.currentTime - a.currentTime); // This is not perfect, needs last watched timestamp
+            .sort((a, b) => (b.lastWatchedAt ?? 0) - (a.lastWatchedAt ?? 0)); // Most recent first
 
         return sortedProgress.map(p => {
             const ep = this.findEpisodeById(p.episodeId);
             if (!ep) return null;
             return {...ep, startTime: p.currentTime};
-// FIX: A type predicate's type must be assignable to its parameter's type. Removed the predicate and added a cast.
         }).filter(item => !!item) as PlayableItem[];
     }
 
@@ -1042,7 +1041,7 @@ class MediaStore {
             const watched = currentTime / duration > 0.9;
             const existing = this.episodeProgress.get(episodeId);
             if (!existing || existing.currentTime < currentTime || watched !== existing.watched) {
-                const newProgress = {episodeId, currentTime, duration, watched};
+                const newProgress = {episodeId, currentTime, duration, watched, lastWatchedAt: Date.now()};
                 this.episodeProgress.set(episodeId, newProgress);
                 db.episodeProgress.put(newProgress);
             }
