@@ -466,13 +466,13 @@ export function createWebSocketRouter() {
                         const existingSlaveId = shortCodeToSlaveId.get(typedPayload.shortCode.toUpperCase());
                         if (existingSlaveId && remoteSessions.has(existingSlaveId)) {
                             const existingSession = remoteSessions.get(existingSlaveId);
-                            // If there's a preserved session (slaveWs = null) with an active master
-                            if (existingSession && existingSession.slaveWs === null &&
-                                existingSession.masterWs && isConnectionOpen(existingSession.masterWs)) {
+                            // If there's a preserved session (slaveWs = null), allow reconnection regardless of master state
+                            // The master will reconnect separately if needed
+                            if (existingSession && existingSession.slaveWs === null) {
                                 // Re-link to the preserved session using the OLD slaveId
                                 persistentId = existingSlaveId;
                                 shortCode = typedPayload.shortCode.toUpperCase();
-                                console.log(`[WebSocket] Slave reconnected to preserved session: ${persistentId}`);
+                                console.log(`[WebSocket] Slave reconnected to preserved session: ${persistentId}, masterConnected=${isConnectionOpen(existingSession.masterWs)}`);
                             }
                         }
                     }
@@ -510,6 +510,10 @@ export function createWebSocketRouter() {
                         // This allows master to successfully register when it retries
                         intentionallyDisconnectingMasters.delete(persistentId);
                         console.log(`[WebSocket] Cleared intentionallyDisconnectingMasters for ${persistentId}`);
+
+                        // Also clear intentionallyDisconnectingSlaves since slave has reconnected
+                        intentionallyDisconnectingSlaves.delete(persistentId);
+                        console.log(`[WebSocket] Cleared intentionallyDisconnectingSlaves for ${persistentId}`);
 
                         // Keep existing masterWs if still connected
 
