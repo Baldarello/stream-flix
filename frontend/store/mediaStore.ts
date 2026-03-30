@@ -259,8 +259,34 @@ class MediaStore {
             item.video_urls = allLinks;
 
             if (allLinks.length === 0) {
-                this.showSnackbar("notifications.noVideoLinks", "warning", true);
-                return; // Can't play, so exit.
+                // Check if this is a TV show and try to find links from first available episode
+                if ('seasons' in item && item.seasons) {
+                    for (const season of item.seasons) {
+                        if (season.episodes) {
+                            for (const ep of season.episodes) {
+                                const episodeLinks = await this.getLinksForMedia(ep.id);
+                                if (episodeLinks.length > 0) {
+                                    item.video_urls = episodeLinks;
+                                    allLinks = episodeLinks;
+                                    // Set proper metadata to make it playable like an episode
+                                    item.show_id = item.id;
+                                    item.show_title = item.name || item.title || '';
+                                    item.season_number = season.season_number;
+                                    if (!item.backdrop_path && ep.still_path) {
+                                        item.backdrop_path = ep.still_path;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        if (allLinks.length > 0) break;
+                    }
+                }
+
+                if (allLinks.length === 0) {
+                    this.showSnackbar("notifications.noVideoLinks", "warning", true);
+                    return; // Can't play, so exit.
+                }
             }
 
             // Determine the pool of links to choose from.
