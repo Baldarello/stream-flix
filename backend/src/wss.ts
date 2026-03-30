@@ -860,6 +860,46 @@ export function createWebSocketRouter() {
                     break;
                 }
 
+                case 'quix-ping': {
+                    // Master sends ping to slave via server
+                    const typedPayload = payload as { slaveId?: string };
+                    const slaveId = typedPayload?.slaveId;
+
+                    if (slaveId) {
+                        const session = remoteSessions.get(slaveId);
+                        if (session && session.slaveWs && isConnectionOpen(session.slaveWs)) {
+                            // Forward ping to slave
+                            session.slaveWs.send(JSON.stringify({
+                                type: 'quix-ping',
+                                payload: {from: 'master', timestamp: Date.now()}
+                            }));
+                            console.log(`[WebSocket] quix-ping forwarded to slave ${slaveId}`);
+                        } else {
+                            console.log(`[WebSocket] quix-ping: slave ${slaveId} not connected`);
+                        }
+                    }
+                    break;
+                }
+
+                case 'quix-pong': {
+                    // Slave responds to ping - forward back to master
+                    const typedPayload = payload as { slaveId?: string; masterId?: string };
+                    const slaveId = typedPayload?.slaveId || wsData.slaveId;
+
+                    if (slaveId) {
+                        const session = remoteSessions.get(slaveId);
+                        if (session && session.masterWs && isConnectionOpen(session.masterWs)) {
+                            // Forward pong to master
+                            session.masterWs.send(JSON.stringify({
+                                type: 'quix-pong',
+                                payload: {slaveId, timestamp: typedPayload?.timestamp || Date.now()}
+                            }));
+                            console.log(`[WebSocket] quix-pong forwarded to master for slave ${slaveId}`);
+                        }
+                    }
+                    break;
+                }
+
                 case 'pong': {
                     // Client responding to server ping - no action needed, connection is alive
                     break;

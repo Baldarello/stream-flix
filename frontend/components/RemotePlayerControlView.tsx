@@ -38,6 +38,7 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import type {Episode, PlayableItem} from '../types.ts';
 import {useTranslations} from '../hooks/useTranslations.ts';
+import ConnectionIndicator from './ConnectionIndicator.tsx';
 
 const formatTime = (timeInSeconds: number) => {
     if (isNaN(timeInSeconds) || timeInSeconds < 0) {
@@ -346,6 +347,7 @@ const RemotePlayerControlView = observer(() => {
                     <Typography variant="h6" noWrap sx={{flexGrow: 1}}>
                         {t('remote.player.title')}
                     </Typography>
+                    <ConnectionIndicator/>
                     {/* FIX: (line 224) Wrap IconButton with Tooltip component */}
                     <Tooltip title={t('remote.player.disconnect')}>
                         <IconButton color="inherit" onClick={disconnectRemoteMaster}>

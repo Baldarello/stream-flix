@@ -129,6 +129,12 @@ class MediaStore {
     shouldAutoFullscreen = false; // Trigger for auto-fullscreen on slave when playback starts
     @observable knownSlaves: { id: string; name: string; lastSeen: number; isOnline?: boolean }[] = [];
 
+    // Connection Health State (ping/pong tracking)
+    missedPings = 0; // Number of consecutive missed pings
+    connectionHealth: 'good' | 'degraded' | 'poor' = 'good'; // green/orange/red
+    pingInterval: number | null = null; // Interval timer for ping/pong
+    lastPingTime: number | null = null; // Last time we sent a ping
+
     // Media Sync State
     isMediaSyncModalOpen = false;
     mediaSyncTargetSlaveId: string | null = null;
@@ -1434,6 +1440,7 @@ class MediaStore {
             this._masterUiActiveView = 'Home';
             this._masterUiSelectedItem = null;
             db.preferences.delete('remoteMasterForSlaveId');
+            this.stopPingInterval();
             this.showSnackbar('notifications.disconnectedFromTV', 'info', true);
         });
     }
@@ -1633,6 +1640,52 @@ class MediaStore {
             this.masterReconnectTimer = null;
         }
         this.isReconnecting = false;
+    };
+
+    // Ping/Pong interval for connection health monitoring
+    startPingInterval = () => {
+        this.stopPingInterval(); // Clear any existing interval
+
+        // Send ping every 10 seconds
+        this.pingInterval = window.setInterval(() => {
+            if (this.isRemoteMaster && this.slaveId && this.isRemoteMasterConnected) {
+                // Send ping to slave
+                websocketService.sendMessage({
+                    type: 'quix-ping',
+                    payload: {slaveId: this.slaveId}
+                });
+                this.lastPingTime = Date.now();
+                console.log('[mediaStore] Sent quix-ping to slave');
+
+                // Check if we missed a pong (timeout after 12 seconds - slightly more than ping interval)
+                setTimeout(() => {
+                    if (this.lastPingTime && Date.now() - this.lastPingTime >= 12000) {
+                        this.missedPings++;
+                        console.log(`[mediaStore] Missed ping detected, missedPings=${this.missedPings}`);
+
+                        if (this.missedPings >= 3) {
+                            this.connectionHealth = 'poor';
+                            console.log('[mediaStore] Connection health: POOR');
+                        } else if (this.missedPings >= 1) {
+                            this.connectionHealth = 'degraded';
+                            console.log('[mediaStore] Connection health: DEGRADED');
+                        }
+                    }
+                }, 12000);
+            }
+        }, 10000); // Ping every 10 seconds
+        console.log('[mediaStore] Ping interval started');
+    };
+
+    stopPingInterval = () => {
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval);
+            this.pingInterval = null;
+        }
+        this.lastPingTime = null;
+        this.missedPings = 0;
+        this.connectionHealth = 'good';
+        console.log('[mediaStore] Ping interval stopped');
     };
 
     stopRemotePlayback = () => {
@@ -2224,6 +2277,8 @@ class MediaStore {
                         }
                         // Stop the reconnect timer since we're now connected
                         this.stopMasterReconnectTimer();
+                        // Start ping interval for connection health monitoring
+                        this.startPingInterval();
                     }
                     this.showSnackbar('notifications.remoteConnected', 'success', true);
                     break;
@@ -2330,6 +2385,22 @@ class MediaStore {
                 case 'quix-slave-status-update':
                     this.remoteSlaveState = payload;
                     break;
+                case 'quix-ping':
+                    // Received ping from master - respond with pong
+                    console.log('[mediaStore] Received quix-ping, responding with pong');
+                    if (this.slaveId) {
+                        websocketService.sendMessage({
+                            type: 'quix-pong',
+                            payload: {slaveId: this.slaveId, timestamp: payload?.timestamp}
+                        });
+                    }
+                    break;
+                case 'quix-pong':
+                    // Received pong from slave - connection is healthy
+                    console.log('[mediaStore] Received quix-pong from slave');
+                    this.missedPings = 0;
+                    this.connectionHealth = 'good';
+                    break;
                 case 'quix-sync-media-request':
                     // Master sent media items to sync to slave
                     if (payload?.mediaItems && Array.isArray(payload.mediaItems)) {
@@ -2351,6 +2422,8 @@ class MediaStore {
                         this.setSlaveOnlineStatus(this.slaveId, false);
                     }
                     this.handleSlaveDisconnected(payload?.willReconnect !== true);
+                    // Stop ping interval
+                    this.stopPingInterval();
                     break;
                 case 'quix-master-disconnected':
                     // Master (phone) disconnected from slave - slave should show QR code again
@@ -2360,6 +2433,7 @@ class MediaStore {
                     this.knownSlaves.forEach(slave => {
                         slave.isOnline = false;
                     });
+                    this.stopPingInterval();
                     this.showSnackbar('notifications.masterDisconnected', 'info', true);
                     break;
             }

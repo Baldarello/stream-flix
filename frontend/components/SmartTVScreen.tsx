@@ -4,6 +4,7 @@ import {mediaStore} from '../store/mediaStore.ts';
 import {Box, Button, CircularProgress, Paper, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {useTranslations} from '../hooks/useTranslations.ts';
+import ConnectionIndicator from './ConnectionIndicator.tsx';
 import {websocketService} from '../services/websocketService.js';
 
 const SmartTVScreen: React.FC = observer(() => {
@@ -68,7 +69,12 @@ const SmartTVScreen: React.FC = observer(() => {
         if (isRemoteMasterConnected) {
             return (
                 <Box sx={{textAlign: 'center', color: 'success.main'}}>
-                    <CheckCircleOutlineIcon sx={{fontSize: 80, mb: 2}}/>
+                    <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2}}>
+                        <CheckCircleOutlineIcon sx={{fontSize: 80}}/>
+                        <Box sx={{ml: 2}}>
+                            <ConnectionIndicator/>
+                        </Box>
+                    </Box>
                     <Typography variant="h4" component="h1" fontWeight="bold">
                         {t('smartTV.connected')}
                     </Typography>
