@@ -106,6 +106,19 @@ const RemotePlayerControlView = observer(() => {
         };
     }, []);
 
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            if (isRemoteMasterConnected && slaveId) {
+                websocketService.sendMessage({type: 'quix-master-disconnecting', payload: {slaveId}});
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isRemoteMasterConnected, slaveId]);
+
     // Show reconnection UI when slave is disconnected
     if (!isRemoteMasterConnected && slaveId) {
         return (

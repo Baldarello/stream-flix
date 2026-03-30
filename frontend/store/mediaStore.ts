@@ -2209,6 +2209,8 @@ class MediaStore {
                     if (payload?.slaveId && this.isRemoteMaster) {
                         console.log(`[mediaStore] quix-master-connected: Updating slaveId from '${this.slaveId}' to '${payload.slaveId}'`);
                         this.slaveId = payload.slaveId;
+                        // CRITICAL FIX: Also update remoteMasterForSlaveId so on refresh we use the FULL id, not shortCode
+                        db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
                     }
 
                     if (this.isSmartTV) {
@@ -2228,11 +2230,26 @@ class MediaStore {
                 case 'quix-master-connection-status':
                     // Handle connection status when master tries to reconnect with shortCode
                     if (payload.status === 'slave-busy') {
-                        this.showSnackbar('notifications.slaveBusy', 'warning', true);
+                        // If we're in reconnection mode (master refreshing/reconnecting),
+                        // this "busy" message might be from our own previous connection attempt.
+                        // Show success since we should be reconnecting successfully.
+                        if (this.isReconnecting || this.masterReconnectTimer) {
+                            console.log(`[mediaStore] slave-busy during reconnection, ignoring - likely our own attempt`);
+                            // Don't show error snackbar - we'll get quix-master-connected soon
+                        } else {
+                            // Real busy scenario - a different master is trying to connect
+                            this.showSnackbar('notifications.slaveBusy', 'warning', true);
+                        }
                     } else if (payload.status === 'slave-not-found') {
                         this.showSnackbar('notifications.slaveNotFound', 'error', true);
                     } else if (payload.status === 'slave-reconnecting') {
                         // Slave is intentionally disconnecting (reloading), keep trying
+                        // Also update slaveId if provided (backend resolves shortCode to full ID)
+                        if (payload.slaveId && this.isRemoteMaster) {
+                            this.slaveId = payload.slaveId;
+                            db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
+                            console.log(`[mediaStore] Slave reconnecting: updated slaveId to ${payload.slaveId}`);
+                        }
                         this.showSnackbar('notifications.slaveReconnecting', 'info', true);
                         // Don't stop the reconnect timer - keep trying
                         console.log(`[mediaStore] Slave is reconnecting, continuing to wait...`);
@@ -2246,7 +2263,13 @@ class MediaStore {
                     // Immediately try to register as master
                     console.log(`[mediaStore] Slave reconnected: ${payload.slaveId}, attempting to reconnect...`);
                     this.showSnackbar('notifications.slaveReconnected', 'success', true);
-                    if (this.isRemoteMaster && this.slaveId) {
+                    if (this.isRemoteMaster) {
+                        // Update slaveId to the full ID (in case we had shortCode stored)
+                        if (payload.slaveId) {
+                            this.slaveId = payload.slaveId;
+                            // CRITICAL: Store the full slaveId so on next refresh we use the correct id
+                            db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
+                        }
                         websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
                         // Request current status to sync UI
                         this.sendRemoteCommand({command: 'request_status'});
