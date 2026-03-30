@@ -846,11 +846,11 @@ class MediaStore {
                 }
             }
             this.knownSlaves = knownSlaves;
-            
+
             // Mark that initial data has been loaded - this allows initRemoteSession to proceed
             this.hasLoadedInitialData = true;
             console.log(`[mediaStore] fetchAllData: initial data loaded, hasLoadedInitialData=true, isSmartTV=${this.isSmartTV}, isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
-            
+
             // Now that data is loaded, trigger initRemoteSession to register as slave or master
             if (this.isSmartTV && this.slaveId) {
                 console.log(`[mediaStore] fetchAllData: calling initRemoteSession for slave`);
@@ -2218,6 +2218,8 @@ class MediaStore {
                             console.log(`[mediaStore] quix-master-connected: Opening sync modal with slaveId=${this.slaveId}`);
                             this.openMediaSyncModal(this.slaveId);
                         }
+                        // Stop the reconnect timer since we're now connected
+                        this.stopMasterReconnectTimer();
                     }
                     this.showSnackbar('notifications.remoteConnected', 'success', true);
                     break;
@@ -2241,6 +2243,7 @@ class MediaStore {
                     // Slave has reconnected after intentional disconnect (reload)
                     // Immediately try to register as master
                     console.log(`[mediaStore] Slave reconnected: ${payload.slaveId}, attempting to reconnect...`);
+                    this.showSnackbar('notifications.slaveReconnected', 'success', true);
                     if (this.isRemoteMaster && this.slaveId) {
                         websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
                         // Request current status to sync UI

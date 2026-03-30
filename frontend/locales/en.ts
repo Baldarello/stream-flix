@@ -191,7 +191,8 @@ export const en = {
         "instructions": "1. Open the camera on your phone.\n2. Point it at the QR code to connect.",
         "initializing": "Initializing device...",
         "browseOnTV": "Browse the catalog directly on the TV",
-        "orEnterCode": "Or enter the code manually:"
+        "orEnterCode": "Or enter the code manually:",
+        "reconnecting": "Reconnecting..."
     },
     "watchTogether": {
         "joinRoomTitle": "Join Room",
@@ -335,6 +336,7 @@ export const en = {
         "slaveBusy": "TV is currently connected to another device. Please disconnect first.",
         "slaveNotFound": "Device not found. Make sure the TV is turned on and ready to connect.",
         "slaveReconnecting": "TV is reconnecting. Please wait...",
+        "slaveReconnected": "TV reconnected!",
         "slaveDisconnected": "TV disconnected. Please scan the QR code to reconnect.",
         "masterDisconnected": "Remote control disconnected.",
         "reconnectingAsRemote": "Reconnecting as remote control...",

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {Box, Button, CircularProgress, Paper, Typography} from '@mui/material';
@@ -13,6 +13,9 @@ const SmartTVScreen: React.FC = observer(() => {
     // Track if we've already sent the disconnecting message to avoid duplicates
     const hasSentDisconnecting = useRef(false);
 
+    // Track if we're in a reconnection state (between beforeunload and reconnect)
+    const [isReconnecting, setIsReconnecting] = useState(false);
+
     // Send disconnecting message before page unload to preserve session for reconnection
     useEffect(() => {
         if (!isSmartTV || !slaveId) return;
@@ -21,6 +24,9 @@ const SmartTVScreen: React.FC = observer(() => {
             // Only send once to avoid duplicate messages
             if (hasSentDisconnecting.current) return;
             hasSentDisconnecting.current = true;
+
+            // Set reconnecting state to show loading UI
+            setIsReconnecting(true);
 
             // Close the WebSocket to ensure the server properly handles the disconnect
             // This is critical for the session to be preserved for reconnection
@@ -41,7 +47,24 @@ const SmartTVScreen: React.FC = observer(() => {
         };
     }, [isSmartTV, slaveId]);
 
+    // Clear reconnecting state when connection is restored
+    useEffect(() => {
+        if (isRemoteMasterConnected && isReconnecting) {
+            setIsReconnecting(false);
+        }
+    }, [isRemoteMasterConnected, isReconnecting]);
+
     const renderContent = () => {
+        // Show reconnecting state when slave is refreshing (between beforeunload and reconnect)
+        if (isReconnecting) {
+            return (
+                <Box sx={{textAlign: 'center'}}>
+                    <CircularProgress sx={{mb: 2}}/>
+                    <Typography variant="h6">{t('smartTV.reconnecting') || 'Reconnecting...'}</Typography>
+                </Box>
+            );
+        }
+
         if (isRemoteMasterConnected) {
             return (
                 <Box sx={{textAlign: 'center', color: 'success.main'}}>
