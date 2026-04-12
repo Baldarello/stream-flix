@@ -223,8 +223,8 @@ const Chat: React.FC = observer(() => {
                       secondaryAction={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {p.id === myClientId ? (
-                            <Tooltip title={t('profile.changeName') || 'Change name'}>
-                              <IconButton edge="end" aria-label={t('profile.changeName') || 'Change name'} size="small" onClick={() => handleNameChangeClick({ id: p.id, name: p.name })}>
+                            <Tooltip title={t('profileDrawer.changeName') || 'Change name'}>
+                              <IconButton edge="end" aria-label={t('profileDrawer.changeName') || 'Change name'} size="small" onClick={() => handleNameChangeClick({ id: p.id, name: p.name })}>
                                 <EditIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
@@ -393,7 +393,7 @@ const Chat: React.FC = observer(() => {
         aria-labelledby="name-edit-dialog-title"
       >
         <DialogTitle id="name-edit-dialog-title">
-          {t('profile.changeName') || 'Change Name'}
+          {t('profileDrawer.changeName') || 'Change Name'}
         </DialogTitle>
         <DialogContent>
           <TextField
