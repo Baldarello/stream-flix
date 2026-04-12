@@ -253,7 +253,7 @@ const AppContent: React.FC = observer(() => {
                 open={mediaStore.isSyncConflictModalOpen}
                 onClose={() => mediaStore.closeSyncConflictModal()}
                 conflictData={mediaStore.syncConflictData}
-                onMerge={(choices) => mediaStore.mergeLocalAndRemote(choices)}
+                onMerge={(choices, deletedIds) => mediaStore.mergeLocalAndRemote(choices, deletedIds)}
                 onOverwriteLocal={() => mediaStore.overwriteLocalWithRemote()}
                 onOverwriteRemote={() => mediaStore.overwriteRemoteWithLocal()}
                 onCancel={() => mediaStore.cancelSyncAndLogout()}

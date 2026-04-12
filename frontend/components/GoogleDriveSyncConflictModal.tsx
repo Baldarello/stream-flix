@@ -6,12 +6,14 @@ import {
     Button,
     Card,
     CardContent,
+    Checkbox,
     Chip,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
+    FormControlLabel,
     IconButton,
     LinearProgress,
     List,
@@ -27,6 +29,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 
 interface ShowMergeChoice {
     id: number;
@@ -35,6 +39,7 @@ interface ShowMergeChoice {
     myListAction: 'local' | 'remote' | 'both' | 'none';
     linksAction: 'local' | 'remote' | 'both';
     progressAction: 'local' | 'remote' | 'both';
+    deleteShow: boolean;
     localLinkCount: number;
     remoteLinkCount: number;
     localProgressCount: number;
@@ -50,7 +55,7 @@ interface GoogleDriveSyncConflictModalProps {
         mediaLinks: { local: any[]; remote: any[] };
         episodeProgress: { local: any[]; remote: any[] };
     } | null;
-    onMerge: (choices: ShowMergeChoice[]) => void;
+    onMerge: (choices: ShowMergeChoice[], deletedIds: number[]) => void;
     onOverwriteLocal: () => void;
     onOverwriteRemote: () => void;
     onCancel: () => void;
@@ -137,6 +142,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                 myListAction,
                 linksAction,
                 progressAction,
+                deleteShow: false,
                 localLinkCount: localLinks.length,
                 remoteLinkCount: remoteLinks.length,
                 localProgressCount: localProgress.length,
@@ -155,7 +161,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
 
     // Stats
     const stats = useMemo(() => {
-        if (!showChoices.length) return { total: 0, withConflicts: 0, localOnly: 0, remoteOnly: 0 };
+        if (!showChoices.length) return { total: 0, withConflicts: 0, localOnly: 0, remoteOnly: 0, toDelete: 0 };
 
         const withConflicts = showChoices.filter(s =>
             s.myListAction === 'both' || s.linksAction === 'both' || s.progressAction === 'both'
@@ -166,8 +172,9 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
         const remoteOnly = showChoices.filter(s =>
             s.myListAction === 'remote' && s.linksAction === 'remote' && s.progressAction === 'remote'
         ).length;
+        const toDelete = showChoices.filter(s => s.deleteShow).length;
 
-        return { total: showChoices.length, withConflicts, localOnly, remoteOnly };
+        return { total: showChoices.length, withConflicts, localOnly, remoteOnly, toDelete };
     }, [showChoices]);
 
     // Initialize choices when opening the choose step
@@ -175,10 +182,19 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
         setChoices(showChoices.map(s => ({ ...s })));
     };
 
-    const updateChoice = (id: number, field: keyof Omit<ShowMergeChoice, 'id' | 'title' | 'mediaType' | 'localLinkCount' | 'remoteLinkCount' | 'localProgressCount' | 'remoteProgressCount'>, value: string) => {
+    const updateChoice = (id: number, field: keyof Omit<ShowMergeChoice, 'id' | 'title' | 'mediaType' | 'localLinkCount' | 'remoteLinkCount' | 'localProgressCount' | 'remoteProgressCount'>, value: any) => {
         setChoices(prev => prev.map(c => {
             if (c.id === id) {
                 return { ...c, [field]: value };
+            }
+            return c;
+        }));
+    };
+
+    const toggleDeleteShow = (id: number) => {
+        setChoices(prev => prev.map(c => {
+            if (c.id === id) {
+                return { ...c, deleteShow: !c.deleteShow };
             }
             return c;
         }));
@@ -211,6 +227,20 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
         })));
     };
 
+    const handleMarkLocalOnlyForDeletion = () => {
+        setChoices(showChoices.map(s => {
+            const isLocalOnly = s.myListAction === 'local' && s.linksAction === 'local' && s.progressAction === 'local';
+            return { ...s, deleteShow: isLocalOnly };
+        }));
+    };
+
+    const handleMarkRemoteOnlyForDeletion = () => {
+        setChoices(showChoices.map(s => {
+            const isRemoteOnly = s.myListAction === 'remote' && s.linksAction === 'remote' && s.progressAction === 'remote';
+            return { ...s, deleteShow: isRemoteOnly };
+        }));
+    };
+
     const getMediaTypeIcon = (type: 'movie' | 'tv') => {
         return type === 'movie' ? <MovieIcon fontSize="small" /> : <TvIcon fontSize="small" />;
     };
@@ -240,6 +270,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                 <Chip label={`Con conflitti: ${stats.withConflicts}`} color="warning" />
                 <Chip label={`Solo locale: ${stats.localOnly}`} color="success" />
                 <Chip label={`Solo remoto: ${stats.remoteOnly}`} color="info" />
+                {stats.toDelete > 0 && <Chip label={`Da eliminare: ${stats.toDelete}`} color="error" />}
             </Box>
 
             <List sx={{ maxHeight: 350, overflowY: 'auto' }}>
@@ -278,6 +309,8 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                 flexDirection: 'column',
                 alignItems: 'stretch',
                 py: 2,
+                bgcolor: choice.deleteShow ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
+                transition: 'background-color 0.2s',
             }}
         >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -286,10 +319,23 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                     <Typography variant="body1" fontWeight="bold">
                         {String(choice.title)}
                     </Typography>
+                    {choice.deleteShow && (
+                        <Chip size="small" label="ELIMINATO" color="error" sx={{ height: 20 }} />
+                    )}
                 </Box>
-                <Typography variant="caption" color="text.secondary">
-                    ID: {String(choice.id)}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="caption" color="text.secondary">
+                        ID: {String(choice.id)}
+                    </Typography>
+                    <Checkbox
+                        checked={choice.deleteShow}
+                        onChange={() => toggleDeleteShow(choice.id)}
+                        size="small"
+                        color="error"
+                        icon={<DeleteIcon />}
+                        checkedIcon={<DeleteSweepIcon />}
+                    />
+                </Box>
             </Box>
 
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
@@ -304,7 +350,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                             fullWidth
                             value={String(choice.myListAction)}
                             onChange={(e) => updateChoice(choice.id, 'myListAction', e.target.value)}
-                            disabled={choice.myListAction === 'none'}
+                            disabled={choice.deleteShow}
                         >
                             <MenuItem value="local">
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -343,6 +389,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                             fullWidth
                             value={String(choice.linksAction)}
                             onChange={(e) => updateChoice(choice.id, 'linksAction', e.target.value)}
+                            disabled={choice.deleteShow}
                         >
                             <MenuItem value="local">Locale ({String(choice.localLinkCount)})</MenuItem>
                             <MenuItem value="remote">Remoto ({String(choice.remoteLinkCount)})</MenuItem>
@@ -362,6 +409,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                             fullWidth
                             value={String(choice.progressAction)}
                             onChange={(e) => updateChoice(choice.id, 'progressAction', e.target.value)}
+                            disabled={choice.deleteShow}
                         >
                             <MenuItem value="local">Locale ({String(choice.localProgressCount)})</MenuItem>
                             <MenuItem value="remote">Remoto ({String(choice.remoteProgressCount)})</MenuItem>
@@ -375,6 +423,10 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
 
     const renderChooseStep = () => (
         <>
+            <Alert severity="info" sx={{ mb: 2 }}>
+                Seleziona per ogni show cosa prendere da dove. Puoi anche eliminare show che non vuoi mantenere.
+            </Alert>
+
             <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
                 <Button variant="outlined" size="small" onClick={handleTakeAllLocal}>
                     Prendi tutto da Locale
@@ -387,6 +439,27 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                 </Button>
             </Box>
 
+            <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+                <Button 
+                    variant="outlined" 
+                    size="small" 
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleMarkLocalOnlyForDeletion}
+                >
+                    Elimina show solo locali ({String(stats.localOnly)})
+                </Button>
+                <Button 
+                    variant="outlined" 
+                    size="small" 
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleMarkRemoteOnlyForDeletion}
+                >
+                    Elimina show solo remoti ({String(stats.remoteOnly)})
+                </Button>
+            </Box>
+
             <Divider sx={{ my: 1 }} />
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -395,6 +468,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
                 </Typography>
                 <Typography variant="caption" color="text.disabled">
                     {String(showChoices.length)} show
+                    {stats.toDelete > 0 && <span style={{ color: '#f44336' }}> ({String(stats.toDelete)} da eliminare)</span>}
                 </Typography>
             </Box>
 
@@ -412,7 +486,10 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
     const handleMerge = () => {
         // Use current choices (either user-modified or initialized from showChoices)
         const choicesToSend = choices.length > 0 ? choices : showChoices;
-        onMerge(choicesToSend);
+        // Filter out deleted shows (they will be handled separately in mediaStore)
+        const filteredChoices = choicesToSend.filter(c => !c.deleteShow);
+        const deletedIds = choicesToSend.filter(c => c.deleteShow).map(c => c.id);
+        onMerge(filteredChoices, deletedIds);
     };
 
     return (

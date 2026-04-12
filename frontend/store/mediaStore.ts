@@ -507,7 +507,7 @@ class MediaStore {
         myListAction: 'local' | 'remote' | 'both' | 'none';
         linksAction: 'local' | 'remote' | 'both';
         progressAction: 'local' | 'remote' | 'both';
-    }>) => {
+    }>, deletedIds: number[] = []) => {
         if (!this.syncConflictData || !this.googleUser?.accessToken) {
             this.closeSyncConflictModal();
             return;
@@ -681,6 +681,19 @@ class MediaStore {
             };
 
             await db.importData(mergedData);
+
+            // Delete shows marked for deletion
+            if (deletedIds.length > 0) {
+                console.log("Deleting shows:", deletedIds);
+                // Delete from myList
+                await db.myList.bulkDelete(deletedIds);
+                // Delete from cachedItems
+                await db.cachedItems.bulkDelete(deletedIds);
+                // Delete mediaLinks for these shows
+                await db.mediaLinks.where('mediaId').anyOf(deletedIds).delete();
+                // Delete episodeProgress for these shows
+                await db.episodeProgress.where('episodeId').anyOf(deletedIds).delete();
+            }
 
             // Backup merged data to drive
             const newFile = await this.backupToDrive(false);
