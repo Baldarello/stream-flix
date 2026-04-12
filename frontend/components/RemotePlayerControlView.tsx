@@ -247,7 +247,25 @@ const RemotePlayerControlView = observer(() => {
                 anchor="right"
                 open={isEpisodesDrawerOpen}
                 onClose={() => setIsEpisodesDrawerOpen(false)}
-                PaperProps={{sx: {width: {xs: '80vw', sm: 350}, bgcolor: 'background.paper'}}}
+                PaperProps={{
+                    sx: {
+                        width: {xs: '80vw', sm: 350},
+                        bgcolor: 'background.paper',
+                        pt: 'env(safe-area-inset-top)',
+                        pb: 'env(safe-area-inset-bottom)',
+                        pr: 'env(safe-area-inset-right)',
+                    }
+                }}
+                ModalProps={{
+                    BackdropProps: {
+                        sx: {
+                            pt: 'env(safe-area-inset-top)',
+                            pb: 'env(safe-area-inset-bottom)',
+                            pl: 'env(safe-area-inset-left)',
+                            pr: 'env(safe-area-inset-right)',
+                        }
+                    }
+                }}
             >
                 <Box sx={{p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                     <Typography variant="h6">{t('remote.player.episodes')}</Typography>
