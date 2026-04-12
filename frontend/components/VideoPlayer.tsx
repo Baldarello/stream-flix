@@ -511,18 +511,25 @@ const VideoPlayer: React.FC = observer(() => {
 
                         {/* Smart TV: Bottom Controls always visible (no Fade) */}
                         {isSmartTV && (
-                            <VideoControlsContainer
-                                playerState={playerState}
-                                handleSeek={handleSeek}
-                                videoRef={videoRef}
-                                handleRewind10={handleRewind10}
-                                handleTogglePlay={handleTogglePlay}
-                                handleForward10={handleForward10}
-                                handleSkipIntro={handleSkipIntro}
-                                handleVolumeChange={handleVolumeChange}
-                                handleDownload={handleDownload}
-                                handleToggleFullScreen={handleToggleFullScreen}
-                            />
+                            <Box sx={{
+                                px: 2,
+                                pt: 2,
+                                pb: 'calc(1rem + env(safe-area-inset-bottom))',
+                                pointerEvents: 'auto'
+                            }}>
+                                <VideoControlsContainer
+                                    playerState={playerState}
+                                    handleSeek={handleSeek}
+                                    videoRef={videoRef}
+                                    handleRewind10={handleRewind10}
+                                    handleTogglePlay={handleTogglePlay}
+                                    handleForward10={handleForward10}
+                                    handleSkipIntro={handleSkipIntro}
+                                    handleVolumeChange={handleVolumeChange}
+                                    handleDownload={handleDownload}
+                                    handleToggleFullScreen={handleToggleFullScreen}
+                                />
+                            </Box>
                         )}
 
                         {/* Non-Smart TV: Bottom Controls with Fade */}

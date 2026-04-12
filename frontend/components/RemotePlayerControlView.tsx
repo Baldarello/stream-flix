@@ -387,8 +387,10 @@ const RemotePlayerControlView = observer(() => {
                 </Box>
             </Box>
 
-            <Box sx={{p: {xs: 2, sm: 3}, flex: 1, display: 'flex', flexDirection: 'column'}}>
-                {/* Progress Bar - at the top of the control section */}
+            {/* Controls section - pushed to bottom with flex layout */}
+            <Box
+                sx={{p: {xs: 2, sm: 3}, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', flex: 1}}>
+                {/* Progress Bar - at the bottom */}
                 <Box sx={{mb: 4}}>
                     <Slider
                         className="video-player-slider"
@@ -410,71 +412,67 @@ const RemotePlayerControlView = observer(() => {
                     </Box>
                 </Box>
 
-                {/* Main Controls - at the bottom */}
-                <Box sx={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                    <Stack direction="row" spacing={{xs: 2, sm: 4}} gap={"0.25rem"}
-                           sx={{justifyContent: 'center', alignItems: 'center', mb: 5}}>
-                        {isEpisode && (
-                            <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode}
-                                        aria-label={t('remote.player.previousEpisode')} sx={{}}>
-                                <SkipPreviousIcon fontSize="large"/>
-                            </IconButton>
-                        )}
-                        <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{}}>
-                            <Replay10 fontSize="large"/>
+                {/* Main Controls */}
+                <Stack direction="row" spacing={{xs: 2, sm: 4}} gap={"0.25rem"}
+                       sx={{justifyContent: 'center', alignItems: 'center', mb: 3}}>
+                    {isEpisode && (
+                        <IconButton onClick={handlePlayPrevious} disabled={!remotePreviousEpisode}
+                                    aria-label={t('remote.player.previousEpisode')} sx={{}}>
+                            <SkipPreviousIcon fontSize="large"/>
                         </IconButton>
-                        <IconButton
-                            onClick={handleTogglePlay}
-                            aria-label={isPlaying ? t('remote.player.pause') : t('remote.player.play')}
-                            sx={{
-                                bgcolor: 'white', color: 'black', transform: "scale(1.5)",
-                                '&:hover': {bgcolor: 'grey.300'}
-                            }}
-                        >
-                            {isPlaying ? <PauseIcon fontSize="large"/> : <PlayArrowIcon fontSize="large"/>}
+                    )}
+                    <IconButton onClick={handleSeekBackward} aria-label={t('remote.player.seekBackward')} sx={{}}>
+                        <Replay10 fontSize="large"/>
+                    </IconButton>
+                    <IconButton
+                        onClick={handleTogglePlay}
+                        aria-label={isPlaying ? t('remote.player.pause') : t('remote.player.play')}
+                        sx={{
+                            bgcolor: 'white', color: 'black', transform: "scale(1.5)",
+                            '&:hover': {bgcolor: 'grey.300'}
+                        }}
+                    >
+                        {isPlaying ? <PauseIcon fontSize="large"/> : <PlayArrowIcon fontSize="large"/>}
+                    </IconButton>
+                    <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{}}>
+                        <Forward10 fontSize="large"/>
+                    </IconButton>
+                    {isEpisode && (
+                        <IconButton onClick={handlePlayNext} disabled={!remoteNextEpisode}
+                                    aria-label={t('remote.player.nextEpisode')} sx={{}}>
+                            <SkipNextIcon fontSize="large"/>
                         </IconButton>
-                        <IconButton onClick={handleSeekForward} aria-label={t('remote.player.seekForward')} sx={{}}>
-                            <Forward10 fontSize="large"/>
-                        </IconButton>
-                        {isEpisode && (
-                            <IconButton onClick={handlePlayNext} disabled={!remoteNextEpisode}
-                                        aria-label={t('remote.player.nextEpisode')} sx={{}}>
-                                <SkipNextIcon fontSize="large"/>
-                            </IconButton>
-                        )}
-                    </Stack>
+                    )}
+                </Stack>
 
-                    {/* Secondary Controls */}
-                    <Stack direction="row" spacing={2} sx={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mt: 4,
-                        height: '48px' /* Reserve space for buttons */
-                    }}>
+                {/* Secondary Controls */}
+                <Stack direction="row" spacing={2} sx={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
+                    <Button
+                        variant="contained"
+                        color="inherit"
+                        onClick={handleSkipIntro}
+                        sx={{
+                            bgcolor: 'rgba(255, 255, 255, 0.8)',
+                            color: 'black',
+                            '&:hover': {bgcolor: 'white'},
+                        }}
+                    >
+                        {t('remote.player.skipIntro')}
+                    </Button>
+                    {isSeries && (
                         <Button
-                            variant="contained"
-                            color="inherit"
-                            onClick={handleSkipIntro}
-                            sx={{
-                                bgcolor: 'rgba(255, 255, 255, 0.8)',
-                                color: 'black',
-                                '&:hover': {bgcolor: 'white'},
-                            }}
+                            variant="outlined"
+                            startIcon={<ListAltIcon/>}
+                            onClick={() => setIsEpisodesDrawerOpen(true)}
+                            sx={{borderColor: 'rgba(255,255,255,0.7)', color: 'white'}}
                         >
-                            {t('remote.player.skipIntro')}
+                            {t('remote.player.episodes')}
                         </Button>
-                        {isSeries && (
-                            <Button
-                                variant="outlined"
-                                startIcon={<ListAltIcon/>}
-                                onClick={() => setIsEpisodesDrawerOpen(true)}
-                                sx={{borderColor: 'rgba(255,255,255,0.7)', color: 'white'}}
-                            >
-                                {t('remote.player.episodes')}
-                            </Button>
-                        )}
-                    </Stack>
-                </Box>
+                    )}
+                </Stack>
             </Box>
 
             {isSeries && renderEpisodesDrawer()}
