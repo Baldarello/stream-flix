@@ -393,6 +393,13 @@ export const it = {
         "preferredLabelSet": "Etichetta '{label}' impostata come preferita.",
         "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'.",
         "linkUpdatedSuccess": "Link aggiornato con successo.",
-        "linksFromDomainDeletedSuccess": "{count} link da {domain} eliminati con successo."
+        "linksFromDomainDeletedSuccess": "{count} link da {domain} eliminati con successo.",
+        "syncMergeComplete": "Unione completata con successo!",
+        "syncMergeError": "Errore durante l'unione dei dati: {error}",
+        "syncOverwriteLocalComplete": "Dati locali sovrascritti con quelli remoti.",
+        "syncOverwriteLocalError": "Errore durante la sovrascrittura locale: {error}",
+        "syncOverwriteRemoteComplete": "Dati remoti sovrascritti con quelli locali.",
+        "syncOverwriteRemoteError": "Errore durante la sovrascrittura remota: {error}",
+        "syncCancelled": "Sincronizzazione annullata. Logout effettuato."
     }
 }

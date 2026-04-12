@@ -208,6 +208,16 @@ class MediaStore {
     isSyncing = false;
     private backupDebounceTimer: number | null = null;
 
+    // Sync Conflict Modal State
+    isSyncConflictModalOpen = false;
+    syncConflictData: {
+        myList: { local: number[]; remote: number[] };
+        shows: Map<number, { local: any; remote: any }>;
+        mediaLinks: { local: any[]; remote: any[] };
+        episodeProgress: { local: any[]; remote: any[] };
+    } | null = null;
+    isProcessingSyncConflict = false;
+
     // Translation State
     language: Language = 'it';
 
@@ -404,10 +414,68 @@ class MediaStore {
                     return; // Exit early
                 }
 
-                // A newer remote file exists, restore it.
+                // A newer remote file exists - compare with local to detect conflicts
+                const remoteData = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
+
+                // Load all local data
+                const [localMyList, localCachedItems, localMediaLinks, localEpisodeProgress] = await Promise.all([
+                    db.myList.toArray(),
+                    db.cachedItems.toArray(),
+                    db.mediaLinks.toArray(),
+                    db.episodeProgress.toArray(),
+                ]);
+
+                const localMyListIds = localMyList.map((item: { id: number }) => item.id);
+                const remoteMyListIds = remoteData.myList || [];
+
+                // Check for significant differences
+                const hasLocalData = localMyListIds.length > 0 || localMediaLinks.length > 0;
+                const hasRemoteData = (remoteMyListIds.length > 0) || (remoteData.mediaLinks?.length > 0);
+
+                // Detect if there's a real conflict (different data in both)
+                const localOnlyItems = localMyListIds.filter((id: number) => !remoteMyListIds.includes(id));
+                const remoteOnlyItems = remoteMyListIds.filter((id: number) => !localMyListIds.includes(id));
+                const hasConflict = (localOnlyItems.length > 0 && hasRemoteData) || (remoteOnlyItems.length > 0 && hasLocalData);
+
+                if (hasConflict && hasLocalData && hasRemoteData) {
+                    // Build shows map for detailed comparison
+                    const localItemsMap = new Map(localCachedItems.map((item: any) => [item.id, item]));
+                    const remoteItemsMap = new Map((remoteData.cachedItems || []).map((item: any) => [item.id, item]));
+
+                    const showsMap = new Map<number, { local: any; remote: any }>();
+                    const allIds = new Set([...localItemsMap.keys(), ...remoteItemsMap.keys()]);
+                    allIds.forEach(id => {
+                        showsMap.set(id, {
+                            local: localItemsMap.get(id),
+                            remote: remoteItemsMap.get(id),
+                        });
+                    });
+
+                    // Show conflict modal
+                    runInAction(() => {
+                        this.syncConflictData = {
+                            myList: {
+                                local: localMyListIds,
+                                remote: remoteMyListIds,
+                            },
+                            shows: showsMap,
+                            mediaLinks: {
+                                local: localMediaLinks,
+                                remote: remoteData.mediaLinks || [],
+                            },
+                            episodeProgress: {
+                                local: localEpisodeProgress,
+                                remote: remoteData.episodeProgress || [],
+                            },
+                        };
+                        this.isSyncConflictModalOpen = true;
+                    });
+                    return; // Exit early - wait for user to choose
+                }
+
+                // No conflict or one side is empty - proceed with simple restore
                 this.showSnackbar('notifications.restoringFromCloud', 'info', true);
-                const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
-                await db.importData(data);
+                await db.importData(remoteData);
                 await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 setTimeout(() => window.location.reload(), 2000);
@@ -427,6 +495,316 @@ class MediaStore {
                 this.isSyncing = false;
             });
         }
+    };
+
+    closeSyncConflictModal = () => {
+        this.isSyncConflictModalOpen = false;
+        this.syncConflictData = null;
+    };
+
+    mergeLocalAndRemote = async (choices?: Array<{
+        id: number;
+        myListAction: 'local' | 'remote' | 'both' | 'none';
+        linksAction: 'local' | 'remote' | 'both';
+        progressAction: 'local' | 'remote' | 'both';
+    }>) => {
+        if (!this.syncConflictData || !this.googleUser?.accessToken) {
+            this.closeSyncConflictModal();
+            return;
+        }
+
+        runInAction(() => {
+            this.isProcessingSyncConflict = true;
+        });
+
+        try {
+            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
+
+            // If no choices provided, do automatic merge (keep everything)
+            if (!choices || choices.length === 0) {
+                // Automatic merge: keep all unique items from both
+                const mergedMyList = [...new Set([...myList.local, ...myList.remote])];
+
+                // For shows, prefer local if it exists, otherwise use remote
+                const mergedShows: any[] = [];
+                shows.forEach((data) => {
+                    if (data.local) {
+                        mergedShows.push(data.local);
+                    } else if (data.remote) {
+                        mergedShows.push(data.remote);
+                    }
+                });
+
+                // For links, combine all unique links (by URL)
+                const mergedLinksMap = new Map<string, any>();
+                [...mediaLinks.local, ...mediaLinks.remote].forEach((link: any) => {
+                    const key = `${link.mediaId}|${link.url}`;
+                    if (!mergedLinksMap.has(key)) {
+                        mergedLinksMap.set(key, link);
+                    }
+                });
+                const mergedLinks = Array.from(mergedLinksMap.values());
+
+                // For episode progress, keep the one with more recent timestamp
+                const mergedProgressMap = new Map<number, any>();
+                [...episodeProgress.local, ...episodeProgress.remote].forEach((progress: any) => {
+                    const existing = mergedProgressMap.get(progress.episodeId);
+                    if (!existing || (progress.lastWatchedAt && existing.lastWatchedAt && progress.lastWatchedAt > existing.lastWatchedAt)) {
+                        mergedProgressMap.set(progress.episodeId, progress);
+                    }
+                });
+                const mergedProgress = Array.from(mergedProgressMap.values());
+
+                // Import merged data
+                const mergedData = {
+                    myList: mergedMyList.map((id, index) => ({id, order: index})),
+                    cachedItems: mergedShows,
+                    mediaLinks: mergedLinks,
+                    episodeProgress: mergedProgress,
+                };
+
+                await db.importData(mergedData);
+
+                // Backup merged data to drive
+                const newFile = await this.backupToDrive(false);
+                if (newFile) {
+                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+                }
+
+                this.showSnackbar('notifications.syncMergeComplete', 'success', true);
+                this.closeSyncConflictModal();
+                setTimeout(() => window.location.reload(), 2000);
+                return;
+            }
+
+            // Interactive merge based on user choices
+            const finalMyList: number[] = [];
+            const finalShows: any[] = [];
+            const finalLinks: any[] = [];
+            const finalProgress: any[] = [];
+
+            // Process each choice
+            choices.forEach((choice) => {
+                const showData = shows.get(choice.id);
+                if (!showData) return;
+
+                // My List
+                if (choice.myListAction === 'local' || choice.myListAction === 'both') {
+                    if (!finalMyList.includes(choice.id)) {
+                        finalMyList.push(choice.id);
+                    }
+                }
+                if (choice.myListAction === 'remote' || choice.myListAction === 'both') {
+                    if (!finalMyList.includes(choice.id)) {
+                        finalMyList.push(choice.id);
+                    }
+                }
+
+                // Shows - add the show from the chosen side
+                if (choice.myListAction !== 'none') {
+                    if (choice.myListAction === 'local' || choice.myListAction === 'both') {
+                        if (showData.local) {
+                            finalShows.push(showData.local);
+                        }
+                    }
+                    if (choice.myListAction === 'remote' || choice.myListAction === 'both') {
+                        if (showData.remote && !finalShows.some(s => s.id === showData.remote.id)) {
+                            finalShows.push(showData.remote);
+                        }
+                    }
+                }
+
+                // Links based on choice
+                const localLinks = mediaLinks.local.filter(l => {
+                    if (showData.local?.seasons) {
+                        return showData.local.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                    }
+                    return l.mediaId === choice.id;
+                });
+                const remoteLinks = mediaLinks.remote.filter(l => {
+                    if (showData.remote?.seasons) {
+                        return showData.remote.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                    }
+                    return l.mediaId === choice.id;
+                });
+
+                if (choice.linksAction === 'local') {
+                    finalLinks.push(...localLinks);
+                } else if (choice.linksAction === 'remote') {
+                    finalLinks.push(...remoteLinks);
+                } else { // both
+                    finalLinks.push(...localLinks, ...remoteLinks);
+                }
+
+                // Progress based on choice
+                const localProgress = episodeProgress.local.filter(p => {
+                    if (!showData.local?.seasons) return false;
+                    return showData.local.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                });
+                const remoteProgress = episodeProgress.remote.filter(p => {
+                    if (!showData.remote?.seasons) return false;
+                    return showData.remote.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                });
+
+                if (choice.progressAction === 'local') {
+                    finalProgress.push(...localProgress);
+                } else if (choice.progressAction === 'remote') {
+                    finalProgress.push(...remoteProgress);
+                } else { // both
+                    // For both, merge with timestamp check
+                    const progressMap = new Map<number, any>();
+                    [...localProgress, ...remoteProgress].forEach(p => {
+                        const existing = progressMap.get(p.episodeId);
+                        if (!existing || (p.lastWatchedAt && existing.lastWatchedAt && p.lastWatchedAt > existing.lastWatchedAt)) {
+                            progressMap.set(p.episodeId, p);
+                        }
+                    });
+                    finalProgress.push(...progressMap.values());
+                }
+            });
+
+            // Remove duplicate links by URL
+            const uniqueLinksMap = new Map<string, any>();
+            finalLinks.forEach(link => {
+                const key = `${link.mediaId}|${link.url}`;
+                if (!uniqueLinksMap.has(key)) {
+                    uniqueLinksMap.set(key, link);
+                }
+            });
+
+            // Import merged data
+            const mergedData = {
+                myList: finalMyList.map((id, index) => ({id, order: index})),
+                cachedItems: finalShows,
+                mediaLinks: Array.from(uniqueLinksMap.values()),
+                episodeProgress: finalProgress,
+            };
+
+            await db.importData(mergedData);
+
+            // Backup merged data to drive
+            const newFile = await this.backupToDrive(false);
+            if (newFile) {
+                await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+            }
+
+            this.showSnackbar('notifications.syncMergeComplete', 'success', true);
+            this.closeSyncConflictModal();
+            setTimeout(() => window.location.reload(), 2000);
+        } catch (error) {
+            console.error("Error merging data:", error);
+            this.showSnackbar('notifications.syncMergeError', 'error', true, {error: (error as Error).message});
+        } finally {
+            runInAction(() => {
+                this.isProcessingSyncConflict = false;
+            });
+        }
+    };
+
+    overwriteLocalWithRemote = async () => {
+        if (!this.syncConflictData || !this.googleUser?.accessToken) {
+            this.closeSyncConflictModal();
+            return;
+        }
+
+        runInAction(() => {
+            this.isProcessingSyncConflict = true;
+        });
+
+        try {
+            // Get the remote file ID again for updating lastSyncFileId
+            const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
+
+            // Build the remote data structure from conflict data
+            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
+
+            const remoteData = {
+                myList: myList.remote.map((id, index) => ({id, order: index})),
+                cachedItems: Array.from(shows.values())
+                    .filter(s => s.remote)
+                    .map(s => s.remote),
+                mediaLinks: mediaLinks.remote,
+                episodeProgress: episodeProgress.remote,
+            };
+
+            await db.importData(remoteData);
+
+            if (remoteFile) {
+                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
+            }
+
+            this.showSnackbar('notifications.syncOverwriteLocalComplete', 'success', true);
+            this.closeSyncConflictModal();
+            setTimeout(() => window.location.reload(), 2000);
+        } catch (error) {
+            console.error("Error overwriting local data:", error);
+            this.showSnackbar('notifications.syncOverwriteLocalError', 'error', true, {error: (error as Error).message});
+        } finally {
+            runInAction(() => {
+                this.isProcessingSyncConflict = false;
+            });
+        }
+    };
+
+    overwriteRemoteWithLocal = async () => {
+        if (!this.syncConflictData || !this.googleUser?.accessToken) {
+            this.closeSyncConflictModal();
+            return;
+        }
+
+        runInAction(() => {
+            this.isProcessingSyncConflict = true;
+        });
+
+        try {
+            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
+
+            // Build local data structure
+            const localData = {
+                myList: myList.local.map((id, index) => ({id, order: index})),
+                cachedItems: Array.from(shows.values())
+                    .filter(s => s.local)
+                    .map(s => s.local),
+                mediaLinks: mediaLinks.local,
+                episodeProgress: episodeProgress.local,
+            };
+
+            // Backup local data to drive (overwrites remote)
+            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
+            const data: { [key: string]: any[] } = {};
+            for (const tableName of tablesToBackup) {
+                if ((db as any)[tableName]) {
+                    data[tableName] = await (db as any)[tableName].toArray();
+                }
+            }
+
+            const newFile = await driveService.writeBackupFile(this.googleUser.accessToken, data);
+            await driveService.deleteOldBackups(this.googleUser.accessToken);
+
+            if (newFile) {
+                await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+            }
+
+            this.showSnackbar('notifications.syncOverwriteRemoteComplete', 'success', true);
+            this.closeSyncConflictModal();
+        } catch (error) {
+            console.error("Error overwriting remote data:", error);
+            this.showSnackbar('notifications.syncOverwriteRemoteError', 'error', true, {error: (error as Error).message});
+        } finally {
+            runInAction(() => {
+                this.isProcessingSyncConflict = false;
+            });
+        }
+    };
+
+    cancelSyncAndLogout = () => {
+        // Close modal and sign out
+        this.closeSyncConflictModal();
+        // Import dynamically to avoid circular dependency
+        import('../services/googleAuthService').then(({handleSignOut}) => {
+            handleSignOut();
+        });
+        this.showSnackbar('notifications.syncCancelled', 'info', true);
     };
 
     backupToDrive = async (showNotification = true): Promise<driveService.DriveFile | undefined> => {

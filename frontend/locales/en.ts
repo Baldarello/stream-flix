@@ -392,6 +392,13 @@ export const en = {
         "preferredLabelSet": "Label '{label}' set as preferred.",
         "preferredLabelRemoved": "Preference removed for label '{label}'.",
         "linkUpdatedSuccess": "Link updated successfully.",
-        "linksFromDomainDeletedSuccess": "{count} links from {domain} deleted successfully."
+        "linksFromDomainDeletedSuccess": "{count} links from {domain} deleted successfully.",
+        "syncMergeComplete": "Merge completed successfully!",
+        "syncMergeError": "Error merging data: {error}",
+        "syncOverwriteLocalComplete": "Local data overwritten with remote data.",
+        "syncOverwriteLocalError": "Error overwriting local data: {error}",
+        "syncOverwriteRemoteComplete": "Remote data overwritten with local data.",
+        "syncOverwriteRemoteError": "Error overwriting remote data: {error}",
+        "syncCancelled": "Sync cancelled. Logged out."
     }
 }
