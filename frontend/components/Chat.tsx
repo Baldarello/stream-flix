@@ -1,25 +1,25 @@
-import React, {useEffect, useRef, useState, ChangeEvent} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  TextField,
-  Tooltip,
-  Typography
+    Avatar,
+    Box,
+    Button,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Divider,
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    Paper,
+    TextField,
+    Tooltip,
+    Typography
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ImageIcon from '@mui/icons-material/Image';

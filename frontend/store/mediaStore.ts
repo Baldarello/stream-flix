@@ -2057,6 +2057,30 @@ class MediaStore {
         return null;
     }
 
+    // FIX: Find the first unwatched episode for a series, or return the first episode if all are watched
+    findFirstUnwatchedEpisode(item: MediaItem): Episode | null {
+        if (!item.seasons) return null;
+
+        for (const season of item.seasons) {
+            if (season.episodes) {
+                for (const episode of season.episodes) {
+                    const progress = this.episodeProgress.get(episode.id);
+                    if (!progress?.watched) {
+                        return episode;
+                    }
+                }
+            }
+        }
+
+        // All episodes watched - return the first episode of the first season
+        const firstSeason = item.seasons[0];
+        if (firstSeason?.episodes?.length > 0) {
+            return firstSeason.episodes[0];
+        }
+
+        return null;
+    }
+
     private hasLinks(showId: number): boolean {
         const item = this.cachedItems.get(showId);
         if (!item || !item.seasons) return false;

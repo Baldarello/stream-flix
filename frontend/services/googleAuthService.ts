@@ -10,116 +10,130 @@ let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 
 
 const tryRestoringSession = async () => {
-  const sessionData = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (!sessionData) {
-    return;
-  }
-
-  try {
-    const user: GoogleUser = JSON.parse(sessionData);
-    if (!user || !user.accessToken) {
-      throw new Error("Invalid session data in localStorage.");
+    const sessionData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (!sessionData) {
+        return;
     }
 
-    // Validate token by fetching user info
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { 'Authorization': `Bearer ${user.accessToken}` }
-    });
+    try {
+        const user: GoogleUser = JSON.parse(sessionData);
+        if (!user || !user.accessToken) {
+            throw new Error("Invalid session data in localStorage.");
+        }
 
-    if (response.ok) {
-      // Token is valid, set user. Sync will be triggered from the main App component.
-      await mediaStore.setGoogleUser(user);
-    } else {
-      // Token is invalid/expired
-      throw new Error("Token validation failed.");
+        // Validate token by fetching user info
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {'Authorization': `Bearer ${user.accessToken}`}
+        });
+
+        if (response.ok) {
+            // Token is valid, set user. Sync will be triggered from the main App component.
+            await mediaStore.setGoogleUser(user);
+        } else {
+            // Token is invalid/expired - parse Google error for better logging
+            let errorDetail = "Token validation failed";
+            try {
+                const errorData = await response.json();
+                errorDetail = errorData.error_description || errorData.error || errorDetail;
+            } catch {
+                // ignore parse errors
+            }
+            console.warn("Google session expired or invalid:", errorDetail);
+            // Clean up invalid data and silently proceed
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+    } catch (error) {
+        console.warn("Could not restore session:", error);
+        // Clean up invalid data
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
-  } catch (error) {
-    console.warn("Could not restore session:", error);
-    // Clean up invalid data
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-  }
 };
 
 
 export const initGoogleAuth = async () => {
-  // If the client ID is not configured, skip all Google authentication logic.
-  if (!GOOGLE_CLIENT_ID) {
-    console.warn("Google Client ID is not configured. Skipping Google Auth initialization.");
-    return;
-  }
-  
-  if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-    // Wait a moment for the GSI script to load from index.html
-    await new Promise(resolve => setTimeout(resolve, 500));
-    if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-      console.error("Google Identity Services library still not loaded after delay.");
-      return;
+    // If the client ID is not configured, skip all Google authentication logic.
+    if (!GOOGLE_CLIENT_ID) {
+        console.warn("Google Client ID is not configured. Skipping Google Auth initialization.");
+        return;
     }
-  }
-  
-  // Attempt to restore session before initializing the client for new logins.
-  await tryRestoringSession();
 
-
-  try {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file',
-        callback: async (tokenResponse) => {
-          if (tokenResponse && tokenResponse.access_token) {
-            // Fetch user profile after getting the token
-            try {
-              const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
-              });
-              if (!response.ok) throw new Error('Failed to fetch user info');
-              const profile = await response.json();
-              
-              const user: GoogleUser = {
-                  name: profile.name,
-                  email: profile.email,
-                  picture: profile.picture,
-                  accessToken: tokenResponse.access_token,
-              };
-              
-              // Persist session to localStorage
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
-              
-              await mediaStore.setGoogleUser(user);
-              await mediaStore.synchronizeWithDrive();
-              
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-                mediaStore.showSnackbar("Failed to fetch user profile.", "error");
-            }
-          } else {
-              console.error("Token response is missing access_token", tokenResponse);
-              mediaStore.showSnackbar("Authentication failed: No access token received.", "error");
-          }
-        },
-        error_callback: (error) => {
-            console.error("Google Auth Error:", error);
-            mediaStore.showSnackbar(`Authentication Error: ${error.type}`, "error");
+    if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+        // Wait a moment for the GSI script to load from index.html
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+            console.error("Google Identity Services library still not loaded after delay.");
+            return;
         }
-      });
-  } catch (error) {
-      console.error("Failed to initialize Google Token Client:", error);
-  }
+    }
+
+    // Attempt to restore session before initializing the client for new logins.
+    await tryRestoringSession();
+
+
+    try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: [
+                'https://www.googleapis.com/auth/drive.appdata',
+                'https://www.googleapis.com/auth/drive.file',
+                'https://www.googleapis.com/auth/userinfo.profile',
+                'https://www.googleapis.com/auth/userinfo.email'
+            ].join(' '),
+            callback: async (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                    // Fetch user profile after getting the token
+                    try {
+                        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                            headers: {'Authorization': `Bearer ${tokenResponse.access_token}`}
+                        });
+                        if (!response.ok) throw new Error('Failed to fetch user info');
+                        const profile = await response.json();
+
+                        const user: GoogleUser = {
+                            name: profile.name,
+                            email: profile.email,
+                            picture: profile.picture,
+                            accessToken: tokenResponse.access_token,
+                        };
+
+                        // Persist session to localStorage
+                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
+
+                        await mediaStore.setGoogleUser(user);
+                        await mediaStore.synchronizeWithDrive();
+
+                    } catch (error) {
+                        console.error("Error fetching user profile:", error);
+                        mediaStore.showSnackbar("Failed to fetch user profile.", "error");
+                    }
+                } else {
+                    console.error("Token response is missing access_token", tokenResponse);
+                    mediaStore.showSnackbar("Authentication failed: No access token received.", "error");
+                }
+            },
+            error_callback: (error) => {
+                console.error("Google Auth Error:", error);
+                mediaStore.showSnackbar(`Authentication Error: ${error.type}`, "error");
+            }
+        });
+    } catch (error) {
+        console.error("Failed to initialize Google Token Client:", error);
+    }
 };
 
 export const handleSignIn = () => {
-  if (!tokenClient) {
-    console.error("Google Auth not initialized.");
-    mediaStore.showSnackbar("Google Authentication is not ready.", "error");
-    return;
-  }
-  // Prompt the user to select an account and grant access
-  tokenClient.requestAccessToken();
+    if (!tokenClient) {
+        console.error("Google Auth not initialized.");
+        mediaStore.showSnackbar("Google Authentication is not ready.", "error");
+        return;
+    }
+    // Prompt the user to select an account and grant access
+    tokenClient.requestAccessToken();
 };
 
 export const handleSignOut = () => {
     const user = mediaStore.googleUser;
-    
+
     // Clear the persisted session
     localStorage.removeItem(LOCAL_STORAGE_KEY);
 
@@ -136,30 +150,37 @@ export const handleSignOut = () => {
 // Define google types globally as they come from a script tag
 // This avoids needing to install a full @types/google.accounts.id package
 declare global {
-  namespace google {
-    namespace accounts {
-      namespace id {
-        function initialize(config: any): void;
-        function renderButton(parent: HTMLElement, options: any): void;
-        function prompt(): void;
-      }
-      namespace oauth2 {
-        function initTokenClient(config: TokenClientConfig): TokenClient;
-        function revoke(token: string, callback: () => void): void;
-        interface TokenClient {
-          requestAccessToken(overrideConfig?: { prompt: string }): void;
+    namespace google {
+        namespace accounts {
+            namespace id {
+                function initialize(config: any): void;
+
+                function renderButton(parent: HTMLElement, options: any): void;
+
+                function prompt(): void;
+            }
+            namespace oauth2 {
+                function initTokenClient(config: TokenClientConfig): TokenClient;
+
+                function revoke(token: string, callback: () => void): void;
+
+                interface TokenClient {
+                    requestAccessToken(overrideConfig?: { prompt: string }): void;
+                }
+
+                interface TokenClientConfig {
+                    client_id: string;
+                    scope: string;
+                    callback: (response: TokenResponse) => void;
+                    error_callback?: (error: any) => void;
+                }
+
+                interface TokenResponse {
+                    access_token: string;
+
+                    [key: string]: any;
+                }
+            }
         }
-        interface TokenClientConfig {
-          client_id: string;
-          scope: string;
-          callback: (response: TokenResponse) => void;
-          error_callback?: (error: any) => void;
-        }
-        interface TokenResponse {
-          access_token: string;
-          [key: string]: any;
-        }
-      }
     }
-  }
 }

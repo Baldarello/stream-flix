@@ -2,7 +2,6 @@ import React, {useCallback, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {
-    Box,
     Button,
     IconButton,
     List,
@@ -73,7 +72,7 @@ export interface VideoControlsProps {
     t: ReturnType<typeof useTranslations>;
 }
 
-const VideoControls: React.FC<VideoControlsProps> = observer(({
+const VideoControlsContainer: React.FC<VideoControlsProps> = observer(({
                                                                   playerState,
                                                                   handleSeek,
                                                                   videoRef,
@@ -237,4 +236,4 @@ const VideoControls: React.FC<VideoControlsProps> = observer(({
     );
 });
 
-export default VideoControls;
+export default VideoControlsContainer;

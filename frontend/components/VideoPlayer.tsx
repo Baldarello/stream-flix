@@ -5,7 +5,7 @@ import {AppBar, Box, Button, Fade, IconButton, Toolbar, Tooltip, Typography} fro
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Chat from './Chat.tsx';
 import EpisodesDrawer from './EpisodesDrawer.tsx';
-import VideoControls from './VideoControls.tsx';
+import VideoControlsContainer from './VideoControlsContainer.tsx';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -511,7 +511,7 @@ const VideoPlayer: React.FC = observer(() => {
 
                         {/* Smart TV: Bottom Controls always visible (no Fade) */}
                         {isSmartTV && (
-                            <VideoControls
+                            <VideoControlsContainer
                                 playerState={playerState}
                                 handleSeek={handleSeek}
                                 videoRef={videoRef}
@@ -534,7 +534,7 @@ const VideoPlayer: React.FC = observer(() => {
                                     pb: 'calc(1rem + env(safe-area-inset-bottom))',
                                     pointerEvents: 'auto'
                                 }}>
-                                    <VideoControls
+                                    <VideoControlsContainer
                                         playerState={playerState}
                                         handleSeek={handleSeek}
                                         videoRef={videoRef}
