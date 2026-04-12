@@ -408,6 +408,12 @@ const ProfileDrawer: React.FC = observer(() => {
                         <ListItemText primary={t('profileDrawer.history')}/>
                     </ListItemButton>
                 </ListItem>
+                <ListItem disablePadding>
+                    <ListItemButton onClick={() => { mediaStore.setActiveView('Libreria'); toggleProfileDrawer(false); }}>
+                        <ListItemIcon><EditIcon/></ListItemIcon>
+                        <ListItemText primary={t('profileDrawer.manageLibrary')}/>
+                    </ListItemButton>
+                </ListItem>
             </List>
         </Box>
     );

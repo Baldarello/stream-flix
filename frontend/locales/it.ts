@@ -164,6 +164,7 @@ export const it = {
         "share": "Condividi Libreria",
         "import": "Importa Libreria",
         "history": "Cronologia Modifiche",
+        "manageLibrary": "Gestisci Libreria",
         "playbackPreferences": "Preferenze di Riproduzione",
         "preferredLabelsDesc": "Dai priorità ai link con queste etichette durante la selezione automatica.",
         "noLabelsFound": "Nessuna etichetta trovata",

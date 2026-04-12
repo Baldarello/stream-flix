@@ -164,6 +164,7 @@ export const en = {
         "share": "Share Library",
         "import": "Import Library",
         "history": "Change History",
+        "manageLibrary": "Manage Library",
         "playbackPreferences": "Playback Preferences",
         "preferredLabelsDesc": "Prioritize links with these labels during auto-selection.",
         "noLabelsFound": "No labels found",
