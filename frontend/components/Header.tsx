@@ -27,6 +27,7 @@ const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveV
     {key: 'movies', view: 'Film'},
     {key: 'anime', view: 'Anime'},
     {key: 'myList', view: 'La mia lista'},
+    {key: 'library', view: 'Libreria'},
 ];
 
 export const Header: React.FC = observer(() => {

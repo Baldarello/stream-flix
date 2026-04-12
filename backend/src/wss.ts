@@ -809,6 +809,14 @@ export function createWebSocketRouter() {
                                 payload: typedPayload
                             }));
                             console.log(`[WebSocket] quix-sync-media-request: Forwarded to slave ${slaveId}`);
+                        } else if (session && session.slaveWs === null) {
+                            // Session exists but slave is temporarily disconnected (preserved for reconnection)
+                            // This can happen when slave is refreshing/reconnecting
+                            console.log(`[WebSocket] quix-sync-media-request: Slave ${slaveId} session preserved but slave disconnected (waiting for reconnect)`);
+                            ws.send(JSON.stringify({
+                                type: 'quix-sync-error',
+                                payload: {error: 'TV is reconnecting. Please wait and try again.'}
+                            }));
                         } else {
                             ws.send(JSON.stringify({
                                 type: 'quix-sync-error',

@@ -31,7 +31,7 @@ import {isSmartTV as detectSmartTV} from '../utils/device.ts';
 import {it} from '../locales/it.ts';
 import {en} from '../locales/en.ts';
 
-export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista';
+export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista' | 'Libreria';
 export type ThemeName = 'SerieTV' | 'Film' | 'Anime';
 export type Language = 'it' | 'en';
 
@@ -928,6 +928,7 @@ class MediaStore {
         if (view === 'Serie TV') this.setActiveTheme('SerieTV');
         else if (view === 'Film') this.setActiveTheme('Film');
         else if (view === 'Anime') this.setActiveTheme('Anime');
+        else if (view === 'Libreria') this.setActiveTheme('Anime'); // Use Anime theme for library management
     };
 
     setActiveTheme = (theme: ThemeName) => {

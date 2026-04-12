@@ -5,6 +5,7 @@ export const en = {
         "movies": "Movies",
         "anime": "Anime",
         "myList": "My List",
+        "library": "Library",
         "searchPlaceholder": "Search titles..."
     },
     "hero": {
@@ -328,6 +329,40 @@ export const en = {
             },
             "unknown": "Action '{type}' on table '{table}'"
         }
+    },
+    "libraryManagement": {
+        "title": "Library Management",
+        "tabs": {
+            "myList": "My List",
+            "continueWatching": "Continue Watching",
+            "links": "Video Links",
+            "preferredSources": "Preferred Sources"
+        },
+        "type": {
+            "series": "TV Series",
+            "movie": "Movie"
+        },
+        "links": "links",
+        "empty": {
+            "myList": "Your list is empty. Add movies and TV series to see them here.",
+            "continueWatching": "Nothing to continue watching.",
+            "links": "No video links associated.",
+            "preferredSources": "No preferred source set."
+        },
+        "removeFromMyList": "Remove from list",
+        "removeFromContinue": "Remove from Continue Watching",
+        "clearAllLinks": "Delete all links",
+        "markWatched": "Mark watched",
+        "markUnwatched": "Mark unwatched",
+        "sub": "SUB",
+        "dub": "DUB",
+        "remove": "Remove",
+        "deleteConfirm": {
+            "title": "Confirm deletion",
+            "message": "Are you sure you want to delete \"{name}\"?"
+        },
+        "cancel": "Cancel",
+        "delete": "Delete"
     },
     "notifications": {
         "roomCreated": "Room created! Share the code to invite friends.",

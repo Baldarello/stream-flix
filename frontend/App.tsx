@@ -25,6 +25,7 @@ import ImportLibraryModal from './components/ImportLibraryModal.tsx';
 import RevisionsModal from './components/RevisionsModal.tsx';
 import MediaSyncModal from './components/MediaSyncModal.tsx';
 import GoogleDriveSyncConflictModal from './components/GoogleDriveSyncConflictModal.tsx';
+import LibraryManagementView from './components/LibraryManagementView.tsx';
 import {useTranslations} from './hooks/useTranslations.ts';
 import {initGoogleAuth} from './services/googleAuthService';
 import {websocketService} from './services/websocketService.js';
@@ -224,6 +225,8 @@ const AppContent: React.FC = observer(() => {
                 return <GridView title={t('gridView.animeTitle')} items={popularAnime}/>;
             case 'La mia lista':
                 return <GridView title={t('gridView.myListTitle')} items={myListItems}/>;
+            case 'Libreria':
+                return <LibraryManagementView/>;
             default:
                 return null;
         }

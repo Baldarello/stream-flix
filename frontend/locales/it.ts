@@ -5,6 +5,7 @@ export const it = {
         "movies": "Film",
         "anime": "Anime",
         "myList": "La mia lista",
+        "library": "Libreria",
         "searchPlaceholder": "Cerca titoli..."
     },
     "hero": {
@@ -328,6 +329,40 @@ export const it = {
             },
             "unknown": "Azione '{type}' sulla tabella '{table}'"
         }
+    },
+    "libraryManagement": {
+        "title": "Gestione Libreria",
+        "tabs": {
+            "myList": "La mia lista",
+            "continueWatching": "Continua a guardare",
+            "links": "Link Video",
+            "preferredSources": "Fonti Preferite"
+        },
+        "type": {
+            "series": "Serie TV",
+            "movie": "Film"
+        },
+        "links": "link",
+        "empty": {
+            "myList": "La tua lista è vuota. Aggiungi film e serie TV per vederli qui.",
+            "continueWatching": "Non c'è nulla da continuare a guardare.",
+            "links": "Nessun link video associato.",
+            "preferredSources": "Nessuna fonte preferita impostata."
+        },
+        "removeFromMyList": "Rimuovi dalla lista",
+        "removeFromContinue": "Rimuovi da Continua a guardare",
+        "clearAllLinks": "Elimina tutti i link",
+        "markWatched": "Segna visto",
+        "markUnwatched": "Segna non visto",
+        "sub": "SUB",
+        "dub": "DUB",
+        "remove": "Rimuovi",
+        "deleteConfirm": {
+            "title": "Conferma eliminazione",
+            "message": "Sei sicuro di voler eliminare \"{name}\"?"
+        },
+        "cancel": "Annulla",
+        "delete": "Elimina"
     },
     "notifications": {
         "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
