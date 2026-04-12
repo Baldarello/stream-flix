@@ -555,12 +555,17 @@ class MediaStore {
                 });
                 const mergedProgress = Array.from(mergedProgressMap.values());
 
+                // Strip Dexie Proxy objects before storing to IndexedDB
+                const cleanedShows = JSON.parse(JSON.stringify(mergedShows));
+                const cleanedLinks = JSON.parse(JSON.stringify(mergedLinks));
+                const cleanedProgress = JSON.parse(JSON.stringify(mergedProgress));
+
                 // Import merged data
                 const mergedData = {
                     myList: mergedMyList.map((id, index) => ({id, order: index})),
-                    cachedItems: mergedShows,
-                    mediaLinks: mergedLinks,
-                    episodeProgress: mergedProgress,
+                    cachedItems: cleanedShows,
+                    mediaLinks: cleanedLinks,
+                    episodeProgress: cleanedProgress,
                 };
 
                 await db.importData(mergedData);
@@ -672,12 +677,17 @@ class MediaStore {
                 }
             });
 
+            // Strip Dexie Proxy objects before storing to IndexedDB
+            const cleanedShows = JSON.parse(JSON.stringify(finalShows));
+            const cleanedLinks = JSON.parse(JSON.stringify(Array.from(uniqueLinksMap.values())));
+            const cleanedProgress = JSON.parse(JSON.stringify(finalProgress));
+
             // Import merged data
             const mergedData = {
                 myList: finalMyList.map((id, index) => ({id, order: index})),
-                cachedItems: finalShows,
-                mediaLinks: Array.from(uniqueLinksMap.values()),
-                episodeProgress: finalProgress,
+                cachedItems: cleanedShows,
+                mediaLinks: cleanedLinks,
+                episodeProgress: cleanedProgress,
             };
 
             await db.importData(mergedData);
@@ -733,11 +743,11 @@ class MediaStore {
 
             const remoteData = {
                 myList: myList.remote.map((id, index) => ({id, order: index})),
-                cachedItems: Array.from(shows.values())
-                    .filter(s => s.remote)
-                    .map(s => s.remote),
-                mediaLinks: mediaLinks.remote,
-                episodeProgress: episodeProgress.remote,
+                cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
+                    .filter((s: any) => s.remote)
+                    .map((s: any) => s.remote))),
+                mediaLinks: JSON.parse(JSON.stringify(mediaLinks.remote)),
+                episodeProgress: JSON.parse(JSON.stringify(episodeProgress.remote)),
             };
 
             await db.importData(remoteData);
@@ -775,11 +785,11 @@ class MediaStore {
             // Build local data structure
             const localData = {
                 myList: myList.local.map((id, index) => ({id, order: index})),
-                cachedItems: Array.from(shows.values())
-                    .filter(s => s.local)
-                    .map(s => s.local),
-                mediaLinks: mediaLinks.local,
-                episodeProgress: episodeProgress.local,
+                cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
+                    .filter((s: any) => s.local)
+                    .map((s: any) => s.local))),
+                mediaLinks: JSON.parse(JSON.stringify(mediaLinks.local)),
+                episodeProgress: JSON.parse(JSON.stringify(episodeProgress.local)),
             };
 
             // Backup local data to drive (overwrites remote)
@@ -787,7 +797,8 @@ class MediaStore {
             const data: { [key: string]: any[] } = {};
             for (const tableName of tablesToBackup) {
                 if ((db as any)[tableName]) {
-                    data[tableName] = await (db as any)[tableName].toArray();
+                    // Strip Dexie Proxy objects before storing to Drive
+                    data[tableName] = JSON.parse(JSON.stringify(await (db as any)[tableName].toArray()));
                 }
             }
 
@@ -1130,11 +1141,27 @@ class MediaStore {
             .filter(p => !p.watched && p.currentTime > 0)
             .sort((a, b) => (b.lastWatchedAt ?? 0) - (a.lastWatchedAt ?? 0)); // Most recent first
 
-        return sortedProgress.map(p => {
+        // Map episodes with their progress data
+        const episodesWithProgress = sortedProgress.map(p => {
             const ep = this.findEpisodeById(p.episodeId);
             if (!ep) return null;
-            return {...ep, startTime: p.currentTime};
-        }).filter(item => !!item) as PlayableItem[];
+            return {...ep, startTime: p.currentTime, progress: p};
+        }).filter(item => !!item) as (PlayableItem & { progress: EpisodeProgress })[];
+
+        // Group by show_id and keep only the episode with highest episode_number per show
+        const showMap = new Map<number, PlayableItem & { progress: EpisodeProgress }>();
+
+        for (const item of episodesWithProgress) {
+            const showId = item.show_id;
+            const existing = showMap.get(showId);
+
+            // Keep the episode with highest episode_number (most recent in series order)
+            if (!existing || (item.episode_number && existing.episode_number && item.episode_number > existing.episode_number)) {
+                showMap.set(showId, item);
+            }
+        }
+
+        return Array.from(showMap.values());
     }
 
     get homePageRows() {

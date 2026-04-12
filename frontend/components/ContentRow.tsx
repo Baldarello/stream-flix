@@ -9,203 +9,299 @@ import {useTranslations} from '../hooks/useTranslations.ts';
 import {mediaStore} from '../store/mediaStore.ts';
 
 interface ContentRowProps {
-  title: string;
-  items: MediaItem[];
-  onCardClick: (item: MediaItem) => void;
-  isContinueWatching?: boolean;
-  isReorderable?: boolean;
+    title: string;
+    items: MediaItem[];
+    onCardClick: (item: MediaItem) => void;
+    isContinueWatching?: boolean;
+    isReorderable?: boolean;
 }
 
-export const ContentRow: React.FC<ContentRowProps> = observer(({ title, items, onCardClick, isContinueWatching, isReorderable = false }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-  const { t } = useTranslations();
-  
-  // State for Drag and Drop
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+export const ContentRow: React.FC<ContentRowProps> = observer(({
+                                                                   title,
+                                                                   items,
+                                                                   onCardClick,
+                                                                   isContinueWatching,
+                                                                   isReorderable = false
+                                                               }) => {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [isHovered, setIsHovered] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+    const {t} = useTranslations();
 
-  const checkScrollability = () => {
-    const el = scrollContainerRef.current;
-    if (el) {
-      const tolerance = 1;
-      setCanScrollLeft(el.scrollLeft > tolerance);
-      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - tolerance);
-    }
-  };
+    // State for Drag and Drop
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    const el = scrollContainerRef.current;
-    if (!el) return;
-    
-    checkScrollability();
+    // Touch drag state
+    const touchDragRef = useRef<{
+        startX: number;
+        startIndex: number;
+        isDragging: boolean;
+    } | null>(null);
+    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const handleResize = () => checkScrollability();
-    const handleScrollEvent = () => checkScrollability();
-    
-    window.addEventListener('resize', handleResize);
-    el.addEventListener('scroll', handleScrollEvent);
-
-    const timer = setTimeout(checkScrollability, 500);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (el) {
-          el.removeEventListener('scroll', handleScrollEvent);
-      }
-      clearTimeout(timer);
+    const checkScrollability = () => {
+        const el = scrollContainerRef.current;
+        if (el) {
+            const tolerance = 1;
+            setCanScrollLeft(el.scrollLeft > tolerance);
+            setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - tolerance);
+        }
     };
-  }, [items]);
 
-  const handleScroll = (direction: 'left' | 'right') => {
-    const el = scrollContainerRef.current;
-    if (el) {
-      const scrollAmount = el.clientWidth * 0.8;
-      el.scrollTo({
-        left: el.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount),
-        behavior: 'smooth',
-      });
-    }
-  };
+    useEffect(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
 
-  // Drag and Drop handlers
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    e.dataTransfer.setData("itemIndex", index.toString());
-    setDraggedIndex(index);
-    setIsDragging(true);
-  };
+        checkScrollability();
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    e.preventDefault();
-    if (index !== draggedIndex) {
-      setDropTargetIndex(index);
-    }
-  };
+        const handleResize = () => checkScrollability();
+        const handleScrollEvent = () => checkScrollability();
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedIndex === null) return;
-    mediaStore.reorderMyList(draggedIndex, dropIndex);
-    handleDragEnd();
-  };
+        window.addEventListener('resize', handleResize);
+        el.addEventListener('scroll', handleScrollEvent);
 
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDropTargetIndex(null);
-    setIsDragging(false);
-  };
+        const timer = setTimeout(checkScrollability, 500);
 
-  const scrollButtonStyles = {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    height: '100%',
-    width: '4rem',
-    zIndex: 20,
-    bgcolor: 'transparent',
-    color: 'white',
-    borderRadius: 0,
-    '&:hover': {
-      bgcolor: 'rgba(20, 20, 30, 0.8)',
-    },
-  };
-
-  return (
-    <Box component="section">
-      <Typography variant="h5" component="h2" fontWeight="bold" sx={{ mb: 0 }}>
-        {title}
-      </Typography>
-      <Box 
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        sx={{ position: 'relative' }}
-      >
-        {/* FIX: (line 127) Wrap IconButton with Fade component */}
-        <Fade in={isHovered && canScrollLeft}>
-          <IconButton
-            onClick={() => handleScroll('left')}
-            sx={{
-              ...scrollButtonStyles,
-              left: 0,
-            }}
-            aria-label={t('contentRow.scrollLeft')}
-          >
-            <ChevronLeftIcon fontSize="large" />
-          </IconButton>
-        </Fade>
-
-        <Box
-          ref={scrollContainerRef}
-          className={`filmstrip-container ${isDragging ? 'is-dragging' : ''}`}
-          sx={{
-            display: 'flex',
-            overflowX: 'auto',
-            overflowY: 'hidden',
-            py: 6,
-            px: 'calc(4rem + 40px)', // Space for buttons and overlap
-            marginLeft: '-4rem',
-            scrollPadding: '0 0 0 calc(4rem + 40px)',
-            scrollBehavior: 'smooth',
-            '&::-webkit-scrollbar': {
-              display: 'none',
-            },
-            scrollbarWidth: 'none', // For Firefox
-            '&:hover .media-card': {
-                opacity: 0.4,
-            },
-            '&:hover .media-card:hover': {
-                opacity: 1,
-            },
-            '&:hover .dnd-wrapper:hover ~ .dnd-wrapper': {
-                transform: 'translateX(60px)',
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            if (el) {
+                el.removeEventListener('scroll', handleScrollEvent);
             }
-          }}
-        >
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''}`}
-              draggable={isReorderable}
-              onDragStart={(e) => isReorderable && handleDragStart(e, index)}
-              onDragOver={(e) => isReorderable && handleDragOver(e, index)}
-              onDrop={(e) => isReorderable && handleDrop(e, index)}
-              onDragEnd={() => isReorderable && handleDragEnd()}
-              onDragLeave={() => isReorderable && setDropTargetIndex(null)}
-              style={{
-                marginLeft: index === 0 ? 0 : '-40px',
-                transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-              }}
-            >
-              <Card 
-                  item={item} 
-                  onClick={() => onCardClick(item)} 
-                  displayMode="row"
-                  className="media-card"
-                  style={{ zIndex: items.length - index }}
-                  isContinueWatching={isContinueWatching}
-                  isReorderable={isReorderable}
-              />
-            </div>
-          ))}
-        </Box>
+            clearTimeout(timer);
+        };
+    }, [items]);
 
-        {/* FIX: (line 195) Wrap IconButton with Fade component */}
-        <Fade in={isHovered && canScrollRight}>
-          <IconButton
-            onClick={() => handleScroll('right')}
-            sx={{
-              ...scrollButtonStyles,
-              right: 0,
-            }}
-            aria-label={t('contentRow.scrollRight')}
-          >
-            <ChevronRightIcon fontSize="large" />
-          </IconButton>
-        </Fade>
-      </Box>
-    </Box>
-  );
+    const handleScroll = (direction: 'left' | 'right') => {
+        const el = scrollContainerRef.current;
+        if (el) {
+            const scrollAmount = el.clientWidth * 0.8;
+            el.scrollTo({
+                left: el.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount),
+                behavior: 'smooth',
+            });
+        }
+    };
+
+    // Drag and Drop handlers
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+        e.dataTransfer.setData("itemIndex", index.toString());
+        setDraggedIndex(index);
+        setIsDragging(true);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+        e.preventDefault();
+        if (index !== draggedIndex) {
+            setDropTargetIndex(index);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+        e.preventDefault();
+        if (draggedIndex === null) return;
+        mediaStore.reorderMyList(draggedIndex, dropIndex);
+        handleDragEnd();
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDropTargetIndex(null);
+        setIsDragging(false);
+        touchDragRef.current = null;
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    };
+
+    // Touch handlers for mobile drag-and-drop
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, index: number) => {
+        if (!isReorderable) return;
+
+        const touch = e.touches[0];
+        touchDragRef.current = {
+            startX: touch.clientX,
+            startIndex: index,
+            isDragging: false,
+        };
+
+        // Start long press timer to initiate drag
+        longPressTimerRef.current = setTimeout(() => {
+            if (touchDragRef.current) {
+                touchDragRef.current.isDragging = true;
+                setDraggedIndex(index);
+                setIsDragging(true);
+            }
+        }, 300); // 300ms long press to start drag
+    };
+
+    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (!isReorderable || draggedIndex === null || !touchDragRef.current) return;
+
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchDragRef.current.startX;
+
+        // If moved significantly, ensure dragging is active
+        if (Math.abs(deltaX) > 10 && !touchDragRef.current.isDragging) {
+            touchDragRef.current.isDragging = true;
+            setDraggedIndex(touchDragRef.current.startIndex);
+            setIsDragging(true);
+        }
+
+        if (touchDragRef.current.isDragging) {
+            e.preventDefault();
+
+            // Calculate drop target based on touch position
+            const container = scrollContainerRef.current;
+            if (!container) return;
+
+            const cards = container.querySelectorAll('.dnd-wrapper');
+            let newDropTarget: number | null = null;
+
+            cards.forEach((card, i) => {
+                const rect = card.getBoundingClientRect();
+                const cardCenter = rect.left + rect.width / 2;
+                if (touch.clientX > cardCenter) {
+                    newDropTarget = i;
+                }
+            });
+
+            if (newDropTarget !== null && newDropTarget !== dropTargetIndex) {
+                setDropTargetIndex(newDropTarget);
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (!isReorderable) return;
+
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+
+        if (draggedIndex !== null && dropTargetIndex !== null && draggedIndex !== dropTargetIndex) {
+            mediaStore.reorderMyList(draggedIndex, dropTargetIndex);
+        }
+
+        handleDragEnd();
+    };
+
+    const scrollButtonStyles = {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        height: '100%',
+        width: '4rem',
+        zIndex: 20,
+        bgcolor: 'transparent',
+        color: 'white',
+        borderRadius: 0,
+        '&:hover': {
+            bgcolor: 'rgba(20, 20, 30, 0.8)',
+        },
+    };
+
+    return (
+        <Box component="section">
+            <Typography variant="h5" component="h2" fontWeight="bold" sx={{mb: 0}}>
+                {title}
+            </Typography>
+            <Box
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                sx={{position: 'relative'}}
+            >
+                {/* FIX: (line 127) Wrap IconButton with Fade component */}
+                <Fade in={isHovered && canScrollLeft}>
+                    <IconButton
+                        onClick={() => handleScroll('left')}
+                        sx={{
+                            ...scrollButtonStyles,
+                            left: 0,
+                        }}
+                        aria-label={t('contentRow.scrollLeft')}
+                    >
+                        <ChevronLeftIcon fontSize="large"/>
+                    </IconButton>
+                </Fade>
+
+                <Box
+                    ref={scrollContainerRef}
+                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''}`}
+                    sx={{
+                        display: 'flex',
+                        overflowX: 'auto',
+                        overflowY: 'hidden',
+                        py: 6,
+                        px: 'calc(4rem + 40px)', // Space for buttons and overlap
+                        marginLeft: '-4rem',
+                        scrollPadding: '0 0 0 calc(4rem + 40px)',
+                        scrollBehavior: 'smooth',
+                        '&::-webkit-scrollbar': {
+                            display: 'none',
+                        },
+                        scrollbarWidth: 'none', // For Firefox
+                        '&:hover .media-card': {
+                            opacity: 0.4,
+                        },
+                        '&:hover .media-card:hover': {
+                            opacity: 1,
+                        },
+                        '&:hover .dnd-wrapper:hover ~ .dnd-wrapper': {
+                            transform: 'translateX(60px)',
+                        }
+                    }}
+                >
+                    {items.map((item, index) => (
+                        <div
+                            key={item.id}
+                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''}`}
+                            draggable={isReorderable}
+                            onDragStart={(e) => isReorderable && handleDragStart(e, index)}
+                            onDragOver={(e) => isReorderable && handleDragOver(e, index)}
+                            onDrop={(e) => isReorderable && handleDrop(e, index)}
+                            onDragEnd={() => isReorderable && handleDragEnd()}
+                            onDragLeave={() => isReorderable && setDropTargetIndex(null)}
+                            onTouchStart={(e) => isReorderable && handleTouchStart(e, index)}
+                            onTouchMove={(e) => isReorderable && handleTouchMove(e)}
+                            onTouchEnd={() => isReorderable && handleTouchEnd()}
+                            style={{
+                                marginLeft: index === 0 ? 0 : '-40px',
+                                transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                                touchAction: isReorderable ? 'none' : undefined,
+                            }}
+                        >
+                            <Card
+                                item={item}
+                                onClick={() => onCardClick(item)}
+                                displayMode="row"
+                                className="media-card"
+                                style={{zIndex: items.length - index}}
+                                isContinueWatching={isContinueWatching}
+                                isReorderable={isReorderable}
+                            />
+                        </div>
+                    ))}
+                </Box>
+
+                {/* FIX: (line 195) Wrap IconButton with Fade component */}
+                <Fade in={isHovered && canScrollRight}>
+                    <IconButton
+                        onClick={() => handleScroll('right')}
+                        sx={{
+                            ...scrollButtonStyles,
+                            right: 0,
+                        }}
+                        aria-label={t('contentRow.scrollRight')}
+                    >
+                        <ChevronRightIcon fontSize="large"/>
+                    </IconButton>
+                </Fade>
+            </Box>
+        </Box>
+    );
 });
