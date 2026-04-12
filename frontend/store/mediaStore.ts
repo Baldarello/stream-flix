@@ -908,13 +908,14 @@ class MediaStore {
 
     closeDetail = () => {
         // This is called by UI elements (e.g., the 'X' button).
-        // It uses the History API to navigate back, which triggers the popstate
-        // event, ensuring the UI state and browser history remain synchronized.
+        // Always close the detail view directly first, then handle history.
+        // This ensures the UI updates immediately regardless of history state.
+        this._closeDetailWithoutHistory();
+
+        // If there's a history state indicating detailViewOpen, go back to clear it
+        // but the detail view is already closed so the user won't be stuck.
         if (window.history.state?.detailViewOpen) {
             window.history.back();
-        } else {
-            // Fallback in case the history state is not what we expect.
-            this._closeDetailWithoutHistory();
         }
     };
 

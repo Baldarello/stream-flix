@@ -177,7 +177,8 @@ export const en = {
         "save": "Save",
         "cancel": "Cancel",
         "online": "Online",
-        "offline": "Offline"
+        "offline": "Offline",
+        "changeName": "Change Name"
     },
     "qrScanner": {
         "close": "Close scanner",
