@@ -140,7 +140,7 @@ const SmartTVScreen: React.FC = observer(() => {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '100vh',
+                height: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
                 bgcolor: 'background.default',
                 color: 'text.primary',
                 p: 3

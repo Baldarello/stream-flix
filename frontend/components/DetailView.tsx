@@ -166,7 +166,7 @@ const DetailView: React.FC = observer(() => {
                 <CloseIcon/>
             </IconButton>
 
-            <Box sx={{position: 'relative', height: '100%', overflowY: 'auto'}}>
+            <Box sx={{position: 'relative', height: '100%', overflowY: 'auto', pt: 'env(safe-area-inset-top)'}}>
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: {xs: '1fr', md: '350px 1fr'},

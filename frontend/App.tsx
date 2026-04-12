@@ -235,7 +235,7 @@ const AppContent: React.FC = observer(() => {
     return (
         <Box sx={{color: 'text.primary'}}>
             <Header/>
-            <main>{renderMainContent()}</main>
+            <main sx={{pt: 'calc(64px + env(safe-area-inset-top))'}}>{renderMainContent()}</main>
             {currentSelectedItem && <DetailView/>} {/* Use currentSelectedItem */}
             <Footer/>
             <ProfileDrawer/>

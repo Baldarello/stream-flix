@@ -324,7 +324,7 @@ const RemotePlayerControlView = observer(() => {
         <Box sx={{
             bgcolor: 'background.default',
             color: 'text.primary',
-            minHeight: '100vh',
+            minHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
             display: 'flex',
             flexDirection: 'column'
         }}>

@@ -77,7 +77,12 @@ const GridView: React.FC<GridViewProps> = observer(({title, items}) => {
     };
 
     return (<Fade in={true} timeout={500}>
-            <Container maxWidth={false} sx={{pt: 12, pb: 8, pl: {xs: 2, md: 6}, pr: {xs: 2, md: 6}}}>
+            <Container maxWidth={false} sx={{
+                pt: 'calc(6rem + env(safe-area-inset-top))',
+                pb: 8,
+                pl: {xs: 2, md: 6},
+                pr: {xs: 2, md: 6}
+            }}>
                 <Typography variant="h4" component="h1" fontWeight="bold" sx={{mb: 4, mt: 4}}>
                     {title}
                 </Typography>
