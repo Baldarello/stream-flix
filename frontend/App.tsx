@@ -157,7 +157,9 @@ const AppContent: React.FC = observer(() => {
     </>;
 
     // If local client is playing, show local video player
-    if (nowPlayingItem) return <><VideoPlayer/> <LinkSelectionModal/><NotificationSnackbar/><DebugOverlay/></>;
+    if (nowPlayingItem) return <><VideoPlayer/> <LinkSelectionModal/><NotificationSnackbar/>
+        <EpisodeInfoModal/>
+        <DebugOverlay/></>;
 
     const renderSearchView = () => {
         if (isSearching && searchQuery) {

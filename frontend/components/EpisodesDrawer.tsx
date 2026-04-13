@@ -98,6 +98,7 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
 
     const handleShowDetails = (e: React.MouseEvent) => {
         e.stopPropagation();
+        mediaStore.closeEpisodesDrawer();
         mediaStore.openEpisodeInfoModal(episode, seasonNumber, uniqueLanguages);
         handleCloseSwipe();
     };
@@ -170,12 +171,55 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
                         }
                     }}
                 >
+                    {/* Desktop action buttons - visible on larger screens */}
+                    <Box sx={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 90,
+                        display: {xs: 'none', sm: 'flex'},
+                        flexDirection: 'column',
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        borderRadius: 1,
+                        zIndex: 1
+                    }}>
+                        <Button
+                            size="small"
+                            startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
+                            onClick={handleToggleWatched}
+                            sx={{
+                                flex: 1,
+                                flexDirection: 'column',
+                                borderRadius: 0,
+                                color: isWatched ? 'warning.main' : 'success.main',
+                                '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                            }}
+                        >
+                            {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
+                        </Button>
+                        <Button
+                            size="small"
+                            startIcon={<InfoIcon/>}
+                            onClick={handleShowDetails}
+                            sx={{
+                                flex: 1,
+                                flexDirection: 'column',
+                                borderRadius: 0,
+                                color: 'info.main',
+                                '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                            }}
+                        >
+                            {t('episodesDrawer.details')}
+                        </Button>
+                    </Box>
                     <ListItemButton
                         selected={isCurrentEpisode}
                         disabled={!hasPlayableLinks}
                         sx={{
                             gap: 2,
                             p: 1,
+                            pl: {xs: 1, sm: '100px'},
                             borderRadius: 1,
                             opacity: hasPlayableLinks ? 1 : 0.5,
                             '&.Mui-selected': {

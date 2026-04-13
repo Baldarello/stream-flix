@@ -375,7 +375,14 @@ class MediaStore {
                 this.nowPlayingItem = item;
 
                 if ('show_id' in item) {
-                    this.nowPlayingShowDetails = this.cachedItems.get(item.show_id) || null;
+                    // First try to get from cache
+                    let showDetails = this.cachedItems.get(item.show_id) || null;
+                    // Fallback to selectedItem if cache miss and selectedItem is the same show
+                    // This handles the case where DetailView starts playback without the show being cached
+                    if (!showDetails && this.selectedItem && 'seasons' in this.selectedItem && this.selectedItem.id === item.show_id) {
+                        showDetails = this.selectedItem;
+                    }
+                    this.nowPlayingShowDetails = showDetails;
                 } else {
                     this.nowPlayingShowDetails = null; // It's a movie
                 }

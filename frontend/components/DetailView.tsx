@@ -125,6 +125,16 @@ const SwipeableEpisodeCardDetailView: React.FC<SwipeableEpisodeCardProps> = obse
         handleCloseSwipe();
     };
 
+    const handleDesktopToggleWatched = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        toggleEpisodeWatchedStatus(episode.id);
+    };
+
+    const handleDesktopShowDetails = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDetailsOpen(true);
+    };
+
     return (
         <>
             <Box sx={{position: 'relative', overflow: 'hidden', borderRadius: 2, mb: 1.5}}>
@@ -193,10 +203,53 @@ const SwipeableEpisodeCardDetailView: React.FC<SwipeableEpisodeCardProps> = obse
                         }
                     }}
                 >
+                    {/* Desktop action buttons - visible on larger screens */}
+                    <Box sx={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 90,
+                        display: {xs: 'none', md: 'flex'},
+                        flexDirection: 'column',
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        borderRadius: 2,
+                        zIndex: 1
+                    }}>
+                        <Button
+                            size="small"
+                            startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
+                            onClick={handleDesktopToggleWatched}
+                            sx={{
+                                flex: 1,
+                                flexDirection: 'column',
+                                borderRadius: 0,
+                                color: isWatched ? 'warning.main' : 'success.main',
+                                '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                            }}
+                        >
+                            {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
+                        </Button>
+                        <Button
+                            size="small"
+                            startIcon={<InfoIcon/>}
+                            onClick={handleDesktopShowDetails}
+                            sx={{
+                                flex: 1,
+                                flexDirection: 'column',
+                                borderRadius: 0,
+                                color: 'info.main',
+                                '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                            }}
+                        >
+                            {t('episodesDrawer.details')}
+                        </Button>
+                    </Box>
                     <ListItemButton
                         disabled={!hasPlayableLinks}
                         sx={{
                             p: 2,
+                            pl: {xs: 2, md: '100px'},
                             borderRadius: 2,
                             opacity: hasPlayableLinks ? 1 : 0.5,
                         }}
