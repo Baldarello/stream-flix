@@ -72,11 +72,11 @@ export const Card: React.FC<CardProps> = observer(({
 
     const rowStyles = {
         '&:hover': {
-            transform: 'scale(1.15) translateY(-10px)',
-            marginLeft: '10px',
-            marginRight: '50px',
+            transform: 'scale(1.15) translateY(-10px) translateX(10px)',
+            marginLeft: '50px',
+            marginRight: '10px',
             borderColor: getGlowColor(),
-            boxShadow: `0 15px 25px rgba(0,0,0,0.7), 0 0 20px ${getGlowColor()}`,
+            boxShadow: `0 15px 25px rgba(0,0,0,0.7), 0 0 20px ${getGlowColor()}`
         },
     };
 
@@ -99,6 +99,7 @@ export const Card: React.FC<CardProps> = observer(({
         transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
         border: '2px solid transparent',
         overflow: 'visible',
+        zIndex: 1,
         '& .title-overlay': {opacity: 0, transition: 'opacity 0.3s'},
         '&:hover .title-overlay': {opacity: 1},
         '& .add-to-list-btn': {opacity: 0, transform: 'translateY(10px)', transition: 'opacity 0.3s, transform 0.3s'},
