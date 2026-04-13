@@ -26,6 +26,7 @@ import RevisionsModal from './components/RevisionsModal.tsx';
 import MediaSyncModal from './components/MediaSyncModal.tsx';
 import GoogleDriveSyncConflictModal from './components/GoogleDriveSyncConflictModal.tsx';
 import LibraryManagementView from './components/LibraryManagementView.tsx';
+import EpisodeInfoModal from './components/EpisodeInfoModal.tsx';
 import {useTranslations} from './hooks/useTranslations.ts';
 import {initGoogleAuth} from './services/googleAuthService';
 import {websocketService} from './services/websocketService.js';
@@ -284,6 +285,7 @@ const AppContent: React.FC = observer(() => {
                 onCancel={() => mediaStore.cancelSyncAndLogout()}
                 isProcessing={mediaStore.isProcessingSyncConflict}
             />
+            <EpisodeInfoModal/>
         </Box>
     );
 });

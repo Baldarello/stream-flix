@@ -162,6 +162,14 @@ class MediaStore {
     // Player Episode Drawer State
     isEpisodesDrawerOpen = false;
 
+    // Episode Info Modal State
+    isEpisodeInfoModalOpen = false;
+    episodeInfoModalData: {
+        episode: Episode;
+        seasonNumber: number;
+        uniqueLanguages: { lang: string; type: string }[];
+    } | null = null;
+
     // Profile Drawer & QR Scanner State
     isProfileDrawerOpen = false;
     isQRScannerOpen = false;
@@ -1038,6 +1046,14 @@ class MediaStore {
     };
     closeEpisodesDrawer = () => {
         this.isEpisodesDrawerOpen = false;
+    };
+    openEpisodeInfoModal = (episode: Episode, seasonNumber: number, uniqueLanguages: { lang: string; type: string }[]) => {
+        this.episodeInfoModalData = {episode, seasonNumber, uniqueLanguages};
+        this.isEpisodeInfoModalOpen = true;
+    };
+    closeEpisodeInfoModal = () => {
+        this.isEpisodeInfoModalOpen = false;
+        this.episodeInfoModalData = null;
     };
     setIntroSkippableOnSlave = (isSkippable: boolean) => {
         this.isIntroSkippableOnSlave = isSkippable;

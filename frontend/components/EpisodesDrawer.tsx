@@ -10,16 +10,11 @@ import {
     IconButton,
     LinearProgress,
     List,
-    ListItem,
     ListItemButton,
     ListItemText,
     Toolbar,
     Typography,
     Chip,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
     Stack
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -50,7 +45,6 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
     const {t} = useTranslations();
     const [swipeX, setSwipeX] = useState(0);
     const [startX, setStartX] = useState(0);
-    const [detailsOpen, setDetailsOpen] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
     const progress = episodeProgress.get(episode.id);
     const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
@@ -104,7 +98,7 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
 
     const handleShowDetails = (e: React.MouseEvent) => {
         e.stopPropagation();
-        setDetailsOpen(true);
+        mediaStore.openEpisodeInfoModal(episode, seasonNumber, uniqueLanguages);
         handleCloseSwipe();
     };
 
@@ -288,67 +282,7 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
                 </Box>
             </Box>
 
-            {/* Episode Details Dialog */}
-            <Dialog
-                open={detailsOpen}
-                onClose={() => setDetailsOpen(false)}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        zIndex: 2200 // Above drawer zIndex 2100
-                    }
-                }}
-            >
-                <DialogTitle>
-                    {episode.name}
-                    <Typography variant="caption" color="text.secondary" sx={{display: 'block'}}>
-                        {t('episodesDrawer.season', {number: seasonNumber})} - {t('episodesDrawer.episode', {number: episode.episode_number})}
-                    </Typography>
-                </DialogTitle>
-                <DialogContent dividers>
-                    {episode.overview && (
-                        <Typography variant="body2" sx={{mb: 2}}>
-                            {episode.overview}
-                        </Typography>
-                    )}
-                    <Typography variant="subtitle2" sx={{mt: 2, mb: 1}}>
-                        {t('episodesDrawer.availableLanguages')}:
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                        {uniqueLanguages.map(({lang, type}) => (
-                            <Chip
-                                key={`${lang}-${type}`}
-                                label={`${lang.toUpperCase()} ${type === 'dub' ? 'Dubbed' : 'Subtitled'}`}
-                                color={type === 'dub' ? 'primary' : 'secondary'}
-                                variant="outlined"
-                            />
-                        ))}
-                    </Stack>
-                    <Box sx={{mt: 2}}>
-                        <Typography variant="subtitle2">
-                            {t('episodesDrawer.airDate')}: {episode.air_date || 'N/A'}
-                        </Typography>
-                        <Typography variant="subtitle2" sx={{mt: 1}}>
-                            {t('episodesDrawer.runtime')}: {episode.runtime || episode.runtime || 'N/A'} min
-                        </Typography>
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDetailsOpen(false)}>{t('common.close')}</Button>
-                    <Button
-                        variant="contained"
-                        startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
-                        onClick={() => {
-                            toggleEpisodeWatchedStatus(episode.id);
-                            setDetailsOpen(false);
-                        }}
-                        color={isWatched ? 'warning' : 'success'}
-                    >
-                        {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+
         </>
     );
 });
