@@ -153,6 +153,12 @@ const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer((
                     <Typography variant="caption" sx={{fontFamily: 'monospace', minWidth: 85, textAlign: 'center'}}>
                         {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
                     </Typography>
+                    <IconButton onClick={handleToggleFullScreen} color="inherit"
+                                disabled={!!roomId && !isHost}
+                                size="medium"
+                    >
+                        {playerState.isFullScreen ? <FullscreenExitIcon/> : <FullscreenIcon/>}
+                    </IconButton>
                 </Stack>
             </>
         );

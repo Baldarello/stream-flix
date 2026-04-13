@@ -289,7 +289,17 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
             </Box>
 
             {/* Episode Details Dialog */}
-            <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)} maxWidth="sm" fullWidth>
+            <Dialog
+                open={detailsOpen}
+                onClose={() => setDetailsOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        zIndex: 2200 // Above drawer zIndex 2100
+                    }
+                }}
+            >
                 <DialogTitle>
                     {episode.name}
                     <Typography variant="caption" color="text.secondary" sx={{display: 'block'}}>
