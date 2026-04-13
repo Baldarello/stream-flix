@@ -1,4 +1,7 @@
 export const en = {
+    "common": {
+        "close": "Close"
+    },
     "header": {
         "home": "Home",
         "series": "TV Series",
@@ -80,7 +83,14 @@ export const en = {
     },
     "episodesDrawer": {
         "title": "Episodes",
-        "season": "Season {number}"
+        "season": "Season {number}",
+        "markWatched": "Watched",
+        "markUnwatched": "Unwatched",
+        "details": "Details",
+        "availableLanguages": "Available Languages",
+        "airDate": "Air Date",
+        "runtime": "Runtime",
+        "episode": "Episode"
     },
     "linkMovieModal": {
         "title": "Link Videos for {title}",

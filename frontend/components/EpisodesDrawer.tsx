@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import {mediaStore} from '../store/mediaStore.ts';
 import {
     Box,
+    Button,
     CardMedia,
     Drawer,
     IconButton,
@@ -13,18 +14,349 @@ import {
     ListItemButton,
     ListItemText,
     Toolbar,
-    Typography
+    Typography,
+    Chip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Stack
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import InfoIcon from '@mui/icons-material/Info';
 import type {Episode} from '../types.ts';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
+interface SwipeableEpisodeCardProps {
+    episode: Episode;
+    isCurrentEpisode: boolean;
+    hasPlayableLinks: boolean;
+    onPlay: () => void;
+    seasonNumber: number;
+}
+
+const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
+                                                                                episode,
+                                                                                isCurrentEpisode,
+                                                                                hasPlayableLinks,
+                                                                                onPlay,
+                                                                                seasonNumber
+                                                                            }) => {
+    const {episodeProgress, toggleEpisodeWatchedStatus, currentShow} = mediaStore;
+    const {t} = useTranslations();
+    const [swipeX, setSwipeX] = useState(0);
+    const [startX, setStartX] = useState(0);
+    const [detailsOpen, setDetailsOpen] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
+    const progress = episodeProgress.get(episode.id);
+    const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
+    const isWatched = progress?.watched;
+
+    // Get available languages from video_urls
+    const availableLanguages = episode.video_urls?.map(link => ({
+        lang: link.language,
+        type: link.type // 'dub' or 'sub'
+    })) || [];
+
+    // Deduplicate languages
+    const uniqueLanguages = availableLanguages.reduce((acc, {lang, type}) => {
+        if (!acc.find(l => l.lang === lang)) {
+            acc.push({lang, type});
+        }
+        return acc;
+    }, [] as { lang: string, type: string }[]);
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setStartX(e.touches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const currentX = e.touches[0].clientX;
+        const diff = currentX - startX;
+        // Only allow left swipe (negative diff) to reveal actions on the right
+        if (diff < 0) {
+            setSwipeX(Math.max(diff, -120)); // Limit swipe distance
+        }
+    };
+
+    const handleTouchEnd = () => {
+        // If swiped more than 50px, keep it open
+        if (swipeX < -50) {
+            setSwipeX(-120); // Full reveal
+        } else {
+            setSwipeX(0); // Close
+        }
+    };
+
+    const handleCloseSwipe = () => {
+        setSwipeX(0);
+    };
+
+    const handleToggleWatched = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        toggleEpisodeWatchedStatus(episode.id);
+        handleCloseSwipe();
+    };
+
+    const handleShowDetails = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setDetailsOpen(true);
+        handleCloseSwipe();
+    };
+
+    return (
+        <>
+            <Box sx={{position: 'relative', overflow: 'hidden', borderRadius: 1, mb: 1}}>
+                {/* Swipe action buttons revealed on swipe left */}
+                <Box sx={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 120,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    bgcolor: 'rgba(0,0,0,0.8)',
+                    transform: swipeX < -20 ? 'translateX(0)' : 'translateX(100%)',
+                    transition: 'transform 0.2s ease-out',
+                    zIndex: 1
+                }}>
+                    <Button
+                        size="small"
+                        startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
+                        onClick={handleToggleWatched}
+                        sx={{
+                            flex: 1,
+                            flexDirection: 'column',
+                            borderRadius: 0,
+                            color: isWatched ? 'warning.main' : 'success.main',
+                            '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                        }}
+                    >
+                        {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
+                    </Button>
+                    <Button
+                        size="small"
+                        startIcon={<InfoIcon/>}
+                        onClick={handleShowDetails}
+                        sx={{
+                            flex: 1,
+                            flexDirection: 'column',
+                            borderRadius: 0,
+                            color: 'info.main',
+                            '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                        }}
+                    >
+                        {t('episodesDrawer.details')}
+                    </Button>
+                </Box>
+
+                {/* Episode card content */}
+                <Box
+                    ref={cardRef}
+                    sx={{
+                        transform: `translateX(${swipeX}px)`,
+                        transition: swipeX < -20 ? 'none' : 'transform 0.2s ease-out',
+                        bgcolor: isCurrentEpisode ? 'rgba(255,255,255,0.1)' : 'transparent',
+                        borderRadius: 1,
+                        cursor: hasPlayableLinks ? 'pointer' : 'default'
+                    }}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onClick={() => {
+                        if (hasPlayableLinks && swipeX === 0) {
+                            onPlay();
+                        } else {
+                            handleCloseSwipe();
+                        }
+                    }}
+                >
+                    <ListItemButton
+                        selected={isCurrentEpisode}
+                        disabled={!hasPlayableLinks}
+                        sx={{
+                            gap: 2,
+                            p: 1,
+                            borderRadius: 1,
+                            opacity: hasPlayableLinks ? 1 : 0.5,
+                            '&.Mui-selected': {
+                                bgcolor: 'rgba(255, 255, 255, 0.15)'
+                            }
+                        }}
+                    >
+                        <Typography sx={{minWidth: '2.5rem', alignSelf: 'center'}} align="center">
+                            {episode.episode_number}
+                        </Typography>
+
+                        <Box sx={{
+                            position: 'relative',
+                            width: 120,
+                            height: 68,
+                            flexShrink: 0,
+                            borderRadius: 1,
+                            overflow: 'hidden'
+                        }}>
+                            {episode.still_path ? (
+                                <CardMedia
+                                    component="img"
+                                    image={episode.still_path}
+                                    alt={episode.name}
+                                    sx={{width: '100%', height: '100%', objectFit: 'cover'}}
+                                />
+                            ) : (
+                                <Box sx={{
+                                    width: '100%', height: '100%',
+                                    bgcolor: 'grey.900',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <TheatersIcon color="disabled" sx={{fontSize: '2.5rem'}}/>
+                                </Box>
+                            )}
+                            <Box
+                                sx={{
+                                    position: 'absolute', inset: 0,
+                                    bgcolor: 'rgba(0,0,0,0.6)', color: 'white',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    opacity: 0,
+                                    transition: 'opacity 0.2s',
+                                    '&:hover': {opacity: 1},
+                                    cursor: 'pointer'
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (hasPlayableLinks) onPlay();
+                                }}
+                            >
+                                <PlayArrowIcon fontSize="large"/>
+                            </Box>
+                            {watchedPercentage > 0 && !isWatched && (
+                                <LinearProgress variant="determinate" value={watchedPercentage} color="primary"
+                                                sx={{position: 'absolute', bottom: 0, left: 0, right: 0, height: 3}}/>
+                            )}
+                            {isWatched && (
+                                <Box sx={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    bgcolor: 'rgba(0,0,0,0.5)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <CheckCircleIcon color="success" sx={{fontSize: '2rem'}}/>
+                                </Box>
+                            )}
+                        </Box>
+
+                        <Box sx={{flex: 1, minWidth: 0}}>
+                            <ListItemText
+                                primary={episode.name}
+                                primaryTypographyProps={{
+                                    fontWeight: 'bold',
+                                    whiteSpace: 'normal',
+                                    lineHeight: 1.3,
+                                    noWrap: false,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                }}
+                                secondary={t('episodesDrawer.season', {number: seasonNumber})}
+                                secondaryTypographyProps={{mt: 0.5}}
+                            />
+                            {/* Language availability chips */}
+                            {uniqueLanguages.length > 0 && (
+                                <Stack direction="row" spacing={0.5} sx={{mt: 0.5, flexWrap: 'wrap', gap: 0.5}}>
+                                    {uniqueLanguages.map(({lang, type}) => (
+                                        <Chip
+                                            key={`${lang}-${type}`}
+                                            label={`${lang.toUpperCase()} ${type === 'dub' ? '🔊' : '📝'}`}
+                                            size="small"
+                                            sx={{
+                                                height: 20,
+                                                fontSize: '0.65rem',
+                                                bgcolor: type === 'dub' ? 'primary.dark' : 'secondary.dark'
+                                            }}
+                                        />
+                                    ))}
+                                </Stack>
+                            )}
+                        </Box>
+                    </ListItemButton>
+                </Box>
+            </Box>
+
+            {/* Episode Details Dialog */}
+            <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>
+                    {episode.name}
+                    <Typography variant="caption" color="text.secondary" sx={{display: 'block'}}>
+                        {t('episodesDrawer.season', {number: seasonNumber})} - {t('episodesDrawer.episode', {number: episode.episode_number})}
+                    </Typography>
+                </DialogTitle>
+                <DialogContent dividers>
+                    {episode.overview && (
+                        <Typography variant="body2" sx={{mb: 2}}>
+                            {episode.overview}
+                        </Typography>
+                    )}
+                    <Typography variant="subtitle2" sx={{mt: 2, mb: 1}}>
+                        {t('episodesDrawer.availableLanguages')}:
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                        {uniqueLanguages.map(({lang, type}) => (
+                            <Chip
+                                key={`${lang}-${type}`}
+                                label={`${lang.toUpperCase()} ${type === 'dub' ? 'Dubbed' : 'Subtitled'}`}
+                                color={type === 'dub' ? 'primary' : 'secondary'}
+                                variant="outlined"
+                            />
+                        ))}
+                    </Stack>
+                    <Box sx={{mt: 2}}>
+                        <Typography variant="subtitle2">
+                            {t('episodesDrawer.airDate')}: {episode.air_date || 'N/A'}
+                        </Typography>
+                        <Typography variant="subtitle2" sx={{mt: 1}}>
+                            {t('episodesDrawer.runtime')}: {episode.runtime || episode.runtime || 'N/A'} min
+                        </Typography>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDetailsOpen(false)}>{t('common.close')}</Button>
+                    <Button
+                        variant="contained"
+                        startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
+                        onClick={() => {
+                            toggleEpisodeWatchedStatus(episode.id);
+                            setDetailsOpen(false);
+                        }}
+                        color={isWatched ? 'warning' : 'success'}
+                    >
+                        {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
+});
+
 const EpisodesDrawer: React.FC = observer(() => {
-    const { isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes, nowPlayingItem, episodeProgress, showFilterPreferences, roomId, isHost, changeWatchTogetherMedia } = mediaStore;
-    const { t } = useTranslations();
+    const {
+        isEpisodesDrawerOpen,
+        closeEpisodesDrawer,
+        currentShow,
+        currentSeasonEpisodes,
+        nowPlayingItem,
+        episodeProgress,
+        showFilterPreferences,
+        roomId,
+        isHost,
+        changeWatchTogetherMedia
+    } = mediaStore;
+    const {t} = useTranslations();
 
     if (!currentShow || !nowPlayingItem || !('episode_number' in nowPlayingItem)) {
         return null;
@@ -32,7 +364,7 @@ const EpisodesDrawer: React.FC = observer(() => {
 
     const currentEpisodeId = nowPlayingItem.id;
     const seasonNumber = nowPlayingItem.season_number;
-    
+
     const currentPreferences = showFilterPreferences.get(currentShow.id) || {};
     const languageFilter = currentPreferences.language;
     const typeFilter = currentPreferences.type;
@@ -43,7 +375,7 @@ const EpisodesDrawer: React.FC = observer(() => {
             const typeMatch = !typeFilter || (link.type === typeFilter);
             return langMatch && typeMatch;
         });
-        
+
         // Extract video_url from the first filtered link for Watch Together sync
         const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] : null;
         const episodeToPlay = {
@@ -55,7 +387,7 @@ const EpisodesDrawer: React.FC = observer(() => {
             backdrop_path: currentShow.backdrop_path,
             season_number: seasonNumber,
         };
-        
+
         // If we're in Watch Together mode and are the host, use changeWatchTogetherMedia
         // to broadcast the episode change to all clients, then start playback
         if (roomId && isHost) {
@@ -65,66 +397,8 @@ const EpisodesDrawer: React.FC = observer(() => {
         } else {
             mediaStore.startPlayback(episodeToPlay);
         }
-        
+
         closeEpisodesDrawer();
-    };
-
-    const ImageWithProgress = ({ episode }: { episode: Episode }) => {
-        const progress = episodeProgress.get(episode.id);
-        const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
-        const isWatched = progress?.watched;
-
-        return (
-            <Box sx={{
-                position: 'relative',
-                width: 120,
-                height: 68,
-                flexShrink: 0,
-                borderRadius: 1,
-                overflow: 'hidden',
-                '&:hover .play-overlay': {
-                    opacity: 1,
-                }
-            }}>
-                {episode.still_path ? (
-                    <CardMedia
-                        component="img"
-                        image={episode.still_path}
-                        alt={episode.name}
-                        sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                ) : (
-                    <Box sx={{
-                        width: '100%', height: '100%',
-                        bgcolor: 'grey.900',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                        <TheatersIcon color="disabled" sx={{ fontSize: '2.5rem' }} />
-                    </Box>
-                )}
-                <Box
-                    className="play-overlay"
-                    sx={{
-                        position: 'absolute', inset: 0,
-                        bgcolor: 'rgba(0,0,0,0.6)', color: 'white',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        opacity: 0,
-                        transition: 'opacity 0.2s ease-in-out',
-                        cursor: 'pointer',
-                    }}
-                >
-                    <PlayArrowIcon fontSize="large" />
-                </Box>
-                {watchedPercentage > 0 && !isWatched && (
-                    <LinearProgress variant="determinate" value={watchedPercentage} color="primary" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3 }} />
-                )}
-                {isWatched && (
-                    <Box sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CheckCircleIcon color="success" sx={{ fontSize: '2rem' }} />
-                    </Box>
-                )}
-            </Box>
-        );
     };
 
     return (
@@ -132,24 +406,24 @@ const EpisodesDrawer: React.FC = observer(() => {
             anchor="right"
             open={isEpisodesDrawerOpen}
             onClose={closeEpisodesDrawer}
-            sx={{ zIndex: 2100 }} // Ensure drawer is above video player (zIndex 2000)
+            sx={{zIndex: 2100}} // Ensure drawer is above video player (zIndex 2000)
             PaperProps={{
                 sx: {
-                    width: { xs: '80%', sm: 400 },
+                    width: {xs: '85%', sm: 400},
                     bgcolor: '#181818',
                 }
             }}
         >
-            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Box sx={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                 <Toolbar>
-                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         {t('episodesDrawer.title')}
                     </Typography>
                     <IconButton edge="end" onClick={closeEpisodesDrawer}>
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
                 </Toolbar>
-                <List sx={{ overflowY: 'auto', flex: 1, p: 1 }}>
+                <List sx={{overflowY: 'auto', flex: 1, px: 1}}>
                     {currentSeasonEpisodes.map((episode) => {
                         const hasPlayableLinks = (episode.video_urls || []).some(link => {
                             const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
@@ -158,39 +432,14 @@ const EpisodesDrawer: React.FC = observer(() => {
                         });
 
                         return (
-                            <ListItem key={episode.id} disablePadding sx={{ mb: 1 }}>
-                                <ListItemButton
-                                    selected={episode.id === currentEpisodeId}
-                                    onClick={() => handleSelectEpisode(episode)}
-                                    disabled={!hasPlayableLinks}
-                                    sx={{ 
-                                        gap: 2, 
-                                        p: 1, 
-                                        borderRadius: 1,
-                                        opacity: hasPlayableLinks ? 1 : 0.5,
-                                        '&.Mui-selected': {
-                                            bgcolor: 'rgba(255, 255, 255, 0.15)'
-                                        }
-                                    }}
-                                >
-                                    <Typography sx={{ minWidth: '2.5rem', alignSelf: 'center' }} align="center">{episode.episode_number}</Typography>
-                                    
-                                    <ImageWithProgress episode={episode} />
-
-                                    <ListItemText
-                                        primary={episode.name}
-                                        primaryTypographyProps={{
-                                            fontWeight: 'bold',
-                                            whiteSpace: 'normal',
-                                            lineHeight: 1.3,
-                                        }}
-                                        secondary={t('episodesDrawer.season', { number: seasonNumber })}
-                                        secondaryTypographyProps={{
-                                            mt: 0.5
-                                        }}
-                                    />
-                                </ListItemButton>
-                            </ListItem>
+                            <SwipeableEpisodeCard
+                                key={episode.id}
+                                episode={episode}
+                                isCurrentEpisode={episode.id === currentEpisodeId}
+                                hasPlayableLinks={hasPlayableLinks}
+                                onPlay={() => handleSelectEpisode(episode)}
+                                seasonNumber={seasonNumber}
+                            />
                         );
                     })}
                 </List>

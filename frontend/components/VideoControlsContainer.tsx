@@ -72,18 +72,23 @@ export interface VideoControlsProps {
     t: ReturnType<typeof useTranslations>;
 }
 
-const VideoControlsContainer: React.FC<VideoControlsProps> = observer(({
-                                                                  playerState,
-                                                                  handleSeek,
-                                                                  videoRef,
-                                                                  handleRewind10,
-                                                                  handleTogglePlay,
-                                                                  handleForward10,
-                                                                  handleSkipIntro,
-                                                                  handleVolumeChange,
-                                                                  handleDownload,
-                                                                  handleToggleFullScreen
-                                                              }) => {
+interface VideoControlsContainerProps extends VideoControlsProps {
+    isMinimal?: boolean; // Show only essential controls (for portrait mobile)
+}
+
+const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer(({
+                                                                                    playerState,
+                                                                                    handleSeek,
+                                                                                    videoRef,
+                                                                                    handleRewind10,
+                                                                                    handleTogglePlay,
+                                                                                    handleForward10,
+                                                                                    handleSkipIntro,
+                                                                                    handleVolumeChange,
+                                                                                    handleDownload,
+                                                                                    handleToggleFullScreen,
+                                                                                    isMinimal = false
+                                                                                }) => {
 
     const {t} = useTranslations();
     const {roomId, isHost, activeTheme} = mediaStore;
@@ -100,6 +105,60 @@ const VideoControlsContainer: React.FC<VideoControlsProps> = observer(({
         Anime: 'var(--glow-anime-color)'
     }[activeTheme] as string;
 
+    // Minimal controls (portrait mobile): only play/pause, rewind, forward, and progress
+    if (isMinimal) {
+        return (
+            <>
+                <Slider
+                    className="video-player-slider"
+                    aria-label="progress"
+                    value={isNaN(playerState.progress) ? 0 : playerState.progress}
+                    onChange={handleSeek}
+                    onChangeCommitted={(_, value) => {
+                        if (videoRef.current && (!roomId || isHost)) {
+                            const newTime = ((value as number) / 100) * playerState.duration;
+                            videoRef.current.currentTime = newTime;
+                        }
+                    }}
+                    sx={{color: themeColor}}
+                    disabled={!!roomId && !isHost}
+                    disableSwap={true}
+                />
+                <Stack direction="row" sx={{justifyContent: 'center', alignItems: 'center', gap: 2}}>
+                    <IconButton onClick={handleRewind10} color="inherit"
+                                disabled={!!roomId && !isHost}
+                                size="medium"
+                    >
+                        <Replay10Icon/>
+                    </IconButton>
+                    <IconButton onClick={handleTogglePlay} color="inherit"
+                                disabled={!!roomId && !isHost}
+                                sx={{
+                                    bgcolor: 'rgba(255,255,255,0.2)',
+                                    '&:hover': {bgcolor: 'rgba(255,255,255,0.3)'},
+                                    borderRadius: '50%',
+                                    width: 48,
+                                    height: 48
+                                }}
+                    >
+                        {playerState.isPlaying ? <PauseIcon fontSize="medium"/> :
+                            <PlayArrowIcon fontSize="medium"/>}
+                    </IconButton>
+                    <IconButton onClick={handleForward10} color="inherit"
+                                disabled={!!roomId && !isHost}
+                                size="medium"
+                    >
+                        <Forward10Icon/>
+                    </IconButton>
+                    <Typography variant="caption" sx={{fontFamily: 'monospace', minWidth: 85, textAlign: 'center'}}>
+                        {formatTime(playerState.currentTime)} / {formatTime(playerState.duration)}
+                    </Typography>
+                </Stack>
+            </>
+        );
+    }
+
+    // Full controls (landscape/fullscreen)
     return (
         <>
             <Slider

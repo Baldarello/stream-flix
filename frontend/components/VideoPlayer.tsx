@@ -39,6 +39,29 @@ const VideoPlayer: React.FC = observer(() => {
     const lastHostUpdateTimeRef = useRef(0);
     const isSeekingRef = useRef(false);
 
+    // Detect if we're in portrait mobile (narrow screen and not fullscreen)
+    const [isPortraitMobile, setIsPortraitMobile] = useState(false);
+    useEffect(() => {
+        const checkPortrait = () => {
+            const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+            const isMobile = window.matchMedia('(max-width: 599px)').matches;
+            const isFs = !!document.fullscreenElement;
+            // Minimal controls in portrait mobile when not fullscreen
+            setIsPortraitMobile(isPortrait && isMobile && !isFs);
+        };
+        checkPortrait();
+        const mediaQuery = window.matchMedia('(orientation: portrait)');
+        const handleChange = () => checkPortrait();
+        mediaQuery.addEventListener('change', handleChange);
+        document.addEventListener('fullscreenchange', handleChange);
+        window.addEventListener('resize', handleChange);
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+            document.removeEventListener('fullscreenchange', handleChange);
+            window.removeEventListener('resize', handleChange);
+        };
+    }, []);
+
     const [playerState, setPlayerState] = useState({
         isPlaying: false,
         progress: 0,
@@ -552,6 +575,7 @@ const VideoPlayer: React.FC = observer(() => {
                                         handleVolumeChange={handleVolumeChange}
                                         handleDownload={handleDownload}
                                         handleToggleFullScreen={handleToggleFullScreen}
+                                        isMinimal={isPortraitMobile}
                                     />
                                 </Box>
                             </Fade>
