@@ -20,7 +20,9 @@ export const it = {
         "detailsFor": "Vedi dettagli per {title}",
         "removeFromList": "Rimuovi dalla mia lista",
         "addToList": "Aggiungi alla mia lista",
-        "removeFromContinueWatching": "Rimuovi da Continua a guardare"
+        "removeFromContinueWatching": "Rimuovi da Continua a guardare",
+        "moveToTop": "Sposta in alto",
+        "moveToBottom": "Sposta in basso"
     },
     "detail": {
         "close": "Chiudi dettaglio",
@@ -39,7 +41,11 @@ export const it = {
         "markAsWatched": "Segna come visto",
         "markAsUnwatched": "Segna come non visto",
         "filterLanguage": "Lingua",
-        "filterType": "Tipo"
+        "filterType": "Tipo",
+        "episodeDetails": "Dettagli episodio",
+        "episode": "Episodio",
+        "availableIn": "Disponibile in",
+        "playEpisode": "Riproduci Episodio"
     },
     "gridView": {
         "myListTitle": "La mia lista",

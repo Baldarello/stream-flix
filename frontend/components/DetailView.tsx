@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import {mediaStore} from '../store/mediaStore.ts';
@@ -7,6 +7,7 @@ import {
     Button,
     CardMedia,
     CircularProgress,
+    Collapse,
     FormControl,
     IconButton,
     InputAdornment,
@@ -32,6 +33,9 @@ import LinkIcon from '@mui/icons-material/Link';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import LinkEpisodesModal from './LinkEpisodesModal.tsx';
 import type {Episode} from '../types.ts';
 import {useTranslations} from '../hooks/useTranslations.ts';
@@ -50,6 +54,9 @@ const DetailView: React.FC = observer(() => {
         setShowFilterPreference
     } = mediaStore;
     const {t} = useTranslations();
+
+    // Track which episode details panel is expanded
+    const [expandedEpisodeId, setExpandedEpisodeId] = useState<number | null>(null);
 
     if (!item) return null;
 
@@ -131,6 +138,10 @@ const DetailView: React.FC = observer(() => {
                 return 'var(--glow-seriestv-color)';
         }
     }
+
+    const toggleEpisodeDetails = (episodeId: number) => {
+        setExpandedEpisodeId(prev => prev === episodeId ? null : episodeId);
+    };
 
     return (
         <Box sx={{position: 'fixed', inset: 0, zIndex: 1200, animation: 'fadeIn 0.5s ease-in-out'}}>
@@ -417,128 +428,226 @@ const DetailView: React.FC = observer(() => {
                                         const typeMatch = !typeFilter || (link.type === typeFilter);
                                         return langMatch && typeMatch;
                                     });
+                                    const isExpanded = expandedEpisodeId === episode.id;
 
                                     return (
-                                        <ListItem
-                                            key={episode.id}
-                                            disablePadding
-                                            secondaryAction={
-                                                // FIX: (line 337) Wrap IconButton with Tooltip component
-                                                <Tooltip
-                                                    title={isWatched ? t('detail.markAsUnwatched') : t('detail.markAsWatched')}>
-                                                    <IconButton
-                                                        edge="end"
-                                                        aria-label={isWatched ? t('detail.markAsUnwatched') : t('detail.markAsWatched')}
-                                                        onClick={() => mediaStore.toggleEpisodeWatchedStatus(episode.id)}
-                                                    >
-                                                        {isWatched ? <CheckCircleIcon color="success"/> :
-                                                            <CheckCircleOutlineIcon/>}
-                                                    </IconButton>
-                                                </Tooltip>
-                                            }
-                                            sx={{
-                                                mb: 1.5,
-                                                bgcolor: 'rgba(20, 20, 30, 0.6)',
-                                                borderRadius: 2,
-                                                transition: 'background-color 0.2s, transform 0.2s',
-                                                '&:hover': {
-                                                    bgcolor: 'rgba(40, 40, 50, 0.8)',
-                                                    transform: hasPlayableLinks ? 'scale(1.02)' : 'none',
-                                                },
-                                                '& .MuiListItemSecondaryAction-root': {
-                                                    right: '16px'
+                                        <React.Fragment key={episode.id}>
+                                            <ListItem
+                                                disablePadding
+                                                secondaryAction={
+                                                    <Stack direction="row" spacing={0.5} sx={{mr: 1}}>
+                                                        {/* Info button to toggle episode details */}
+                                                        <Tooltip
+                                                            title={t('detail.episodeDetails') || 'Episode details'}>
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label={t('detail.episodeDetails') || 'Episode details'}
+                                                                onClick={() => toggleEpisodeDetails(episode.id)}
+                                                                sx={{
+                                                                    color: isExpanded ? 'primary.main' : 'inherit',
+                                                                }}
+                                                            >
+                                                                {isExpanded ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        {/* Watched toggle */}
+                                                        <Tooltip
+                                                            title={isWatched ? t('detail.markAsUnwatched') : t('detail.markAsWatched')}>
+                                                            <IconButton
+                                                                edge="end"
+                                                                aria-label={isWatched ? t('detail.markAsUnwatched') : t('detail.markAsWatched')}
+                                                                onClick={() => mediaStore.toggleEpisodeWatchedStatus(episode.id)}
+                                                            >
+                                                                {isWatched ? <CheckCircleIcon color="success"/> :
+                                                                    <CheckCircleOutlineIcon/>}
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Stack>
                                                 }
-                                            }}
-                                        >
-                                            <ListItemButton
-                                                disabled={!hasPlayableLinks}
-                                                onClick={() => {
-                                                    const filteredLinks = (episode.video_urls || []).filter(link => {
-                                                        const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
-                                                        const typeMatch = !typeFilter || (link.type === typeFilter);
-                                                        return langMatch && typeMatch;
-                                                    });
-
-                                                    mediaStore.startPlayback({
-                                                        ...episode,
-                                                        video_urls: filteredLinks,
-                                                        video_url: undefined, // Let startPlayback decide
-                                                        show_id: item.id,
-                                                        show_title: item.title || item.name || '',
-                                                        backdrop_path: item.backdrop_path,
-                                                        season_number: currentSeason.season_number,
-                                                    });
-                                                }}
                                                 sx={{
-                                                    p: 2,
+                                                    mb: 1.5,
+                                                    bgcolor: 'rgba(20, 20, 30, 0.6)',
                                                     borderRadius: 2,
-                                                    pr: '64px',
-                                                    opacity: hasPlayableLinks ? 1 : 0.5,
+                                                    transition: 'background-color 0.2s, transform 0.2s',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(40, 40, 50, 0.8)',
+                                                        transform: hasPlayableLinks ? 'scale(1.02)' : 'none',
+                                                    },
+                                                    '& .MuiListItemSecondaryAction-root': {
+                                                        right: '16px'
+                                                    }
                                                 }}
                                             >
-                                                <Typography sx={{
-                                                    mr: 2,
-                                                    fontWeight: 'bold'
-                                                }}>{episode.episode_number}</Typography>
+                                                <ListItemButton
+                                                    disabled={!hasPlayableLinks}
+                                                    onClick={() => {
+                                                        const filteredLinks = (episode.video_urls || []).filter(link => {
+                                                            const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+                                                            const typeMatch = !typeFilter || (link.type === typeFilter);
+                                                            return langMatch && typeMatch;
+                                                        });
+
+                                                        mediaStore.startPlayback({
+                                                            ...episode,
+                                                            video_urls: filteredLinks,
+                                                            video_url: undefined, // Let startPlayback decide
+                                                            show_id: item.id,
+                                                            show_title: item.title || item.name || '',
+                                                            backdrop_path: item.backdrop_path,
+                                                            season_number: currentSeason.season_number,
+                                                        });
+                                                    }}
+                                                    sx={{
+                                                        p: 2,
+                                                        borderRadius: 2,
+                                                        pr: '120px',
+                                                        opacity: hasPlayableLinks ? 1 : 0.5,
+                                                    }}
+                                                >
+                                                    <Typography sx={{
+                                                        mr: 2,
+                                                        fontWeight: 'bold'
+                                                    }}>{episode.episode_number}</Typography>
+                                                    <Box sx={{
+                                                        position: 'relative',
+                                                        width: 150,
+                                                        aspectRatio: '16/9',
+                                                        mr: 2,
+                                                        flexShrink: 0,
+                                                        overflow: 'hidden',
+                                                        borderRadius: 1
+                                                    }}>
+                                                        {episode.still_path ? (
+                                                            <CardMedia
+                                                                component="img"
+                                                                image={episode.still_path}
+                                                                alt={`Scena da ${episode.name}`}
+                                                                sx={{width: '100%', height: '100%', objectFit: 'cover'}}
+                                                            />
+                                                        ) : (
+                                                            <Box sx={{
+                                                                width: '100%',
+                                                                height: '100%',
+                                                                bgcolor: 'rgba(255,255,255,0.05)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>
+                                                                <TheatersIcon color="disabled" sx={{fontSize: '3rem'}}/>
+                                                            </Box>
+                                                        )}
+                                                        {watchedPercentage > 0 && !isWatched && (
+                                                            <LinearProgress variant="determinate"
+                                                                            value={watchedPercentage}
+                                                                            color="primary" sx={{
+                                                                position: 'absolute',
+                                                                bottom: 0,
+                                                                left: 0,
+                                                                right: 0,
+                                                                height: 4
+                                                            }}/>
+                                                        )}
+                                                        {isWatched && (
+                                                            <Box sx={{
+                                                                position: 'absolute',
+                                                                inset: 0,
+                                                                bgcolor: 'rgba(0,0,0,0.5)',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center'
+                                                            }}>
+                                                                <CheckCircleIcon color="success"
+                                                                                 sx={{fontSize: '3rem'}}/>
+                                                            </Box>
+                                                        )}
+                                                    </Box>
+                                                    <ListItemText
+                                                        primary={episode.name}
+                                                        secondary={episode.overview}
+                                                        primaryTypographyProps={{fontWeight: 'bold'}}
+                                                        secondaryTypographyProps={{
+                                                            noWrap: true,
+                                                            textOverflow: 'ellipsis'
+                                                        }}
+                                                    />
+                                                </ListItemButton>
+                                            </ListItem>
+                                            {/* Episode Details Panel - expands on click/tap */}
+                                            <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                                                 <Box sx={{
-                                                    position: 'relative',
-                                                    width: 150,
-                                                    aspectRatio: '16/9',
+                                                    mb: 1.5,
+                                                    p: 3,
+                                                    ml: 2,
                                                     mr: 2,
-                                                    flexShrink: 0,
-                                                    overflow: 'hidden',
-                                                    borderRadius: 1
+                                                    bgcolor: 'rgba(30, 30, 50, 0.8)',
+                                                    borderRadius: 2,
+                                                    border: '1px solid rgba(255,255,255,0.1)',
                                                 }}>
-                                                    {episode.still_path ? (
-                                                        <CardMedia
-                                                            component="img"
-                                                            image={episode.still_path}
-                                                            alt={`Scena da ${episode.name}`}
-                                                            sx={{width: '100%', height: '100%', objectFit: 'cover'}}
-                                                        />
-                                                    ) : (
-                                                        <Box sx={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            bgcolor: 'rgba(255,255,255,0.05)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <TheatersIcon color="disabled" sx={{fontSize: '3rem'}}/>
-                                                        </Box>
-                                                    )}
-                                                    {watchedPercentage > 0 && !isWatched && (
-                                                        <LinearProgress variant="determinate" value={watchedPercentage}
-                                                                        color="primary" sx={{
-                                                            position: 'absolute',
-                                                            bottom: 0,
-                                                            left: 0,
-                                                            right: 0,
-                                                            height: 4
-                                                        }}/>
-                                                    )}
-                                                    {isWatched && (
-                                                        <Box sx={{
-                                                            position: 'absolute',
-                                                            inset: 0,
-                                                            bgcolor: 'rgba(0,0,0,0.5)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center'
-                                                        }}>
-                                                            <CheckCircleIcon color="success" sx={{fontSize: '3rem'}}/>
-                                                        </Box>
-                                                    )}
+                                                    <Stack spacing={2}>
+                                                        {/* Episode Header */}
+                                                        <Stack direction="row" spacing={2} alignItems="center">
+                                                            <Typography variant="h6" fontWeight="bold" color="primary">
+                                                                {t('detail.episode')} {episode.episode_number}: {episode.name}
+                                                            </Typography>
+                                                            {episode.air_date && (
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {episode.air_date}
+                                                                </Typography>
+                                                            )}
+                                                        </Stack>
+
+                                                        {/* Full Overview */}
+                                                        {episode.overview && (
+                                                            <Typography variant="body2" sx={{lineHeight: 1.6}}>
+                                                                {episode.overview}
+                                                            </Typography>
+                                                        )}
+
+                                                        {/* Episode Stats */}
+                                                        <Stack direction="row" spacing={3} sx={{mt: 1}}>
+                                                            {episode.runtime && (
+                                                                <Typography variant="caption" color="text.secondary">
+                                                                    ⏱ {episode.runtime} min
+                                                                </Typography>
+                                                            )}
+                                                            {hasPlayableLinks && (
+                                                                <Typography variant="caption" color="success.main">
+                                                                    ✓ {t('detail.availableIn') || 'Available'}
+                                                                </Typography>
+                                                            )}
+                                                        </Stack>
+
+                                                        {/* Play Button */}
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            startIcon={<PlayArrowIcon/>}
+                                                            size="small"
+                                                            onClick={() => {
+                                                                const filteredLinks = (episode.video_urls || []).filter(link => {
+                                                                    const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
+                                                                    const typeMatch = !typeFilter || (link.type === typeFilter);
+                                                                    return langMatch && typeMatch;
+                                                                });
+
+                                                                mediaStore.startPlayback({
+                                                                    ...episode,
+                                                                    video_urls: filteredLinks,
+                                                                    video_url: undefined,
+                                                                    show_id: item.id,
+                                                                    show_title: item.title || item.name || '',
+                                                                    backdrop_path: item.backdrop_path,
+                                                                    season_number: currentSeason.season_number,
+                                                                });
+                                                            }}
+                                                            sx={{alignSelf: 'flex-start', mt: 1}}
+                                                        >
+                                                            {t('detail.playEpisode') || 'Play Episode'}
+                                                        </Button>
+                                                    </Stack>
                                                 </Box>
-                                                <ListItemText
-                                                    primary={episode.name}
-                                                    secondary={episode.overview}
-                                                    primaryTypographyProps={{fontWeight: 'bold'}}
-                                                    secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis'}}
-                                                />
-                                            </ListItemButton>
-                                        </ListItem>
+                                            </Collapse>
+                                        </React.Fragment>
                                     )
                                 })}
                             </List>

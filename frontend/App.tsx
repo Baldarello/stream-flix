@@ -160,13 +160,35 @@ const AppContent: React.FC = observer(() => {
 
     const renderSearchView = () => {
         if (isSearching && searchQuery) {
-            return <Box sx={{display: 'flex', justifyContent: 'center', pt: 20}}><CircularProgress/></Box>;
+            return (
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: 'calc(100vh - 64px - 200px)',
+                    pt: 'env(safe-area-inset-top)'
+                }}>
+                    <CircularProgress/>
+                </Box>
+            );
         }
         if (!searchQuery) {
             return (
-                <Box sx={{textAlign: 'center', pt: 20}}>
-                    <Typography variant="h5">{t('misc.searchPrompt.title')}</Typography>
-                    <Typography color="text.secondary">{t('misc.searchPrompt.subtitle')}</Typography>
+                <Box sx={{
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 'calc(100vh - 64px - 200px)',
+                    pt: 'env(safe-area-inset-top)'
+                }}>
+                    <Typography variant="h3" fontWeight="bold" gutterBottom>
+                        {t('misc.searchPrompt.title')}
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary">
+                        {t('misc.searchPrompt.subtitle')}
+                    </Typography>
                 </Box>
             )
         }

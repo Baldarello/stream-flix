@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
                 ))}
             </Box>
             <Typography variant="body2" sx={{mt: 4}}>
-                &copy; 1997-2024 Quix, Inc.
+                &copy; 2026 Quix
             </Typography>
         </Container>
     );

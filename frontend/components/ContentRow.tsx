@@ -1,9 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useCallback} from 'react';
 import type {MediaItem} from '../types.ts';
 import {Card} from './Card.tsx';
 import {Box, Fade, IconButton, Typography} from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {observer} from 'mobx-react-lite';
 import {useTranslations} from '../hooks/useTranslations.ts';
 import {mediaStore} from '../store/mediaStore.ts';
@@ -33,6 +35,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [activeDragIndex, setActiveDragIndex] = useState<number | null>(null);
 
     // Touch drag state
     const touchDragRef = useRef<{
@@ -41,6 +44,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         isDragging: boolean;
     } | null>(null);
     const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const checkScrollability = () => {
         const el = scrollContainerRef.current;
@@ -74,6 +78,31 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         };
     }, [items]);
 
+    // Auto-scroll during drag when near edges
+    const startAutoScroll = useCallback((direction: 'left' | 'right') => {
+        if (autoScrollRef.current) return;
+        autoScrollRef.current = setInterval(() => {
+            const el = scrollContainerRef.current;
+            if (el) {
+                const scrollAmount = 15;
+                el.scrollLeft += direction === 'left' ? -scrollAmount : scrollAmount;
+            }
+        }, 16); // ~60fps
+    }, []);
+
+    const stopAutoScroll = useCallback(() => {
+        if (autoScrollRef.current) {
+            clearInterval(autoScrollRef.current);
+            autoScrollRef.current = null;
+        }
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            stopAutoScroll();
+        };
+    }, [stopAutoScroll]);
+
     const handleScroll = (direction: 'left' | 'right') => {
         const el = scrollContainerRef.current;
         if (el) {
@@ -85,11 +114,25 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         }
     };
 
+    // Quick reorder handlers - move item to top or bottom
+    const moveToTop = (index: number) => {
+        if (index > 0) {
+            mediaStore.reorderMyList(index, 0);
+        }
+    };
+
+    const moveToBottom = (index: number) => {
+        if (index < items.length - 1) {
+            mediaStore.reorderMyList(index, items.length - 1);
+        }
+    };
+
     // Drag and Drop handlers
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
         e.dataTransfer.setData("itemIndex", index.toString());
         setDraggedIndex(index);
         setIsDragging(true);
+        setActiveDragIndex(index);
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
@@ -97,10 +140,25 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         if (index !== draggedIndex) {
             setDropTargetIndex(index);
         }
+
+        // Auto-scroll near edges during drag
+        const container = scrollContainerRef.current;
+        if (container) {
+            const rect = container.getBoundingClientRect();
+            const edgeThreshold = 80;
+            if (e.clientX < rect.left + edgeThreshold) {
+                startAutoScroll('left');
+            } else if (e.clientX > rect.right - edgeThreshold) {
+                startAutoScroll('right');
+            } else {
+                stopAutoScroll();
+            }
+        }
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
         e.preventDefault();
+        stopAutoScroll();
         if (draggedIndex === null) return;
         mediaStore.reorderMyList(draggedIndex, dropIndex);
         handleDragEnd();
@@ -110,6 +168,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         setDraggedIndex(null);
         setDropTargetIndex(null);
         setIsDragging(false);
+        setActiveDragIndex(null);
+        stopAutoScroll();
         touchDragRef.current = null;
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
@@ -134,6 +194,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                 touchDragRef.current.isDragging = true;
                 setDraggedIndex(index);
                 setIsDragging(true);
+                setActiveDragIndex(index);
             }
         }, 300); // 300ms long press to start drag
     };
@@ -149,6 +210,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
             touchDragRef.current.isDragging = true;
             setDraggedIndex(touchDragRef.current.startIndex);
             setIsDragging(true);
+            setActiveDragIndex(touchDragRef.current.startIndex);
         }
 
         if (touchDragRef.current.isDragging) {
@@ -172,11 +234,23 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
             if (newDropTarget !== null && newDropTarget !== dropTargetIndex) {
                 setDropTargetIndex(newDropTarget);
             }
+
+            // Auto-scroll near edges during touch drag
+            const rect = container.getBoundingClientRect();
+            const edgeThreshold = 80;
+            if (touch.clientX < rect.left + edgeThreshold) {
+                startAutoScroll('left');
+            } else if (touch.clientX > rect.right - edgeThreshold) {
+                startAutoScroll('right');
+            } else {
+                stopAutoScroll();
+            }
         }
     };
 
     const handleTouchEnd = () => {
         if (!isReorderable) return;
+        stopAutoScroll();
 
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
@@ -212,7 +286,10 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
             </Typography>
             <Box
                 onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
+                onMouseLeave={() => {
+                    setIsHovered(false);
+                    stopAutoScroll();
+                }}
                 sx={{position: 'relative'}}
             >
                 {/* FIX: (line 127) Wrap IconButton with Fade component */}
@@ -265,7 +342,10 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                             onDragOver={(e) => isReorderable && handleDragOver(e, index)}
                             onDrop={(e) => isReorderable && handleDrop(e, index)}
                             onDragEnd={() => isReorderable && handleDragEnd()}
-                            onDragLeave={() => isReorderable && setDropTargetIndex(null)}
+                            onDragLeave={() => {
+                                if (isReorderable) setDropTargetIndex(null);
+                                stopAutoScroll();
+                            }}
                             onTouchStart={(e) => isReorderable && handleTouchStart(e, index)}
                             onTouchMove={(e) => isReorderable && handleTouchMove(e)}
                             onTouchEnd={() => isReorderable && handleTouchEnd()}
@@ -283,6 +363,9 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                                 style={{zIndex: items.length - index}}
                                 isContinueWatching={isContinueWatching}
                                 isReorderable={isReorderable}
+                                onReorderTop={() => moveToTop(index)}
+                                onReorderBottom={() => moveToBottom(index)}
+                                isDragActive={activeDragIndex === index}
                             />
                         </div>
                     ))}
