@@ -1840,6 +1840,7 @@ class MediaStore {
                 label: link.label || new URL(link.url).hostname,
                 language: link.language,
                 type: link.type,
+                isValid: true, // New links are assumed valid by default
             }));
 
             // Automatically set the first source as preferred if none is set
