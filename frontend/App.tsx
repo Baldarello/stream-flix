@@ -93,6 +93,7 @@ const AppContent: React.FC = observer(() => {
     const {t} = useTranslations();
     const {
         loading,
+        isReloadingData,
         error,
         heroContent,
         nowPlayingItem,
@@ -126,7 +127,7 @@ const AppContent: React.FC = observer(() => {
         };
     }, [currentSelectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster, remoteSlaveState?.nowPlayingItem]);
 
-    if (loading) {
+    if (loading || isReloadingData) {
         return (
             <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
                 <CircularProgress color="primary"/>

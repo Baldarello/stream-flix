@@ -235,6 +235,19 @@ class MediaStore {
     // Google Auth & Sync State
     googleUser: GoogleUser | null = null;
     isSyncing = false;
+    isReloadingData = false; // Loading state per ricaricamento dati senza refresh pagina
+
+    // Reload all data in memory (used after sync operations instead of page reload)
+    reloadAllData = async () => {
+        this.isReloadingData = true;
+        try {
+            await this.loadPersistedData();
+            await this.fetchAllData();
+        } finally {
+            this.isReloadingData = false;
+        }
+    };
+
     private backupDebounceTimer: number | null = null;
 
     // Sync Conflict Modal State
@@ -535,7 +548,8 @@ class MediaStore {
                 await db.importData(remoteData);
                 await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
-                setTimeout(() => window.location.reload(), 2000);
+                // Reload data in memory instead of reloading the page
+                await this.reloadAllData();
             } else {
                 // No remote backup exists. Create one from local DB.
                 this.showSnackbar('notifications.noBackupFoundCreating', 'info', true);
@@ -638,7 +652,8 @@ class MediaStore {
 
                 this.showSnackbar('notifications.syncMergeComplete', 'success', true);
                 this.closeSyncConflictModal();
-                setTimeout(() => window.location.reload(), 2000);
+                // Reload data in memory instead of reloading the page
+                await this.reloadAllData();
                 return;
             }
 
@@ -776,7 +791,8 @@ class MediaStore {
 
             this.showSnackbar('notifications.syncMergeComplete', 'success', true);
             this.closeSyncConflictModal();
-            setTimeout(() => window.location.reload(), 2000);
+            // Reload data in memory instead of reloading the page
+            await this.reloadAllData();
         } catch (error) {
             console.error("Error merging data:", error);
             this.showSnackbar('notifications.syncMergeError', 'error', true, {error: (error as Error).message});
@@ -824,7 +840,8 @@ class MediaStore {
 
             this.showSnackbar('notifications.syncOverwriteLocalComplete', 'success', true);
             this.closeSyncConflictModal();
-            setTimeout(() => window.location.reload(), 2000);
+            // Reload data in memory instead of reloading the page
+            await this.reloadAllData();
         } catch (error) {
             console.error("Error overwriting local data:", error);
             this.showSnackbar('notifications.syncOverwriteLocalError', 'error', true, {error: (error as Error).message});
@@ -946,7 +963,8 @@ class MediaStore {
                 await db.importData(data);
                 await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
-                setTimeout(() => window.location.reload(), 2000);
+                // Reload data in memory instead of reloading the page
+                await this.reloadAllData();
             } else {
                 this.showSnackbar('notifications.noBackupFound', 'warning', true);
             }
@@ -2619,7 +2637,8 @@ class MediaStore {
                 showCount: data.shows.length,
                 linkCount: totalLinksAdded
             });
-            setTimeout(() => window.location.reload(), 3000);
+            // Reload data in memory instead of reloading the page
+            await this.reloadAllData();
         } catch (error) {
             this.showSnackbar('notifications.importError', 'error', true, {error: (error as Error).message});
             this.isImportingLibrary = false;
@@ -2656,8 +2675,8 @@ class MediaStore {
             // Remove the revision itself
             if (revision.id) await db.revisions.delete(revision.id);
             this.showSnackbar('notifications.revertSuccess', 'success', true);
-            // Reload the page after 1.5 seconds to ensure all state is consistent
-            setTimeout(() => window.location.reload(), 1500);
+            // Reload data in memory instead of reloading the page
+            await this.reloadAllData();
         } catch (error) {
             this.showSnackbar('notifications.revertError', 'error', true, {error: (error as Error).message});
         }
@@ -3254,7 +3273,7 @@ class MediaStore {
             websocketService.sendMessage({type: 'quix-sync-completed'});
 
             // Reload the local data so the slave's UI reflects the new content
-            await this.loadPersistedData();
+            await this.reloadAllData();
 
         } catch (error) {
             console.error('Error syncing media from master:', error);
