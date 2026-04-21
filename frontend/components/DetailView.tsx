@@ -82,8 +82,9 @@ const SwipeableEpisodeCardDetailView: React.FC<SwipeableEpisodeCardProps> = obse
         type: link.type
     })) || [];
 
+    // Deduplicate languages (check both lang AND type to keep dub AND sub)
     const uniqueLanguages = availableLanguages.reduce((acc, {lang, type}) => {
-        if (!acc.find(l => l.lang === lang)) {
+        if (!acc.find(l => l.lang === lang && l.type === type)) {
             acc.push({lang, type});
         }
         return acc;
@@ -785,16 +786,22 @@ const DetailView: React.FC = observer(() => {
                                             isCurrentEpisode={false}
                                             hasPlayableLinks={hasPlayableLinks}
                                             onPlay={() => {
-                                                const filteredLinks = (episode.video_urls || []).filter(link => {
+                                                const allVideoUrls = episode.video_urls || [];
+
+                                                // Apply user filter preferences to determine which URL to play
+                                                const filteredLinks = allVideoUrls.filter(link => {
                                                     const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
                                                     const typeMatch = !typeFilter || (link.type === typeFilter);
                                                     return langMatch && typeMatch;
                                                 });
 
+                                                // Get the first filtered link for playback
+                                                const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] : null;
+
                                                 mediaStore.startPlayback({
                                                     ...episode,
-                                                    video_urls: filteredLinks,
-                                                    video_url: undefined,
+                                                    video_urls: allVideoUrls, // Pass ALL links so VideoPlayer can show language/type pickers
+                                                    video_url: firstFilteredLink?.url, // Use first filtered link's URL for playback
                                                     show_id: item.id,
                                                     show_title: item.title || item.name || '',
                                                     backdrop_path: item.backdrop_path,
