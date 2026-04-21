@@ -257,6 +257,8 @@ class MediaStore {
 
     constructor() {
         makeAutoObservable(this);
+        // Initialize invalidLinkIds from DB
+        this.loadInvalidLinksFromDb();
         // isSmartTV is now determined on app load based on DB preference.
         // We still run the detector for first-time use.
         if (detectSmartTV()) {
@@ -273,6 +275,22 @@ class MediaStore {
         this.knownSlaves.forEach(slave => {
             slave.isOnline = false;
         });
+    };
+
+    // Load invalid links from DB on startup
+    loadInvalidLinksFromDb = async () => {
+        try {
+            const invalidLinks = await db.mediaLinks.filter(link => link.isValid === false).toArray();
+            const invalidIds = new Set<number>();
+            invalidLinks.forEach(link => {
+                if (link.id) invalidIds.add(link.id);
+            });
+            runInAction(() => {
+                this.invalidLinkIds = invalidIds;
+            });
+        } catch (error) {
+            console.error('Error loading invalid links from DB:', error);
+        }
     };
 
     @computed get currentActiveView(): ActiveView {
@@ -1861,6 +1879,7 @@ class MediaStore {
     validateAllLinks = async () => {
         this.invalidLinksLoading = true;
         const newInvalidIds = new Set<number>();
+        const linksToUpdate: {id: number; isValid: boolean}[] = [];
         
         try {
             // Check all links from mediaLinks Map
@@ -1868,11 +1887,22 @@ class MediaStore {
                 for (const link of links) {
                     if (link.id) {
                         const isValid = await checkLinkValidity(link.url);
+                        linksToUpdate.push({ id: link.id, isValid });
                         if (!isValid) {
                             newInvalidIds.add(link.id);
                         }
                     }
                 }
+            }
+            
+            // Save validity to database
+            if (linksToUpdate.length > 0) {
+                const db = this.db;
+                await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
+                    for (const linkUpdate of linksToUpdate) {
+                        await db.mediaLinks.update(linkUpdate.id, { isValid: linkUpdate.isValid });
+                    }
+                });
             }
             
             runInAction(() => {

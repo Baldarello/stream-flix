@@ -5,6 +5,7 @@ export interface MediaLink {
     label: string;
     language: string; // e.g., 'ITA', 'ENG', 'JPN'
     type: 'sub' | 'dub'; // Subtitled or Dubbed
+    isValid?: boolean; // Cached validity status from last validation
 }
 
 export interface Episode {
