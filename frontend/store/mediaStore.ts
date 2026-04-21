@@ -577,9 +577,10 @@ class MediaStore {
 
                 // Import merged data
                 const mergedData = {
-                    myList: JSON.parse(JSON.stringify(mergedMyList
-                        .filter(id => typeof id === 'number' || typeof id === 'string')
-                        .map((id, index) => ({id, order: index})))),
+                    myList: JSON.parse(JSON.stringify((mergedMyList || [])
+                        .map((id: any) => typeof id === 'object' && id !== null ? id.id : id)
+                        .filter((id: any) => typeof id === 'number' || typeof id === 'string')
+                        .map((id: any, index: number) => ({id, order: index})))),
                     cachedItems: cleanedShows,
                     mediaLinks: cleanedLinks,
                     episodeProgress: cleanedProgress,
@@ -701,9 +702,10 @@ class MediaStore {
 
             // Import merged data
             const mergedData = {
-                myList: JSON.parse(JSON.stringify(finalMyList
-                    .filter(id => typeof id === 'number' || typeof id === 'string')
-                    .map((id, index) => ({id, order: index})))),
+                myList: JSON.parse(JSON.stringify((finalMyList || [])
+                    .map((id: any) => typeof id === 'object' && id !== null ? id.id : id)
+                    .filter((id: any) => typeof id === 'number' || typeof id === 'string')
+                    .map((id: any, index: number) => ({id, order: index})))),
                 cachedItems: cleanedShows,
                 mediaLinks: cleanedLinks,
                 episodeProgress: cleanedProgress,
@@ -761,7 +763,8 @@ class MediaStore {
             const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
 
             const remoteData = {
-                myList: JSON.parse(JSON.stringify(myList.remote
+                myList: JSON.parse(JSON.stringify((myList.remote || [])
+                    .map(id => typeof id === 'object' && id !== null ? id.id : id)
                     .filter(id => typeof id === 'number' || typeof id === 'string')
                     .map((id, index) => ({id, order: index})))),
                 cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
@@ -805,7 +808,8 @@ class MediaStore {
 
             // Build local data structure
             const localData = {
-                myList: JSON.parse(JSON.stringify(myList.local
+                myList: JSON.parse(JSON.stringify((myList.local || [])
+                    .map(id => typeof id === 'object' && id !== null ? id.id : id)
                     .filter(id => typeof id === 'number' || typeof id === 'string')
                     .map((id, index) => ({id, order: index})))),
                 cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
