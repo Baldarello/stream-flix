@@ -28,7 +28,21 @@ const LinkSelectionModal: React.FC = () => {
   const handleSelectLink = (link: MediaLink) => {
     if (itemForLinkSelection) {
       // Create a new item object with the selected video_url to pass to the player
-      const itemToPlay = { ...itemForLinkSelection, video_url: link.url };
+      const itemToPlay = {
+        ...itemForLinkSelection,
+        video_url: link.url,
+        video_urls: itemForLinkSelection.video_urls || []
+      };
+
+      // Save the language/type preference based on the selected link
+      const showId = 'show_id' in itemForLinkSelection ? itemForLinkSelection.show_id : itemForLinkSelection.id;
+      if (showId) {
+        mediaStore.setShowFilterPreference(showId, {
+          language: link.language,
+          type: link.type as 'sub' | 'dub'
+        });
+      }
+
       if (linkSelectionContext === 'remote') {
         playRemoteItem(itemToPlay);
       } else {

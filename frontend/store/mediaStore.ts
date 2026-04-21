@@ -371,8 +371,6 @@ class MediaStore {
             // Store all candidate links so VideoPlayer can show language/type pickers
             item.video_urls = candidateLinks;
             
-            // Determine the language/type from the selected URL and save as user preference
-            const showId = 'show_id' in item ? item.show_id : item.id;
             let selectedLink: MediaLink | undefined;
 
             if (candidateLinks.length === 1) {
