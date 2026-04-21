@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {
     AppBar,
+    Badge,
     Box,
     Button,
     Fade,
@@ -31,7 +32,7 @@ const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveV
 ];
 
 export const Header: React.FC = observer(() => {
-    const {isSearchActive, toggleSearch, searchQuery, setSearchQuery} = mediaStore;
+    const {isSearchActive, toggleSearch, searchQuery, setSearchQuery, unreadNotificationsCount, openNotificationsModal} = mediaStore;
     const {t} = useTranslations();
     const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -181,8 +182,10 @@ export const Header: React.FC = observer(() => {
                     {/* FIX: (line 162) Wrap Box with Fade component */}
                     <Fade in={!isSearchActive}>
                         <Box sx={{display: isSearchActive ? 'none' : 'flex', alignItems: 'center', gap: 1}}>
-                            <IconButton color="inherit">
-                                <NotificationsIcon/>
+                            <IconButton color="inherit" onClick={openNotificationsModal}>
+                                <Badge badgeContent={unreadNotificationsCount} color="error">
+                                    <NotificationsIcon/>
+                                </Badge>
                             </IconButton>
                             <IconButton color="inherit" onClick={() => mediaStore.enableSmartTVMode()}>
                                 <TvIcon/>

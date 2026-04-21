@@ -14,6 +14,7 @@ import type {
     SharedShowData,
     ViewingHistoryItem
 } from '../types.ts';
+import {checkLinksForShow, type InvalidLinkInfo} from '../services/linkValidator';
 import type {AlertColor} from '@mui/material';
 import {
     getLatestMovies,
@@ -206,6 +207,18 @@ class MediaStore {
         isTranslationKey?: boolean,
         translationValues?: Record<string, any>
     } | null = null;
+
+    // Notifications State
+    notifications: Array<{
+        id: string;
+        type: 'invalid_links';
+        title: string;
+        message: string;
+        data: InvalidLinkInfo[];
+        read: boolean;
+        createdAt: number;
+    }> = [];
+    isNotificationsModalOpen = false;
 
     // Debug Mode State
     isDebugModeActive = false;
@@ -925,6 +938,71 @@ class MediaStore {
     // --- START OF IMPLEMENTED METHODS ---
     hideSnackbar = () => {
         this.snackbarMessage = null;
+    };
+
+    // Notifications Methods
+    addNotification = (notification: Omit<typeof this.notifications[0], 'id' | 'read' | 'createdAt'>) => {
+        const newNotification = {
+            ...notification,
+            id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            read: false,
+            createdAt: Date.now(),
+        };
+        this.notifications.unshift(newNotification);
+    };
+
+    markNotificationRead = (id: string) => {
+        const notification = this.notifications.find(n => n.id === id);
+        if (notification) {
+            notification.read = true;
+        }
+    };
+
+    markAllNotificationsRead = () => {
+        this.notifications.forEach(n => n.read = true);
+    };
+
+    clearNotifications = () => {
+        this.notifications = [];
+    };
+
+    dismissNotification = (id: string) => {
+        this.notifications = this.notifications.filter(n => n.id !== id);
+    };
+
+    openNotificationsModal = () => {
+        this.isNotificationsModalOpen = true;
+    };
+
+    closeNotificationsModal = () => {
+        this.isNotificationsModalOpen = false;
+    };
+
+    get unreadNotificationsCount() {
+        return this.notifications.filter(n => !n.read).length;
+    }
+
+    checkAndNotifyInvalidLinks = async (item: MediaItem) => {
+        try {
+            const invalidLinks = await checkLinksForShow(item, this.mediaLinks);
+            
+            if (invalidLinks.length > 0) {
+                // Group invalid links by show for the notification
+                const showName = item.title || item.name || 'Unknown';
+                const episodeInfo = item.media_type === 'tv' && invalidLinks[0].episodeName
+                    ? ` (${invalidLinks[0].seasonNumber}x${invalidLinks[0].episodeName})`
+                    : '';
+                
+                this.addNotification({
+                    type: 'invalid_links',
+                    title: 'notifications.invalidLinks',
+                    message: `notifications.invalidLinksDesc`,
+                    data: invalidLinks,
+                });
+            }
+        } catch (error) {
+            console.error('Error checking links:', error);
+        }
     };
 
     // This is called by the popstate event handler to close the detail view

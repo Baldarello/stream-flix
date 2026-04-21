@@ -456,6 +456,17 @@ export const it = {
         "syncOverwriteLocalError": "Errore durante la sovrascrittura locale: {error}",
         "syncOverwriteRemoteComplete": "Dati remoti sovrascritti con quelli locali.",
         "syncOverwriteRemoteError": "Errore durante la sovrascrittura remota: {error}",
-        "syncCancelled": "Sincronizzazione annullata. Logout effettuato."
+        "syncCancelled": "Sincronizzazione annullata. Logout effettuato.",
+        "title": "Notifiche",
+        "noNotifications": "Nessuna notifica",
+        "markAllRead": "Segna tutti come letti",
+        "clearAll": "Elimina tutti",
+        "invalidLinks": "Link non validi trovati",
+        "invalidLinksDesc": "{count} link video potrebbero non essere più validi.",
+        "manageLinks": "Gestisci Link",
+        "dismiss": "Ignora",
+        "new": "Nuovo",
+        "season": "Stagione",
+        "episode": "Episodio"
     }
 }

@@ -459,6 +459,13 @@ const DetailView: React.FC = observer(() => {
         }
     }, [item, currentSeason, availableLanguages, availableTypes, showFilterPreferences, setShowFilterPreference]);
 
+    // Check for invalid links when show details are loaded
+    useEffect(() => {
+        if (item && !isDetailLoading) {
+            mediaStore.checkAndNotifyInvalidLinks(item);
+        }
+    }, [item, isDetailLoading]);
+
 
     const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;

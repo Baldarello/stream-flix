@@ -455,6 +455,17 @@ export const en = {
         "syncOverwriteLocalError": "Error overwriting local data: {error}",
         "syncOverwriteRemoteComplete": "Remote data overwritten with local data.",
         "syncOverwriteRemoteError": "Error overwriting remote data: {error}",
-        "syncCancelled": "Sync cancelled. Logged out."
+        "syncCancelled": "Sync cancelled. Logged out.",
+        "title": "Notifications",
+        "noNotifications": "No notifications",
+        "markAllRead": "Mark all as read",
+        "clearAll": "Clear all",
+        "invalidLinks": "Invalid links found",
+        "invalidLinksDesc": "{count} video link(s) may no longer be valid.",
+        "manageLinks": "Manage Links",
+        "dismiss": "Dismiss",
+        "new": "New",
+        "season": "Season",
+        "episode": "Episode"
     }
 }
