@@ -41,6 +41,7 @@ const VideoPlayer: React.FC = observer(() => {
     const uiTimeoutRef = useRef<number | null>(null);
     const lastHostUpdateTimeRef = useRef(0);
     const isSeekingRef = useRef(false);
+    const lastProgressBeforeLanguageChangeRef = useRef<number | null>(null);
 
     // Detect if we're in portrait mobile (narrow screen and not fullscreen)
     const [isPortraitMobile, setIsPortraitMobile] = useState(false);
@@ -532,8 +533,28 @@ const VideoPlayer: React.FC = observer(() => {
             const newVideoSrc = filteredLinks[0].url;
             // Use currentVideoSrc to track changes across multiple filter updates
             if (newVideoSrc !== currentVideoSrc) {
+                // Save current progress before changing src
+                const currentTime = videoRef.current.currentTime;
+                lastProgressBeforeLanguageChangeRef.current = currentTime;
+                
                 setCurrentVideoSrc(newVideoSrc);
                 videoRef.current.src = newVideoSrc;
+                
+                // Restore progress after new video loads metadata
+                const video = videoRef.current;
+                const restoreProgress = () => {
+                    if (lastProgressBeforeLanguageChangeRef.current !== null && video.readyState >= 1) {
+                        video.currentTime = lastProgressBeforeLanguageChangeRef.current;
+                        lastProgressBeforeLanguageChangeRef.current = null;
+                    }
+                };
+                
+                if (video.readyState >= 1) {
+                    restoreProgress();
+                } else {
+                    video.addEventListener('loadedmetadata', restoreProgress, { once: true });
+                }
+                
                 videoRef.current.play().catch(console.error);
             }
         }
@@ -611,7 +632,10 @@ const VideoPlayer: React.FC = observer(() => {
                                                 open={Boolean(languageMenuAnchor)}
                                                 onClose={handleCloseLanguageMenu}
                                                 PaperProps={{
-                                                    sx: { bgcolor: 'rgba(30, 30, 30, 0.95)' }
+                                                    sx: { 
+                                                        bgcolor: 'rgba(30, 30, 30, 0.95)',
+                                                        minWidth: 120
+                                                    }
                                                 }}
                                             >
                                                 {hasMultipleLanguages && (
@@ -620,7 +644,19 @@ const VideoPlayer: React.FC = observer(() => {
                                                             Lingua
                                                         </MenuItem>
                                                         {availableLanguages.map(lang => (
-                                                            <MenuItem key={lang} value={lang} onClick={() => { handleLanguageChange(lang); handleCloseLanguageMenu(); }}>
+                                                            <MenuItem 
+                                                                key={lang} 
+                                                                value={lang} 
+                                                                onClick={() => { handleLanguageChange(lang); handleCloseLanguageMenu(); }}
+                                                                sx={{
+                                                                    py: 0.75,
+                                                                    px: 2,
+                                                                    opacity: 0.7,
+                                                                    fontSize: '0.875rem',
+                                                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                }}
+                                                            >
                                                                 {selectedLanguage === lang && '✓ '}{lang}
                                                             </MenuItem>
                                                         ))}
@@ -633,7 +669,19 @@ const VideoPlayer: React.FC = observer(() => {
                                                             Tipo
                                                         </MenuItem>
                                                         {availableTypes.map(type => (
-                                                            <MenuItem key={type} value={type} onClick={() => { handleTypeChange(type as 'sub' | 'dub'); handleCloseLanguageMenu(); }}>
+                                                            <MenuItem 
+                                                                key={type} 
+                                                                value={type} 
+                                                                onClick={() => { handleTypeChange(type as 'sub' | 'dub'); handleCloseLanguageMenu(); }}
+                                                                sx={{
+                                                                    py: 0.75,
+                                                                    px: 2,
+                                                                    opacity: 0.7,
+                                                                    fontSize: '0.875rem',
+                                                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                }}
+                                                            >
                                                                 {selectedType === type && '✓ '}{type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
                                                             </MenuItem>
                                                         ))}
@@ -657,6 +705,20 @@ const VideoPlayer: React.FC = observer(() => {
                                                             '& .MuiSelect-icon': {color: 'white'},
                                                             '& .MuiSelect-select': {py: 0.5, px: 1}
                                                         }}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                sx: {
+                                                                    bgcolor: 'rgba(30, 30, 30, 0.95)',
+                                                                    color: 'white',
+                                                                    minWidth: 120
+                                                                }
+                                                            },
+                                                            MenuListProps: {
+                                                                sx: {
+                                                                    py: 0.5
+                                                                }
+                                                            }
+                                                        }}
                                                         renderValue={(val) => (
                                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                                                                 <VolumeUpIcon sx={{fontSize: 18}} />
@@ -665,7 +727,20 @@ const VideoPlayer: React.FC = observer(() => {
                                                         )}
                                                     >
                                                         {availableLanguages.map(lang => (
-                                                            <MenuItem key={lang} value={lang}>{lang}</MenuItem>
+                                                            <MenuItem 
+                                                                key={lang} 
+                                                                value={lang}
+                                                                sx={{
+                                                                    py: 0.75,
+                                                                    px: 2,
+                                                                    opacity: 0.7,
+                                                                    fontSize: '0.875rem',
+                                                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                }}
+                                                            >
+                                                                {selectedLanguage === lang && '✓ '}{lang}
+                                                            </MenuItem>
                                                         ))}
                                                     </Select>
                                                 </FormControl>
@@ -683,6 +758,20 @@ const VideoPlayer: React.FC = observer(() => {
                                                             '& .MuiSelect-icon': {color: 'white'},
                                                             '& .MuiSelect-select': {py: 0.5, px: 1}
                                                         }}
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                sx: {
+                                                                    bgcolor: 'rgba(30, 30, 30, 0.95)',
+                                                                    color: 'white',
+                                                                    minWidth: 120
+                                                                }
+                                                            },
+                                                            MenuListProps: {
+                                                                sx: {
+                                                                    py: 0.5
+                                                                }
+                                                            }
+                                                        }}
                                                         renderValue={(val) => (
                                                             <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                                                                 <ClosedCaptionIcon sx={{fontSize: 18}} />
@@ -691,7 +780,20 @@ const VideoPlayer: React.FC = observer(() => {
                                                         )}
                                                     >
                                                         {availableTypes.map(type => (
-                                                            <MenuItem key={type} value={type}>{type === 'dub' ? 'Dopp.' : 'Sub'}</MenuItem>
+                                                            <MenuItem 
+                                                                key={type} 
+                                                                value={type}
+                                                                sx={{
+                                                                    py: 0.75,
+                                                                    px: 2,
+                                                                    opacity: 0.7,
+                                                                    fontSize: '0.875rem',
+                                                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                }}
+                                                            >
+                                                                {selectedType === type && '✓ '}{type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
+                                                            </MenuItem>
                                                         ))}
                                                     </Select>
                                                 </FormControl>
