@@ -357,18 +357,22 @@ const EpisodesDrawer: React.FC = observer(() => {
     const typeFilter = currentPreferences.type;
 
     const handleSelectEpisode = (episode: Episode) => {
-        const filteredLinks = (episode.video_urls || []).filter(link => {
+        // Get ALL video_urls for the episode (not filtered) so VideoPlayer can show pickers
+        const allVideoUrls = episode.video_urls || [];
+        
+        // Apply user filter preferences to determine which URL to play
+        const filteredLinks = allVideoUrls.filter(link => {
             const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
             const typeMatch = !typeFilter || (link.type === typeFilter);
             return langMatch && typeMatch;
         });
 
-        // Extract video_url from the first filtered link for Watch Together sync
+        // Extract video_url from the first filtered link for playback
         const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] : null;
         const episodeToPlay = {
             ...episode,
-            video_urls: filteredLinks,
-            video_url: firstFilteredLink?.url, // Use first filtered link's URL
+            video_urls: allVideoUrls, // Pass ALL links so VideoPlayer can show language/type pickers
+            video_url: firstFilteredLink?.url, // Use first filtered link's URL for playback
             show_id: currentShow.id,
             show_title: currentShow.title || currentShow.name || '',
             backdrop_path: currentShow.backdrop_path,
