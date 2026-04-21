@@ -577,18 +577,9 @@ const VideoPlayer: React.FC = observer(() => {
                                 <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')}
                                             onClick={stopPlayback}><ArrowBackIcon/></IconButton>
                                 <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
-                                {/* FIX: (line 366) Wrap IconButton with Tooltip component */}
-                                {mediaStore.nextEpisode &&
-                                    <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit"
-                                                                                              onClick={handleNextEpisode}
-                                                                                              disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
-                                {/* FIX: (line 367) Wrap IconButton with Tooltip component */}
-                                {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit"
-                                                                                                        onClick={mediaStore.openEpisodesDrawer}
-                                                                                                        disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
                                 {/* Language/Subtitle pickers - only show when multiple options available */}
                                 {showLanguagePickers && !isPortraitMobile && (
-                                    <Box sx={{display: 'flex', gap: 1, ml: 1}}>
+                                    <Box sx={{display: 'flex', gap: 1, mr: 1}}>
                                         {hasMultipleLanguages && (
                                             <FormControl size="small" sx={{minWidth: 80}}>
                                                 <Select
@@ -645,6 +636,14 @@ const VideoPlayer: React.FC = observer(() => {
                                         )}
                                     </Box>
                                 )}
+                                {/* Buttons - positioned after language pickers */}
+                                {mediaStore.nextEpisode &&
+                                    <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit"
+                                                                                              onClick={handleNextEpisode}
+                                                                                              disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
+                                {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit"
+                                                                                                        onClick={mediaStore.openEpisodesDrawer}
+                                                                                                        disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
                             </Toolbar>
                         </AppBar>
 

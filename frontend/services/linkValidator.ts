@@ -21,27 +21,26 @@ export interface InvalidLinkInfo {
 }
 
 /**
- * Check if a single link is valid by making a HEAD request
+ * Check if a single link is valid by making a request through the backend API
+ * This bypasses CORS issues that would occur with direct fetch from frontend
  */
 export const checkLinkValidity = async (url: string): Promise<boolean> => {
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), LINK_CHECK_TIMEOUT);
-
-        // Try GET with Range header - more reliable for video servers
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors',
+        const response = await fetch('/api/validate-link', {
+            method: 'POST',
             headers: {
-                'Range': 'bytes=0-0', // Request only first byte to check if resource exists
+                'Content-Type': 'application/json',
             },
-            signal: controller.signal,
+            body: JSON.stringify({url}),
         });
 
-        clearTimeout(timeoutId);
+        if (!response.ok) {
+            console.warn('Link validation API error:', response.status);
+            return false;
+        }
 
-        // Accept 2xx and 3xx as valid (redirects are okay)
-        return response.status < 400;
+        const result = await response.json() as {isValid: boolean};
+        return result.isValid;
     } catch (error) {
         console.warn('Link validation failed:', url, error);
         return false;

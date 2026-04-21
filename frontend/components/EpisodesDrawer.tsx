@@ -415,7 +415,7 @@ const EpisodesDrawer: React.FC = observer(() => {
             anchor="right"
             open={isEpisodesDrawerOpen}
             onClose={closeEpisodesDrawer}
-            sx={{zIndex: 2100}} // Ensure drawer is above video player (zIndex 2000)
+            sx={{zIndex: 9999}} // High zIndex to ensure visibility above video player overlay
             PaperProps={{
                 sx: {
                     width: {xs: '85%', sm: 400},

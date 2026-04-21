@@ -58,8 +58,40 @@ const app = new Elysia({
         endpoints: {
             websocket: `ws://localhost:${PORT}/ws`,
             health: 'GET /health',
+            validateLink: 'POST /api/validate-link',
         },
     }))
+    // Link validation endpoint - bypasses CORS issues from frontend
+    .post('/api/validate-link', async ({body, set}) => {
+        const {url} = body as {url?: string};
+        
+        if (!url || typeof url !== 'string') {
+            set.status = 400;
+            return {isValid: false, error: 'URL is required'};
+        }
+        
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Range': 'bytes=0-0',
+                },
+                signal: controller.signal,
+            });
+            
+            clearTimeout(timeoutId);
+            
+            // Accept 2xx and 3xx as valid
+            const isValid = response.status < 400;
+            return {isValid};
+        } catch (error) {
+            console.warn('Link validation failed:', url, error);
+            return {isValid: false};
+        }
+    })
     // WebSocket connection handler
     .ws('/ws', {
         message: createWebSocketRouter(),
