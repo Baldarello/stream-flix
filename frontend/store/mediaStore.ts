@@ -14,7 +14,7 @@ import type {
     SharedShowData,
     ViewingHistoryItem
 } from '../types.ts';
-import {checkLinksForShow, type InvalidLinkInfo} from '../services/linkValidator';
+import {checkLinksForShow, checkLinkValidity, type InvalidLinkInfo} from '../services/linkValidator';
 import type {AlertColor} from '@mui/material';
 import {
     getLatestMovies,
