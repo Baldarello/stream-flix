@@ -25,6 +25,12 @@ export default defineConfig(({ mode }) => {
         server: {
             port: 3069,
             strictPort: true,
+            proxy: {
+                '/api': {
+                    target: 'http://localhost:3011',
+                    changeOrigin: true,
+                },
+            }
         }
     };
 });
