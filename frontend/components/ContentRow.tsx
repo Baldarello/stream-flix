@@ -41,6 +41,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const [reorderHint, setReorderHint] = useState<string | null>(null);
     const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isLongPressRef = useRef<boolean>(false);
+    const [swipeTargetIndex, setSwipeTargetIndex] = useState<number | null>(null);
+    const touchStartYRef = useRef<number>(0);
 
     // State for Drag and Drop (desktop only)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -64,6 +66,14 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
         if (!isReorderable || !isMobile) return;
 
+        // Prevent event propagation and default touch behavior
+        e.stopPropagation();
+        e.preventDefault();
+
+        // Store initial touch Y position for swipe detection
+        const touch = e.touches[0];
+        touchStartYRef.current = touch.clientY;
+
         // Clear any existing timer
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
@@ -80,14 +90,52 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     }, [isReorderable, isMobile]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+        // Prevent event propagation and default touch behavior
+        e.stopPropagation();
+        e.preventDefault();
+
         // Cancel long press if user moves finger
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
             longPressTimerRef.current = null;
         }
-    }, []);
+
+        // Only track swipe if long press was triggered
+        if (!isLongPressRef.current || selectedForReorder === null) return;
+
+        const touch = e.touches[0];
+        const deltaY = touch.clientY - touchStartYRef.current;
+
+        // Only consider significant vertical swipe (> 30px)
+        if (Math.abs(deltaY) > 30) {
+            const container = scrollContainerRef.current;
+            if (!container) return;
+
+            // Get all card elements
+            const cardElements = container.querySelectorAll('.dnd-wrapper');
+            const containerRect = container.getBoundingClientRect();
+            const targetY = touch.clientY;
+
+            // Find which card the user is swiping over
+            let targetIndex: number | null = null;
+            cardElements.forEach((card, idx) => {
+                const rect = card.getBoundingClientRect();
+                if (targetY >= rect.top && targetY <= rect.bottom) {
+                    targetIndex = idx;
+                }
+            });
+
+            if (targetIndex !== null && targetIndex !== selectedForReorder) {
+                setSwipeTargetIndex(targetIndex);
+            }
+        }
+    }, [selectedForReorder]);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
+        // Prevent event propagation and default touch behavior
+        e.stopPropagation();
+        e.preventDefault();
+
         // Cancel long press timer
         if (longPressTimerRef.current) {
             clearTimeout(longPressTimerRef.current);
@@ -96,9 +144,18 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
 
         if (!isReorderable || !isMobile) return;
 
-        // If long press was triggered, don't process tap
+        // If long press was triggered, check for swipe-based reorder
         if (isLongPressRef.current) {
             isLongPressRef.current = false;
+
+            // If user swiped to a different target, perform the swap
+            if (swipeTargetIndex !== null && swipeTargetIndex !== selectedForReorder) {
+                mediaStore.reorderMyList(selectedForReorder, swipeTargetIndex);
+            }
+
+            // Reset all states
+            setSelectedForReorder(null);
+            setSwipeTargetIndex(null);
             return;
         }
 
@@ -113,7 +170,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                 setSelectedForReorder(null);
             }
         }
-    }, [isReorderable, isMobile, selectedForReorder]);
+    }, [isReorderable, isMobile, selectedForReorder, swipeTargetIndex]);
 
     // Handle click for desktop (when not dragging)
     const handleCardClick = useCallback((item: MediaItem, index: number) => {
@@ -303,7 +360,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
 
                 <Box
                     ref={scrollContainerRef}
-                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''} ${selectedForReorder !== null ? 'is-reorder-mode' : ''}`}
+                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''} ${selectedForReorder !== null ? 'is-reorder-mode' : ''} ${swipeTargetIndex !== null ? 'is-swiping' : ''}`}
                     sx={{
                         display: 'flex',
                         overflowX: 'auto',
@@ -331,7 +388,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                     {items.map((item, index) => (
                         <div
                             key={item.id}
-                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''} ${selectedForReorder === index ? 'long-press-selected' : ''}`}
+                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''} ${selectedForReorder === index ? 'long-press-selected' : ''} ${swipeTargetIndex === index ? 'reorder-target' : ''}`}
                             draggable={isReorderable && !isMobile}
                             onDragStart={(e) => isReorderable && !isMobile && handleDragStart(e, index)}
                             onDragOver={(e) => isReorderable && !isMobile && handleDragOver(e, index)}

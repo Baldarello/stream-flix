@@ -107,6 +107,28 @@
 }
 
 /* Mobile Long Press Reorder Styles */
+/* Enable touch handling on dnd-wrapper for mobile reorder */
+.dnd-wrapper {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Swiping state - applied when user is swiping to reorder */
+.filmstrip-container.is-swiping .media-card {
+  opacity: 0.6;
+}
+
+.filmstrip-container.is-swiping .long-press-selected .media-card {
+  opacity: 1;
+}
+
+.filmstrip-container.is-swiping .reorder-target .media-card {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 .long-press-selected {
   outline: 4px solid #ff9800;
   outline-offset: 6px;
