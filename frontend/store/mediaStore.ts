@@ -1948,10 +1948,12 @@ class MediaStore {
     }
 
     // Navigate to library links tab with filters set
-    navigateToLibraryLinksTab = (showId: number) => {
+    navigateToLibraryLinksTab = async (showId: number) => {
         this.activeLibraryTab = 2; // Links tab
         this.linksFilterShowId = showId;
         this.showOnlyInvalidLinks = true;
+        // Reload invalid links from DB to ensure we have the latest data
+        await this.loadInvalidLinksFromDb();
     }
 
     // Clear invalid link from set (when user updates it)
