@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {
@@ -11,7 +11,9 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    FormControl,
     IconButton,
+    InputLabel,
     List,
     ListItem,
     ListItemText,
@@ -19,6 +21,7 @@ import {
     Paper,
     Select,
     Stack,
+    Switch,
     Tab,
     Tabs,
     TextField,
@@ -37,6 +40,7 @@ import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StarIcon from '@mui/icons-material/Star';
+import WarningIcon from '@mui/icons-material/Warning';
 import type {MediaItem, MediaLink} from '../types.ts';
 import {useTranslations} from '../hooks/useTranslations.ts';
 
@@ -63,7 +67,8 @@ function TabPanel(props: TabPanelProps) {
 
 const LibraryManagementView: React.FC = observer(() => {
     const {t} = useTranslations();
-    const [activeTab, setActiveTab] = useState(0);
+    const activeTab = mediaStore.activeLibraryTab;
+    const setActiveTab = (tab: number) => mediaStore.setActiveLibraryTab(tab);
 
     const [editingLink, setEditingLink] = useState<{ id: number; data: Partial<MediaLink> } | null>(null);
     const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: number; name: string } | null>(null);
@@ -156,6 +161,8 @@ const LibraryManagementView: React.FC = observer(() => {
             await handleClearLinksForShow(deleteConfirm.id);
         } else if (deleteConfirm.type === 'episodeProgress') {
             await mediaStore.removeFromContinueWatching(deleteConfirm.id);
+        } else if (deleteConfirm.type === 'deleteAllInvalid') {
+            await mediaStore.deleteAllInvalidLinks();
         }
         setDeleteConfirm(null);
     };
@@ -397,8 +404,102 @@ const LibraryManagementView: React.FC = observer(() => {
                         </Typography>
                     </Box>
                 ) : (
-                    <Stack spacing={3}>
-                        {mediaLinksEntries.map(([mediaId, links]) => {
+                    <Stack spacing={2}>
+                        {/* Filters */}
+                        <Paper sx={{p: 2}}>
+                            <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" gap={2}>
+                                <FormControl size="small" sx={{minWidth: 200}}>
+                                    <InputLabel id="links-filter-show-label">{t('libraryManagement.filters.allShows')}</InputLabel>
+                                    <Select
+                                        labelId="links-filter-show-label"
+                                        value={mediaStore.linksFilterShowId || ''}
+                                        label={t('libraryManagement.filters.allShows')}
+                                        onChange={(e) => mediaStore.setLinksFilterShowId(e.target.value ? Number(e.target.value) : null)}
+                                    >
+                                        <MenuItem value="">
+                                            <em>{t('libraryManagement.filters.allShows')}</em>
+                                        </MenuItem>
+                                        {mediaStore.showsWithLinks.map(show => (
+                                            <MenuItem key={show.id} value={show.id}>
+                                                {show.name || show.title}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                
+                                <FormControl size="small" sx={{minWidth: 150}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                        <Switch
+                                            checked={mediaStore.showOnlyInvalidLinks}
+                                            onChange={(e) => mediaStore.setShowOnlyInvalidLinks(e.target.checked)}
+                                            size="small"
+                                        />
+                                        <Typography variant="body2">
+                                            {t('libraryManagement.filters.showOnlyInvalid')}
+                                        </Typography>
+                                    </Box>
+                                </FormControl>
+                                
+                                {mediaStore.invalidLinkIds.size > 0 && (
+                                    <Button
+                                        variant="outlined"
+                                        color="error"
+                                        size="small"
+                                        startIcon={<DeleteIcon />}
+                                        onClick={() => setDeleteConfirm({
+                                            type: 'deleteAllInvalid',
+                                            id: 0,
+                                            name: `${mediaStore.invalidLinkIds.size}`
+                                        })}
+                                    >
+                                        {t('libraryManagement.filters.deleteAllInvalid')} ({mediaStore.invalidLinkIds.size})
+                                    </Button>
+                                )}
+                                
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    onClick={() => mediaStore.validateAllLinks()}
+                                    disabled={mediaStore.invalidLinksLoading}
+                                >
+                                    {mediaStore.invalidLinksLoading ? '...' : 'Valida Link'}
+                                </Button>
+                            </Stack>
+                        </Paper>
+                        
+                        {/* Links List */}
+                        {mediaLinksEntries
+                            .filter(([mediaId, links]) => {
+                                // Filter by show
+                                if (mediaStore.linksFilterShowId !== null) {
+                                    const epInfo = getEpisodeInfo(mediaId);
+                                    if (epInfo) {
+                                        // Find show for episode
+                                        let found = false;
+                                        for (const show of mediaStore.cachedItems.values()) {
+                                            if (show.seasons) {
+                                                for (const season of show.seasons) {
+                                                    if (season.episodes.some(e => e.id === mediaId) && show.id === mediaStore.linksFilterShowId) {
+                                                        found = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (found) break;
+                                        }
+                                        if (!found) return false;
+                                    } else if (mediaId !== mediaStore.linksFilterShowId) {
+                                        return false;
+                                    }
+                                }
+                                // Filter by invalid
+                                if (mediaStore.showOnlyInvalidLinks) {
+                                    const hasInvalid = links.some(l => l.id && mediaStore.invalidLinkIds.has(l.id));
+                                    return hasInvalid;
+                                }
+                                return true;
+                            })
+                            .map(([mediaId, links]) => {
                             if (links.length === 0) return null;
                             const epInfo = getEpisodeInfo(mediaId);
                             const showName = epInfo ? epInfo.show : getShowNameForEpisode(mediaId);
@@ -412,12 +513,19 @@ const LibraryManagementView: React.FC = observer(() => {
                                         alignItems: 'center',
                                         mb: 2
                                     }}>
-                                        <Typography variant="subtitle1" sx={{fontWeight: 600}}>
-                                            {isEpisode
-                                                ? `${showName} - S${epInfo!.season}E${epInfo!.episode}: ${epInfo!.name}`
-                                                : showName
-                                            }
-                                        </Typography>
+                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                                            <Typography variant="subtitle1" sx={{fontWeight: 600}}>
+                                                {isEpisode
+                                                    ? `${showName} - S${epInfo!.season}E${epInfo!.episode}: ${epInfo!.name}`
+                                                    : showName
+                                                }
+                                            </Typography>
+                                            {links.some(l => l.id && mediaStore.invalidLinkIds.has(l.id)) && (
+                                                <Tooltip title={t('libraryManagement.filters.invalidLink')}>
+                                                    <WarningIcon color="error" fontSize="small" />
+                                                </Tooltip>
+                                            )}
+                                        </Box>
                                         <Button
                                             color="error"
                                             size="small"
@@ -502,8 +610,19 @@ const LibraryManagementView: React.FC = observer(() => {
                                                 <Paper
                                                     key={link.id}
                                                     variant="outlined"
-                                                    sx={{p: 1, display: 'flex', alignItems: 'center', gap: 1}}
+                                                    sx={{
+                                                        p: 1, 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        gap: 1,
+                                                        bgcolor: link.id && mediaStore.invalidLinkIds.has(link.id) ? 'error.dark' : 'inherit'
+                                                    }}
                                                 >
+                                                    {link.id && mediaStore.invalidLinkIds.has(link.id) && (
+                                                        <Tooltip title={t('libraryManagement.filters.invalidLink')}>
+                                                            <WarningIcon color="error" fontSize="small" />
+                                                        </Tooltip>
+                                                    )}
                                                     <ListItemText
                                                         primary={truncatedLabel}
                                                         secondary={link.url}
@@ -597,10 +716,16 @@ const LibraryManagementView: React.FC = observer(() => {
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
-                <DialogTitle>{t('libraryManagement.deleteConfirm.title')}</DialogTitle>
+                <DialogTitle>
+                    {deleteConfirm?.type === 'deleteAllInvalid' 
+                        ? t('libraryManagement.confirmDeleteAllInvalid.title')
+                        : t('libraryManagement.deleteConfirm.title')}
+                </DialogTitle>
                 <DialogContent>
                     <Typography>
-                        {t('libraryManagement.deleteConfirm.message', {name: deleteConfirm?.name || ''})}
+                        {deleteConfirm?.type === 'deleteAllInvalid'
+                            ? t('libraryManagement.confirmDeleteAllInvalid.message', {count: deleteConfirm?.name || '0'})
+                            : t('libraryManagement.deleteConfirm.message', {name: deleteConfirm?.name || ''})}
                     </Typography>
                 </DialogContent>
                 <DialogActions>

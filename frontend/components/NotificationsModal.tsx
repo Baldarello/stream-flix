@@ -39,7 +39,9 @@ const NotificationsModal: React.FC = observer(() => {
             if (show) {
                 markNotificationRead(notification.id);
                 closeNotificationsModal();
-                mediaStore.selectMedia(show, 'detailView');
+                // Navigate to Library Management View - Links tab with filters set
+                mediaStore.setActiveView('Libreria');
+                mediaStore.navigateToLibraryLinksTab(show.id);
             }
         }
     };
@@ -142,53 +144,45 @@ const NotificationsModal: React.FC = observer(() => {
                                                     {t(notification.message, {count: notification.data.length})}
                                                 </Typography>
                                                 
-                                                {/* Show invalid links grouped by show/episode */}
-                                                <Box sx={{mt: 2, mb: 1}}>
-                                                    <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                                                        {notification.data.slice(0, 5).map((link, idx) => (
-                                                            <Chip
-                                                                key={idx}
-                                                                size="small"
-                                                                label={`${link.label || new URL(link.url).hostname} (${link.language})`}
-                                                                color="error"
-                                                                variant="outlined"
-                                                            />
-                                                        ))}
-                                                        {notification.data.length > 5 && (
-                                                            <Chip
-                                                                size="small"
-                                                                label={`+${notification.data.length - 5} more`}
-                                                                variant="outlined"
-                                                            />
-                                                        )}
-                                                    </Stack>
-                                                </Box>
+                                                {/* Group invalid links by show and season */}
+                                                {(() => {
+                                                    // Group by showId
+                                                    const groupedByShow = notification.data.reduce((acc, link) => {
+                                                        const key = `${link.showId}-${link.seasonNumber || 'movie'}`;
+                                                        if (!acc[key]) {
+                                                            acc[key] = {
+                                                                showName: link.showName,
+                                                                showId: link.showId,
+                                                                seasonNumber: link.seasonNumber,
+                                                                links: [],
+                                                            };
+                                                        }
+                                                        acc[key].links.push(link);
+                                                        return acc;
+                                                    }, {} as Record<string, { showName: string; showId: number; seasonNumber?: number; links: InvalidLinkInfo[] }>);
 
-                                                {/* Detailed list (collapsible) */}
-                                                <Box sx={{mt: 1}}>
-                                                    {notification.data.slice(0, 10).map((link: InvalidLinkInfo, idx: number) => (
-                                                        <Box
-                                                            key={idx}
-                                                            sx={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: 1,
-                                                                py: 0.5,
-                                                                fontSize: '0.75rem',
-                                                                color: 'text.secondary'
-                                                            }}
-                                                        >
-                                                            <Typography variant="caption" sx={{fontFamily: 'monospace', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                                                                {link.url}
-                                                            </Typography>
-                                                            {link.episodeName && (
-                                                                <Typography variant="caption">
-                                                                    • {t('notifications.season')} {link.seasonNumber} {t('notifications.episode')} "{link.episodeName}"
-                                                                </Typography>
-                                                            )}
+                                                    return (
+                                                        <Box sx={{mt: 2, mb: 1}}>
+                                                            {Object.values(groupedByShow).map((group, idx) => (
+                                                                <Box key={idx} sx={{mb: 1}}>
+                                                                    <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                        {group.showName}
+                                                                        {group.seasonNumber && ` - ${t('notifications.season')} ${group.seasonNumber}`}
+                                                                    </Typography>
+                                                                    <Stack direction="row" spacing={1} flexWrap="wrap" gap={1} sx={{mt: 0.5}}>
+                                                                        <Chip
+                                                                            size="small"
+                                                                            label={`${group.links.length} ${t('libraryManagement.filters.invalidLink')}`}
+                                                                            color="error"
+                                                                            variant="outlined"
+                                                                            icon={<WarningIcon />}
+                                                                        />
+                                                                    </Stack>
+                                                                </Box>
+                                                            ))}
                                                         </Box>
-                                                    ))}
-                                                </Box>
+                                                    );
+                                                })()}
 
                                                 {/* Actions */}
                                                 <Box sx={{mt: 2, display: 'flex', gap: 1}}>

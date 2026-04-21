@@ -147,6 +147,14 @@ class MediaStore {
 
     // FIX: Rename episodeLinks state to mediaLinks and use MediaLink type
     mediaLinks: Map<number, MediaLink[]> = new Map();
+    // Invalid links state - tracks which links are invalid
+    invalidLinkIds: Set<number> = new Set();
+    invalidLinksLoading = false;
+    // Active library tab (0: MyList, 1: ContinueWatching, 2: Links, 3: PreferredSources)
+    activeLibraryTab = 0;
+    // Filters for links tab
+    linksFilterShowId: number | null = null;
+    showOnlyInvalidLinks = false;
     // Episode Linking State
     isLinkEpisodesModalOpen = false;
     linkingEpisodesForItem: MediaItem | null = null;
@@ -1317,6 +1325,29 @@ class MediaStore {
         return Array.from(this.cachedItems.values()).filter(item => item.media_type === 'tv' && this.hasLinks(item.id));
     }
 
+    // Get unique shows that have links (for filter dropdown)
+    get showsWithLinks() {
+        const showIds = new Set<number>();
+        for (const [mediaId] of this.mediaLinks.entries()) {
+            // Find the show for this episode
+            for (const show of this.cachedItems.values()) {
+                if (show.seasons) {
+                    for (const season of show.seasons) {
+                        if (season.episodes.some(e => e.id === mediaId)) {
+                            showIds.add(show.id);
+                            break;
+                        }
+                    }
+                }
+                // Check if it's a movie
+                if (show.id === mediaId && show.media_type === 'movie') {
+                    showIds.add(show.id);
+                }
+            }
+        }
+        return Array.from(showIds).map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item);
+    }
+
     fetchAllData = async () => {
         this.loading = true;
         try {
@@ -1824,6 +1855,78 @@ class MediaStore {
         if (mediaId) {
             await this.refreshLinksForMediaId(mediaId);
         }
+    }
+
+    // Validate all links and update invalidLinkIds set
+    validateAllLinks = async () => {
+        this.invalidLinksLoading = true;
+        const newInvalidIds = new Set<number>();
+        
+        try {
+            // Check all links from mediaLinks Map
+            for (const [, links] of this.mediaLinks.entries()) {
+                for (const link of links) {
+                    if (link.id) {
+                        const isValid = await checkLinkValidity(link.url);
+                        if (!isValid) {
+                            newInvalidIds.add(link.id);
+                        }
+                    }
+                }
+            }
+            
+            runInAction(() => {
+                this.invalidLinkIds = newInvalidIds;
+                this.invalidLinksLoading = false;
+            });
+        } catch (error) {
+            console.error('Error validating links:', error);
+            runInAction(() => {
+                this.invalidLinksLoading = false;
+            });
+        }
+    }
+
+    // Delete all invalid links
+    deleteAllInvalidLinks = async () => {
+        const invalidIds = Array.from(this.invalidLinkIds);
+        let deletedCount = 0;
+        
+        for (const linkId of invalidIds) {
+            await this.deleteMediaLink(linkId);
+            deletedCount++;
+        }
+        
+        runInAction(() => {
+            this.invalidLinkIds.clear();
+        });
+        
+        this.showSnackbar('notifications.deletedAllInvalid', 'success', true, { count: deletedCount });
+    }
+
+    // Set filter for links tab
+    setLinksFilterShowId = (showId: number | null) => {
+        this.linksFilterShowId = showId;
+    }
+
+    setShowOnlyInvalidLinks = (showOnly: boolean) => {
+        this.showOnlyInvalidLinks = showOnly;
+    }
+
+    setActiveLibraryTab = (tab: number) => {
+        this.activeLibraryTab = tab;
+    }
+
+    // Navigate to library links tab with filters set
+    navigateToLibraryLinksTab = (showId: number) => {
+        this.activeLibraryTab = 2; // Links tab
+        this.linksFilterShowId = showId;
+        this.showOnlyInvalidLinks = true;
+    }
+
+    // Clear invalid link from set (when user updates it)
+    clearInvalidLink = (linkId: number) => {
+        this.invalidLinkIds.delete(linkId);
     }
 
     updateMediaLink = async (linkId: number, updates: Partial<Omit<MediaLink, 'id' | 'mediaId'>>) => {

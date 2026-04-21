@@ -383,7 +383,19 @@ export const en = {
             "message": "Are you sure you want to delete \"{name}\"?"
         },
         "cancel": "Cancel",
-        "delete": "Delete"
+        "delete": "Delete",
+        "filters": {
+            "allShows": "All series",
+            "showOnlyInvalid": "Only invalid links",
+            "deleteAllInvalid": "Delete all invalid",
+            "invalidLink": "Invalid link",
+            "noInvalidLinks": "No invalid links"
+        },
+        "confirmDeleteAllInvalid": {
+            "title": "Delete all invalid links",
+            "message": "Are you sure you want to delete all {count} invalid links? This action cannot be undone."
+        },
+        "deletedAllInvalid": "{count} invalid links deleted successfully."
     },
     "notifications": {
         "roomCreated": "Room created! Share the code to invite friends.",

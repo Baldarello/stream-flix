@@ -383,7 +383,19 @@ export const it = {
             "message": "Sei sicuro di voler eliminare \"{name}\"?"
         },
         "cancel": "Annulla",
-        "delete": "Elimina"
+        "delete": "Elimina",
+        "filters": {
+            "allShows": "Tutte le serie",
+            "showOnlyInvalid": "Solo link scaduti",
+            "deleteAllInvalid": "Cancella tutti gli scaduti",
+            "invalidLink": "Link scaduto",
+            "noInvalidLinks": "Nessun link scaduto"
+        },
+        "confirmDeleteAllInvalid": {
+            "title": "Cancella tutti i link scaduti",
+            "message": "Sei sicuro di voler eliminare tutti i {count} link scaduti? Questa azione non può essere annullata."
+        },
+        "deletedAllInvalid": "{count} link scaduti eliminati con successo."
     },
     "notifications": {
         "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
