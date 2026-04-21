@@ -439,6 +439,7 @@ const VideoPlayer: React.FC = observer(() => {
     };
 
     const isEpisode = 'episode_number' in nowPlayingItem;
+    const currentShowId = isEpisode && 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : null;
     let videoSrc = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
     let title: string;
 
@@ -531,7 +532,6 @@ const VideoPlayer: React.FC = observer(() => {
     // Show pickers when there are multiple video URLs (multiple languages OR multiple types)
     const showLanguagePickers = videoUrls.length > 1;
     // Get current selection from showFilterPreferences
-    const currentShowId = isEpisode && 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : null;
     const currentPrefs = currentShowId ? mediaStore.showFilterPreferences.get(currentShowId) || {} : {};
     const selectedLanguage = currentPrefs.language || '';
     const selectedType = currentPrefs.type || '';
