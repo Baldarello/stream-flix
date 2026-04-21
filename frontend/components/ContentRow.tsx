@@ -66,9 +66,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
         if (!isReorderable || !isMobile) return;
 
-        // Prevent event propagation and default touch behavior
+        // Stop propagation to prevent parent handlers from interfering
         e.stopPropagation();
-        e.preventDefault();
 
         // Store initial touch Y position for swipe detection
         const touch = e.touches[0];
@@ -90,9 +89,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     }, [isReorderable, isMobile]);
 
     const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-        // Prevent event propagation and default touch behavior
+        // Stop propagation to prevent parent handlers from interfering
         e.stopPropagation();
-        e.preventDefault();
 
         // Cancel long press if user moves finger
         if (longPressTimerRef.current) {
@@ -113,7 +111,6 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
 
             // Get all card elements
             const cardElements = container.querySelectorAll('.dnd-wrapper');
-            const containerRect = container.getBoundingClientRect();
             const targetY = touch.clientY;
 
             // Find which card the user is swiping over
@@ -132,9 +129,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     }, [selectedForReorder]);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
-        // Prevent event propagation and default touch behavior
+        // Stop propagation to prevent parent handlers from interfering
         e.stopPropagation();
-        e.preventDefault();
 
         // Cancel long press timer
         if (longPressTimerRef.current) {
