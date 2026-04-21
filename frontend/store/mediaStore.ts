@@ -1922,17 +1922,41 @@ class MediaStore {
     deleteAllInvalidLinks = async () => {
         const invalidIds = Array.from(this.invalidLinkIds);
         let deletedCount = 0;
+        let errorCount = 0;
+        const total = invalidIds.length;
         
-        for (const linkId of invalidIds) {
-            await this.deleteMediaLink(linkId);
-            deletedCount++;
+        if (total === 0) {
+            this.showSnackbar('notifications.noInvalidLinks', 'info', true);
+            return;
+        }
+        
+        this.showSnackbar(`Eliminazione link in corso... (0/${total})`, 'info', false);
+        
+        for (let i = 0; i < invalidIds.length; i++) {
+            const linkId = invalidIds[i];
+            try {
+                await this.deleteMediaLink(linkId);
+                deletedCount++;
+            } catch (error) {
+                console.error(`Error deleting link ${linkId}:`, error);
+                errorCount++;
+            }
+            
+            // Update progress every 5 links or at the end
+            if ((i + 1) % 5 === 0 || i === invalidIds.length - 1) {
+                this.showSnackbar(`Eliminazione link in corso... (${i + 1}/${total})`, 'info', false);
+            }
         }
         
         runInAction(() => {
             this.invalidLinkIds.clear();
         });
         
-        this.showSnackbar('notifications.deletedAllInvalid', 'success', true, { count: deletedCount });
+        if (errorCount > 0) {
+            this.showSnackbar(`Eliminati ${deletedCount} link, ${errorCount} errori`, 'warning', true, { deletedCount, errorCount });
+        } else {
+            this.showSnackbar('notifications.deletedAllInvalid', 'success', true, { count: deletedCount });
+        }
     }
 
     // Set filter for links tab
