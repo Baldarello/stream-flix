@@ -45,6 +45,8 @@ const VideoPlayer: React.FC = observer(() => {
     // Detect if we're in portrait mobile (narrow screen and not fullscreen)
     const [isPortraitMobile, setIsPortraitMobile] = useState(false);
     const [languageMenuAnchor, setLanguageMenuAnchor] = useState<null | HTMLElement>(null);
+    // Track current video src for filter changes
+    const [currentVideoSrc, setCurrentVideoSrc] = useState<string>('');
     useEffect(() => {
         const checkPortrait = () => {
             const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -528,12 +530,21 @@ const VideoPlayer: React.FC = observer(() => {
         });
         if (filteredLinks.length > 0 && videoRef.current) {
             const newVideoSrc = filteredLinks[0].url;
-            if (newVideoSrc !== videoSrc) {
+            // Use currentVideoSrc to track changes across multiple filter updates
+            if (newVideoSrc !== currentVideoSrc) {
+                setCurrentVideoSrc(newVideoSrc);
                 videoRef.current.src = newVideoSrc;
                 videoRef.current.play().catch(console.error);
             }
         }
     };
+
+    // Effect to sync initial video src
+    useEffect(() => {
+        if (videoSrc && videoSrc !== currentVideoSrc) {
+            setCurrentVideoSrc(videoSrc);
+        }
+    }, [videoSrc]);
 
     // Mobile language menu handlers
     const handleOpenLanguageMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -653,7 +664,6 @@ const VideoPlayer: React.FC = observer(() => {
                                                             </Box>
                                                         )}
                                                     >
-                                                        <MenuItem value=""><em>None</em></MenuItem>
                                                         {availableLanguages.map(lang => (
                                                             <MenuItem key={lang} value={lang}>{lang}</MenuItem>
                                                         ))}
@@ -680,7 +690,6 @@ const VideoPlayer: React.FC = observer(() => {
                                                             </Box>
                                                         )}
                                                     >
-                                                        <MenuItem value=""><em>None</em></MenuItem>
                                                         {availableTypes.map(type => (
                                                             <MenuItem key={type} value={type}>{type === 'dub' ? 'Dopp.' : 'Sub'}</MenuItem>
                                                         ))}
