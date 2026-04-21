@@ -577,7 +577,7 @@ class MediaStore {
 
                 // Import merged data
                 const mergedData = {
-                    myList: mergedMyList.map((id, index) => ({id, order: index})),
+                    myList: JSON.parse(JSON.stringify(mergedMyList.map((id, index) => ({id, order: index})))),
                     cachedItems: cleanedShows,
                     mediaLinks: cleanedLinks,
                     episodeProgress: cleanedProgress,
@@ -699,7 +699,7 @@ class MediaStore {
 
             // Import merged data
             const mergedData = {
-                myList: finalMyList.map((id, index) => ({id, order: index})),
+                myList: JSON.parse(JSON.stringify(finalMyList.map((id, index) => ({id, order: index})))),
                 cachedItems: cleanedShows,
                 mediaLinks: cleanedLinks,
                 episodeProgress: cleanedProgress,
@@ -757,7 +757,7 @@ class MediaStore {
             const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
 
             const remoteData = {
-                myList: myList.remote.map((id, index) => ({id, order: index})),
+                myList: JSON.parse(JSON.stringify(myList.remote.map((id, index) => ({id, order: index})))),
                 cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
                     .filter((s: any) => s.remote)
                     .map((s: any) => s.remote))),
@@ -799,7 +799,7 @@ class MediaStore {
 
             // Build local data structure
             const localData = {
-                myList: myList.local.map((id, index) => ({id, order: index})),
+                myList: JSON.parse(JSON.stringify(myList.local.map((id, index) => ({id, order: index})))),
                 cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
                     .filter((s: any) => s.local)
                     .map((s: any) => s.local))),

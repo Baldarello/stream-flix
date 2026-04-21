@@ -185,7 +185,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         zIndex: 20,
         color: 'white',
         borderRadius: 0,
-        backgroundColor: 'transparent',
+        // backgroundColor: 'transparent',
+        backgroundColor: 'rgba(20, 20, 30, 0.8)',
         '&:hover': {
             backgroundColor: 'rgba(20, 20, 30, 0.8)',
         },
@@ -223,8 +224,9 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                         onClick={() => handleScroll('left')}
                         sx={{
                             ...scrollButtonStyles,
-                            left: 0,
-                            opacity: (isMobile && isMyList) ? 1 : undefined,
+                            left: "-16px",
+                            // opacity: (isMobile && isMyList) ? 1 : undefined,
+                            opacity: 1 ,
                         }}
                         aria-label={t('contentRow.scrollLeft')}
                     >
@@ -300,8 +302,9 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                         onClick={() => handleScroll('right')}
                         sx={{
                             ...scrollButtonStyles,
-                            right: 0,
-                            opacity: (isMobile && isMyList) ? 1 : undefined,
+                            right: "-16px",
+                            opacity: 1 ,
+                            // opacity: (isMobile && isMyList) ? 1 : undefined,
                         }}
                         aria-label={t('contentRow.scrollRight')}
                     >
