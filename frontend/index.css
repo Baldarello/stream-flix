@@ -107,14 +107,6 @@
 }
 
 /* Mobile Long Press Reorder Styles */
-/* Enable touch handling on dnd-wrapper for mobile reorder */
-.dnd-wrapper {
-  touch-action: none;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
 /* Swiping state - applied when user is swiping to reorder */
 .filmstrip-container.is-swiping .media-card {
   opacity: 0.6;
@@ -176,3 +168,6 @@ body.theme-film {
 body.theme-anime {
   background: var(--anime-gradient);
 }
+
+
+
