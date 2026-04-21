@@ -7,17 +7,22 @@ import {
     Button,
     CardMedia,
     Drawer,
+    FormControl,
     IconButton,
     LinearProgress,
     List,
     ListItemButton,
     ListItemText,
+    MenuItem,
+    Select,
     Toolbar,
     Typography,
     Chip,
     Stack
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -357,6 +362,22 @@ const EpisodesDrawer: React.FC = observer(() => {
     const languageFilter = currentPreferences.language;
     const typeFilter = currentPreferences.type;
 
+    // Extract available languages and types from current season episodes
+    const allLinks = currentSeasonEpisodes.flatMap(ep => ep.video_urls || []);
+    const availableLanguages = [...new Set(allLinks.map(link => link.language))];
+    const availableTypes = [...new Set(allLinks.map(link => link.type))];
+    const hasMultipleLanguages = availableLanguages.length > 1;
+    const hasMultipleTypes = availableTypes.length > 1;
+    const showLanguagePickers = hasMultipleLanguages || hasMultipleTypes;
+
+    const handleLanguageFilterChange = (lang: string) => {
+        mediaStore.setShowFilterPreference(currentShow.id, {language: lang});
+    };
+
+    const handleTypeFilterChange = (type: 'sub' | 'dub') => {
+        mediaStore.setShowFilterPreference(currentShow.id, {type});
+    };
+
     const handleSelectEpisode = (episode: Episode) => {
         const filteredLinks = (episode.video_urls || []).filter(link => {
             const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
@@ -403,10 +424,71 @@ const EpisodesDrawer: React.FC = observer(() => {
             }}
         >
             <Box sx={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-                <Toolbar>
+                <Toolbar sx={{flexWrap: 'wrap', gap: 1}}>
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         {t('episodesDrawer.title')}
                     </Typography>
+                    {/* Language/Subtitle pickers for mobile */}
+                    {showLanguagePickers && (
+                        <Box sx={{display: 'flex', gap: 1, flexWrap: 'wrap'}}>
+                            {hasMultipleLanguages && (
+                                <FormControl size="small" sx={{minWidth: 80}}>
+                                    <Select
+                                        value={languageFilter || ''}
+                                        onChange={(e) => handleLanguageFilterChange(e.target.value)}
+                                        displayEmpty
+                                        sx={{
+                                            bgcolor: 'rgba(255,255,255,0.1)',
+                                            borderRadius: 2,
+                                            '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
+                                            '& .MuiSelect-icon': {color: 'white'},
+                                            color: 'white',
+                                            '& .MuiSelect-select': {py: 0.5, px: 1}
+                                        }}
+                                        renderValue={(val) => (
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                <VolumeUpIcon sx={{fontSize: 18}} />
+                                                <Typography variant="caption">{val || 'Lingua'}</Typography>
+                                            </Box>
+                                        )}
+                                    >
+                                        <MenuItem value=""><em>None</em></MenuItem>
+                                        {availableLanguages.map(lang => (
+                                            <MenuItem key={lang} value={lang}>{lang}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            )}
+                            {hasMultipleTypes && (
+                                <FormControl size="small" sx={{minWidth: 70}}>
+                                    <Select
+                                        value={typeFilter || ''}
+                                        onChange={(e) => handleTypeFilterChange(e.target.value as 'sub' | 'dub')}
+                                        displayEmpty
+                                        sx={{
+                                            bgcolor: 'rgba(255,255,255,0.1)',
+                                            borderRadius: 2,
+                                            '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
+                                            '& .MuiSelect-icon': {color: 'white'},
+                                            color: 'white',
+                                            '& .MuiSelect-select': {py: 0.5, px: 1}
+                                        }}
+                                        renderValue={(val) => (
+                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                <ClosedCaptionIcon sx={{fontSize: 18}} />
+                                                <Typography variant="caption">{val || 'Sub'}</Typography>
+                                            </Box>
+                                        )}
+                                    >
+                                        <MenuItem value=""><em>None</em></MenuItem>
+                                        {availableTypes.map(type => (
+                                            <MenuItem key={type} value={type}>{type === 'dub' ? 'Dopp.' : 'Sub'}</MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            )}
+                        </Box>
+                    )}
                     <IconButton edge="end" onClick={closeEpisodesDrawer}>
                         <CloseIcon/>
                     </IconButton>

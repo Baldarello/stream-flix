@@ -1,8 +1,10 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {AppBar, Box, Button, Fade, IconButton, Toolbar, Tooltip, Typography} from '@mui/material';
+import {AppBar, Box, Button, Fade, FormControl, IconButton, MenuItem, Select, Toolbar, Tooltip, Typography} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';
 import Chat from './Chat.tsx';
 import EpisodesDrawer from './EpisodesDrawer.tsx';
 import VideoControlsContainer from './VideoControlsContainer.tsx';
@@ -477,6 +479,61 @@ const VideoPlayer: React.FC = observer(() => {
         }
     };
 
+    // Extract available languages and types from video_urls
+    const videoUrls = nowPlayingItem.video_urls || [];
+    const availableLanguages = useMemo(() => {
+        const langs = new Set<string>();
+        videoUrls.forEach(link => langs.add(link.language));
+        return Array.from(langs);
+    }, [videoUrls]);
+
+    const availableTypes = useMemo(() => {
+        const types = new Set<string>();
+        videoUrls.forEach(link => types.add(link.type));
+        return Array.from(types);
+    }, [videoUrls]);
+
+    const hasMultipleLanguages = availableLanguages.length > 1;
+    const hasMultipleTypes = availableTypes.length > 1;
+    const showLanguagePickers = hasMultipleLanguages || hasMultipleTypes;
+
+    // Get current selection from showFilterPreferences
+    const currentShowId = isEpisode && 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : null;
+    const currentPrefs = currentShowId ? mediaStore.showFilterPreferences.get(currentShowId) || {} : {};
+    const selectedLanguage = currentPrefs.language || '';
+    const selectedType = currentPrefs.type || '';
+
+    const handleLanguageChange = (lang: string) => {
+        if (currentShowId) {
+            mediaStore.setShowFilterPreference(currentShowId, {language: lang});
+            // Reload video with new language
+            reloadVideoWithFilters(lang, selectedType);
+        }
+    };
+
+    const handleTypeChange = (type: 'sub' | 'dub') => {
+        if (currentShowId) {
+            mediaStore.setShowFilterPreference(currentShowId, {type});
+            // Reload video with new type
+            reloadVideoWithFilters(selectedLanguage, type);
+        }
+    };
+
+    const reloadVideoWithFilters = (lang: string, type: string) => {
+        const filteredLinks = videoUrls.filter(link => {
+            const langMatch = !lang || link.language.toUpperCase() === lang.toUpperCase();
+            const typeMatch = !type || link.type === type;
+            return langMatch && typeMatch;
+        });
+        if (filteredLinks.length > 0 && videoRef.current) {
+            const newVideoSrc = filteredLinks[0].url;
+            if (newVideoSrc !== videoSrc) {
+                videoRef.current.src = newVideoSrc;
+                videoRef.current.play().catch(console.error);
+            }
+        }
+    };
+
     return (
         <Box ref={playerContainerRef} sx={{
             position: 'relative',
@@ -529,6 +586,65 @@ const VideoPlayer: React.FC = observer(() => {
                                 {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit"
                                                                                                         onClick={mediaStore.openEpisodesDrawer}
                                                                                                         disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
+                                {/* Language/Subtitle pickers - only show when multiple options available */}
+                                {showLanguagePickers && !isPortraitMobile && (
+                                    <Box sx={{display: 'flex', gap: 1, ml: 1}}>
+                                        {hasMultipleLanguages && (
+                                            <FormControl size="small" sx={{minWidth: 80}}>
+                                                <Select
+                                                    value={selectedLanguage}
+                                                    onChange={(e) => handleLanguageChange(e.target.value)}
+                                                    sx={{
+                                                        color: 'white',
+                                                        bgcolor: 'rgba(0,0,0,0.5)',
+                                                        borderRadius: 4,
+                                                        '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
+                                                        '& .MuiSelect-icon': {color: 'white'},
+                                                        '& .MuiSelect-select': {py: 0.5, px: 1}
+                                                    }}
+                                                    renderValue={(val) => (
+                                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                            <VolumeUpIcon sx={{fontSize: 18}} />
+                                                            <Typography variant="caption">{val || 'Lingua'}</Typography>
+                                                        </Box>
+                                                    )}
+                                                >
+                                                    <MenuItem value=""><em>None</em></MenuItem>
+                                                    {availableLanguages.map(lang => (
+                                                        <MenuItem key={lang} value={lang}>{lang}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                        {hasMultipleTypes && (
+                                            <FormControl size="small" sx={{minWidth: 70}}>
+                                                <Select
+                                                    value={selectedType}
+                                                    onChange={(e) => handleTypeChange(e.target.value as 'sub' | 'dub')}
+                                                    sx={{
+                                                        color: 'white',
+                                                        bgcolor: 'rgba(0,0,0,0.5)',
+                                                        borderRadius: 4,
+                                                        '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
+                                                        '& .MuiSelect-icon': {color: 'white'},
+                                                        '& .MuiSelect-select': {py: 0.5, px: 1}
+                                                    }}
+                                                    renderValue={(val) => (
+                                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                            <ClosedCaptionIcon sx={{fontSize: 18}} />
+                                                            <Typography variant="caption">{val || 'Sub'}</Typography>
+                                                        </Box>
+                                                    )}
+                                                >
+                                                    <MenuItem value=""><em>None</em></MenuItem>
+                                                    {availableTypes.map(type => (
+                                                        <MenuItem key={type} value={type}>{type === 'dub' ? 'Dopp.' : 'Sub'}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    </Box>
+                                )}
                             </Toolbar>
                         </AppBar>
 
