@@ -452,6 +452,19 @@ const VideoPlayer: React.FC = observer(() => {
         title = nowPlayingItem.title || nowPlayingItem.name || 'Video';
     }
 
+    // Extract initial language/type from the current video_url if not already in preferences
+    const videoUrls = nowPlayingItem.video_urls || [];
+    const currentVideoUrl = videoSrc && videoSrc !== "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" ? videoSrc : null;
+    if (currentVideoUrl && currentShowId && !mediaStore.showFilterPreferences.get(currentShowId)) {
+        const currentLink = videoUrls.find(l => l.url === currentVideoUrl);
+        if (currentLink) {
+            mediaStore.setShowFilterPreference(currentShowId, {
+                language: currentLink.language,
+                type: currentLink.type as 'sub' | 'dub'
+            });
+        }
+    }
+
     const handleDownload = () => {
         if (!videoSrc) return;
         const safeTitle = title.replace(/[<>:"/\\|?*]+/g, '_');
@@ -467,12 +480,28 @@ const VideoPlayer: React.FC = observer(() => {
     const handleNextEpisode = () => {
         const nextEp = mediaStore.nextEpisode;
         if (nextEp && mediaStore.currentShow && 'episode_number' in nowPlayingItem) {
+            const showId = mediaStore.currentShow.id;
+            // Get current language/type preferences to apply to next episode
+            const prefs = mediaStore.showFilterPreferences.get(showId) || {};
+            
+            // Filter the video URLs based on preferences
+            const allUrls = nextEp.video_urls || [];
+            const filteredUrls = allUrls.filter(link => {
+                const langMatch = !prefs.language || link.language.toUpperCase() === prefs.language.toUpperCase();
+                const typeMatch = !prefs.type || link.type === prefs.type;
+                return langMatch && typeMatch;
+            });
+            
+            // Get the video_url from filtered results, or first available
+            const videoUrl = filteredUrls[0]?.url || allUrls[0]?.url;
+            
             mediaStore.startPlayback({
                 ...nextEp,
-                show_id: mediaStore.currentShow.id,
+                show_id: showId,
                 show_title: mediaStore.currentShow.title || mediaStore.currentShow.name || '',
                 backdrop_path: mediaStore.currentShow.backdrop_path,
                 season_number: nowPlayingItem.season_number,
+                video_url: videoUrl,
             });
         }
     };
@@ -510,9 +539,13 @@ const VideoPlayer: React.FC = observer(() => {
 
     const handleLanguageChange = (lang: string) => {
         if (currentShowId) {
-            const newType = lang ? selectedType : ''; // Reset type if no language selected
-            mediaStore.setShowFilterPreference(currentShowId, {language: lang, type: newType});
-            reloadVideoWithFilters(lang, newType);
+            const newType = lang ? selectedType : undefined;
+            const updates: { language: string; type?: 'sub' | 'dub' } = {language: lang};
+            if (newType && (newType === 'sub' || newType === 'dub')) {
+                updates.type = newType;
+            }
+            mediaStore.setShowFilterPreference(currentShowId, updates);
+            reloadVideoWithFilters(lang, newType || '');
         }
     };
 

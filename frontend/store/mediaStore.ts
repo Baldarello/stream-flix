@@ -371,27 +371,28 @@ class MediaStore {
             // Store all candidate links so VideoPlayer can show language/type pickers
             item.video_urls = candidateLinks;
             
+            // Determine the language/type from the selected URL and save as user preference
+            const showId = 'show_id' in item ? item.show_id : item.id;
+            let selectedLink: MediaLink | undefined;
+
             if (candidateLinks.length === 1) {
                 item.video_url = candidateLinks[0].url;
+                selectedLink = candidateLinks[0];
             } else { // candidateLinks.length > 1
-                // There are multiple candidates. Try to select based on preferred labels.
-                const preferredLabels = this.preferredLabels;
-                let bestLink: MediaLink | undefined = undefined;
+                // More than one link, and no preferred label match, so we must ask the user.
+                this.linksForSelection = candidateLinks;
+                this.itemForLinkSelection = item;
+                this.linkSelectionContext = 'local';
+                this.isLinkSelectionModalOpen = true;
+                return;
+            }
 
-                if (preferredLabels.length > 0) {
-                    bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
-                }
-
-                if (bestLink) {
-                    item.video_url = bestLink.url;
-                } else {
-                    // More than one link, and no preferred label match, so we must ask the user.
-                    this.linksForSelection = candidateLinks;
-                    this.itemForLinkSelection = item;
-                    this.linkSelectionContext = 'local';
-                    this.isLinkSelectionModalOpen = true;
-                    return;
-                }
+            // Save the language/type preference based on the selected link
+            if (selectedLink && showId) {
+                this.setShowFilterPreference(showId, {
+                    language: selectedLink.language,
+                    type: selectedLink.type as 'sub' | 'dub'
+                });
             }
         }
 
