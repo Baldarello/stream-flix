@@ -78,6 +78,8 @@ export interface GoogleUser {
     email: string;
     picture: string;
     accessToken: string;
+    refreshToken?: string;
+    tokenExpiry?: number; // Unix timestamp when the token expires
 }
 
 // Types for Library Sharing
