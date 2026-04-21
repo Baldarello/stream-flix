@@ -61,9 +61,9 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
         type: link.type // 'dub' or 'sub'
     })) || [];
 
-    // Deduplicate languages
+    // Deduplicate languages (check both lang AND type to keep dub AND sub)
     const uniqueLanguages = availableLanguages.reduce((acc, {lang, type}) => {
-        if (!acc.find(l => l.lang === lang)) {
+        if (!acc.find(l => l.lang === lang && l.type === type)) {
             acc.push({lang, type});
         }
         return acc;
