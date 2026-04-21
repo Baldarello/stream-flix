@@ -28,39 +28,23 @@ export const checkLinkValidity = async (url: string): Promise<boolean> => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), LINK_CHECK_TIMEOUT);
 
+        // Try GET with Range header - more reliable for video servers
         const response = await fetch(url, {
-            method: 'HEAD',
-            mode: 'no-cors', // Many video servers don't support CORS for HEAD
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Range': 'bytes=0-0', // Request only first byte to check if resource exists
+            },
             signal: controller.signal,
         });
 
         clearTimeout(timeoutId);
 
-        // In no-cors mode, we can't check the status, so we'll try GET with range
-        // If HEAD failed but we have a valid URL structure, consider it potentially valid
-        return true;
-    } catch {
-        // Try GET with range header as fallback
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), LINK_CHECK_TIMEOUT);
-
-            const response = await fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                headers: {
-                    'Range': 'bytes=0-0', // Request only first byte to check if resource exists
-                },
-                signal: controller.signal,
-            });
-
-            clearTimeout(timeoutId);
-
-            // If we get a 2xx or 3xx response, the link is valid
-            return response.status < 400;
-        } catch {
-            return false;
-        }
+        // Accept 2xx and 3xx as valid (redirects are okay)
+        return response.status < 400;
+    } catch (error) {
+        console.warn('Link validation failed:', url, error);
+        return false;
     }
 };
 

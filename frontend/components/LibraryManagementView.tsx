@@ -499,6 +499,19 @@ const LibraryManagementView: React.FC = observer(() => {
                                 }
                                 return true;
                             })
+                            .sort(([idA], [idB]) => {
+                                // Sort by season, then by episode number
+                                const infoA = getEpisodeInfo(idA);
+                                const infoB = getEpisodeInfo(idB);
+                                if (!infoA && !infoB) return 0;
+                                if (!infoA) return 1;
+                                if (!infoB) return -1;
+                                // Sort by season first, then by episode
+                                if (infoA.season !== infoB.season) {
+                                    return infoA.season - infoB.season;
+                                }
+                                return infoA.episode - infoB.episode;
+                            })
                             .map(([mediaId, links]) => {
                             if (links.length === 0) return null;
                             const epInfo = getEpisodeInfo(mediaId);
