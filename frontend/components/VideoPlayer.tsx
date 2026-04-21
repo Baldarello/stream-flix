@@ -380,7 +380,7 @@ const VideoPlayer: React.FC = observer(() => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, , handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
+    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
 
     // Player state management and event listeners
     useEffect(() => {
@@ -513,8 +513,7 @@ const VideoPlayer: React.FC = observer(() => {
         }
     };
 
-    // Extract available languages and types from video_urls
-    const videoUrls = nowPlayingItem.video_urls || [];
+    // Extract available languages and types from video_urls (videoUrls already declared at line 456)
     const availableLanguages = useMemo(() => {
         const langs = new Set<string>();
         videoUrls.forEach(link => langs.add(link.language));
