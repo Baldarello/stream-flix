@@ -1899,7 +1899,6 @@ class MediaStore {
             
             // Save validity to database - set isValid for all links
             if (linksToUpdate.length > 0) {
-                const db = this.db;
                 await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
                     for (const linkUpdate of linksToUpdate) {
                         await db.mediaLinks.update(linkUpdate.id, { isValid: linkUpdate.isValid });

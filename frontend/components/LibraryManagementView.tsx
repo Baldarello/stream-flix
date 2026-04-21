@@ -492,7 +492,7 @@ const LibraryManagementView: React.FC = observer(() => {
                                         return false;
                                     }
                                 }
-                                // Filter by invalid
+                                // Filter by invalid - show only episodes that have at least one invalid link
                                 if (mediaStore.showOnlyInvalidLinks) {
                                     const hasInvalid = links.some(l => l.id && mediaStore.invalidLinkIds.has(l.id));
                                     return hasInvalid;
@@ -552,7 +552,9 @@ const LibraryManagementView: React.FC = observer(() => {
                                         </Button>
                                     </Box>
                                     <Stack spacing={1}>
-                                        {links.map(link => {
+                                        {links
+                                            .filter(link => !mediaStore.showOnlyInvalidLinks || (link.id && mediaStore.invalidLinkIds.has(link.id)))
+                                            .map(link => {
                                             const isEditing = editingLink?.id === link.id;
                                             const truncatedLabel = link.label.length > 30 ? `${link.label.substring(0, 30)}...` : link.label;
 

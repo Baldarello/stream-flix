@@ -1,10 +1,11 @@
 import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {AppBar, Box, Button, Fade, FormControl, IconButton, MenuItem, Select, Toolbar, Tooltip, Typography} from '@mui/material';
+import {AppBar, Box, Button, Fade, FormControl, IconButton, Menu, MenuItem, Select, Toolbar, Tooltip, Typography} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';
+import LanguageIcon from '@mui/icons-material/Language';
 import Chat from './Chat.tsx';
 import EpisodesDrawer from './EpisodesDrawer.tsx';
 import VideoControlsContainer from './VideoControlsContainer.tsx';
@@ -43,6 +44,7 @@ const VideoPlayer: React.FC = observer(() => {
 
     // Detect if we're in portrait mobile (narrow screen and not fullscreen)
     const [isPortraitMobile, setIsPortraitMobile] = useState(false);
+    const [languageMenuAnchor, setLanguageMenuAnchor] = useState<null | HTMLElement>(null);
     useEffect(() => {
         const checkPortrait = () => {
             const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -495,8 +497,8 @@ const VideoPlayer: React.FC = observer(() => {
 
     const hasMultipleLanguages = availableLanguages.length > 1;
     const hasMultipleTypes = availableTypes.length > 1;
-    const showLanguagePickers = hasMultipleLanguages || hasMultipleTypes;
-
+    // Show pickers when there are multiple video URLs (multiple languages OR multiple types)
+    const showLanguagePickers = videoUrls.length > 1;
     // Get current selection from showFilterPreferences
     const currentShowId = isEpisode && 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : null;
     const currentPrefs = currentShowId ? mediaStore.showFilterPreferences.get(currentShowId) || {} : {};
@@ -505,16 +507,15 @@ const VideoPlayer: React.FC = observer(() => {
 
     const handleLanguageChange = (lang: string) => {
         if (currentShowId) {
-            mediaStore.setShowFilterPreference(currentShowId, {language: lang});
-            // Reload video with new language
-            reloadVideoWithFilters(lang, selectedType);
+            const newType = lang ? selectedType : ''; // Reset type if no language selected
+            mediaStore.setShowFilterPreference(currentShowId, {language: lang, type: newType});
+            reloadVideoWithFilters(lang, newType);
         }
     };
 
     const handleTypeChange = (type: 'sub' | 'dub') => {
         if (currentShowId) {
             mediaStore.setShowFilterPreference(currentShowId, {type});
-            // Reload video with new type
             reloadVideoWithFilters(selectedLanguage, type);
         }
     };
@@ -532,6 +533,15 @@ const VideoPlayer: React.FC = observer(() => {
                 videoRef.current.play().catch(console.error);
             }
         }
+    };
+
+    // Mobile language menu handlers
+    const handleOpenLanguageMenu = (event: React.MouseEvent<HTMLElement>) => {
+        setLanguageMenuAnchor(event.currentTarget);
+    };
+
+    const handleCloseLanguageMenu = () => {
+        setLanguageMenuAnchor(null);
     };
 
     return (
@@ -578,63 +588,107 @@ const VideoPlayer: React.FC = observer(() => {
                                             onClick={stopPlayback}><ArrowBackIcon/></IconButton>
                                 <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
                                 {/* Language/Subtitle pickers - only show when multiple options available */}
-                                {showLanguagePickers && !isPortraitMobile && (
-                                    <Box sx={{display: 'flex', gap: 1, mr: 1}}>
-                                        {hasMultipleLanguages && (
-                                            <FormControl size="small" sx={{minWidth: 80}}>
-                                                <Select
-                                                    value={selectedLanguage}
-                                                    onChange={(e) => handleLanguageChange(e.target.value)}
-                                                    sx={{
-                                                        color: 'white',
-                                                        bgcolor: 'rgba(0,0,0,0.5)',
-                                                        borderRadius: 4,
-                                                        '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
-                                                        '& .MuiSelect-icon': {color: 'white'},
-                                                        '& .MuiSelect-select': {py: 0.5, px: 1}
-                                                    }}
-                                                    renderValue={(val) => (
-                                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                                            <VolumeUpIcon sx={{fontSize: 18}} />
-                                                            <Typography variant="caption">{val || 'Lingua'}</Typography>
-                                                        </Box>
-                                                    )}
-                                                >
-                                                    <MenuItem value=""><em>None</em></MenuItem>
-                                                    {availableLanguages.map(lang => (
-                                                        <MenuItem key={lang} value={lang}>{lang}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                        {hasMultipleTypes && (
-                                            <FormControl size="small" sx={{minWidth: 70}}>
-                                                <Select
-                                                    value={selectedType}
-                                                    onChange={(e) => handleTypeChange(e.target.value as 'sub' | 'dub')}
-                                                    sx={{
-                                                        color: 'white',
-                                                        bgcolor: 'rgba(0,0,0,0.5)',
-                                                        borderRadius: 4,
-                                                        '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
-                                                        '& .MuiSelect-icon': {color: 'white'},
-                                                        '& .MuiSelect-select': {py: 0.5, px: 1}
-                                                    }}
-                                                    renderValue={(val) => (
-                                                        <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                                            <ClosedCaptionIcon sx={{fontSize: 18}} />
-                                                            <Typography variant="caption">{val || 'Sub'}</Typography>
-                                                        </Box>
-                                                    )}
-                                                >
-                                                    <MenuItem value=""><em>None</em></MenuItem>
-                                                    {availableTypes.map(type => (
-                                                        <MenuItem key={type} value={type}>{type === 'dub' ? 'Dopp.' : 'Sub'}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    </Box>
+                                {showLanguagePickers && (
+                                    isPortraitMobile ? (
+                                        // Mobile: IconButton with Popover
+                                        <>
+                                            <IconButton color="inherit" onClick={handleOpenLanguageMenu}>
+                                                <LanguageIcon />
+                                            </IconButton>
+                                            <Menu
+                                                anchorEl={languageMenuAnchor}
+                                                open={Boolean(languageMenuAnchor)}
+                                                onClose={handleCloseLanguageMenu}
+                                                PaperProps={{
+                                                    sx: { bgcolor: 'rgba(30, 30, 30, 0.95)' }
+                                                }}
+                                            >
+                                                {hasMultipleLanguages && (
+                                                    <>
+                                                        <MenuItem disabled sx={{ opacity: 0.7, fontSize: '0.75rem' }}>
+                                                            Lingua
+                                                        </MenuItem>
+                                                        {availableLanguages.map(lang => (
+                                                            <MenuItem key={lang} value={lang} onClick={() => { handleLanguageChange(lang); handleCloseLanguageMenu(); }}>
+                                                                {selectedLanguage === lang && '✓ '}{lang}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </>
+                                                )}
+                                                {hasMultipleLanguages && hasMultipleTypes && <Box sx={{ borderTop: 1, borderColor: 'divider', my: 0.5 }} />}
+                                                {hasMultipleTypes && (
+                                                    <>
+                                                        <MenuItem disabled sx={{ opacity: 0.7, fontSize: '0.75rem' }}>
+                                                            Tipo
+                                                        </MenuItem>
+                                                        {availableTypes.map(type => (
+                                                            <MenuItem key={type} value={type} onClick={() => { handleTypeChange(type as 'sub' | 'dub'); handleCloseLanguageMenu(); }}>
+                                                                {selectedType === type && '✓ '}{type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </>
+                                                )}
+                                            </Menu>
+                                        </>
+                                    ) : (
+                                        // Desktop: Select dropdowns
+                                        <Box sx={{display: 'flex', gap: 1, mr: 1}}>
+                                            {hasMultipleLanguages && (
+                                                <FormControl size="small" sx={{minWidth: 80}}>
+                                                    <Select
+                                                        value={selectedLanguage}
+                                                        onChange={(e) => handleLanguageChange(e.target.value)}
+                                                        sx={{
+                                                            color: 'white',
+                                                            bgcolor: 'rgba(0,0,0,0.5)',
+                                                            borderRadius: 4,
+                                                            '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
+                                                            '& .MuiSelect-icon': {color: 'white'},
+                                                            '& .MuiSelect-select': {py: 0.5, px: 1}
+                                                        }}
+                                                        renderValue={(val) => (
+                                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                                <VolumeUpIcon sx={{fontSize: 18}} />
+                                                                <Typography variant="caption">{val || 'Lingua'}</Typography>
+                                                            </Box>
+                                                        )}
+                                                    >
+                                                        <MenuItem value=""><em>None</em></MenuItem>
+                                                        {availableLanguages.map(lang => (
+                                                            <MenuItem key={lang} value={lang}>{lang}</MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            )}
+                                            {hasMultipleTypes && (
+                                                <FormControl size="small" sx={{minWidth: 70}}>
+                                                    <Select
+                                                        value={selectedType}
+                                                        onChange={(e) => handleTypeChange(e.target.value as 'sub' | 'dub')}
+                                                        sx={{
+                                                            color: 'white',
+                                                            bgcolor: 'rgba(0,0,0,0.5)',
+                                                            borderRadius: 4,
+                                                            '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
+                                                            '& .MuiSelect-icon': {color: 'white'},
+                                                            '& .MuiSelect-select': {py: 0.5, px: 1}
+                                                        }}
+                                                        renderValue={(val) => (
+                                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
+                                                                <ClosedCaptionIcon sx={{fontSize: 18}} />
+                                                                <Typography variant="caption">{val || 'Sub'}</Typography>
+                                                            </Box>
+                                                        )}
+                                                    >
+                                                        <MenuItem value=""><em>None</em></MenuItem>
+                                                        {availableTypes.map(type => (
+                                                            <MenuItem key={type} value={type}>{type === 'dub' ? 'Dopp.' : 'Sub'}</MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            )}
+                                        </Box>
+                                    )
                                 )}
                                 {/* Buttons - positioned after language pickers */}
                                 {mediaStore.nextEpisode &&
