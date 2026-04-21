@@ -18,8 +18,7 @@ export const en = {
     "contentRow": {
         "scrollLeft": "scroll left",
         "scrollRight": "scroll right",
-        "holdToReorder": "Hold to reorder",
-        "tapToSwap": "Tap another card to swap"
+        "editOrder": "Edit order",\n        "reorderInstructions": "Drag items to reorder, or use the arrows",\n        "saveOrder": "Save order"
     },
     "card": {
         "detailsFor": "View details for {title}",

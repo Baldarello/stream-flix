@@ -1,14 +1,14 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
 import type {MediaItem} from '../types.ts';
 import {Card} from './Card.tsx';
-import {Box, Fade, IconButton, Snackbar, Typography, useMediaQuery, useTheme} from '@mui/material';
+import {Box, Fade, IconButton, Typography, useMediaQuery, useTheme} from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import EditIcon from '@mui/icons-material/Edit';
 import {observer} from 'mobx-react-lite';
 import {useTranslations} from '../hooks/useTranslations.ts';
 import {mediaStore} from '../store/mediaStore.ts';
+import {ReorderDrawer} from './ReorderDrawer.tsx';
 
 interface ContentRowProps {
     title: string;
@@ -29,20 +29,13 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const [isHovered, setIsHovered] = useState(false);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
+    const [isReorderDrawerOpen, setIsReorderDrawerOpen] = useState(false);
     const {t} = useTranslations();
 
     // Detect mobile and my list context
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isMyList = title.toLowerCase().includes('my list') || title.toLowerCase().includes('mia lista');
-
-    // Long Press + Tap reorder state (mobile only)
-    const [selectedForReorder, setSelectedForReorder] = useState<number | null>(null);
-    const [reorderHint, setReorderHint] = useState<string | null>(null);
-    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const isLongPressRef = useRef<boolean>(false);
-    const [swipeTargetIndex, setSwipeTargetIndex] = useState<number | null>(null);
-    const touchStartYRef = useRef<number>(0);
 
     // State for Drag and Drop (desktop only)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -51,131 +44,11 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const [activeDragIndex, setActiveDragIndex] = useState<number | null>(null);
 
     const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const LONG_PRESS_DURATION = 500; // ms for long press detection
 
-    // Clear reorder hint when selection changes
-    useEffect(() => {
-        if (selectedForReorder !== null) {
-            setReorderHint(t('contentRow.tapToSwap') || 'Tap another card to swap');
-        } else {
-            setReorderHint(null);
-        }
-    }, [selectedForReorder, t]);
-
-    // Long Press handlers for mobile reorder
-    const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
-        if (!isReorderable || !isMobile) return;
-
-        // Stop propagation to prevent parent handlers from interfering
-        e.stopPropagation();
-
-        // Store initial touch Y position for swipe detection
-        const touch = e.touches[0];
-        touchStartYRef.current = touch.clientY;
-
-        // Clear any existing timer
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-        }
-
-        // Reset long press flag
-        isLongPressRef.current = false;
-
-        // Start long press timer
-        longPressTimerRef.current = setTimeout(() => {
-            isLongPressRef.current = true;
-            setSelectedForReorder(index);
-        }, LONG_PRESS_DURATION);
-    }, [isReorderable, isMobile]);
-
-    const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
-        // Stop propagation to prevent parent handlers from interfering
-        e.stopPropagation();
-
-        // Cancel long press if user moves finger
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-
-        // Only track swipe if long press was triggered
-        if (!isLongPressRef.current || selectedForReorder === null) return;
-
-        const touch = e.touches[0];
-        const deltaY = touch.clientY - touchStartYRef.current;
-
-        // Only consider significant vertical swipe (> 30px)
-        if (Math.abs(deltaY) > 30) {
-            const container = scrollContainerRef.current;
-            if (!container) return;
-
-            // Get all card elements
-            const cardElements = container.querySelectorAll('.dnd-wrapper');
-            const targetY = touch.clientY;
-
-            // Find which card the user is swiping over
-            let targetIndex: number | null = null;
-            cardElements.forEach((card, idx) => {
-                const rect = card.getBoundingClientRect();
-                if (targetY >= rect.top && targetY <= rect.bottom) {
-                    targetIndex = idx;
-                }
-            });
-
-            if (targetIndex !== null && targetIndex !== selectedForReorder) {
-                setSwipeTargetIndex(targetIndex);
-            }
-        }
-    }, [selectedForReorder]);
-
-    const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
-        // Stop propagation to prevent parent handlers from interfering
-        e.stopPropagation();
-
-        // Cancel long press timer
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-
-        if (!isReorderable || !isMobile) return;
-
-        // If long press was triggered, check for swipe-based reorder
-        if (isLongPressRef.current) {
-            isLongPressRef.current = false;
-
-            // If user swiped to a different target, perform the swap
-            if (swipeTargetIndex !== null && swipeTargetIndex !== selectedForReorder) {
-                mediaStore.reorderMyList(selectedForReorder, swipeTargetIndex);
-            }
-
-            // Reset all states
-            setSelectedForReorder(null);
-            setSwipeTargetIndex(null);
-            return;
-        }
-
-        // Regular tap - if a card is already selected, swap or deselect
-        if (selectedForReorder !== null) {
-            if (selectedForReorder === index) {
-                // Tap on same card - deselect
-                setSelectedForReorder(null);
-            } else {
-                // Tap on different card - swap positions
-                mediaStore.reorderMyList(selectedForReorder, index);
-                setSelectedForReorder(null);
-            }
-        }
-    }, [isReorderable, isMobile, selectedForReorder, swipeTargetIndex]);
-
-    // Handle click for desktop (when not dragging)
-    const handleCardClick = useCallback((item: MediaItem, index: number) => {
-        if (!isReorderable || isMobile) {
-            onCardClick(item);
-            return;
-        }
+    // Handle card click
+    const handleCardClick = useCallback((item: MediaItem) => {
         onCardClick(item);
-    }, [isReorderable, isMobile, onCardClick]);
+    }, [onCardClick]);
 
     const checkScrollability = () => {
         const el = scrollContainerRef.current;
@@ -325,9 +198,14 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                     {title}
                 </Typography>
                 {isMobile && isReorderable && (
-                    <Typography variant="caption" color="warning.main" sx={{opacity: 0.8}}>
-                        {t('contentRow.holdToReorder') || 'Hold to reorder'}
-                    </Typography>
+                    <IconButton
+                        onClick={() => setIsReorderDrawerOpen(true)}
+                        size="small"
+                        sx={{color: 'warning.main'}}
+                        aria-label={t('contentRow.editOrder') || 'Edit order'}
+                    >
+                        <EditIcon fontSize="small"/>
+                    </IconButton>
                 )}
             </Box>
             
@@ -356,7 +234,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
 
                 <Box
                     ref={scrollContainerRef}
-                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''} ${selectedForReorder !== null ? 'is-reorder-mode' : ''} ${swipeTargetIndex !== null ? 'is-swiping' : ''}`}
+                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''}`}
                     sx={{
                         display: 'flex',
                         overflowX: 'auto',
@@ -384,7 +262,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                     {items.map((item, index) => (
                         <div
                             key={item.id}
-                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''} ${selectedForReorder === index ? 'long-press-selected' : ''} ${swipeTargetIndex === index ? 'reorder-target' : ''}`}
+                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''}`}
                             draggable={isReorderable && !isMobile}
                             onDragStart={(e) => isReorderable && !isMobile && handleDragStart(e, index)}
                             onDragOver={(e) => isReorderable && !isMobile && handleDragOver(e, index)}
@@ -394,10 +272,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                                 if (isReorderable && !isMobile) setDropTargetIndex(null);
                                 stopAutoScroll();
                             }}
-                            // Mobile touch handlers for long press reorder
-                            onTouchStart={(e) => isReorderable && isMobile && handleTouchStart(e, index)}
-                            onTouchMove={(e) => isReorderable && isMobile && handleTouchMove(e)}
-                            onTouchEnd={(e) => isReorderable && isMobile && handleTouchEnd(e, index)}
+
                             style={{
                                 marginLeft: index === 0 ? 0 : '-40px',
                                 transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
@@ -435,15 +310,13 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                 </Fade>
             </Box>
 
-            {/* Reorder hint snackbar */}
-            <Snackbar
-                open={selectedForReorder !== null}
-                message={reorderHint || ''}
-                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                sx={{
-                    '& .MuiSnackbarContent-root': {
-                        bgcolor: '#ff9800',
-                    }
+            {/* Reorder Drawer for mobile */}
+            <ReorderDrawer
+                open={isReorderDrawerOpen}
+                onClose={() => setIsReorderDrawerOpen(false)}
+                items={items}
+                onReorder={async (fromIndex, toIndex) => {
+                    await mediaStore.reorderMyList(fromIndex, toIndex);
                 }}
             />
         </Box>

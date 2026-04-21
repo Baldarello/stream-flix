@@ -18,8 +18,9 @@ export const it = {
     "contentRow": {
         "scrollLeft": "scorri a sinistra",
         "scrollRight": "scorri a destra",
-        "holdToReorder": "Tieni premuto per riordinare",
-        "tapToSwap": "Tappa un'altra card per scambiare"
+        "editOrder": "Modifica ordine",
+        "reorderInstructions": "Trascina gli elementi per riordinare, oppure usa le frecce",
+        "saveOrder": "Salva ordine"
     },
     "card": {
         "detailsFor": "Vedi dettagli per {title}",
