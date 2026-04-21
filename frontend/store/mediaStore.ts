@@ -280,7 +280,8 @@ class MediaStore {
     // Load invalid links from DB on startup
     loadInvalidLinksFromDb = async () => {
         try {
-            const invalidLinks = await db.mediaLinks.filter(link => link.isValid === false).toArray();
+            // Load both explicitly marked invalid and legacy links (isValid !== true means potentially invalid)
+            const invalidLinks = await db.mediaLinks.filter(link => link.isValid === false || link.isValid === undefined).toArray();
             const invalidIds = new Set<number>();
             invalidLinks.forEach(link => {
                 if (link.id) invalidIds.add(link.id);
@@ -1895,7 +1896,7 @@ class MediaStore {
                 }
             }
             
-            // Save validity to database
+            // Save validity to database - set isValid for all links
             if (linksToUpdate.length > 0) {
                 const db = this.db;
                 await (db as Dexie).transaction('rw', db.mediaLinks, async () => {

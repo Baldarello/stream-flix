@@ -170,6 +170,10 @@ export class QuixDB extends Dexie {
         (this as Dexie).version(12).stores({
             episodeProgress: '&episodeId, lastWatchedAt' // Add index on lastWatchedAt
         });
+
+        (this as Dexie).version(13).stores({
+            mediaLinks: '++id, mediaId, isValid' // Add isValid field for link validation
+        });
     }
 
     async importData(data: any) {
