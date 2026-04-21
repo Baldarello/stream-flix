@@ -511,7 +511,7 @@ const VideoPlayer: React.FC = observer(() => {
 
                         {/* Top Bar */}
                         <AppBar position="static" sx={{
-                            bgcolor: 'transparent',
+                            backgroundColor: 'transparent',
                             boxShadow: 'none',
                             pointerEvents: 'auto',
                             paddingTop: 'env(safe-area-inset-top)'

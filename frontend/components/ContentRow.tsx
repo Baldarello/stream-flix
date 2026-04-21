@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
 import type {MediaItem} from '../types.ts';
 import {Card} from './Card.tsx';
-import {Box, Fade, IconButton, Typography} from '@mui/material';
+import {Box, Fade, IconButton, Snackbar, Typography, useMediaQuery, useTheme} from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -31,20 +31,98 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
     const [canScrollRight, setCanScrollRight] = useState(false);
     const {t} = useTranslations();
 
-    // State for Drag and Drop
+    // Detect mobile and my list context
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMyList = title.toLowerCase().includes('my list') || title.toLowerCase().includes('mia lista');
+
+    // Long Press + Tap reorder state (mobile only)
+    const [selectedForReorder, setSelectedForReorder] = useState<number | null>(null);
+    const [reorderHint, setReorderHint] = useState<string | null>(null);
+    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isLongPressRef = useRef<boolean>(false);
+
+    // State for Drag and Drop (desktop only)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
     const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [activeDragIndex, setActiveDragIndex] = useState<number | null>(null);
 
-    // Touch drag state
-    const touchDragRef = useRef<{
-        startX: number;
-        startIndex: number;
-        isDragging: boolean;
-    } | null>(null);
-    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const LONG_PRESS_DURATION = 500; // ms for long press detection
+
+    // Clear reorder hint when selection changes
+    useEffect(() => {
+        if (selectedForReorder !== null) {
+            setReorderHint(t('contentRow.tapToSwap') || 'Tap another card to swap');
+        } else {
+            setReorderHint(null);
+        }
+    }, [selectedForReorder, t]);
+
+    // Long Press handlers for mobile reorder
+    const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
+        if (!isReorderable || !isMobile) return;
+
+        // Clear any existing timer
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+        }
+
+        // Reset long press flag
+        isLongPressRef.current = false;
+
+        // Start long press timer
+        longPressTimerRef.current = setTimeout(() => {
+            isLongPressRef.current = true;
+            setSelectedForReorder(index);
+        }, LONG_PRESS_DURATION);
+    }, [isReorderable, isMobile]);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+        // Cancel long press if user moves finger
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLDivElement>, index: number) => {
+        // Cancel long press timer
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+
+        if (!isReorderable || !isMobile) return;
+
+        // If long press was triggered, don't process tap
+        if (isLongPressRef.current) {
+            isLongPressRef.current = false;
+            return;
+        }
+
+        // Regular tap - if a card is already selected, swap or deselect
+        if (selectedForReorder !== null) {
+            if (selectedForReorder === index) {
+                // Tap on same card - deselect
+                setSelectedForReorder(null);
+            } else {
+                // Tap on different card - swap positions
+                mediaStore.reorderMyList(selectedForReorder, index);
+                setSelectedForReorder(null);
+            }
+        }
+    }, [isReorderable, isMobile, selectedForReorder]);
+
+    // Handle click for desktop (when not dragging)
+    const handleCardClick = useCallback((item: MediaItem, index: number) => {
+        if (!isReorderable || isMobile) {
+            onCardClick(item);
+            return;
+        }
+        onCardClick(item);
+    }, [isReorderable, isMobile, onCardClick]);
 
     const checkScrollability = () => {
         const el = scrollContainerRef.current;
@@ -127,7 +205,7 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         }
     };
 
-    // Drag and Drop handlers
+    // Drag and Drop handlers (desktop only)
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
         e.dataTransfer.setData("itemIndex", index.toString());
         setDraggedIndex(index);
@@ -170,98 +248,6 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         setIsDragging(false);
         setActiveDragIndex(null);
         stopAutoScroll();
-        touchDragRef.current = null;
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-    };
-
-    // Touch handlers for mobile drag-and-drop
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, index: number) => {
-        if (!isReorderable) return;
-
-        const touch = e.touches[0];
-        touchDragRef.current = {
-            startX: touch.clientX,
-            startIndex: index,
-            isDragging: false,
-        };
-
-        // Start long press timer to initiate drag
-        longPressTimerRef.current = setTimeout(() => {
-            if (touchDragRef.current) {
-                touchDragRef.current.isDragging = true;
-                setDraggedIndex(index);
-                setIsDragging(true);
-                setActiveDragIndex(index);
-            }
-        }, 300); // 300ms long press to start drag
-    };
-
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (!isReorderable || draggedIndex === null || !touchDragRef.current) return;
-
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - touchDragRef.current.startX;
-
-        // If moved significantly, ensure dragging is active
-        if (Math.abs(deltaX) > 10 && !touchDragRef.current.isDragging) {
-            touchDragRef.current.isDragging = true;
-            setDraggedIndex(touchDragRef.current.startIndex);
-            setIsDragging(true);
-            setActiveDragIndex(touchDragRef.current.startIndex);
-        }
-
-        if (touchDragRef.current.isDragging) {
-            e.preventDefault();
-
-            // Calculate drop target based on touch position
-            const container = scrollContainerRef.current;
-            if (!container) return;
-
-            const cards = container.querySelectorAll('.dnd-wrapper');
-            let newDropTarget: number | null = null;
-
-            cards.forEach((card, i) => {
-                const rect = card.getBoundingClientRect();
-                const cardCenter = rect.left + rect.width / 2;
-                if (touch.clientX > cardCenter) {
-                    newDropTarget = i;
-                }
-            });
-
-            if (newDropTarget !== null && newDropTarget !== dropTargetIndex) {
-                setDropTargetIndex(newDropTarget);
-            }
-
-            // Auto-scroll near edges during touch drag
-            const rect = container.getBoundingClientRect();
-            const edgeThreshold = 80;
-            if (touch.clientX < rect.left + edgeThreshold) {
-                startAutoScroll('left');
-            } else if (touch.clientX > rect.right - edgeThreshold) {
-                startAutoScroll('right');
-            } else {
-                stopAutoScroll();
-            }
-        }
-    };
-
-    const handleTouchEnd = () => {
-        if (!isReorderable) return;
-        stopAutoScroll();
-
-        if (longPressTimerRef.current) {
-            clearTimeout(longPressTimerRef.current);
-            longPressTimerRef.current = null;
-        }
-
-        if (draggedIndex !== null && dropTargetIndex !== null && draggedIndex !== dropTargetIndex) {
-            mediaStore.reorderMyList(draggedIndex, dropTargetIndex);
-        }
-
-        handleDragEnd();
     };
 
     const scrollButtonStyles = {
@@ -271,19 +257,27 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
         height: '100%',
         width: '4rem',
         zIndex: 20,
-        bgcolor: 'transparent',
         color: 'white',
         borderRadius: 0,
+        backgroundColor: 'transparent',
         '&:hover': {
-            bgcolor: 'rgba(20, 20, 30, 0.8)',
+            backgroundColor: 'rgba(20, 20, 30, 0.8)',
         },
     };
 
     return (
         <Box component="section">
-            <Typography variant="h5" component="h2" fontWeight="bold" sx={{mb: 0}}>
-                {title}
-            </Typography>
+            <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mb: 0}}>
+                <Typography variant="h5" component="h2" fontWeight="bold">
+                    {title}
+                </Typography>
+                {isMobile && isReorderable && (
+                    <Typography variant="caption" color="warning.main" sx={{opacity: 0.8}}>
+                        {t('contentRow.holdToReorder') || 'Hold to reorder'}
+                    </Typography>
+                )}
+            </Box>
+            
             <Box
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => {
@@ -292,13 +286,14 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                 }}
                 sx={{position: 'relative'}}
             >
-                {/* FIX: (line 127) Wrap IconButton with Fade component */}
-                <Fade in={isHovered && canScrollLeft}>
+                {/* Scroll Left Button */}
+                <Fade in={(isMobile && isMyList) || (isHovered && canScrollLeft)}>
                     <IconButton
                         onClick={() => handleScroll('left')}
                         sx={{
                             ...scrollButtonStyles,
                             left: 0,
+                            opacity: (isMobile && isMyList) ? 1 : undefined,
                         }}
                         aria-label={t('contentRow.scrollLeft')}
                     >
@@ -308,20 +303,20 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
 
                 <Box
                     ref={scrollContainerRef}
-                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''}`}
+                    className={`filmstrip-container ${isDragging ? 'is-dragging' : ''} ${selectedForReorder !== null ? 'is-reorder-mode' : ''}`}
                     sx={{
                         display: 'flex',
                         overflowX: 'auto',
                         overflowY: 'hidden',
                         py: 6,
-                        px: 'calc(4rem + 40px)', // Space for buttons and overlap
+                        px: 'calc(4rem + 40px)',
                         marginLeft: '-4rem',
                         scrollPadding: '0 0 0 calc(4rem + 40px)',
                         scrollBehavior: 'smooth',
                         '&::-webkit-scrollbar': {
                             display: 'none',
                         },
-                        scrollbarWidth: 'none', // For Firefox
+                        scrollbarWidth: 'none',
                         '&:hover .media-card': {
                             opacity: 0.4,
                         },
@@ -336,28 +331,28 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                     {items.map((item, index) => (
                         <div
                             key={item.id}
-                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''}`}
-                            draggable={isReorderable}
-                            onDragStart={(e) => isReorderable && handleDragStart(e, index)}
-                            onDragOver={(e) => isReorderable && handleDragOver(e, index)}
-                            onDrop={(e) => isReorderable && handleDrop(e, index)}
-                            onDragEnd={() => isReorderable && handleDragEnd()}
+                            className={`dnd-wrapper ${draggedIndex === index ? 'dragging-item' : ''} ${dropTargetIndex === index ? 'drop-target-item' : ''} ${selectedForReorder === index ? 'long-press-selected' : ''}`}
+                            draggable={isReorderable && !isMobile}
+                            onDragStart={(e) => isReorderable && !isMobile && handleDragStart(e, index)}
+                            onDragOver={(e) => isReorderable && !isMobile && handleDragOver(e, index)}
+                            onDrop={(e) => isReorderable && !isMobile && handleDrop(e, index)}
+                            onDragEnd={() => isReorderable && !isMobile && handleDragEnd()}
                             onDragLeave={() => {
-                                if (isReorderable) setDropTargetIndex(null);
+                                if (isReorderable && !isMobile) setDropTargetIndex(null);
                                 stopAutoScroll();
                             }}
-                            onTouchStart={(e) => isReorderable && handleTouchStart(e, index)}
-                            onTouchMove={(e) => isReorderable && handleTouchMove(e)}
-                            onTouchEnd={() => isReorderable && handleTouchEnd()}
+                            // Mobile touch handlers for long press reorder
+                            onTouchStart={(e) => isReorderable && isMobile && handleTouchStart(e, index)}
+                            onTouchMove={(e) => isReorderable && isMobile && handleTouchMove(e)}
+                            onTouchEnd={(e) => isReorderable && isMobile && handleTouchEnd(e, index)}
                             style={{
                                 marginLeft: index === 0 ? 0 : '-40px',
                                 transition: isDragging ? 'none' : 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-                                touchAction: isReorderable ? 'none' : undefined,
                             }}
                         >
                             <Card
                                 item={item}
-                                onClick={() => onCardClick(item)}
+                                onClick={() => handleCardClick(item, index)}
                                 displayMode="row"
                                 className="media-card"
                                 style={{zIndex: items.length - index}}
@@ -371,13 +366,14 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                     ))}
                 </Box>
 
-                {/* FIX: (line 195) Wrap IconButton with Fade component */}
-                <Fade in={isHovered && canScrollRight}>
+                {/* Scroll Right Button */}
+                <Fade in={(isMobile && isMyList) || (isHovered && canScrollRight)}>
                     <IconButton
                         onClick={() => handleScroll('right')}
                         sx={{
                             ...scrollButtonStyles,
                             right: 0,
+                            opacity: (isMobile && isMyList) ? 1 : undefined,
                         }}
                         aria-label={t('contentRow.scrollRight')}
                     >
@@ -385,6 +381,18 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                     </IconButton>
                 </Fade>
             </Box>
+
+            {/* Reorder hint snackbar */}
+            <Snackbar
+                open={selectedForReorder !== null}
+                message={reorderHint || ''}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                sx={{
+                    '& .MuiSnackbarContent-root': {
+                        bgcolor: '#ff9800',
+                    }
+                }}
+            />
         </Box>
     );
 });

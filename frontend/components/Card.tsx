@@ -92,7 +92,7 @@ export const Card: React.FC<CardProps> = observer(({
 
     const cardBaseStyles = {
         position: 'relative',
-        bgcolor: 'transparent',
+        backgroundColor: 'transparent',
         flexShrink: 0,
         width: {xs: 160, md: 208, lg: 256},
         aspectRatio: '2/3',
