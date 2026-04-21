@@ -1465,6 +1465,15 @@ class MediaStore {
         await db.myList.bulkPut(itemsToUpdate);
     }
 
+    setMyListOrder = async (orderedIds: number[]) => {
+        runInAction(() => {
+            this.myList = orderedIds;
+        });
+
+        const itemsToUpdate = orderedIds.map((id, index) => ({id, order: index}));
+        await db.myList.bulkPut(itemsToUpdate);
+    }
+
     removeFromContinueWatching = async (episodeId: number) => {
         try {
             await db.episodeProgress.delete(episodeId);

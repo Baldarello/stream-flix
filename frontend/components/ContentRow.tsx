@@ -315,8 +315,8 @@ export const ContentRow: React.FC<ContentRowProps> = observer(({
                 open={isReorderDrawerOpen}
                 onClose={() => setIsReorderDrawerOpen(false)}
                 items={items}
-                onReorder={async (fromIndex, toIndex) => {
-                    await mediaStore.reorderMyList(fromIndex, toIndex);
+                onSave={async (orderedIds) => {
+                    await mediaStore.setMyListOrder(orderedIds);
                 }}
             />
         </Box>

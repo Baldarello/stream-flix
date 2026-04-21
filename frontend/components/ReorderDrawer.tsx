@@ -21,14 +21,14 @@ interface ReorderDrawerProps {
     open: boolean;
     onClose: () => void;
     items: MediaItem[];
-    onReorder: (fromIndex: number, toIndex: number) => Promise<void>;
+    onSave: (orderedIds: number[]) => Promise<void>;
 }
 
 export const ReorderDrawer: React.FC<ReorderDrawerProps> = ({
     open,
     onClose,
     items,
-    onReorder
+    onSave
 }) => {
     const {t} = useTranslations();
     const [localItems, setLocalItems] = useState<MediaItem[]>([...items]);
@@ -79,13 +79,9 @@ export const ReorderDrawer: React.FC<ReorderDrawerProps> = ({
     }, [localItems]);
 
     const handleSave = async () => {
-        // Find which items changed position
-        for (let i = 0; i < localItems.length; i++) {
-            const originalIndex = items.findIndex(item => item.id === localItems[i].id);
-            if (originalIndex !== i) {
-                await onReorder(originalIndex, i);
-            }
-        }
+        // Extract all IDs in the new order
+        const orderedIds = localItems.map(item => item.id);
+        await onSave(orderedIds);
         setHasChanges(false);
         onClose();
     };
