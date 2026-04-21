@@ -368,6 +368,9 @@ class MediaStore {
             }
 
             // Now, from the candidate links, select one to play.
+            // Store all candidate links so VideoPlayer can show language/type pickers
+            item.video_urls = candidateLinks;
+            
             if (candidateLinks.length === 1) {
                 item.video_url = candidateLinks[0].url;
             } else { // candidateLinks.length > 1
