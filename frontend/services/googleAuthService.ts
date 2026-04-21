@@ -8,10 +8,40 @@ const LOCAL_STORAGE_KEY = 'QUIX_GOOGLE_USER_SESSION';
 
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let refreshTimer: number | null = null;
+let authPopup: Window | null = null;
+let authPopupCheckInterval: number | null = null;
 
 // Token refresh interval (in milliseconds) - refresh 5 minutes before expiry
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Stops the popup polling interval and cleans up.
+ */
+const stopPopupPolling = () => {
+    if (authPopupCheckInterval) {
+        clearInterval(authPopupCheckInterval);
+        authPopupCheckInterval = null;
+    }
+    authPopup = null;
+};
+
+/**
+ * Check if the auth popup has been closed without completing login.
+ * Called periodically after the OAuth popup is opened.
+ */
+const checkAuthPopupClosed = () => {
+    // If popup was already closed by callback (success or error), stop checking
+    if (!authPopup || authPopup.closed) {
+        stopPopupPolling();
+        
+        // If we still have the loading flag set, it means no callback was triggered
+        // (user closed the popup without completing login)
+        if (mediaStore.isGoogleAuthLoading) {
+            console.log("Auth popup was closed without completing login.");
+            mediaStore.isGoogleAuthLoading = false;
+        }
+    }
+};
 
 /**
  * Attempts to refresh the access token using the stored refresh token.
@@ -219,6 +249,10 @@ export const initGoogleAuth = async () => {
             // prompt: 'consent' ensures we get a refresh token for persistent sessions
             prompt: 'consent',
             callback: async (tokenResponse) => {
+                // Reset loading state
+                mediaStore.isGoogleAuthLoading = false;
+                stopPopupPolling();
+                
                 if (tokenResponse && tokenResponse.access_token) {
                     // Fetch user profile after getting the token
                     try {
@@ -263,6 +297,10 @@ export const initGoogleAuth = async () => {
                 }
             },
             error_callback: (error) => {
+                // Reset loading state
+                mediaStore.isGoogleAuthLoading = false;
+                stopPopupPolling();
+                
                 console.error("Google Auth Error:", error);
                 mediaStore.showSnackbar(`Authentication Error: ${error.type}`, "error");
             }
@@ -278,8 +316,27 @@ export const handleSignIn = () => {
         mediaStore.showSnackbar("Google Authentication is not ready.", "error");
         return;
     }
+    
+    // Set loading state to show app loading screen
+    mediaStore.isGoogleAuthLoading = true;
+    
     // Prompt the user to select an account and grant access
     tokenClient.requestAccessToken();
+    
+    // Start polling to detect if popup is closed without completing login
+    // Give a small delay for the popup to open
+    setTimeout(() => {
+        // Try to get reference to the popup window (may not always work due to browser security)
+        try {
+            // Most browsers will have the popup as the most recently focused window
+            authPopup = window;
+        } catch (e) {
+            console.log("Cannot access popup window reference");
+        }
+        
+        // Start checking interval
+        authPopupCheckInterval = window.setInterval(checkAuthPopupClosed, 500);
+    }, 100);
 };
 
 export const handleSignOut = () => {

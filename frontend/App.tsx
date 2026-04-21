@@ -94,6 +94,7 @@ const AppContent: React.FC = observer(() => {
     const {
         loading,
         isReloadingData,
+        isGoogleAuthLoading,
         error,
         heroContent,
         nowPlayingItem,
@@ -127,7 +128,7 @@ const AppContent: React.FC = observer(() => {
         };
     }, [currentSelectedItem, nowPlayingItem, isSmartTVPairingVisible, isRemoteMaster, remoteSlaveState?.nowPlayingItem]);
 
-    if (loading || isReloadingData) {
+    if (loading || isReloadingData || isGoogleAuthLoading) {
         return (
             <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'}}>
                 <CircularProgress color="primary"/>

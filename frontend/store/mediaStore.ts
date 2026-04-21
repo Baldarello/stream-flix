@@ -236,6 +236,7 @@ class MediaStore {
     googleUser: GoogleUser | null = null;
     isSyncing = false;
     isReloadingData = false; // Loading state per ricaricamento dati senza refresh pagina
+    isGoogleAuthLoading = false; // Loading state during Google OAuth popup
 
     // Reload all data in memory (used after sync operations instead of page reload)
     reloadAllData = async () => {
