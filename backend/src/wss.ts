@@ -540,15 +540,18 @@ export function createWebSocketRouter() {
 
                 case 'quix-slave-disconnecting': {
                     // Slave is about to reload/disconnect intentionally - preserve session for reconnection
-                    const slaveId = wsData.slaveId;
-                    if (slaveId) {
-                        intentionallyDisconnectingSlaves.add(slaveId);
-                        const session = remoteSessions.get(slaveId);
+                    // Payload now includes slaveId explicitly for consistency
+                    const typedPayload = payload as { slaveId?: string };
+                    // Use wsData.slaveId as primary source (set during slave registration)
+                    const effectiveSlaveId = wsData.slaveId || typedPayload?.slaveId;
+                    if (effectiveSlaveId) {
+                        intentionallyDisconnectingSlaves.add(effectiveSlaveId);
+                        const session = remoteSessions.get(effectiveSlaveId);
                         if (session) {
                             // Mark slave as disconnecting but PRESERVE the session and master connection
                             // The session will be reused when the slave reconnects
                             session.slaveWs = null; // Clear WebSocket but keep session
-                            console.log(`[WebSocket] Slave ${slaveId} disconnecting intentionally, session preserved for reconnection`);
+                            console.log(`[WebSocket] Slave ${effectiveSlaveId} disconnecting intentionally, session preserved for reconnection`);
                         }
                     }
                     break;
@@ -737,10 +740,13 @@ export function createWebSocketRouter() {
                 }
 
                 case 'quix-slave-status-update': {
+                    // Payload now includes slaveId explicitly for consistency
                     const typedPayload = payload as { slaveId?: string };
-                    const slaveId = typedPayload?.slaveId;
-                    if (slaveId) {
-                        const session = remoteSessions.get(slaveId);
+                    // Use wsData.slaveId from the WebSocket data (set during slave registration)
+                    // This ensures we use the correct ID regardless of what the payload contains
+                    const effectiveSlaveId = wsData.slaveId || typedPayload?.slaveId;
+                    if (effectiveSlaveId) {
+                        const session = remoteSessions.get(effectiveSlaveId);
                         if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-slave-status-update', payload}));
                         }
@@ -829,25 +835,26 @@ export function createWebSocketRouter() {
                 }
 
                 case 'quix-sync-completed': {
-                    // Slave sends sync completed - forward to master
-                    const wsData = getWSData(ws);
-                    // This message comes FROM the slave, so use wsData.slaveId
-                    if (wsData.slaveId) {
-                        const session = remoteSessions.get(wsData.slaveId);
+                    // Payload now includes slaveId explicitly for consistency
+                    // Use wsData.slaveId as primary source (set during slave registration)
+                    const typedPayload = payload as { slaveId?: string };
+                    const effectiveSlaveId = wsData.slaveId || typedPayload?.slaveId;
+                    if (effectiveSlaveId) {
+                        const session = remoteSessions.get(effectiveSlaveId);
                         if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-sync-completed', payload}));
-                            console.log(`[WebSocket] quix-sync-completed: Forwarded to master for slave ${wsData.slaveId}`);
+                            console.log(`[WebSocket] quix-sync-completed: Forwarded to master for slave ${effectiveSlaveId}`);
                         }
                     }
                     break;
                 }
 
                 case 'quix-sync-error': {
-                    // Slave sends sync error - forward to master
-                    const wsData = getWSData(ws);
-                    // This message comes FROM the slave, so use wsData.slaveId
-                    if (wsData.slaveId) {
-                        const session = remoteSessions.get(wsData.slaveId);
+                    // Payload now includes slaveId explicitly for consistency
+                    const typedPayload = payload as { slaveId?: string };
+                    const effectiveSlaveId = wsData.slaveId || typedPayload?.slaveId;
+                    if (effectiveSlaveId) {
+                        const session = remoteSessions.get(effectiveSlaveId);
                         if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-sync-error', payload}));
                         }
@@ -856,11 +863,11 @@ export function createWebSocketRouter() {
                 }
 
                 case 'quix-sync-progress-update': {
-                    // Slave sends progress updates - forward to master
-                    const wsData = getWSData(ws);
-                    // This message comes FROM the slave, forward to master
-                    if (wsData.slaveId) {
-                        const session = remoteSessions.get(wsData.slaveId);
+                    // Payload now includes slaveId explicitly for consistency
+                    const typedPayload = payload as { slaveId?: string };
+                    const effectiveSlaveId = wsData.slaveId || typedPayload?.slaveId;
+                    if (effectiveSlaveId) {
+                        const session = remoteSessions.get(effectiveSlaveId);
                         if (session && isConnectionOpen(session.masterWs)) {
                             session.masterWs.send(JSON.stringify({type: 'quix-sync-progress-update', payload}));
                         }
@@ -891,18 +898,20 @@ export function createWebSocketRouter() {
 
                 case 'quix-pong': {
                     // Slave responds to ping - forward back to master
-                    const typedPayload = payload as { slaveId?: string; masterId?: string };
-                    const slaveId = typedPayload?.slaveId || wsData.slaveId;
+                    // Payload now includes 'from: slave' and slaveId for clarity
+                    const typedPayload = payload as { slaveId?: string; from?: string };
+                    // Use wsData.slaveId as primary source (set during slave registration)
+                    const effectiveSlaveId = wsData.slaveId || typedPayload?.slaveId;
 
-                    if (slaveId) {
-                        const session = remoteSessions.get(slaveId);
+                    if (effectiveSlaveId) {
+                        const session = remoteSessions.get(effectiveSlaveId);
                         if (session && session.masterWs && isConnectionOpen(session.masterWs)) {
                             // Forward pong to master
                             session.masterWs.send(JSON.stringify({
                                 type: 'quix-pong',
-                                payload: {slaveId, timestamp: typedPayload?.timestamp || Date.now()}
+                                payload: {slaveId: effectiveSlaveId, from: 'slave', timestamp: typedPayload?.timestamp || Date.now()}
                             }));
-                            console.log(`[WebSocket] quix-pong forwarded to master for slave ${slaveId}`);
+                            console.log(`[WebSocket] quix-pong forwarded to master for slave ${effectiveSlaveId}`);
                         }
                     }
                     break;

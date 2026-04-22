@@ -3253,14 +3253,16 @@ class MediaStore {
             }
 
             this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
-            websocketService.sendSyncCompleted();
+            // Pass slaveId explicitly for consistency with backend
+            websocketService.sendSyncCompleted(this.slaveId || undefined);
 
             // Reload the local data so the slave's UI reflects the new content
             await this.reloadAllData();
 
         } catch (error) {
             console.error('Error syncing media from master:', error);
-            websocketService.sendSyncError('Failed to sync media');
+            // Pass slaveId explicitly for consistency with backend
+            websocketService.sendSyncError('Failed to sync media', this.slaveId || undefined);
         }
     };
     transferHost = (newHostId: string) => {

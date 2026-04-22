@@ -306,9 +306,16 @@ class WebSocketService {
     /**
      * Send slave status update to master
      * @param {Object} status - Slave status information
+     * @param {string} status.slaveId - This slave's ID (auto-filled from connection)
+     * @param {boolean} status.isPlaying - Whether slave is playing
+     * @param {Object} status.nowPlayingItem - Current playing item
+     * @param {boolean} status.isIntroSkippable - Whether intro is skippable
+     * @param {number} status.currentTime - Current playback time
+     * @param {number} status.duration - Total duration
      */
     sendSlaveStatusUpdate(status) {
-        this.sendMessage({type: 'quix-slave-status-update', payload: status});
+        // Always include slaveId from the connection to ensure consistency with backend
+        this.sendMessage({type: 'quix-slave-status-update', payload: {slaveId: this._clientId, ...status}});
     }
 
     /**
@@ -326,7 +333,7 @@ class WebSocketService {
      * @param {number} [options.timestamp] - Timestamp from ping
      */
     pong(options) {
-        this.sendMessage({type: 'quix-pong', payload: options});
+        this.sendMessage({type: 'quix-pong', payload: {from: 'slave', slaveId: options.slaveId || this._clientId, timestamp: options.timestamp}});
     }
 
     /**
@@ -353,33 +360,37 @@ class WebSocketService {
      * Send sync progress update to master
      * @param {number} completed - Number of items completed
      * @param {number} total - Total number of items
+     * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
     sendSyncProgressUpdate(completed, total) {
-        this.sendMessage({type: 'quix-sync-progress-update', payload: {completed, total}});
+        this.sendMessage({type: 'quix-sync-progress-update', payload: {slaveId: this._clientId, completed, total}});
     }
 
     /**
      * Notify master that sync is completed
+     * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
-    sendSyncCompleted() {
-        this.sendMessage({type: 'quix-sync-completed'});
+    sendSyncCompleted(slaveId) {
+        this.sendMessage({type: 'quix-sync-completed', payload: {slaveId: slaveId || this._clientId}});
     }
 
     /**
      * Notify master that sync failed
      * @param {string} error - Error message
+     * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
-    sendSyncError(error) {
-        this.sendMessage({type: 'quix-sync-error', payload: {error}});
+    sendSyncError(error, slaveId) {
+        this.sendMessage({type: 'quix-sync-error', payload: {slaveId: slaveId || this._clientId, error}});
     }
 
     // ==================== SMART TV METHODS ====================
 
     /**
      * Notify server that slave (TV) is intentionally disconnecting
+     * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
-    slaveDisconnecting() {
-        this.sendMessage({type: 'quix-slave-disconnecting'});
+    slaveDisconnecting(slaveId) {
+        this.sendMessage({type: 'quix-slave-disconnecting', payload: {slaveId: slaveId || this._clientId}});
     }
 
     setClientId(id) {
