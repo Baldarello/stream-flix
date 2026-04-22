@@ -471,19 +471,14 @@ const SmartTVScreen: React.FC = observer(() => {
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+                height: '100dvh',
                 bgcolor: 'background.default',
                 color: 'text.primary',
-                p: 3,
-                position: 'relative',
-                overflowY: 'auto',
-                overflowX: 'hidden',
+                overflow: 'hidden',
                 // Animated background - fixed so it doesn't scroll
                 '&::before': {
                     content: '""',
-                    position: 'fixed',
+                    position: 'absolute',
                     top: '-50%',
                     left: '-50%',
                     width: '200%',
@@ -501,7 +496,7 @@ const SmartTVScreen: React.FC = observer(() => {
             {/* Decorative elements - fixed so they don't scroll */}
             <Box
                 sx={{
-                    position: 'fixed',
+                    position: 'absolute',
                     top: '10%',
                     right: '10%',
                     width: 300,
@@ -515,7 +510,7 @@ const SmartTVScreen: React.FC = observer(() => {
             />
             <Box
                 sx={{
-                    position: 'fixed',
+                    position: 'absolute',
                     bottom: '10%',
                     left: '10%',
                     width: 250,
@@ -528,8 +523,25 @@ const SmartTVScreen: React.FC = observer(() => {
                 }}
             />
             
-            {/* Main content */}
-            <Box sx={{ position: 'relative', zIndex: 1, py: 4 }}>
+            {/* Main content - scrollable wrapper */}
+            <Box
+                sx={{
+                    position: 'relative',
+                    zIndex: 1,
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    px: 3,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    width: '100%',
+                    // Safe area padding for mobile notches/status bars
+                    pt: 2,
+                    pb: 2,
+                }}
+            >
                 {renderContent()}
             </Box>
         </Box>

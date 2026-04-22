@@ -205,7 +205,11 @@ export const en = {
         "error": "Invalid QR code. Make sure you are scanning the code shown on the TV.",
         "or": "OR",
         "enterCode": "Enter TV Code",
-        "connect": "Connect"
+        "connect": "Connect",
+        "scanInstructions": "Position the QR code within the frame for best results",
+        "connecting": "Connecting...",
+        "connectingMessage": "Please wait while we establish the connection",
+        "success": "Connection successful!"
     },
     "smartTV": {
         "connected": "Remote Connected!",

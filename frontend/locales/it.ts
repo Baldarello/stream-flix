@@ -205,7 +205,11 @@ export const it = {
         "error": "Codice QR non valido. Assicurati di scansionare il codice mostrato sulla TV.",
         "or": "OPPURE",
         "enterCode": "Inserisci Codice TV",
-        "connect": "Connetti"
+        "connect": "Connetti",
+        "scanInstructions": "Posiziona il codice QR all'interno della cornice per risultati ottimali",
+        "connecting": "Connessione in corso...",
+        "connectingMessage": "Attendi mentre stabiliamo la connessione",
+        "success": "Connessione riuscita!"
     },
     "smartTV": {
         "connected": "Telecomando Connesso!",
