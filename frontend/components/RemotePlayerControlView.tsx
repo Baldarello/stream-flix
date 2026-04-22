@@ -110,7 +110,7 @@ const RemotePlayerControlView = observer(() => {
     useEffect(() => {
         const handleBeforeUnload = () => {
             if (isRemoteMasterConnected && slaveId) {
-                websocketService.sendMessage({type: 'quix-master-disconnecting', payload: {slaveId}});
+                websocketService.masterDisconnecting(slaveId);
             }
         };
 

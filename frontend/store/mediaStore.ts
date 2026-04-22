@@ -1141,7 +1141,7 @@ class MediaStore {
         const payload: { slaveId?: string; shortCode?: string } = {};
         if (this.slaveId) payload.slaveId = this.slaveId;
         if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
-        websocketService.sendMessage({type: 'quix-register-slave', payload});
+        websocketService.registerSlave(payload);
     };
     exitSmartTVPairingMode = () => {
         this.isSmartTVPairingVisible = false;
@@ -2112,7 +2112,7 @@ class MediaStore {
     closeWatchTogetherModal = () => {
         this.watchTogetherModalOpen = false;
         if (this.roomId) {
-            websocketService.sendMessage({type: 'quix-leave-room'});
+            websocketService.leaveRoom();
             this.roomId = null;
         }
     };
@@ -2121,17 +2121,14 @@ class MediaStore {
         this.username = username;
         db.preferences.put({key: 'username', value: username});
         if (this.watchTogetherSelectedItem) {
-            websocketService.sendMessage({
-                type: 'quix-create-room',
-                payload: {username, media: this.watchTogetherSelectedItem}
-            });
+            websocketService.createRoom({username, media: this.watchTogetherSelectedItem});
         }
     };
 
     joinRoom = (roomId: string, username: string) => {
         this.username = username;
         db.preferences.put({key: 'username', value: username});
-        websocketService.sendMessage({type: 'quix-join-room', payload: {roomId: roomId.toUpperCase(), username}});
+        websocketService.joinRoom({roomId: roomId.toUpperCase(), username});
     };
 
     changeWatchTogetherMedia = (item: PlayableItem) => {
@@ -2142,12 +2139,12 @@ class MediaStore {
             if (!mediaToSend.video_url && (mediaToSend as any).video_urls?.length > 0) {
                 mediaToSend.video_url = (mediaToSend as any).video_urls[0].url;
             }
-            websocketService.sendMessage({type: 'quix-select-media', payload: {media: mediaToSend}});
+            websocketService.selectMedia(mediaToSend);
         }
     };
 
     changeRoomCode = () => {
-        websocketService.sendMessage({type: 'quix-change-room-code'});
+        websocketService.changeRoomCode();
     };
 
     connectAsRemoteMaster = async (slaveId: string) => {
@@ -2162,7 +2159,7 @@ class MediaStore {
 
         // Prefer shortCode for reconnection if available, otherwise use full slaveId
         const shortCode = existingSlave?.shortCode;
-        websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: shortCode || slaveId}});
+        websocketService.registerMaster({slaveId: shortCode || slaveId});
 
         const slaveData = {
             id: slaveId,
@@ -2319,7 +2316,7 @@ class MediaStore {
         // A remote control (master) sends commands to its connected TV (slave).
         if (this.isRemoteMaster && this.slaveId) {
             console.log(`[mediaStore] sendRemoteCommand: isRemoteMaster=${this.isRemoteMaster}, slaveId='${this.slaveId}', payload=`, payload);
-            websocketService.sendMessage({type: 'quix-remote-command', payload: {...payload, slaveId: this.slaveId}});
+            websocketService.sendRemoteCommand({...payload, slaveId: this.slaveId});
         } else {
             console.log(`[mediaStore] sendRemoteCommand: NOT sending - isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
         }
@@ -2328,16 +2325,13 @@ class MediaStore {
     sendSlaveStatusUpdate = () => {
         if (this.isSmartTV && this.slaveId) {
             const video = document.querySelector('video');
-            websocketService.sendMessage({
-                type: 'quix-slave-status-update',
-                payload: {
-                    slaveId: this.slaveId,
-                    isPlaying: this.isPlaying,
-                    nowPlayingItem: this.nowPlayingItem,
-                    isIntroSkippable: this.isIntroSkippableOnSlave,
-                    currentTime: video?.currentTime,
-                    duration: video?.duration
-                }
+            websocketService.sendSlaveStatusUpdate({
+                slaveId: this.slaveId,
+                isPlaying: this.isPlaying,
+                nowPlayingItem: this.nowPlayingItem,
+                isIntroSkippable: this.isIntroSkippableOnSlave,
+                currentTime: video?.currentTime,
+                duration: video?.duration
             });
         }
     };
@@ -2370,10 +2364,7 @@ class MediaStore {
 
         this.masterReconnectTimer = window.setInterval(() => {
             if (!this.isRemoteMasterConnected && this.slaveId && this.masterReconnectAttempts < 12) {
-                websocketService.sendMessage({
-                    type: 'quix-register-master',
-                    payload: {slaveId: this.slaveId}
-                });
+                websocketService.registerMaster({slaveId: this.slaveId});
                 this.masterReconnectAttempts++;
                 console.log(`[mediaStore] Master reconnection attempt ${this.masterReconnectAttempts}/12`);
             } else if (this.masterReconnectAttempts >= 12 || this.isRemoteMasterConnected) {
@@ -2398,10 +2389,7 @@ class MediaStore {
         this.pingInterval = window.setInterval(() => {
             if (this.isRemoteMaster && this.slaveId && this.isRemoteMasterConnected) {
                 // Send ping to slave
-                websocketService.sendMessage({
-                    type: 'quix-ping',
-                    payload: {slaveId: this.slaveId}
-                });
+                websocketService.ping(this.slaveId);
                 this.lastPingTime = Date.now();
                 console.log('[mediaStore] Sent quix-ping to slave');
 
@@ -3007,11 +2995,11 @@ class MediaStore {
             if (this.slaveId) payload.slaveId = this.slaveId;
             if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
             console.log(`[mediaStore] initRemoteSession: registering slave with slaveId=${this.slaveId}, shortCode=${this.slaveShortCode}`);
-            websocketService.sendMessage({type: 'quix-register-slave', payload});
+            websocketService.registerSlave(payload);
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.
-            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
+            websocketService.registerMaster({slaveId: this.slaveId});
             // Request the current status from the slave to sync the UI
             this.sendRemoteCommand({command: 'request_status'});
         }
@@ -3264,21 +3252,18 @@ class MediaStore {
                 }
 
                 // Send progress update back to master
-                websocketService.sendMessage({
-                    type: 'quix-sync-progress-update',
-                    payload: {completed: i + 1, total: mediaItems.length}
-                });
+                websocketService.sendSyncProgressUpdate(i + 1, mediaItems.length);
             }
 
             this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
-            websocketService.sendMessage({type: 'quix-sync-completed'});
+            websocketService.sendSyncCompleted();
 
             // Reload the local data so the slave's UI reflects the new content
             await this.reloadAllData();
 
         } catch (error) {
             console.error('Error syncing media from master:', error);
-            websocketService.sendMessage({type: 'quix-sync-error', payload: {error: 'Failed to sync media'}});
+            websocketService.sendSyncError('Failed to sync media');
         }
     };
     transferHost = (newHostId: string) => {

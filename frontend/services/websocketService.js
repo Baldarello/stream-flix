@@ -194,6 +194,194 @@ class WebSocketService {
         }
     }
 
+    // ==================== WATCHTOGETHER METHODS ====================
+
+    /**
+     * Register as a slave (TV) with the server
+     * @param {Object} options - Registration options
+     * @param {string} [options.slaveId] - Existing slave ID for reconnection
+     * @param {string} [options.shortCode] - Short code for quick reconnection
+     */
+    registerSlave(options = {}) {
+        this.sendMessage({type: 'quix-register-slave', payload: options});
+    }
+
+    /**
+     * Leave the current watch together room
+     */
+    leaveRoom() {
+        this.sendMessage({type: 'quix-leave-room'});
+    }
+
+    /**
+     * Create a new watch together room
+     * @param {Object} options - Room creation options
+     * @param {string} options.username - Host username
+     * @param {Object} options.media - Media item to share
+     */
+    createRoom(options) {
+        this.sendMessage({type: 'quix-create-room', payload: options});
+    }
+
+    /**
+     * Join an existing watch together room
+     * @param {Object} options - Join room options
+     * @param {string} options.roomId - Room ID to join
+     * @param {string} options.username - Username
+     */
+    joinRoom(options) {
+        this.sendMessage({type: 'quix-join-room', payload: options});
+    }
+
+    /**
+     * Select media to play in the room (host only)
+     * @param {Object} media - Media item to select
+     */
+    selectMedia(media) {
+        this.sendMessage({type: 'quix-select-media', payload: {media}});
+    }
+
+    /**
+     * Change the room code (host only)
+     */
+    changeRoomCode() {
+        this.sendMessage({type: 'quix-change-room-code'});
+    }
+
+    /**
+     * Register as a master (remote control) for a slave
+     * @param {Object} options - Registration options
+     * @param {string} options.slaveId - Slave ID to connect to
+     */
+    registerMaster(options) {
+        this.sendMessage({type: 'quix-register-master', payload: options});
+    }
+
+    /**
+     * Send playback control command (play/pause) in watch together
+     * @param {Object} playbackState - Playback state
+     */
+    playbackControl(playbackState) {
+        this.sendMessage({type: 'quix-playback-control', payload: {playbackState}});
+    }
+
+    /**
+     * Send a chat message in the watch together room
+     * @param {Object} message - Chat message object
+     * @param {string} [message.text] - Text content
+     * @param {string} [message.image] - Image (base64)
+     */
+    sendChatMessage(message) {
+        this.sendMessage({type: 'quix-chat-message', payload: {message}});
+    }
+
+    /**
+     * Transfer host role to another participant
+     * @param {string} newHostId - ID of new host
+     */
+    transferHost(newHostId) {
+        this.sendMessage({type: 'quix-transfer-host', payload: {newHostId}});
+    }
+
+    /**
+     * Change participant name in the room
+     * @param {Object} options - Name change options
+     * @param {string} options.participantId - Participant ID
+     * @param {string} options.name - New name
+     */
+    changeName(options) {
+        this.sendMessage({type: 'quix-change-name', payload: options});
+    }
+
+    // ==================== REMOTE CONTROL METHODS ====================
+
+    /**
+     * Send remote command to slave (play, pause, seek, etc.)
+     * @param {Object} payload - Command payload (command, item, time, etc.)
+     */
+    sendRemoteCommand(payload) {
+        this.sendMessage({type: 'quix-remote-command', payload});
+    }
+
+    /**
+     * Send slave status update to master
+     * @param {Object} status - Slave status information
+     */
+    sendSlaveStatusUpdate(status) {
+        this.sendMessage({type: 'quix-slave-status-update', payload: status});
+    }
+
+    /**
+     * Send ping to slave for connection health monitoring
+     * @param {string} slaveId - Target slave ID
+     */
+    ping(slaveId) {
+        this.sendMessage({type: 'quix-ping', payload: {slaveId}});
+    }
+
+    /**
+     * Send pong response to master
+     * @param {Object} options - Pong options
+     * @param {string} options.slaveId - This slave's ID
+     * @param {number} [options.timestamp] - Timestamp from ping
+     */
+    pong(options) {
+        this.sendMessage({type: 'quix-pong', payload: options});
+    }
+
+    /**
+     * Notify slave that master is disconnecting
+     * @param {string} slaveId - Slave ID being disconnected from
+     */
+    masterDisconnecting(slaveId) {
+        this.sendMessage({type: 'quix-master-disconnecting', payload: {slaveId}});
+    }
+
+    // ==================== MEDIA SYNC METHODS ====================
+
+    /**
+     * Request media sync from master to slave
+     * @param {Object} options - Sync request options
+     * @param {string} options.slaveId - Target slave ID
+     * @param {Array} options.mediaItems - Media items with links to sync
+     */
+    requestSyncMedia(options) {
+        this.sendMessage({type: 'quix-sync-media-request', payload: options});
+    }
+
+    /**
+     * Send sync progress update to master
+     * @param {number} completed - Number of items completed
+     * @param {number} total - Total number of items
+     */
+    sendSyncProgressUpdate(completed, total) {
+        this.sendMessage({type: 'quix-sync-progress-update', payload: {completed, total}});
+    }
+
+    /**
+     * Notify master that sync is completed
+     */
+    sendSyncCompleted() {
+        this.sendMessage({type: 'quix-sync-completed'});
+    }
+
+    /**
+     * Notify master that sync failed
+     * @param {string} error - Error message
+     */
+    sendSyncError(error) {
+        this.sendMessage({type: 'quix-sync-error', payload: {error}});
+    }
+
+    // ==================== SMART TV METHODS ====================
+
+    /**
+     * Notify server that slave (TV) is intentionally disconnecting
+     */
+    slaveDisconnecting() {
+        this.sendMessage({type: 'quix-slave-disconnecting'});
+    }
+
     setClientId(id) {
         this._clientId = id;
     }

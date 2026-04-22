@@ -32,7 +32,7 @@ const SmartTVScreen: React.FC = observer(() => {
             // Close the WebSocket to ensure the server properly handles the disconnect
             // This is critical for the session to be preserved for reconnection
             if (websocketService.ws) {
-                websocketService.sendMessage({type: 'quix-slave-disconnecting'});
+                websocketService.slaveDisconnecting();
                 // Close with a delay to ensure the message is sent
                 setTimeout(() => {
                     if (websocketService.ws && websocketService.ws.readyState === WebSocket.OPEN) {
