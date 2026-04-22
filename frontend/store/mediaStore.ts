@@ -3096,7 +3096,7 @@ class MediaStore {
                             // CRITICAL: Store the full slaveId so on next refresh we use the correct id
                             db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
                         }
-                        websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
+                        websocketService.registerMaster({slaveId: this.slaveId});
                         // Request current status to sync UI
                         this.sendRemoteCommand({command: 'request_status'});
                     }
@@ -3160,10 +3160,7 @@ class MediaStore {
                     // Received ping from master - respond with pong
                     console.log('[mediaStore] Received quix-ping, responding with pong');
                     if (this.slaveId) {
-                        websocketService.sendMessage({
-                            type: 'quix-pong',
-                            payload: {slaveId: this.slaveId, timestamp: payload?.timestamp}
-                        });
+                        websocketService.pong({slaveId: this.slaveId, timestamp: payload?.timestamp});
                     }
                     break;
                 case 'quix-pong':
@@ -3212,7 +3209,7 @@ class MediaStore {
     };
     sendPlaybackControl = (state: PlaybackState) => {
         if (this.roomId) {
-            websocketService.sendMessage({type: 'quix-playback-control', payload: {playbackState: state}});
+            websocketService.playbackControl(state);
         }
     };
     addPlaybackListener = (listener: (state: PlaybackState) => void) => {
@@ -3222,7 +3219,7 @@ class MediaStore {
         };
     };
     sendChatMessage = (message: { text?: string; image?: string; }) => {
-        websocketService.sendMessage({type: 'quix-chat-message', payload: {message}});
+        websocketService.sendChatMessage(message);
     };
 
     // Sync media items from master to slave
@@ -3267,7 +3264,7 @@ class MediaStore {
         }
     };
     transferHost = (newHostId: string) => {
-        websocketService.sendMessage({type: 'quix-transfer-host', payload: {newHostId}});
+        websocketService.transferHost(newHostId);
     };
 
     changeName = (participantId: string, newName: string) => {
@@ -3285,7 +3282,7 @@ class MediaStore {
         }
         // Send to server for broadcast to all room members
         console.log(`[DEBUG] changeName: Sending quix-change-name message for participantId=${participantId}, name=${newName}`);
-        websocketService.sendMessage({type: 'quix-change-name', payload: {participantId, name: newName}});
+        websocketService.changeName({participantId, name: newName});
     };
 }
 
