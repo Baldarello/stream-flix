@@ -126,18 +126,12 @@ const QRScanner: React.FC = observer(() => {
     return (
         <Box
             sx={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100dvh',
-                bgcolor: 'background.default',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
+                height: '100dvh',
+                bgcolor: 'background.default',
+                color: 'text.primary',
                 overflow: 'hidden',
-                zIndex: 9999,
                 // Animated background - fixed so it doesn't scroll
                 '&::before': {
                     content: '""',
@@ -156,31 +150,34 @@ const QRScanner: React.FC = observer(() => {
                 },
             }}
         >
-            {/* Decorative blur orbs */}
-            <Box sx={{
-                position: 'absolute',
-                top: '10%',
-                right: '10%',
-                width: 300,
-                height: 300,
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(0,163,255,0.1) 0%, transparent 70%)',
-                filter: 'blur(60px)',
-                pointerEvents: 'none',
-                zIndex: 0,
-            }} />
-            <Box sx={{
-                position: 'absolute',
-                bottom: '10%',
-                left: '10%',
-                width: 250,
-                height: 250,
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(76,175,80,0.08) 0%, transparent 70%)',
-                filter: 'blur(50px)',
-                pointerEvents: 'none',
-                zIndex: 0,
-            }} />
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '10%',
+                    right: '10%',
+                    width: 300,
+                    height: 300,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(0,163,255,0.1) 0%, transparent 70%)',
+                    filter: 'blur(60px)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}
+            />
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: '10%',
+                    left: '10%',
+                    width: 250,
+                    height: 250,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(76,175,80,0.08) 0%, transparent 70%)',
+                    filter: 'blur(50px)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}
+            />
 
             {/* Main content wrapper */}
             <Box
@@ -460,23 +457,7 @@ const QRScanner: React.FC = observer(() => {
                         {t('qrScanner.connect')}
                     </Button>
                 </Box>
-                
-                {/* Code preview */}
-                {manualCode.length > 0 && (
-                    <Typography 
-                        variant="h4" 
-                        sx={{ 
-                            color: getGlowColor(),
-                            mt: 2,
-                            letterSpacing: '0.5em',
-                            fontWeight: 'bold',
-                            textShadow: `0 0 20px ${getGlowColor()}`,
-                            zIndex: 10
-                        }}
-                    >
-                        {manualCode.padEnd(5, '•')}
-                    </Typography>
-                )}
+
 
                 {/* Error Alert */}
                 {scanError && (

@@ -144,6 +144,9 @@ const AppContent: React.FC = observer(() => {
         );
     }
 
+    if(isQRScannerOpen ){
+        return    <QRScanner/>
+    }
     // Smart TV pairing mode always takes precedence, unless we're playing content
     // When nowPlayingItem is set (e.g., slave receiving playback from master), show VideoPlayer instead
     if (isSmartTVPairingVisible && !nowPlayingItem) return <><SmartTVScreen/> <NotificationSnackbar/><DebugOverlay/></>;
@@ -267,7 +270,7 @@ const AppContent: React.FC = observer(() => {
             {currentSelectedItem && <DetailView/>} {/* Use currentSelectedItem */}
             <Footer/>
             <ProfileDrawer/>
-            {isQRScannerOpen && <QRScanner/>}
+
             <WatchTogetherModal/>
             <NotificationSnackbar/>
             <LinkSelectionModal/>
