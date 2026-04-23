@@ -25,7 +25,7 @@ import {
 import {SelectChangeEvent} from '@mui/material/Select';
 // FIX: Imported CloseIcon to resolve the "Cannot find name" error.
 import CloseIcon from '@mui/icons-material/Close';
-import ManageLinksView from '../../library/ManageLinksView.tsx';
+import ManageLinksView from '../library/ManageLinksView.tsx';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 
 

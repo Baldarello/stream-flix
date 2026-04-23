@@ -87,7 +87,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         setSyncError(null);
 
         try {
-            const {db} = await import('../services/db.ts');
+            const {db} = await import('../../services/db.ts');
 
             // 1. Load IDs from db.myList
             const listItems = await db.myList.toArray();
@@ -174,7 +174,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         setSyncComplete(false);
         setSyncError(null);
 
-        const {db} = await import('../services/db.ts');
+        const {db} = await import('../../services/db.ts');
 
         // Build the full payload: for each selected item, include the MediaItem + all its links
         const itemsWithLinks = await Promise.all(

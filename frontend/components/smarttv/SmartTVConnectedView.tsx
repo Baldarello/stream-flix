@@ -3,7 +3,7 @@ import {Box, Button, Fade, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {useTranslations} from '../../hooks/useTranslations.ts';
-import ConnectionIndicator from '../../utilities/ConnectionIndicator.tsx';
+import ConnectionIndicator from '../utilities/ConnectionIndicator.tsx';
 import {mediaStore} from '../../store/mediaStore.ts';
 
 interface SmartTVConnectedViewProps {

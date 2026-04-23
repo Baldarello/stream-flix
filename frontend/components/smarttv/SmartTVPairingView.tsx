@@ -2,7 +2,7 @@ import React from 'react';
 import {Box, Button, Fade, Grow, Paper, Typography} from '@mui/material';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 import {mediaStore} from '../../store/mediaStore.ts';
-import QRCodeCard from '../QRCodeCard.tsx';
+import QRCodeCard from './QRCodeCard.tsx';
 
 interface SmartTVPairingViewProps {
     showContent: boolean;
