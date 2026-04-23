@@ -1,4 +1,4 @@
-import type {MediaLink, MediaItem, Episode, Season} from '../types.ts';
+import type {Episode, MediaItem, MediaLink, Season} from '../types.ts';
 
 const LINK_CHECK_TIMEOUT = 5000; // 5 seconds
 

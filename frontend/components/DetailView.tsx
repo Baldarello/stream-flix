@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState, useRef} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import {mediaStore} from '../store/mediaStore.ts';
@@ -8,7 +8,6 @@ import {
     CardMedia,
     Chip,
     CircularProgress,
-    Collapse,
     Dialog,
     DialogActions,
     DialogContent,
@@ -19,7 +18,6 @@ import {
     InputLabel,
     LinearProgress,
     List,
-    ListItem,
     ListItemButton,
     ListItemText,
     MenuItem,
@@ -37,10 +35,6 @@ import GroupIcon from '@mui/icons-material/Group';
 import LinkIcon from '@mui/icons-material/Link';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LinkEpisodesModal from './LinkEpisodesModal.tsx';

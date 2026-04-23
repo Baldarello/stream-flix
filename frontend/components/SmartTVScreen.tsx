@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {Box, Button, CircularProgress, Fade, Grow, Paper, Typography} from '@mui/material';
+import {Box, Button, Fade, Grow, Paper, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {useTranslations} from '../hooks/useTranslations.ts';

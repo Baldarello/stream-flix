@@ -1,14 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {
-    Alert,
-    Box,
-    Button,
-    IconButton,
-    TextField,
-    Typography
-} from '@mui/material';
+import {Alert, Box, Button, IconButton, TextField, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {Html5QrcodeScanner} from 'html5-qrcode';

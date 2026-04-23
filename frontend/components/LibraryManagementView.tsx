@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
 import {
@@ -14,8 +14,6 @@ import {
     FormControl,
     IconButton,
     InputLabel,
-    List,
-    ListItem,
     ListItemText,
     MenuItem,
     Paper,

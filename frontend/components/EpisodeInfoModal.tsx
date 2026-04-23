@@ -1,21 +1,10 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {
-    Box,
-    Button,
-    Chip,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Stack,
-    Typography
-} from '@mui/material';
+import {Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography} from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import {useTranslations} from '../hooks/useTranslations.ts';
-import type {Episode} from '../types.ts';
 
 const EpisodeInfoModal: React.FC = observer(() => {
     const {t} = useTranslations();

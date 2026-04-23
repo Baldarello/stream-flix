@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useMemo, useState} from 'react';
+import {observer} from 'mobx-react-lite';
 import {
     Alert,
     Box,
@@ -13,7 +13,6 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
-    FormControlLabel,
     IconButton,
     LinearProgress,
     List,

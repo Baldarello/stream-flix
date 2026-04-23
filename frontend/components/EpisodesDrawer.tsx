@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import {mediaStore} from '../store/mediaStore.ts';
@@ -6,16 +6,16 @@ import {
     Box,
     Button,
     CardMedia,
+    Chip,
     Drawer,
     IconButton,
     LinearProgress,
     List,
     ListItemButton,
     ListItemText,
+    Stack,
     Toolbar,
-    Typography,
-    Chip,
-    Stack
+    Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';

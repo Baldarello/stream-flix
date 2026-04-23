@@ -1,7 +1,20 @@
-import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../store/mediaStore.ts';
-import {AppBar, Box, Button, Fade, FormControl, IconButton, Menu, MenuItem, Select, Toolbar, Tooltip, Typography} from '@mui/material';
+import {
+    AppBar,
+    Box,
+    Button,
+    Fade,
+    FormControl,
+    IconButton,
+    Menu,
+    MenuItem,
+    Select,
+    Toolbar,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';

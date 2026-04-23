@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState, useCallback} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import type {MediaItem} from '../types.ts';
 import {Card} from './Card.tsx';
 import {Box, Fade, IconButton, Typography, useMediaQuery, useTheme} from '@mui/material';
