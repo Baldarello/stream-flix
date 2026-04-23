@@ -2518,8 +2518,17 @@ class MediaStore {
                 // Use remoteSlaveState.nowPlayingItem when receiving remote content, otherwise use local nowPlayingItem
                 const remoteItem = this.remoteSlaveState?.nowPlayingItem;
                 const item = remoteItem ?? this.nowPlayingItem;
-                if (item && 'intro_end_s' in item && item.intro_end_s) {
-                    video.currentTime = item.intro_end_s;
+                if (video && item) {
+                    // Logica simile a VideoPlayer.tsx handleSkipIntro
+                    if ('intro_end_s' in item && item.intro_end_s && item.intro_end_s > (item as any).intro_start_s) {
+                        // Skip to intro_end_s
+                        video.currentTime = item.intro_end_s;
+                    } else {
+                        // Use showIntroDurations fallback
+                        const showId = 'show_id' in item ? (item as any).show_id : (item as any).id;
+                        const skipDuration = this.showIntroDurations.get(showId) || 80;
+                        video.currentTime = Math.min(video.duration, video.currentTime + skipDuration);
+                    }
                 }
                 break;
             }
