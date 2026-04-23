@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Box} from '@mui/material';
 import {mediaStore} from '../../store/mediaStore.ts';
+import {remoteStore} from '../../store/remoteStore.ts';
 import {websocketService} from '../../services/websocketService.js';
 import SmartTVBackground from '../smarttv/SmartTVBackground.tsx';
 import SmartTVLoadingView from '../smarttv/SmartTVLoadingView.tsx';
@@ -10,7 +11,8 @@ import SmartTVConnectedView from '../smarttv/SmartTVConnectedView.tsx';
 import SmartTVPairingView from '../smarttv/SmartTVPairingView.tsx';
 
 const SmartTVScreen: React.FC = observer(() => {
-    const {slaveId, isRemoteMasterConnected, isSmartTV} = mediaStore;
+    const { slaveId } = remoteStore;
+    const { isRemoteMasterConnected, isSmartTV } = remoteStore;
 
     // Track if we've already sent the disconnecting message to avoid duplicates
     const hasSentDisconnecting = useRef(false);

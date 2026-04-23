@@ -20,6 +20,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {observer} from 'mobx-react-lite';
 import {ActiveView, mediaStore} from '../../store/mediaStore.ts';
+import {remoteStore} from '../../store/remoteStore.ts';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 
 const navKeys: { key: keyof typeof mediaStore.translations.header, view: ActiveView }[] = [
@@ -47,7 +48,7 @@ export const Header: React.FC = observer(() => {
 
     const handleNavClick = (view: ActiveView) => {
         toggleSearch(false);
-        if (mediaStore.isRemoteMaster) {
+        if (remoteStore.isRemoteMaster) {
             // If remote master, clear any selected item on its own UI
             mediaStore.clearMasterUiSelection();
             // And set the master's active view

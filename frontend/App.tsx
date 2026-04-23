@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore, ThemeName} from './store/mediaStore.ts';
+import {remoteStore} from './store/remoteStore.ts';
 import {Alert, Box, CircularProgress, colors, Container, Typography} from '@mui/material';
 import {createTheme, ThemeOptions, ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -98,14 +99,12 @@ const AppContent: React.FC = observer(() => {
         error,
         heroContent,
         nowPlayingItem,
-        isRemoteMaster,
         remoteSlaveState,
         isSmartTVPairingVisible,
         isSearchActive,
         searchResults,
         searchQuery,
         isSearching,
-        isQRScannerOpen,
         topSeries,
         allMovies,
         popularAnime,
@@ -113,6 +112,7 @@ const AppContent: React.FC = observer(() => {
         currentActiveView,   // <-- Using computed property
         currentSelectedItem, // <-- Using computed property
     } = mediaStore;
+    const { isRemoteMaster, isQRScannerOpen } = remoteStore;
 
     useEffect(() => {
         // Determine if scroll should be locked based on *current* UI state

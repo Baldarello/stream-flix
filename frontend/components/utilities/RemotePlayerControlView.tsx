@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.ts';
+import {remoteStore} from '../../store/remoteStore.ts';
 import {websocketService} from '../../services/websocketService.js';
 import {
     AppBar,
@@ -68,13 +69,10 @@ const RemotePlayerControlView = observer(() => {
         remoteNextEpisode,
         remotePreviousEpisode,
         playRemoteItem,
-        disconnectRemoteMaster,
-        isRemoteMasterConnected,
-        slaveId,
-        openQRScanner,
-        isReconnecting,
-        masterReconnectAttempts
+        masterReconnectAttempts,
+        isReconnecting
     } = mediaStore;
+    const { isRemoteMasterConnected, slaveId, openQRScanner, disconnectRemoteMaster } = remoteStore;
     const {t} = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);

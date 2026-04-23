@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.ts';
+import {remoteStore} from '../../store/remoteStore.ts';
 import {Alert, Box, Button, IconButton, TextField, Typography} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
@@ -8,7 +9,8 @@ import {Html5QrcodeScanner} from 'html5-qrcode';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 
 const QRScanner: React.FC = observer(() => {
-    const { isQRScannerOpen, closeQRScanner, isRemoteMasterConnected } = mediaStore;
+    const { isQRScannerOpen, isRemoteMasterConnected } = remoteStore;
+    const { closeQRScanner, connectAsRemoteMaster } = remoteStore;
     const { t } = useTranslations();
     const [scanError, setScanError] = useState<string | null>(null);
     const [scanSuccess, setScanSuccess] = useState(false);
@@ -50,7 +52,7 @@ const QRScanner: React.FC = observer(() => {
 
                     if (url.origin === expectedOrigin && slaveId) {
                         setScanSuccess(true);
-                        mediaStore.connectAsRemoteMaster(slaveId);
+                        connectAsRemoteMaster(slaveId);
                     } else {
                         throw new Error("Invalid QR code for this application.");
                     }

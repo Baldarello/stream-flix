@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a a default one.
 import {mediaStore} from '../../store/mediaStore.ts';
+import {watchTogetherStore} from '../../store/watchTogetherStore.ts';
 import {
     Alert,
     Box,
@@ -55,12 +56,13 @@ const style = {
 };
 
 const WatchTogetherModal: React.FC = observer(() => {
+  const { selectedItem } = mediaStore;
   const { 
       watchTogetherModalOpen, closeWatchTogetherModal, createRoom, joinRoom, roomId, 
-      isHost, participants, hostId, selectedItem, watchTogetherError, isDetailLoading, 
+      isHost, participants, hostId, watchTogetherError, 
       changeWatchTogetherMedia, joinRoomIdFromUrl, setJoinRoomIdFromUrl, changeRoomCode,
       watchTogetherSelectedItem
-  } = mediaStore;
+  } = watchTogetherStore;
   // In the modal, the source of truth for the content can either be the globally selected item (when creating a room)
   // or the specific item for the watch together session (when joining or after the room is created).
   const itemForModal = roomId ? watchTogetherSelectedItem : selectedItem;

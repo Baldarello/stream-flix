@@ -1,10 +1,10 @@
 import React from 'react';
 import {Box} from '@mui/material';
 import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.ts';
+import {remoteStore} from '../../store/remoteStore.ts';
 
 const ConnectionIndicator = observer(() => {
-    const {connectionHealth, missedPings, isRemoteMasterConnected} = mediaStore;
+    const {connectionHealth, missedPings, isRemoteMasterConnected} = remoteStore;
 
     // Determine color based on connection health
     const getColor = () => {

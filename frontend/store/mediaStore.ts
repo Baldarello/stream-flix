@@ -9,9 +9,6 @@ import type {
     MediaLink,
     PlayableItem,
     Revision,
-    SharedEpisodeLink,
-    SharedLibraryData,
-    SharedShowData,
     ViewingHistoryItem
 } from '../types.ts';
 import {checkLinksForShow, checkLinkValidity, type InvalidLinkInfo} from '../services/linkValidator';
@@ -31,6 +28,9 @@ import {db} from '../services/db';
 import {isSmartTV as detectSmartTV} from '../utils/device.ts';
 import {it} from '../locales/it.ts';
 import {en} from '../locales/en.ts';
+import {remoteStore} from './remoteStore';
+import {watchTogetherStore} from './watchTogetherStore';
+import {syncStore} from './syncStore';
 
 export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista' | 'Libreria';
 export type ThemeName = 'SerieTV' | 'Film' | 'Anime';
@@ -48,18 +48,6 @@ type RemoteSlaveState = {
 }
 
 const allTranslations = {it, en};
-
-// FIX: Add translation helper functions for use within the store.
-const getNestedValue = (obj: any, path: string): string | undefined => {
-    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-};
-
-const interpolate = (str: string, values: Record<string, any>): string => {
-    return str.replace(/\{(\w+)\}/g, (placeholder, key) => {
-        return values[key] !== undefined ? String(values[key]) : placeholder;
-    });
-}
-
 
 class MediaStore {
     trending: MediaItem[] = [];
@@ -91,59 +79,105 @@ class MediaStore {
     isSearching = false;
     private searchDebounceTimer: number | null = null;
 
-    // Watch Together State
-    watchTogetherModalOpen = false;
-    roomId: string | null = null;
-    hostId: string | null = null;
-    isHost = false;
-    participants: { id: string, name: string }[] = [];
-    username: string | null = null;
-    watchTogetherError: string | null = null;
-    playbackState: PlaybackState = {status: 'paused', time: 0};
-    chatHistory: ChatMessage[] = [];
-    private playbackListeners: ((state: PlaybackState) => void)[] = [];
-    joinRoomIdFromUrl: string | null = null;
-    watchTogetherSelectedItem: PlayableItem | null = null;
-    myClientId: string | null = null;
-    private isCreatingRoom = false; // Flag to manage host's view after room creation
+    // ===== WATCH TOGETHER DELEGATIONS (see watchTogetherStore) =====
+    get watchTogetherModalOpen() { return watchTogetherStore.watchTogetherModalOpen; }
+    set watchTogetherModalOpen(v) { watchTogetherStore.watchTogetherModalOpen = v; }
+    get roomId() { return watchTogetherStore.roomId; }
+    set roomId(v) { watchTogetherStore.roomId = v; }
+    get hostId() { return watchTogetherStore.hostId; }
+    set hostId(v) { watchTogetherStore.hostId = v; }
+    get isHost() { return watchTogetherStore.isHost; }
+    set isHost(v) { watchTogetherStore.isHost = v; }
+    get participants() { return watchTogetherStore.participants; }
+    set participants(v) { watchTogetherStore.participants = v; }
+    get username() { return watchTogetherStore.username; }
+    set username(v) { watchTogetherStore.username = v; }
+    get watchTogetherError() { return watchTogetherStore.watchTogetherError; }
+    set watchTogetherError(v) { watchTogetherStore.watchTogetherError = v; }
+    get playbackState() { return watchTogetherStore.playbackState; }
+    set playbackState(v) { watchTogetherStore.playbackState = v; }
+    get chatHistory() { return watchTogetherStore.chatHistory; }
+    set chatHistory(v) { watchTogetherStore.chatHistory = v; }
+    get playbackListeners() { return watchTogetherStore.playbackListeners; }
+    get joinRoomIdFromUrl() { return watchTogetherStore.joinRoomIdFromUrl; }
+    set joinRoomIdFromUrl(v) { watchTogetherStore.joinRoomIdFromUrl = v; }
+    get watchTogetherSelectedItem() { return watchTogetherStore.watchTogetherSelectedItem; }
+    set watchTogetherSelectedItem(v) { watchTogetherStore.watchTogetherSelectedItem = v; }
+    get myClientId() { return watchTogetherStore.myClientId; }
+    set myClientId(v) { watchTogetherStore.myClientId = v; }
+    get isCreatingRoom() { return watchTogetherStore.isCreatingRoom; }
+    set isCreatingRoom(v) { watchTogetherStore.isCreatingRoom = v; }
+    openWatchTogetherModal = watchTogetherStore.openWatchTogetherModal;
+    closeWatchTogetherModal = watchTogetherStore.closeWatchTogetherModal;
+    createRoom = watchTogetherStore.createRoom;
+    joinRoom = watchTogetherStore.joinRoom;
+    changeWatchTogetherMedia = watchTogetherStore.changeWatchTogetherMedia;
+    changeRoomCode = watchTogetherStore.changeRoomCode;
+    setJoinRoomIdFromUrl = (v: string | null) => { watchTogetherStore.joinRoomIdFromUrl = v; };
 
-    // Remote Control State
-    isSmartTV = false;
-    isSmartTVPairingVisible = false;
-    isRemoteMaster = false;
-    slaveId: string | null = null;
-    slaveShortCode: string | null = null;
-    isRemoteMasterConnected = false;
-    // Flag to track if initial data has been loaded (needed for proper slave reconnection)
-    hasLoadedInitialData = false;
-    // Master reconnection state for automatic reconnection after slave disconnect
-    masterReconnectAttempts = 0;
-    masterReconnectTimer: number | null = null;
-    isReconnecting = false; // UI indicator for reconnection state
-    remoteSlaveState: RemoteSlaveState | null = null;
-    remoteSelectedItem: MediaItem | null = null; // This is the item selected *on the slave* (remote TV)
-    isRemoteDetailLoading = false;
-    remoteAction: { type: string; payload?: any; id: number } | null = null;
-    remoteFullItem: MediaItem | null = null;
-    isRemoteFullItemLoading = false;
-    isIntroSkippableOnSlave = false;
-    shouldAutoFullscreen = false; // Trigger for auto-fullscreen on slave when playback starts
-    @observable knownSlaves: { id: string; name: string; lastSeen: number; isOnline?: boolean }[] = [];
-
-    // Connection Health State (ping/pong tracking)
-    missedPings = 0; // Number of consecutive missed pings
-    connectionHealth: 'good' | 'degraded' | 'poor' = 'good'; // green/orange/red
-    pingInterval: number | null = null; // Interval timer for ping/pong
-    lastPingTime: number | null = null; // Last time we sent a ping
-
-    // Media Sync State
-    isMediaSyncModalOpen = false;
-    mediaSyncTargetSlaveId: string | null = null;
-
-    // UI states for the Master remote when it's controlling a TV
-    @observable _masterUiActiveView: ActiveView = 'Home'; // The active view on the MASTER device
-    @observable _masterUiSelectedItem: MediaItem | null = null; // The selected item on the MASTER device
-
+    // ===== REMOTE STORE DELEGATIONS (see remoteStore) =====
+    get isRemoteMaster() { return remoteStore.isRemoteMaster; }
+    set isRemoteMaster(v) { remoteStore.isRemoteMaster = v; }
+    get isRemoteMasterConnected() { return remoteStore.isRemoteMasterConnected; }
+    set isRemoteMasterConnected(v) { remoteStore.isRemoteMasterConnected = v; }
+    get slaveId() { return remoteStore.slaveId; }
+    set slaveId(v) { remoteStore.slaveId = v; }
+    get slaveShortCode() { return remoteStore.slaveShortCode; }
+    set slaveShortCode(v) { remoteStore.slaveShortCode = v; }
+    get hasLoadedInitialData() { return remoteStore.hasLoadedInitialData; }
+    set hasLoadedInitialData(v) { remoteStore.hasLoadedInitialData = v; }
+    get masterReconnectAttempts() { return remoteStore.masterReconnectAttempts; }
+    set masterReconnectAttempts(v) { remoteStore.masterReconnectAttempts = v; }
+    get masterReconnectTimer() { return remoteStore.masterReconnectTimer; }
+    set masterReconnectTimer(v) { remoteStore.masterReconnectTimer = v; }
+    get isReconnecting() { return remoteStore.isReconnecting; }
+    set isReconnecting(v) { remoteStore.isReconnecting = v; }
+    get remoteSlaveState() { return remoteStore.remoteSlaveState; }
+    set remoteSlaveState(v) { remoteStore.remoteSlaveState = v; }
+    get remoteSelectedItem() { return remoteStore.remoteSelectedItem; }
+    set remoteSelectedItem(v) { remoteStore.remoteSelectedItem = v; }
+    get isRemoteDetailLoading() { return remoteStore.isRemoteDetailLoading; }
+    set isRemoteDetailLoading(v) { remoteStore.isRemoteDetailLoading = v; }
+    get remoteAction() { return remoteStore.remoteAction; }
+    set remoteAction(v) { remoteStore.remoteAction = v; }
+    get remoteFullItem() { return remoteStore.remoteFullItem; }
+    set remoteFullItem(v) { remoteStore.remoteFullItem = v; }
+    get isRemoteFullItemLoading() { return remoteStore.isRemoteFullItemLoading; }
+    set isRemoteFullItemLoading(v) { remoteStore.isRemoteFullItemLoading = v; }
+    get isIntroSkippableOnSlave() { return remoteStore.isIntroSkippableOnSlave; }
+    set isIntroSkippableOnSlave(v) { remoteStore.isIntroSkippableOnSlave = v; }
+    get shouldAutoFullscreen() { return remoteStore.shouldAutoFullscreen; }
+    set shouldAutoFullscreen(v) { remoteStore.shouldAutoFullscreen = v; }
+    get knownSlaves() { return remoteStore.knownSlaves; }
+    set knownSlaves(v) { remoteStore.knownSlaves = v; }
+    get missedPings() { return remoteStore.missedPings; }
+    set missedPings(v) { remoteStore.missedPings = v; }
+    get connectionHealth() { return remoteStore.connectionHealth; }
+    set connectionHealth(v) { remoteStore.connectionHealth = v; }
+    get pingInterval() { return remoteStore.pingInterval; }
+    set pingInterval(v) { remoteStore.pingInterval = v; }
+    get lastPingTime() { return remoteStore.lastPingTime; }
+    set lastPingTime(v) { remoteStore.lastPingTime = v; }
+    get isMediaSyncModalOpen() { return remoteStore.isMediaSyncModalOpen; }
+    set isMediaSyncModalOpen(v) { remoteStore.isMediaSyncModalOpen = v; }
+    get mediaSyncTargetSlaveId() { return remoteStore.mediaSyncTargetSlaveId; }
+    set mediaSyncTargetSlaveId(v) { remoteStore.mediaSyncTargetSlaveId = v; }
+    get _masterUiActiveView() { return remoteStore._masterUiActiveView; }
+    set _masterUiActiveView(v) { remoteStore._masterUiActiveView = v; }
+    get _masterUiSelectedItem() { return remoteStore._masterUiSelectedItem; }
+    set _masterUiSelectedItem(v) { remoteStore._masterUiSelectedItem = v; }
+    connectAsRemoteMaster = remoteStore.connectAsRemoteMaster;
+    disconnectRemoteMaster = remoteStore.disconnectRemoteMaster;
+    sendRemoteCommand = remoteStore.sendRemoteCommand;
+    stopRemotePlayback = remoteStore.stopRemotePlayback;
+    startPingInterval = remoteStore.startPingInterval;
+    stopPingInterval = remoteStore.stopPingInterval;
+    openMediaSyncModal = remoteStore.openMediaSyncModal;
+    closeMediaSyncModal = remoteStore.closeMediaSyncModal;
+    handleSlaveDisconnected = remoteStore.handleSlaveDisconnected;
+    startMasterReconnectTimer = remoteStore.startMasterReconnectTimer;
+    stopMasterReconnectTimer = remoteStore.stopMasterReconnectTimer;
+    triggerAutoFullscreen = remoteStore.triggerAutoFullscreen;
 
     // FIX: Rename episodeLinks state to mediaLinks and use MediaLink type
     mediaLinks: Map<number, MediaLink[]> = new Map();
@@ -2147,35 +2181,7 @@ class MediaStore {
         websocketService.changeRoomCode();
     };
 
-    connectAsRemoteMaster = async (slaveId: string) => {
-        const existingSlave = await db.knownSlaves.get(slaveId);
-
-        runInAction(() => {
-            this.isRemoteMaster = true;
-            this.slaveId = slaveId;
-            this.isQRScannerOpen = false;
-            db.preferences.put({key: 'remoteMasterForSlaveId', value: slaveId});
-        });
-
-        // Prefer shortCode for reconnection if available, otherwise use full slaveId
-        const shortCode = existingSlave?.shortCode;
-        websocketService.registerMaster({slaveId: shortCode || slaveId});
-
-        const slaveData = {
-            id: slaveId,
-            name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
-            lastSeen: Date.now(),
-            shortCode: shortCode // Preserve existing shortCode
-        };
-        await db.knownSlaves.put(slaveData);
-
-        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
-        runInAction(() => {
-            this.knownSlaves = updatedSlaves;
-        });
-
-        this.showSnackbar('notifications.connectedToTV', 'success', true);
-    };
+    // connectAsRemoteMaster moved to remoteStore
 
     disconnectRemoteMaster = () => {
         runInAction(() => {
@@ -2311,17 +2317,11 @@ class MediaStore {
         }
     }
 
-    sendRemoteCommand = (payload: any) => {
-        // FIX: Cannot find name 'remoteSessions'. Logic rewritten to correctly send command from master to slave.
-        // A remote control (master) sends commands to its connected TV (slave).
-        if (this.isRemoteMaster && this.slaveId) {
-            console.log(`[mediaStore] sendRemoteCommand: isRemoteMaster=${this.isRemoteMaster}, slaveId='${this.slaveId}', payload=`, payload);
-            websocketService.sendRemoteCommand({...payload, slaveId: this.slaveId});
-        } else {
-            console.log(`[mediaStore] sendRemoteCommand: NOT sending - isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
-        }
-    };
+    // NOTE: sendRemoteCommand, triggerAutoFullscreen, handleSlaveDisconnected,
+    // startMasterReconnectTimer, stopMasterReconnectTimer, startPingInterval, stopPingInterval
+    // are delegated to remoteStore
 
+    // sendSlaveStatusUpdate is called by mediaStore for its own SmartTV (slave) status
     sendSlaveStatusUpdate = () => {
         if (this.isSmartTV && this.slaveId) {
             const video = document.querySelector('video');
@@ -2334,94 +2334,6 @@ class MediaStore {
                 duration: video?.duration
             });
         }
-    };
-
-    // Trigger auto-fullscreen on slave when playback starts from master
-    triggerAutoFullscreen = () => {
-        // Only trigger if not already in fullscreen mode
-        if (!document.fullscreenElement) {
-            this.shouldAutoFullscreen = true;
-        }
-    };
-
-    // Master reconnection methods for automatic reconnection after slave disconnect
-    handleSlaveDisconnected = (shouldOpenQRScanner = true) => {
-        this.isRemoteMasterConnected = false;
-        this.remoteSlaveState = null;
-        this.startMasterReconnectTimer();
-        if (shouldOpenQRScanner) {
-            this.openQRScanner();
-        }
-        this.showSnackbar('notifications.slaveDisconnected', 'warning', true);
-    };
-
-    startMasterReconnectTimer = () => {
-        if (this.masterReconnectTimer) {
-            clearInterval(this.masterReconnectTimer);
-        }
-        this.masterReconnectAttempts = 0;
-        this.isReconnecting = true;
-
-        this.masterReconnectTimer = window.setInterval(() => {
-            if (!this.isRemoteMasterConnected && this.slaveId && this.masterReconnectAttempts < 12) {
-                websocketService.registerMaster({slaveId: this.slaveId});
-                this.masterReconnectAttempts++;
-                console.log(`[mediaStore] Master reconnection attempt ${this.masterReconnectAttempts}/12`);
-            } else if (this.masterReconnectAttempts >= 12 || this.isRemoteMasterConnected) {
-                this.stopMasterReconnectTimer();
-            }
-        }, 5000); // Retry every 5 seconds, max 12 attempts (60 seconds)
-    };
-
-    stopMasterReconnectTimer = () => {
-        if (this.masterReconnectTimer) {
-            clearInterval(this.masterReconnectTimer);
-            this.masterReconnectTimer = null;
-        }
-        this.isReconnecting = false;
-    };
-
-    // Ping/Pong interval for connection health monitoring
-    startPingInterval = () => {
-        this.stopPingInterval(); // Clear any existing interval
-
-        // Send ping every 10 seconds
-        this.pingInterval = window.setInterval(() => {
-            if (this.isRemoteMaster && this.slaveId && this.isRemoteMasterConnected) {
-                // Send ping to slave
-                websocketService.ping(this.slaveId);
-                this.lastPingTime = Date.now();
-                console.log('[mediaStore] Sent quix-ping to slave');
-
-                // Check if we missed a pong (timeout after 12 seconds - slightly more than ping interval)
-                setTimeout(() => {
-                    if (this.lastPingTime && Date.now() - this.lastPingTime >= 12000) {
-                        this.missedPings++;
-                        console.log(`[mediaStore] Missed ping detected, missedPings=${this.missedPings}`);
-
-                        if (this.missedPings >= 3) {
-                            this.connectionHealth = 'poor';
-                            console.log('[mediaStore] Connection health: POOR');
-                        } else if (this.missedPings >= 1) {
-                            this.connectionHealth = 'degraded';
-                            console.log('[mediaStore] Connection health: DEGRADED');
-                        }
-                    }
-                }, 12000);
-            }
-        }, 10000); // Ping every 10 seconds
-        console.log('[mediaStore] Ping interval started');
-    };
-
-    stopPingInterval = () => {
-        if (this.pingInterval) {
-            clearInterval(this.pingInterval);
-            this.pingInterval = null;
-        }
-        this.lastPingTime = null;
-        this.missedPings = 0;
-        this.connectionHealth = 'good';
-        console.log('[mediaStore] Ping interval stopped');
     };
 
     stopRemotePlayback = () => {
