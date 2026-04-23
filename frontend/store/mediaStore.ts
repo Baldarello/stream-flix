@@ -2514,11 +2514,15 @@ class MediaStore {
             case 'seek_to':
                 video.currentTime = time;
                 break;
-            case 'skip_intro':
-                if (this.nowPlayingItem && 'intro_end_s' in this.nowPlayingItem && this.nowPlayingItem.intro_end_s) {
-                    video.currentTime = this.nowPlayingItem.intro_end_s;
+            case 'skip_intro': {
+                // Use remoteSlaveState.nowPlayingItem when receiving remote content, otherwise use local nowPlayingItem
+                const remoteItem = this.remoteSlaveState?.nowPlayingItem;
+                const item = remoteItem ?? this.nowPlayingItem;
+                if (item && 'intro_end_s' in item && item.intro_end_s) {
+                    video.currentTime = item.intro_end_s;
                 }
                 break;
+            }
         }
         this.sendSlaveStatusUpdate();
     };
