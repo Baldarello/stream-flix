@@ -2,7 +2,7 @@ import React from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.ts';
 import {Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography} from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PlaylistAddCheckCircleIcon from '@mui/icons-material/PlaylistAddCheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 
@@ -71,7 +71,7 @@ const EpisodeInfoModal: React.FC = observer(() => {
                 <Button onClick={closeEpisodeInfoModal}>{t('common.close')}</Button>
                 <Button
                     variant="contained"
-                    startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
+                    startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <PlaylistAddCheckCircleIcon/>}
                     onClick={() => {
                         if (episode) {
                             toggleEpisodeWatchedStatus(episode.id);

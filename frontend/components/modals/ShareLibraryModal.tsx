@@ -19,7 +19,7 @@ import {
     Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import IosShareIcon from '@mui/icons-material/IosShare';
 import {createShareLink} from '../../services/shareService.ts';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 
@@ -132,7 +132,7 @@ const ShareLibraryModal: React.FC = observer(() => {
                                     {/* FIX: (line 117) Wrap IconButton with Tooltip component */}
                                     <Tooltip title={t('shareAndImport.copyLink')}>
                                         <IconButton onClick={handleCopyToClipboard}>
-                                            <ContentCopyIcon />
+                                            <IosShareIcon />
                                         </IconButton>
                                     </Tooltip>
                                 </InputAdornment>

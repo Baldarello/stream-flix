@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonIcon from '@mui/icons-material/Person';
 import TvIcon from '@mui/icons-material/Tv';
 import CloseIcon from '@mui/icons-material/Close';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
@@ -195,7 +195,7 @@ export const Header: React.FC = observer(() => {
                                 <QrCodeScannerIcon/>
                             </IconButton>
                             <IconButton color="inherit" onClick={() => mediaStore.toggleProfileDrawer(true)}>
-                                <AccountCircleIcon/>
+                                <PersonIcon/>
                             </IconButton>
                         </Box>
                     </Fade>

@@ -13,6 +13,8 @@
     "dev:fe": "cd frontend && bun run dev",
     "docker:build": "docker build -t quix:latest .",
     "docker:start": "docker run --name quix-local -p 3000:3000 quix:latest"
+  },
+  "dependencies": {
+    "@mui/icons-material": "5.18.0"
   }
-
 }

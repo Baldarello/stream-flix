@@ -24,3 +24,4 @@ frontend/.env
 *.njsproj
 *.sln
 *.sw?
+/.junie/

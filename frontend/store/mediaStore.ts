@@ -118,7 +118,6 @@ class MediaStore {
     
     // Profile & QR State
     isProfileDrawerOpen = false;
-    isQRScannerOpen = false;
     
     // Sharing State
     isShareModalOpen = false;
@@ -338,7 +337,7 @@ class MediaStore {
     loadInvalidLinksFromDb = async () => {
         try {
             const invalidLinks = await db.mediaLinks.filter(link => link.isValid === false || link.isValid === undefined).toArray();
-            const invalidIds = new Set<number>();
+            const invalidIds = new Set();
             invalidLinks.forEach(link => {
                 if (link.id) invalidIds.add(link.id);
             });

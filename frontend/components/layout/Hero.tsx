@@ -2,7 +2,7 @@ import React from 'react';
 import type {MediaItem} from '../../types.ts';
 import {Box, Button, Stack, Typography} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import PermDeviceInformationIcon from '@mui/icons-material/PermDeviceInformation';
 import {useTranslations} from '../../hooks/useTranslations.ts';
 import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
@@ -84,7 +84,7 @@ export const Hero: React.FC<HeroProps> = observer(({item, onMoreInfoClick, onPla
                         }} onClick={onPlayClick}>
                             {t('hero.play')}
                         </Button>
-                        <Button variant="contained" startIcon={<InfoOutlinedIcon/>} size="large"
+                        <Button variant="contained" startIcon={<PermDeviceInformationIcon/>} size="large"
                                 onClick={onMoreInfoClick} sx={{
                             bgcolor: 'rgba(109, 109, 110, 0.7)',
                             backdropFilter: 'blur(5px)',
