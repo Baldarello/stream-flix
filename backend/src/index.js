@@ -63,7 +63,7 @@ const app = new Elysia({
     }))
     // Link validation endpoint - bypasses CORS issues from frontend
     .post('/api/validate-link', async ({body, set}) => {
-        const {url} = body as {url?: string};
+        const {url} = body;
         
         if (!url || typeof url !== 'string') {
             set.status = 400;
@@ -95,8 +95,8 @@ const app = new Elysia({
     // WebSocket connection handler
     .ws('/ws', {
         message: createWebSocketRouter(),
-        open(ws: unknown) {
-            const socket = ws as { id: string; send: (data: string) => void; data?: any };
+        open(ws) {
+            const socket = ws;
             console.log(`WebSocket client connected: ${socket.id}`);
 
             // Generate client ID immediately
@@ -116,12 +116,12 @@ const app = new Elysia({
                 }
             }));
         },
-        close(ws: unknown) {
-            const socket = ws as { id: string };
+        close(ws) {
+            const socket = ws;
             console.log(`WebSocket client disconnected: ${socket.id}`);
         },
-        error(ws: unknown) {
-            const socket = ws as { id: string };
+        error(ws) {
+            const socket = ws;
             console.error(`WebSocket error for ${socket.id}`);
         },
     });
@@ -164,7 +164,7 @@ if (isProduction) {
             });
 
             set.status = response.status;
-            const headers: Record<string, string> = {};
+            const headers = {};
             response.headers.forEach((value, key) => {
                 headers[key] = value;
             });
@@ -204,9 +204,7 @@ app.onError(({code, error, set}) => {
 // ============================================================================
 
 const heartbeatInterval = setInterval(() => {
-    const wsServer = (app.server as unknown as {
-        ws?: { clients: Iterable<{ isAlive?: boolean; terminate?: () => void }> }
-    })?.ws;
+    const wsServer = app.server?.ws;
     if (!wsServer?.clients) return;
 
     for (const ws of Array.from(wsServer.clients)) {

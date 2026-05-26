@@ -1,30 +1,32 @@
-import type {Episode, MediaItem, MediaLink, Season} from '../types.ts';
-
 const LINK_CHECK_TIMEOUT = 5000; // 5 seconds
 
-export interface LinkValidationResult {
-    valid: MediaLink[];
-    invalid: MediaLink[];
+export class LinkValidationResult {
+    constructor(valid, invalid) {
+        this.valid = valid;
+        this.invalid = invalid;
+    }
 }
 
-export interface InvalidLinkInfo {
-    mediaId: number;
-    episodeId?: number;
-    episodeName?: string;
-    seasonNumber?: number;
-    showName: string;
-    showId: number;
-    url: string;
-    label: string;
-    language: string;
-    type: 'sub' | 'dub';
+export class InvalidLinkInfo {
+    constructor(mediaId, episodeId, episodeName, seasonNumber, showName, showId, url, label, language, type) {
+        this.mediaId = mediaId;
+        this.episodeId = episodeId;
+        this.episodeName = episodeName;
+        this.seasonNumber = seasonNumber;
+        this.showName = showName;
+        this.showId = showId;
+        this.url = url;
+        this.label = label;
+        this.language = language;
+        this.type = type;
+    }
 }
 
 /**
  * Check if a single link is valid by making a request through the backend API
  * This bypasses CORS issues that would occur with direct fetch from frontend
  */
-export const checkLinkValidity = async (url: string): Promise<boolean> => {
+export const checkLinkValidity = async (url) => {
     try {
         const response = await fetch('/api/validate-link', {
             method: 'POST',
@@ -39,7 +41,7 @@ export const checkLinkValidity = async (url: string): Promise<boolean> => {
             return false;
         }
 
-        const result = await response.json() as {isValid: boolean};
+        const result = await response.json();
         return result.isValid;
     } catch (error) {
         console.warn('Link validation failed:', url, error);
@@ -50,9 +52,9 @@ export const checkLinkValidity = async (url: string): Promise<boolean> => {
 /**
  * Check all links for a single episode
  */
-export const checkLinksForEpisode = async (links: MediaLink[]): Promise<LinkValidationResult> => {
-    const valid: MediaLink[] = [];
-    const invalid: MediaLink[] = [];
+export const checkLinksForEpisode = async (links) => {
+    const valid = [];
+    const invalid = [];
 
     // Check links in parallel with a limit
     const batchSize = 5;
@@ -80,12 +82,9 @@ export const checkLinksForEpisode = async (links: MediaLink[]): Promise<LinkVali
 /**
  * Check all links for a TV show or movie
  */
-export const checkLinksForShow = async (
-    item: MediaItem,
-    existingLinks?: Map<number, MediaLink[]>
-): Promise<InvalidLinkInfo[]> => {
-    const invalidLinks: InvalidLinkInfo[] = [];
-    const linksToCheck: Array<{links: MediaLink[], episode?: Episode, season?: Season}> = [];
+export const checkLinksForShow = async (item, existingLinks) => {
+    const invalidLinks = [];
+    const linksToCheck = [];
 
     if (item.media_type === 'tv' && item.seasons) {
         // For TV shows, check all episodes across all seasons

@@ -1,4 +1,4 @@
-export const isSmartTV = (): boolean => {
+export const isSmartTV = () => {
   const userAgent = navigator.userAgent.toLowerCase();
   const tvKeywords = [
     'smart-tv',
