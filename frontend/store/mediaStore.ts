@@ -1,10 +1,8 @@
 import {computed, makeAutoObservable, observable, runInAction} from 'mobx';
 import Dexie from 'dexie';
 import type {
-    ChatMessage,
     Episode,
     EpisodeProgress,
-    GoogleUser,
     MediaItem,
     MediaLink,
     PlayableItem,
@@ -23,7 +21,6 @@ import {
     searchShow
 } from '../services/apiCall';
 import {websocketService} from '../services/websocketService.js';
-import * as driveService from '../services/googleDriveService';
 import {db} from '../services/db';
 import {isSmartTV as detectSmartTV} from '../utils/device.ts';
 import {it} from '../locales/it.ts';
@@ -36,34 +33,46 @@ export type ActiveView = 'Home' | 'Serie TV' | 'Film' | 'Anime' | 'La mia lista'
 export type ThemeName = 'SerieTV' | 'Film' | 'Anime';
 export type Language = 'it' | 'en';
 
-
-type PlaybackState = { status: 'playing' | 'paused'; time: number };
-
-type RemoteSlaveState = {
-    isPlaying: boolean;
-    nowPlayingItem: PlayableItem | null;
-    isIntroSkippable?: boolean;
-    currentTime?: number;
-    duration?: number;
-}
-
 const allTranslations = {it, en};
 
+// Types for sharing functionality
+type SharedLibraryData = {
+    version: number;
+    shows: SharedShowData[];
+};
+
+type SharedShowData = {
+    tmdbId: number;
+    links: SharedEpisodeLink[];
+};
+
+type SharedEpisodeLink = {
+    seasonNumber: number;
+    episodeNumber: number;
+    url: string;
+    label: string;
+    language: string;
+    type: 'sub' | 'dub';
+};
+
 class MediaStore {
+    // ===== CORE STATE =====
     trending: MediaItem[] = [];
     latestMovies: MediaItem[] = [];
     topSeries: MediaItem[] = [];
     popularAnime: MediaItem[] = [];
     loading = true;
     error: string | null = null;
-    @observable selectedItem: MediaItem | null = null; // Local selected item for non-remote master
+    
+    @observable selectedItem: MediaItem | null = null;
     private playbackOriginItem: MediaItem | null = null;
     isDetailLoading = false;
+    
     myList: number[] = [];
     isPlaying = false;
     nowPlayingItem: PlayableItem | null = null;
-    nowPlayingShowDetails: MediaItem | null = null; // Full details for the show currently playing
-    @observable activeView: ActiveView = 'Home'; // Local active view for non-remote master
+    nowPlayingShowDetails: MediaItem | null = null;
+    @observable activeView: ActiveView = 'Home';
     viewingHistory: ViewingHistoryItem[] = [];
     cachedItems: Map<number, MediaItem> = new Map();
     episodeProgress: Map<number, EpisodeProgress> = new Map();
@@ -71,15 +80,97 @@ class MediaStore {
     preferredLabels: string[] = [];
     selectedSeasons: Map<number, number> = new Map();
     showFilterPreferences: Map<number, { language?: string; type?: 'sub' | 'dub'; }> = new Map();
-
+    
     // Search State
     searchQuery = '';
     searchResults: MediaItem[] = [];
     isSearchActive = false;
     isSearching = false;
     private searchDebounceTimer: number | null = null;
+    
+    // Links State
+    mediaLinks: Map<number, MediaLink[]> = new Map();
+    invalidLinkIds: Set<number> = new Set();
+    invalidLinksLoading = false;
+    
+    // Library State
+    activeLibraryTab = 0;
+    linksFilterShowId: number | null = null;
+    showOnlyInvalidLinks = false;
+    isLinkEpisodesModalOpen = false;
+    linkingEpisodesForItem: MediaItem | null = null;
+    isLinkMovieModalOpen = false;
+    linkingMovieItem: MediaItem | null = null;
+    isLinkSelectionModalOpen = false;
+    itemForLinkSelection: PlayableItem | null = null;
+    linksForSelection: MediaLink[] = [];
+    linkSelectionContext: 'local' | 'remote' = 'local';
+    expandedLinkAccordionId: number | false = false;
+    
+    // Player Drawers State
+    isEpisodesDrawerOpen = false;
+    isEpisodeInfoModalOpen = false;
+    episodeInfoModalData: {
+        episode: Episode;
+        seasonNumber: number;
+        uniqueLanguages: { lang: string; type: string }[];
+    } | null = null;
+    
+    // Profile & QR State
+    isProfileDrawerOpen = false;
+    isQRScannerOpen = false;
+    
+    // Sharing State
+    isShareModalOpen = false;
+    isImportModalOpen = false;
+    isImportingLibrary = false;
+    importUrl: string | null = null;
+    
+    // Revisions State
+    isRevisionsModalOpen = false;
+    isRevisionsLoading = false;
+    revisions: Revision[] = [];
+    private episodeContextMap: Map<number, {
+        show: string | undefined;
+        s: number;
+        e: number;
+        epName: string;
+    }> = new Map();
+    
+    // Custom Intro Durations
+    showIntroDurations: Map<number, number> = new Map();
+    
+    // Theme & Translation State
+    activeTheme: ThemeName = 'Anime';
+    language: Language = 'it';
+    
+    // Snackbar State
+    snackbarMessage: {
+        message: string,
+        severity: AlertColor,
+        action?: { label: string, onClick: () => void },
+        isTranslationKey?: boolean,
+        translationValues?: Record<string, any>
+    } | null = null;
+    
+    // Notifications State
+    notifications: Array<{
+        id: string;
+        type: 'invalid_links';
+        title: string;
+        message: string;
+        data: InvalidLinkInfo[];
+        read: boolean;
+        createdAt: number;
+    }> = [];
+    isNotificationsModalOpen = false;
+    
+    // Debug Mode State
+    isDebugModeActive = false;
+    debugMessages: string[] = [];
 
-    // ===== WATCH TOGETHER DELEGATIONS (see watchTogetherStore) =====
+    // ===== WATCH TOGETHER STATE (delegated from watchTogetherStore) =====
+    // These are exposed for components that access watchTogether state through mediaStore
     get watchTogetherModalOpen() { return watchTogetherStore.watchTogetherModalOpen; }
     set watchTogetherModalOpen(v) { watchTogetherStore.watchTogetherModalOpen = v; }
     get roomId() { return watchTogetherStore.roomId; }
@@ -98,24 +189,56 @@ class MediaStore {
     set playbackState(v) { watchTogetherStore.playbackState = v; }
     get chatHistory() { return watchTogetherStore.chatHistory; }
     set chatHistory(v) { watchTogetherStore.chatHistory = v; }
-    get playbackListeners() { return watchTogetherStore.playbackListeners; }
     get joinRoomIdFromUrl() { return watchTogetherStore.joinRoomIdFromUrl; }
     set joinRoomIdFromUrl(v) { watchTogetherStore.joinRoomIdFromUrl = v; }
     get watchTogetherSelectedItem() { return watchTogetherStore.watchTogetherSelectedItem; }
     set watchTogetherSelectedItem(v) { watchTogetherStore.watchTogetherSelectedItem = v; }
     get myClientId() { return watchTogetherStore.myClientId; }
     set myClientId(v) { watchTogetherStore.myClientId = v; }
-    get isCreatingRoom() { return watchTogetherStore.isCreatingRoom; }
-    set isCreatingRoom(v) { watchTogetherStore.isCreatingRoom = v; }
+    // WatchTogether methods delegated
     openWatchTogetherModal = watchTogetherStore.openWatchTogetherModal;
     closeWatchTogetherModal = watchTogetherStore.closeWatchTogetherModal;
     createRoom = watchTogetherStore.createRoom;
     joinRoom = watchTogetherStore.joinRoom;
     changeWatchTogetherMedia = watchTogetherStore.changeWatchTogetherMedia;
     changeRoomCode = watchTogetherStore.changeRoomCode;
-    setJoinRoomIdFromUrl = (v: string | null) => { watchTogetherStore.joinRoomIdFromUrl = v; };
+    sendPlaybackControl = watchTogetherStore.sendPlaybackControl;
+    addPlaybackListener = watchTogetherStore.addPlaybackListener;
+    sendChatMessage = watchTogetherStore.sendChatMessage;
+    transferHost = watchTogetherStore.transferHost;
+    changeName = watchTogetherStore.changeName;
 
-    // ===== REMOTE STORE DELEGATIONS (see remoteStore) =====
+    // ===== SYNC STORE STATE (delegated from syncStore) =====
+    // These are exposed for components that access sync state through mediaStore
+    get googleUser() { return syncStore.googleUser; }
+    set googleUser(v) { syncStore.googleUser = v; }
+    get isSyncing() { return syncStore.isSyncing; }
+    set isSyncing(v) { syncStore.isSyncing = v; }
+    get isReloadingData() { return syncStore.isReloadingData; }
+    set isReloadingData(v) { syncStore.isReloadingData = v; }
+    get isGoogleAuthLoading() { return syncStore.isGoogleAuthLoading; }
+    set isGoogleAuthLoading(v) { syncStore.isGoogleAuthLoading = v; }
+    get isSyncConflictModalOpen() { return syncStore.isSyncConflictModalOpen; }
+    set isSyncConflictModalOpen(v) { syncStore.isSyncConflictModalOpen = v; }
+    get syncConflictData() { return syncStore.syncConflictData; }
+    set syncConflictData(v) { syncStore.syncConflictData = v; }
+    get isProcessingSyncConflict() { return syncStore.isProcessingSyncConflict; }
+    set isProcessingSyncConflict(v) { syncStore.isProcessingSyncConflict = v; }
+    // SyncStore methods delegated
+    reloadAllData = syncStore.reloadAllData;
+    synchronizeWithDrive = syncStore.synchronizeWithDrive;
+    closeSyncConflictModal = syncStore.closeSyncConflictModal;
+    mergeLocalAndRemote = syncStore.mergeLocalAndRemote;
+    overwriteLocalWithRemote = syncStore.overwriteLocalWithRemote;
+    overwriteRemoteWithLocal = syncStore.overwriteRemoteWithLocal;
+    cancelSyncAndLogout = syncStore.cancelSyncAndLogout;
+    backupToDrive = syncStore.backupToDrive;
+    restoreFromDrive = syncStore.restoreFromDrive;
+    triggerDebouncedBackup = syncStore.triggerDebouncedBackup;
+    setGoogleUser = syncStore.setGoogleUser;
+
+    // ===== REMOTE STORE STATE (delegated from remoteStore) =====
+    // These are exposed for components that access remote state through mediaStore
     get isRemoteMaster() { return remoteStore.isRemoteMaster; }
     set isRemoteMaster(v) { remoteStore.isRemoteMaster = v; }
     get isRemoteMasterConnected() { return remoteStore.isRemoteMasterConnected; }
@@ -166,6 +289,13 @@ class MediaStore {
     set _masterUiActiveView(v) { remoteStore._masterUiActiveView = v; }
     get _masterUiSelectedItem() { return remoteStore._masterUiSelectedItem; }
     set _masterUiSelectedItem(v) { remoteStore._masterUiSelectedItem = v; }
+    get isSmartTV() { return remoteStore.isSmartTV; }
+    set isSmartTV(v) { remoteStore.isSmartTV = v; }
+    get isSmartTVPairingVisible() { return remoteStore.isSmartTVPairingVisible; }
+    set isSmartTVPairingVisible(v) { remoteStore.isSmartTVPairingVisible = v; }
+    get isQRScannerOpen() { return remoteStore.isQRScannerOpen; }
+    set isQRScannerOpen(v) { remoteStore.isQRScannerOpen = v; }
+    // RemoteStore methods delegated
     connectAsRemoteMaster = remoteStore.connectAsRemoteMaster;
     disconnectRemoteMaster = remoteStore.disconnectRemoteMaster;
     sendRemoteCommand = remoteStore.sendRemoteCommand;
@@ -178,139 +308,22 @@ class MediaStore {
     startMasterReconnectTimer = remoteStore.startMasterReconnectTimer;
     stopMasterReconnectTimer = remoteStore.stopMasterReconnectTimer;
     triggerAutoFullscreen = remoteStore.triggerAutoFullscreen;
-
-    // FIX: Rename episodeLinks state to mediaLinks and use MediaLink type
-    mediaLinks: Map<number, MediaLink[]> = new Map();
-    // Invalid links state - tracks which links are invalid
-    invalidLinkIds: Set<number> = new Set();
-    invalidLinksLoading = false;
-    // Active library tab (0: MyList, 1: ContinueWatching, 2: Links, 3: PreferredSources)
-    activeLibraryTab = 0;
-    // Filters for links tab
-    linksFilterShowId: number | null = null;
-    showOnlyInvalidLinks = false;
-    // Episode Linking State
-    isLinkEpisodesModalOpen = false;
-    linkingEpisodesForItem: MediaItem | null = null;
-    // FIX: Add state for movie linking modal
-    isLinkMovieModalOpen = false;
-    linkingMovieItem: MediaItem | null = null;
-    isLinkSelectionModalOpen = false;
-    itemForLinkSelection: PlayableItem | null = null;
-    // FIX: Use MediaLink type for linksForSelection
-    linksForSelection: MediaLink[] = [];
-    linkSelectionContext: 'local' | 'remote' = 'local';
-    expandedLinkAccordionId: number | false = false;
-
-    // Player Episode Drawer State
-    isEpisodesDrawerOpen = false;
-
-    // Episode Info Modal State
-    isEpisodeInfoModalOpen = false;
-    episodeInfoModalData: {
-        episode: Episode;
-        seasonNumber: number;
-        uniqueLanguages: { lang: string; type: string }[];
-    } | null = null;
-
-    // Profile Drawer & QR Scanner State
-    isProfileDrawerOpen = false;
-    isQRScannerOpen = false;
-
-    // Library Sharing State
-    isShareModalOpen = false;
-    isImportModalOpen = false;
-    isImportingLibrary = false;
-    importUrl: string | null = null;
-
-    // Revisions State
-    isRevisionsModalOpen = false;
-    isRevisionsLoading = false;
-    revisions: Revision[] = [];
-    private episodeContextMap: Map<number, {
-        show: string | undefined;
-        s: number;
-        e: number;
-        epName: string;
-    }> = new Map();
-
-
-    // Custom Intro Durations
-    showIntroDurations: Map<number, number> = new Map();
-
-    // Theme state
-    activeTheme: ThemeName = 'Anime';
-
-    // Snackbar State
-    snackbarMessage: {
-        message: string,
-        severity: AlertColor,
-        action?: { label: string, onClick: () => void },
-        isTranslationKey?: boolean,
-        translationValues?: Record<string, any>
-    } | null = null;
-
-    // Notifications State
-    notifications: Array<{
-        id: string;
-        type: 'invalid_links';
-        title: string;
-        message: string;
-        data: InvalidLinkInfo[];
-        read: boolean;
-        createdAt: number;
-    }> = [];
-    isNotificationsModalOpen = false;
-
-    // Debug Mode State
-    isDebugModeActive = false;
-    debugMessages: string[] = [];
-
-    // Google Auth & Sync State
-    googleUser: GoogleUser | null = null;
-    isSyncing = false;
-    isReloadingData = false; // Loading state per ricaricamento dati senza refresh pagina
-    isGoogleAuthLoading = false; // Loading state during Google OAuth popup
-
-    // Reload all data in memory (used after sync operations instead of page reload)
-    reloadAllData = async () => {
-        this.isReloadingData = true;
-        try {
-            await this.loadPersistedData();
-            await this.fetchAllData();
-        } finally {
-            this.isReloadingData = false;
-        }
-    };
-
-    private backupDebounceTimer: number | null = null;
-
-    // Sync Conflict Modal State
-    isSyncConflictModalOpen = false;
-    syncConflictData: {
-        myList: { local: number[]; remote: number[] };
-        shows: Map<number, { local: any; remote: any }>;
-        mediaLinks: { local: any[]; remote: any[] };
-        episodeProgress: { local: any[]; remote: any[] };
-    } | null = null;
-    isProcessingSyncConflict = false;
-
-    // Translation State
-    language: Language = 'it';
+    setIntroSkippableOnSlave = remoteStore.setIntroSkippableOnSlave;
+    fetchRemoteFullItem = remoteStore.fetchRemoteFullItem;
+    playRemoteItem = remoteStore.playRemoteItem;
+    syncMediaFromMaster = remoteStore.syncMediaFromMaster;
+    openQRScanner = remoteStore.openQRScanner;
+    closeQRScanner = remoteStore.closeQRScanner;
 
     get translations() {
         return allTranslations[this.language];
     }
 
-
     constructor() {
         makeAutoObservable(this);
-        // Initialize invalidLinkIds from DB
         this.loadInvalidLinksFromDb();
-        // isSmartTV is now determined on app load based on DB preference.
-        // We still run the detector for first-time use.
         if (detectSmartTV()) {
-            this.isSmartTV = true;
+            remoteStore.isSmartTV = true;
         }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
@@ -319,16 +332,11 @@ class MediaStore {
     }
 
     handleSlavesOffline = () => {
-        // Mark all known slaves as offline when WebSocket disconnects
-        this.knownSlaves.forEach(slave => {
-            slave.isOnline = false;
-        });
+        remoteStore.handleSlavesOffline();
     };
 
-    // Load invalid links from DB on startup
     loadInvalidLinksFromDb = async () => {
         try {
-            // Load both explicitly marked invalid and legacy links (isValid !== true means potentially invalid)
             const invalidLinks = await db.mediaLinks.filter(link => link.isValid === false || link.isValid === undefined).toArray();
             const invalidIds = new Set<number>();
             invalidLinks.forEach(link => {
@@ -347,39 +355,36 @@ class MediaStore {
     }
 
     @computed get currentSelectedItem(): MediaItem | null {
-        // The master device should still show the detail view even if the slave is playing.
         return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
     }
 
+    // ===== CORE PLAYBACK METHODS =====
+
     startPlayback = async (item: PlayableItem) => {
-        // If we are a remote master, send play command to slave instead of playing locally
         if (this.isRemoteMaster) {
-            this.playRemoteItem(item); // This already handles link resolution and sending command
+            this.playRemoteItem(item);
             return;
         }
 
-        // --- Step 1: Ensure we have a single, playable URL ---
         if (!item.video_url) {
             const mediaId = item.id;
             let allLinks: MediaLink[] = item.video_urls || await this.getLinksForMedia(mediaId);
             item.video_urls = allLinks;
 
             if (allLinks.length === 0) {
-                // Check if this is a TV show and try to find links from first available episode
                 if ('seasons' in item && item.seasons) {
                     for (const season of item.seasons) {
                         if (season.episodes) {
                             for (const ep of season.episodes) {
                                 const episodeLinks = await this.getLinksForMedia(ep.id);
                                 if (episodeLinks.length > 0) {
-                                    item.video_urls = episodeLinks;
+                                    (item as any).video_urls = episodeLinks;
                                     allLinks = episodeLinks;
-                                    // Set proper metadata to make it playable like an episode
-                                    item.show_id = item.id;
-                                    item.show_title = item.name || item.title || '';
-                                    item.season_number = season.season_number;
-                                    if (!item.backdrop_path && ep.still_path) {
-                                        item.backdrop_path = ep.still_path;
+                                    (item as any).show_id = item.id;
+                                    (item as any).show_title = item.name || item.title || '';
+                                    (item as any).season_number = season.season_number;
+                                    if (!(item as any).backdrop_path && ep.still_path) {
+                                        (item as any).backdrop_path = ep.still_path;
                                     }
                                     break;
                                 }
@@ -391,11 +396,10 @@ class MediaStore {
 
                 if (allLinks.length === 0) {
                     this.showSnackbar("notifications.noVideoLinks", "warning", true);
-                    return; // Can't play, so exit.
+                    return;
                 }
             }
 
-            // Determine the pool of links to choose from.
             let candidateLinks: MediaLink[] = allLinks;
             const showId = 'show_id' in item ? item.show_id : item.id;
             const preferredOrigin = this.preferredSources.get(showId);
@@ -403,7 +407,6 @@ class MediaStore {
             if (preferredOrigin) {
                 const linksFromPreferred = allLinks.filter(l => {
                     try {
-                        // Compare origins for a more robust match than startsWith
                         return new URL(l.url).origin === preferredOrigin;
                     } catch {
                         return false;
@@ -415,17 +418,13 @@ class MediaStore {
                 }
             }
 
-            // Now, from the candidate links, select one to play.
-            // Store all candidate links so VideoPlayer can show language/type pickers
             item.video_urls = candidateLinks;
-            
             let selectedLink: MediaLink | undefined;
 
             if (candidateLinks.length === 1) {
                 item.video_url = candidateLinks[0].url;
                 selectedLink = candidateLinks[0];
-            } else { // candidateLinks.length > 1
-                // More than one link, and no preferred label match, so we must ask the user.
+            } else {
                 this.linksForSelection = candidateLinks;
                 this.itemForLinkSelection = item;
                 this.linkSelectionContext = 'local';
@@ -433,7 +432,6 @@ class MediaStore {
                 return;
             }
 
-            // Save the language/type preference based on the selected link
             if (selectedLink && showId) {
                 this.setShowFilterPreference(showId, {
                     language: selectedLink.language,
@@ -442,20 +440,15 @@ class MediaStore {
             }
         }
 
-        // --- Step 2: If we have a URL, start playback ---
         if (item.video_url) {
             runInAction(() => {
                 if (this.selectedItem) {
                     this.playbackOriginItem = this.selectedItem;
-                    // Close detail view without affecting history, as we will push a new state for the player.
                     this._closeDetailWithoutHistory();
                 } else {
-                    // Ensure playbackOriginItem is cleared if we start playing from a non-detail view.
                     this.playbackOriginItem = null;
                 }
 
-                // Push a new history state for the video player.
-                // Replace state if another player is somehow already open.
                 if (window.history.state?.playerOpen) {
                     window.history.replaceState({playerOpen: true, itemId: item.id}, '', window.location.href);
                 } else {
@@ -465,16 +458,13 @@ class MediaStore {
                 this.nowPlayingItem = item;
 
                 if ('show_id' in item) {
-                    // First try to get from cache
                     let showDetails = this.cachedItems.get(item.show_id) || null;
-                    // Fallback to selectedItem if cache miss and selectedItem is the same show
-                    // This handles the case where DetailView starts playback without the show being cached
                     if (!showDetails && this.selectedItem && 'seasons' in this.selectedItem && this.selectedItem.id === item.show_id) {
                         showDetails = this.selectedItem;
                     }
                     this.nowPlayingShowDetails = showDetails;
                 } else {
-                    this.nowPlayingShowDetails = null; // It's a movie
+                    this.nowPlayingShowDetails = null;
                 }
             });
         }
@@ -491,538 +481,23 @@ class MediaStore {
     }
 
     stopPlayback = () => {
-        // This is called by UI elements (e.g., the back button in the player).
-        // It uses the History API to navigate back, which triggers the popstate
-        // event, ensuring the UI state and browser history remain synchronized.
         if (window.history.state?.playerOpen) {
             window.history.back();
         } else {
-            // Fallback in case the history state is not what we expect.
             this._stopPlaybackWithoutHistory();
         }
     }
 
-    synchronizeWithDrive = async () => {
-        if (!this.isLoggedIn || !this.googleUser?.accessToken) {
-            return;
-        }
-        this.isSyncing = true;
-        try {
-            this.showSnackbar('notifications.syncChecking', 'info', true);
-            const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
-            const lastSyncFileId = (await db.preferences.get('lastSyncFileId'))?.value;
-
-            if (remoteFile) {
-                // If the latest remote file is the same one we last synced with, do nothing.
-                if (remoteFile.id === lastSyncFileId) {
-                    this.showSnackbar('notifications.syncUpToDate', 'success', true);
-                    return; // Exit early
-                }
-
-                // A newer remote file exists - compare with local to detect conflicts
-                const remoteData = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
-
-                // Load all local data
-                const [localMyList, localCachedItems, localMediaLinks, localEpisodeProgress] = await Promise.all([
-                    db.myList.toArray(),
-                    db.cachedItems.toArray(),
-                    db.mediaLinks.toArray(),
-                    db.episodeProgress.toArray(),
-                ]);
-
-                const localMyListIds = localMyList.map((item: { id: number }) => item.id);
-                const remoteMyListIds = remoteData.myList || [];
-
-                // Check for significant differences
-                const hasLocalData = localMyListIds.length > 0 || localMediaLinks.length > 0;
-                const hasRemoteData = (remoteMyListIds.length > 0) || (remoteData.mediaLinks?.length > 0);
-
-                // Detect if there's a real conflict (different data in both)
-                const localOnlyItems = localMyListIds.filter((id: number) => !remoteMyListIds.includes(id));
-                const remoteOnlyItems = remoteMyListIds.filter((id: number) => !localMyListIds.includes(id));
-                const hasConflict = (localOnlyItems.length > 0 && hasRemoteData) || (remoteOnlyItems.length > 0 && hasLocalData);
-
-                if (hasConflict && hasLocalData && hasRemoteData) {
-                    // Build shows map for detailed comparison
-                    const localItemsMap = new Map(localCachedItems.map((item: any) => [item.id, item]));
-                    const remoteItemsMap = new Map((remoteData.cachedItems || []).map((item: any) => [item.id, item]));
-
-                    const showsMap = new Map<number, { local: any; remote: any }>();
-                    const allIds = new Set([...localItemsMap.keys(), ...remoteItemsMap.keys()]);
-                    allIds.forEach(id => {
-                        showsMap.set(id, {
-                            local: localItemsMap.get(id),
-                            remote: remoteItemsMap.get(id),
-                        });
-                    });
-
-                    // Show conflict modal
-                    runInAction(() => {
-                        this.syncConflictData = {
-                            myList: {
-                                local: localMyListIds,
-                                remote: remoteMyListIds,
-                            },
-                            shows: showsMap,
-                            mediaLinks: {
-                                local: localMediaLinks,
-                                remote: remoteData.mediaLinks || [],
-                            },
-                            episodeProgress: {
-                                local: localEpisodeProgress,
-                                remote: remoteData.episodeProgress || [],
-                            },
-                        };
-                        this.isSyncConflictModalOpen = true;
-                    });
-                    return; // Exit early - wait for user to choose
-                }
-
-                // No conflict or one side is empty - proceed with simple restore
-                this.showSnackbar('notifications.restoringFromCloud', 'info', true);
-                await db.importData(remoteData);
-                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
-                this.showSnackbar('notifications.restoreComplete', 'success', true);
-                // Reload data in memory instead of reloading the page
-                await this.reloadAllData();
-            } else {
-                // No remote backup exists. Create one from local DB.
-                this.showSnackbar('notifications.noBackupFoundCreating', 'info', true);
-                const newFile = await this.backupToDrive(false);
-                if (newFile) {
-                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
-                }
-            }
-        } catch (error) {
-            console.error("Error during initial sync:", error);
-            this.showSnackbar('notifications.syncError', 'error', true);
-        } finally {
-            runInAction(() => {
-                this.isSyncing = false;
-            });
-        }
-    };
-
-    closeSyncConflictModal = () => {
-        this.isSyncConflictModalOpen = false;
-        this.syncConflictData = null;
-    };
-
-    mergeLocalAndRemote = async (choices?: Array<{
-        id: number;
-        myListAction: 'local' | 'remote' | 'both' | 'none';
-        linksAction: 'local' | 'remote' | 'both';
-        progressAction: 'local' | 'remote' | 'both';
-    }>, deletedIds: number[] = []) => {
-        if (!this.syncConflictData || !this.googleUser?.accessToken) {
-            this.closeSyncConflictModal();
-            return;
-        }
-
-        runInAction(() => {
-            this.isProcessingSyncConflict = true;
-        });
-
-        try {
-            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
-
-            // If no choices provided, do automatic merge (keep everything)
-            if (!choices || choices.length === 0) {
-                // Automatic merge: keep all unique items from both
-                const mergedMyList = [...new Set([...myList.local, ...myList.remote])];
-
-                // For shows, prefer local if it exists, otherwise use remote
-                const mergedShows: any[] = [];
-                shows.forEach((data) => {
-                    if (data.local) {
-                        mergedShows.push(data.local);
-                    } else if (data.remote) {
-                        mergedShows.push(data.remote);
-                    }
-                });
-
-                // For links, combine all unique links (by URL)
-                const mergedLinksMap = new Map<string, any>();
-                [...mediaLinks.local, ...mediaLinks.remote].forEach((link: any) => {
-                    const key = `${link.mediaId}|${link.url}`;
-                    if (!mergedLinksMap.has(key)) {
-                        mergedLinksMap.set(key, link);
-                    }
-                });
-                const mergedLinks = Array.from(mergedLinksMap.values());
-
-                // For episode progress, keep the one with more recent timestamp
-                const mergedProgressMap = new Map<number, any>();
-                [...episodeProgress.local, ...episodeProgress.remote].forEach((progress: any) => {
-                    const existing = mergedProgressMap.get(progress.episodeId);
-                    if (!existing || (progress.lastWatchedAt && existing.lastWatchedAt && progress.lastWatchedAt > existing.lastWatchedAt)) {
-                        mergedProgressMap.set(progress.episodeId, progress);
-                    }
-                });
-                const mergedProgress = Array.from(mergedProgressMap.values());
-
-                // Strip Dexie Proxy objects before storing to IndexedDB
-                const cleanedShows = JSON.parse(JSON.stringify(mergedShows));
-                const cleanedLinks = JSON.parse(JSON.stringify(mergedLinks));
-                const cleanedProgress = JSON.parse(JSON.stringify(mergedProgress));
-
-                // Import merged data
-                const mergedData = {
-                    myList: JSON.parse(JSON.stringify((mergedMyList || [])
-                        .map((id: any) => typeof id === 'object' && id !== null ? id.id : id)
-                        .filter((id: any) => typeof id === 'number' || typeof id === 'string')
-                        .map((id: any, index: number) => ({id, order: index})))),
-                    cachedItems: cleanedShows,
-                    mediaLinks: cleanedLinks,
-                    episodeProgress: cleanedProgress,
-                };
-
-                await db.importData(mergedData);
-
-                // Backup merged data to drive
-                const newFile = await this.backupToDrive(false);
-                if (newFile) {
-                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
-                }
-
-                this.showSnackbar('notifications.syncMergeComplete', 'success', true);
-                this.closeSyncConflictModal();
-                // Reload data in memory instead of reloading the page
-                await this.reloadAllData();
-                return;
-            }
-
-            // Interactive merge based on user choices
-            const finalMyList: number[] = [];
-            const finalShows: any[] = [];
-            const finalLinks: any[] = [];
-            const finalProgress: any[] = [];
-
-            // Process each choice
-            choices.forEach((choice) => {
-                const showData = shows.get(choice.id);
-                if (!showData) return;
-
-                // My List
-                if (choice.myListAction === 'local' || choice.myListAction === 'both') {
-                    if (!finalMyList.includes(choice.id)) {
-                        finalMyList.push(choice.id);
-                    }
-                }
-                if (choice.myListAction === 'remote' || choice.myListAction === 'both') {
-                    if (!finalMyList.includes(choice.id)) {
-                        finalMyList.push(choice.id);
-                    }
-                }
-
-                // Shows - add the show from the chosen side
-                if (choice.myListAction !== 'none') {
-                    if (choice.myListAction === 'local' || choice.myListAction === 'both') {
-                        if (showData.local) {
-                            finalShows.push(showData.local);
-                        }
-                    }
-                    if (choice.myListAction === 'remote' || choice.myListAction === 'both') {
-                        if (showData.remote && !finalShows.some(s => s.id === showData.remote.id)) {
-                            finalShows.push(showData.remote);
-                        }
-                    }
-                }
-
-                // Links based on choice
-                const localLinks = mediaLinks.local.filter(l => {
-                    if (showData.local?.seasons) {
-                        return showData.local.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
-                    }
-                    return l.mediaId === choice.id;
-                });
-                const remoteLinks = mediaLinks.remote.filter(l => {
-                    if (showData.remote?.seasons) {
-                        return showData.remote.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
-                    }
-                    return l.mediaId === choice.id;
-                });
-
-                if (choice.linksAction === 'local') {
-                    finalLinks.push(...localLinks);
-                } else if (choice.linksAction === 'remote') {
-                    finalLinks.push(...remoteLinks);
-                } else { // both
-                    finalLinks.push(...localLinks, ...remoteLinks);
-                }
-
-                // Progress based on choice
-                const localProgress = episodeProgress.local.filter(p => {
-                    if (!showData.local?.seasons) return false;
-                    return showData.local.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
-                });
-                const remoteProgress = episodeProgress.remote.filter(p => {
-                    if (!showData.remote?.seasons) return false;
-                    return showData.remote.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
-                });
-
-                if (choice.progressAction === 'local') {
-                    finalProgress.push(...localProgress);
-                } else if (choice.progressAction === 'remote') {
-                    finalProgress.push(...remoteProgress);
-                } else { // both
-                    // For both, merge with timestamp check
-                    const progressMap = new Map<number, any>();
-                    [...localProgress, ...remoteProgress].forEach(p => {
-                        const existing = progressMap.get(p.episodeId);
-                        if (!existing || (p.lastWatchedAt && existing.lastWatchedAt && p.lastWatchedAt > existing.lastWatchedAt)) {
-                            progressMap.set(p.episodeId, p);
-                        }
-                    });
-                    finalProgress.push(...progressMap.values());
-                }
-            });
-
-            // Remove duplicate links by URL
-            const uniqueLinksMap = new Map<string, any>();
-            finalLinks.forEach(link => {
-                const key = `${link.mediaId}|${link.url}`;
-                if (!uniqueLinksMap.has(key)) {
-                    uniqueLinksMap.set(key, link);
-                }
-            });
-
-            // Strip Dexie Proxy objects before storing to IndexedDB
-            const cleanedShows = JSON.parse(JSON.stringify(finalShows));
-            const cleanedLinks = JSON.parse(JSON.stringify(Array.from(uniqueLinksMap.values())));
-            const cleanedProgress = JSON.parse(JSON.stringify(finalProgress));
-
-            // Import merged data
-            const mergedData = {
-                myList: JSON.parse(JSON.stringify((finalMyList || [])
-                    .map((id: any) => typeof id === 'object' && id !== null ? id.id : id)
-                    .filter((id: any) => typeof id === 'number' || typeof id === 'string')
-                    .map((id: any, index: number) => ({id, order: index})))),
-                cachedItems: cleanedShows,
-                mediaLinks: cleanedLinks,
-                episodeProgress: cleanedProgress,
-            };
-
-            await db.importData(mergedData);
-
-            // Delete shows marked for deletion
-            if (deletedIds.length > 0) {
-                console.log("Deleting shows:", deletedIds);
-                // Delete from myList
-                await db.myList.bulkDelete(deletedIds);
-                // Delete from cachedItems
-                await db.cachedItems.bulkDelete(deletedIds);
-                // Delete mediaLinks for these shows
-                await db.mediaLinks.where('mediaId').anyOf(deletedIds).delete();
-                // Delete episodeProgress for these shows
-                await db.episodeProgress.where('episodeId').anyOf(deletedIds).delete();
-            }
-
-            // Backup merged data to drive
-            const newFile = await this.backupToDrive(false);
-            if (newFile) {
-                await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
-            }
-
-            this.showSnackbar('notifications.syncMergeComplete', 'success', true);
-            this.closeSyncConflictModal();
-            // Reload data in memory instead of reloading the page
-            await this.reloadAllData();
-        } catch (error) {
-            console.error("Error merging data:", error);
-            this.showSnackbar('notifications.syncMergeError', 'error', true, {error: (error as Error).message});
-        } finally {
-            runInAction(() => {
-                this.isProcessingSyncConflict = false;
-            });
-        }
-    };
-
-    overwriteLocalWithRemote = async () => {
-        if (!this.syncConflictData || !this.googleUser?.accessToken) {
-            this.closeSyncConflictModal();
-            return;
-        }
-
-        runInAction(() => {
-            this.isProcessingSyncConflict = true;
-        });
-
-        try {
-            // Get the remote file ID again for updating lastSyncFileId
-            const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
-
-            // Build the remote data structure from conflict data
-            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
-
-            const remoteData = {
-                myList: JSON.parse(JSON.stringify((myList.remote || [])
-                    .map(id => typeof id === 'object' && id !== null ? id.id : id)
-                    .filter(id => typeof id === 'number' || typeof id === 'string')
-                    .map((id, index) => ({id, order: index})))),
-                cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
-                    .filter((s: any) => s.remote)
-                    .map((s: any) => s.remote))),
-                mediaLinks: JSON.parse(JSON.stringify(mediaLinks.remote)),
-                episodeProgress: JSON.parse(JSON.stringify(episodeProgress.remote)),
-            };
-
-            await db.importData(remoteData);
-
-            if (remoteFile) {
-                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
-            }
-
-            this.showSnackbar('notifications.syncOverwriteLocalComplete', 'success', true);
-            this.closeSyncConflictModal();
-            // Reload data in memory instead of reloading the page
-            await this.reloadAllData();
-        } catch (error) {
-            console.error("Error overwriting local data:", error);
-            this.showSnackbar('notifications.syncOverwriteLocalError', 'error', true, {error: (error as Error).message});
-        } finally {
-            runInAction(() => {
-                this.isProcessingSyncConflict = false;
-            });
-        }
-    };
-
-    overwriteRemoteWithLocal = async () => {
-        if (!this.syncConflictData || !this.googleUser?.accessToken) {
-            this.closeSyncConflictModal();
-            return;
-        }
-
-        runInAction(() => {
-            this.isProcessingSyncConflict = true;
-        });
-
-        try {
-            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
-
-            // Build local data structure
-            const localData = {
-                myList: JSON.parse(JSON.stringify((myList.local || [])
-                    .map(id => typeof id === 'object' && id !== null ? id.id : id)
-                    .filter(id => typeof id === 'number' || typeof id === 'string')
-                    .map((id, index) => ({id, order: index})))),
-                cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
-                    .filter((s: any) => s.local)
-                    .map((s: any) => s.local))),
-                mediaLinks: JSON.parse(JSON.stringify(mediaLinks.local)),
-                episodeProgress: JSON.parse(JSON.stringify(episodeProgress.local)),
-            };
-
-            // Backup local data to drive (overwrites remote)
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
-            const data: { [key: string]: any[] } = {};
-            for (const tableName of tablesToBackup) {
-                if ((db as any)[tableName]) {
-                    // Strip Dexie Proxy objects before storing to Drive
-                    data[tableName] = JSON.parse(JSON.stringify(await (db as any)[tableName].toArray()));
-                }
-            }
-
-            const newFile = await driveService.writeBackupFile(this.googleUser.accessToken, data);
-            await driveService.deleteOldBackups(this.googleUser.accessToken);
-
-            if (newFile) {
-                await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
-            }
-
-            this.showSnackbar('notifications.syncOverwriteRemoteComplete', 'success', true);
-            this.closeSyncConflictModal();
-        } catch (error) {
-            console.error("Error overwriting remote data:", error);
-            this.showSnackbar('notifications.syncOverwriteRemoteError', 'error', true, {error: (error as Error).message});
-        } finally {
-            runInAction(() => {
-                this.isProcessingSyncConflict = false;
-            });
-        }
-    };
-
-    cancelSyncAndLogout = () => {
-        // Close modal and sign out
-        this.closeSyncConflictModal();
-        // Import dynamically to avoid circular dependency
-        import('../services/googleAuthService').then(({handleSignOut}) => {
-            handleSignOut();
-        });
-        this.showSnackbar('notifications.syncCancelled', 'info', true);
-    };
-
-    backupToDrive = async (showNotification = true): Promise<driveService.DriveFile | undefined> => {
-        if (!this.isLoggedIn || !this.googleUser?.accessToken) {
-            if (showNotification) this.showSnackbar('notifications.loginRequired', 'warning', true);
-            return;
-        }
-        if (showNotification) this.showSnackbar('notifications.backupInProgress', 'info', true);
-        this.isSyncing = true;
-        try {
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
-            const data: { [key: string]: any[] } = {};
-            for (const tableName of tablesToBackup) {
-                if ((db as any)[tableName]) {
-                    data[tableName] = await (db as any)[tableName].toArray();
-                }
-            }
-
-            const newFile = await driveService.writeBackupFile(this.googleUser.accessToken, data);
-            await driveService.deleteOldBackups(this.googleUser.accessToken);
-
-            if (showNotification) this.showSnackbar('notifications.backupComplete', 'success', true);
-            return newFile;
-        } catch (error) {
-            console.error('Failed to backup to drive:', error);
-            if (showNotification) this.showSnackbar('notifications.backupSaveError', 'error', true);
-            return undefined;
-        } finally {
-            runInAction(() => {
-                this.isSyncing = false;
-            });
-        }
-    };
-
-    restoreFromDrive = async () => {
-        if (!this.isLoggedIn || !this.googleUser?.accessToken) {
-            this.showSnackbar('notifications.loginRequired', 'warning', true);
-            return;
-        }
-        this.showSnackbar('notifications.restoreInProgress', 'info', true);
-        this.isSyncing = true;
-        try {
-            const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
-            if (remoteFile) {
-                const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
-                await db.importData(data);
-                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
-                this.showSnackbar('notifications.restoreComplete', 'success', true);
-                // Reload data in memory instead of reloading the page
-                await this.reloadAllData();
-            } else {
-                this.showSnackbar('notifications.noBackupFound', 'warning', true);
-            }
-        } catch (error) {
-            console.error("Error during restore:", error);
-            this.showSnackbar('notifications.restoreError', 'error', true, {error: (error as Error).message});
-        } finally {
-            runInAction(() => {
-                this.isSyncing = false;
-            });
-        }
-    };
+    // ===== UI STATE METHODS =====
 
     showSnackbar = (message: string, severity: AlertColor = 'info', isTranslationKey = false, translationValues?: Record<string, any>) => {
         this.snackbarMessage = {message, severity, isTranslationKey, translationValues};
     }
 
-    // --- START OF IMPLEMENTED METHODS ---
     hideSnackbar = () => {
         this.snackbarMessage = null;
     };
 
-    // Notifications Methods
     addNotification = (notification: Omit<typeof this.notifications[0], 'id' | 'read' | 'createdAt'>) => {
         const newNotification = {
             ...notification,
@@ -1069,12 +544,7 @@ class MediaStore {
             const invalidLinks = await checkLinksForShow(item, this.mediaLinks);
             
             if (invalidLinks.length > 0) {
-                // Group invalid links by show for the notification
                 const showName = item.title || item.name || 'Unknown';
-                const episodeInfo = item.media_type === 'tv' && invalidLinks[0].episodeName
-                    ? ` (${invalidLinks[0].seasonNumber}x${invalidLinks[0].episodeName})`
-                    : '';
-                
                 this.addNotification({
                     type: 'invalid_links',
                     title: 'notifications.invalidLinks',
@@ -1087,20 +557,12 @@ class MediaStore {
         }
     };
 
-    // This is called by the popstate event handler to close the detail view
-    // without further manipulating the browser history.
     _closeDetailWithoutHistory = () => {
         this.selectedItem = null;
     };
 
     closeDetail = () => {
-        // This is called by UI elements (e.g., the 'X' button).
-        // Always close the detail view directly first, then handle history.
-        // This ensures the UI updates immediately regardless of history state.
         this._closeDetailWithoutHistory();
-
-        // If there's a history state indicating detailViewOpen, go back to clear it
-        // but the detail view is already closed so the user won't be stuck.
         if (window.history.state?.detailViewOpen) {
             window.history.back();
         }
@@ -1116,13 +578,27 @@ class MediaStore {
         if (view === 'Serie TV') this.setActiveTheme('SerieTV');
         else if (view === 'Film') this.setActiveTheme('Film');
         else if (view === 'Anime') this.setActiveTheme('Anime');
-        else if (view === 'Libreria') this.setActiveTheme('Anime'); // Use Anime theme for library management
+        else if (view === 'Libreria') this.setActiveTheme('Anime');
     };
 
     setActiveTheme = (theme: ThemeName) => {
         this.activeTheme = theme;
         db.preferences.put({key: 'activeTheme', value: theme});
     };
+
+    setLanguage = (lang: Language) => {
+        this.language = lang;
+        db.preferences.put({key: 'language', value: lang});
+    };
+
+    toggleSearch = (isActive: boolean) => {
+        this.isSearchActive = isActive;
+        if (!isActive) {
+            this.searchQuery = '';
+            this.searchResults = [];
+        }
+    };
+
     setSearchQuery = (query: string) => {
         this.searchQuery = query;
         if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
@@ -1143,113 +619,105 @@ class MediaStore {
             }
         }, 300);
     };
-    toggleSearch = (isActive: boolean) => {
-        this.isSearchActive = isActive;
-        if (!isActive) {
-            this.searchQuery = '';
-            this.searchResults = [];
-        }
-    };
-    setJoinRoomIdFromUrl = (roomId: string | null) => {
-        this.joinRoomIdFromUrl = roomId;
-    };
-    setImportUrl = (url: string | null) => {
-        this.importUrl = url;
-    };
+
+    // Profile & QR Methods
     toggleProfileDrawer = (isOpen: boolean) => {
         this.isProfileDrawerOpen = isOpen;
     };
-    openQRScanner = () => {
-        this.isQRScannerOpen = true;
-        this.isProfileDrawerOpen = false;
-    };
-    closeQRScanner = () => {
-        this.isQRScannerOpen = false;
-    };
+
     enableSmartTVMode = () => {
-        this.isSmartTV = true; // Mark this client as acting as a TV
-        this.isSmartTVPairingVisible = true;
+        remoteStore.isSmartTV = true;
+        remoteStore.isSmartTVPairingVisible = true;
         this.isProfileDrawerOpen = false;
         db.preferences.put({key: 'isConfiguredAsSlave', value: true});
-        // Manually send registration message, using existing ID and shortCode if available
         const payload: { slaveId?: string; shortCode?: string } = {};
         if (this.slaveId) payload.slaveId = this.slaveId;
         if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
         websocketService.registerSlave(payload);
     };
+
     exitSmartTVPairingMode = () => {
-        this.isSmartTVPairingVisible = false;
-        this.isSmartTV = false; // Reset Smart TV mode state
+        remoteStore.isSmartTVPairingVisible = false;
+        remoteStore.isSmartTV = false;
         db.preferences.delete('isConfiguredAsSlave');
     };
-    openMediaSyncModal = (slaveId: string) => {
-        console.log(`[mediaStore] openMediaSyncModal: slaveId='${slaveId}', current slaveId='${this.slaveId}'`);
-        this.mediaSyncTargetSlaveId = slaveId;
-        this.isMediaSyncModalOpen = true;
-    };
-    closeMediaSyncModal = () => {
-        this.isMediaSyncModalOpen = false;
-        this.mediaSyncTargetSlaveId = null;
-    };
-    setLanguage = (lang: Language) => {
-        this.language = lang;
-        db.preferences.put({key: 'language', value: lang});
-    };
+
+    // Modal Methods
     openShareModal = () => {
         this.isShareModalOpen = true;
     };
+
     closeShareModal = () => {
         this.isShareModalOpen = false;
     };
+
     openImportModal = () => {
         this.isImportModalOpen = true;
     };
+
     closeImportModal = () => {
         this.isImportModalOpen = false;
         if (this.importUrl) this.importUrl = null;
     };
+
     openRevisionsModal = () => {
         this.isRevisionsModalOpen = true;
         this.fetchRevisions();
     };
+
     closeRevisionsModal = () => {
         this.isRevisionsModalOpen = false;
     };
+
     closeLinkSelectionModal = () => {
         this.isLinkSelectionModalOpen = false;
         this.itemForLinkSelection = null;
         this.linkSelectionContext = 'local';
     };
+
     openEpisodesDrawer = () => {
         this.isEpisodesDrawerOpen = true;
     };
+
     closeEpisodesDrawer = () => {
         this.isEpisodesDrawerOpen = false;
     };
+
     openEpisodeInfoModal = (episode: Episode, seasonNumber: number, uniqueLanguages: { lang: string; type: string }[]) => {
         this.episodeInfoModalData = {episode, seasonNumber, uniqueLanguages};
         this.isEpisodeInfoModalOpen = true;
     };
+
     closeEpisodeInfoModal = () => {
         this.isEpisodeInfoModalOpen = false;
         this.episodeInfoModalData = null;
     };
-    setIntroSkippableOnSlave = (isSkippable: boolean) => {
-        this.isIntroSkippableOnSlave = isSkippable;
-    };
-    clearRemoteSelectedItem = () => {
-        this.clearMasterUiSelection(); // Clear master's UI selected item
-        this.sendRemoteCommand({command: 'clear_selection'}); // Also tell slave to clear its selection (detail view)
-    };
-    clearMasterUiSelection = () => {
-        this._masterUiSelectedItem = null;
-        this.isDetailLoading = false; // Also clear the loading state for master's detail
-    };
+
     setExpandedLinkAccordionId = (id: number | false) => {
         this.expandedLinkAccordionId = id;
     };
 
-    // Getters
+    clearRemoteSelectedItem = () => {
+        this._masterUiSelectedItem = null;
+        this.isDetailLoading = false;
+        this.sendRemoteCommand({command: 'clear_selection'});
+    };
+
+    clearMasterUiSelection = () => {
+        this._masterUiSelectedItem = null;
+        this.isDetailLoading = false;
+    };
+
+    setJoinRoomIdFromUrl = (roomId: string | null) => {
+        watchTogetherStore.joinRoomIdFromUrl = roomId;
+    };
+
+    setImportUrl = (url: string | null) => {
+        this.importUrl = url;
+    };
+
+    // ===== COMPUTED GETTERS =====
+
     get isLoggedIn() {
         return !!this.googleUser;
     }
@@ -1322,8 +790,8 @@ class MediaStore {
         const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id); // Find the current episode's index
-        if (currentEpisodeIndex > 0) { // If it's not the first episode
+        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        if (currentEpisodeIndex > 0) {
             return season.episodes[currentEpisodeIndex - 1];
         }
         return null;
@@ -1336,24 +804,20 @@ class MediaStore {
     get continueWatchingItems(): PlayableItem[] {
         const sortedProgress = Array.from(this.episodeProgress.values())
             .filter(p => !p.watched && p.currentTime > 0)
-            .sort((a, b) => (b.lastWatchedAt ?? 0) - (a.lastWatchedAt ?? 0)); // Most recent first
+            .sort((a, b) => (b.lastWatchedAt ?? 0) - (a.lastWatchedAt ?? 0));
 
-        // Map episodes with their progress data
         const episodesWithProgress = sortedProgress.map(p => {
             const ep = this.findEpisodeById(p.episodeId);
             if (!ep) return null;
             return {...ep, startTime: p.currentTime, progress: p};
         }).filter(item => !!item) as (PlayableItem & { progress: EpisodeProgress })[];
 
-        // Group by show_id and keep only the episode with highest episode_number per show
         const showMap = new Map<number, PlayableItem & { progress: EpisodeProgress }>();
 
         for (const item of episodesWithProgress) {
-            const showId = item.show_id;
+            const showId = (item as any).show_id;
             const existing = showMap.get(showId);
-
-            // Keep the episode with highest episode_number (most recent in series order)
-            if (!existing || (item.episode_number && existing.episode_number && item.episode_number > existing.episode_number)) {
+            if (!existing || ((item as any).episode_number && (existing as any).episode_number && (item as any).episode_number > (existing as any).episode_number)) {
                 showMap.set(showId, item);
             }
         }
@@ -1399,11 +863,9 @@ class MediaStore {
         return Array.from(this.cachedItems.values()).filter(item => item.media_type === 'tv' && this.hasLinks(item.id));
     }
 
-    // Get unique shows that have links (for filter dropdown)
     get showsWithLinks() {
         const showIds = new Set<number>();
         for (const [mediaId] of this.mediaLinks.entries()) {
-            // Find the show for this episode
             for (const show of this.cachedItems.values()) {
                 if (show.seasons) {
                     for (const season of show.seasons) {
@@ -1413,7 +875,6 @@ class MediaStore {
                         }
                     }
                 }
-                // Check if it's a movie
                 if (show.id === mediaId && show.media_type === 'movie') {
                     showIds.add(show.id);
                 }
@@ -1421,6 +882,8 @@ class MediaStore {
         }
         return Array.from(showIds).map(id => this.cachedItems.get(id)).filter((item): item is MediaItem => !!item);
     }
+
+    // ===== DATA FETCHING =====
 
     fetchAllData = async () => {
         this.loading = true;
@@ -1454,7 +917,12 @@ class MediaStore {
     }
 
     loadPersistedData = async () => {
-        const [myListItems, cachedItems, mediaLinks, introDurations, language, progress, preferredSources, username, activeTheme, selectedSeasons, preferredLabelsPref, showFilterPreferencesData, remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId, selfShortCode] = await Promise.all([
+        const [
+            myListItems, cachedItems, mediaLinksData, introDurations, languagePref, 
+            progress, preferredSourcesData, usernamePref, activeThemePref, 
+            selectedSeasonsData, preferredLabelsPref, showFilterPreferencesData,
+            remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId, selfShortCode
+        ] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
             db.mediaLinks.toArray(),
@@ -1471,14 +939,15 @@ class MediaStore {
             db.preferences.get('isConfiguredAsSlave'),
             db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
             db.preferences.get('selfSlaveId'),
-            db.preferences.get('selfShortCode'), // NEW - load shortCode for slave persistence
+            db.preferences.get('selfShortCode'),
         ]);
+
         runInAction(() => {
             this.myList = myListItems.map(item => item.id);
             this.cachedItems = new Map(cachedItems.map(item => [item.id, item]));
 
             const linksMap = new Map<number, MediaLink[]>();
-            mediaLinks.forEach(link => {
+            mediaLinksData.forEach(link => {
                 const links = linksMap.get(link.mediaId) || [];
                 links.push(link);
                 linksMap.set(link.mediaId, links);
@@ -1486,13 +955,13 @@ class MediaStore {
             this.mediaLinks = linksMap;
 
             this.showIntroDurations = new Map(introDurations.map(item => [item.id, item.duration]));
-            if (language?.value) this.language = language.value;
-            if (activeTheme?.value) this.activeTheme = activeTheme.value;
+            if (languagePref?.value) this.language = languagePref.value;
+            if (activeThemePref?.value) this.activeTheme = activeThemePref.value;
             this.episodeProgress = new Map(progress.map(p => [p.episodeId, p]));
-            this.preferredSources = new Map(preferredSources.map(p => [p.showId, p.origin]));
-            this.selectedSeasons = new Map(selectedSeasons.map(s => [s.showId, s.seasonNumber]));
+            this.preferredSources = new Map(preferredSourcesData.map(p => [p.showId, p.origin]));
+            this.selectedSeasons = new Map(selectedSeasonsData.map(s => [s.showId, s.seasonNumber]));
             if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
-            if (username?.value) this.username = username.value;
+            if (usernamePref?.value) this.username = usernamePref.value;
             this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, {
                 language: p.language,
                 type: p.type
@@ -1516,40 +985,33 @@ class MediaStore {
             }
             this.knownSlaves = knownSlaves;
 
-            // Mark that initial data has been loaded - this allows initRemoteSession to proceed
             this.hasLoadedInitialData = true;
             console.log(`[mediaStore] fetchAllData: initial data loaded, hasLoadedInitialData=true, isSmartTV=${this.isSmartTV}, isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
 
-            // Now that data is loaded, trigger initRemoteSession to register as slave or master
             if (this.isSmartTV && this.slaveId) {
-                console.log(`[mediaStore] fetchAllData: calling initRemoteSession for slave`);
                 this.initRemoteSession();
             } else if (this.isRemoteMaster && this.slaveId) {
-                // Master also needs to re-register when data is loaded
-                console.log(`[mediaStore] fetchAllData: calling initRemoteSession for master`);
                 this.initRemoteSession();
             }
         });
     }
 
+    // ===== MEDIA SELECTION =====
+
     selectMedia = async (item: MediaItem, context: 'detailView' | 'watchTogether' | 'remoteControl' | 'cacheOnly' = 'detailView') => {
         if (this.isRemoteMaster && context !== 'remoteControl' && context !== 'cacheOnly') {
-            // When acting as a remote master, clicking an item should display its details locally
-            // AND send a command to the slave to select the item (which will show its details on the TV).
             runInAction(() => {
                 this._masterUiSelectedItem = item;
-                this.isDetailLoading = true; // Start loading for master's UI
+                this.isDetailLoading = true;
             });
 
-            // Send command to slave to select the item
             this.sendRemoteCommand({command: 'select_item', item: item});
 
-            // Fetch details for the master's display
             try {
                 let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
                 fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
                 runInAction(() => {
-                    if (this._masterUiSelectedItem?.id === item.id) { // Ensure it's still the same item
+                    if (this._masterUiSelectedItem?.id === item.id) {
                         this._masterUiSelectedItem = fullItemDetails;
                     }
                 });
@@ -1561,15 +1023,11 @@ class MediaStore {
                     this.isDetailLoading = false;
                 });
             }
-            return; // Remote master handles selection differently, so return here.
+            return;
         }
 
-        // --- Original local selectMedia logic continues below ---
-        // 1. Set initial state based on context
         switch (context) {
             case 'detailView':
-                // If another detail view is already open, replace the history state. Otherwise, push a new one.
-                // This ensures the back button always exits the detail view, instead of going to a previous detail view.
                 if (this.selectedItem) {
                     window.history.replaceState({detailViewOpen: true, itemId: item.id}, '', window.location.href);
                 } else {
@@ -1585,8 +1043,8 @@ class MediaStore {
                 }
                 break;
             case 'remoteControl':
-                this.remoteSelectedItem = item;
-                this.isRemoteDetailLoading = true;
+                remoteStore.remoteSelectedItem = item;
+                remoteStore.isRemoteDetailLoading = true;
                 break;
             case 'cacheOnly':
                 break;
@@ -1596,12 +1054,9 @@ class MediaStore {
             let fullItemDetails: MediaItem = this.cachedItems.get(item.id) || item;
             fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
 
-            // Dexie/IndexedDB cannot serialize MobX proxies. We must convert the object
-            // to a plain JavaScript object before saving to prevent an error.
             await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
             runInAction(() => {
                 this.cachedItems.set(item.id, fullItemDetails!);
-                // 2. Update the correct state property with full details
                 switch (context) {
                     case 'detailView':
                         if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
@@ -1613,9 +1068,7 @@ class MediaStore {
                         }
                         break;
                     case 'remoteControl':
-                        if (this.remoteSelectedItem?.id === item.id) this.remoteSelectedItem = fullItemDetails;
-                        break;
-                    case 'cacheOnly':
+                        if (remoteStore.remoteSelectedItem?.id === item.id) remoteStore.remoteSelectedItem = fullItemDetails;
                         break;
                 }
             });
@@ -1625,12 +1078,13 @@ class MediaStore {
             this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
         } finally {
             runInAction(() => {
-                // 3. Reset loading flags
                 if (context === 'detailView') this.isDetailLoading = false;
-                if (context === 'remoteControl') this.isRemoteDetailLoading = false;
+                if (context === 'remoteControl') remoteStore.isRemoteDetailLoading = false;
             });
         }
     }
+
+    // ===== MY LIST METHODS =====
 
     toggleMyList = (item: MediaItem) => {
         const itemId = item.id;
@@ -1669,6 +1123,8 @@ class MediaStore {
         await db.myList.bulkPut(itemsToUpdate);
     }
 
+    // ===== PROGRESS METHODS =====
+
     removeFromContinueWatching = async (episodeId: number) => {
         try {
             await db.episodeProgress.delete(episodeId);
@@ -1699,7 +1155,6 @@ class MediaStore {
         const existingProgress = this.episodeProgress.get(episodeId);
 
         if (existingProgress?.watched) {
-            // Mark as unwatched
             const newProgress: EpisodeProgress = {
                 episodeId,
                 duration: existingProgress.duration,
@@ -1710,7 +1165,6 @@ class MediaStore {
             await db.episodeProgress.put(newProgress);
             this.showSnackbar('notifications.markedAsUnwatched', 'info', true);
         } else {
-            // Mark as watched
             const newProgress: EpisodeProgress = {
                 episodeId,
                 duration: existingProgress?.duration || 1,
@@ -1722,6 +1176,8 @@ class MediaStore {
             this.showSnackbar('notifications.markedAsWatched', 'success', true);
         }
     }
+
+    // ===== PREFERENCES METHODS =====
 
     setShowIntroDuration = (showId: number, duration: number) => {
         this.showIntroDurations.set(showId, duration);
@@ -1751,18 +1207,35 @@ class MediaStore {
         this.showSnackbar(isPreferred ? 'notifications.preferredLabelRemoved' : 'notifications.preferredLabelSet', 'success', true, {label});
     }
 
+    setPreferredSource = async (showId: number, origin: string) => {
+        const current = this.preferredSources.get(showId);
+        if (current === origin) {
+            this.preferredSources.delete(showId);
+            await db.preferredSources.delete(showId);
+        } else {
+            this.preferredSources.set(showId, origin);
+            await db.preferredSources.put({showId, origin});
+            this.showSnackbar('notifications.preferredSourceSet', 'success', true);
+        }
+    }
+
+    // ===== LINK MANAGEMENT METHODS =====
+
     openLinkEpisodesModal = (item: MediaItem) => {
         this.linkingEpisodesForItem = item;
         this.isLinkEpisodesModalOpen = true;
     };
+
     closeLinkEpisodesModal = () => {
         this.isLinkEpisodesModalOpen = false;
         this.linkingEpisodesForItem = null;
     };
+
     openLinkMovieModal = (item: MediaItem) => {
         this.linkingMovieItem = item;
         this.isLinkMovieModalOpen = true;
     };
+
     closeLinkMovieModal = () => {
         this.isLinkMovieModalOpen = false;
         this.linkingMovieItem = null;
@@ -1790,13 +1263,9 @@ class MediaStore {
                     const startEpisode = data.start || 1;
                     const endEpisode = data.end || season.episode_count;
                     const safeEndEpisode = Math.min(endEpisode, season.episode_count);
-
-                    // The counter for the [@EP] placeholder, which can be different from the actual episode number
                     let currentNumber = data.startNum ?? startEpisode;
 
                     for (let i = startEpisode; i <= safeEndEpisode; i++) {
-                        // 'i' is the episode number we are targeting in the season
-                        // 'currentNumber' is the number to put in the URL
                         const epNum = String(currentNumber).padStart(data.padding, '0');
                         const ep = season.episodes.find(e => e.episode_number === i);
                         if (ep) {
@@ -1807,7 +1276,7 @@ class MediaStore {
                                 language,
                                 type,
                             });
-                            currentNumber++; // Increment the placeholder number for the next episode in the range
+                            currentNumber++;
                         }
                     }
                     break;
@@ -1860,7 +1329,6 @@ class MediaStore {
                 }
             }
 
-            // Automatically set the first source as preferred if none is set for this show
             if (linksToAdd.length > 0 && !this.preferredSources.has(show.id)) {
                 try {
                     const firstUrl = new URL(linksToAdd[0].url);
@@ -1895,10 +1363,9 @@ class MediaStore {
                 label: link.label || new URL(link.url).hostname,
                 language: link.language,
                 type: link.type,
-                isValid: true, // New links are assumed valid by default
+                isValid: true,
             }));
 
-            // Automatically set the first source as preferred if none is set
             if (linksToAdd.length > 0 && !this.preferredSources.has(mediaId)) {
                 try {
                     const firstUrl = new URL(linksToAdd[0].url);
@@ -1917,7 +1384,6 @@ class MediaStore {
     }
 
     deleteMediaLink = async (linkId: number) => {
-        // FIX: Cast `db` to `Dexie` to call the `transaction` method, resolving a TypeScript error where the method was not found on the extended `QuixDB` class.
         const mediaId = await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
             const link = await db.mediaLinks.get(linkId);
             if (link) {
@@ -1932,14 +1398,12 @@ class MediaStore {
         }
     }
 
-    // Validate all links and update invalidLinkIds set
     validateAllLinks = async () => {
         this.invalidLinksLoading = true;
         const newInvalidIds = new Set<number>();
         const linksToUpdate: {id: number; isValid: boolean}[] = [];
         
         try {
-            // Check all links from mediaLinks Map
             for (const [, links] of this.mediaLinks.entries()) {
                 for (const link of links) {
                     if (link.id) {
@@ -1952,7 +1416,6 @@ class MediaStore {
                 }
             }
             
-            // Save validity to database - set isValid for all links
             if (linksToUpdate.length > 0) {
                 await (db as Dexie).transaction('rw', db.mediaLinks, async () => {
                     for (const linkUpdate of linksToUpdate) {
@@ -1973,7 +1436,6 @@ class MediaStore {
         }
     }
 
-    // Delete all invalid links
     deleteAllInvalidLinks = async () => {
         const invalidIds = Array.from(this.invalidLinkIds);
         let deletedCount = 0;
@@ -1997,7 +1459,6 @@ class MediaStore {
                 errorCount++;
             }
             
-            // Update progress every 5 links or at the end
             if ((i + 1) % 5 === 0 || i === invalidIds.length - 1) {
                 this.showSnackbar(`Eliminazione link in corso... (${i + 1}/${total})`, 'info', false);
             }
@@ -2014,7 +1475,6 @@ class MediaStore {
         }
     }
 
-    // Set filter for links tab
     setLinksFilterShowId = (showId: number | null) => {
         this.linksFilterShowId = showId;
     }
@@ -2027,16 +1487,13 @@ class MediaStore {
         this.activeLibraryTab = tab;
     }
 
-    // Navigate to library links tab with filters set
     navigateToLibraryLinksTab = async (showId: number) => {
-        this.activeLibraryTab = 2; // Links tab
+        this.activeLibraryTab = 2;
         this.linksFilterShowId = showId;
         this.showOnlyInvalidLinks = true;
-        // Reload invalid links from DB to ensure we have the latest data
         await this.loadInvalidLinksFromDb();
     }
 
-    // Clear invalid link from set (when user updates it)
     clearInvalidLink = (linkId: number) => {
         this.invalidLinkIds.delete(linkId);
     }
@@ -2123,343 +1580,18 @@ class MediaStore {
         }
     }
 
-    setPreferredSource = async (showId: number, origin: string) => {
-        const current = this.preferredSources.get(showId);
-        if (current === origin) { // If clicking the same one, unset it
-            this.preferredSources.delete(showId);
-            await db.preferredSources.delete(showId);
-        } else {
-            this.preferredSources.set(showId, origin);
-            await db.preferredSources.put({showId, origin});
-            this.showSnackbar('notifications.preferredSourceSet', 'success', true);
-        }
-    }
-
-    openWatchTogetherModal = (item: MediaItem | PlayableItem | null) => {
-        this.watchTogetherError = null;
-        if (item) {
-            this.selectMedia(item as MediaItem, 'watchTogether');
-        }
-        this.watchTogetherModalOpen = true;
-    };
-
-    closeWatchTogetherModal = () => {
-        this.watchTogetherModalOpen = false;
-        if (this.roomId) {
-            websocketService.leaveRoom();
-            this.roomId = null;
-        }
-    };
-
-    createRoom = (username: string) => {
-        this.username = username;
-        db.preferences.put({key: 'username', value: username});
-        if (this.watchTogetherSelectedItem) {
-            websocketService.createRoom({username, media: this.watchTogetherSelectedItem});
-        }
-    };
-
-    joinRoom = (roomId: string, username: string) => {
-        this.username = username;
-        db.preferences.put({key: 'username', value: username});
-        websocketService.joinRoom({roomId: roomId.toUpperCase(), username});
-    };
-
-    changeWatchTogetherMedia = (item: PlayableItem) => {
-        this.watchTogetherSelectedItem = item;
-        if (this.isHost) {
-            // Ensure video_url is set from video_urls for WebSocket broadcast
-            const mediaToSend = {...item};
-            if (!mediaToSend.video_url && (mediaToSend as any).video_urls?.length > 0) {
-                mediaToSend.video_url = (mediaToSend as any).video_urls[0].url;
-            }
-            websocketService.selectMedia(mediaToSend);
-        }
-    };
-
-    changeRoomCode = () => {
-        websocketService.changeRoomCode();
-    };
-
-    // connectAsRemoteMaster moved to remoteStore
-
-    disconnectRemoteMaster = () => {
-        runInAction(() => {
-            this.isRemoteMaster = false;
-            this.slaveId = null;
-            this.remoteSlaveState = null;
-            this._masterUiActiveView = 'Home';
-            this._masterUiSelectedItem = null;
-            db.preferences.delete('remoteMasterForSlaveId');
-            this.stopPingInterval();
-            this.showSnackbar('notifications.disconnectedFromTV', 'info', true);
-        });
-    }
-
-    reconnectToSlave = (slaveId: string) => {
-        this.connectAsRemoteMaster(slaveId);
-    };
-
-    updateSlaveName = async (slaveId: string, name: string) => {
-        await db.knownSlaves.update(slaveId, {name});
-        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
-        runInAction(() => {
-            this.knownSlaves = updatedSlaves;
-        });
-    };
-
-    updateSlaveShortCode = async (slaveId: string, shortCode: string) => {
-        await db.knownSlaves.update(slaveId, {shortCode});
-        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
-        runInAction(() => {
-            this.knownSlaves = updatedSlaves;
-        });
-    };
-
-    forgetSlave = async (slaveId: string) => {
-        if (this.isRemoteMaster && this.slaveId === slaveId) {
-            this.disconnectRemoteMaster();
-        }
-        await db.knownSlaves.delete(slaveId);
-        const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
-        runInAction(() => {
-            this.knownSlaves = updatedSlaves;
-        });
-    };
-
-    setSlaveOnlineStatus = (slaveId: string, isOnline: boolean) => {
-        runInAction(() => {
-            const slave = this.knownSlaves.find(s => s.id === slaveId);
-            if (slave) {
-                slave.isOnline = isOnline;
-            }
-        });
-    };
-
-    setRemoteSelectedItem = (item: MediaItem) => {
-        // This is called by the RemoteControlView (now acting as master's home)
-        // when a card is clicked. It will call `selectMedia` on the master which
-        // handles displaying it locally and sending command to slave.
-        this.selectMedia(item, 'remoteControl');
-    };
-
-    private sendPlayCommandAndOptimisticallyUpdate = (item: PlayableItem) => {
-        this.sendRemoteCommand({command: 'play_item', item});
-        runInAction(() => {
-            this.remoteSlaveState = {
-                ...(this.remoteSlaveState ?? {}),
-                isPlaying: true,
-                nowPlayingItem: item,
-                currentTime: item.startTime ?? 0,
-                duration: this.remoteSlaveState?.nowPlayingItem?.id === item.id ? this.remoteSlaveState.duration : 0,
-            };
-        });
-    };
-
-    playRemoteItem = async (item: PlayableItem) => {
-        // This method is called by the Master remote.
-        // It needs to resolve the video URL before sending the command to the Slave.
-        if (item.video_url) {
-            this.sendPlayCommandAndOptimisticallyUpdate(item);
-            this.closeLinkSelectionModal();
-            return;
-        }
-
-        // --- Resolve URL ---
-        const mediaId = 'episode_number' in item ? item.id : item.id;
-        const allLinks = item.video_urls || await this.getLinksForMedia(mediaId);
-
-        if (allLinks.length === 0) {
-            this.showSnackbar("notifications.noVideoLinks", "warning", true);
-            return;
-        }
-
-        let candidateLinks: MediaLink[] = allLinks;
-        const showId = 'show_id' in item ? item.show_id : item.id;
-        const preferredOrigin = this.preferredSources.get(showId);
-
-        if (preferredOrigin) {
-            const linksFromPreferred = allLinks.filter(l => {
-                try {
-                    return new URL(l.url).origin === preferredOrigin;
-                } catch {
-                    return false;
-                }
-            });
-            if (linksFromPreferred.length > 0) {
-                candidateLinks = linksFromPreferred;
-            }
-        }
-
-        if (candidateLinks.length === 1) {
-            this.sendPlayCommandAndOptimisticallyUpdate({...item, video_url: candidateLinks[0].url});
-            return;
-        }
-
-        // More than one candidate, try preferred labels.
-        const preferredLabels = this.preferredLabels;
-        let bestLink: MediaLink | undefined = undefined;
-
-        if (preferredLabels.length > 0) {
-            bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
-        }
-
-        if (bestLink) {
-            this.sendPlayCommandAndOptimisticallyUpdate({...item, video_url: bestLink.url});
-        } else {
-            // More than one link, no preferred label, must ask user.
-            runInAction(() => {
-                this.linksForSelection = candidateLinks;
-                this.itemForLinkSelection = item;
-                this.linkSelectionContext = 'remote'; // Set context for modal
-                this.isLinkSelectionModalOpen = true;
-            });
-        }
-    }
-
-    // NOTE: sendRemoteCommand, triggerAutoFullscreen, handleSlaveDisconnected,
-    // startMasterReconnectTimer, stopMasterReconnectTimer, startPingInterval, stopPingInterval
-    // are delegated to remoteStore
-
-    // sendSlaveStatusUpdate is called by mediaStore for its own SmartTV (slave) status
-    sendSlaveStatusUpdate = () => {
-        if (this.isSmartTV && this.slaveId) {
-            const video = document.querySelector('video');
-            websocketService.sendSlaveStatusUpdate({
-                slaveId: this.slaveId,
-                isPlaying: this.isPlaying,
-                nowPlayingItem: this.nowPlayingItem,
-                isIntroSkippable: this.isIntroSkippableOnSlave,
-                currentTime: video?.currentTime,
-                duration: video?.duration
-            });
-        }
-    };
-
-    stopRemotePlayback = () => {
-        this.sendRemoteCommand({command: 'stop'});
-    };
-
-    fetchRemoteFullItem = async () => {
-        if (!this.remoteSlaveState?.nowPlayingItem) return;
-        const item = this.remoteSlaveState.nowPlayingItem;
-        const showId = 'show_id' in item ? item.show_id : item.id;
-
-        this.isRemoteFullItemLoading = true;
-        try {
-            const fullDetails = await getSeriesDetails(showId);
-            const seasonsWithEpisodes = await Promise.all(
-                fullDetails.seasons?.map(async (season) => {
-                    const episodes = await getSeriesEpisodes(showId, season.season_number);
-                    const episodesWithLinks = await Promise.all(episodes.map(async ep => {
-                        const links = await this.getLinksForMedia(ep.id);
-                        return {...ep, video_urls: links, video_url: links[0]?.url};
-                    }));
-                    return {...season, episodes: episodesWithLinks};
-                }) || []
-            );
-            runInAction(() => {
-                this.remoteFullItem = {...fullDetails, seasons: seasonsWithEpisodes};
-            });
-        } catch (error) {
-            console.error("Failed to fetch full remote item details", error);
-        } finally {
-            runInAction(() => {
-                this.isRemoteFullItemLoading = false;
-            });
-        }
-    };
-
-    handleRemoteCommand = (payload: any) => {
-        const {command, item, time, slaveId} = payload;
-
-        // Commands that do NOT require an existing video element
-        switch (command) {
-            case 'play_item':
-                this.startPlayback(item);
-                this.sendSlaveStatusUpdate();
-                this.triggerAutoFullscreen(); // Auto-fullscreen when playback starts
-                return; // Exit after handling
-            case 'stop':
-                this.stopPlayback();
-                this.sendSlaveStatusUpdate();
-                return; // Exit after handling
-            case 'select_item': // Slave receives command to select an item
-                this.selectMedia(item, 'detailView');
-                this.sendSlaveStatusUpdate();
-                return;
-            case 'clear_selection': // Slave receives command to clear selected item
-                this.closeDetail();
-                this.sendSlaveStatusUpdate();
-                return;
-            case 'request_status':
-                this.sendSlaveStatusUpdate();
-                return;
-            case 'request-media-sync':
-                // Slave is requesting the master to show the media sync modal
-                if (slaveId) {
-                    this.openMediaSyncModal(slaveId);
-                }
-                return;
-        }
-
-        // All subsequent commands require a video element
-        const video = document.querySelector('video');
-        if (!video) return;
-
-        switch (command) {
-            case 'play':
-                if (this.nowPlayingItem) this.isPlaying = true;
-                video.play();
-                // this.triggerAutoFullscreen(); // Auto-fullscreen when playback starts
-                break;
-            case 'pause':
-                if (this.nowPlayingItem) this.isPlaying = false;
-                video.pause();
-                break;
-            case 'seek_forward':
-                video.currentTime += 10;
-                break;
-            case 'seek_backward':
-                video.currentTime -= 10;
-                break;
-            case 'seek_to':
-                video.currentTime = time;
-                break;
-            case 'skip_intro': {
-                // Use remoteSlaveState.nowPlayingItem when receiving remote content, otherwise use local nowPlayingItem
-                const remoteItem = this.remoteSlaveState?.nowPlayingItem;
-                const item = remoteItem ?? this.nowPlayingItem;
-                if (video && item) {
-                    // Logica simile a VideoPlayer.tsx handleSkipIntro
-                    if ('intro_end_s' in item && item.intro_end_s && item.intro_end_s > (item as any).intro_start_s) {
-                        // Skip to intro_end_s
-                        video.currentTime = item.intro_end_s;
-                    } else {
-                        // Use showIntroDurations fallback
-                        const showId = 'show_id' in item ? (item as any).show_id : (item as any).id;
-                        const skipDuration = this.showIntroDurations.get(showId) || 80;
-                        video.currentTime = Math.min(video.duration, video.currentTime + skipDuration);
-                    }
-                }
-                break;
-            }
-        }
-        this.sendSlaveStatusUpdate();
-    };
+    // ===== SHARING METHODS =====
 
     generateShareableData = async (showIds: number[]): Promise<SharedLibraryData> => {
         const shows: SharedShowData[] = [];
         for (const showId of showIds) {
-            // Ensure full details are loaded, as the cached item might be partial.
             const cachedShow = this.cachedItems.get(showId);
             const needsFetch = !cachedShow || !cachedShow.seasons || cachedShow.seasons.some(s => s.episodes.length === 0);
             if (needsFetch) {
-                // selectMedia with 'cacheOnly' will fetch from API and update the cache.
                 await this.selectMedia({id: showId, media_type: 'tv'} as MediaItem, 'cacheOnly');
             }
 
-            const show = this.cachedItems.get(showId); // Get the updated item
+            const show = this.cachedItems.get(showId);
             if (!show || !show.seasons) continue;
 
             const links: SharedEpisodeLink[] = [];
@@ -2494,14 +1626,12 @@ class MediaStore {
             for (const showData of data.shows) {
                 showIdsToAddToMyList.push(showData.tmdbId);
 
-                // Ensure show details are in cache
                 if (!this.cachedItems.has(showData.tmdbId)) {
                     await this.selectMedia({id: showData.tmdbId, media_type: 'tv'} as MediaItem, 'cacheOnly');
                 }
                 const show = this.cachedItems.get(showData.tmdbId);
                 if (!show || !show.seasons) continue;
 
-                // Prevent duplicate links
                 const allEpisodeIds = show.seasons.flatMap(s => s.episodes.map(e => e.id));
                 if (allEpisodeIds.length === 0) continue;
 
@@ -2523,7 +1653,7 @@ class MediaStore {
                                 language: link.language,
                                 type: link.type
                             });
-                            existingLinkSet.add(linkIdentifier); // Avoid adding duplicates from within the same import file
+                            existingLinkSet.add(linkIdentifier);
                         }
                     }
                 }
@@ -2533,10 +1663,9 @@ class MediaStore {
                 }
             }
 
-            // Add imported shows to "My List"
             if (showIdsToAddToMyList.length > 0) {
                 const itemsToAddToMyList = showIdsToAddToMyList
-                    .filter(id => !this.myList.includes(id)) // Filter out duplicates
+                    .filter(id => !this.myList.includes(id))
                     .map((id, index) => ({id, order: this.myList.length + index}));
 
                 if (itemsToAddToMyList.length > 0) {
@@ -2551,13 +1680,14 @@ class MediaStore {
                 showCount: data.shows.length,
                 linkCount: totalLinksAdded
             });
-            // Reload data in memory instead of reloading the page
             await this.reloadAllData();
         } catch (error) {
             this.showSnackbar('notifications.importError', 'error', true, {error: (error as Error).message});
             this.isImportingLibrary = false;
         }
     }
+
+    // ===== REVISIONS METHODS =====
 
     fetchRevisions = async () => {
         this.isRevisionsLoading = true;
@@ -2575,50 +1705,150 @@ class MediaStore {
             if (!table) throw new Error(`Table ${revision.table} not found.`);
 
             switch (revision.type) {
-                case 1: // Revert create -> delete
+                case 1:
                     await table.delete(revision.key);
                     break;
-                case 2: // Revert update
-                case 3: // Revert delete
+                case 2:
+                case 3:
                     if (!revision.oldObj) {
                         throw new Error(this.t('revisions.errors.missingOldObject'));
                     }
                     await table.put(revision.oldObj);
                     break;
             }
-            // Remove the revision itself
             if (revision.id) await db.revisions.delete(revision.id);
             this.showSnackbar('notifications.revertSuccess', 'success', true);
-            // Reload data in memory instead of reloading the page
             await this.reloadAllData();
         } catch (error) {
             this.showSnackbar('notifications.revertError', 'error', true, {error: (error as Error).message});
         }
     }
 
-    triggerDebouncedBackup = () => {
-        if (this.backupDebounceTimer) clearTimeout(this.backupDebounceTimer);
-        this.backupDebounceTimer = window.setTimeout(async () => {
-            if (this.isLoggedIn) {
-                const newFile = await this.backupToDrive();
-                if (newFile) {
-                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
-                }
-            }
-        }, 30000); // 30-second debounce
-    };
+    // ===== WEBSOCKET HANDLERS =====
 
-    setGoogleUser = async (user: GoogleUser | null) => {
-        this.googleUser = user;
-        if (user) {
-            this.showSnackbar('notifications.welcomeUser', 'success', true, {name: user.name});
-        } else {
-            this.showSnackbar('notifications.logoutSuccess', 'info', true);
+    addDebugMessage = (message: string) => {
+        if (this.debugMessages.length > 100) {
+            this.debugMessages.shift();
         }
+        this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`);
     };
 
-    // Private helpers
-    private async _fetchAndCacheMediaDetails(itemId: number, initialItem: MediaItem): Promise<MediaItem> {
+    initRemoteSession = () => {
+        remoteStore.initRemoteSession();
+    };
+
+    handleIncomingMessage = (message: any) => {
+        runInAction(() => {
+            const {type, payload} = message;
+            this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
+
+            switch (type) {
+                // Remote control events - delegate to remoteStore
+                case 'quix-slave-registered':
+                case 'quix-master-connected':
+                case 'quix-master-connection-status':
+                case 'quix-slave-reconnected':
+                case 'quix-remote-command':
+                case 'quix-remote-command-received':
+                case 'quix-slave-status-update':
+                case 'quix-ping':
+                case 'quix-pong':
+                case 'quix-sync-media-request':
+                case 'quix-sync-completed':
+                case 'quix-sync-error':
+                case 'quix-slave-disconnected':
+                case 'quix-master-disconnected':
+                    // These are handled by remoteStore's WebSocket handler
+                    // Just update local delegation properties
+                    if (type === 'quix-slave-registered') {
+                        this.slaveId = payload.slaveId;
+                        this.slaveShortCode = payload.shortCode;
+                        if (this.isSmartTV) {
+                            db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
+                            db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
+                        }
+                        this.showSnackbar('notifications.tvReady', 'info', true);
+                    } else if (type === 'quix-master-connected') {
+                        this.isRemoteMasterConnected = true;
+                        if (this.slaveId) {
+                            this.setSlaveOnlineStatus(this.slaveId, true);
+                        }
+                        if (payload?.slaveId && this.isRemoteMaster) {
+                            this.slaveId = payload.slaveId;
+                            db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
+                        }
+                        if (this.isSmartTV) {
+                            this.isSmartTVPairingVisible = false;
+                        } else {
+                            if (this.slaveId) {
+                                this.openMediaSyncModal(this.slaveId);
+                            }
+                            this.stopMasterReconnectTimer();
+                            this.startPingInterval();
+                        }
+                        this.showSnackbar('notifications.remoteConnected', 'success', true);
+                    } else if (type === 'quix-slave-status-update') {
+                        this.remoteSlaveState = payload;
+                    } else if (type === 'quix-slave-disconnected') {
+                        if (this.slaveId) {
+                            this.setSlaveOnlineStatus(this.slaveId, false);
+                        }
+                        this.handleSlaveDisconnected(payload?.willReconnect !== true);
+                        this.stopPingInterval();
+                    } else if (type === 'quix-master-disconnected') {
+                        this.isRemoteMasterConnected = false;
+                        this.knownSlaves.forEach(slave => {
+                            slave.isOnline = false;
+                        });
+                        this.stopPingInterval();
+                        this.showSnackbar('notifications.masterDisconnected', 'info', true);
+                    }
+                    break;
+
+                // Watch Together events - delegate to watchTogetherStore
+                case 'quix-room-update':
+                case 'quix-playback-update':
+                    // These are handled by watchTogetherStore
+                    break;
+
+                default:
+                    break;
+            }
+        });
+    };
+
+    reconnectToSlave = (slaveId: string) => {
+        this.connectAsRemoteMaster(slaveId);
+    };
+
+    updateSlaveName = async (slaveId: string, name: string) => {
+        await remoteStore.updateSlaveName(slaveId, name);
+    };
+
+    updateSlaveShortCode = async (slaveId: string, shortCode: string) => {
+        await remoteStore.updateSlaveShortCode(slaveId, shortCode);
+    };
+
+    forgetSlave = async (slaveId: string) => {
+        await remoteStore.forgetSlave(slaveId);
+    };
+
+    setSlaveOnlineStatus = (slaveId: string, isOnline: boolean) => {
+        remoteStore.setSlaveOnlineStatus(slaveId, isOnline);
+    };
+
+    setRemoteSelectedItem = (item: MediaItem) => {
+        this.selectMedia(item, 'remoteControl');
+    };
+
+    // Send slave status update
+    sendSlaveStatusUpdate = () => {
+        remoteStore.sendSlaveStatusUpdate();
+    };
+
+    // ===== PRIVATE HELPER METHODS =====
+
+    _fetchAndCacheMediaDetails = async (itemId: number, initialItem: MediaItem): Promise<MediaItem> => {
         let fullItemDetails = initialItem;
         const needsApiFetch = fullItemDetails.media_type === 'tv' &&
             (!fullItemDetails.seasons || fullItemDetails.seasons.some(s => s.episodes.length === 0));
@@ -2659,8 +1889,7 @@ class MediaStore {
         return fullItemDetails;
     }
 
-// FIX: Modified findEpisodeById to return an object that is structurally compatible with MediaItem for use in ContentRow/Card components.
-    private findEpisodeById(episodeId: number): (Episode & {
+    private findEpisodeById = (episodeId: number): (Episode & {
         show_id: number,
         show_title: string,
         backdrop_path: string,
@@ -2669,7 +1898,7 @@ class MediaStore {
         title: string,
         media_type: 'tv',
         name: string
-    }) | null {
+    }) | null => {
         for (const show of this.cachedItems.values()) {
             if (show.seasons) {
                 for (const season of show.seasons) {
@@ -2681,7 +1910,6 @@ class MediaStore {
                             show_title: show.name || show.title,
                             backdrop_path: show.backdrop_path,
                             season_number: season.season_number,
-                            // Make it MediaItem-like for Card component
                             poster_path: episode.still_path || show.poster_path,
                             title: episode.name,
                             media_type: 'tv',
@@ -2694,8 +1922,7 @@ class MediaStore {
         return null;
     }
 
-    // FIX: Find the first unwatched episode with playable links for a series, or return the first episode with links if all are watched
-    findFirstUnwatchedEpisode(item: MediaItem): Episode | null {
+    findFirstUnwatchedEpisode = (item: MediaItem): Episode | null => {
         if (!item.seasons) return null;
 
         for (const season of item.seasons) {
@@ -2703,7 +1930,6 @@ class MediaStore {
                 for (const episode of season.episodes) {
                     const progress = this.episodeProgress.get(episode.id);
                     if (!progress?.watched) {
-                        // Check if this episode has playable links
                         const links = this.mediaLinks.get(episode.id);
                         if (links && links.length > 0) {
                             return episode;
@@ -2713,7 +1939,6 @@ class MediaStore {
             }
         }
 
-        // All unwatched episodes have no links, or all are watched - find first episode with links
         for (const season of item.seasons) {
             if (season.episodes) {
                 for (const episode of season.episodes) {
@@ -2728,13 +1953,14 @@ class MediaStore {
         return null;
     }
 
-    private hasLinks(showId: number): boolean {
+    private hasLinks = (showId: number): boolean => {
         const item = this.cachedItems.get(showId);
         if (!item || !item.seasons) return false;
         return item.seasons.some(s => s.episodes.some(ep => this.mediaLinks.has(ep.id)));
     }
 
-    private async getLinksForMedia(mediaId: number): Promise<MediaLink[]> {
+    // Public method used by remoteStore for resolving video URLs
+    getLinksForMedia = async (mediaId: number): Promise<MediaLink[]> => {
         let links = this.mediaLinks.get(mediaId);
         if (!links) {
             links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
@@ -2743,27 +1969,21 @@ class MediaStore {
         return links;
     }
 
-    private async refreshLinksForMediaId(mediaId: number) {
+    private refreshLinksForMediaId = async (mediaId: number): Promise<void> => {
         const links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
         runInAction(() => {
             this.mediaLinks.set(mediaId, links);
-            // This is complex because we don't know which show this episode belongs to without searching.
-            // A full refresh of the selected item is safer.
             if (this.linkingEpisodesForItem) this.refreshLinksForShow(this.linkingEpisodesForItem.id);
-
-            // Also refresh the movie item if it's the one being linked
             if (this.linkingMovieItem?.id === mediaId) {
-                // By creating a new object, we ensure MobX detects the change and re-renders the observer component.
                 this.linkingMovieItem = {...this.linkingMovieItem, video_urls: links};
             }
         });
     }
 
-    private async refreshLinksForShow(showId: number) {
+    private refreshLinksForShow = async (showId: number): Promise<void> => {
         const show = this.cachedItems.get(showId);
         if (!show || !show.seasons) return;
 
-        // Create new season and episode objects to ensure MobX detects changes
         const updatedSeasons = await Promise.all(
             show.seasons.map(async (season) => {
                 const updatedEpisodes = await Promise.all(
@@ -2772,39 +1992,29 @@ class MediaStore {
                         runInAction(() => {
                             this.mediaLinks.set(episode.id, links);
                         });
-                        // Create a new episode object with updated links
                         return {...episode, video_urls: links, video_url: links[0]?.url};
                     })
                 );
-                // Create a new season object with updated episodes
                 return {...season, episodes: updatedEpisodes};
             })
         );
 
-        // Create a new show object with the updated seasons
         const updatedShow = {...show, seasons: updatedSeasons};
 
         runInAction(() => {
-            // Update the main cache
             this.cachedItems.set(showId, updatedShow);
-
-            // If this show is the currently selected item in the detail view, update it to trigger a re-render.
             if (this.selectedItem?.id === showId) {
                 this.selectedItem = updatedShow;
             }
-
-            // Also update the item being linked in the modal.
             if (this.linkingEpisodesForItem?.id === showId) {
                 this.linkingEpisodesForItem = updatedShow;
             }
-            // Also update the master UI selected item if it's this show
             if (this._masterUiSelectedItem?.id === showId) {
                 this._masterUiSelectedItem = updatedShow;
             }
         });
     }
 
-    // FIX: Add private translation method for use inside the store.
     private t = (key: string, values?: Record<string, any>): string => {
         const translatedString = getNestedValue(this.translations, key);
         if (translatedString) {
@@ -2814,7 +2024,7 @@ class MediaStore {
         return key;
     }
 
-    private async enrichRevisionsWithContext(revs: Revision[]) {
+    private enrichRevisionsWithContext = async (revs: Revision[]): Promise<void> => {
         for (const rev of revs) {
             rev.icon = rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'delete';
             const obj = rev.obj || rev.oldObj;
@@ -2837,10 +2047,7 @@ class MediaStore {
                         if (context) {
                             rev.description = this.t('revisions.descriptions.episodeLinks.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), context);
                         } else {
-                            rev.description = this.t('revisions.descriptions.unknown', {
-                                type: rev.type,
-                                table: rev.table
-                            });
+                            rev.description = this.t('revisions.descriptions.unknown', {type: rev.type, table: rev.table});
                         }
                         break;
                     case 'showIntroDurations':
@@ -2855,10 +2062,7 @@ class MediaStore {
                         if (vhContext) {
                             rev.description = this.t('revisions.descriptions.viewingHistory.add', vhContext);
                         } else {
-                            rev.description = this.t('revisions.descriptions.unknown', {
-                                type: rev.type,
-                                table: rev.table
-                            });
+                            rev.description = this.t('revisions.descriptions.unknown', {type: rev.type, table: rev.table});
                         }
                         break;
                     default:
@@ -2871,12 +2075,12 @@ class MediaStore {
         }
     }
 
-    private async findEpisodeContext(episodeId: number): Promise<{
+    private findEpisodeContext = async (episodeId: number): Promise<{
         show: string | undefined;
         s: number;
         e: number;
         epName: string;
-    } | null> {
+    } | null> => {
         if (this.episodeContextMap.has(episodeId)) return this.episodeContextMap.get(episodeId) || null;
 
         for (const show of this.cachedItems.values()) {
@@ -2896,321 +2100,17 @@ class MediaStore {
                 }
             }
         }
-        return null; // Should fetch if not found, but this is for UI display, so fail silently.
+        return null;
     }
+}
 
-    // Websocket and remote control methods
-    addDebugMessage = (message: string) => {
-        if (this.debugMessages.length > 100) {
-            this.debugMessages.shift();
-        }
-        this.debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`);
-    };
-    initRemoteSession = () => {
-        // For slave: only register after initial data has been loaded (to ensure slaveId is available)
-        if (this.isSmartTV) {
-            // Wait for fetchAllData to complete before registering as slave
-            // This ensures we have the persisted slaveId available
-            if (!this.hasLoadedInitialData) {
-                console.log(`[mediaStore] initRemoteSession: waiting for initial data to load before registering slave`);
-                return;
-            }
-            // Send both slaveId and shortCode for proper reconnection
-            const payload: { slaveId?: string; shortCode?: string } = {};
-            if (this.slaveId) payload.slaveId = this.slaveId;
-            if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
-            console.log(`[mediaStore] initRemoteSession: registering slave with slaveId=${this.slaveId}, shortCode=${this.slaveShortCode}`);
-            websocketService.registerSlave(payload);
-        } else if (this.isRemoteMaster && this.slaveId) {
-            // When the WebSocket connects (or reconnects), if this client is a master,
-            // it needs to re-register with its slave to re-establish the control session.
-            websocketService.registerMaster({slaveId: this.slaveId});
-            // Request the current status from the slave to sync the UI
-            this.sendRemoteCommand({command: 'request_status'});
-        }
-    };
-    handleIncomingMessage = (message: any) => {
-        runInAction(() => {
-            const {type, payload} = message;
-            this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
-            switch (type) {
-                case 'quix-slave-registered':
-                    this.slaveId = payload.slaveId;
-                    this.slaveShortCode = payload.shortCode;
-                    if (this.isSmartTV) {
-                        // Store BOTH slaveId AND shortCode for persistence
-                        db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
-                        db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
-                    }
-                    this.showSnackbar('notifications.tvReady', 'info', true);
-                    break;
-                case 'quix-master-connected':
-                    console.log(`[mediaStore] quix-master-connected: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, payload=${JSON.stringify(payload)}`);
-                    this.isRemoteMasterConnected = true;
+// Helper functions that were missing
+function getNestedValue(obj: any, path: string): string | undefined {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
 
-                    // Mark slave as online
-                    if (this.slaveId) {
-                        this.setSlaveOnlineStatus(this.slaveId, true);
-                    }
-
-                    // FIX: Update slaveId if provided in payload (backend resolves shortCode to full ID)
-                    // This ensures master uses the correct slaveId that matches backend's remoteSessions key
-                    if (payload?.slaveId && this.isRemoteMaster) {
-                        console.log(`[mediaStore] quix-master-connected: Updating slaveId from '${this.slaveId}' to '${payload.slaveId}'`);
-                        this.slaveId = payload.slaveId;
-                        // CRITICAL FIX: Also update remoteMasterForSlaveId so on refresh we use the FULL id, not shortCode
-                        db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
-                    }
-
-                    if (this.isSmartTV) {
-                        // Slave side: hide the pairing screen
-                        this.isSmartTVPairingVisible = false;
-                    } else {
-                        // Master side: open the media sync modal
-                        if (this.slaveId) {
-                            console.log(`[mediaStore] quix-master-connected: Opening sync modal with slaveId=${this.slaveId}`);
-                            this.openMediaSyncModal(this.slaveId);
-                        }
-                        // Stop the reconnect timer since we're now connected
-                        this.stopMasterReconnectTimer();
-                        // Start ping interval for connection health monitoring
-                        this.startPingInterval();
-                    }
-                    this.showSnackbar('notifications.remoteConnected', 'success', true);
-                    break;
-                case 'quix-master-connection-status':
-                    // Handle connection status when master tries to reconnect with shortCode
-                    if (payload.status === 'slave-busy') {
-                        // If we're in reconnection mode (master refreshing/reconnecting),
-                        // this "busy" message might be from our own previous connection attempt.
-                        // Show success since we should be reconnecting successfully.
-                        if (this.isReconnecting || this.masterReconnectTimer) {
-                            console.log(`[mediaStore] slave-busy during reconnection, ignoring - likely our own attempt`);
-                            // Don't show error snackbar - we'll get quix-master-connected soon
-                        } else {
-                            // Real busy scenario - a different master is trying to connect
-                            this.showSnackbar('notifications.slaveBusy', 'warning', true);
-                        }
-                    } else if (payload.status === 'slave-not-found') {
-                        this.showSnackbar('notifications.slaveNotFound', 'error', true);
-                    } else if (payload.status === 'slave-reconnecting') {
-                        // Slave is intentionally disconnecting (reloading), keep trying
-                        // Also update slaveId if provided (backend resolves shortCode to full ID)
-                        if (payload.slaveId && this.isRemoteMaster) {
-                            this.slaveId = payload.slaveId;
-                            db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
-                            console.log(`[mediaStore] Slave reconnecting: updated slaveId to ${payload.slaveId}`);
-                        }
-                        this.showSnackbar('notifications.slaveReconnecting', 'info', true);
-                        // Don't stop the reconnect timer - keep trying
-                        console.log(`[mediaStore] Slave is reconnecting, continuing to wait...`);
-                    } else if (payload.slaveId && payload.shortCode) {
-                        // Backend resolved shortCode to slaveId - update knownSlaves with both
-                        this.updateSlaveShortCode(payload.slaveId, payload.shortCode);
-                    }
-                    break;
-                case 'quix-slave-reconnected':
-                    // Slave has reconnected after intentional disconnect (reload)
-                    // Immediately try to register as master
-                    console.log(`[mediaStore] Slave reconnected: ${payload.slaveId}, attempting to reconnect...`);
-                    this.showSnackbar('notifications.slaveReconnected', 'success', true);
-                    if (this.isRemoteMaster) {
-                        // Update slaveId to the full ID (in case we had shortCode stored)
-                        if (payload.slaveId) {
-                            this.slaveId = payload.slaveId;
-                            // CRITICAL: Store the full slaveId so on next refresh we use the correct id
-                            db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
-                        }
-                        websocketService.registerMaster({slaveId: this.slaveId});
-                        // Request current status to sync UI
-                        this.sendRemoteCommand({command: 'request_status'});
-                    }
-                    break;
-                case 'quix-room-update':
-                    console.log(`[DEBUG] quix-room-update received: roomId=${payload.roomId}, participants count=${payload.participants?.length}, myClientId=${websocketService.clientId}`);
-                    console.log(`[DEBUG] quix-room-update participants:`, payload.participants);
-                    this.roomId = payload.roomId;
-                    this.hostId = payload.hostId;
-                    // Create a new array reference to ensure MobX properly detects the change
-                    this.participants = payload.participants ? [...payload.participants] : [];
-                    this.playbackState = payload.playbackState;
-                    this.chatHistory = payload.chatHistory;
-                    this.isHost = payload.isHost;
-                    this.myClientId = websocketService.clientId;
-                    if (payload.selectedMedia) {
-                        const existing = this.cachedItems.get(payload.selectedMedia.id);
-                        // For non-hosts, episode change should trigger playback
-                        const isNonHost = !this.isHost;
-                        const hasNewEpisode = this.watchTogetherSelectedItem?.id !== (payload.selectedMedia as any)?.id;
-
-                        // Set watchTogetherSelectedItem from the payload's episode (which has video_urls)
-                        this.watchTogetherSelectedItem = payload.selectedMedia as PlayableItem;
-
-                        if (existing) {
-                            this.selectMedia(existing, 'watchTogether');
-                        } else { // If not cached, fetch it
-                            this.selectMedia(payload.selectedMedia, 'watchTogether');
-                        }
-
-                        // For non-hosts, if the episode changed, start playback with the video_url from video_urls
-                        if (isNonHost && hasNewEpisode && (payload.selectedMedia as any)?.video_urls?.length > 0) {
-                            const episodeWithUrl = {
-                                ...(payload.selectedMedia as any),
-                                video_url: (payload.selectedMedia as any).video_urls[0].url
-                            };
-                            this.startPlayback(episodeWithUrl);
-                        }
-                    }
-                    break;
-                case 'quix-playback-update':
-                    this.playbackState = payload.playbackState;
-                    this.playbackListeners.forEach(l => l(this.playbackState));
-                    // If we are in a room, not the host, and not currently playing, this update means the host has started playback.
-                    if (this.roomId && !this.isHost && !this.nowPlayingItem && this.watchTogetherSelectedItem && payload.playbackState.status === 'playing') {
-                        this.startPlayback(this.watchTogetherSelectedItem);
-                    }
-                    break;
-                case 'quix-remote-command':
-                    this.handleRemoteCommand(payload);
-                    break;
-                case 'quix-remote-command-received':
-                    // This is just an acknowledgment from the backend - update UI state only, don't execute command
-                    console.log('[mediaStore] Remote command received by backend:', payload);
-                    // Could add UI feedback here like setting a flag to show "command sent" status
-                    break;
-                case 'quix-slave-status-update':
-                    this.remoteSlaveState = payload;
-                    break;
-                case 'quix-ping':
-                    // Received ping from master - respond with pong
-                    console.log('[mediaStore] Received quix-ping, responding with pong');
-                    if (this.slaveId) {
-                        websocketService.pong({slaveId: this.slaveId, timestamp: payload?.timestamp});
-                    }
-                    break;
-                case 'quix-pong':
-                    // Received pong from slave - connection is healthy
-                    console.log('[mediaStore] Received quix-pong from slave');
-                    this.missedPings = 0;
-                    this.connectionHealth = 'good';
-                    break;
-                case 'quix-sync-media-request':
-                    // Master sent media items to sync to slave
-                    if (payload?.mediaItems && Array.isArray(payload.mediaItems)) {
-                        this.syncMediaFromMaster(payload.mediaItems);
-                    }
-                    break;
-                case 'quix-sync-completed':
-                    // Sync completed notification
-                    this.showSnackbar('notifications.syncCompleted', 'success', true);
-                    break;
-                case 'quix-sync-error':
-                    this.showSnackbar(payload?.error || 'Sync failed', 'error', true);
-                    break;
-                case 'quix-slave-disconnected':
-                    // Slave (TV) disconnected from master - master should show reconnection UI
-                    console.log('[mediaStore] Slave disconnected, willReconnect:', payload?.willReconnect);
-                    // Mark slave as offline
-                    if (this.slaveId) {
-                        this.setSlaveOnlineStatus(this.slaveId, false);
-                    }
-                    this.handleSlaveDisconnected(payload?.willReconnect !== true);
-                    // Stop ping interval
-                    this.stopPingInterval();
-                    break;
-                case 'quix-master-disconnected':
-                    // Master (phone) disconnected from slave - slave should show QR code again
-                    console.log('[mediaStore] Master disconnected');
-                    this.isRemoteMasterConnected = false;
-                    // Mark all slaves as offline since this client (slave) is no longer connected to master
-                    this.knownSlaves.forEach(slave => {
-                        slave.isOnline = false;
-                    });
-                    this.stopPingInterval();
-                    this.showSnackbar('notifications.masterDisconnected', 'info', true);
-                    break;
-            }
-        });
-    };
-    sendPlaybackControl = (state: PlaybackState) => {
-        if (this.roomId) {
-            websocketService.playbackControl(state);
-        }
-    };
-    addPlaybackListener = (listener: (state: PlaybackState) => void) => {
-        this.playbackListeners.push(listener);
-        return () => {
-            this.playbackListeners = this.playbackListeners.filter(l => l !== listener);
-        };
-    };
-    sendChatMessage = (message: { text?: string; image?: string; }) => {
-        websocketService.sendChatMessage(message);
-    };
-
-    // Sync media items from master to slave
-    syncMediaFromMaster = async (mediaItems: any[]) => {
-        try {
-            const {db} = await import('../services/db.ts');
-
-            for (let i = 0; i < mediaItems.length; i++) {
-                const {mediaItem, links} = mediaItems[i];
-
-                // Save the full media item metadata
-                await db.cachedItems.put(mediaItem);
-
-                // Add to myList
-                await db.myList.put({id: mediaItem.id, order: Date.now() + i});
-
-                // Save all links (strip the id field to let IndexedDB auto-assign)
-                if (links && links.length > 0) {
-                    const linksToSave = links.map(({id: _id, ...link}: any) => link);
-                    await db.mediaLinks.bulkPut(linksToSave);
-
-                    // FIX: Clear the in-memory mediaLinks cache for these media IDs to prevent stale data
-                    // When playRemoteItem() later calls getLinksForMedia(), it won't get stale empty caches
-                    for (const link of linksToSave) {
-                        this.mediaLinks.delete(link.mediaId);
-                    }
-                }
-
-                // Send progress update back to master
-                websocketService.sendSyncProgressUpdate(i + 1, mediaItems.length);
-            }
-
-            this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
-            // Pass slaveId explicitly for consistency with backend
-            websocketService.sendSyncCompleted(this.slaveId || undefined);
-
-            // Reload the local data so the slave's UI reflects the new content
-            await this.reloadAllData();
-
-        } catch (error) {
-            console.error('Error syncing media from master:', error);
-            // Pass slaveId explicitly for consistency with backend
-            websocketService.sendSyncError('Failed to sync media', this.slaveId || undefined);
-        }
-    };
-    transferHost = (newHostId: string) => {
-        websocketService.transferHost(newHostId);
-    };
-
-    changeName = (participantId: string, newName: string) => {
-        // Optimistically update local participant state for immediate UI feedback
-        // Create a new array to ensure MobX properly detects the change
-        const updatedParticipants = this.participants.map(p =>
-            p.id === participantId ? {...p, name: newName} : p
-        );
-        const participantExists = updatedParticipants.some(p => p.id === participantId && p.name === newName);
-        if (participantExists) {
-            this.participants = updatedParticipants;
-            console.log(`[DEBUG] changeName: Optimistically updated local participant ${participantId} to "${newName}"`);
-        } else {
-            console.log(`[DEBUG] changeName: Participant ${participantId} not found in local participants`);
-        }
-        // Send to server for broadcast to all room members
-        console.log(`[DEBUG] changeName: Sending quix-change-name message for participantId=${participantId}, name=${newName}`);
-        websocketService.changeName({participantId, name: newName});
-    };
+function interpolate(str: string, values: Record<string, any>): string {
+    return str.replace(/\{(\w+)\}/g, (_, key) => values[key] ?? `{${key}}`);
 }
 
 export const mediaStore = new MediaStore();
