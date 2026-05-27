@@ -234,7 +234,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                                     <FormControl fullWidth size="small">
                                                         {/* FIX: (line 220) Pass label text as children to InputLabel */}
                                                         <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
-                                                        <Select value={editFormData.type} label={t('linkEpisodesModal.add.type')} onChange={(e) => handleEditFormChange('type', e.target.value as 'sub' | 'dub')}>
+                                                        <Select value={editFormData.type} label={t('linkEpisodesModal.add.type')} onChange={(e) => handleEditFormChange('type', e.target.value)}>
                                                             <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
                                                             <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
                                                         </Select>
