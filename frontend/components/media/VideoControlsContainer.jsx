@@ -42,41 +42,13 @@ const formatTime = (timeInSeconds) => {
 
 const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-export interface PlayerState {
-    isPlaying;
-    progress;
-    volume;
-    isMuted;
-    duration;
-    currentTime;
-    isFullScreen;
-    playbackRate;
-}
 
-export interface VideoControlsProps {
-    playerState: PlayerState;
-    handleSeek: (event: Event, newValue: number | number[]) => void;
-    videoRef: React.RefObject<HTMLVideoElement>;
-    handleRewind10: () => void;
-    handleTogglePlay: () => void;
-    handleForward10: () => void;
-    handleSkipIntro: () => void;
-    setVolumeAnchorEl: (el: HTMLButtonElement | null) => void;
-    volumeAnchorEl: HTMLButtonElement | null;
-    handleVolumeChange: (event: Event, newValue: number | number[]) => void;
-    handleDownload: () => void;
-    setSpeedAnchorEl: (el: HTMLButtonElement | null) => void;
-    speedAnchorEl: HTMLButtonElement | null;
-    handleToggleFullScreen: () => void;
-    handleSpeedChange: (rate) => void;
-    t: ReturnType<typeof useTranslations>;
-}
 
-interface VideoControlsContainerProps extends VideoControlsProps {
-    isMinimal?; // Show only essential controls (for portrait mobile)
-}
 
-const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer(({
+
+
+
+const VideoControlsContainer = observer(({
                                                                                     playerState,
                                                                                     handleSeek,
                                                                                     videoRef,
@@ -103,7 +75,7 @@ const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer((
         SerieTV: 'var(--glow-seriestv-color)',
         Film: 'var(--glow-film-color)',
         Anime: 'var(--glow-anime-color)'
-    }[activeTheme] as string;
+    }[activeTheme];
 
     // Minimal controls (portrait mobile): only play/pause, rewind, forward, and progress
     if (isMinimal) {
@@ -116,7 +88,7 @@ const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer((
                     onChange={handleSeek}
                     onChangeCommitted={(_, value) => {
                         if (videoRef.current && (!roomId || isHost)) {
-                            const newTime = ((value as number) / 100) * playerState.duration;
+                            const newTime = ((value) / 100) * playerState.duration;
                             videoRef.current.currentTime = newTime;
                         }
                     }}
@@ -174,7 +146,7 @@ const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer((
                 onChange={handleSeek}
                 onChangeCommitted={(_, value) => {
                     if (videoRef.current && (!roomId || isHost)) {
-                        const newTime = ((value as number) / 100) * playerState.duration;
+                        const newTime = ((value) / 100) * playerState.duration;
                         videoRef.current.currentTime = newTime;
                     }
                 }}
@@ -302,3 +274,6 @@ const VideoControlsContainer: React.FC<VideoControlsContainerProps> = observer((
 });
 
 export default VideoControlsContainer;
+
+
+

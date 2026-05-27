@@ -12,20 +12,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface CardProps {
-    item: MediaItem;
-    onClick: (item: MediaItem) => void;
-    displayMode?: 'row' | 'grid';
-    className?;
-    style?: React.CSSProperties;
-    isContinueWatching?;
-    isReorderable?;
-    onReorderTop?: () => void;
-    onReorderBottom?: () => void;
-    isDragActive?;
-}
-
-export const Card: React.FC<CardProps> = observer(({
+export const Card = observer(({
                                                        item,
                                                        onClick,
                                                        displayMode = 'row',
@@ -41,7 +28,7 @@ export const Card: React.FC<CardProps> = observer(({
     const title = item.title || item.name;
     const isInMyList = mediaStore.myList.includes(item.id);
 
-    const handleActionButtonClick = (event: React.MouseEvent) => {
+    const handleActionButtonClick = (event) => {
         event.stopPropagation();
         if (isContinueWatching) {
             mediaStore.removeFromContinueWatching(item.id);
@@ -121,7 +108,7 @@ export const Card: React.FC<CardProps> = observer(({
             sx={{
                 ...cardBaseStyles,
                 ...(displayMode === 'row' ? rowStyles : gridStyles),
-                cursor: isReorderable ? 'grab' ,
+                cursor: isReorderable ? 'grab' : 'pointer',
             }}
             onClick={() => onClick(item)}
             role="button"

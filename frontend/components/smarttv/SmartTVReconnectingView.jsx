@@ -2,11 +2,7 @@ import React from 'react';
 import {Box, Grow, Typography} from '@mui/material';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface SmartTVReconnectingViewProps {
-    showContent;
-}
-
-const SmartTVReconnectingView: React.FC<SmartTVReconnectingViewProps> = ({showContent}) => {
+const SmartTVReconnectingView = ({showContent}) => {
     const {t} = useTranslations();
 
     return (

@@ -42,13 +42,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index;
-    value;
-}
-
-function TabPanel(props: TabPanelProps) {
+function TabPanel(props) {
     const {children, value, index, ...other} = props;
     return (
         <div
@@ -63,13 +57,13 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-const LibraryManagementView: React.FC = observer(() => {
+const LibraryManagementView = observer(() => {
     const {t} = useTranslations();
     const activeTab = mediaStore.activeLibraryTab;
     const setActiveTab = (tab) => mediaStore.setActiveLibraryTab(tab);
 
-    const [editingLink, setEditingLink] = useState<{ id; data:  } | null>(null);
-    const [deleteConfirm, setDeleteConfirm] = useState<{ type; id; name: string } | null>(null);
+    const [editingLink, setEditingLink] = useState(null);
+    const [deleteConfirm, setDeleteConfirm] = useState(null);
 
     // My List items with full details
     const myListItems = mediaStore.myListItems;
@@ -96,7 +90,7 @@ const LibraryManagementView: React.FC = observer(() => {
         mediaStore.showSnackbar('notifications.copiedToClipboard', 'success', true);
     };
 
-    const handleStartEditLink = (link: MediaLink) => {
+    const handleStartEditLink = (link) => {
         setEditingLink({
             id: link.id,
             data: {
@@ -184,12 +178,7 @@ const LibraryManagementView: React.FC = observer(() => {
     };
 
     // Get episode info for a given episode ID
-    const getEpisodeInfo = (episodeId): {
-        show;
-        season;
-        episode;
-        name: string
-    } | null => {
+    const getEpisodeInfo = (episodeId) => {
         for (const show of mediaStore.cachedItems.values()) {
             if (show.seasons) {
                 for (const season of show.seasons) {
@@ -412,7 +401,7 @@ const LibraryManagementView: React.FC = observer(() => {
                                         labelId="links-filter-show-label"
                                         value={mediaStore.linksFilterShowId || ''}
                                         label={t('libraryManagement.filters.allShows')}
-                                        onChange={(e) => mediaStore.setLinksFilterShowId(e.target.value ? Number(e.target.value) )}
+                                        onChange={(e) => mediaStore.setLinksFilterShowId(e.target.value ? Number(e.target.value) : null)}
                                     >
                                         <MenuItem value="">
                                             <em>{t('libraryManagement.filters.allShows')}</em>
@@ -601,7 +590,7 @@ const LibraryManagementView: React.FC = observer(() => {
                                                                 ...editingLink,
                                                                 data: {
                                                                     ...editingLink.data,
-                                                                    type: e.target.value as 'sub' | 'dub'
+                                                                    type: e.target.value
                                                                 }
                                                             })}
                                                             sx={{width: 120}}

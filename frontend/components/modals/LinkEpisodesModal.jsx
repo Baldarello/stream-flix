@@ -30,7 +30,7 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -47,23 +47,15 @@ const style = {
   overflowY: 'auto',
 };
 
-type TabValue = 'add' | 'manage';
-
-const AddLinkTabs: React.FC<{
-    selectedSeason;
-    seasonEpisodeCount;
-    seasonName;
-    onSave: (payload: { seasonNumber; method; data; language; type: 'sub' | 'dub'; seasonName; }) => Promise<boolean>;
-    onSuccess: () => void;
-}> = observer(({ selectedSeason, seasonEpisodeCount, seasonName, onSave, onSuccess }) => {
+const AddLinkTabs = observer(({ selectedSeason, seasonEpisodeCount, seasonName, onSave, onSuccess }) => {
     const { t } = useTranslations();
-    const [addMethod, setAddMethod] = useState<'pattern' | 'list' | 'json'>('pattern');
+    const [addMethod, setAddMethod] = useState('pattern');
     const [pattern, setPattern] = useState('');
     const [padding, setPadding] = useState('2');
     const [label, setLabel] = useState('');
     const [linkList, setLinkList] = useState('');
     const [json, setJson] = useState('');
-    const patternInputRef = useRef<HTMLInputElement>(null);
+    const patternInputRef = useRef(null);
     const [isAdvanced, setIsAdvanced] = useState(false);
     const [startEpisode, setStartEpisode] = useState('1');
     const [endEpisode, setEndEpisode] = useState('12');
@@ -71,7 +63,7 @@ const AddLinkTabs: React.FC<{
     const [endNumber, setEndNumber] = useState('12');
     const [isSaving, setIsSaving] = useState(false);
     const [language, setLanguage] = useState('ITA');
-    const [type, setType] = useState<'sub' | 'dub'>('sub');
+    const [type, setType] = useState('sub');
 
     useEffect(() => {
         setEndEpisode(seasonEpisodeCount.toString());
@@ -88,7 +80,7 @@ const AddLinkTabs: React.FC<{
 
     const handleSave = async () => {
         setIsSaving(true);
-        let data, error = null, isErrorKey = false, errorValues:  = {};
+        let data, error = null, isErrorKey = false, errorValues = {};
         switch (addMethod) {
             case 'pattern':
                 if (!pattern) { error = "Il pattern non può essere vuoto."; }
@@ -150,8 +142,8 @@ const AddLinkTabs: React.FC<{
         }
     };
     
-    const handleInsertPlaceholder = (placeholder: '[@EP]' | '[@LABEL]') => {
-      const input = placeholder === '[@EP]' ? patternInputRef.current ; // Can be extended for label field
+    const handleInsertPlaceholder = (placeholder) => {
+      const input = placeholder === '[@EP]' ? patternInputRef.current : null; // Can be extended for label field
       const setter = placeholder === '[@EP]' ? setPattern : setLabel;
 
       if (input) {
@@ -282,7 +274,7 @@ const AddLinkTabs: React.FC<{
                 <FormControl fullWidth required sx={{ display: { xs: 'block', md: 'none' } }}>
                     {/* FIX: (line 265) Pass label text as children to InputLabel */}
                     <InputLabel>Metodo</InputLabel>
-                    <Select value={addMethod} label="Metodo" onChange={(e) => setAddMethod(e.target.value as 'pattern' | 'list' | 'json')}>
+                    <Select value={addMethod} label="Metodo" onChange={(e) => setAddMethod(e.target.value)}>
                         <MenuItem value="pattern">{t('linkEpisodesModal.add.pattern')}</MenuItem>
                         <MenuItem value="list">{t('linkEpisodesModal.add.list')}</MenuItem>
                         <MenuItem value="json">{t('linkEpisodesModal.add.json')}</MenuItem>
@@ -302,7 +294,7 @@ const AddLinkTabs: React.FC<{
                     <FormControl fullWidth required>
                         {/* FIX: (line 284) Pass label text as children to InputLabel */}
                         <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
-                        <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value as 'sub' | 'dub')}>
+                        <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value)}>
                             <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
                             <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
                         </Select>
@@ -342,7 +334,7 @@ const AddLinkTabs: React.FC<{
 });
 
 
-const LinkEpisodesModal: React.FC = observer(() => {
+const LinkEpisodesModal = observer(() => {
   const { isLinkEpisodesModalOpen, closeLinkEpisodesModal, linkingEpisodesForItem: item, setEpisodeLinksForSeason, expandedLinkAccordionId, setExpandedLinkAccordionId } = mediaStore;
   const { t } = useTranslations();
   
@@ -362,12 +354,12 @@ const LinkEpisodesModal: React.FC = observer(() => {
   
   const currentSeason = item.seasons?.find(s => s.season_number === selectedSeason);
 
-  const handleAccordionChange = (panelId) => (event: React.SyntheticEvent, isExpanded) => {
+  const handleAccordionChange = (panelId) => (event, isExpanded) => {
     setExpandedLinkAccordionId(isExpanded ? panelId : false);
   };
   
-  const handleSeasonChange = (event: SelectChangeEvent<number>) => {
-      setSelectedSeason(event.target.value as number);
+  const handleSeasonChange = (event) => {
+      setSelectedSeason(event.target.value);
       setExpandedLinkAccordionId(false); // Reset expanded accordion when season changes
   };
   

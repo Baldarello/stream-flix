@@ -38,11 +38,11 @@ const style = {
   flexDirection: 'column',
 };
 
-const ShareLibraryModal: React.FC = observer(() => {
+const ShareLibraryModal = observer(() => {
     const { isShareModalOpen, closeShareModal, shareableShows, generateShareableData, showSnackbar, isLoggedIn, googleUser } = mediaStore;
     const { t } = useTranslations();
     
-    const [selectedShows, setSelectedShows] = useState<Set()>(new Set());
+    const [selectedShows, setSelectedShows] = useState(new Set());
     const [generatedLink, setGeneratedLink] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
 

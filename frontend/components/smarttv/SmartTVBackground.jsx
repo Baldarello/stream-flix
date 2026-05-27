@@ -1,7 +1,7 @@
 import React from 'react';
 import {Box} from '@mui/material';
 
-const SmartTVBackground: React.FC = () => {
+const SmartTVBackground = () => {
     return (
         <>
             {/* Animated background - fixed so it doesn't scroll */}

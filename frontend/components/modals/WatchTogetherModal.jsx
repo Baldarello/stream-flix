@@ -105,7 +105,7 @@ const WatchTogetherModal = observer(() => {
     setTransferTargetParticipant(null);
   };
 
-  const handleNameChangeClick = (participant: { id; name: string }) => {
+  const handleNameChangeClick = (participant) => {
     setNameEditTargetParticipant(participant);
     setNewName(participant.name);
     setNameEditOpen(true);
@@ -182,7 +182,7 @@ const WatchTogetherModal = observer(() => {
     closeWatchTogetherModal();
   };
 
-  const handleSelectEpisode = (episode: Episode) => {
+  const handleSelectEpisode = (episode) => {
     // FIX: Add a type guard to ensure itemForModal is a MediaItem before accessing its properties.
     if (!itemForModal || !('seasons' in itemForModal) || !currentSeason) return;
     const itemToPlay = {
@@ -195,7 +195,7 @@ const WatchTogetherModal = observer(() => {
     changeWatchTogetherMedia(itemToPlay);
   };
   
-  const handleSelectNewContent = (item: MediaItem) => {
+  const handleSelectNewContent = (item) => {
       changeWatchTogetherMedia(item);
       setIsChangingContent(false);
       setSearchQuery('');
@@ -205,7 +205,7 @@ const WatchTogetherModal = observer(() => {
   // FIX: Add a type guard to safely access the 'seasons' property.
   const currentSeason = (itemForModal && 'seasons' in itemForModal && itemForModal.seasons)
     ? itemForModal.seasons.find(s => s.season_number === selectedSeason)
-    ;
+    : null;
 
   const renderInitialView = () => {
     // FIX: Add a type guard to safely access the 'media_type' property.

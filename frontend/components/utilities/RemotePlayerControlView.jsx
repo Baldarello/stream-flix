@@ -74,7 +74,7 @@ const RemotePlayerControlView = observer(() => {
     } = mediaStore;
     const { isRemoteMasterConnected, slaveId, openQRScanner, disconnectRemoteMaster } = remoteStore;
     const {t} = useTranslations();
-    const [selectedSeason, setSelectedSeason] = useState<number | undefined>(undefined);
+    const [selectedSeason, setSelectedSeason] = useState(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
 
     const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
@@ -93,7 +93,7 @@ const RemotePlayerControlView = observer(() => {
 
     // Listen for slave not connected events
     useEffect(() => {
-        const handleSlaveNotConnected = (payload: { slaveId; message: string }) => {
+        const handleSlaveNotConnected = (payload) => {
             console.log('[RemotePlayerControlView] Slave not connected:', payload);
             mediaStore.showSnackbar(payload.message || 'TV not connected. Please scan QR code to reconnect.', 'error');
         };
@@ -203,12 +203,12 @@ const RemotePlayerControlView = observer(() => {
         }
     };
 
-    const handleSeek = (event: Event, newValue: number | number[]) => {
-        const newTime = ((newValue as number) / 100) * (remoteSlaveState?.duration || 0);
+    const handleSeek = (event, newValue) => {
+        const newTime = ((newValue) / 100) * (remoteSlaveState?.duration || 0);
         sendRemoteCommand({command: 'seek_to', time: newTime});
     };
 
-    const handleSelectEpisode = (episode: Episode) => {
+    const handleSelectEpisode = (episode) => {
         if (!remoteFullItem || !selectedSeason) return;
         const itemToPlay = {
             ...episode,
@@ -225,7 +225,7 @@ const RemotePlayerControlView = observer(() => {
 
     const introDuration = remoteFullItem ? (mediaStore.showIntroDurations.get(remoteFullItem.id) ?? 80) : 80;
 
-    const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleIntroDurationChange = (event) => {
         const value = event.target.value;
         if (!remoteFullItem) return;
         const duration = parseInt(value, 10);

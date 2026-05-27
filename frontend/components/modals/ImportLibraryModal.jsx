@@ -8,7 +8,7 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 import {runInAction} from 'mobx';
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
@@ -19,7 +19,7 @@ const style = {
   borderRadius: 2,
 };
 
-const ImportLibraryModal: React.FC = observer(() => {
+const ImportLibraryModal = observer(() => {
     const { isImportModalOpen, closeImportModal, importUrl, importSharedLibrary, isImportingLibrary } = mediaStore;
     const { t } = useTranslations();
 

@@ -620,7 +620,7 @@ class RemoteStore {
     // Sync media from master to slave
     syncMediaFromMaster = async (mediaItems) => {
         try {
-            const {db: localDb} = await import('../services/db.ts');
+            const {db: localDb} = await import('../services/db.js');
 
             for (let i = 0; i < mediaItems.length; i++) {
                 const {mediaItem, links} = mediaItems[i];

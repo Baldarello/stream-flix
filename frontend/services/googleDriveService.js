@@ -29,7 +29,7 @@ export const findLatestBackupFile = async (accessToken) => {
     }
 
     const data = await response.json();
-    return data.files.length > 0 ? data.files[0] ;
+    return data.files.length > 0 ? data.files[0] : null;
 };
 
 // New function to list all backup files for cleanup

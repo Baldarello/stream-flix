@@ -133,7 +133,7 @@ export const getSeriesEpisodes = async (seriesId, seasonNumber) => {
       name: ep.name,
       overview: ep.overview,
       still_path: buildImageURL(ep.still_path, 'w300'),
-      intro_start_s: hasIntro ? 15 ,
+      intro_start_s: hasIntro ? 15 : 0,
     };
   });
 };

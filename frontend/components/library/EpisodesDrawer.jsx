@@ -26,15 +26,7 @@ import InfoIcon from '@mui/icons-material/Info';
 
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface SwipeableEpisodeCardProps {
-    episode: Episode;
-    isCurrentEpisode;
-    hasPlayableLinks;
-    onPlay: () => void;
-    seasonNumber;
-}
-
-const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
+const SwipeableEpisodeCard = observer(({
                                                                                 episode,
                                                                                 isCurrentEpisode,
                                                                                 hasPlayableLinks,
@@ -45,7 +37,7 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
     const {t} = useTranslations();
     const [swipeX, setSwipeX] = useState(0);
     const [startX, setStartX] = useState(0);
-    const cardRef = useRef<HTMLDivElement>(null);
+    const cardRef = useRef(null);
     const progress = episodeProgress.get(episode.id);
     const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
     const isWatched = progress?.watched;
@@ -62,13 +54,13 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
             acc.push({lang, type});
         }
         return acc;
-    }, [] as { lang, type: string }[]);
+    }, []);
 
-    const handleTouchStart = (e: React.TouchEvent) => {
+    const handleTouchStart = (e) => {
         setStartX(e.touches[0].clientX);
     };
 
-    const handleTouchMove = (e: React.TouchEvent) => {
+    const handleTouchMove = (e) => {
         const currentX = e.touches[0].clientX;
         const diff = currentX - startX;
         // Only allow left swipe (negative diff) to reveal actions on the right
@@ -90,13 +82,13 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
         setSwipeX(0);
     };
 
-    const handleToggleWatched = (e: React.MouseEvent) => {
+    const handleToggleWatched = (e) => {
         e.stopPropagation();
         toggleEpisodeWatchedStatus(episode.id);
         handleCloseSwipe();
     };
 
-    const handleShowDetails = (e: React.MouseEvent) => {
+    const handleShowDetails = (e) => {
         e.stopPropagation();
         mediaStore.closeEpisodesDrawer();
         mediaStore.openEpisodeInfoModal(episode, seasonNumber, uniqueLanguages);
@@ -331,7 +323,7 @@ const SwipeableEpisodeCard: React.FC<SwipeableEpisodeCardProps> = observer(({
     );
 });
 
-const EpisodesDrawer: React.FC = observer(() => {
+const EpisodesDrawer = observer(() => {
     const {
         isEpisodesDrawerOpen,
         closeEpisodesDrawer,
@@ -356,7 +348,7 @@ const EpisodesDrawer: React.FC = observer(() => {
     const languageFilter = currentPreferences.language;
     const typeFilter = currentPreferences.type;
 
-    const handleSelectEpisode = (episode: Episode) => {
+    const handleSelectEpisode = (episode) => {
         // Get ALL video_urls for the episode (not filtered) so VideoPlayer can show pickers
         const allVideoUrls = episode.video_urls || [];
         
@@ -368,7 +360,7 @@ const EpisodesDrawer: React.FC = observer(() => {
         });
 
         // Extract video_url from the first filtered link for playback
-        const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] ;
+        const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] : null;
         const episodeToPlay = {
             ...episode,
             video_urls: allVideoUrls, // Pass ALL links so VideoPlayer can show language/type pickers
@@ -440,3 +432,6 @@ const EpisodesDrawer: React.FC = observer(() => {
 });
 
 export default EpisodesDrawer;
+
+
+

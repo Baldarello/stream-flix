@@ -6,11 +6,7 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 import ConnectionIndicator from '../utilities/ConnectionIndicator.jsx';
 import {mediaStore} from '../../store/mediaStore.js';
 
-interface SmartTVConnectedViewProps {
-    showContent;
-}
-
-const SmartTVConnectedView: React.FC<SmartTVConnectedViewProps> = ({showContent}) => {
+const SmartTVConnectedView = ({showContent}) => {
     const {t} = useTranslations();
 
     return (

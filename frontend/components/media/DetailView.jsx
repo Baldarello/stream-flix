@@ -371,7 +371,7 @@ const SwipeableEpisodeCardDetailView = observer(({
     );
 });
 
-const DetailView: React.FC = observer(() => {
+const DetailView = observer(() => {
     const {
         currentSelectedItem: item,
         myList,
@@ -387,7 +387,7 @@ const DetailView: React.FC = observer(() => {
     const {t} = useTranslations();
 
     // Track which episode details panel is expanded
-    const [expandedEpisodeId, setExpandedEpisodeId] = useState<number | null>(null);
+    const [expandedEpisodeId, setExpandedEpisodeId] = useState(null);
 
     if (!item) return null;
 
@@ -412,8 +412,8 @@ const DetailView: React.FC = observer(() => {
 
     const {availableLanguages, availableTypes} = useMemo(() => {
         if (!currentSeason) return {availableLanguages: [], availableTypes: []};
-        const langSet = new Set<string>();
-        const typeSet = new Set<'sub' | 'dub'>();
+        const langSet = new Set();
+        const typeSet = new Set();
         currentSeason.episodes.forEach(ep => {
             (ep.video_urls || []).forEach(link => {
                 if (link.language) langSet.add(link.language.toUpperCase());
@@ -436,7 +436,7 @@ const DetailView: React.FC = observer(() => {
     useEffect(() => {
         // Set initial default preferences in the store if they don't exist for this show
         if (item && !showFilterPreferences.has(item.id) && currentSeason) {
-            const defaultPrefs: { language?; type?: 'sub' | 'dub' } = {};
+            const defaultPrefs = {};
             if (availableLanguages.length > 0) defaultPrefs.language = availableLanguages[0];
             if (availableTypes.length > 0) defaultPrefs.type = availableTypes[0];
             if (Object.keys(defaultPrefs).length > 0) {
@@ -453,7 +453,7 @@ const DetailView: React.FC = observer(() => {
     }, [item, isDetailLoading]);
 
 
-    const handleIntroDurationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleIntroDurationChange = (event) => {
         const value = event.target.value;
         const duration = parseInt(value, 10);
         if (value === '' || isNaN(duration)) {
@@ -704,7 +704,7 @@ const DetailView: React.FC = observer(() => {
                                             {/* FIX: (line 277) Pass label text as children to InputLabel */}
                                             <InputLabel>{t('detail.filterType')}</InputLabel>
                                             <Select value={typeFilter || ''} label={t('detail.filterType')}
-                                                    onChange={(e) => setShowFilterPreference(item.id, {type: e.target.value as 'sub' | 'dub'})}
+                                                    onChange={(e) => setShowFilterPreference(item.id, {type: e.target.value})}
                                                     sx={{
                                                         bgcolor: 'rgba(20, 20, 30, 0.7)',
                                                         '.MuiOutlinedInput-notchedOutline': {borderColor: 'rgba(255,255,255,0.2)'}
@@ -757,7 +757,7 @@ const DetailView: React.FC = observer(() => {
                             </Box>
                         ) : (
                             <List sx={{px: 2}}>
-                                {(currentSeason?.episodes || []).map((episode: Episode) => {
+                                {(currentSeason?.episodes || []).map((episode) => {
                                     const hasPlayableLinks = (episode.video_urls || []).some(link => {
                                         const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
                                         const typeMatch = !typeFilter || (link.type === typeFilter);
@@ -781,7 +781,7 @@ const DetailView: React.FC = observer(() => {
                                                 });
 
                                                 // Get the first filtered link for playback
-                                                const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] ;
+                                                const firstFilteredLink = filteredLinks.length > 0 ? filteredLinks[0] : null;
 
                                                 mediaStore.startPlayback({
                                                     ...episode,

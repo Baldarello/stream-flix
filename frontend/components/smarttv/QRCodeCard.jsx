@@ -2,11 +2,7 @@ import React from 'react';
 import {Box, Paper} from '@mui/material';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface QRCodeCardProps {
-    qrCodeUrl;
-}
-
-const QRCodeCard: React.FC<QRCodeCardProps> = ({qrCodeUrl}) => {
+const QRCodeCard = ({qrCodeUrl}) => {
     const {t} = useTranslations();
 
     return (

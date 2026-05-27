@@ -6,7 +6,7 @@ import PlaylistAddCheckCircleIcon from '@mui/icons-material/PlaylistAddCheckCirc
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-const EpisodeInfoModal: React.FC = observer(() => {
+const EpisodeInfoModal = observer(() => {
     const {t} = useTranslations();
     const {
         isEpisodeInfoModalOpen,

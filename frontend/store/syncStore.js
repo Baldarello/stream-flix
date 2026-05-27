@@ -14,12 +14,7 @@ class SyncStore {
     
     // Sync conflict modal
     isSyncConflictModalOpen = false;
-    syncConflictData: {
-        myList: { local; remote: number[] };
-        shows: Map<number, { local; remote: any }>;
-        mediaLinks: { local; remote: any[] };
-        episodeProgress: { local; remote: any[] };
-    } | null = null;
+    syncConflictData = null;
     isProcessingSyncConflict = false;
 
     // Backup debounce timer
@@ -83,7 +78,7 @@ class SyncStore {
                     db.episodeProgress.toArray(),
                 ]);
 
-                const localMyListIds = localMyList.map((item: { id: number }) => item.id);
+                const localMyListIds = localMyList.map((item) => item.id);
                 const remoteMyListIds = remoteData.myList || [];
 
                 // Check for significant differences
@@ -457,7 +452,7 @@ class SyncStore {
 
             // Backup local data to drive (overwrites remote)
             const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
-            const data: { [key: string]: any[] } = {};
+            const data = {};
             for (const tableName of tablesToBackup) {
                 if ((db)[tableName]) {
                     // Strip Dexie Proxy objects before storing to Drive
@@ -505,7 +500,7 @@ class SyncStore {
         });
         try {
             const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
-            const data: { [key: string]: any[] } = {};
+            const data= {};
             for (const tableName of tablesToBackup) {
                 if ((db)[tableName]) {
                     data[tableName] = await (db)[tableName].toArray();

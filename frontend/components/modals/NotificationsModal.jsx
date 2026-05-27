@@ -26,11 +26,11 @@ import {mediaStore} from '../../store/mediaStore.js';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
 
-const NotificationsModal: React.FC = observer(() => {
+const NotificationsModal = observer(() => {
     const {isNotificationsModalOpen, notifications, closeNotificationsModal, markAllNotificationsRead, clearNotifications, markNotificationRead} = mediaStore;
     const {t} = useTranslations();
 
-    const handleManageLinks = (notification: typeof notifications[0]) => {
+    const handleManageLinks = (notification) => {
         const invalidLinks = notification.data;
         if (invalidLinks.length > 0) {
             const firstLink = invalidLinks[0];
@@ -159,7 +159,7 @@ const NotificationsModal: React.FC = observer(() => {
                                                         }
                                                         acc[key].links.push(link);
                                                         return acc;
-                                                    }, {} as );
+                                                    }, {});
 
                                                     return (
                                                         <Box sx={{mt: 2, mb: 1}}>

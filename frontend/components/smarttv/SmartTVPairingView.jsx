@@ -4,11 +4,7 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 import {mediaStore} from '../../store/mediaStore.js';
 import QRCodeCard from './QRCodeCard.jsx';
 
-interface SmartTVPairingViewProps {
-    showContent;
-}
-
-const SmartTVPairingView: React.FC<SmartTVPairingViewProps> = ({showContent}) => {
+const SmartTVPairingView = ({showContent}) => {
     const {t} = useTranslations();
     const {slaveId, slaveShortCode} = mediaStore;
 

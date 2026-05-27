@@ -35,7 +35,7 @@ export const NotificationSnackbar = observer(() => {
         }}>
             {actionLabelText}
         </Button>
-    );
+    ) : null;
 
 
     return (

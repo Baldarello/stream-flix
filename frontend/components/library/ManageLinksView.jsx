@@ -32,19 +32,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface ManageLinksViewProps {
-    currentSeason: Season;
-    item: MediaItem;
-    expandedAccordion: number | false;
-    onAccordionChange: (panelId) => (event: React.SyntheticEvent, isExpanded) => void;
-}
-
-const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
+const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
     const { t } = useTranslations();
     const { deleteMediaLink, updateMediaLink, clearLinksForSeason, showSnackbar, updateLinksDomain, preferredSources, setPreferredSource, clearLinksForDomain } = mediaStore;
-    const [domainInputs, setDomainInputs] = useState<>({});
-    const [editingLinkId, setEditingLinkId] = useState<number | null>(null);
-    const [editFormData, setEditFormData] = useState<>({});
+    const [domainInputs, setDomainInputs] = useState({});
+    const [editingLinkId, setEditingLinkId] = useState(null);
+    const [editFormData, setEditFormData] = useState({});
 
 
     const linksByDomain = currentSeason.episodes
@@ -60,10 +53,10 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                 // Ignore invalid URLs
             }
             return acc;
-        }, {} as );
+        }, {});
 
     useEffect(() => {
-        const initialInputs:  = {};
+        const initialInputs = {};
         Object.keys(linksByDomain).forEach(origin => {
             initialInputs[origin] = origin;
         });
@@ -94,7 +87,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
         }
     };
 
-    const handleStartEdit = (link: MediaLink) => {
+    const handleStartEdit = (link) => {
         setEditingLinkId(link.id);
         setEditFormData({
             url: link.url,
@@ -116,7 +109,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
         }
     };
 
-    const handleEditFormChange = (field: keyof MediaLink, value) => {
+    const handleEditFormChange = (field, value) => {
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -221,7 +214,7 @@ const ManageLinksView: React.FC<ManageLinksViewProps> = observer(({ currentSeaso
                             {/* FIX: Add Array.isArray guard to ensure `episode.video_urls` is an array before calling .map() or accessing .length. */}
                             {(Array.isArray(episode.video_urls) && episode.video_urls.length > 0) ? (
                                 <Stack spacing={1}>
-                                    {episode.video_urls.map((link: MediaLink) => {
+                                    {episode.video_urls.map((link) => {
                                         const isEditing = editingLinkId === link.id;
                                         const truncatedLabel = link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
 

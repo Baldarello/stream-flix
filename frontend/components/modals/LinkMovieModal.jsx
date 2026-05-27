@@ -59,7 +59,7 @@ const LinkMovieModal = observer(() => {
   const [newUrl, setNewUrl] = useState('');
   const [newLabel, setNewLabel] = useState('');
   const [newLanguage, setNewLanguage] = useState('ITA');
-  const [newType, setNewType] = useState<'sub' | 'dub'>('sub');
+  const [newType, setNewType] = useState('sub');
 
   const item = linkingMovieItem;
   
@@ -170,7 +170,7 @@ const LinkMovieModal = observer(() => {
                                     </Tooltip>
                                 </Box>
                                 {/* FIX: Add Array.isArray guard to prevent runtime errors if links is not an array. */}
-                                {Array.isArray(links) && links.map((link: MediaLink) => (
+                                {Array.isArray(links) && links.map((link) => (
                                     <ListItem
                                         key={link.id}
                                         secondaryAction={

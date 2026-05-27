@@ -2,11 +2,7 @@ import React from 'react';
 import {Box, Fade, Typography} from '@mui/material';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface SmartTVLoadingViewProps {
-    showContent;
-}
-
-const SmartTVLoadingView: React.FC<SmartTVLoadingViewProps> = ({showContent}) => {
+const SmartTVLoadingView = ({showContent}) => {
     const {t} = useTranslations();
 
     return (

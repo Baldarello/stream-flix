@@ -29,27 +29,12 @@ import {mediaStore} from '../../store/mediaStore.js';
 import {websocketService} from '../../services/websocketService';
 
 
-interface MediaSyncItem {
-    id;
-    title;
-    name?;
-    media_type: 'movie' | 'tv';
-    poster_path;
-    selected;
-}
-
-interface MediaSyncModalProps {
-    open;
-    onClose: () => void;
-    slaveId;
-}
-
-const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, slaveId}) => {
-    const [mediaItems, setMediaItems] = useState<MediaSyncItem[]>([]);
+const MediaSyncModal = observer(({open, onClose, slaveId}) => {
+    const [mediaItems, setMediaItems] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [syncProgress, setSyncProgress] = useState<{ current; total: number } | null>(null);
+    const [syncProgress, setSyncProgress] = useState(null);
     const [syncComplete, setSyncComplete] = useState(false);
-    const [syncError, setSyncError] = useState<string | null>(null);
+    const [syncError, setSyncError] = useState(null);
 
     // Load available media from the library
     useEffect(() => {
@@ -87,17 +72,17 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         setSyncError(null);
 
         try {
-            const {db} = await import('../../services/db.ts');
+            const {db} = await import('../../services/db.js');
 
             // 1. Load IDs from db.myList
             const listItems = await db.myList.toArray();
-            const ids = listItems.map((item: { id: number }) => item.id);
+            const ids = listItems.map((item) => item.id);
 
             // 2. Fetch full MediaItem objects from db.cachedItems
             const cachedItems = await db.cachedItems.where('id').anyOf(ids).toArray();
 
             // 3. Filter to only items that have at least one configured link
-            const itemsWithLinks: = [];
+            const itemsWithLinks = [];
 
             for (const item of cachedItems) {
                 let hasLink = false;
@@ -155,7 +140,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         }
     };
 
-    const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSelectAll = (event) => {
         setMediaItems(prev => prev.map(item => ({...item, selected: event.target.checked})));
     };
 
@@ -174,7 +159,7 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         setSyncComplete(false);
         setSyncError(null);
 
-        const {db} = await import('../../services/db.ts');
+        const {db} = await import('../../services/db.js');
 
         // Build the full payload: for each selected item, include the MediaItem + all its links
         const itemsWithLinks = await Promise.all(
@@ -219,11 +204,11 @@ const MediaSyncModal: React.FC<MediaSyncModalProps> = observer(({open, onClose, 
         }
     };
 
-    const getMediaTypeIcon = (type: 'movie' | 'tv') => {
+    const getMediaTypeIcon = (type) => {
         return type === 'movie' ? <MovieIcon/> : <TvIcon/>;
     };
 
-    const getMediaTypeLabel = (type: 'movie' | 'tv') => {
+    const getMediaTypeLabel = (type) => {
         return type === 'movie' ? 'Film' : 'Serie TV';
     };
 

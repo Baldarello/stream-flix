@@ -31,37 +31,7 @@ import TvIcon from '@mui/icons-material/Tv';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 
-interface ShowMergeChoice {
-    id;
-    title;
-    mediaType: 'movie' | 'tv';
-    myListAction: 'local' | 'remote' | 'both' | 'none';
-    linksAction: 'local' | 'remote' | 'both';
-    progressAction: 'local' | 'remote' | 'both';
-    deleteShow;
-    localLinkCount;
-    remoteLinkCount;
-    localProgressCount;
-    remoteProgressCount;
-}
-
-interface GoogleDriveSyncConflictModalProps {
-    open;
-    onClose: () => void;
-    conflictData: {
-        myList: { local; remote: number[] };
-        shows: Map<number, { local; remote: any }>;
-        mediaLinks: { local; remote: any[] };
-        episodeProgress: { local; remote: any[] };
-    } | null;
-    onMerge: (choices: , deletedIds) => void;
-    onOverwriteLocal: () => void;
-    onOverwriteRemote: () => void;
-    onCancel: () => void;
-    isProcessing?;
-}
-
-const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> = observer(({
+const GoogleDriveSyncConflictModal = observer(({
     open,
     onClose,
     conflictData,
@@ -71,15 +41,15 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
     onCancel,
     isProcessing = false,
 }) => {
-    const [step, setStep] = useState<'overview' | 'choose'>('overview');
-    const [choices, setChoices] = useState<ShowMergeChoice[]>([]);
+    const [step, setStep] = useState('overview');
+    const [choices, setChoices] = useState([]);
 
     // Build show choices from conflict data
-    const showChoices = useMemo((): => {
+    const showChoices = useMemo(() => {
         if (!conflictData) return [];
 
-        const result: = [];
-        const allIds = new Set()();
+        const result = [];
+        const allIds = new Set();
 
         // Collect all show IDs from myList
         conflictData.myList.local.forEach(id => allIds.add(id));
@@ -119,18 +89,18 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
             });
 
             // Determine default myList action
-            let myListAction: 'local' | 'remote' | 'both' | 'none' = 'none';
+            let myListAction = 'none';
             if (localInList && remoteInList) myListAction = 'both';
             else if (localInList) myListAction = 'local';
             else if (remoteInList) myListAction = 'remote';
 
             // Default links action
-            let linksAction: 'local' | 'remote' | 'both' = 'both';
+            let linksAction = 'both';
             if (localLinks.length > 0 && remoteLinks.length === 0) linksAction = 'local';
             else if (remoteLinks.length > 0 && localLinks.length === 0) linksAction = 'remote';
 
             // Default progress action
-            let progressAction: 'local' | 'remote' | 'both' = 'both';
+            let progressAction = 'both';
             if (localProgress.length > 0 && remoteProgress.length === 0) progressAction = 'local';
             else if (remoteProgress.length > 0 && localProgress.length === 0) progressAction = 'remote';
 
@@ -181,7 +151,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
         setChoices(showChoices.map(s => ({ ...s })));
     };
 
-    const updateChoice = (id, field: keyof , value) => {
+    const updateChoice = (id, field, value) => {
         setChoices(prev => prev.map(c => {
             if (c.id === id) {
                 return { ...c, [field]: value };
@@ -240,7 +210,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
         }));
     };
 
-    const getMediaTypeIcon = (type: 'movie' | 'tv') => {
+    const getMediaTypeIcon = (type) => {
         return type === 'movie' ? <MovieIcon fontSize="small" /> : <TvIcon fontSize="small" />;
     };
 
@@ -300,7 +270,7 @@ const GoogleDriveSyncConflictModal: React.FC<GoogleDriveSyncConflictModalProps> 
         </>
     );
 
-    const renderChoiceRow = (choice: ShowMergeChoice) => (
+    const renderChoiceRow = (choice) => (
         <ListItem
             key={String(choice.id)}
             sx={{

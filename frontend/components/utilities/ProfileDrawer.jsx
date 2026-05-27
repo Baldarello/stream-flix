@@ -51,17 +51,14 @@ const ProfileDrawer = observer(() => {
         updateSlaveName, forgetSlave
     } = mediaStore;
     const {t} = useTranslations();
-    const [editingSlaveId, setEditingSlaveId] = useState<string | null>(null);
+    const [editingSlaveId, setEditingSlaveId] = useState(null);
     const [editedName, setEditedName] = useState('');
 
     const handleScanQRCode = () => {
         openQRScanner();
     };
 
-    const handleThemeChange = (
-        event: React.MouseEvent<HTMLElement>,
-        newTheme: ThemeName | null,
-    ) => {
+    const handleThemeChange = (event, newTheme) => {
         if (newTheme !== null) {
             mediaStore.setActiveTheme(newTheme);
             mediaStore.setActiveView('Home'); // Navigate to home to see the changes
@@ -69,16 +66,13 @@ const ProfileDrawer = observer(() => {
         }
     };
 
-    const handleLanguageChange = (
-        event: React.MouseEvent<HTMLElement>,
-        newLang: Language | null,
-    ) => {
+    const handleLanguageChange = (event, newLang) => {
         if (newLang !== null) {
             setLanguage(newLang);
         }
     };
 
-    const handleStartEdit = (slave: { id, name, shortCode?: string }) => {
+    const handleStartEdit = (slave) => {
         setEditingSlaveId(slave.id);
         setEditedName(slave.name);
     };

@@ -53,33 +53,33 @@ const compressImage = (base64, maxWidth = 800) => {
   });
 };
 
-const fileToBase64 = (file: File) => {
+const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => resolve(reader.result);
     reader.onerror = error => reject(error);
   });
 };
 
-const Chat: React.FC = observer(() => {
+const Chat = observer(() => {
   const { chatHistory, sendChatMessage, participants, hostId, isHost, myClientId, transferHost, changeName } = mediaStore;
   const { t } = useTranslations();
   const [text, setText] = useState('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const fileInputRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
   // Host transfer confirmation modal state
   const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
-  const [transferTargetParticipant, setTransferTargetParticipant] = useState<{ id; name: string } | null>(null);
+  const [transferTargetParticipant, setTransferTargetParticipant] = useState(null);
 
   // Name edit dialog state
   const [nameEditOpen, setNameEditOpen] = useState(false);
-  const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState<{ id; name: string } | null>(null);
+  const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState(null);
   const [newName, setNewName] = useState('');
 
-  const handleTransferHostClick = (participant: { id; name: string }) => {
+  const handleTransferHostClick = (participant) => {
     setTransferTargetParticipant(participant);
     setTransferConfirmOpen(true);
   };
@@ -97,7 +97,7 @@ const Chat: React.FC = observer(() => {
     setTransferTargetParticipant(null);
   };
 
-  const handleNameChangeClick = (participant: { id; name: string }) => {
+  const handleNameChangeClick = (participant) => {
     setNameEditTargetParticipant(participant);
     setNewName(participant.name);
     setNameEditOpen(true);
@@ -128,7 +128,7 @@ const Chat: React.FC = observer(() => {
     
     if (hasText || hasImage) {
       sendChatMessage({ 
-        text: hasText ? text , 
+        text: hasText ? text : '',
         image: hasImage ? selectedImage : undefined 
       });
       setText('');
@@ -140,7 +140,7 @@ const Chat: React.FC = observer(() => {
     setSelectedImage(null);
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
     if (file) {
       await processAndSendImage(file);
@@ -151,7 +151,7 @@ const Chat: React.FC = observer(() => {
     }
   };
 
-  const processAndSendImage = async (file: File) => {
+  const processAndSendImage = async (file) => {
     if (!file.type.startsWith('image/')) {
       console.error('Selected file is not an image');
       return;
@@ -178,7 +178,7 @@ const Chat: React.FC = observer(() => {
     }
   };
 
-  const handlePaste = async (event: ClipboardEvent) => {
+  const handlePaste = async (event) => {
     const items = event.clipboardData?.items;
     if (!items) return;
     

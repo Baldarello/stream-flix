@@ -17,22 +17,15 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-interface ReorderDrawerProps {
-    open;
-    onClose: () => void;
-    items: ;
-    onSave: (orderedIds) => Promise<void>;
-}
-
-export const ReorderDrawer: React.FC<ReorderDrawerProps> = ({
+export const ReorderDrawer = ({
     open,
     onClose,
     items,
     onSave
 }) => {
     const {t} = useTranslations();
-    const [localItems, setLocalItems] = useState<MediaItem[]>([...items]);
-    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [localItems, setLocalItems] = useState([...items]);
+    const [draggedIndex, setDraggedIndex] = useState(null);
     const [hasChanges, setHasChanges] = useState(false);
 
     // Sync local items when drawer opens or items change
@@ -45,7 +38,7 @@ export const ReorderDrawer: React.FC<ReorderDrawerProps> = ({
         setDraggedIndex(index);
     };
 
-    const handleDragOver = (e: React.DragEvent, index) => {
+    const handleDragOver = (e, index) => {
         e.preventDefault();
         if (draggedIndex === null || draggedIndex === index) return;
 

@@ -46,21 +46,21 @@ const VideoPlayer = observer(() => {
         shouldAutoFullscreen
     } = mediaStore;
     const {t} = useTranslations();
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const playerContainerRef = useRef<HTMLDivElement>(null);
+    const videoRef = useRef(null);
+    const playerContainerRef = useRef(null);
     const [isSyncing, setIsSyncing] = useState(false);
     const [showSkipIntro, setShowSkipIntro] = useState(false);
     const [isUiVisible, setIsUiVisible] = useState(true);
-    const uiTimeoutRef = useRef<number | null>(null);
+    const uiTimeoutRef = useRef(null);
     const lastHostUpdateTimeRef = useRef(0);
     const isSeekingRef = useRef(false);
-    const lastProgressBeforeLanguageChangeRef = useRef<number | null>(null);
+    const lastProgressBeforeLanguageChangeRef = useRef(null);
 
     // Detect if we're in portrait mobile (narrow screen and not fullscreen)
     const [isPortraitMobile, setIsPortraitMobile] = useState(false);
-    const [languageMenuAnchor, setLanguageMenuAnchor] = useState<null | HTMLElement>(null);
+    const [languageMenuAnchor, setLanguageMenuAnchor] = useState(null);
     // Track current video src for filter changes
-    const [currentVideoSrc, setCurrentVideoSrc] = useState<string>('');
+    const [currentVideoSrc, setCurrentVideoSrc] = useState('');
     useEffect(() => {
         const checkPortrait = () => {
             const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -332,8 +332,8 @@ const VideoPlayer = observer(() => {
 
     // Effect for Keyboard Shortcuts
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            const target = e.target as HTMLElement;
+        const handleKeyDown = (e) => {
+            const target = e.target;
             if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
 
             const video = videoRef.current;
@@ -529,13 +529,13 @@ const VideoPlayer = observer(() => {
 
     // Extract available languages and types from video_urls (videoUrls already declared at line 456)
     const availableLanguages = useMemo(() => {
-        const langs = new Set<string>();
+        const langs = new Set();
         videoUrls.forEach(link => langs.add(link.language));
         return Array.from(langs);
     }, [videoUrls]);
 
     const availableTypes = useMemo(() => {
-        const types = new Set<string>();
+        const types = new Set();
         videoUrls.forEach(link => types.add(link.type));
         return Array.from(types);
     }, [videoUrls]);
@@ -551,8 +551,8 @@ const VideoPlayer = observer(() => {
 
     const handleLanguageChange = (lang) => {
         if (currentShowId) {
-            const newType = lang ? selectedType ;
-            const updates: { language; type?: 'sub' | 'dub' } = {language: lang};
+            const newType = lang ? selectedType : null;
+            const updates = {language: lang};
             if (newType && (newType === 'sub' || newType === 'dub')) {
                 updates.type = newType;
             }
@@ -561,7 +561,7 @@ const VideoPlayer = observer(() => {
         }
     };
 
-    const handleTypeChange = (type: 'sub' | 'dub') => {
+    const handleTypeChange = (type) => {
         if (currentShowId) {
             mediaStore.setShowFilterPreference(currentShowId, {type});
             reloadVideoWithFilters(selectedLanguage, type);
@@ -613,7 +613,7 @@ const VideoPlayer = observer(() => {
     }, [videoSrc]);
 
     // Mobile language menu handlers
-    const handleOpenLanguageMenu = (event: React.MouseEvent<HTMLElement>) => {
+    const handleOpenLanguageMenu = (event) => {
         setLanguageMenuAnchor(event.currentTarget);
     };
 
@@ -717,7 +717,7 @@ const VideoPlayer = observer(() => {
                                                             <MenuItem 
                                                                 key={type} 
                                                                 value={type} 
-                                                                onClick={() => { handleTypeChange(type as 'sub' | 'dub'); handleCloseLanguageMenu(); }}
+                                                                onClick={() => { handleTypeChange(type); handleCloseLanguageMenu(); }}
                                                                 sx={{
                                                                     py: 0.75,
                                                                     px: 2,
@@ -794,7 +794,7 @@ const VideoPlayer = observer(() => {
                                                 <FormControl size="small" sx={{minWidth: 70}}>
                                                     <Select
                                                         value={selectedType}
-                                                        onChange={(e) => handleTypeChange(e.target.value as 'sub' | 'dub')}
+                                                        onChange={(e) => handleTypeChange(e.target.value)}
                                                         sx={{
                                                             color: 'white',
                                                             bgcolor: 'rgba(0,0,0,0.5)',
