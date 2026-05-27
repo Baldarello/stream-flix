@@ -59,4 +59,4 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=2s --retries=5 \
     CMD bun ./health-check.js || exit 1
 
 # Start the application with Bun (run TypeScript directly)
-CMD ["bun", "run", "src/index.ts"]
+CMD ["bun", "run", "src/index.js"]
