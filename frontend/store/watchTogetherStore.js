@@ -5,7 +5,6 @@ import {db} from '../services/db';
 import {mediaStore} from './mediaStore';
 
 
-
 class WatchTogetherStore {
     // Modal state
     watchTogetherModalOpen = false;

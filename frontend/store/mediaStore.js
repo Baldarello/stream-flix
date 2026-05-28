@@ -1,5 +1,4 @@
-import {computed, makeAutoObservable, observable, runInAction} from 'mobx';
-import Dexie from 'dexie';
+import {makeAutoObservable, runInAction} from 'mobx';
 
 import {checkLinksForShow, checkLinkValidity} from '../services/linkValidator.js';
 
@@ -20,9 +19,6 @@ import {en} from '../locales/en.js';
 import {remoteStore} from './remoteStore';
 import {watchTogetherStore} from './watchTogetherStore';
 import {syncStore} from './syncStore';
-
-
-
 
 
 const allTranslations = {it, en};

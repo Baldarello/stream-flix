@@ -1,14 +1,9 @@
-import {makeAutoObservable, observable, runInAction, computed} from 'mobx';
+import {makeAutoObservable, observable, runInAction} from 'mobx';
 
 import {websocketService} from '../services/websocketService.js';
 import {db} from '../services/db';
-import {isSmartTV as detectSmartTV} from '../utils/device.js';
 import {mediaStore} from './mediaStore';
 import {getSeriesDetails, getSeriesEpisodes} from '../services/apiCall';
-
-
-
-
 
 
 class RemoteStore {

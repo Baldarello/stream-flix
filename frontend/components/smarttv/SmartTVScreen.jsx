@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {Box} from '@mui/material';
-import {mediaStore} from '../../store/mediaStore.js';
 import {remoteStore} from '../../store/remoteStore.js';
 import {websocketService} from '../../services/websocketService.js';
 import SmartTVBackground from '../smarttv/SmartTVBackground.jsx';

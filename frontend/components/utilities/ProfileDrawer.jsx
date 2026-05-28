@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Language, mediaStore, ThemeName} from '../../store/mediaStore.js';
+import {mediaStore} from '../../store/mediaStore.js';
 import {
     Avatar,
     Box,
