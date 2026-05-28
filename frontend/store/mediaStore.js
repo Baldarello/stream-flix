@@ -1728,6 +1728,11 @@ class MediaStore {
                         this.showSnackbar('notifications.remoteConnected', 'success', true);
                     } else if (type === 'quix-slave-status-update') {
                         this.remoteSlaveState = payload;
+                    } else if (type === 'quix-remote-command') {
+                        remoteStore.handleRemoteCommand(payload);
+                    } else if (type === 'quix-remote-command-received') {
+                        // Acknowledgment from server - already handled optimistically
+                        console.log('[mediaStore] Remote command acknowledged');
                     } else if (type === 'quix-slave-disconnected') {
                         if (this.slaveId) {
                             this.setSlaveOnlineStatus(this.slaveId, false);

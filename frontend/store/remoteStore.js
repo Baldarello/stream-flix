@@ -300,7 +300,7 @@ class RemoteStore {
         if (this.isRemoteMaster && this.slaveId) {
             console.log(`[RemoteStore] sendRemoteCommand: isRemoteMaster=${this.isRemoteMaster}, slaveId='${this.slaveId}'`);
             websocketService.sendMessage({
-                type: 'master-playback',
+                type: 'quix-remote-command',
                 payload: {...command, slaveId: this.slaveId}
             });
         } else {
@@ -426,6 +426,7 @@ class RemoteStore {
         switch (command) {
             case 'play_item':
                 mediaStore.startPlayback(item);
+                mediaStore.isPlaying = true;  // Set playing state since startPlayback doesn't set it
                 this.sendSlaveStatusUpdate();
                 this.triggerAutoFullscreen();
                 return;
@@ -492,6 +493,7 @@ class RemoteStore {
     };
 
     sendSlaveStatusUpdate = () => {
+        console.log(`[RemoteStore] sendSlaveStatusUpdate: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, isPlaying=${mediaStore.isPlaying}`);
         if (this.isSmartTV && this.slaveId) {
             const video = document.querySelector('video');
             websocketService.sendMessage({
@@ -505,6 +507,8 @@ class RemoteStore {
                     duration: video?.duration
                 }
             });
+        } else {
+            console.log(`[RemoteStore] sendSlaveStatusUpdate: BLOCKED - isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}`);
         }
     };
 
@@ -586,7 +590,7 @@ class RemoteStore {
                 const payload = this.slaveShortCode 
                     ? {slaveId: this.slaveShortCode} 
                     : {slaveId: this.slaveId};
-                websocketService.sendMessage({type: 'master-connect', payload});
+                websocketService.sendMessage({type: 'quix-register-master', payload});
                 this.masterReconnectAttempts++;
                 console.log(`[RemoteStore] Master reconnection attempt ${this.masterReconnectAttempts}/12 using ${this.slaveShortCode ? "shortCode" : "fullId"}`);
             } else if (this.masterReconnectAttempts >= 12 || this.isRemoteMasterConnected) {
@@ -676,7 +680,7 @@ class RemoteStore {
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.
-            websocketService.sendMessage({type: 'master-connect', payload: {slaveId: this.slaveId}});
+            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
             // Request the current status from the slave to sync the UI
             this.sendRemoteCommand({command: 'request_status'});
         }
