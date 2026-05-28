@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import PersonIcon from '@mui/icons-material/Person';
+import MenuIcon from '@mui/icons-material/Menu';
 import TvIcon from '@mui/icons-material/Tv';
 import CloseIcon from '@mui/icons-material/Close';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
@@ -33,7 +33,14 @@ const navKeys = [
 ];
 
 export const Header = observer(() => {
-    const {isSearchActive, toggleSearch, searchQuery, setSearchQuery, unreadNotificationsCount, openNotificationsModal} = mediaStore;
+    const {
+        isSearchActive,
+        toggleSearch,
+        searchQuery,
+        setSearchQuery,
+        unreadNotificationsCount,
+        openNotificationsModal
+    } = mediaStore;
     const {t} = useTranslations();
     const searchInputRef = useRef(null);
 
@@ -183,19 +190,19 @@ export const Header = observer(() => {
                     {/* FIX: (line 162) Wrap Box with Fade component */}
                     <Fade in={!isSearchActive}>
                         <Box sx={{display: isSearchActive ? 'none' : 'flex', alignItems: 'center', gap: 1}}>
-                            <IconButton color="inherit" onClick={openNotificationsModal}>
+                            <IconButton color="inherit" onClick={openNotificationsModal} id={"notification-button"}>
                                 <Badge badgeContent={unreadNotificationsCount} color="error">
                                     <NotificationsIcon/>
                                 </Badge>
                             </IconButton>
-                            <IconButton color="inherit" onClick={() => remoteStore.enableSmartTVMode()}>
+                            <IconButton color="inherit" onClick={() => remoteStore.enableSmartTVMode()} id={"slave-button"}>
                                 <TvIcon/>
                             </IconButton>
-                            <IconButton color="inherit" onClick={() => mediaStore.openQRScanner()}>
+                            <IconButton color="inherit" onClick={() => remoteStore.openQRScanner()} id={"master-button"}>
                                 <QrCodeScannerIcon/>
                             </IconButton>
-                            <IconButton color="inherit" onClick={() => mediaStore.toggleProfileDrawer(true)}>
-                                <PersonIcon/>
+                            <IconButton color="inherit" onClick={() => mediaStore.toggleProfileDrawer(true)} id={"menu-button"}>
+                                <MenuIcon/>
                             </IconButton>
                         </Box>
                     </Fade>
