@@ -188,7 +188,7 @@ export const Header = observer(() => {
                                     <NotificationsIcon/>
                                 </Badge>
                             </IconButton>
-                            <IconButton color="inherit" onClick={() => mediaStore.enableSmartTVMode()}>
+                            <IconButton color="inherit" onClick={() => remoteStore.enableSmartTVMode()}>
                                 <TvIcon/>
                             </IconButton>
                             <IconButton color="inherit" onClick={() => mediaStore.openQRScanner()}>

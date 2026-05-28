@@ -11,6 +11,7 @@ import {ContentRow} from './components/layout/ContentRow.jsx';
 import {Footer} from './components/layout/Footer.jsx';
 import DetailView from './components/media/DetailView.jsx';
 import VideoPlayer from './components/media/VideoPlayer.jsx';
+import SlaveVideoPlayer from './components/media/SlaveVideoPlayer.jsx';
 import GridView from './components/layout/GridView.jsx';
 import SmartTVScreen from './components/smarttv/SmartTVScreen.jsx';
 import RemotePlayerControlView from './components/utilities/RemotePlayerControlView.jsx';
@@ -161,6 +162,11 @@ const AppContent = observer(() => {
         />
         <NotificationSnackbar/><DebugOverlay/>
     </>;
+
+    // If Smart TV (slave) is playing content from master, show SlaveVideoPlayer
+    if (remoteStore.isSmartTV && nowPlayingItem) return <><SlaveVideoPlayer/> <NotificationSnackbar/>
+        <EpisodeInfoModal/>
+        <DebugOverlay/></>;
 
     // If local client is playing, show local video player
     if (nowPlayingItem) return <><VideoPlayer/> <LinkSelectionModal/><NotificationSnackbar/>

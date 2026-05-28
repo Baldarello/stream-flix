@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
 import {
     Avatar,
     Box,
@@ -45,7 +46,7 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 
 const ProfileDrawer = observer(() => {
     const {
-        isProfileDrawerOpen, toggleProfileDrawer, openQRScanner, enableSmartTVMode,
+        isProfileDrawerOpen, toggleProfileDrawer, openQRScanner,
         isLoggedIn, googleUser, isSyncing, backupToDrive, restoreFromDrive, language, setLanguage,
         openShareModal, openImportModal, openRevisionsModal, knownSlaves, reconnectToSlave,
         updateSlaveName, forgetSlave
@@ -375,7 +376,7 @@ const ProfileDrawer = observer(() => {
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
-                    <ListItemButton onClick={enableSmartTVMode}>
+                    <ListItemButton onClick={() => remoteStore.enableSmartTVMode()}>
                         <ListItemIcon><TvIcon/></ListItemIcon>
                         <ListItemText primary={t('profileDrawer.showQR')}/>
                     </ListItemButton>

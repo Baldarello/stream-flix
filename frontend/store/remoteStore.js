@@ -4,6 +4,7 @@ import {websocketService} from '../services/websocketService.js';
 import {db} from '../services/db';
 import {mediaStore} from './mediaStore';
 import {getSeriesDetails, getSeriesEpisodes} from '../services/apiCall';
+import {isSmartTV as detectSmartTV} from '../utils/device.js';
 
 
 class RemoteStore {
@@ -105,6 +106,9 @@ class RemoteStore {
             __masterUiActiveView: observable,
             __masterUiSelectedItem: observable,
         });
+        if (detectSmartTV()) {
+            this.isSmartTV = true;
+        }
     }
     
     // Getters
@@ -161,6 +165,23 @@ class RemoteStore {
 
     closeQRScanner = () => {
         this.isQRScannerOpen = false;
+    };
+
+    enableSmartTVMode = () => {
+        this.isSmartTV = true;
+        this.isSmartTVPairingVisible = true;
+        mediaStore.isProfileDrawerOpen = false;
+        db.preferences.put({key: 'isConfiguredAsSlave', value: true});
+        const payload = {};
+        if (this.slaveId) payload.slaveId = this.slaveId;
+        if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
+        websocketService.registerSlave(payload);
+    };
+
+    exitSmartTVPairingMode = () => {
+        this.isSmartTVPairingVisible = false;
+        this.isSmartTV = false;
+        db.preferences.delete('isConfiguredAsSlave');
     };
 
     openMediaSyncModal = (slaveId) => {
@@ -684,6 +705,32 @@ class RemoteStore {
             // Request the current status from the slave to sync the UI
             this.sendRemoteCommand({command: 'request_status'});
         }
+    };
+
+    // Load persisted Smart TV data from IndexedDB
+    loadPersistedData = async () => {
+        const [isConfiguredAsSlave, selfSlaveId, selfShortCode, knownSlavesData] = await Promise.all([
+            db.preferences.get('isConfiguredAsSlave'),
+            db.preferences.get('selfSlaveId'),
+            db.preferences.get('selfShortCode'),
+            db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
+        ]);
+
+        runInAction(() => {
+            if (isConfiguredAsSlave?.value) {
+                this.isSmartTV = true;
+                this.isSmartTVPairingVisible = true;
+                if (selfSlaveId?.value) {
+                    this.slaveId = selfSlaveId.value;
+                }
+                if (selfShortCode?.value) {
+                    this.slaveShortCode = selfShortCode.value;
+                }
+            }
+            this.knownSlaves = knownSlavesData;
+            this.hasLoadedInitialData = true;
+            console.log(`[remoteStore] loadPersistedData: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, shortCode=${this.slaveShortCode}`);
+        });
     };
 
     // WebSocket message handler

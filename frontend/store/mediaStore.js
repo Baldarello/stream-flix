@@ -13,7 +13,6 @@ import {
 } from '../services/apiCall';
 import {websocketService} from '../services/websocketService.js';
 import {db} from '../services/db';
-import {isSmartTV as detectSmartTV} from '../utils/device.js';
 import {it} from '../locales/it.js';
 import {en} from '../locales/en.js';
 import {remoteStore} from './remoteStore';
@@ -240,12 +239,6 @@ class MediaStore {
     set _masterUiActiveView(v) { remoteStore._masterUiActiveView = v; }
     get _masterUiSelectedItem() { return remoteStore._masterUiSelectedItem; }
     set _masterUiSelectedItem(v) { remoteStore._masterUiSelectedItem = v; }
-    get isSmartTV() { return remoteStore.isSmartTV; }
-    set isSmartTV(v) { remoteStore.isSmartTV = v; }
-    get isSmartTVPairingVisible() { return remoteStore.isSmartTVPairingVisible; }
-    set isSmartTVPairingVisible(v) { remoteStore.isSmartTVPairingVisible = v; }
-    get isQRScannerOpen() { return remoteStore.isQRScannerOpen; }
-    set isQRScannerOpen(v) { remoteStore.isQRScannerOpen = v; }
     // RemoteStore methods delegated
     connectAsRemoteMaster = remoteStore.connectAsRemoteMaster;
     disconnectRemoteMaster = remoteStore.disconnectRemoteMaster;
@@ -259,7 +252,6 @@ class MediaStore {
     startMasterReconnectTimer = remoteStore.startMasterReconnectTimer;
     stopMasterReconnectTimer = remoteStore.stopMasterReconnectTimer;
     triggerAutoFullscreen = remoteStore.triggerAutoFullscreen;
-    setIntroSkippableOnSlave = remoteStore.setIntroSkippableOnSlave;
     fetchRemoteFullItem = remoteStore.fetchRemoteFullItem;
     playRemoteItem = remoteStore.playRemoteItem;
     syncMediaFromMaster = remoteStore.syncMediaFromMaster;
@@ -273,9 +265,6 @@ class MediaStore {
     constructor() {
         makeAutoObservable(this);
         this.loadInvalidLinksFromDb();
-        if (detectSmartTV()) {
-            remoteStore.isSmartTV = true;
-        }
         websocketService.events.on('message', this.handleIncomingMessage);
         websocketService.events.on('open', this.initRemoteSession);
         websocketService.events.on('debug', this.addDebugMessage);
@@ -576,23 +565,6 @@ class MediaStore {
         this.isProfileDrawerOpen = isOpen;
     };
 
-    enableSmartTVMode = () => {
-        remoteStore.isSmartTV = true;
-        remoteStore.isSmartTVPairingVisible = true;
-        this.isProfileDrawerOpen = false;
-        db.preferences.put({key: 'isConfiguredAsSlave', value: true});
-        const payload = {};
-        if (this.slaveId) payload.slaveId = this.slaveId;
-        if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
-        websocketService.registerSlave(payload);
-    };
-
-    exitSmartTVPairingMode = () => {
-        remoteStore.isSmartTVPairingVisible = false;
-        remoteStore.isSmartTV = false;
-        db.preferences.delete('isConfiguredAsSlave');
-    };
-
     // Modal Methods
     openShareModal = () => {
         this.isShareModalOpen = true;
@@ -872,7 +844,7 @@ class MediaStore {
             myListItems, cachedItems, mediaLinksData, introDurations, languagePref, 
             progress, preferredSourcesData, usernamePref, activeThemePref, 
             selectedSeasonsData, preferredLabelsPref, showFilterPreferencesData,
-            remoteMasterSlaveId, isConfiguredAsSlave, knownSlaves, selfSlaveId, selfShortCode
+            remoteMasterSlaveId
         ] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
@@ -887,10 +859,6 @@ class MediaStore {
             db.preferences.get('preferredLabels'),
             db.showFilterPreferences.toArray(),
             db.preferences.get('remoteMasterForSlaveId'),
-            db.preferences.get('isConfiguredAsSlave'),
-            db.knownSlaves.orderBy('lastSeen').reverse().toArray(),
-            db.preferences.get('selfSlaveId'),
-            db.preferences.get('selfShortCode'),
         ]);
 
         runInAction(() => {
@@ -924,27 +892,18 @@ class MediaStore {
                 this.showSnackbar('notifications.reconnectingAsRemote', 'info', true);
             }
 
-            if (isConfiguredAsSlave?.value) {
-                this.isSmartTV = true;
-                this.isSmartTVPairingVisible = true;
-                if (selfSlaveId?.value) {
-                    this.slaveId = selfSlaveId.value;
-                }
-                if (selfShortCode?.value) {
-                    this.slaveShortCode = selfShortCode.value;
-                }
-            }
-            this.knownSlaves = knownSlaves;
-
-            this.hasLoadedInitialData = true;
-            console.log(`[mediaStore] fetchAllData: initial data loaded, hasLoadedInitialData=true, isSmartTV=${this.isSmartTV}, isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
-
-            if (this.isSmartTV && this.slaveId) {
-                this.initRemoteSession();
-            } else if (this.isRemoteMaster && this.slaveId) {
-                this.initRemoteSession();
-            }
+            console.log(`[mediaStore] loadPersistedData: initial data loaded, isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
         });
+
+        // Load remote-specific persisted data
+        await remoteStore.loadPersistedData();
+
+        // Init remote session after remote data is loaded
+        if (remoteStore.isSmartTV && remoteStore.slaveId) {
+            remoteStore.initRemoteSession();
+        } else if (this.isRemoteMaster && this.slaveId) {
+            remoteStore.initRemoteSession();
+        }
     }
 
     // ===== MEDIA SELECTION =====
@@ -1783,11 +1742,6 @@ class MediaStore {
 
     setRemoteSelectedItem = (item) => {
         this.selectMedia(item, 'remoteControl');
-    };
-
-    // Send slave status update
-    sendSlaveStatusUpdate = () => {
-        remoteStore.sendSlaveStatusUpdate();
     };
 
     // ===== PRIVATE HELPER METHODS =====

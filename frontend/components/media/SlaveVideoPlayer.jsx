@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
 import {
     AppBar,
     Box,
@@ -19,22 +20,31 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import ClosedCaptionIcon from '@mui/icons-material/ClosedCaption';
 import LanguageIcon from '@mui/icons-material/Language';
-import Chat from '../utilities/Chat.jsx';
 import EpisodesDrawer from '../library/EpisodesDrawer.jsx';
 import VideoControlsContainer from './VideoControlsContainer.jsx';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import Replay10Icon from '@mui/icons-material/Replay10';
+import Forward10Icon from '@mui/icons-material/Forward10';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
 
-const VideoPlayer = observer(() => {
-    const {
-        nowPlayingItem,
-        roomId,
-        isHost,
-        sendPlaybackControl,
-        stopPlayback,
-    } = mediaStore;
+const SlaveVideoPlayer = observer(() => {
+    // Use remoteStore for slave-specific state
+    const { 
+        remoteSlaveState,
+        sendSlaveStatusUpdate,
+        setIntroSkippableOnSlave,
+        shouldAutoFullscreen
+    } = remoteStore;
+    
+    // For slave, nowPlayingItem comes from remoteSlaveState
+    const nowPlayingItem = remoteSlaveState?.nowPlayingItem || mediaStore.nowPlayingItem;
+    
     const {t} = useTranslations();
     const videoRef = useRef(null);
     const playerContainerRef = useRef(null);
@@ -84,86 +94,6 @@ const VideoPlayer = observer(() => {
     });
 
 
-    // Effect for Watch Together Synchronization
-    useEffect(() => {
-        const videoElement = videoRef.current;
-        if (!videoElement || !roomId) return;
-
-        if (!isHost) {
-            const {playbackState} = mediaStore;
-            const initialSync = () => {
-                if (!videoRef.current) return;
-                if (Math.abs(videoRef.current.currentTime - playbackState.time) > 1.5) {
-                    videoRef.current.currentTime = playbackState.time;
-                }
-                if (playbackState.status === 'playing' && videoRef.current.paused) {
-                    videoRef.current.play().catch(e => console.error("Sync play failed", e));
-                } else if (playbackState.status === 'paused' && !videoRef.current.paused) {
-                    videoRef.current.pause();
-                }
-            };
-            if (videoElement.readyState >= videoElement.HAVE_METADATA) initialSync();
-            else videoElement.addEventListener('loadedmetadata', initialSync, {once: true});
-        }
-
-        const handlePlay = () => isHost && !isSyncing && sendPlaybackControl({
-            status: 'playing',
-            time: videoElement.currentTime
-        });
-        const handlePause = () => isHost && !isSyncing && !isSeekingRef.current && sendPlaybackControl({
-            status: 'paused',
-            time: videoElement.currentTime
-        });
-        const handleSeeking = () => {
-            if (isHost && !isSyncing) isSeekingRef.current = true;
-        };
-        const handleSeeked = () => {
-            if (isHost && !isSyncing) {
-                isSeekingRef.current = false;
-                sendPlaybackControl({
-                    status: videoElement.paused ? 'paused' : 'playing',
-                    time: videoElement.currentTime
-                });
-            }
-        };
-        const handleTimeUpdate = () => {
-            const now = Date.now();
-            if (isHost && !isSyncing && !isSeekingRef.current && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
-                lastHostUpdateTimeRef.current = now;
-                sendPlaybackControl({status: 'playing', time: videoElement.currentTime});
-            }
-        }
-
-        if (isHost) {
-            videoElement.addEventListener('play', handlePlay);
-            videoElement.addEventListener('pause', handlePause);
-            videoElement.addEventListener('seeking', handleSeeking);
-            videoElement.addEventListener('seeked', handleSeeked);
-            videoElement.addEventListener('timeupdate', handleTimeUpdate);
-        }
-
-        const disposer = mediaStore.addPlaybackListener((state) => {
-            if (!isHost && videoElement) {
-                setIsSyncing(true);
-                if (Math.abs(videoElement.currentTime - state.time) > 1.5) videoElement.currentTime = state.time;
-                if (state.status === 'playing' && videoElement.paused) videoElement.play().catch(console.error);
-                else if (state.status === 'paused' && !videoElement.paused) videoElement.pause();
-                setTimeout(() => setIsSyncing(false), 200);
-            }
-        });
-
-        return () => {
-            if (videoElement) {
-                videoElement.removeEventListener('play', handlePlay);
-                videoElement.removeEventListener('pause', handlePause);
-                videoElement.removeEventListener('seeking', handleSeeking);
-                videoElement.removeEventListener('seeked', handleSeeked);
-                videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-            }
-            if (disposer) disposer();
-        };
-    }, [isHost, sendPlaybackControl, roomId]);
-
     // Effect for resuming playback from startTime
     useEffect(() => {
         const video = videoRef.current;
@@ -202,11 +132,22 @@ const VideoPlayer = observer(() => {
         };
     }, [nowPlayingItem?.id]);
 
+    // Effect for periodic Smart TV status updates - slave sends status to master
+    useEffect(() => {
+        if (playerState.isPlaying) {
+            const interval = setInterval(() => {
+                sendSlaveStatusUpdate();
+            }, 1000); // Send update every second
+            return () => clearInterval(interval);
+        }
+    }, [playerState.isPlaying, sendSlaveStatusUpdate]);
+
     // Effect for "Skip Intro" button visibility
     useEffect(() => {
         const videoElement = videoRef.current;
         if (!videoElement || !nowPlayingItem || !('intro_start_s' in nowPlayingItem) || !nowPlayingItem.intro_start_s) {
             if (showSkipIntro) setShowSkipIntro(false);
+            setIntroSkippableOnSlave(false);
             return;
         }
         const handleTimeUpdate = () => {
@@ -216,13 +157,14 @@ const VideoPlayer = observer(() => {
             const isSkippable = currentTime >= introStart && currentTime < introEnd;
             if (isSkippable !== showSkipIntro) {
                 setShowSkipIntro(isSkippable);
+                setIntroSkippableOnSlave(isSkippable);
             }
         };
         videoElement.addEventListener('timeupdate', handleTimeUpdate);
         return () => {
             if (videoElement) videoElement.removeEventListener('timeupdate', handleTimeUpdate);
         };
-    }, [nowPlayingItem?.id, showSkipIntro, nowPlayingItem]);
+    }, [nowPlayingItem?.id, showSkipIntro, setIntroSkippableOnSlave, nowPlayingItem]);
 
     // Effect to manage UI visibility
     useEffect(() => {
@@ -253,6 +195,24 @@ const VideoPlayer = observer(() => {
         };
     }, [playerState.isPlaying]);
 
+    // Effect for auto-fullscreen on slave when playback starts from master
+    useEffect(() => {
+        if (shouldAutoFullscreen) {
+            // Small delay to ensure video is ready
+            const timer = setTimeout(async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await playerContainerRef.current?.requestFullscreen();
+                    }
+                } catch (e) {
+                    console.error('Auto-fullscreen failed:', e);
+                }
+                // Reset the trigger
+                remoteStore.shouldAutoFullscreen = false;
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [shouldAutoFullscreen]);
 
     const handleTogglePlay = useCallback(() => {
         if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
@@ -290,7 +250,7 @@ const VideoPlayer = observer(() => {
         }
     }, [nowPlayingItem]);
 
-    // Effect for Keyboard Shortcuts
+    // Effect for Keyboard Shortcuts - slave can control playback locally
     useEffect(() => {
         const handleKeyDown = (e) => {
             const target = e.target;
@@ -299,14 +259,10 @@ const VideoPlayer = observer(() => {
             const video = videoRef.current;
             if (!video) return;
 
-            // In Watch Together mode, only host can control playback
-            const isWatchTogetherNonHost = !!roomId && !isHost;
-
             switch (e.key.toLowerCase()) {
                 case ' ':
                     e.preventDefault();
-                    // Non-hosts in Watch Together cannot control playback
-                    if (!isWatchTogetherNonHost) handleTogglePlay();
+                    handleTogglePlay();
                     break;
                 case 'f':
                     e.preventDefault();
@@ -318,13 +274,11 @@ const VideoPlayer = observer(() => {
                     break;
                 case 'arrowright':
                     e.preventDefault();
-                    // Non-hosts in Watch Together cannot seek
-                    if (!isWatchTogetherNonHost) video.currentTime = Math.min(video.duration, video.currentTime + 5);
+                    video.currentTime = Math.min(video.duration, video.currentTime + 5);
                     break;
                 case 'arrowleft':
                     e.preventDefault();
-                    // Non-hosts in Watch Together cannot seek
-                    if (!isWatchTogetherNonHost) video.currentTime = Math.max(0, video.currentTime - 5);
+                    video.currentTime = Math.max(0, video.currentTime - 5);
                     break;
                 case 'arrowup':
                     e.preventDefault();
@@ -336,15 +290,15 @@ const VideoPlayer = observer(() => {
                     break;
                 case 'j':
                     e.preventDefault();
-                    if (!isWatchTogetherNonHost) handleRewind10();
+                    handleRewind10();
                     break;
                 case 'l':
                     e.preventDefault();
-                    if (!isWatchTogetherNonHost) handleForward10();
+                    handleForward10();
                     break;
                 case 'n':
                     e.preventDefault();
-                    if (!isWatchTogetherNonHost) handleSkipIntro();
+                    handleSkipIntro();
                     break;
                 default:
                     break;
@@ -353,7 +307,7 @@ const VideoPlayer = observer(() => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
+    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleRewind10, handleForward10, handleSkipIntro]);
 
     // Player state management and event listeners
     useEffect(() => {
@@ -400,11 +354,9 @@ const VideoPlayer = observer(() => {
     if (!nowPlayingItem) return null;
 
     const handleSeek = (event, newValue) => {
-        if (videoRef.current && (!roomId || isHost)) {
+        if (videoRef.current) {
             const newTime = (newValue / 100) * playerState.duration;
             videoRef.current.currentTime = newTime;
-            // Send playback control to sync with other clients in Watch Together
-            sendPlaybackControl({status: videoRef.current.paused ? 'paused' : 'playing', time: newTime});
         }
     };
     const handleVolumeChange = (event, newValue) => {
@@ -596,9 +548,7 @@ const VideoPlayer = observer(() => {
                     ref={videoRef}
                     src={videoSrc}
                     autoPlay
-                    onClick={() => {
-                        if (!roomId || isHost) handleTogglePlay();
-                    }}
+                    onClick={handleTogglePlay}
                     style={{width: '100%', height: '100%', objectFit: 'contain'}}
                 />
                 {/* FIX: (line 358) Wrap Box with Fade component */}
@@ -622,7 +572,7 @@ const VideoPlayer = observer(() => {
                         }}>
                             <Toolbar>
                                 <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')}
-                                            onClick={stopPlayback}><ArrowBackIcon/></IconButton>
+                                            onClick={mediaStore.stopPlayback}><ArrowBackIcon/></IconButton>
                                 <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
                                 {/* Language/Subtitle pickers - only show when multiple options available */}
                                 {showLanguagePickers && (
@@ -810,34 +760,134 @@ const VideoPlayer = observer(() => {
                                 {mediaStore.nextEpisode &&
                                     <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit"
                                                                                               onClick={handleNextEpisode}
-                                                                                              disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
+                                                                                              ><SkipNextIcon/></IconButton></Tooltip>}
                                 {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit"
                                                                                                         onClick={mediaStore.openEpisodesDrawer}
-                                                                                                        disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
+                                                                                                        ><ListAltIcon/></IconButton></Tooltip>}
                             </Toolbar>
                         </AppBar>
 
-                        {/* Bottom Controls with Fade */}
+                        {/* Slave (Smart TV) Bottom Controls - always visible, no fade */}
+                        <Box sx={{
+                            px: 2,
+                            pt: 2,
+                            pb: 'calc(1rem + env(safe-area-inset-bottom))',
+                            pointerEvents: 'auto'
+                        }}>
+                            <VideoControlsContainer
+                                playerState={playerState}
+                                handleSeek={handleSeek}
+                                videoRef={videoRef}
+                                handleRewind10={handleRewind10}
+                                handleTogglePlay={handleTogglePlay}
+                                handleForward10={handleForward10}
+                                handleSkipIntro={handleSkipIntro}
+                                handleVolumeChange={handleVolumeChange}
+                                handleDownload={handleDownload}
+                                handleToggleFullScreen={handleToggleFullScreen}
+                            />
+                        </Box>
+
+                        {/* Slave (Smart TV) Overlay: Play/Pause button only - fullscreen is in bottom bar */}
                         <Fade in={isUiVisible} timeout={500}>
                             <Box sx={{
-                                px: 2,
-                                pt: 2,
-                                pb: 'calc(1rem + env(safe-area-inset-bottom))',
-                                pointerEvents: 'auto'
+                                position: 'absolute',
+                                inset: 0,
+                                width: "100%",
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                pointerEvents: 'none'
                             }}>
-                                <VideoControlsContainer
-                                    playerState={playerState}
-                                    handleSeek={handleSeek}
-                                    videoRef={videoRef}
-                                    handleRewind10={handleRewind10}
-                                    handleTogglePlay={handleTogglePlay}
-                                    handleForward10={handleForward10}
-                                    handleSkipIntro={handleSkipIntro}
-                                    handleVolumeChange={handleVolumeChange}
-                                    handleDownload={handleDownload}
-                                    handleToggleFullScreen={handleToggleFullScreen}
-                                    isMinimal={isPortraitMobile}
-                                />
+
+                                <Box sx={{
+                                    width: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <IconButton onClick={handleRewind10} color="inherit"
+                                                sx={{
+                                                    bgcolor: 'rgba(0,0,0,0.6)',
+                                                    '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+                                                    width: 80,
+                                                    height: 80
+                                                }}>
+                                        <Replay10Icon fontSize="large"/>
+                                    </IconButton>
+                                </Box>
+                                <Box sx={{
+                                    width: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <IconButton onClick={handleTogglePlay} sx={{
+                                        bgcolor: 'rgba(0,0,0,0.6)',
+                                        '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+                                        width: 80,
+                                        height: 80
+                                    }}>
+                                        {playerState.isPlaying ? <PauseIcon sx={{fontSize: 48, color: 'white'}}/> :
+                                            <PlayArrowIcon sx={{fontSize: 48, color: 'white'}}/>}
+                                    </IconButton>
+                                </Box>
+                                <Box sx={{
+                                    width: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <IconButton onClick={handleForward10} color="inherit"
+                                                sx={{
+                                                    bgcolor: 'rgba(0,0,0,0.6)',
+                                                    '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+                                                    width: 80,
+                                                    height: 80
+                                                }}>
+                                        <Forward10Icon fontSize="large"/>
+                                    </IconButton>
+                                </Box>
+                                <Box sx={{
+                                    width: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <IconButton onClick={handleSkipIntro} color="inherit"
+                                                sx={{
+                                                    bgcolor: 'rgba(0,0,0,0.6)',
+                                                    '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+
+                                                    width: 80,
+                                                    height: 80
+                                                }}>
+                                        <SkipNextIcon fontSize="large"/>
+                                    </IconButton>
+                                </Box>
+                                <Box sx={{
+                                    width: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    pointerEvents: 'auto'
+                                }}>
+                                    <IconButton onClick={handleToggleFullScreen} sx={{
+                                        bgcolor: 'rgba(0,0,0,0.6)',
+                                        '&:hover': {bgcolor: 'rgba(0,0,0,0.8)'},
+                                        width: 80,
+                                        height: 80
+                                    }}>
+                                        {playerState.isFullScreen ?
+                                            <FullscreenExitIcon sx={{fontSize: 48, color: 'white'}}/> :
+                                            <FullscreenIcon sx={{fontSize: 48, color: 'white'}}/>}
+                                    </IconButton>
+                                </Box>
+
                             </Box>
                         </Fade>
                     </Box>
@@ -863,10 +913,9 @@ const VideoPlayer = observer(() => {
                     </Fade>
                 )}
             </Box>
-            {roomId && <Chat/>}
             {isEpisode && <EpisodesDrawer/>}
         </Box>
     );
 });
 
-export default VideoPlayer;
+export default SlaveVideoPlayer;
