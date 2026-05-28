@@ -19,15 +19,6 @@ const SmartTVScreen = observer(() => {
     // Track if we're in a reconnection state (between beforeunload and reconnect)
     const [isReconnecting, setIsReconnecting] = useState(false);
 
-    // Animation state for staggered entrance
-    const [showContent, setShowContent] = useState(false);
-
-    useEffect(() => {
-        // Delay content reveal for smooth entrance animation
-        const timer = setTimeout(() => setShowContent(true), 100);
-        return () => clearTimeout(timer);
-    }, []);
-
     // Send disconnecting message before page unload to preserve session for reconnection
     useEffect(() => {
         if (!isSmartTV || !slaveId) return;
@@ -69,19 +60,19 @@ const SmartTVScreen = observer(() => {
     const renderContent = () => {
         // Show reconnecting state when slave is refreshing (between beforeunload and reconnect)
         if (isReconnecting) {
-            return <SmartTVReconnectingView showContent={showContent} />;
+            return <SmartTVReconnectingView />;
         }
 
         if (isRemoteMasterConnected) {
-            return <SmartTVConnectedView showContent={showContent} />;
+            return <SmartTVConnectedView />;
         }
 
         if (slaveId) {
-            return <SmartTVPairingView showContent={showContent} />;
+            return <SmartTVPairingView />;
         }
 
         // Loading state
-        return <SmartTVLoadingView showContent={showContent} />;
+        return <SmartTVLoadingView />;
     };
 
     return (

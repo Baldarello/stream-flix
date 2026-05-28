@@ -15,18 +15,7 @@ const QRScanner = observer(() => {
     const [scanError, setScanError] = useState(null);
     const [scanSuccess, setScanSuccess] = useState(false);
     const [manualCode, setManualCode] = useState('');
-    const [showContent, setShowContent] = useState(false);
     const scannerInstanceRef = useRef(null);
-
-    // Animation state for staggered entrance
-    useEffect(() => {
-        if (isQRScannerOpen) {
-            const timer = setTimeout(() => setShowContent(true), 100);
-            return () => clearTimeout(timer);
-        } else {
-            setShowContent(false);
-        }
-    }, [isQRScannerOpen]);
 
     const scannerContainerRef = useCallback((node) => {
         if (node !== null) {
@@ -127,53 +116,8 @@ const QRScanner = observer(() => {
                 bgcolor: 'background.default',
                 color: 'text.primary',
                 overflow: 'hidden',
-                // Animated background - fixed so it doesn't scroll
-                '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: '-50%',
-                    left: '-50%',
-                    width: '200%',
-                    height: '200%',
-                    background: 'radial-gradient(circle at 30% 30%, rgba(0,163,255,0.08) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(76,175,80,0.06) 0%, transparent 50%)',
-                    animation: 'bgMove 20s ease-in-out infinite',
-                    zIndex: 0,
-                    '@keyframes bgMove': {
-                        '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' },
-                        '50%': { transform: 'translate(-5%, -5%) rotate(180deg)' },
-                    },
-                },
             }}
         >
-            <Box
-                sx={{
-                    position: 'absolute',
-                    top: '10%',
-                    right: '10%',
-                    width: 300,
-                    height: 300,
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(0,163,255,0.1) 0%, transparent 70%)',
-                    filter: 'blur(60px)',
-                    pointerEvents: 'none',
-                    zIndex: 0,
-                }}
-            />
-            <Box
-                sx={{
-                    position: 'absolute',
-                    bottom: '10%',
-                    left: '10%',
-                    width: 250,
-                    height: 250,
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(76,175,80,0.08) 0%, transparent 70%)',
-                    filter: 'blur(50px)',
-                    pointerEvents: 'none',
-                    zIndex: 0,
-                }}
-            />
-
             {/* Main content wrapper */}
             <Box
                 sx={{
@@ -200,9 +144,8 @@ const QRScanner = observer(() => {
                         right: 16, 
                         color: 'white', 
                         bgcolor: 'rgba(0,0,0,0.5)', 
-                        transition: 'all 0.3s ease',
                         zIndex: 1000,
-                        '&:hover': { bgcolor: 'rgba(0,0,0,0.8)', transform: 'scale(1.1) rotate(90deg)' }
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' }
                     }}
                 >
                     <CloseIcon />
@@ -214,8 +157,7 @@ const QRScanner = observer(() => {
                         mb: 2, 
                         p: 2, 
                         borderRadius: '50%', 
-                        bgcolor: 'rgba(255,255,255,0.1)',
-                        animation: 'pulse 2s ease-in-out infinite'
+                        bgcolor: 'rgba(255,255,255,0.1)'
                     }}>
                         <QrCodeScannerIcon sx={{ fontSize: 48, color: 'white' }} />
                     </Box>
@@ -224,8 +166,7 @@ const QRScanner = observer(() => {
                         sx={{ 
                             color: 'white', 
                             fontWeight: 'bold', 
-                            textAlign: 'center',
-                            textShadow: `0 0 20px ${getGlowColor()}`
+                            textAlign: 'center'
                         }}
                     >
                         {isConnecting ? t('qrScanner.connecting') : t('qrScanner.title')}
@@ -310,8 +251,7 @@ const QRScanner = observer(() => {
                                 textDecoration: 'underline !important'
                             },
                             '& video': {
-                                borderRadius: '8px',
-                                boxShadow: `0 0 30px ${getGlowColor()}`
+                                borderRadius: '8px'
                             },
                             '& #qr-reader__dashboard_section': {
                                 bgcolor: 'rgba(255,255,255,0.05)',
@@ -324,12 +264,7 @@ const QRScanner = observer(() => {
                                 border: 'none !important',
                                 borderRadius: '8px !important',
                                 fontWeight: 'bold !important',
-                                padding: '12px 24px !important',
-                                transition: 'all 0.3s ease !important',
-                                '&:hover': {
-                                    transform: 'scale(1.05)',
-                                    boxShadow: `0 0 20px ${getGlowColor()}`
-                                }
+                                padding: '12px 24px !important'
                             },
                             '& #qr-reader__header_permission_button': {
                                 bgcolor: 'rgba(255,255,255,0.1)',
@@ -337,22 +272,13 @@ const QRScanner = observer(() => {
                                 border: '1px solid rgba(255,255,255,0.3)',
                                 borderRadius: '8px',
                                 fontWeight: 'bold',
-                                padding: '12px 20px',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    bgcolor: 'rgba(255,255,255,0.2)',
-                                    borderColor: 'white',
-                                    boxShadow: `0 0 15px ${getGlowColor()}`
-                                }
+                                padding: '12px 20px'
                             },
                             '& #qr-reader__camera_selection_button': {
                                 bgcolor: 'rgba(255,255,255,0.1)',
                                 color: 'white',
                                 border: '1px solid rgba(255,255,255,0.3)',
-                                borderRadius: '8px',
-                                '&:hover': {
-                                    bgcolor: 'rgba(255,255,255,0.2)'
-                                }
+                                borderRadius: '8px'
                             }
                         }} 
                     />
@@ -407,8 +333,7 @@ const QRScanner = observer(() => {
                                 '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
                                 '&:hover fieldset': { borderColor: 'white' },
                                 '&.Mui-focused fieldset': { 
-                                    borderColor: getGlowColor(),
-                                    boxShadow: `0 0 10px ${getGlowColor()}`
+                                    borderColor: getGlowColor()
                                 },
                             },
                             '& .MuiInputLabel-root': { 
@@ -437,10 +362,8 @@ const QRScanner = observer(() => {
                             bgcolor: 'rgba(0,163,255,0.2)',
                             color: 'white',
                             border: '1px solid rgba(0,163,255,0.5)',
-                            transition: 'all 0.3s ease',
                             '&:hover': { 
                                 bgcolor: 'rgba(0,163,255,0.4)',
-                                boxShadow: `0 0 20px rgba(0,163,255,0.5)`,
                                 borderColor: 'rgba(0,163,255,0.8)'
                             },
                             '&:disabled': { 
@@ -453,7 +376,6 @@ const QRScanner = observer(() => {
                     </Button>
                 </Box>
 
-
                 {/* Error Alert */}
                 {scanError && (
                     <Alert 
@@ -463,26 +385,12 @@ const QRScanner = observer(() => {
                             bottom: 24, 
                             zIndex: 1000,
                             bgcolor: 'rgba(244, 67, 54, 0.9)',
-                            color: 'white',
-                            backdropFilter: 'blur(10px)',
-                            animation: 'slideUp 0.3s ease-out'
+                            color: 'white'
                         }}
                     >
                         {scanError}
                     </Alert>
                 )}
-                
-                {/* CSS animations */}
-                <style>{`
-                    @keyframes pulse {
-                        0%, 100% { transform: scale(1); opacity: 1; }
-                        50% { transform: scale(1.05); opacity: 0.8; }
-                    }
-                    @keyframes slideUp {
-                        from { transform: translateY(20px); opacity: 0; }
-                        to { transform: translateY(0); opacity: 1; }
-                    }
-                `}</style>
             </Box>
         </Box>
     );
