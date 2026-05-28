@@ -697,7 +697,7 @@ class RemoteStore {
             if (this.slaveId) payload.slaveId = this.slaveId;
             if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
             console.log(`[RemoteStore] initRemoteSession: registering slave with slaveId=${this.slaveId || "null (will be created)"}, shortCode=${this.slaveShortCode || "null"}`);
-            websocketService.sendMessage({type: 'tv-register', payload});
+            websocketService.sendMessage({type: 'quix-register-slave', payload});
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.
@@ -740,14 +740,36 @@ class RemoteStore {
             this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
 
             switch (type) {
-                case 'tv-registration-confirmed':
-                    this.slaveId = payload.tvId;
+                case 'quix-slave-registered':
+                    this.slaveId = payload.slaveId;
                     this.slaveShortCode = payload.shortCode;
                     if (this.isSmartTV) {
-                        db.preferences.put({key: 'selfSlaveId', value: payload.tvId});
+                        db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
                         db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
                     }
                     this.showSnackbar('notifications.tvReady', 'info', true);
+                    break;
+                case 'quix-master-connected':
+                    // This message is sent to the slave when a master connects
+                    console.log(`[RemoteStore] quix-master-connected: master connected to slave ${payload?.slaveId}`);
+                    runInAction(() => {
+                        this.isRemoteMasterConnected = true;
+                        this.isSmartTVPairingVisible = false;
+                    });
+                    this.showSnackbar('notifications.remoteConnected', 'success', true);
+                    break;
+                case 'quix-master-connection-status':
+                    // This message is sent to the master when connection status changes
+                    console.log(`[RemoteStore] quix-master-connection-status: status=${payload?.status}, slaveId=${payload?.slaveId}`);
+                    if (payload?.status === 'slave-reconnecting') {
+                        this.showSnackbar('notifications.slaveReconnecting', 'warning', true);
+                        // Retry is handled by startMasterReconnectTimer
+                    } else if (payload?.status === 'slave-not-found') {
+                        this.showSnackbar('notifications.slaveNotFound', 'error', true);
+                        this.handleReconnectFailed(payload?.shortCode);
+                    } else if (payload?.status === 'slave-busy') {
+                        this.showSnackbar('notifications.slaveBusy', 'warning', true);
+                    }
                     break;
                 case 'connection-established':
                     if ((payload)?.role === 'master') {
