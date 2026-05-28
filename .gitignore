@@ -25,3 +25,6 @@ frontend/.env
 *.sln
 *.sw?
 /.junie/
+/.playwright-mcp/
+/page-snapshot.yml
+/temp-bundle.js

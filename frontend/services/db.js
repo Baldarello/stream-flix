@@ -92,7 +92,55 @@ export class QuixDB extends Dexie {
             knownSlaves: '&id, shortCode',
         });
 
-        // LiveQuery subscription
+        this.version(7).stores({
+            mediaLinks: '++id, mediaId',
+            episodeLinks: null,
+        }).upgrade(async (tx) => {
+            const episodeLinks = await tx.table('episodeLinks').toArray();
+            if (episodeLinks.length > 0) {
+                const mediaLinksToMigrate = episodeLinks.map(link => ({
+                    mediaId: link.episodeId,
+                    url: link.url,
+                    label: link.label || new URL(link.url).hostname,
+                }));
+                await tx.table('mediaLinks').bulkAdd(mediaLinksToMigrate);
+            }
+        });
+
+        this.version(8).stores({
+            myList: '&id, order',
+        }).upgrade(async (tx) => {
+            const oldMyList = await tx.table('myList').toArray();
+            if (oldMyList.length > 0 && typeof oldMyList[0].order === 'undefined') {
+                const newMyList = oldMyList.map((item, index) => ({
+                    id: item.id,
+                    order: index
+                }));
+                await tx.table('myList').clear();
+                await tx.table('myList').bulkAdd(newMyList);
+            }
+        });
+
+        this.version(9).stores({
+            selectedSeasons: '&showId'
+        });
+
+        this.version(10).stores({
+            showFilterPreferences: '&showId'
+        });
+
+        this.version(11).stores({
+            knownSlaves: '&id, lastSeen'
+        });
+
+        this.version(12).stores({
+            episodeProgress: '&episodeId, lastWatchedAt'
+        });
+
+        this.version(13).stores({
+            mediaLinks: '++id, mediaId, isValid'
+        });
+
         this.on('liveQuery', (event, subscriber) => {
             const subscriberFunc = (changes) => {
                 // Handle Dexie v4/v5 change format
