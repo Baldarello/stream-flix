@@ -2,8 +2,8 @@ import {Elysia} from 'elysia';
 import {cors} from '@elysiajs/cors';
 import {staticPlugin} from '@elysiajs/static';
 import {createWebSocketRouter} from './wss.js';
-import {readFileSync, existsSync} from 'fs';
-import {join, dirname} from 'path';
+import {existsSync, readFileSync} from 'fs';
+import {dirname, join} from 'path';
 import {fileURLToPath} from 'url';
 
 

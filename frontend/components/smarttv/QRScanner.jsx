@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
 import {remoteStore} from '../../store/remoteStore.js';
