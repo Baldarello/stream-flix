@@ -70,9 +70,12 @@ const RemotePlayerControlView = observer(() => {
         remotePreviousEpisode,
         playRemoteItem,
         masterReconnectAttempts,
-        isReconnecting
-    } = mediaStore;
-    const { isRemoteMasterConnected, slaveId, openQRScanner, disconnectRemoteMaster } = remoteStore;
+        isReconnecting,
+        isRemoteMasterConnected,
+        slaveId,
+        openQRScanner,
+        disconnectRemoteMaster
+    } = remoteStore;
     const {t} = useTranslations();
     const [selectedSeason, setSelectedSeason] = useState(undefined);
     const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
@@ -80,7 +83,7 @@ const RemotePlayerControlView = observer(() => {
     const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
 
     useEffect(() => {
-        mediaStore.fetchRemoteFullItem();
+        remoteStore.fetchRemoteFullItem();
     }, [nowPlayingItem?.id]);
 
     useEffect(() => {
@@ -217,7 +220,7 @@ const RemotePlayerControlView = observer(() => {
             backdrop_path: remoteFullItem.backdrop_path,
             season_number: selectedSeason,
         };
-        mediaStore.playRemoteItem(itemToPlay);
+        remoteStore.playRemoteItem(itemToPlay);
         setIsEpisodesDrawerOpen(false); // Close drawer after selection
     };
 
@@ -349,9 +352,9 @@ const RemotePlayerControlView = observer(() => {
                     <IconButton edge="start" color="inherit" onClick={() => {
                         stopRemotePlayback();
                         // Navigate to series list by clearing nowPlayingItem
-                        if (mediaStore.remoteSlaveState) {
-                            mediaStore.remoteSlaveState = {
-                                ...mediaStore.remoteSlaveState,
+                        if (remoteStore.remoteSlaveState) {
+                            remoteStore.remoteSlaveState = {
+                                ...remoteStore.remoteSlaveState,
                                 nowPlayingItem: null
                             };
                         }

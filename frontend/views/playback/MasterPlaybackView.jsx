@@ -12,8 +12,8 @@ import RemotePlayerControlView from '../../components/utilities/RemotePlayerCont
  * MasterPlaybackView Component
  * 
  * Wrapper for the RemotePlayerControlView component used when:
- * - mediaStore.isRemoteMaster is true (this device is a remote master)
- * - mediaStore.remoteSlaveState?.nowPlayingItem is set (slave is playing)
+ * - remoteStore.isRemoteMaster is true (this device is a remote master)
+ * - remoteStore.remoteSlaveState?.nowPlayingItem is set (slave is playing)
  * 
  * @returns {React.ReactElement} Remote master playback controls view
  */

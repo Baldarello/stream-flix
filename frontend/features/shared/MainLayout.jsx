@@ -8,6 +8,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import { mediaStore } from '../../store/mediaStore.js';
+import { remoteStore } from '../../store/remoteStore.js';
 import { Header } from '../../components/layout/Header.jsx';
 import { Footer } from '../../components/layout/Footer.jsx';
 import DetailView from '../../components/media/DetailView.jsx';
@@ -60,9 +61,9 @@ export const MainLayout = ({ children }) => {
             <ImportLibraryModal />
             <RevisionsModal />
             <MediaSyncModal
-                open={mediaStore.isMediaSyncModalOpen}
-                onClose={() => mediaStore.closeMediaSyncModal()}
-                slaveId={mediaStore.mediaSyncTargetSlaveId || ''}
+                open={remoteStore.isMediaSyncModalOpen}
+                onClose={() => remoteStore.closeMediaSyncModal()}
+                slaveId={remoteStore.mediaSyncTargetSlaveId || ''}
             />
             <GoogleDriveSyncConflictModal
                 open={mediaStore.isSyncConflictModalOpen}

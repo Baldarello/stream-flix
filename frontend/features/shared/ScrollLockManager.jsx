@@ -27,8 +27,8 @@ export const ScrollLockManager = () => {
         const shouldLockScroll = 
             !!mediaStore.currentSelectedItem || 
             !!mediaStore.nowPlayingItem || 
-            mediaStore.isSmartTVPairingVisible || 
-            (mediaStore.isRemoteMaster && !!remoteStore.remoteSlaveState?.nowPlayingItem);
+            remoteStore.isSmartTVPairingVisible || 
+            (remoteStore.isRemoteMaster && !!remoteStore.remoteSlaveState?.nowPlayingItem);
         
         if (shouldLockScroll) {
             document.body.style.overflow = 'hidden';
@@ -42,8 +42,8 @@ export const ScrollLockManager = () => {
     }, [
         mediaStore.currentSelectedItem, 
         mediaStore.nowPlayingItem, 
-        mediaStore.isSmartTVPairingVisible, 
-        mediaStore.isRemoteMaster, 
+        remoteStore.isSmartTVPairingVisible, 
+        remoteStore.isRemoteMaster, 
         remoteStore.remoteSlaveState?.nowPlayingItem
     ]);
 

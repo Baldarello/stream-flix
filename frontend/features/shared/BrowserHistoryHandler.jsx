@@ -8,6 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { mediaStore } from '../../store/mediaStore.js';
+import { remoteStore } from '../../store/remoteStore.js';
 
 /**
  * Browser History Handler Component
@@ -36,8 +37,8 @@ export const BrowserHistoryHandler = () => {
             // For remote master, we check currentSelectedItem, for slave/local, we check selectedItem.
             if (!state.detailViewOpen && mediaStore.currentSelectedItem && !mediaStore.nowPlayingItem) {
                 // Check if it's a remote master clearing its UI state
-                if (mediaStore.isRemoteMaster) {
-                    mediaStore.clearMasterUiSelection();
+                if (remoteStore.isRemoteMaster) {
+                    remoteStore._masterUiSelectedItem = null;
                     // We don't push history for remote master's UI. The popstate should only be local.
                 } else {
                     mediaStore._closeDetailWithoutHistory();

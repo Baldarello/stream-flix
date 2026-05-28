@@ -4,7 +4,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import ConnectionIndicator from '../utilities/ConnectionIndicator.jsx';
-import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
 
 const SmartTVConnectedView = () => {
     const {t} = useTranslations();
@@ -67,7 +67,7 @@ const SmartTVConnectedView = () => {
             <Button
                 variant="outlined"
                 size="large"
-                onClick={() => mediaStore.exitSmartTVPairingMode()}
+                onClick={() => remoteStore.exitSmartTVPairingMode()}
                 startIcon={<QrCodeScannerIcon/>}
                 sx={{
                     px: 4,

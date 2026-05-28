@@ -70,13 +70,13 @@ export const ViewSwitch = observer(() => {
     // App Mode: SmartTV Pairing
     // Show SmartTV pairing screen when visible and no content is playing
     // When nowPlayingItem is set (e.g., slave receiving playback), show player instead
-    if (mediaStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) {
+    if (remoteStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) {
         return <SmartTVPairingView />;
     }
     
     // Playback: Remote Master
     // When this device is a master and slave is playing content
-    if (mediaStore.isRemoteMaster && mediaStore.remoteSlaveState?.nowPlayingItem) {
+    if (remoteStore.isRemoteMaster && remoteStore.remoteSlaveState?.nowPlayingItem) {
         return <MasterPlaybackView />;
     }
     

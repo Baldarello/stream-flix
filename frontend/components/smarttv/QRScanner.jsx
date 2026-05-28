@@ -30,7 +30,7 @@ const QRScanner = observer(() => {
             };
 
             const onScanSuccess = (decodedText) => {
-                if (!mediaStore.isQRScannerOpen) return;
+                if (!isQRScannerOpen) return;
 
                 try {
                     const url = new URL(decodedText);
@@ -84,7 +84,7 @@ const QRScanner = observer(() => {
     
     const handleManualConnect = () => {
         if (manualCode.trim()) {
-            mediaStore.connectAsRemoteMaster(manualCode.trim().toUpperCase());
+            connectAsRemoteMaster(manualCode.trim().toUpperCase());
         }
     };
 

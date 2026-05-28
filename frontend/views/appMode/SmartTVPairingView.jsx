@@ -12,7 +12,7 @@ import SmartTVScreen from '../../components/smarttv/SmartTVScreen.jsx';
  * SmartTVPairingView Component
  * 
  * Wrapper for the SmartTVScreen component used when:
- * - mediaStore.isSmartTVPairingVisible is true
+ * - remoteStore.isSmartTVPairingVisible is true
  * - mediaStore.nowPlayingItem is not set
  * 
  * @returns {React.ReactElement} SmartTV pairing view

@@ -1,12 +1,12 @@
 import React from 'react';
 import {Box, Button, Paper, Typography} from '@mui/material';
 import {useTranslations} from '../../hooks/useTranslations.js';
-import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
 import QRCodeCard from './QRCodeCard.jsx';
 
 const SmartTVPairingView = () => {
     const {t} = useTranslations();
-    const {slaveId, slaveShortCode} = mediaStore;
+    const {slaveId, slaveShortCode} = remoteStore;
 
     const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
     const baseUrl = isLocalhost ? window.location.origin : "https://q.tnl.one";
@@ -126,7 +126,7 @@ const SmartTVPairingView = () => {
             <Box sx={{ mt: 5 }}>
                 <Button
                     variant="text"
-                    onClick={() => mediaStore.exitSmartTVPairingMode()}
+                    onClick={() => remoteStore.exitSmartTVPairingMode()}
                     sx={{
                         color: 'text.secondary',
                         '&:hover': { color: 'text.primary', bgcolor: 'rgba(255,255,255,0.05)' },

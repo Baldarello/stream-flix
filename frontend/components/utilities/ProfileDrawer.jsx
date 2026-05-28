@@ -46,11 +46,15 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 
 const ProfileDrawer = observer(() => {
     const {
-        isProfileDrawerOpen, toggleProfileDrawer, openQRScanner,
+        isProfileDrawerOpen, toggleProfileDrawer,
         isLoggedIn, googleUser, isSyncing, backupToDrive, restoreFromDrive, language, setLanguage,
-        openShareModal, openImportModal, openRevisionsModal, knownSlaves, reconnectToSlave,
-        updateSlaveName, forgetSlave
+        openShareModal, openImportModal, openRevisionsModal
     } = mediaStore;
+    const {
+        knownSlaves, reconnectToSlave,
+        updateSlaveName, forgetSlave,
+        openQRScanner
+    } = remoteStore;
     const {t} = useTranslations();
     const [editingSlaveId, setEditingSlaveId] = useState(null);
     const [editedName, setEditedName] = useState('');

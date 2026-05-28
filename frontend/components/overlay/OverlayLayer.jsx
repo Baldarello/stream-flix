@@ -9,6 +9,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { mediaStore } from '../../store/mediaStore.js';
+import { remoteStore } from '../../store/remoteStore.js';
 import WatchTogetherModal from '../modals/WatchTogetherModal.jsx';
 import { NotificationSnackbar } from '../utilities/NotificationSnackbar.jsx';
 import LinkSelectionModal from '../modals/LinkSelectionModal.jsx';
@@ -42,9 +43,9 @@ export const OverlayLayer = observer(() => {
             <ImportLibraryModal />
             <RevisionsModal />
             <MediaSyncModal
-                open={mediaStore.isMediaSyncModalOpen}
-                onClose={() => mediaStore.closeMediaSyncModal()}
-                slaveId={mediaStore.mediaSyncTargetSlaveId || ''}
+                open={remoteStore.isMediaSyncModalOpen}
+                onClose={() => remoteStore.closeMediaSyncModal()}
+                slaveId={remoteStore.mediaSyncTargetSlaveId || ''}
             />
             <GoogleDriveSyncConflictModal
                 open={mediaStore.isSyncConflictModalOpen}

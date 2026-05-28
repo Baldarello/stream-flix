@@ -57,7 +57,7 @@ export const Header = observer(() => {
         toggleSearch(false);
         if (remoteStore.isRemoteMaster) {
             // If remote master, clear any selected item on its own UI
-            mediaStore.clearMasterUiSelection();
+            remoteStore._masterUiSelectedItem = null;
             // And set the master's active view
             mediaStore.setActiveView(view);
         } else {
