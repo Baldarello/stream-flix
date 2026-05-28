@@ -11,8 +11,8 @@ import { observer } from 'mobx-react-lite';
 import { Box, Container } from '@mui/material';
 import { useTranslations } from '../../hooks/useTranslations.js';
 import { mediaStore } from '../../store/mediaStore.js';
-import Hero from '../../components/layout/Hero.jsx';
-import ContentRow from '../../components/layout/ContentRow.jsx';
+import { Hero } from '../../components/layout/Hero.jsx';
+import { ContentRow } from '../../components/layout/ContentRow.jsx';
 
 /**
  * Home View Component
