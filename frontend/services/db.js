@@ -1,6 +1,4 @@
-import 'dexie-observable/api';
 import Dexie from 'dexie';
-import dexieObservable from 'dexie-observable';
 
 /**
  * @typedef {Object} MyListItem
@@ -56,7 +54,7 @@ import dexieObservable from 'dexie-observable';
 
 export class QuixDB extends Dexie {
     constructor() {
-        super('quixDB', {addons: [dexieObservable]});
+        super('quixDB');
 
         this.version(1).stores({
             myList: '&id',
@@ -141,16 +139,7 @@ export class QuixDB extends Dexie {
             mediaLinks: '++id, mediaId, isValid'
         });
 
-        this.on('liveQuery', (event, subscriber) => {
-            const subscriberFunc = (changes) => {
-                // Handle Dexie v4/v5 change format
-                const processedChanges = changes.map ? changes : [];
-                if (processedChanges.length > 0) {
-                    this.handleDbChanges(processedChanges);
-                }
-            };
-            subscriber(subscriberFunc);
-        });
+
     }
 
     /**

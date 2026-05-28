@@ -15,7 +15,6 @@
     "@mui/material": "5.18.0",
     "axios": "1.13.6",
     "dexie": "4.3.0",
-    "dexie-observable": "^4.0.1-beta.13",
     "html5-qrcode": "2.3.8",
     "mobx": "6.15.0",
     "mobx-react-lite": "4.1.1",

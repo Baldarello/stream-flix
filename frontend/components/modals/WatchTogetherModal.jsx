@@ -56,7 +56,7 @@ const style = {
 };
 
 const WatchTogetherModal = observer(() => {
-  const { selectedItem } = mediaStore;
+  const { selectedItem,isDetailLoading } = mediaStore;
   const { 
       watchTogetherModalOpen, closeWatchTogetherModal, createRoom, joinRoom, roomId, 
       isHost, participants, hostId, watchTogetherError, 

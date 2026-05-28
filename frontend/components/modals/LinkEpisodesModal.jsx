@@ -337,8 +337,8 @@ const LinkEpisodesModal = observer(() => {
   const { isLinkEpisodesModalOpen, closeLinkEpisodesModal, linkingEpisodesForItem: item, setEpisodeLinksForSeason, expandedLinkAccordionId, setExpandedLinkAccordionId } = mediaStore;
   const { t } = useTranslations();
   
-  const [activeTab, setActiveTab] = useState<TabValue>('add');
-  const [selectedSeason, setSelectedSeason] = useState<number | ''>('');
+  const [activeTab, setActiveTab] = useState('add');
+  const [selectedSeason, setSelectedSeason] = useState('');
 
   useEffect(() => {
     if (item?.seasons?.[0]) {
