@@ -1677,6 +1677,23 @@ class MediaStore {
                     // These are handled by watchTogetherStore
                     break;
 
+                // Error and kick events
+                case 'quix-error':
+                    console.log(`[mediaStore] Error received: ${payload?.message}`);
+                    this.showSnackbar(payload?.message || 'An error occurred', 'error', true);
+                    break;
+                case 'quix-kick-player':
+                    console.log(`[mediaStore] You were kicked from the room`);
+                    this.showSnackbar(payload?.message || 'You were kicked from the room', 'error', true);
+                    runInAction(() => {
+                        this.roomId = null;
+                        this.hostId = null;
+                        this.isHost = false;
+                        this.participants = [];
+                        this.chatHistory = [];
+                    });
+                    break;
+
                 default:
                     break;
             }

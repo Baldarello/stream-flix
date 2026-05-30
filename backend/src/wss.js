@@ -248,6 +248,11 @@ export function createWebSocketRouter() {
         if (!wsData.userName) {
             wsData.userName = generateId('player');
             console.log(`[WebSocket] New client connected. Assigned ID: ${wsData.userName}, Connection open: ${isConnectionOpen(ws)}`);
+            // Send connected message with clientId to frontend
+            ws.send(JSON.stringify({
+                type: 'connected',
+                payload: {clientId: wsData.userName}
+            }));
         }
 
         try {
