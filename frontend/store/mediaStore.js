@@ -1624,7 +1624,7 @@ class MediaStore {
                     if (type === 'quix-slave-registered') {
                         this.slaveId = payload.slaveId;
                         this.slaveShortCode = payload.shortCode;
-                        if (this.isSmartTV) {
+                        if (remoteStore.isSmartTV) {
                             db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
                             db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
                         }
@@ -1638,8 +1638,8 @@ class MediaStore {
                             this.slaveId = payload.slaveId;
                             db.preferences.put({key: 'remoteMasterForSlaveId', value: payload.slaveId});
                         }
-                        if (this.isSmartTV) {
-                            this.isSmartTVPairingVisible = false;
+                        if (remoteStore.isSmartTV) {
+                            remoteStore.isSmartTVPairingVisible = false;
                         } else {
                             if (this.slaveId) {
                                 this.openMediaSyncModal(this.slaveId);
