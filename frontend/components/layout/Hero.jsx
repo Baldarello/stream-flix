@@ -29,6 +29,7 @@ export const Hero = observer(({item, onMoreInfoClick, onPlayClick}) => {
         <Box
             sx={{
                 position: 'relative',
+                isolation: 'isolate',
                 height: {xs: '70vh', md: '56.25vw'},
                 minHeight: '400px',
                 maxHeight: {xs: '600px', md: '800px'},
@@ -36,30 +37,42 @@ export const Hero = observer(({item, onMoreInfoClick, onPlayClick}) => {
                 color: 'white',
                 display: 'flex',
                 alignItems: 'center',
-                overflow: 'hidden', // to contain the animated background
-                '&::before': {
-                    content: '""',
+                overflow: 'hidden',
+                zIndex: 0,
+                pointerEvents: 'none', // Disable pointer events on the entire Hero
+            }}
+        >
+            {/* Background image */}
+            <Box
+                sx={{
                     position: 'absolute',
                     inset: 0,
                     backgroundImage: `url(${item.backdrop_path})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     animation: 'kenburns 30s ease-in-out infinite',
-                },
-                '&::after': {
-                    content: '""',
+                    zIndex: 1,
+                    pointerEvents: 'none',
+                }}
+            />
+            {/* Gradient overlay */}
+            <Box
+                sx={{
                     position: 'absolute',
                     inset: 0,
                     background: 'linear-gradient(to right, rgba(20, 20, 20, 0.9) 30%, transparent 70%), linear-gradient(to top, rgba(20, 20, 20, 1) 10%, transparent 50%)',
-                }
-            }}
-        >
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                }}
+            />
+            {/* Content - enable pointer events here */}
             <Box sx={{
                 position: 'relative',
-                zIndex: 1,
+                zIndex: 3,
                 p: {xs: 2, md: 8},
                 pt: {xs: 'calc(6rem + env(safe-area-inset-top))', md: 'calc(2rem + env(safe-area-inset-top))'},
-                width: {xs: '100%', md: '50%', lg: '40%'}
+                width: {xs: '100%', md: '50%', lg: '40%'},
+                pointerEvents: 'auto' // Re-enable pointer events for content
             }}>
                 <Stack spacing={2}>
                     <Typography variant="h2" component="h1" fontWeight="bold"

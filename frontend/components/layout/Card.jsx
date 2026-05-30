@@ -194,16 +194,18 @@ export const Card = observer(({
                     {actionButtonIcon}
                 </IconButton>
             </Tooltip>
-            <CardActionArea sx={{borderRadius: '10px', overflow: 'hidden', height: '100%'}}>
+            <CardActionArea sx={{borderRadius: '10px', overflow: 'hidden', height: '100%'}} onClick={(e) => { e.stopPropagation(); onClick(item); }}>
                 {item.poster_path ? (
                     <CardMedia
                         component="img"
                         image={item.poster_path}
                         alt={title}
+                        onClick={(e) => { e.stopPropagation(); onClick(item); }}
                         sx={{
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
+                            cursor: 'pointer',
                         }}
                     />
                 ) : (
