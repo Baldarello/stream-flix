@@ -320,6 +320,7 @@ const QRScanner = observer(() => {
                     gap: 1.5
                 }}>
                     <TextField
+                        id="master-slave-code-input"
                         label={t('qrScanner.enterCode')}
                         variant="outlined"
                         value={manualCode}
@@ -353,6 +354,7 @@ const QRScanner = observer(() => {
                         }}
                     />
                     <Button
+                        id="connect-master-slave"
                         variant="contained"
                         onClick={handleManualConnect}
                         disabled={!manualCode.trim() || manualCode.length !== 5}

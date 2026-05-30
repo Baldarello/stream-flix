@@ -49,6 +49,7 @@ const SmartTVPairingView = () => {
                     }}
                 >
                     <Typography
+                        id={"slave-code"}
                         variant="h4"
                         component="p"
                         sx={{

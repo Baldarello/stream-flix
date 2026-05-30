@@ -170,7 +170,8 @@ const AddLinkTabs = observer(({ selectedSeason, seasonEpisodeCount, seasonName, 
             return (
               <Stack spacing={2} >
                 <Alert severity="info">{t('linkEpisodesModal.add.patternInfo')}</Alert>
-                <TextField 
+                <TextField
+                    id={"pattern-url-episode"}
                     label={t('linkEpisodesModal.add.patternUrl')} 
                     required value={pattern} 
                     onChange={e => setPattern(e.target.value)} 
@@ -322,7 +323,7 @@ const AddLinkTabs = observer(({ selectedSeason, seasonEpisodeCount, seasonName, 
                         {renderAddContent()}
                     </Box>
                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1, pr: 0 }}>
-                        <Button onClick={handleSave} variant="contained" disabled={isSaving}>
+                        <Button onClick={handleSave} variant="contained" disabled={isSaving} id={"add-links-button"}>
                             {isSaving ? <CircularProgress size={24} color="inherit" /> : t('linkEpisodesModal.add.save')}
                         </Button>
                     </Box>

@@ -571,7 +571,7 @@ const DetailView = observer(() => {
                                 // FIX: (line 198) Wrap IconButton with Tooltip component
                                 <Tooltip title={t('detail.linkEpisodesTooltip')}>
                                     {/* FIX: openLinkMovieModal will be added to mediaStore */}
-                                    <IconButton onClick={() => mediaStore.openLinkMovieModal(item)}>
+                                    <IconButton id={"link-episode"} onClick={() => mediaStore.openLinkMovieModal(item)}>
                                         <LinkIcon/>
                                     </IconButton>
                                 </Tooltip>
@@ -677,7 +677,7 @@ const DetailView = observer(() => {
                                             fontWeight="bold">{t('detail.episodes')}</Typography>
                                 {/* FIX: (line 259) Wrap IconButton with Tooltip component */}
                                 <Tooltip title={t('detail.linkEpisodesTooltip')}>
-                                    <IconButton onClick={() => mediaStore.openLinkEpisodesModal(item)}>
+                                    <IconButton id={"link-episode"} onClick={() => mediaStore.openLinkEpisodesModal(item)}>
                                         <LinkIcon/>
                                     </IconButton>
                                 </Tooltip>
