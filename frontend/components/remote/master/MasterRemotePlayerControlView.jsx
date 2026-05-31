@@ -444,6 +444,7 @@ const MasterRemotePlayerControlView = observer(() => {
                         <Replay10 fontSize="large"/>
                     </IconButton>
                     <IconButton
+                        id={"play-pause-button"}
                         onClick={handleTogglePlay}
                         aria-label={isPlaying ? t('remote.player.pause') : t('remote.player.play')}
                         sx={{
