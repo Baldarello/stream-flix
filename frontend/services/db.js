@@ -159,36 +159,66 @@ export class QuixDB extends Dexie {
     }
 
     /**
-     * Import data from a SharedLibraryData object
-     * @param {Object} data
+     * Import data from a backup data object
+     * @param {Object} data - Object containing myList, cachedItems, mediaLinks, and episodeProgress
      */
     async importData(data) {
-        if (!data || !data.shows || !Array.isArray(data.shows)) {
-            throw new Error('Invalid import data format');
+        if (!data) {
+            throw new Error('Invalid import data format: data is null or undefined');
         }
 
-        const shows = data.shows;
         const now = Date.now();
 
-        await this.transaction('rw', this.cachedItems, this.mediaLinks, async () => {
-            for (const show of shows) {
-                // First, save the show (assuming shows have an 'id' property from TMDB)
-                // Note: In a real implementation, you might need to fetch show details first
-                const showData = show;
-                await this.cachedItems.put(showData);
+        await this.transaction('rw', [this.myList, this.cachedItems, this.mediaLinks, this.episodeProgress], async () => {
+            // Handle myList table - clear and import
+            if (data.myList && Array.isArray(data.myList)) {
+                await this.myList.clear();
+                if (data.myList.length > 0) {
+                    await this.myList.bulkPut(data.myList);
+                }
+            }
 
-                // Then save all the links for this show
-                if (showData.links && showData.links.length > 0) {
-                    const linksToAdd = showData.links.map(link => ({
-                        ...link,
-                        mediaId: showData.tmdbId,
-                    }));
-                    await this.mediaLinks.bulkPut(linksToAdd);
+            // Handle cachedItems (shows) - clear and import
+            if (data.cachedItems && Array.isArray(data.cachedItems)) {
+                await this.cachedItems.clear();
+                for (const show of data.cachedItems) {
+                    await this.cachedItems.put(show);
+
+                    // Handle links for this show if present
+                    if (show.links && Array.isArray(show.links)) {
+                        for (const link of show.links) {
+                            await this.mediaLinks.put({
+                                ...link,
+                                mediaId: show.id,
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Handle mediaLinks table - clear and import (if passed directly)
+            if (data.mediaLinks && Array.isArray(data.mediaLinks)) {
+                await this.mediaLinks.clear();
+                for (const link of data.mediaLinks) {
+                    await this.mediaLinks.put(link);
+                }
+            }
+
+            // Handle episodeProgress table - clear and import
+            if (data.episodeProgress && Array.isArray(data.episodeProgress)) {
+                await this.episodeProgress.clear();
+                for (const progress of data.episodeProgress) {
+                    await this.episodeProgress.put(progress);
                 }
             }
         });
 
-        console.log(`[DB] Import completed: ${shows.length} shows processed`);
+        const showsCount = data.cachedItems?.length || 0;
+        const myListCount = data.myList?.length || 0;
+        const linksCount = data.mediaLinks?.length || 0;
+        const progressCount = data.episodeProgress?.length || 0;
+
+        console.log(`[DB] Import completed: ${showsCount} shows, ${myListCount} myList items, ${linksCount} links, ${progressCount} progress items`);
     }
 }
 
