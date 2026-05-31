@@ -320,6 +320,17 @@ class RemoteStore {
     sendRemoteCommand = (command) => {
         if (this.isRemoteMaster && this.slaveId) {
             console.log(`[RemoteStore] sendRemoteCommand: isRemoteMaster=${this.isRemoteMaster}, slaveId='${this.slaveId}'`);
+
+            // Optimistically update local state for play/pause commands to keep UI in sync
+            if (command.command === 'play' || command.command === 'pause') {
+                runInAction(() => {
+                    this.remoteSlaveState = {
+                        ...(this.remoteSlaveState ?? {}),
+                        isPlaying: command.command === 'play',
+                    };
+                });
+            }
+
             websocketService.sendMessage({
                 type: 'quix-remote-command',
                 payload: {...command, slaveId: this.slaveId}
