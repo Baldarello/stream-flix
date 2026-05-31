@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {remoteStore} from '../../store/remoteStore.js';
-import {websocketService} from '../../services/websocketService.js';
+import {mediaStore} from '../../../store/mediaStore.js';
+import {remoteStore} from '../../../store/remoteStore.js';
+import {websocketService} from '../../../services/websocketService.js';
 import {
     AppBar,
     Box,
@@ -38,8 +38,8 @@ import SkipNextIcon from '@mui/icons-material/SkipNext';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
-import {useTranslations} from '../../hooks/useTranslations.js';
-import ConnectionIndicator from '../utilities/ConnectionIndicator.jsx';
+import {useTranslations} from '../../../hooks/useTranslations.js';
+import ConnectionIndicator from '../../utilities/ConnectionIndicator.jsx';
 
 const formatTime = (timeInSeconds) => {
     if (isNaN(timeInSeconds) || timeInSeconds < 0) {
@@ -59,7 +59,7 @@ const formatTime = (timeInSeconds) => {
 };
 
 
-const RemotePlayerControlView = observer(() => {
+const MasterRemotePlayerControlView = observer(() => {
     const {
         remoteSlaveState,
         sendRemoteCommand,
@@ -97,7 +97,7 @@ const RemotePlayerControlView = observer(() => {
     // Listen for slave not connected events
     useEffect(() => {
         const handleSlaveNotConnected = (payload) => {
-            console.log('[RemotePlayerControlView] Slave not connected:', payload);
+            console.log('[MasterRemotePlayerControlView] Slave not connected:', payload);
             mediaStore.showSnackbar(payload.message || 'TV not connected. Please scan QR code to reconnect.', 'error');
         };
 
@@ -499,4 +499,4 @@ const RemotePlayerControlView = observer(() => {
     );
 });
 
-export default RemotePlayerControlView;
+export default MasterRemotePlayerControlView;

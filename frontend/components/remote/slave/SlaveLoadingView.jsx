@@ -1,8 +1,8 @@
 import React from 'react';
 import {Box, Typography} from '@mui/material';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
-const SmartTVLoadingView = () => {
+const SlaveLoadingView = () => {
     const {t} = useTranslations();
 
     return (
@@ -40,4 +40,4 @@ const SmartTVLoadingView = () => {
     );
 };
 
-export default SmartTVLoadingView;
+export default SlaveLoadingView;

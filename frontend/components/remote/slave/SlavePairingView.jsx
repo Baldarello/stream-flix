@@ -1,10 +1,10 @@
 import React from 'react';
 import {Box, Button, Paper, Typography} from '@mui/material';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {remoteStore} from '../../store/remoteStore.js';
-import QRCodeCard from './QRCodeCard.jsx';
+import {useTranslations} from '../../../hooks/useTranslations.js';
+import {remoteStore} from '../../../store/remoteStore.js';
+import QRCodeCard from './SlaveQRCodeCard.jsx';
 
-const SmartTVPairingView = () => {
+const SlavePairingView = () => {
     const {t} = useTranslations();
     const {slaveId, slaveShortCode} = remoteStore;
 
@@ -140,4 +140,4 @@ const SmartTVPairingView = () => {
     );
 };
 
-export default SmartTVPairingView;
+export default SlavePairingView;

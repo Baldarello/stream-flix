@@ -2,11 +2,11 @@ import React from 'react';
 import {Box, Button, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import ConnectionIndicator from '../utilities/ConnectionIndicator.jsx';
-import {remoteStore} from '../../store/remoteStore.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
+import ConnectionIndicator from '../../utilities/ConnectionIndicator.jsx';
+import {remoteStore} from '../../../store/remoteStore.js';
 
-const SmartTVConnectedView = () => {
+const SlaveConnectedView = () => {
     const {t} = useTranslations();
 
     return (
@@ -87,4 +87,4 @@ const SmartTVConnectedView = () => {
     );
 };
 
-export default SmartTVConnectedView;
+export default SlaveConnectedView;

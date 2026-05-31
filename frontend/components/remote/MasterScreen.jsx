@@ -8,7 +8,7 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import {Html5QrcodeScanner} from 'html5-qrcode';
 import {useTranslations} from '../../hooks/useTranslations.js';
 
-const QRScanner = observer(() => {
+const MasterScreen = observer(() => {
     const { isQRScannerOpen, isRemoteMasterConnected } = remoteStore;
     const { closeQRScanner, connectAsRemoteMaster } = remoteStore;
     const { t } = useTranslations();
@@ -398,4 +398,4 @@ const QRScanner = observer(() => {
     );
 });
 
-export default QRScanner;
+export default MasterScreen;

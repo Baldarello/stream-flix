@@ -3,13 +3,13 @@ import {observer} from 'mobx-react-lite';
 import {Box} from '@mui/material';
 import {remoteStore} from '../../store/remoteStore.js';
 import {websocketService} from '../../services/websocketService.js';
-import SmartTVBackground from '../smarttv/SmartTVBackground.jsx';
-import SmartTVLoadingView from '../smarttv/SmartTVLoadingView.jsx';
-import SmartTVReconnectingView from '../smarttv/SmartTVReconnectingView.jsx';
-import SmartTVConnectedView from '../smarttv/SmartTVConnectedView.jsx';
-import SmartTVPairingView from '../smarttv/SmartTVPairingView.jsx';
+import SmartTVBackground from './slave/SlaveBackground.jsx';
+import SlaveLoadingView from './slave/SlaveLoadingView.jsx';
+import SlaveReconnectingView from './slave/SlaveReconnectingView.jsx';
+import SlaveConnectedView from './slave/SlaveConnectedView.jsx';
+import SlavePairingView from './slave/SlavePairingView.jsx';
 
-const SmartTVScreen = observer(() => {
+const SlaveScreen = observer(() => {
     const { slaveId } = remoteStore;
     const { isRemoteMasterConnected, isSmartTV } = remoteStore;
 
@@ -60,19 +60,19 @@ const SmartTVScreen = observer(() => {
     const renderContent = () => {
         // Show reconnecting state when slave is refreshing (between beforeunload and reconnect)
         if (isReconnecting) {
-            return <SmartTVReconnectingView />;
+            return <SlaveReconnectingView />;
         }
 
         if (isRemoteMasterConnected) {
-            return <SmartTVConnectedView />;
+            return <SlaveConnectedView />;
         }
 
         if (slaveId) {
-            return <SmartTVPairingView />;
+            return <SlavePairingView />;
         }
 
         // Loading state
-        return <SmartTVLoadingView />;
+        return <SlaveLoadingView />;
     };
 
     return (
@@ -114,4 +114,4 @@ const SmartTVScreen = observer(() => {
     );
 });
 
-export default SmartTVScreen;
+export default SlaveScreen;

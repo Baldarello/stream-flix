@@ -123,9 +123,9 @@ quix/
 │   │   ├── Hero.tsx              # Featured content hero
 │   │   ├── MediaSyncModal.tsx    # Device sync modal
 │   │   ├── ProfileDrawer.tsx     # User profile drawer
-│   │   ├── QRScanner.tsx         # QR code scanner
-│   │   ├── RemotePlayerControlView.tsx  # Remote control UI
-│   │   ├── SmartTVScreen.tsx     # Full-screen TV mode
+│   │   ├── MasterScreen.tsx         # QR code scanner
+│   │   ├── MasterRemotePlayerControlView.tsx  # Remote control UI
+│   │   ├── SlaveScreen.tsx     # Full-screen TV mode
 │   │   ├── VideoPlayer.tsx       # Custom video player
 │   │   ├── WatchTogetherModal.tsx      # Watch together room
 │   │   ├── LinkMovieModal.tsx           # Link video to movie

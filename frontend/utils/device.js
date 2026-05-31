@@ -2,7 +2,7 @@ export const isSmartTV = () => {
   const userAgent = navigator.userAgent.toLowerCase();
   const tvKeywords = [
     'smart-tv',
-    'smarttv',
+    'remote',
     'googletv',
     'crkey', // Chromecast
     'tizen', // Samsung

@@ -38,7 +38,7 @@ export const Hero = observer(({item, onMoreInfoClick, onPlayClick}) => {
                 display: 'flex',
                 alignItems: 'center',
                 overflow: 'hidden',
-                zIndex: 0,
+                zIndex: 100,
                 pointerEvents: 'none', // Disable pointer events on the entire Hero
             }}
         >

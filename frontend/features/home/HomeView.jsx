@@ -39,7 +39,7 @@ export const HomeView = observer(() => {
             <Container 
                 id="home-content-rows"
                 maxWidth={false} 
-                sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 } }}
+                sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 }, zIndex: 0, position: 'relative' }}
             >
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                     {homePageRows.map(row => {

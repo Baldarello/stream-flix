@@ -1,6 +1,6 @@
 import React from 'react';
 import {Box, Paper} from '@mui/material';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 const QRCodeCard = ({qrCodeUrl}) => {
     const {t} = useTranslations();

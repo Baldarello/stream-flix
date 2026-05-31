@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import QRScanner from '../../components/smarttv/QRScanner.jsx';
+import MasterScreen from '@/remote/MasterScreen.jsx';
 
 /**
  * QRScannerView Component
  * 
- * Wrapper for the QRScanner component used when remoteStore.isQRScannerOpen is true.
+ * Wrapper for the MasterScreen component used when remoteStore.isQRScannerOpen is true.
  * 
  * @returns {React.ReactElement} QR Scanner view
  */
 export const QRScannerView = () => {
-    return <QRScanner />;
+    return <MasterScreen />;
 };
 
 QRScannerView.displayName = 'QRScannerView';
