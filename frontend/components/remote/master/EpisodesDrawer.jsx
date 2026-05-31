@@ -36,17 +36,27 @@ const EpisodesDrawer = observer(({
     const isEpisode = nowPlayingItem && 'episode_number' in nowPlayingItem;
 
     const [selectedSeason, setSelectedSeason] = useState(undefined);
-    const isInitialMount = useRef(true);
+    const userHasSelectedSeason = useRef(false);
 
     // Initialize selectedSeason based on currently playing episode
     useEffect(() => {
-        // Only initialize selectedSeason on first mount (when undefined)
-        // Use ref to track initial mount to avoid resetting user selection
-        if (isInitialMount.current && nowPlayingItem && 'season_number' in nowPlayingItem) {
+        // Only sync with nowPlayingItem if user hasn't manually selected a season
+        if (!userHasSelectedSeason.current && nowPlayingItem && 'season_number' in nowPlayingItem) {
             setSelectedSeason(nowPlayingItem.season_number);
-            isInitialMount.current = false;
         }
     }, [nowPlayingItem]);
+
+    // Reset user selection tracking when drawer closes
+    useEffect(() => {
+        if (!isOpen) {
+            userHasSelectedSeason.current = false;
+        }
+    }, [isOpen]);
+
+    const handleSeasonChange = (e) => {
+        userHasSelectedSeason.current = true;
+        setSelectedSeason(Number(e.target.value));
+    };
 
     const handleSelectEpisode = (episode) => {
         if (!remoteFullItem) return;
@@ -128,9 +138,9 @@ const EpisodesDrawer = observer(({
                         {/* FIX: (line 170) Pass label text as children to InputLabel */}
                         <InputLabel>{t('remote.detail.season')}</InputLabel>
                         <Select
-                            value={selectedSeason || ''}
+                            value={selectedSeason ?? ''}
                             label={t('remote.detail.season')}
-                            onChange={(e) => setSelectedSeason(Number(e.target.value))}
+                            onChange={handleSeasonChange}
                         >
                             {remoteFullItem.seasons.map(season => (
                                 <MenuItem key={season.id} value={season.season_number}>
