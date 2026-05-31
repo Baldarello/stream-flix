@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../../store/mediaStore.js';
 import {remoteStore} from '../../../store/remoteStore.js';
@@ -36,15 +36,17 @@ const EpisodesDrawer = observer(({
     const isEpisode = nowPlayingItem && 'episode_number' in nowPlayingItem;
 
     const [selectedSeason, setSelectedSeason] = useState(undefined);
+    const isInitialMount = useRef(true);
 
     // Initialize selectedSeason based on currently playing episode
     useEffect(() => {
-        // Only initialize selectedSeason on first load (when undefined)
-        // Don't reset when nowPlayingItem changes to preserve user selection
-        if (selectedSeason === undefined && nowPlayingItem && 'season_number' in nowPlayingItem) {
+        // Only initialize selectedSeason on first mount (when undefined)
+        // Use ref to track initial mount to avoid resetting user selection
+        if (isInitialMount.current && nowPlayingItem && 'season_number' in nowPlayingItem) {
             setSelectedSeason(nowPlayingItem.season_number);
+            isInitialMount.current = false;
         }
-    }, [nowPlayingItem, selectedSeason]);
+    }, [nowPlayingItem]);
 
     const handleSelectEpisode = (episode) => {
         if (!remoteFullItem) return;
