@@ -212,13 +212,12 @@ const MasterRemotePlayerControlView = observer(() => {
     };
 
     const handleSelectEpisode = (episode) => {
-        if (!remoteFullItem || !selectedSeason) return;
+        if (!remoteFullItem) return;
         const itemToPlay = {
             ...episode,
             show_id: remoteFullItem.id,
             show_title: remoteFullItem.title || remoteFullItem.name || '',
             backdrop_path: remoteFullItem.backdrop_path,
-            season_number: selectedSeason,
         };
         remoteStore.playRemoteItem(itemToPlay);
         setIsEpisodesDrawerOpen(false); // Close drawer after selection
