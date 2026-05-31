@@ -87,12 +87,12 @@ const MasterRemotePlayerControlView = observer(() => {
     }, [nowPlayingItem?.id]);
 
     useEffect(() => {
-        if (nowPlayingItem && 'season_number' in nowPlayingItem) {
+        // Only initialize selectedSeason on first load (when undefined)
+        // Don't reset when nowPlayingItem changes to preserve user selection
+        if (selectedSeason === undefined && nowPlayingItem && 'season_number' in nowPlayingItem) {
             setSelectedSeason(nowPlayingItem.season_number);
-        } else {
-            setSelectedSeason(undefined);
         }
-    }, [nowPlayingItem]);
+    }, [nowPlayingItem, selectedSeason]);
 
     // Listen for slave not connected events
     useEffect(() => {
