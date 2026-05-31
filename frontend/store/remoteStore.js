@@ -263,6 +263,33 @@ class RemoteStore {
         });
     };
 
+    // Update the slave ID in knownSlaves (used when backend returns full ID after shortCode was stored)
+    updateSlaveId = async (newSlaveId) => {
+        // Find if there's an existing slave with a matching shortCode (likely stored by shortCode)
+        const currentSlaveId = this.slaveId;
+        const existingSlave = this.knownSlaves.find(s => s.id === currentSlaveId);
+        
+        if (existingSlave && currentSlaveId !== newSlaveId) {
+            // Delete old entry and create new one with full ID
+            await db.knownSlaves.delete(currentSlaveId);
+            const updatedSlave = {
+                ...existingSlave,
+                id: newSlaveId,
+                lastSeen: Date.now()
+            };
+            await db.knownSlaves.put(updatedSlave);
+            
+            // Update in-memory knownSlaves
+            const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
+            runInAction(() => {
+                this.knownSlaves = updatedSlaves;
+                // Also update this.slaveId to the new full ID
+                this.slaveId = newSlaveId;
+            });
+            console.log(`[RemoteStore] Updated slave ID from ${currentSlaveId} to ${newSlaveId}`);
+        }
+    };
+
     forgetSlave = async (slaveId) => {
         if (this.isRemoteMaster && this.slaveId === slaveId) {
             this.disconnectRemoteMaster();
@@ -274,13 +301,21 @@ class RemoteStore {
         });
     };
 
-    setSlaveOnlineStatus = (slaveId, isOnline) => {
+    setSlaveOnlineStatus = async (slaveId, isOnline) => {
         runInAction(() => {
             const slave = this.knownSlaves.find(s => s.id === slaveId);
             if (slave) {
                 slave.isOnline = isOnline;
             }
         });
+        // Persist isOnline status to IndexedDB so it survives page refreshes
+        if (slaveId) {
+            try {
+                await db.knownSlaves.update(slaveId, {isOnline});
+            } catch (error) {
+                console.error('[RemoteStore] Failed to persist isOnline status:', error);
+            }
+        }
     };
 
     setRemoteSelectedItem = (item) => {

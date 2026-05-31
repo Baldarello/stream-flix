@@ -1638,8 +1638,13 @@ class MediaStore {
                         this.showSnackbar('notifications.tvReady', 'info', true);
                     } else if (type === 'quix-master-connected') {
                         this.isRemoteMasterConnected = true;
-                        if (this.slaveId) {
-                            this.setSlaveOnlineStatus(this.slaveId, true);
+                        // Use payload.slaveId (full ID from backend) to mark slave as online
+                        // This ensures we use the correct full ID even if remoteStore.slaveId was a shortCode
+                        if (payload?.slaveId) {
+                            this.setSlaveOnlineStatus(payload.slaveId, true);
+                            // Also update knownSlaves entry with the full ID if we only have shortCode stored
+                            // This handles the case where connectAsRemoteMaster stored by shortCode
+                            remoteStore.updateSlaveId(payload.slaveId);
                         }
                         if (payload?.slaveId && this.isRemoteMaster) {
                             this.slaveId = payload.slaveId;
@@ -1648,13 +1653,19 @@ class MediaStore {
                         if (remoteStore.isSmartTV) {
                             remoteStore.isSmartTVPairingVisible = false;
                         } else {
-                            if (this.slaveId) {
-                                this.openMediaSyncModal(this.slaveId);
+                            if (payload?.slaveId) {
+                                this.openMediaSyncModal(payload.slaveId);
                             }
                             this.stopMasterReconnectTimer();
                             this.startPingInterval();
                         }
                         this.showSnackbar('notifications.remoteConnected', 'success', true);
+                    } else if (type === 'quix-slave-reconnected') {
+                        // Slave has reconnected - mark it as online
+                        if (payload?.slaveId) {
+                            this.setSlaveOnlineStatus(payload.slaveId, true);
+                        }
+                        this.showSnackbar('notifications.slaveReconnected', 'success', true);
                     } else if (type === 'quix-slave-status-update') {
                         this.remoteSlaveState = payload;
                     } else if (type === 'quix-remote-command') {
