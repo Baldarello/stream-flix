@@ -37,6 +37,7 @@ class RemoteStore {
     __masterUiActiveView = 'Home';
     __masterUiSelectedItem = null;
     _isQRScannerOpen = false;
+    _pendingRemoteSessionInit = false; // Flag to track if we need to re-init after data loads
 
     // ===== PUBLIC GETTERS/SETTERS (for backwards compatibility) =====
     get isSmartTV() { return this._isSmartTV; }
@@ -698,12 +699,16 @@ class RemoteStore {
         if (this.isSmartTV) {
             if (!this.hasLoadedInitialData) {
                 console.log("[RemoteStore] initRemoteSession: waiting for initial data to load before registering slave");
+                this._pendingRemoteSessionInit = true; // Mark that we need to retry after data loads
                 return;
             }
             if (!websocketService.isConnected) {
                 console.log("[RemoteStore] initRemoteSession: websocket not connected, will retry on reconnect");
+                this._pendingRemoteSessionInit = true;
                 return;
             }
+            // Clear the pending flag since we're about to init
+            this._pendingRemoteSessionInit = false;
             const payload = {};
             if (this.slaveId) payload.slaveId = this.slaveId;
             if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;

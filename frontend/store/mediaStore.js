@@ -868,7 +868,8 @@ class MediaStore {
         await remoteStore.loadPersistedData();
 
         // Init remote session after remote data is loaded
-        if (remoteStore.isSmartTV && remoteStore.slaveId) {
+        // Check _pendingRemoteSessionInit flag in case WebSocket connected before data was loaded
+        if ((remoteStore.isSmartTV && remoteStore.slaveId) || remoteStore._pendingRemoteSessionInit) {
             remoteStore.initRemoteSession();
         } else if (this.isRemoteMaster && this.slaveId) {
             remoteStore.initRemoteSession();

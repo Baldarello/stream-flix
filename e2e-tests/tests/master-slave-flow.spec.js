@@ -258,6 +258,66 @@ test.describe('Master-Slave Remote SmartTV Flow', () => {
   });
 
   /**
+   * Test: Slave Short Code Persists After Refresh
+   * 
+   * This test verifies that when a slave device refreshes the page,
+   * it receives the same short code as before (not a new one).
+   * This is critical for the persistent short code feature.
+   */
+  test('slave short code persists after page refresh', async ({ browser }) => {
+    const page = await slaveContext.newPage();
+    
+    // Log all console messages
+    page.on('console', msg => {
+      console.log(`[SLAVE CONSOLE ${msg.type()}]: ${msg.text()}`);
+    });
+    
+    // Step 1: Open application and enable SmartTV mode
+    console.log('=== STEP 1: Initial load and enable SmartTV mode ===');
+    await page.goto(BASE_URL);
+    await page.waitForLoadState('networkidle');
+    
+    // Click slave-button to enable SmartTV mode
+    const slaveBtn = page.locator('#slave-button');
+    await slaveBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await slaveBtn.click();
+    
+    // Wait for SlavePairingView and code to be populated
+    await page.waitForTimeout(3000);
+    
+    // Get the initial short code
+    const slaveCodeElement = page.locator('#slave-code');
+    await slaveCodeElement.waitFor({ state: 'visible', timeout: 10000 });
+    
+    const initialShortCode = await slaveCodeElement.textContent();
+    console.log(`Initial short code: "${initialShortCode}"`);
+    
+    expect(initialShortCode).toBeTruthy();
+    expect(initialShortCode.length).toBe(5);
+    
+    // Step 2: Refresh the page (simulating user pressing F5 or refresh button)
+    console.log('=== STEP 2: Refreshing page ===');
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    
+    // Wait for data to be loaded after refresh
+    // After refresh, isSmartTV=true is persisted, so SlavePairingView is shown directly
+    // We just need to wait for the short code to be displayed
+    await page.waitForTimeout(3000);
+    
+    // Get the short code after refresh (SlavePairingView should be shown automatically)
+    const refreshedShortCodeElement = page.locator('#slave-code');
+    await refreshedShortCodeElement.waitFor({ state: 'visible', timeout: 10000 });
+    
+    const refreshedShortCode = await refreshedShortCodeElement.textContent();
+    console.log(`Short code after refresh: "${refreshedShortCode}"`);
+    
+    // Verify the short code is the same as before
+    expect(refreshedShortCode).toBe(initialShortCode);
+    console.log(`SUCCESS: Short code persisted after refresh!`);
+  });
+
+  /**
    * Test: Episode Link Configuration
    */
   test('can configure episode links for a show', async ({ browser }) => {
