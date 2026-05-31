@@ -14,6 +14,10 @@ let authPopupCheckInterval = null;
 // Token refresh interval (in milliseconds) - refresh 5 minutes before expiry
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
+// Retry configuration for token refresh
+const TOKEN_REFRESH_MAX_RETRIES = 3;
+const TOKEN_REFRESH_RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff: 1s, 2s, 4s
+
 /**
  * Stops the popup polling interval and cleans up.
  */
@@ -37,7 +41,7 @@ const checkAuthPopupClosed = () => {
         // If we still have the loading flag set, it means no callback was triggered
         // (user closed the popup without completing login)
         if (mediaStore.isGoogleAuthLoading) {
-            console.log("Auth popup was closed without completing login.");
+            console.log("[GoogleAuth] Auth popup was closed without completing login.");
             mediaStore.isGoogleAuthLoading = false;
         }
     }
@@ -49,9 +53,11 @@ const checkAuthPopupClosed = () => {
  */
 const refreshAccessToken = async (user) => {
     if (!user.refreshToken) {
-        console.warn("No refresh token available for renewal.");
+        console.warn("[GoogleAuth] No refresh token available for renewal.");
         return null;
     }
+
+    console.log("[GoogleAuth] Attempting to refresh access token...");
 
     try {
         // Use Google's token endpoint to exchange refresh token for new access token
@@ -69,11 +75,12 @@ const refreshAccessToken = async (user) => {
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            console.error("Failed to refresh token:", errorData);
+            console.error("[GoogleAuth] Failed to refresh token:", errorData);
             return null;
         }
 
         const tokenData = await response.json();
+        console.log("[GoogleAuth] Token refresh successful. New token expires in:", tokenData.expires_in, "seconds");
         
         return {
             ...user,
@@ -83,9 +90,40 @@ const refreshAccessToken = async (user) => {
             refreshToken: tokenData.refresh_token || user.refreshToken,
         };
     } catch (error) {
-        console.error("Error during token refresh:", error);
+        console.error("[GoogleAuth] Error during token refresh:", error);
         return null;
     }
+};
+
+/**
+ * Attempts to refresh the access token with exponential backoff retry logic.
+ * @param {Object} user - The user object containing the refresh token
+ * @returns A new GoogleUser object with the new access token, or null if all retries failed.
+ */
+const refreshAccessTokenWithRetry = async (user) => {
+    let lastError = null;
+    
+    for (let attempt = 0; attempt < TOKEN_REFRESH_MAX_RETRIES; attempt++) {
+        console.log(`[GoogleAuth] Token refresh attempt ${attempt + 1} of ${TOKEN_REFRESH_MAX_RETRIES}`);
+        
+        const result = await refreshAccessToken(user);
+        
+        if (result) {
+            return result;
+        }
+        
+        lastError = "Token refresh returned null";
+        
+        // If not the last attempt, wait before retrying
+        if (attempt < TOKEN_REFRESH_MAX_RETRIES - 1) {
+            const delay = TOKEN_REFRESH_RETRY_DELAYS[attempt];
+            console.log(`[GoogleAuth] Token refresh failed, retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+    
+    console.error(`[GoogleAuth] Token refresh failed after ${TOKEN_REFRESH_MAX_RETRIES} attempts. Last error:`, lastError);
+    return null;
 };
 
 
@@ -101,6 +139,7 @@ const scheduleTokenRefresh = (user) => {
 
     if (!user.refreshToken || !user.tokenExpiry) {
         // No refresh token available, token will expire naturally
+        console.log("[GoogleAuth] No refresh token or expiry. Token will expire naturally.");
         return;
     }
 
@@ -108,29 +147,29 @@ const scheduleTokenRefresh = (user) => {
     const timeUntilRefresh = user.tokenExpiry - Date.now() - TOKEN_REFRESH_BUFFER_MS;
     
     if (timeUntilRefresh > 0) {
-        console.log(`Scheduling token refresh in ${Math.round(timeUntilRefresh / 1000 / 60)} minutes.`);
+        console.log(`[GoogleAuth] Scheduling token refresh in ${Math.round(timeUntilRefresh / 1000 / 60)} minutes.`);
         refreshTimer = window.setTimeout(async () => {
-            console.log("Attempting to refresh access token...");
-            const newUser = await refreshAccessToken(user);
+            console.log("[GoogleAuth] Token refresh timer triggered. Attempting to refresh access token...");
+            const newUser = await refreshAccessTokenWithRetry(user);
             
             if (newUser) {
                 // Save updated session
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUser));
                 await mediaStore.setGoogleUser(newUser);
-                console.log("Access token refreshed successfully.");
+                console.log("[GoogleAuth] Access token refreshed successfully via scheduled refresh.");
                 
                 // Schedule next refresh
                 scheduleTokenRefresh(newUser);
             } else {
                 // Refresh failed, user will need to re-authenticate
-                console.warn("Token refresh failed. User will need to sign in again.");
+                console.warn("[GoogleAuth] Token refresh failed after all retries. User will need to sign in again.");
                 mediaStore.showSnackbar("Session expired. Please sign in again.", "warning");
             }
         }, timeUntilRefresh);
     } else {
         // Token already needs refresh
-        console.log("Token already expired or close to expiry. Attempting refresh...");
-        refreshAccessToken(user).then((newUser) => {
+        console.log("[GoogleAuth] Token already expired or close to expiry. Attempting immediate refresh...");
+        refreshAccessTokenWithRetry(user).then((newUser) => {
             if (newUser) {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUser));
                 mediaStore.setGoogleUser(newUser);
@@ -142,10 +181,15 @@ const scheduleTokenRefresh = (user) => {
 
 
 const tryRestoringSession = async () => {
+    console.log("[GoogleAuth] Attempting to restore Google session...");
+    
     const sessionData = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!sessionData) {
+        console.log("[GoogleAuth] No session data found in localStorage.");
         return;
     }
+
+    console.log("[GoogleAuth] Session data found in localStorage. Parsing...");
 
     try {
         const user = JSON.parse(sessionData);
@@ -153,28 +197,37 @@ const tryRestoringSession = async () => {
             throw new Error("Invalid session data in localStorage.");
         }
 
+        console.log("[GoogleAuth] Session data parsed successfully. User:", user.email);
+
         // Check if token is expired or about to expire
         const now = Date.now();
         const isTokenExpired = user.tokenExpiry ? now >= user.tokenExpiry : true;
         const isTokenExpiringSoon = user.tokenExpiry ? now >= (user.tokenExpiry - TOKEN_REFRESH_BUFFER_MS) : false;
 
+        console.log(`[GoogleAuth] Token status - Expired: ${isTokenExpired}, Expiring Soon: ${isTokenExpiringSoon}`);
+
         if (isTokenExpired) {
             // Token is expired, try to use refresh token
             if (user.refreshToken) {
-                console.log("Access token expired. Attempting to refresh...");
-                const newUser = await refreshAccessToken(user);
+                console.log("[GoogleAuth] Access token expired. Attempting to refresh with retry logic...");
+                const newUser = await refreshAccessTokenWithRetry(user);
                 
                 if (newUser) {
                     // Save refreshed session
+                    console.log("[GoogleAuth] Session restored successfully via refresh.");
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUser));
                     await mediaStore.setGoogleUser(newUser);
                     scheduleTokenRefresh(newUser);
                     return;
                 }
+                
+                console.warn("[GoogleAuth] Token refresh failed after all retries.");
+            } else {
+                console.warn("[GoogleAuth] No refresh token available.");
             }
             
             // Refresh failed or no refresh token available
-            console.warn("Google session expired and could not be refreshed.");
+            console.warn("[GoogleAuth] Google session expired and could not be refreshed.");
             localStorage.removeItem(LOCAL_STORAGE_KEY);
             return;
         }
@@ -182,17 +235,20 @@ const tryRestoringSession = async () => {
         // Token is valid (or expiring soon but we'll refresh it)
         // Validate by fetching user info if token is not about to expire
         if (!isTokenExpiringSoon) {
+            console.log("[GoogleAuth] Validating token with Google API...");
             const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                 headers: {'Authorization': `Bearer ${user.accessToken}`}
             });
 
             if (!response.ok) {
                 // Token validation failed, try refresh
+                console.log("[GoogleAuth] Token validation failed. Status:", response.status);
                 if (user.refreshToken) {
-                    console.log("Token validation failed. Attempting to refresh...");
-                    const newUser = await refreshAccessToken(user);
+                    console.log("[GoogleAuth] Attempting to refresh token...");
+                    const newUser = await refreshAccessTokenWithRetry(user);
                     
                     if (newUser) {
+                        console.log("[GoogleAuth] Session restored after failed validation.");
                         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newUser));
                         await mediaStore.setGoogleUser(newUser);
                         scheduleTokenRefresh(newUser);
@@ -200,17 +256,22 @@ const tryRestoringSession = async () => {
                     }
                 }
                 
-                console.warn("Google session invalid and could not be refreshed.");
+                console.warn("[GoogleAuth] Google session invalid and could not be refreshed.");
                 localStorage.removeItem(LOCAL_STORAGE_KEY);
                 return;
             }
+            
+            console.log("[GoogleAuth] Token validated successfully with Google API.");
+        } else {
+            console.log("[GoogleAuth] Token is expiring soon. Skipping validation, will refresh proactively.");
         }
 
         // Token is valid (or we refreshed it)
+        console.log("[GoogleAuth] Restoring session for user:", user.email);
         await mediaStore.setGoogleUser(user);
         scheduleTokenRefresh(user);
     } catch (error) {
-        console.warn("Could not restore session:", error);
+        console.warn("[GoogleAuth] Could not restore session:", error);
         // Clean up invalid data
         localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
@@ -218,9 +279,11 @@ const tryRestoringSession = async () => {
 
 
 export const initGoogleAuth = async () => {
+    console.log("[GoogleAuth] Initializing Google Auth...");
+    
     // If the client ID is not configured, skip all Google authentication logic.
     if (!GOOGLE_CLIENT_ID) {
-        console.warn("Google Client ID is not configured. Skipping Google Auth initialization.");
+        console.warn("[GoogleAuth] Google Client ID is not configured. Skipping Google Auth initialization.");
         return;
     }
 
@@ -228,7 +291,7 @@ export const initGoogleAuth = async () => {
         // Wait a moment for the GSI script to load from index.html
         await new Promise(resolve => setTimeout(resolve, 500));
         if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-            console.error("Google Identity Services library still not loaded after delay.");
+            console.error("[GoogleAuth] Google Identity Services library still not loaded after delay.");
             return;
         }
     }
@@ -252,6 +315,13 @@ export const initGoogleAuth = async () => {
                 // Reset loading state
                 mediaStore.isGoogleAuthLoading = false;
                 stopPopupPolling();
+                
+                console.log("[GoogleAuth] Token response received:", {
+                    hasAccessToken: !!tokenResponse?.access_token,
+                    hasRefreshToken: !!tokenResponse?.refresh_token,
+                    expiresIn: tokenResponse?.expires_in,
+                    error: tokenResponse?.error
+                });
                 
                 if (tokenResponse && tokenResponse.access_token) {
                     // Fetch user profile after getting the token
@@ -277,6 +347,7 @@ export const initGoogleAuth = async () => {
                         };
 
                         // Persist session to localStorage
+                        console.log("[GoogleAuth] Saving session to localStorage. User:", user.email, "Token expires in:", tokenResponse.expires_in, "seconds");
                         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
 
                         await mediaStore.setGoogleUser(user);
@@ -288,11 +359,11 @@ export const initGoogleAuth = async () => {
                         await mediaStore.synchronizeWithDrive();
 
                     } catch (error) {
-                        console.error("Error fetching user profile:", error);
+                        console.error("[GoogleAuth] Error fetching user profile:", error);
                         mediaStore.showSnackbar("Failed to fetch user profile.", "error");
                     }
                 } else {
-                    console.error("Token response is missing access_token", tokenResponse);
+                    console.error("[GoogleAuth] Token response is missing access_token", tokenResponse);
                     mediaStore.showSnackbar("Authentication failed: No access token received.", "error");
                 }
             },
@@ -301,18 +372,20 @@ export const initGoogleAuth = async () => {
                 mediaStore.isGoogleAuthLoading = false;
                 stopPopupPolling();
                 
-                console.error("Google Auth Error:", error);
+                console.error("[GoogleAuth] Google Auth Error:", error);
                 mediaStore.showSnackbar(`Authentication Error: ${error.type}`, "error");
             }
         });
     } catch (error) {
-        console.error("Failed to initialize Google Token Client:", error);
+        console.error("[GoogleAuth] Failed to initialize Google Token Client:", error);
     }
 };
 
 export const handleSignIn = () => {
+    console.log("[GoogleAuth] handleSignIn called");
+    
     if (!tokenClient) {
-        console.error("Google Auth not initialized.");
+        console.error("[GoogleAuth] Google Auth not initialized.");
         mediaStore.showSnackbar("Google Authentication is not ready.", "error");
         return;
     }
@@ -331,7 +404,7 @@ export const handleSignIn = () => {
             // Most browsers will have the popup as the most recently focused window
             authPopup = window;
         } catch (e) {
-            console.log("Cannot access popup window reference");
+            console.log("[GoogleAuth] Cannot access popup window reference");
         }
         
         // Start checking interval
@@ -340,6 +413,8 @@ export const handleSignIn = () => {
 };
 
 export const handleSignOut = () => {
+    console.log("[GoogleAuth] handleSignOut called");
+    
     const user = mediaStore.googleUser;
 
     // Clear any scheduled refresh timers
@@ -354,7 +429,7 @@ export const handleSignOut = () => {
     if (user?.accessToken) {
         // Revoke the token to sever the connection
         google.accounts.oauth2.revoke(user.accessToken, () => {
-            console.log('Access token revoked.');
+            console.log('[GoogleAuth] Access token revoked.');
         });
     }
     // Clear user data from the store
