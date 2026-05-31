@@ -648,6 +648,12 @@ class MediaStore {
     }
 
     get heroContent() {
+        // Priority 1: First item from user's personal list
+        if (this.myListItems.length > 0) {
+            return this.myListItems[0];
+        }
+
+        // Priority 2: Theme-based content
         switch (this.activeTheme) {
             case 'Film':
                 return this.latestMovies.length > 0 ? this.latestMovies[0] : this.trending[0];

@@ -8,7 +8,7 @@ import {observer} from 'mobx-react-lite';
 // FIX: mediaStore is now a named export, not a default one.
 import {mediaStore} from '../../store/mediaStore.js';
 
-export const Hero = observer(({item, onMoreInfoClick, onPlayClick}) => {
+export const Hero = observer(({item, onMoreInfoClick, onPlayClick, id}) => {
     const {t} = useTranslations();
     const title = item.title || item.name;
     const overview = item.overview.length > 200 ? `${item.overview.substring(0, 200)}...` : item.overview;
@@ -27,6 +27,7 @@ export const Hero = observer(({item, onMoreInfoClick, onPlayClick}) => {
 
     return (
         <Box
+            id={id}
             sx={{
                 position: 'relative',
                 isolation: 'isolate',
