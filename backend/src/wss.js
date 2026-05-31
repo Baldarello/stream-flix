@@ -12,6 +12,7 @@ const remoteSessions = new Map();
 const shortCodeToSlaveId = new Map();
 const shortCodeExpiry = new Map(); // shortCode -> expiry timestamp
 const SHORT_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL for shortCodes after slave disconnect
+const slaveIdToShortCode = new Map(); // Persistent mapping of slaveId -> shortCode (never expires for known slaves)
 const mediaSyncProgress = new Map();
 // Track slaves that are intentionally disconnecting (for reload) - preserve session for reconnection
 const intentionallyDisconnectingSlaves = new Set();
@@ -19,10 +20,20 @@ const intentionallyDisconnectingSlaves = new Set();
 const intentionallyDisconnectingMasters = new Set();
 
 // ShortCode cleanup interval - removes expired shortCodes
+// NOTE: shortCodeToSlaveId mappings are now persistent for registered slaves
+// This cleanup only removes orphaned shortCodes that were never claimed by a slave
 setInterval(() => {
     const now = Date.now();
     for (const [code, expiry] of shortCodeExpiry.entries()) {
         if (now > expiry) {
+            // Only clean up if this shortCode is NOT associated with a known slaveId
+            // If it has a corresponding slaveId with a persistent mapping, skip cleanup
+            const slaveId = shortCodeToSlaveId.get(code);
+            if (slaveId && slaveIdToShortCode.has(slaveId)) {
+                // This slaveId has a persistent shortCode - don't clean it up
+                console.log(`[WebSocket] Skipping cleanup for persistent shortCode: ${code} (slaveId: ${slaveId})`);
+                continue;
+            }
             shortCodeToSlaveId.delete(code);
             shortCodeExpiry.delete(code);
             console.log(`[WebSocket] Cleaned up expired shortCode: ${code}`);
@@ -419,35 +430,46 @@ export function createWebSocketRouter() {
                 case 'quix-register-slave': {
                     const typedPayload = payload;
 
-                    // FIX: If slave provides shortCode, first check if there's a preserved session
-                    // This handles reconnection after page refresh
+                    // PERSISTENT SHORT CODE: Support for consistent short codes across reconnections
+                    // - If slaveId already has a persistent shortCode, reuse it
+                    // - If slave provides a shortCode, validate it maps to the correct slaveId
                     let persistentId = typedPayload?.slaveId || wsData.userName;
                     let shortCode = typedPayload?.shortCode || wsData.shortCode;
 
-                    // If shortCode is provided, check if it maps to an existing session
-                    if (typedPayload?.shortCode) {
-                        const existingSlaveId = shortCodeToSlaveId.get(typedPayload.shortCode.toUpperCase());
-                        if (existingSlaveId && remoteSessions.has(existingSlaveId)) {
-                            const existingSession = remoteSessions.get(existingSlaveId);
-                            // If there's a preserved session (slaveWs = null), allow reconnection regardless of master state
-                            // The master will reconnect separately if needed
-                            if (existingSession && existingSession.slaveWs === null) {
-                                // Re-link to the preserved session using the OLD slaveId
-                                persistentId = existingSlaveId;
-                                shortCode = typedPayload.shortCode.toUpperCase();
-                                console.log(`[WebSocket] Slave reconnected to preserved session: ${persistentId}, masterConnected=${isConnectionOpen(existingSession.masterWs)}`);
-                            }
+                    // Check if this slaveId already has a persistent shortCode assigned
+                    const existingPersistentShortCode = slaveIdToShortCode.get(persistentId);
+                    if (existingPersistentShortCode) {
+                        // Reuse the existing shortCode for this slave
+                        shortCode = existingPersistentShortCode;
+                        console.log(`[WebSocket] Reusing persistent shortCode ${shortCode} for slaveId ${persistentId}`);
+                    } else if (typedPayload?.shortCode) {
+                        // New slave or slave without persistent code - validate provided shortCode
+                        const providedShortCode = typedPayload.shortCode.toUpperCase();
+                        const existingSlaveId = shortCodeToSlaveId.get(providedShortCode);
+                        
+                        if (existingSlaveId && existingSlaveId !== persistentId) {
+                            // ShortCode is taken by another slave - ignore and generate new
+                            console.log(`[WebSocket] Provided shortCode ${providedShortCode} is taken by ${existingSlaveId}, generating new`);
+                            shortCode = generateShortCode();
+                        } else {
+                            // ShortCode is free or already maps to this slaveId - use it
+                            shortCode = providedShortCode;
                         }
+                    } else if (!shortCode) {
+                        // No shortCode provided and no persistent one - generate new
+                        shortCode = generateShortCode();
                     }
 
                     if (!persistentId) return;
 
                     setWSData(ws, 'slaveId', persistentId);
-
-                    if (!shortCode) {
-                        // Only generate new if this is a fresh registration
-                        shortCode = generateShortCode();
-                    }
+                    
+                    // Ensure shortCode is uppercase for consistency
+                    shortCode = shortCode.toUpperCase();
+                    
+                    // PERSISTENT MAPPING: Store the slaveId -> shortCode mapping permanently
+                    // This ensures the same shortCode is always available for this slave
+                    slaveIdToShortCode.set(persistentId, shortCode);
                     shortCodeToSlaveId.set(shortCode, persistentId);
                     setWSData(ws, 'shortCode', shortCode);
 
