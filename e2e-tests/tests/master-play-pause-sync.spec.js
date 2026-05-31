@@ -1,12 +1,12 @@
-import { test, expect, BrowserContext } from '@playwright/test';
+const { test, expect } = require('@playwright/test');
 
 // Test configuration
 const BASE_URL = 'http://localhost:3002';
 const KAIJU_SHOW_NAME = 'Kaiju No. 8';
 
 test.describe('Master Play-Pause Button State Sync', () => {
-  let masterContext: BrowserContext;
-  let slaveContext: BrowserContext;
+  let masterContext;
+  let slaveContext;
 
   test.beforeEach(async ({ browser }) => {
     masterContext = await browser.newContext();
@@ -115,12 +115,12 @@ test.describe('Master Play-Pause Button State Sync', () => {
     console.log(`Slave short code: "${slaveCode}"`);
     
     expect(slaveCode).toBeTruthy();
-    expect(slaveCode!.length).toBe(5);
+    expect(slaveCode.length).toBe(5);
 
     // ===== STEP 4: CONNECT MASTER AND SLAVE =====
     console.log('\n=== STEP 4: Connect Master and Slave ===');
     
-    await codeInput.fill(slaveCode!);
+    await codeInput.fill(slaveCode);
     
     const connectBtn = masterPage.getByRole('button', { name: /connetti/i });
     await connectBtn.waitFor({ state: 'visible', timeout: 10000 });

@@ -1,12 +1,12 @@
-import { test, expect, chromium, BrowserContext } from '@playwright/test';
+const { test, expect } = require('@playwright/test');
 
 // Test configuration
 const BASE_URL = 'http://localhost:3002';
 
 test.describe('WebSocket Message Consistency', () => {
-  let context: BrowserContext;
-  let consoleMessages: Array<{ type: string; text: string }> = [];
-  let wsMessages: string[] = [];
+  let context;
+  let consoleMessages;
+  let wsMessages;
 
   test.beforeEach(async ({ browser }) => {
     context = await browser.newContext();

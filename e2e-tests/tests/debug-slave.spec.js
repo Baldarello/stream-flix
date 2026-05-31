@@ -1,4 +1,4 @@
-import { test, expect, chromium } from '@playwright/test';
+const { test, expect, chromium } = require('@playwright/test');
 
 const BASE_URL = 'http://127.0.0.1:3069';
 

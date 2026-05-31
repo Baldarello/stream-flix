@@ -1,4 +1,4 @@
-import { test, expect, BrowserContext } from '@playwright/test';
+const { test, expect } = require('@playwright/test');
 
 // Test configuration
 const BASE_URL = 'http://localhost:3069';
@@ -6,8 +6,8 @@ const REMOTE_URL = `${BASE_URL}/remote`;
 const TVPLAYER_URL = `${BASE_URL}/tvPlayer?slave=true`;
 
 test.describe('Sync Modal Master-Slave Behavior', () => {
-  let masterContext: BrowserContext;
-  let slaveContext: BrowserContext;
+  let masterContext;
+  let slaveContext;
 
   test.beforeEach(async ({ browser }) => {
     // Create master browser (normal mode)
@@ -57,20 +57,20 @@ test.describe('Sync Modal Master-Slave Behavior', () => {
     console.log(`=== SLAVE shortCode: "${shortCode}" ===`);
     
     expect(shortCode).toBeTruthy();
-    expect(shortCode!.length).toBeGreaterThan(0);
+    expect(shortCode.length).toBeGreaterThan(0);
     
     // Step 4: Copy shortCode to master and connect
     console.log('=== MASTER: Entering shortCode and connecting ===');
     const shortCodeInput = masterPage.locator('input[placeholder*="code" i], input[id*="code" i], input[id*="shortcode" i]').first();
     
     if (await shortCodeInput.isVisible()) {
-      await shortCodeInput.fill(shortCode!);
+      await shortCodeInput.fill(shortCode);
       console.log(`[MASTER] Filled shortCode: ${shortCode}`);
     } else {
       // Try finding by label or any input
       const anyInput = masterPage.locator('input[type="text"], input:not([type="hidden"])').first();
       if (await anyInput.isVisible()) {
-        await anyInput.fill(shortCode!);
+        await anyInput.fill(shortCode);
         console.log(`[MASTER] Filled shortCode in generic input: ${shortCode}`);
       }
     }
@@ -150,11 +150,11 @@ test.describe('Sync Modal Master-Slave Behavior', () => {
     // Fill shortCode and connect
     const shortCodeInput = masterPage.locator('input[placeholder*="code" i], input[id*="code" i], input[id*="shortcode" i]').first();
     if (await shortCodeInput.isVisible()) {
-      await shortCodeInput.fill(shortCode!);
+      await shortCodeInput.fill(shortCode);
     } else {
       const anyInput = masterPage.locator('input[type="text"], input:not([type="hidden"])').first();
       if (await anyInput.isVisible()) {
-        await anyInput.fill(shortCode!);
+        await anyInput.fill(shortCode);
       }
     }
     
