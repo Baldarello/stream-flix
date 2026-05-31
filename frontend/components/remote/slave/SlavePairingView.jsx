@@ -1,16 +1,16 @@
 import React from 'react';
 import {Box, Button, Paper, Typography} from '@mui/material';
+import {observer} from 'mobx-react-lite';
 import {useTranslations} from '../../../hooks/useTranslations.js';
 import {remoteStore} from '../../../store/remoteStore.js';
 import QRCodeCard from './SlaveQRCodeCard.jsx';
 
-const SlavePairingView = () => {
+const SlavePairingView = observer(() => {
     const {t} = useTranslations();
-    const {slaveId, slaveShortCode} = remoteStore;
 
     const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
     const baseUrl = isLocalhost ? window.location.origin : "https://q.tnl.one";
-    const remoteUrl = `${baseUrl}/?remote_for=${slaveId}`;
+    const remoteUrl = `${baseUrl}/?remote_for=${remoteStore.slaveId}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
 
     return (
@@ -59,7 +59,7 @@ const SlavePairingView = () => {
                             color: 'primary.main',
                         }}
                     >
-                        {slaveShortCode || '...'}
+                        {remoteStore.slaveShortCode || '...'}
                     </Typography>
                 </Paper>
             </Box>
@@ -138,6 +138,6 @@ const SlavePairingView = () => {
             </Box>
         </Box>
     );
-};
+});
 
 export default SlavePairingView;

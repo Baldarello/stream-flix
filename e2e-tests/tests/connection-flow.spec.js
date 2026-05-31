@@ -1,7 +1,7 @@
 const { test, expect, chromium } = require('@playwright/test');
 
 // Test configuration
-const BASE_URL = 'http://localhost:3069';
+const BASE_URL = 'http://localhost:3002';
 const REMOTE_URL = `${BASE_URL}/remote`;
 const TVPLAYER_URL = `${BASE_URL}/tvPlayer?slave=true`;
 

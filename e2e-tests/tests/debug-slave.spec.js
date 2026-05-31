@@ -1,6 +1,6 @@
 const { test, expect, chromium } = require('@playwright/test');
 
-const BASE_URL = 'http://127.0.0.1:3069';
+const BASE_URL = 'http://127.0.0.1:3002';
 
 test('debug slave page', async () => {
   const browser = await chromium.launch({ headless: true });

@@ -1631,10 +1631,10 @@ class MediaStore {
                     if (type === 'quix-slave-registered') {
                         this.slaveId = payload.slaveId;
                         this.slaveShortCode = payload.shortCode;
-                        if (remoteStore.isSmartTV) {
-                            db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
-                            db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
-                        }
+                        // Also update remoteStore to keep slaveShortCode in sync
+                        remoteStore.handleIncomingMessage(message);
+                        // Persist isConfiguredAsSlave to ensure it's saved even if enableSmartTVMode hasn't completed yet
+                        db.preferences.put({key: 'isConfiguredAsSlave', value: true});
                         this.showSnackbar('notifications.tvReady', 'info', true);
                     } else if (type === 'quix-master-connected') {
                         this.isRemoteMasterConnected = true;
