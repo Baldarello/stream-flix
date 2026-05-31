@@ -733,15 +733,19 @@ class RemoteStore {
         ]);
 
         runInAction(() => {
+            // Always restore slave ID and short code if they exist in IndexedDB
+            // This ensures the slave can reconnect with the same short code even after
+            // exiting slave mode and refreshing the page
+            if (selfSlaveId?.value) {
+                this.slaveId = selfSlaveId.value;
+            }
+            if (selfShortCode?.value) {
+                this.slaveShortCode = selfShortCode.value;
+            }
+            // Only enable SmartTV mode if explicitly configured
             if (isConfiguredAsSlave?.value) {
                 this.isSmartTV = true;
                 this.isSmartTVPairingVisible = true;
-                if (selfSlaveId?.value) {
-                    this.slaveId = selfSlaveId.value;
-                }
-                if (selfShortCode?.value) {
-                    this.slaveShortCode = selfShortCode.value;
-                }
             }
             this.knownSlaves = knownSlavesData;
             this.hasLoadedInitialData = true;
@@ -759,10 +763,10 @@ class RemoteStore {
                 case 'quix-slave-registered':
                     this.slaveId = payload.slaveId;
                     this.slaveShortCode = payload.shortCode;
-                    if (this.isSmartTV) {
-                        db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
-                        db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
-                    }
+                    // Always persist slave ID and short code so they survive page refreshes
+                    // and the user can reconnect with the same short code
+                    db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
+                    db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
                     this.showSnackbar('notifications.tvReady', 'info', true);
                     break;
                 case 'quix-master-connected':
