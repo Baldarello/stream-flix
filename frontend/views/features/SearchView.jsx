@@ -11,6 +11,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import { useStores } from '../../context/StoreContext.jsx';
 import { useTranslations } from '../../hooks/useTranslations.js';
 import GridView from '../../components/layout/GridView.jsx';
+import { Header } from '../../components/layout/Header.jsx';
 
 /**
  * SearchView Component
@@ -30,60 +31,69 @@ export const SearchView = observer(() => {
     // Loading state
     if (isSearching && searchQuery) {
         return (
-            <Box
-                id="search-loading"
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight: 'calc(100vh - 64px - 200px)',
-                    pt: 'env(safe-area-inset-top)'
-                }}
-            >
-                <CircularProgress />
-            </Box>
+            <>
+                <Header />
+                <Box
+                    id="search-loading"
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minHeight: 'calc(100vh - 64px - 200px)',
+                        pt: 'calc(64px + env(safe-area-inset-top))'
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
+            </>
         );
     }
 
     // Prompt state - no search query
     if (!searchQuery) {
         return (
-            <Box
-                id="search-prompt"
-                sx={{
-                    textAlign: 'center',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    minHeight: 'calc(100vh - 64px - 200px)',
-                    pt: 'env(safe-area-inset-top)'
-                }}
-            >
-                <Typography variant="h3" fontWeight="bold" gutterBottom>
-                    {t('misc.searchPrompt.title')}
-                </Typography>
-                <Typography variant="h6" color="text.secondary">
-                    {t('misc.searchPrompt.subtitle')}
-                </Typography>
-            </Box>
+            <>
+                <Header />
+                <Box
+                    id="search-prompt"
+                    sx={{
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 'calc(100vh - 64px - 200px)',
+                        pt: 'calc(64px + env(safe-area-inset-top))'
+                    }}
+                >
+                    <Typography variant="h3" fontWeight="bold" gutterBottom>
+                        {t('misc.searchPrompt.title')}
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary">
+                        {t('misc.searchPrompt.subtitle')}
+                    </Typography>
+                </Box>
+            </>
         );
     }
 
     // Results state
     return (
-        <Box
-            id="search-results"
-            sx={{
-                pt: 'calc(64px + env(safe-area-inset-top))'
-            }}
-        >
-            <GridView 
-                id="search-results-grid"
-                title={t('gridView.searchResultsFor', { query: searchQuery })} 
-                items={searchResults} 
-            />
-        </Box>
+        <>
+            <Header />
+            <Box
+                id="search-results"
+                sx={{
+                    pt: 'calc(64px + env(safe-area-inset-top))'
+                }}
+            >
+                <GridView 
+                    id="search-results-grid"
+                    title={t('gridView.searchResultsFor', { query: searchQuery })} 
+                    items={searchResults} 
+                />
+            </Box>
+        </>
     );
 });
 
