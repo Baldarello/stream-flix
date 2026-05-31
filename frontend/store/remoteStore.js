@@ -529,7 +529,7 @@ class RemoteStore {
         if (this.isSmartTV && this.slaveId) {
             const video = document.querySelector('video');
             websocketService.sendMessage({
-                type: 'tv-status-update',
+                type: 'quix-slave-status-update',
                 payload: {
                     slaveId: this.slaveId,
                     isPlaying: mediaStore.isPlaying,
