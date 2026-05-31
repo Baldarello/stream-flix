@@ -514,7 +514,7 @@ class RemoteStore {
                         video.currentTime = (activeItem).intro_end_s;
                     } else {
                         const showId = 'show_id' in activeItem ? (activeItem).show_id : (activeItem).id;
-                        const skipDuration = mediaStore.showIntroDurations.get(showId) || 80;
+                        const skipDuration = payload.skipDuration ?? mediaStore.showIntroDurations.get(showId) ?? 80;
                         video.currentTime = Math.min(video.duration, video.currentTime + skipDuration);
                     }
                 }

@@ -160,7 +160,11 @@ const MasterRemotePlayerControlView = observer(() => {
     const handleTogglePlay = () => sendRemoteCommand({command: isPlaying ? 'pause' : 'play'});
     const handleSeekForward = () => sendRemoteCommand({command: 'seek_forward'});
     const handleSeekBackward = () => sendRemoteCommand({command: 'seek_backward'});
-    const handleSkipIntro = () => sendRemoteCommand({command: 'skip_intro'});
+    const handleSkipIntro = () => {
+        const showId = 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : nowPlayingItem.id;
+        const skipDuration = mediaStore.showIntroDurations.get(showId) || 80;
+        sendRemoteCommand({command: 'skip_intro', skipDuration});
+    };
 
     const handlePlayNext = () => {
         if (remoteNextEpisode && remoteFullItem && isEpisode && 'season_number' in nowPlayingItem) {
