@@ -52,4 +52,23 @@ After completing each task, perform a git commit with an automatic commit messag
 
 Use JetBrains MCP terminal commands (`mcp__jetbrains__execute_terminal_command`) to execute git operations.
 
-For every change run `graphify export callflow-html` to update the structure.  
+For every change run `graphify export callflow-html` to update the structure.
+
+## Semantic graph (graphify)
+
+This repo ships a precomputed semantic index in `graphify-out/`. Before running
+any graphify command that needs to *rebuild* the graph, set your API key:
+
+    copy graphify.env.example graphify.env
+    # edit graphify.env to set GEMINI_API_KEY=...
+
+Useful commands (read-only, no key needed once `graph.json` exists):
+
+    graphify query "how does the watch-together room sync playback?"
+    graphify explain MediaStore
+    graphify path frontend/components/VideoPlayer.tsx backend/src/wss.ts
+    graphify tree
+    graphify export callflow-html
+
+The post-commit hook (`graphify hook install`) keeps the graph fresh locally;
+the committed `graphify-out/` is the shared source of truth.

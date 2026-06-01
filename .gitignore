@@ -13,6 +13,7 @@ dist-ssr
 
 # Environment files (contain sensitive credentials)
 frontend/.env
+graphify.env
 
 # Editor directories and files
 .vscode/*
@@ -30,3 +31,4 @@ frontend/.env
 /temp-bundle.js
 /skills-lock.json
 /.env
+/graphify.env.example
