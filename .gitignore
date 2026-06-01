@@ -28,3 +28,5 @@ frontend/.env
 /.playwright-mcp/
 /page-snapshot.yml
 /temp-bundle.js
+/skills-lock.json
+/.env
