@@ -502,6 +502,20 @@ class MediaStore {
     };
 
     closeDetail = () => {
+        // When the user is on the remote master, the detail view is driven
+        // by `_masterUiSelectedItem` (not `selectedItem`), and the master
+        // never pushes a `history.pushState` for the detail view, so the
+        // `history.back()` path below is never reached. We must therefore
+        // clear `_masterUiSelectedItem` directly and tell the slave to do
+        // the same so both UIs stay in sync.
+        if (this.isRemoteMaster) {
+            runInAction(() => {
+                this._masterUiSelectedItem = null;
+            });
+            remoteStore.sendRemoteCommand({command: 'clear_selection'});
+            return;
+        }
+
         this._closeDetailWithoutHistory();
         if (window.history.state?.detailViewOpen) {
             window.history.back();

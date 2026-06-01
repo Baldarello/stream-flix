@@ -58,6 +58,9 @@ export const Header = observer(() => {
         if (remoteStore.isRemoteMaster) {
             // If remote master, clear any selected item on its own UI
             remoteStore._masterUiSelectedItem = null;
+            // And tell the slave to close its detail view too, so both UIs
+            // stay in sync when the user navigates away via the header.
+            remoteStore.sendRemoteCommand({command: 'clear_selection'});
             // And set the master's active view
             mediaStore.setActiveView(view);
         } else {

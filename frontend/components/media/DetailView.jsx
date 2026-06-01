@@ -502,6 +502,7 @@ const DetailView = observer(() => {
             )}
 
             <IconButton
+                id="master-remote-detail-close-button"
                 onClick={() => mediaStore.closeDetail()}
                 aria-label={t('detail.close')}
                 sx={{
