@@ -340,9 +340,14 @@
     "semantic_hash": "57f886e4abc1c0eae143fe9e4f0dde7b"
   },
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\tests\\master-remote-back-button.spec.js": {
-    "mtime": 1780318886.4609282,
-    "ast_hash": "8027980c0adfb67895be710a359ec6ca",
-    "semantic_hash": "8027980c0adfb67895be710a359ec6ca"
+    "mtime": 1780320875.7574272,
+    "ast_hash": "267926383f2f07ac983de9c9a10a7546",
+    "semantic_hash": "267926383f2f07ac983de9c9a10a7546"
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\tests\\master-remote-detail-close.spec.js": {
+    "mtime": 1780326143.6403134,
+    "ast_hash": "7caed48ef343b71f8e3dfaa6898069e8",
+    "semantic_hash": "7caed48ef343b71f8e3dfaa6898069e8"
   },
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\tests\\master-slave-flow.spec.js": {
     "mtime": 1780238377.304777,
@@ -415,9 +420,9 @@
     "semantic_hash": "c9cbb4724f7c3408a040901c729cbf08"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\Header.jsx": {
-    "mtime": 1780228471.7311337,
-    "ast_hash": "a39afe73dae8b68686111cb2a7a1d985",
-    "semantic_hash": "a39afe73dae8b68686111cb2a7a1d985"
+    "mtime": 1780326080.3531206,
+    "ast_hash": "ef865b323ac1d4dd6f20ce2a191117f5",
+    "semantic_hash": "ef865b323ac1d4dd6f20ce2a191117f5"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\Hero.jsx": {
     "mtime": 1780231879.042359,
@@ -440,9 +445,9 @@
     "semantic_hash": "d65888835cbe3bd0b3fd44f821ed6968"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\media\\DetailView.jsx": {
-    "mtime": 1780228471.7341337,
-    "ast_hash": "23c25e47f2464248b24b2ba28d74fe03",
-    "semantic_hash": "23c25e47f2464248b24b2ba28d74fe03"
+    "mtime": 1780326068.4239743,
+    "ast_hash": "b2de49affcd74a99d1ed242738e792b1",
+    "semantic_hash": "b2de49affcd74a99d1ed242738e792b1"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\media\\SlaveVideoPlayer.jsx": {
     "mtime": 1780228471.734633,
@@ -535,9 +540,9 @@
     "semantic_hash": "852c8bb489abb4dc0fb89f73ede36b1c"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\remote\\master\\MasterRemotePlayerControlView.jsx": {
-    "mtime": 1780317237.6741488,
-    "ast_hash": "6bb8afc6e999596879dd27b7ade3c21e",
-    "semantic_hash": "6bb8afc6e999596879dd27b7ade3c21e"
+    "mtime": 1780320960.533157,
+    "ast_hash": "2a6a310c7598a1a0ca8ee2eb386f0011",
+    "semantic_hash": "2a6a310c7598a1a0ca8ee2eb386f0011"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\remote\\slave\\SlaveBackground.jsx": {
     "mtime": 1780228471.7441473,
@@ -695,14 +700,14 @@
     "semantic_hash": "76c132b21c4305f5c2e46b070300c265"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\mediaStore.js": {
-    "mtime": 1780254522.0610752,
-    "ast_hash": "1270d05e91023c626950c96951efd670",
-    "semantic_hash": "1270d05e91023c626950c96951efd670"
+    "mtime": 1780326057.3027856,
+    "ast_hash": "b068a9db5f6f669223fe56cef5743ef7",
+    "semantic_hash": "b068a9db5f6f669223fe56cef5743ef7"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\remoteStore.js": {
-    "mtime": 1780317188.603453,
-    "ast_hash": "5504a990a895f1ba09de4e7d09ff7f08",
-    "semantic_hash": "5504a990a895f1ba09de4e7d09ff7f08"
+    "mtime": 1780320978.565192,
+    "ast_hash": "6959221a1ab3faf0f7d1d523a6a9e339",
+    "semantic_hash": "6959221a1ab3faf0f7d1d523a6a9e339"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\syncStore.js": {
     "mtime": 1780228471.7661622,
@@ -785,8 +790,493 @@
     "semantic_hash": "6314a62f78f7a07ffed6c0a9b678d116"
   },
   "E:\\Lavoro\\TND\\stream-flix\\test-results\\.last-run.json": {
-    "mtime": 1780318918.9454656,
-    "ast_hash": "5d68769f7c6d3acf57c8cffdf1b13555",
-    "semantic_hash": "5d68769f7c6d3acf57c8cffdf1b13555"
+    "mtime": 1780326303.7827353,
+    "ast_hash": "f196824657d8858bc7fa44eecbba38b1",
+    "semantic_hash": "f196824657d8858bc7fa44eecbba38b1"
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\brainstorming\\SKILL.md": {
+    "mtime": 1780312807.9258392,
+    "ast_hash": "02d86f11c496ece51327cca35491c45c",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\brainstorming\\scripts\\frame-template.html": {
+    "mtime": 1780312807.9480064,
+    "ast_hash": "b84f721842a76863e21074fb607b03d5",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\brainstorming\\spec-document-reviewer-prompt.md": {
+    "mtime": 1780312807.9308786,
+    "ast_hash": "ea74c0f2369ae553c62f36af4ed3d424",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\brainstorming\\visual-companion.md": {
+    "mtime": 1780312807.9368906,
+    "ast_hash": "98407f42a43e3c3e3aae399376821e7e",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\brandkit\\SKILL.md": {
+    "mtime": 1780312305.1007035,
+    "ast_hash": "7491f8fb77b0ebf517b758d096ac4ab4",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\design-taste-frontend-v1\\SKILL.md": {
+    "mtime": 1780312305.1102502,
+    "ast_hash": "e109588218fb2a3411cb5110f93bb634",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\design-taste-frontend\\SKILL.md": {
+    "mtime": 1780312305.11125,
+    "ast_hash": "648c8bf98f84fbe7f14bf2da035c57fe",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\dispatching-parallel-agents\\SKILL.md": {
+    "mtime": 1780312807.9891157,
+    "ast_hash": "af319c60c986d9024c49de78dff43593",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\executing-plans\\SKILL.md": {
+    "mtime": 1780312807.9996488,
+    "ast_hash": "63061f08162428574aeccec5d0ef1f26",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\finishing-a-development-branch\\SKILL.md": {
+    "mtime": 1780312808.010674,
+    "ast_hash": "e9b367120e56b5d4f438225cd4861caf",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\full-output-enforcement\\SKILL.md": {
+    "mtime": 1780312305.1067123,
+    "ast_hash": "2072dc2c1357dc9cd6384d1f441e05c3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\gpt-taste\\SKILL.md": {
+    "mtime": 1780312305.102712,
+    "ast_hash": "e2a7560cbfce7a853dd8f65eca12c103",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\high-end-visual-design\\SKILL.md": {
+    "mtime": 1780312305.1082137,
+    "ast_hash": "64f7c1069a5a3d18797950d8fac7b63a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\image-to-code\\SKILL.md": {
+    "mtime": 1780312305.103712,
+    "ast_hash": "b18a810930da9c6b558b15c85bc74007",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\imagegen-frontend-mobile\\SKILL.md": {
+    "mtime": 1780312305.104213,
+    "ast_hash": "6253c18387ca5d561a945ffe14e70d54",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\imagegen-frontend-web\\SKILL.md": {
+    "mtime": 1780312305.1052132,
+    "ast_hash": "728f55ab7e44330e78aac4ca8331d83a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\SKILL.md": {
+    "mtime": 1780312232.3507671,
+    "ast_hash": "97c5216fe4b5b3af5736802dd49a7c12",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\agents\\openai.yaml": {
+    "mtime": 1780312232.3527675,
+    "ast_hash": "7b0c955694fc8b2b320c03ada2080d00",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\adapt.md": {
+    "mtime": 1780312232.3532667,
+    "ast_hash": "7f09fdec5a24ff77e81ae5f08fbadbe3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\animate.md": {
+    "mtime": 1780312232.354267,
+    "ast_hash": "ebbf70a374bd675d8d2ef74b4a707f26",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\audit.md": {
+    "mtime": 1780312232.354767,
+    "ast_hash": "8dcaf7ba38f036393193467f5aad03c0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\bolder.md": {
+    "mtime": 1780312232.354767,
+    "ast_hash": "2aedd5cd29a48d09b79d54073facd547",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\brand.md": {
+    "mtime": 1780312232.355266,
+    "ast_hash": "d525f5a3912c301e4d8b219c59214c3b",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\clarify.md": {
+    "mtime": 1780312232.3562665,
+    "ast_hash": "c939d61e568a196dd2eb7afbdfb9e8e1",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\codex.md": {
+    "mtime": 1780312232.356767,
+    "ast_hash": "8a1dae470d56bad952d6c27e0b976667",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\colorize.md": {
+    "mtime": 1780312232.356767,
+    "ast_hash": "ab3840ac9fac5d7e8d58678bad949da4",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\craft.md": {
+    "mtime": 1780312232.3577726,
+    "ast_hash": "66ef1b6222e8b326f4615189c3d797cf",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\critique.md": {
+    "mtime": 1780312232.3582792,
+    "ast_hash": "009665c31c4cb27b6ca2bf98e215ad2c",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\delight.md": {
+    "mtime": 1780312232.3587787,
+    "ast_hash": "7c6e23a9a5280c8d58222f6e9ded5fb9",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\distill.md": {
+    "mtime": 1780312232.3587787,
+    "ast_hash": "572e8eb25abfebfbf6d1c4ad7c4e98b2",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\document.md": {
+    "mtime": 1780312232.3597846,
+    "ast_hash": "d6914f6b4ba8e2d1c495709a2199a686",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\extract.md": {
+    "mtime": 1780312232.3602912,
+    "ast_hash": "4a604a2960fd1f13a0ba5bc76c286294",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\harden.md": {
+    "mtime": 1780312232.3607912,
+    "ast_hash": "794fbb12dcc3789211d75ae8df1bbff7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\init.md": {
+    "mtime": 1780312232.361791,
+    "ast_hash": "bc3366b849d76614ac6b6d621311621e",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\interaction-design.md": {
+    "mtime": 1780312232.3622892,
+    "ast_hash": "7efe6b89e89a4117ae1d9fdf35f610ea",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\layout.md": {
+    "mtime": 1780312232.3627925,
+    "ast_hash": "b3ef3ba4b83ec4e4b49fbf3ad43c2c4a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\live.md": {
+    "mtime": 1780312232.3637912,
+    "ast_hash": "c90712b884c592b22b2f15b31faf78fe",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\onboard.md": {
+    "mtime": 1780312232.3647926,
+    "ast_hash": "6f0bbcfebe2ab4f18f83994e9d7613e5",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\optimize.md": {
+    "mtime": 1780312232.3652909,
+    "ast_hash": "4ed13d4168ab26be4bd9f57bda15a61e",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\overdrive.md": {
+    "mtime": 1780312232.36579,
+    "ast_hash": "a850f9052d9c913a016e41eac9ff00a0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\polish.md": {
+    "mtime": 1780312232.3662922,
+    "ast_hash": "97e551295ae47d046f718ee98742a338",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\product.md": {
+    "mtime": 1780312232.3667922,
+    "ast_hash": "3e48497f27dc0056894338a15f22b65e",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\quieter.md": {
+    "mtime": 1780312232.367292,
+    "ast_hash": "63c7a87649e853bf1fd1c865e0f512c9",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\shape.md": {
+    "mtime": 1780312232.367292,
+    "ast_hash": "500a40c71164719c69028d15a4ab0d72",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\impeccable\\reference\\typeset.md": {
+    "mtime": 1780312232.368804,
+    "ast_hash": "d3567179c353907196ea6ec39ab7a9d7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\industrial-brutalist-ui\\SKILL.md": {
+    "mtime": 1780312305.1022122,
+    "ast_hash": "da7f92d7e3b8b526ecbd71009fe973ca",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\minimalist-ui\\SKILL.md": {
+    "mtime": 1780312305.1062136,
+    "ast_hash": "32f8681f79a681d00a4b72ddce4415b1",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\receiving-code-review\\SKILL.md": {
+    "mtime": 1780312808.0216956,
+    "ast_hash": "dd0aadbca70fe3bedbd059b730a6edbb",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\redesign-existing-projects\\SKILL.md": {
+    "mtime": 1780312305.1077132,
+    "ast_hash": "c8d729e3e807df37dcd5e6262c9b8843",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\requesting-code-review\\SKILL.md": {
+    "mtime": 1780312807.6714666,
+    "ast_hash": "f7d20aeaa4eca81b2617b6c68f3b91b9",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\requesting-code-review\\code-reviewer.md": {
+    "mtime": 1780312807.6834815,
+    "ast_hash": "11211d21337d0c498660f51edff7323b",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stitch-design-taste\\DESIGN.md": {
+    "mtime": 1780312305.1087132,
+    "ast_hash": "7f8c91aeecc8983b687965c2fc23438c",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stitch-design-taste\\SKILL.md": {
+    "mtime": 1780312305.109745,
+    "ast_hash": "782a1107366a3490dc52ab8b032f05ef",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stop-slop-main\\CHANGELOG.md": {
+    "mtime": 1780312689.914187,
+    "ast_hash": "4eee8c703407cf007a4ea158a92acb17",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stop-slop-main\\README.md": {
+    "mtime": 1780312689.9298236,
+    "ast_hash": "43211f20f113cae0a68fdf6351e3686d",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stop-slop-main\\SKILL.md": {
+    "mtime": 1780312689.9348228,
+    "ast_hash": "aaf679c0ebfa3121deb469549a87fe72",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stop-slop-main\\references\\examples.md": {
+    "mtime": 1780312689.9434073,
+    "ast_hash": "5d72b764096a8a6e3d75ccc558f9ea04",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stop-slop-main\\references\\phrases.md": {
+    "mtime": 1780312689.9489298,
+    "ast_hash": "3553c1700db60eb2942a53222087aca0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\stop-slop-main\\references\\structures.md": {
+    "mtime": 1780312689.954429,
+    "ast_hash": "f638c6c57a3768239ef9cb557f0dbacb",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\subagent-driven-development\\SKILL.md": {
+    "mtime": 1780312807.693998,
+    "ast_hash": "da1219128741a51fccc499a613072fc3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\subagent-driven-development\\code-quality-reviewer-prompt.md": {
+    "mtime": 1780312807.6990175,
+    "ast_hash": "fc5e2ea930681d4228debaa3714f6ea0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\subagent-driven-development\\implementer-prompt.md": {
+    "mtime": 1780312807.704527,
+    "ast_hash": "b856c2076801a91854adf094a907de9c",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\subagent-driven-development\\spec-reviewer-prompt.md": {
+    "mtime": 1780312807.709559,
+    "ast_hash": "ecc20717d0b31a9013ba732f366eba8f",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\CREATION-LOG.md": {
+    "mtime": 1780312807.7200704,
+    "ast_hash": "b7ba553678c10cc2234dc9ae193d5347",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\SKILL.md": {
+    "mtime": 1780312807.7261112,
+    "ast_hash": "3a08f3330fce34e3b2104e7d97f64af0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\condition-based-waiting.md": {
+    "mtime": 1780312807.7421343,
+    "ast_hash": "c64d669f2490aa489c514304c9ad46d3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\defense-in-depth.md": {
+    "mtime": 1780312807.7476418,
+    "ast_hash": "002a0c9e8bee8fc29f85d7a434916977",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\root-cause-tracing.md": {
+    "mtime": 1780312807.762673,
+    "ast_hash": "7e96b2fe346c89d4f2300341529178cc",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\test-academic.md": {
+    "mtime": 1780312807.768178,
+    "ast_hash": "272ab1d95e755a7ff9479d547168eef9",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\test-pressure-1.md": {
+    "mtime": 1780312807.7731931,
+    "ast_hash": "3d8805e8946e3889d4de0e906af66c47",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\test-pressure-2.md": {
+    "mtime": 1780312807.7787025,
+    "ast_hash": "237f40dfd0b48af48d239ab3af499f7b",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\systematic-debugging\\test-pressure-3.md": {
+    "mtime": 1780312807.7837133,
+    "ast_hash": "42ea1bd281ca8d837f5dd45143762b95",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\test-driven-development\\SKILL.md": {
+    "mtime": 1780312807.7952302,
+    "ast_hash": "b349bbcc136f3f50c45f04d0917bdfc9",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\test-driven-development\\testing-anti-patterns.md": {
+    "mtime": 1780312807.799739,
+    "ast_hash": "f4373033bf29f06897cd63c994deb2a7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\ui-ux-pro-max\\SKILL.md": {
+    "mtime": 1780312601.6358342,
+    "ast_hash": "b33a6a2bede0b68b6919ec33248476f8",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\using-git-worktrees\\SKILL.md": {
+    "mtime": 1780312807.8097594,
+    "ast_hash": "19c5db98107c897bed0f70415e294015",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\using-superpowers\\SKILL.md": {
+    "mtime": 1780312807.819811,
+    "ast_hash": "7e7a8bba2c866b16f5f05351faf2e2c5",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\using-superpowers\\references\\codex-tools.md": {
+    "mtime": 1780312807.828445,
+    "ast_hash": "980b647b2c982b5b31cf08b83823a284",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\using-superpowers\\references\\copilot-tools.md": {
+    "mtime": 1780312807.8334844,
+    "ast_hash": "d4424fd67d662e17b470d9560e1cd930",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\using-superpowers\\references\\gemini-tools.md": {
+    "mtime": 1780312807.8390791,
+    "ast_hash": "4f93c6d265d412b76c4ecc15c0c2e4b4",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\verification-before-completion\\SKILL.md": {
+    "mtime": 1780312807.8491254,
+    "ast_hash": "ccf0e58c597adc512d920263562b5391",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-plans\\SKILL.md": {
+    "mtime": 1780312807.8591437,
+    "ast_hash": "e9325200b86a2c27c64c4458e7943e34",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-plans\\plan-document-reviewer-prompt.md": {
+    "mtime": 1780312807.8641508,
+    "ast_hash": "dcad0192c2c468107951d7dcb47246a9",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-skills\\SKILL.md": {
+    "mtime": 1780312807.8741643,
+    "ast_hash": "87cef13875b60fa4cd3bc5b3e64ec3d3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-skills\\anthropic-best-practices.md": {
+    "mtime": 1780312807.8796744,
+    "ast_hash": "05c7c66a824d55afc81f3be10dd04750",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-skills\\examples\\CLAUDE_MD_TESTING.md": {
+    "mtime": 1780312807.9142995,
+    "ast_hash": "2980791d97afe0f32c2eb4a6264fb8e6",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-skills\\persuasion-principles.md": {
+    "mtime": 1780312807.892701,
+    "ast_hash": "5f0c22c7c8c3c5e12f255719833c2545",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.agents\\skills\\writing-skills\\testing-skills-with-subagents.md": {
+    "mtime": 1780312807.9052489,
+    "ast_hash": "3b7b7942a42cb0450896d4b48cd49ed0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\AGENTS.md": {
+    "mtime": 1780318269.8383853,
+    "ast_hash": "641308943e29fbd22a27ec37aac07bfd",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\README.md": {
+    "mtime": 1780228471.7211244,
+    "ast_hash": "60eecdfa4bf6190d27814b69682fb2ce",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\USER_FLOW.md": {
+    "mtime": 1780228471.7216253,
+    "ast_hash": "f8ccb4cf887b1721d25b05d3ea15e671",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\docker-compose.yml": {
+    "mtime": 1780228471.7241254,
+    "ast_hash": "f4f1567591b168ce1b35b3e12c430cc7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\index.html": {
+    "mtime": 1780331506.7328424,
+    "ast_hash": "b1e991f7224db4bea9191acedcadde6d",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\debug-slave.png": {
+    "mtime": 1776865097.9759183,
+    "ast_hash": "fb104b5fd49f2bc00c5499566cb87451",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\error-screenshot.png": {
+    "mtime": 1780228471.7281327,
+    "ast_hash": "73635015d80a7386419d1b5cffc53aea",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\master-after-back-click.png": {
+    "mtime": 1780326303.6709244,
+    "ast_hash": "00dcd33ddfef1e22b259bcf535663df0",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\master-after-detail-close.png": {
+    "mtime": 1780326256.0928953,
+    "ast_hash": "378a2678bd698dd64a8ec457ed4c467b",
+    "semantic_hash": ""
   }
 }

@@ -15,6 +15,12 @@ dist-ssr
 frontend/.env
 graphify.env
 
+# graphify tool: ignore its date-stamped backup folders and any
+# extract/rebuild scratch logs that are not part of the canonical outputs.
+graphify-out/2026-*/
+graphify-out/.output*.txt
+graphify-extract.log
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -31,4 +37,3 @@ graphify.env
 /temp-bundle.js
 /skills-lock.json
 /.env
-/graphify.env.example
