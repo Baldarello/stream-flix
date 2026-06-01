@@ -211,7 +211,12 @@ const MasterRemotePlayerControlView = observer(() => {
         }}>
             <AppBar position="sticky" sx={{bgcolor: 'background.paper'}}>
                 <Toolbar>
-                    <IconButton edge="start" color="inherit" onClick={() => {
+                    <IconButton id="master-remote-back-button" edge="start" color="inherit" onClick={() => {
+                        // Mark the remote as stopping so that any subsequent
+                        // 'quix-slave-status-update' messages coming from the
+                        // slave (sent every 1s) do not bounce the view back to
+                        // the MasterRemotePlayerControlView.
+                        remoteStore.isStoppingRemotePlayback = true;
                         stopRemotePlayback();
                         // Navigate to series list by clearing nowPlayingItem
                         if (remoteStore.remoteSlaveState) {

@@ -1667,7 +1667,24 @@ class MediaStore {
                         }
                         this.showSnackbar('notifications.slaveReconnected', 'success', true);
                     } else if (type === 'quix-slave-status-update') {
-                        this.remoteSlaveState = payload;
+                        // If the user has pressed the back button to leave the remote player,
+                        // ignore the nowPlayingItem coming from the slave's periodic status
+                        // updates so the UI does not bounce back to MasterRemotePlayerControlView.
+                        if (remoteStore._isStoppingRemotePlayback && payload && payload.nowPlayingItem) {
+                            const {nowPlayingItem, ...rest} = payload;
+                            this.remoteSlaveState = {
+                                ...(this.remoteSlaveState ?? {}),
+                                ...rest,
+                                nowPlayingItem: null,
+                            };
+                        } else {
+                            this.remoteSlaveState = payload;
+                            // The slave confirmed it stopped playing (or it has no
+                            // nowPlayingItem), so it's safe to clear the stop flag.
+                            if (remoteStore._isStoppingRemotePlayback && !payload?.nowPlayingItem) {
+                                remoteStore._isStoppingRemotePlayback = false;
+                            }
+                        }
                     } else if (type === 'quix-remote-command') {
                         remoteStore.handleRemoteCommand(payload);
                     } else if (type === 'quix-remote-command-received') {

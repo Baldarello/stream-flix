@@ -38,6 +38,7 @@ class RemoteStore {
     __masterUiSelectedItem = null;
     _isQRScannerOpen = false;
     _pendingRemoteSessionInit = false; // Flag to track if we need to re-init after data loads
+    _isStoppingRemotePlayback = false; // Flag to ignore stale nowPlayingItem from slave after user pressed back
 
     // ===== PUBLIC GETTERS/SETTERS (for backwards compatibility) =====
     get isSmartTV() { return this._isSmartTV; }
@@ -96,6 +97,8 @@ class RemoteStore {
     set _masterUiSelectedItem(v) { this.__masterUiSelectedItem = v; }
     get isQRScannerOpen() { return this._isQRScannerOpen; }
     set isQRScannerOpen(v) { this._isQRScannerOpen = v; }
+    get isStoppingRemotePlayback() { return this._isStoppingRemotePlayback; }
+    set isStoppingRemotePlayback(v) { this._isStoppingRemotePlayback = v; }
 
     // Expose showSnackbar for methods that need to show notifications
     get showSnackbar() { return mediaStore.showSnackbar; }
@@ -235,6 +238,7 @@ class RemoteStore {
             this.isRemoteMaster = false;
             this.slaveId = null;
             this.remoteSlaveState = null;
+            this._isStoppingRemotePlayback = false;
             this._masterUiActiveView = 'Home';
             this._masterUiSelectedItem = null;
             db.preferences.delete('remoteMasterForSlaveId');
@@ -379,6 +383,7 @@ class RemoteStore {
     sendPlayCommandAndOptimisticallyUpdate = (item) => {
         this.sendRemoteCommand({command: 'play_item', item: item});
         runInAction(() => {
+            this._isStoppingRemotePlayback = false;
             this.remoteSlaveState = {
                 ...(this.remoteSlaveState ?? {}),
                 isPlaying: true,
@@ -878,6 +883,10 @@ class RemoteStore {
                     }
                     break;
                 case 'playback-status':
+                    // NOTE: kept for backwards compatibility. The actual
+                    // 'quix-slave-status-update' handler that ignores stale
+                    // nowPlayingItem while the user is leaving the player lives
+                    // in MediaStore#handleIncomingMessage.
                     runInAction(() => {
                         this.remoteSlaveState = payload;
                     });
