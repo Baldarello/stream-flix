@@ -312,9 +312,11 @@ const SwipeableEpisodeCardDetailView = observer(({
                 onClose={() => setDetailsOpen(false)}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{
-                    sx: {
-                        zIndex: 1300 // Above DetailView zIndex 1200
+                slotProps={{
+                    paper: {
+                        sx: {
+                            zIndex: 1300 // Above DetailView zIndex 1200
+                        }
                     }
                 }}
             >

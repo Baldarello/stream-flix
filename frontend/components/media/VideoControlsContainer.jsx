@@ -192,13 +192,15 @@ const VideoControlsContainer = observer(({
                             onClose={() => setVolumeAnchorEl(null)}
                             anchorOrigin={{vertical: 'top', horizontal: 'center'}}
                             transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                            PaperProps={{
-                                sx: {
-                                    bgcolor: 'rgba(30,30,30,0.8)',
-                                    backdropFilter: 'blur(5px)',
-                                    p: 2,
-                                    borderRadius: 2,
-                                    backgroundImage: 'none'
+                            slotProps={{
+                                paper: {
+                                    sx: {
+                                        bgcolor: 'rgba(30,30,30,0.8)',
+                                        backdropFilter: 'blur(5px)',
+                                        p: 2,
+                                        borderRadius: 2,
+                                        backgroundImage: 'none'
+                                    }
                                 }
                             }}
                         >
@@ -245,11 +247,13 @@ const VideoControlsContainer = observer(({
                             onClose={() => setSpeedAnchorEl(null)}
                             anchorOrigin={{vertical: 'top', horizontal: 'center'}}
                             transformOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                            PaperProps={{
-                                sx: {
-                                    bgcolor: 'rgba(30,30,30,0.8)',
-                                    backdropFilter: 'blur(5px)',
-                                    backgroundImage: 'none'
+                            slotProps={{
+                                paper: {
+                                    sx: {
+                                        bgcolor: 'rgba(30,30,30,0.8)',
+                                        backdropFilter: 'blur(5px)',
+                                        backgroundImage: 'none'
+                                    }
                                 }
                             }}
                         >

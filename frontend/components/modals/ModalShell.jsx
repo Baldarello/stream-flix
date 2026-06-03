@@ -99,27 +99,29 @@ export const ModalShell = ({
             onClose={onClose}
             maxWidth={maxWidth}
             fullWidth={fullWidth}
-            PaperProps={{
-                ref: paperRef,
-                className: 'modal-shell-paper',
-                sx: {
-                    position: 'relative',
-                    backgroundColor: 'var(--bg-deep)',
-                    backgroundImage: 'var(--holo-grad)',
-                    color: 'var(--text-primary)',
-                    border: '1px solid rgba(76, 210, 255, 0.35)',
-                    borderRadius: '14px',
-                    boxShadow: '0 0 24px rgba(76, 210, 255, 0.35), 0 24px 60px rgba(0, 0, 0, 0.7)',
-                    overflow: 'hidden',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        inset: 0,
-                        borderRadius: 'inherit',
-                        background: 'var(--holo-grad)',
-                        opacity: 0.35,
-                        pointerEvents: 'none',
-                        zIndex: 0
+            slotProps={{
+                paper: {
+                    ref: paperRef,
+                    className: 'modal-shell-paper',
+                    sx: {
+                        position: 'relative',
+                        backgroundColor: 'var(--bg-deep)',
+                        backgroundImage: 'var(--holo-grad)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid rgba(76, 210, 255, 0.35)',
+                        borderRadius: '14px',
+                        boxShadow: '0 0 24px rgba(76, 210, 255, 0.35), 0 24px 60px rgba(0, 0, 0, 0.7)',
+                        overflow: 'hidden',
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            inset: 0,
+                            borderRadius: 'inherit',
+                            background: 'var(--holo-grad)',
+                            opacity: 0.35,
+                            pointerEvents: 'none',
+                            zIndex: 0
+                        }
                     }
                 }
             }}

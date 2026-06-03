@@ -422,9 +422,11 @@ const ProfileDrawer = observer(() => {
             anchor="right"
             open={isProfileDrawerOpen}
             onClose={() => toggleProfileDrawer(false)}
-            PaperProps={{
-                sx: {
-                    bgcolor: 'background.paper'
+            slotProps={{
+                paper: {
+                    sx: {
+                        bgcolor: 'background.paper'
+                    }
                 }
             }}
         >

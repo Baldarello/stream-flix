@@ -27,9 +27,11 @@ const EpisodeInfoModal = observer(() => {
             onClose={closeEpisodeInfoModal}
             maxWidth="sm"
             fullWidth
-            PaperProps={{
-                sx: {
-                    zIndex: 2200 // Above drawer zIndex 2100
+            slotProps={{
+                paper: {
+                    sx: {
+                        zIndex: 2200 // Above drawer zIndex 2100
+                    }
                 }
             }}
         >

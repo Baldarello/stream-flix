@@ -11,8 +11,8 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@mui/icons-material": "5.18.0",
-    "@mui/material": "5.18.0",
+    "@mui/icons-material": "7.3.11",
+    "@mui/material": "7.3.11",
     "axios": "1.13.6",
     "dexie": "4.3.0",
     "gsap": "3.12.5",

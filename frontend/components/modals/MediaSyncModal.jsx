@@ -218,11 +218,13 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
             onClose={handleClose}
             maxWidth="md"
             fullWidth
-            PaperProps={{
-                sx: {
-                    bgcolor: 'background.paper',
-                    borderRadius: 3,
-                    maxHeight: '90vh',
+            slotProps={{
+                paper: {
+                    sx: {
+                        bgcolor: 'background.paper',
+                        borderRadius: 3,
+                        maxHeight: '90vh',
+                    },
                 },
             }}
         >

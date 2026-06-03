@@ -586,10 +586,12 @@ const SlaveVideoPlayer = observer(() => {
                                                 anchorEl={languageMenuAnchor}
                                                 open={Boolean(languageMenuAnchor)}
                                                 onClose={handleCloseLanguageMenu}
-                                                PaperProps={{
-                                                    sx: { 
-                                                        bgcolor: 'rgba(30, 30, 30, 0.95)',
-                                                        minWidth: 120
+                                                slotProps={{
+                                                    paper: {
+                                                        sx: {
+                                                            bgcolor: 'rgba(30, 30, 30, 0.95)',
+                                                            minWidth: 120
+                                                        }
                                                     }
                                                 }}
                                             >
@@ -660,15 +662,15 @@ const SlaveVideoPlayer = observer(() => {
                                                             '& .MuiSelect-icon': {color: 'white'},
                                                             '& .MuiSelect-select': {py: 0.5, px: 1}
                                                         }}
-                                                        MenuProps={{
-                                                            PaperProps: {
+                                                        slotProps={{
+                                                            paper: {
                                                                 sx: {
                                                                     bgcolor: 'rgba(30, 30, 30, 0.95)',
                                                                     color: 'white',
                                                                     minWidth: 120
                                                                 }
                                                             },
-                                                            MenuListProps: {
+                                                            list: {
                                                                 sx: {
                                                                     py: 0.5
                                                                 }
@@ -713,15 +715,15 @@ const SlaveVideoPlayer = observer(() => {
                                                             '& .MuiSelect-icon': {color: 'white'},
                                                             '& .MuiSelect-select': {py: 0.5, px: 1}
                                                         }}
-                                                        MenuProps={{
-                                                            PaperProps: {
+                                                        slotProps={{
+                                                            paper: {
                                                                 sx: {
                                                                     bgcolor: 'rgba(30, 30, 30, 0.95)',
                                                                     color: 'white',
                                                                     minWidth: 120
                                                                 }
                                                             },
-                                                            MenuListProps: {
+                                                            list: {
                                                                 sx: {
                                                                     py: 0.5
                                                                 }

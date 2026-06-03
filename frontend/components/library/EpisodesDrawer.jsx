@@ -390,10 +390,12 @@ const EpisodesDrawer = observer(() => {
             open={isEpisodesDrawerOpen}
             onClose={closeEpisodesDrawer}
             sx={{zIndex: 9999}} // High zIndex to ensure visibility above video player overlay
-            PaperProps={{
-                sx: {
-                    width: {xs: '85%', sm: 400},
-                    bgcolor: '#181818',
+            slotProps={{
+                paper: {
+                    sx: {
+                        width: {xs: '85%', sm: 400},
+                        bgcolor: '#181818',
+                    }
                 }
             }}
         >

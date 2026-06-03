@@ -62,10 +62,12 @@ const NotificationsModal = observer(() => {
             onClose={closeNotificationsModal}
             maxWidth="sm"
             fullWidth
-            PaperProps={{
-                sx: {
-                    bgcolor: 'background.paper',
-                    backgroundImage: 'none',
+            slotProps={{
+                paper: {
+                    sx: {
+                        bgcolor: 'background.paper',
+                        backgroundImage: 'none',
+                    }
                 }
             }}
         >

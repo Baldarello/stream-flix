@@ -150,8 +150,8 @@ const SeasonSelector = observer(({seasons, value, onChange}) => {
                     background: 'var(--bg-glass)',
                     borderRadius: '8px',
                 }}
-                MenuProps={{
-                    PaperProps: {
+                slotProps={{
+                    paper: {
                         sx: {
                             background: 'var(--bg-deep)',
                             backgroundImage: 'var(--holo-grad)',
@@ -631,8 +631,8 @@ const EpisodesDrawer = observer(({
             onClose={onClose}
             id="episodes-drawer"
             aria-label={t('remote.player.episodes') || 'Episodes'}
-            ModalProps={{
-                BackdropProps: {
+            slotProps={{
+                backdrop: {
                     sx: {
                         pt: 'env(safe-area-inset-top)',
                         pb: 'env(safe-area-inset-bottom)',
@@ -642,24 +642,24 @@ const EpisodesDrawer = observer(({
                         backdropFilter: 'blur(4px)',
                         WebkitBackdropFilter: 'blur(4px)',
                     }
-                }
-            }}
-            PaperProps={{
-                ref: paperRef,
-                className: 'episodes-drawer-paper holo-surface',
-                sx: {
-                    width: {xs: '85vw', sm: 400, md: 420},
-                    pt: 'env(safe-area-inset-top)',
-                    pb: 'env(safe-area-inset-bottom)',
-                    pr: 'env(safe-area-inset-right)',
-                    color: 'var(--text-primary)',
-                    background: 'var(--bg-deep)',
-                    backgroundImage: 'var(--holo-grad)',
-                    borderLeft: '1px solid rgba(76, 210, 255, 0.35)',
-                    boxShadow: '0 0 24px rgba(76, 210, 255, 0.3), 0 18px 40px rgba(0,0,0,0.55)',
-                    backdropFilter: 'blur(12px) saturate(140%)',
-                    WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-                    overflow: 'hidden',
+                },
+                paper: {
+                    ref: paperRef,
+                    className: 'episodes-drawer-paper holo-surface',
+                    sx: {
+                        width: {xs: '85vw', sm: 400, md: 420},
+                        pt: 'env(safe-area-inset-top)',
+                        pb: 'env(safe-area-inset-bottom)',
+                        pr: 'env(safe-area-inset-right)',
+                        color: 'var(--text-primary)',
+                        background: 'var(--bg-deep)',
+                        backgroundImage: 'var(--holo-grad)',
+                        borderLeft: '1px solid rgba(76, 210, 255, 0.35)',
+                        boxShadow: '0 0 24px rgba(76, 210, 255, 0.3), 0 18px 40px rgba(0,0,0,0.55)',
+                        backdropFilter: 'blur(12px) saturate(140%)',
+                        WebkitBackdropFilter: 'blur(12px) saturate(140%)',
+                        overflow: 'hidden',
+                    }
                 }
             }}
         >

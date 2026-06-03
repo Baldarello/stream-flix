@@ -93,13 +93,15 @@ export const ReorderDrawer = ({
             anchor="bottom"
             open={open}
             onClose={handleClose}
-            PaperProps={{
-                sx: {
-                    borderTopLeftRadius: 16,
-                    borderTopRightRadius: 16,
-                    maxHeight: '80vh',
-                    backgroundColor: 'rgba(20, 20, 30, 0.95)',
-                    backdropFilter: 'blur(10px)',
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                        maxHeight: '80vh',
+                        backgroundColor: 'rgba(20, 20, 30, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                    }
                 }
             }}
         >
