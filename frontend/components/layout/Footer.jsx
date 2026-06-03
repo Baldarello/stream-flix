@@ -1,36 +1,12 @@
-import React from 'react';
-import {Box, Container, IconButton, Typography} from '@mui/material';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import YouTubeIcon from '@mui/icons-material/YouTube';
+/**
+ * @fileoverview Footer - Deprecated re-export shim.
+ *
+ * The cinematic-futuristic rework replaces the legacy footer with
+ * `CinematicFooter`. This file remains as a thin re-export so any
+ * feature folder that still imports `Footer` continues to work.
+ *
+ * New code should import `CinematicFooter` directly.
+ */
 
-export const Footer = () => {
-    const socialIcons = [
-        {icon: <FacebookIcon/>, href: '#'},
-        {icon: <InstagramIcon/>, href: '#'},
-        {icon: <TwitterIcon/>, href: '#'},
-        {icon: <YouTubeIcon/>, href: '#'},
-    ];
-
-    return (
-        <Container maxWidth="md" component="footer" sx={{
-            pt: 8,
-            pb: 'calc(1.5rem + env(safe-area-inset-bottom))',
-            color: 'text.secondary',
-            textAlign: 'center'
-        }}>
-            <Box sx={{display: 'flex', justifyContent: 'center', gap: 2, mb: 3}}>
-                {socialIcons.map((social, index) => (
-                    <IconButton key={index} component="a" href={social.href} color="inherit"
-                                sx={{'&:hover': {color: 'text.primary', transform: 'scale(1.1)'}}}>
-                        {social.icon}
-                    </IconButton>
-                ))}
-            </Box>
-            <Typography variant="body2" sx={{mt: 4}}>
-                &copy; 2026 Quix
-            </Typography>
-        </Container>
-    );
-};
+export { CinematicFooter as Footer } from './CinematicFooter.jsx';
+export { CinematicFooter } from './CinematicFooter.jsx';

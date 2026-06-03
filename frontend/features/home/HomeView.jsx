@@ -11,8 +11,8 @@ import { observer } from 'mobx-react-lite';
 import { Box, Container } from '@mui/material';
 import { useTranslations } from '../../hooks/useTranslations.js';
 import { mediaStore } from '../../store/mediaStore.js';
-import { Hero } from '../../components/layout/Hero.jsx';
-import { ContentRow } from '../../components/layout/ContentRow.jsx';
+import { CinematicHero } from '../../components/layout/CinematicHero.jsx';
+import { CinematicRow } from '../../components/layout/CinematicRow.jsx';
 
 /**
  * Home View Component
@@ -29,7 +29,7 @@ export const HomeView = observer(() => {
     return (
         <>
             {heroContent && (
-                <Hero
+                <CinematicHero
                     id="home-hero"
                     item={heroContent}
                     onMoreInfoClick={() => selectMedia(heroContent, 'detailView')}
@@ -53,7 +53,7 @@ export const HomeView = observer(() => {
                         };
 
                         return (
-                            <ContentRow
+                            <CinematicRow
                                 key={row.titleKey}
                                 id={`content-row-${row.titleKey}`}
                                 title={t(row.titleKey)}

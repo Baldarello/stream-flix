@@ -15,12 +15,14 @@
     "@mui/material": "5.18.0",
     "axios": "1.13.6",
     "dexie": "4.3.0",
+    "gsap": "3.12.5",
     "html5-qrcode": "2.3.8",
     "mobx": "6.15.0",
     "mobx-react-lite": "4.1.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-router": "7.13.1"
+    "react-router": "7.13.1",
+    "three": "0.160.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "5.1.4",

@@ -1,12 +1,20 @@
-:root {
-  --glow-seriestv-color: #00A3FF;
-  --glow-film-color: #ffab00;
-  --glow-anime-color: #ab47bc;
+@import './styles/cinematic.css';
 
-  /* Theme Gradients */
-  --serietv-gradient: linear-gradient(to bottom, #0F0C29, #1c1642, #141414);
-  --film-gradient: linear-gradient(to bottom, #2d1a04, #4a2a0a, #141414);
-  --anime-gradient: linear-gradient(to bottom, #1d0f29, #331642, #141414);
+:root {
+  /* Legacy glow variables - kept as aliases for backward compatibility.
+     The cinematic palette uses cyan as the unified accent; per-category
+     tints can still be applied via the *--neon-accent* CSS variable and
+     the row accent strips. */
+  --glow-seriestv-color: var(--neon-accent);
+  --glow-film-color: var(--neon-accent);
+  --glow-anime-color: var(--neon-accent);
+
+  /* Legacy theme gradients - mapped to the unified futuristic backdrop
+     so the body never flashes a different color when the activeTheme
+     observable is read by legacy code. */
+  --serietv-gradient: var(--cinematic-grad);
+  --film-gradient: var(--cinematic-grad);
+  --anime-gradient: var(--cinematic-grad);
 }
 
 @keyframes kenburns {
@@ -26,14 +34,14 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #181818;
+  background: var(--bg-deep);
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #424242;
+  background-color: rgba(76, 210, 255, 0.35);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+  background-color: rgba(122, 240, 255, 0.55);
 }
 
 /* Custom Video Player Slider Styles */
@@ -66,12 +74,12 @@
 /* Drag and Drop Styles */
 .dragging-item {
   opacity: 0.4;
-  border: 2px dashed var(--glow-seriestv-color);
+  border: 2px dashed var(--neon-accent);
 }
 .drop-target-item {
   transform: scale(1.05);
-  border: 2px dashed var(--glow-seriestv-color);
-  box-shadow: 0 0 15px var(--glow-seriestv-color);
+  border: 2px dashed var(--neon-accent);
+  box-shadow: 0 0 15px var(--neon-accent);
 }
 /* Disable sibling-shift hover effect during drag to prevent jank */
 .filmstrip-container.is-dragging .dnd-wrapper:hover ~ .dnd-wrapper {
@@ -80,13 +88,13 @@
 
 /* Mobile Swipe Reorder Styles */
 .selected-for-reorder {
-  outline: 3px solid #ff9800;
+  outline: 3px solid var(--neon-warn);
   outline-offset: 4px;
   animation: pulse-reorder 1s infinite;
 }
 
 .reorder-target {
-  outline: 3px dashed #4caf50;
+  outline: 3px dashed var(--neon-accent-hot);
   outline-offset: 4px;
   transform: scale(1.1) translateY(-10px);
   z-index: 100;
@@ -102,8 +110,8 @@
 }
 
 @keyframes pulse-reorder {
-  0%, 100% { outline-color: #ff9800; }
-  50% { outline-color: #ffc107; }
+  0%, 100% { outline-color: var(--neon-warn); }
+  50% { outline-color: var(--neon-accent-hot); }
 }
 
 /* Mobile Long Press Reorder Styles */
@@ -122,7 +130,7 @@
 }
 
 .long-press-selected {
-  outline: 4px solid #ff9800;
+  outline: 4px solid var(--neon-warn);
   outline-offset: 6px;
   animation: long-press-pulse 0.6s ease-in-out infinite;
   z-index: 50;
@@ -130,7 +138,7 @@
 
 .long-press-selected .media-card {
   transform: scale(1.08);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 30px rgba(255, 152, 0, 0.5);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 30px rgba(255, 94, 155, 0.5);
 }
 
 .filmstrip-container.is-reorder-mode .media-card {
@@ -145,29 +153,31 @@
 }
 
 @keyframes long-press-pulse {
-  0%, 100% { 
-    outline-color: #ff9800;
+  0%, 100% {
+    outline-color: var(--neon-warn);
     outline-width: 4px;
   }
-  50% { 
-    outline-color: #ffc107;
+  50% {
+    outline-color: var(--neon-accent-hot);
     outline-width: 6px;
   }
 }
 
 body {
+  background: var(--cinematic-grad);
   background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-body);
   transition: background 0.5s ease-in-out;
+  min-height: 100vh;
 }
-body.theme-serietv {
-  background: var(--serietv-gradient);
-}
-body.theme-film {
-  background: var(--film-gradient);
-}
+
+/* The three body classes are kept for backward compatibility (legacy
+   components still emit them from `App.jsx`). All three now map to the
+   single futuristic backdrop. */
+body.theme-serietv,
+body.theme-film,
 body.theme-anime {
-  background: var(--anime-gradient);
+  background: var(--cinematic-grad);
+  color: var(--text-primary);
 }
-
-
-

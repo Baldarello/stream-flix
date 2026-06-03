@@ -12,10 +12,10 @@ import { useStores } from '../../context/StoreContext.jsx';
 import { useTranslations } from '../../hooks/useTranslations.js';
 import { Header } from '../../components/layout/Header.jsx';
 import { Footer } from '../../components/layout/Footer.jsx';
-import DetailView from '../../components/media/DetailView.jsx';
+import { CinematicDetail } from '../../components/media/CinematicDetail.jsx';
 import ProfileDrawer from '../../components/utilities/ProfileDrawer.jsx';
 import { HomeView } from '../../features/home/HomeView.jsx';
-import GridView from '../../components/layout/GridView.jsx';
+import { CinematicGrid } from '../../components/layout/CinematicGrid.jsx';
 import LibraryManagementView from '../../components/library/LibraryManagementView.jsx';
 
 /**
@@ -52,34 +52,34 @@ export const FeatureRouter = observer(() => {
                 return <HomeView />;
             case 'Serie TV':
                 return (
-                    <GridView 
+                    <CinematicGrid
                         id="grid-view-series"
-                        title={t('gridView.seriesTitle')} 
-                        items={topSeries} 
+                        title={t('gridView.seriesTitle')}
+                        items={topSeries}
                     />
                 );
             case 'Film':
                 return (
-                    <GridView 
+                    <CinematicGrid
                         id="grid-view-movies"
-                        title={t('gridView.moviesTitle')} 
-                        items={allMovies} 
+                        title={t('gridView.moviesTitle')}
+                        items={allMovies}
                     />
                 );
             case 'Anime':
                 return (
-                    <GridView 
+                    <CinematicGrid
                         id="grid-view-anime"
-                        title={t('gridView.animeTitle')} 
-                        items={popularAnime} 
+                        title={t('gridView.animeTitle')}
+                        items={popularAnime}
                     />
                 );
             case 'La mia lista':
                 return (
-                    <GridView 
+                    <CinematicGrid
                         id="grid-view-mylist"
-                        title={t('gridView.myListTitle')} 
-                        items={myListItems} 
+                        title={t('gridView.myListTitle')}
+                        items={myListItems}
                     />
                 );
             case 'Libreria':
@@ -98,7 +98,7 @@ export const FeatureRouter = observer(() => {
             >
                 {renderFeatureContent()}
             </main>
-            {currentSelectedItem && <DetailView id="detail-view" />}
+            {currentSelectedItem && <CinematicDetail id="detail-cinematic" />}
             <Footer />
             <ProfileDrawer />
         </Box>

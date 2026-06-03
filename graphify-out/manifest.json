@@ -395,39 +395,39 @@
     "semantic_hash": "d8f6eb9462cf2fe802cd0533ec9cc2aa"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\App.jsx": {
-    "mtime": 1780228471.7286339,
-    "ast_hash": "fa4a20c7d5c825de6afd6b6e95911414",
-    "semantic_hash": "fa4a20c7d5c825de6afd6b6e95911414"
+    "mtime": 1780476271.5175154,
+    "ast_hash": "ed977f780394342ff50c292aaeabad1d",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\Card.jsx": {
-    "mtime": 1780228471.729635,
-    "ast_hash": "d4176f2e1ef5f40ef300f844be959ea9",
-    "semantic_hash": "d4176f2e1ef5f40ef300f844be959ea9"
+    "mtime": 1780354670.7179327,
+    "ast_hash": "04b2ec62672d9346bc6c9bfaa0f2a380",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\ContentRow.jsx": {
-    "mtime": 1780228471.7301335,
-    "ast_hash": "fe17e937024b40d104045a7e049f1176",
-    "semantic_hash": "fe17e937024b40d104045a7e049f1176"
+    "mtime": 1780354741.298786,
+    "ast_hash": "eafb1895da1b9c3996ccd290dc57ac11",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\Footer.jsx": {
-    "mtime": 1780228471.7301335,
-    "ast_hash": "432890b92d6a2a4af1fc3b72766cdf71",
-    "semantic_hash": "432890b92d6a2a4af1fc3b72766cdf71"
+    "mtime": 1780354813.2332225,
+    "ast_hash": "e277dbab167bb86b76d7744b828398b3",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\GridView.jsx": {
-    "mtime": 1780228471.7306347,
-    "ast_hash": "c9cbb4724f7c3408a040901c729cbf08",
-    "semantic_hash": "c9cbb4724f7c3408a040901c729cbf08"
+    "mtime": 1780354778.9642246,
+    "ast_hash": "5cba4ce795317bbc495e3049924fe067",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\Header.jsx": {
-    "mtime": 1780326080.3531206,
-    "ast_hash": "ef865b323ac1d4dd6f20ce2a191117f5",
-    "semantic_hash": "ef865b323ac1d4dd6f20ce2a191117f5"
+    "mtime": 1780353698.5290203,
+    "ast_hash": "7c7744165fa3a2b82772de4bc0a9ba42",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\Hero.jsx": {
-    "mtime": 1780231879.042359,
-    "ast_hash": "2afa9fb69873865db237f72cfa48ca7a",
-    "semantic_hash": "2afa9fb69873865db237f72cfa48ca7a"
+    "mtime": 1780354115.3957112,
+    "ast_hash": "14d10500c57d11c4eb64f1a0d4877f7f",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\EpisodesDrawer.jsx": {
     "mtime": 1780228471.732135,
@@ -445,7 +445,7 @@
     "semantic_hash": "d65888835cbe3bd0b3fd44f821ed6968"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\media\\DetailView.jsx": {
-    "mtime": 1780326068.4239743,
+    "mtime": 1780354895.5108845,
     "ast_hash": "b2de49affcd74a99d1ed242738e792b1",
     "semantic_hash": "b2de49affcd74a99d1ed242738e792b1"
   },
@@ -540,9 +540,9 @@
     "semantic_hash": "852c8bb489abb4dc0fb89f73ede36b1c"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\remote\\master\\MasterRemotePlayerControlView.jsx": {
-    "mtime": 1780320960.533157,
-    "ast_hash": "2a6a310c7598a1a0ca8ee2eb386f0011",
-    "semantic_hash": "2a6a310c7598a1a0ca8ee2eb386f0011"
+    "mtime": 1780475409.4380474,
+    "ast_hash": "0c9446bb1aad4d0d2467b7dfa044f054",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\remote\\slave\\SlaveBackground.jsx": {
     "mtime": 1780228471.7441473,
@@ -590,9 +590,9 @@
     "semantic_hash": "12630de5077c6c4d92c191c5d83da6e7"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\utilities\\NotificationSnackbar.jsx": {
-    "mtime": 1780228471.7486596,
-    "ast_hash": "ea600511163af5504745decabaf23b47",
-    "semantic_hash": "ea600511163af5504745decabaf23b47"
+    "mtime": 1780476350.083145,
+    "ast_hash": "049d4d3c524b8c64d22d36a676d7668b",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\utilities\\ProfileDrawer.jsx": {
     "mtime": 1780228471.7490146,
@@ -610,14 +610,14 @@
     "semantic_hash": "68c510217b6320aad2b280855fdc0817"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\features\\home\\HomeView.jsx": {
-    "mtime": 1780228471.7516632,
-    "ast_hash": "77dbabe313722e7c6fa35e95712f6702",
-    "semantic_hash": "77dbabe313722e7c6fa35e95712f6702"
+    "mtime": 1780354952.7651355,
+    "ast_hash": "9bb380a79307ac02dca71329dee95373",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\features\\shared\\AppInitializer.jsx": {
-    "mtime": 1780228471.7521598,
-    "ast_hash": "462ab6a8cdc07f285a92b86b6b8df332",
-    "semantic_hash": "462ab6a8cdc07f285a92b86b6b8df332"
+    "mtime": 1780352972.997616,
+    "ast_hash": "13c44ff513dc021abafabb3b7b46315e",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\features\\shared\\BrowserHistoryHandler.jsx": {
     "mtime": 1780228471.7526622,
@@ -660,9 +660,9 @@
     "semantic_hash": "663de076f39e3dca2162d8d600056b6d"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\package.json": {
-    "mtime": 1780228471.7591631,
-    "ast_hash": "b4239fb95a7b9db9a61ce180c8d6192b",
-    "semantic_hash": "b4239fb95a7b9db9a61ce180c8d6192b"
+    "mtime": 1780352739.5642433,
+    "ast_hash": "47ec03b6f9679f4a9469f86c4ab8858c",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\services\\apiCall.jsx": {
     "mtime": 1780228471.759663,
@@ -725,9 +725,9 @@
     "semantic_hash": "4dc3a48959b993ed16883e3aa71d1852"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\views\\ViewSwitch.jsx": {
-    "mtime": 1780228471.7686646,
-    "ast_hash": "646901928b2a86e877a9032decf48c31",
-    "semantic_hash": "646901928b2a86e877a9032decf48c31"
+    "mtime": 1780353803.1789215,
+    "ast_hash": "6a0154a2d2e1a726466b3ed6186a269c",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\views\\appMode\\SmartTVPairingView.jsx": {
     "mtime": 1780228471.7691648,
@@ -735,9 +735,9 @@
     "semantic_hash": "61f1b1fe59c9e2f11f1f65fb6aed37f1"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\views\\features\\FeatureRouter.jsx": {
-    "mtime": 1780228471.7696636,
-    "ast_hash": "372e17c678a641435bde61af25f001b8",
-    "semantic_hash": "372e17c678a641435bde61af25f001b8"
+    "mtime": 1780354985.739894,
+    "ast_hash": "6db7dffb0e17431fbc99089bf333353d",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\views\\features\\SearchView.jsx": {
     "mtime": 1780256863.8928657,
@@ -770,9 +770,9 @@
     "semantic_hash": "bddf1ebd07e7175dbcc7113f3a9214c6"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\views\\system\\LoadingView.jsx": {
-    "mtime": 1780228471.7726624,
-    "ast_hash": "2924213e2f85c6fe9d9e3c071de1e642",
-    "semantic_hash": "2924213e2f85c6fe9d9e3c071de1e642"
+    "mtime": 1780475231.7046692,
+    "ast_hash": "37d3096ae057ea6b26ded8d7a74e9538",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\vite.config.js": {
     "mtime": 1780236949.6562324,
@@ -790,7 +790,7 @@
     "semantic_hash": "6314a62f78f7a07ffed6c0a9b678d116"
   },
   "E:\\Lavoro\\TND\\stream-flix\\test-results\\.last-run.json": {
-    "mtime": 1780326303.7827353,
+    "mtime": 1780476415.940358,
     "ast_hash": "f196824657d8858bc7fa44eecbba38b1",
     "semantic_hash": "f196824657d8858bc7fa44eecbba38b1"
   },
@@ -1255,8 +1255,8 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\index.html": {
-    "mtime": 1780331506.7328424,
-    "ast_hash": "b1e991f7224db4bea9191acedcadde6d",
+    "mtime": 1780352986.8565464,
+    "ast_hash": "3d7c354055b86fd5375fe661d6b5e207",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\debug-slave.png": {
@@ -1269,19 +1269,174 @@
     "ast_hash": "73635015d80a7386419d1b5cffc53aea",
     "semantic_hash": ""
   },
-  "E:\\Lavoro\\TND\\stream-flix\\master-after-back-click.png": {
-    "mtime": 1780326303.6709244,
-    "ast_hash": "00dcd33ddfef1e22b259bcf535663df0",
-    "semantic_hash": ""
-  },
-  "E:\\Lavoro\\TND\\stream-flix\\master-after-detail-close.png": {
-    "mtime": 1780326256.0928953,
-    "ast_hash": "378a2678bd698dd64a8ec457ed4c467b",
-    "semantic_hash": ""
-  },
   "E:\\Lavoro\\TND\\stream-flix\\.output.txt": {
-    "mtime": 1780334878.2737677,
-    "ast_hash": "f29226177f093b1a03c0f6da18412d8e",
+    "mtime": 1780475852.6983607,
+    "ast_hash": "15b065fc0dcf350ce670a2f99e19dca2",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\cinematic-rework.spec.js": {
+    "mtime": 1780476397.4368174,
+    "ast_hash": "79466a5618ea263b0f1d6dd0d8003c4a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\stages\\01-design-system.spec.js": {
+    "mtime": 1780353100.0025532,
+    "ast_hash": "9fb5c40dfcf64ef7414da55bd311e1d7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\stages\\02-webgl.spec.js": {
+    "mtime": 1780353503.1670506,
+    "ast_hash": "a59d2e5bc928147479ef0b91f0fde444",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\stages\\03-dock-and-transitions.spec.js": {
+    "mtime": 1780353859.9393442,
+    "ast_hash": "f508cd3d6955ebace4cd5338fc4062c6",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\stages\\04-hero.spec.js": {
+    "mtime": 1780354464.7040277,
+    "ast_hash": "c7fe1b7db6ad94967cd866355c83c300",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\stages\\05-surfaces.spec.js": {
+    "mtime": 1780476081.8721905,
+    "ast_hash": "0b8a68b56169bf8eb0336dbf61230e6a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\tests\\master-remote-progress-time-layout.spec.js": {
+    "mtime": 1780476324.3628323,
+    "ast_hash": "b780625dfc8639d5bf2be8448cf53eb5",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\feedback\\HoloChip.jsx": {
+    "mtime": 1780476320.6836457,
+    "ast_hash": "c1615596fc82714ef45b35b884be67f2",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\feedback\\ScanlineOverlay.jsx": {
+    "mtime": 1780353735.2382917,
+    "ast_hash": "eb31e3e7d0732f92564e52f13f228105",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\feedback\\Skeleton.jsx": {
+    "mtime": 1780354688.921085,
+    "ast_hash": "71c8ec080d3ee64a5d61c66ac9b10f40",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\CinematicFooter.jsx": {
+    "mtime": 1780354801.6913033,
+    "ast_hash": "669eb830a49d344aaa30826917917522",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\CinematicGrid.jsx": {
+    "mtime": 1780354763.484921,
+    "ast_hash": "c6bff9ae52f3f8c0a9a1ee216cb54479",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\CinematicHero.jsx": {
+    "mtime": 1780354102.02438,
+    "ast_hash": "80d34afd6d2a635c10a8db78b1cc16d4",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\CinematicRow.jsx": {
+    "mtime": 1780354724.6363442,
+    "ast_hash": "dcd5a10a861d68ece9857c1fb76d31cc",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\FloatingDock.jsx": {
+    "mtime": 1780353682.2673142,
+    "ast_hash": "11f7d1ad5ac8baa449244ad8ac7ffd3f",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\layout\\HoloCard.jsx": {
+    "mtime": 1780354655.9339218,
+    "ast_hash": "ac3535502b122b16c40f984dddc1a4d4",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\media\\CinematicDetail.jsx": {
+    "mtime": 1780354837.7149823,
+    "ast_hash": "c6268bd12b14d80d5e24837074c5ec1b",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\media\\HoloPlayerControls.jsx": {
+    "mtime": 1780476303.7580576,
+    "ast_hash": "61c8118adeace691c0f9614d1e2c4f2a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\modals\\ModalShell.jsx": {
+    "mtime": 1780476257.2749367,
+    "ast_hash": "9715ae4cae229e3b8aef74ba59126791",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\fx\\AmbientCanvas.jsx": {
+    "mtime": 1780353374.3734422,
+    "ast_hash": "caa92e2327a87d8d0fe20f91ffe28efe",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\fx\\SceneCanvas.jsx": {
+    "mtime": 1780353408.2931857,
+    "ast_hash": "72d0600c33bda37496c0d56df433a81f",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\fx\\TransitionPortal.jsx": {
+    "mtime": 1780353907.1080565,
+    "ast_hash": "3b7cc9bcf7903d0575c6e1c67522930e",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\fx\\shaders\\holo.glsl.js": {
+    "mtime": 1780353327.2455933,
+    "ast_hash": "ff521af9bb57f72b14bd3cbe9a60fdac",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\fx\\shaders\\lightleak.glsl.js": {
+    "mtime": 1780353315.5385947,
+    "ast_hash": "1c061ac2276e8b5dc8bdc97348ce0b2b",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\fx\\shaders\\starfield.glsl.js": {
+    "mtime": 1780353304.0984755,
+    "ast_hash": "2ef957c75147cab95079c22f92265acc",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\motion\\grammar.js": {
+    "mtime": 1780352768.810971,
+    "ast_hash": "f37239d643a7cc6f815ce29f5579b5eb",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\motion\\registry.js": {
+    "mtime": 1780353451.4007277,
+    "ast_hash": "2366452d356090a5b8ab5abaf1742ac7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\fxStore.js": {
+    "mtime": 1780352900.424817,
+    "ast_hash": "9c538374c67b25add20804a2d3f166f7",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\utils\\reducedMotion.js": {
+    "mtime": 1780352801.7518775,
+    "ast_hash": "e50fdcbc610e62c7507ca1d693af48cb",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\utils\\webglDetect.js": {
+    "mtime": 1780352792.458974,
+    "ast_hash": "8048c1f83771ea239b9a5b4c792cb201",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\hero-theme-content.png": {
+    "mtime": 1780476039.4654076,
+    "ast_hash": "5dda840eb113f428307107f50222b3ed",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\manual-verify-progress-layout.png": {
+    "mtime": 1780476461.0285118,
+    "ast_hash": "50294c04202a368326ddf694b36df8f5",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\master-remote-progress-time-layout.png": {
+    "mtime": 1780476415.8165548,
+    "ast_hash": "74692e7792962a41957918b7327a4607",
     "semantic_hash": ""
   }
 }

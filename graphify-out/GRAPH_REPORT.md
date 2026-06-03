@@ -1,16 +1,16 @@
-# Graph Report - stream-flix  (2026-06-01)
+# Graph Report - stream-flix  (2026-06-03)
 
 ## Corpus Check
-- 248 files · ~866,310 words
+- 278 files · ~425,886 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3772 nodes · 6209 edges · 277 communities (234 shown, 43 thin omitted)
+- 3874 nodes · 6430 edges · 281 communities (229 shown, 52 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 46 edges (avg confidence: 0.81)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `41c29d06`
+- Built from commit: `b5f25ec5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -286,12 +286,16 @@
 - [[_COMMUNITY_Community 274|Community 274]]
 - [[_COMMUNITY_Community 275|Community 275]]
 - [[_COMMUNITY_Community 276|Community 276]]
+- [[_COMMUNITY_Community 277|Community 277]]
+- [[_COMMUNITY_Community 278|Community 278]]
+- [[_COMMUNITY_Community 279|Community 279]]
+- [[_COMMUNITY_Community 280|Community 280]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `MediaStore` - 104 edges
+1. `MediaStore` - 108 edges
 2. `_()` - 55 edges
-3. `RemoteStore` - 54 edges
-4. `useTranslations()` - 43 edges
+3. `RemoteStore` - 55 edges
+4. `useTranslations()` - 51 edges
 5. `WebSocketService` - 39 edges
 6. `CORE DIRECTIVE: IMAGE-FIRST WEBSITE DESIGN TO CODE` - 39 edges
 7. `CORE DIRECTIVE: PREMIUM MOBILE APP IMAGE DIRECTION` - 39 edges
@@ -314,7 +318,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (277 total, 43 thin omitted)
+## Communities (281 total, 52 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -325,12 +329,12 @@ Cohesion: 0.05
 Nodes (4): en, it, allTranslations, MediaStore
 
 ### Community 2 - "Community 2"
-Cohesion: 0.14
-Nodes (33): argVal(), buildInsertWrapperLines(), computeInsertLine(), INSERT_POSITIONS, insertCli(), isInsertPosition(), resolveElementMatch(), applyBufferedManualEditToLines() (+25 more)
+Cohesion: 0.07
+Nodes (63): hasGeneratedHeader(), HEADER_MARKERS, isGeneratedFile(), isGitIgnored(), acceptCli(), argVal(), deindentContent(), detectCommentSyntax() (+55 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.06
-Nodes (54): addBrowserFindings(), addVisualContrastFindings(), addVisualContrastResult(), analyzeVisualContrast(), analyzeVisualContrastCandidate(), blendRgba(), buildSelectorSegment(), checkBorders() (+46 more)
+Cohesion: 0.08
+Nodes (30): borderWidthsFromStyle(), buildSelectorSegment(), checkBorders(), checkElementBorders(), checkElementBordersDOM(), checkElementGptBorderShadow(), checkElementGptBorderShadowDOM(), checkElementItalicSerif() (+22 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.10
@@ -349,12 +353,12 @@ Cohesion: 0.11
 Nodes (53): _(), ae(), be(), bt(), Ce(), Ct(), de(), dt() (+45 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.06
-Nodes (37): addOpToManualApplyChunk(), annotRoot, APPLY_EVENT_HARD_TIMEOUT_MS, APPLY_EVENT_SOFT_DEADLINE_MS, args, cancelPendingManualApplyEvents(), compactManualApplySourceMatch(), CONTEXT_DIR (+29 more)
+Cohesion: 0.05
+Nodes (52): addOpToManualApplyChunk(), annotRoot, APPLY_EVENT_HARD_TIMEOUT_MS, APPLY_EVENT_SOFT_DEADLINE_MS, args, buildManualApplyAgentAction(), cancelPendingManualApplyEvents(), collectManualApplyFiles() (+44 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.09
-Nodes (50): checkBorders(), checkColors(), checkCreamPalette(), checkElementAIPaletteDOM(), checkElementBorders(), checkElementBordersDOM(), checkElementColors(), checkElementColorsDOM() (+42 more)
+Cohesion: 0.07
+Nodes (60): borderWidthsFromStyle(), checkBorders(), checkColors(), checkCreamPalette(), checkElementAIPaletteDOM(), checkElementBorders(), checkElementBordersDOM(), checkElementColors() (+52 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.09
@@ -365,8 +369,8 @@ Cohesion: 0.05
 Nodes (3): MasterRemotePlayerControlView, RemoteStore, ConnectionIndicator
 
 ### Community 12 - "Community 12"
-Cohesion: 0.09
-Nodes (14): checkAuthPopupClosed(), handleSignIn(), handleSignOut(), initGoogleAuth(), refreshAccessToken(), refreshAccessTokenWithRetry(), scheduleTokenRefresh(), stopPopupPolling() (+6 more)
+Cohesion: 0.13
+Nodes (3): EventEmitter, ICE_SERVERS, WebSocketService
 
 ### Community 13 - "Community 13"
 Cohesion: 0.15
@@ -377,12 +381,12 @@ Cohesion: 0.09
 Nodes (22): FORBIDDEN_MANUAL_EDIT_TEXT_CHARS, INSERT_POSITIONS, isValidId(), isValidVariantId(), validateAnnotationFields(), validateEvent(), validateInsertGenerate(), validateManualEditEvent() (+14 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.07
-Nodes (25): HomeView, useTranslations(), Card, ContentRow, GridView, Hero, EpisodesDrawer, SwipeableEpisodeCard (+17 more)
+Cohesion: 0.06
+Nodes (32): useTranslations(), Card, CinematicGrid, CinematicHero, CinematicRow, CinematicRowInner(), ContentRow, GridView (+24 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.12
-Nodes (14): SmartTVPairingView(), StoreContext, useStores(), FeatureRouter, SearchView, Header, navKeys, LibraryManagementView (+6 more)
+Cohesion: 0.11
+Nodes (13): SmartTVPairingView(), StoreContext, StoreProvider(), useStores(), FeatureRouter, SearchView, Skeleton, LocalPlaybackView() (+5 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.05
@@ -397,16 +401,16 @@ Cohesion: 0.09
 Nodes (31): addManualContextText(), applyEditing(), buildLocatorForLeaf(), canRestoreManualEditElement(), collectManualContextPieces(), contextElementForManualEdit(), copyEditContainerContext(), copyEditLeafContext() (+23 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.20
-Nodes (20): createBrowserDetector(), confirm(), detectCli(), formatFindings(), handleStdin(), printUsage(), buildImportGraph(), detectFrameworkConfig() (+12 more)
+Cohesion: 0.11
+Nodes (32): createBrowserDetector(), confirm(), detectCli(), formatFindings(), handleStdin(), printUsage(), buildImportGraph(), detectFrameworkConfig() (+24 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.16
-Nodes (26): acceptCli(), argVal(), deindentContent(), detectCommentSyntax(), escapeRegExp(), expandReplaceRange(), EXTENSIONS, extractCss() (+18 more)
+Cohesion: 0.09
+Nodes (26): ScanlineOverlay, SkeletonCard(), CinematicFooterInner(), socialIcons, CinematicGridInner(), HoloCard, HoloCardInner(), CinematicDetail (+18 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.07
-Nodes (26): dependencies, axios, dexie, @emotion/react, @emotion/styled, html5-qrcode, mobx, mobx-react-lite (+18 more)
+Nodes (28): dependencies, axios, dexie, @emotion/react, @emotion/styled, gsap, html5-qrcode, mobx (+20 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.15
@@ -437,16 +441,16 @@ Cohesion: 0.12
 Nodes (29): attachSteerFocusGuard(), barPaletteForTheme(), brandMarkSvg(), buildDesignHeader(), connectSSE(), defangOutsideHandlers(), designPanelCss(), detectPageTheme() (+21 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.13
-Nodes (21): applyStaticDeclaration(), compareStaticPriority(), cssPropToCamel(), expandStaticBoxValues(), expandStaticDeclaration(), extractStaticColor(), makeStaticStyle(), NAMED_COLORS (+13 more)
+Cohesion: 0.10
+Nodes (29): checkElementHeroEyebrow(), checkElementHeroEyebrowDOM(), checkElementQuality(), checkElementQualityDOM(), checkHeroEyebrow(), checkQuality(), isAccentColor(), resolveLengthPx() (+21 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.09
-Nodes (19): Footer(), GoogleDriveSyncConflictModal, ImportLibraryModal, style, LinkMovieModal, style, LinkSelectionModal(), style (+11 more)
+Cohesion: 0.07
+Nodes (27): HomeView, CinematicFooter, FloatingDock, NAV_KEYS, Footer(), Header, navKeys, DetailView (+19 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.17
-Nodes (11): finding(), getAP(), CSS_IN_JS_EXTENSIONS, detectText(), extractCSSinJS(), extractStyleBlocks(), REGEX_ANALYZERS, REGEX_MATCHERS (+3 more)
+Cohesion: 0.11
+Nodes (32): detectUrl(), runVisualContrastFallback(), finding(), getAP(), extractFindingIds(), profileFindings(), profileFindingsAsync(), profileNow() (+24 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.05
@@ -465,76 +469,76 @@ Cohesion: 0.10
 Nodes (34): actionLabel(), applyParamDefaults(), applyParamValue(), buildConfigureRow(), buildConfirmedRow(), buildCyclingRow(), buildDots(), buildGeneratingRow() (+26 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.19
-Nodes (18): args, buffer, cwd, pageUrlFilter, remaining, buildManualEditEvidence(), countByPage(), getBufferPath() (+10 more)
+Cohesion: 0.21
+Nodes (17): args, buffer, cwd, pageUrlFilter, remaining, buildManualEditEvidence(), countByPage(), getBufferPath() (+9 more)
 
 ### Community 38 - "Community 38"
 Cohesion: 0.21
 Nodes (17): isLiveServerPidReachable(), readLiveServerInfo(), completeCli(), completeThroughServer(), parseArgs(), readServerInfo(), collectManualApplyFiles(), manualApplyReplyCommand() (+9 more)
 
 ### Community 39 - "Community 39"
-Cohesion: 0.19
-Nodes (16): buildUpdateDirective(), cli(), compareSemver(), computeUpdateDirective(), DESIGN_NAMES, FALLBACK_DIRS, fetchLatestSkillVersion(), firstExisting() (+8 more)
+Cohesion: 0.05
+Nodes (50): Adapt Reference, Animate Reference, Audit Reference, Bolder Reference, buildUpdateDirective(), cli(), compareSemver(), computeUpdateDirective() (+42 more)
 
 ### Community 40 - "Community 40"
-Cohesion: 0.23
-Nodes (16): detectUrl(), runVisualContrastFallback(), createDetectorProfile(), extractFindingIds(), profileFindings(), profileFindingsAsync(), profileNow(), profileStep() (+8 more)
+Cohesion: 0.83
+Nodes (3): captureVisualContrastCandidate(), compareScreenshotContrast(), sanitizeScreenshotClip()
 
 ### Community 41 - "Community 41"
 Cohesion: 0.20
 Nodes (16): firstExisting(), getDesignSidecarCandidates(), getDesignSidecarPath(), getImpeccableDir(), getLegacyLiveConfigPath(), getLegacyLiveServerPath(), getLiveAnnotationsDir(), getLiveConfigPath() (+8 more)
 
 ### Community 42 - "Community 42"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (4): buildBorderOverrideMap(), normalizeColorForCheck(), StaticDocument, StaticElement
 
 ### Community 43 - "Community 43"
-Cohesion: 0.18
-Nodes (14): appendOriginToDirective(), buildTagBlock(), commentClose(), commentOpen(), CONFIG_PATH, __dirname, findCspMetaTags(), getAttr() (+6 more)
+Cohesion: 0.13
+Nodes (21): __dirname, ensureServerRunning(), appendOriginToDirective(), buildTagBlock(), commentClose(), commentOpen(), CONFIG_PATH, __dirname (+13 more)
 
 ### Community 44 - "Community 44"
-Cohesion: 0.24
-Nodes (13): firstCssUrl(), getLayerValue(), loadVisualContrastImage(), parseObjectPosition(), parsePositionPair(), parsePositionToken(), pointToImageSource(), resolveObjectImageRect() (+5 more)
+Cohesion: 0.20
+Nodes (15): blendRgba(), clampByte(), firstCssUrl(), getLayerValue(), loadVisualContrastImage(), parseObjectPosition(), parsePositionPair(), parsePositionToken() (+7 more)
 
 ### Community 45 - "Community 45"
 Cohesion: 0.12
 Nodes (15): dependencies, @mui/icons-material, description, devDependencies, @playwright/test, name, private, scripts (+7 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.15
-Nodes (12): Adapt Reference, Animate Reference, Audit Reference, Bolder Reference, args, buildWeights(), hashUnit(), pickSeed() (+4 more)
+Cohesion: 0.18
+Nodes (10): checkClippedOverflow(), checkElementClippedOverflow(), checkElementClippedOverflowDOM(), checkElementTextOverflowDOM(), checkRepeatedSectionKickersDOM(), classSelector(), cleanInlineText(), collectRepeatedSectionKickerCandidates() (+2 more)
 
 ### Community 47 - "Community 47"
-Cohesion: 0.14
-Nodes (29): checkColors(), checkCreamPalette(), checkElementAIPaletteDOM(), checkElementColors(), checkElementColorsDOM(), checkElementGlow(), checkElementGlowDOM(), checkElementIconTile() (+21 more)
+Cohesion: 0.16
+Nodes (23): analyzeVisualContrast(), analyzeVisualContrastCandidate(), checkElementColors(), checkElementColorsDOM(), checkElementGlowDOM(), checkElementIconTile(), checkElementIconTileDOM(), checkIconTile() (+15 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.13
-Nodes (23): checkElementHeroEyebrow(), checkElementHeroEyebrowDOM(), checkElementOversizedH1(), checkElementOversizedH1DOM(), checkElementQuality(), checkElementQualityDOM(), checkHeroEyebrow(), checkOversizedH1() (+15 more)
+Cohesion: 0.18
+Nodes (13): checkElementHeroEyebrow(), checkElementHeroEyebrowDOM(), checkElementOversizedH1(), checkElementOversizedH1DOM(), checkElementQuality(), checkElementQualityDOM(), checkHeroEyebrow(), checkOversizedH1() (+5 more)
 
 ### Community 49 - "Community 49"
-Cohesion: 0.17
-Nodes (11): apiClient, buildImageURL(), getLatestMovies(), getPopularAnime(), getSeriesDetails(), getSeriesEpisodes(), getTopRatedSeries(), getTrending() (+3 more)
+Cohesion: 0.20
+Nodes (12): checkAuthPopupClosed(), handleSignIn(), handleSignOut(), initGoogleAuth(), refreshAccessToken(), refreshAccessTokenWithRetry(), scheduleTokenRefresh(), stopPopupPolling() (+4 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.23
-Nodes (11): extractRegister(), cli(), COMMON_DEV_PORTS, devServerSignals(), gatherSignals(), gitSignals(), hasCode(), latestCritique() (+3 more)
+Cohesion: 0.29
+Nodes (10): checkColors(), checkElementAIPaletteDOM(), checkElementGlow(), checkGlow(), colorToHex(), contrastRatio(), getHue(), hasChroma() (+2 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.31
-Nodes (11): kebab(), listSnapshotsForSlug(), main(), nowFilenameStamp(), parseFrontmatter(), readLatestSnapshot(), readTrend(), serializeFrontmatter() (+3 more)
+Cohesion: 0.25
+Nodes (9): addBrowserFindings(), addVisualContrastFindings(), addVisualContrastResult(), clearOverlays(), detachOverlay(), disconnectLazyVisualContrastObserver(), scheduleLazyVisualContrast(), shouldRunVisualContrast() (+1 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.06
 Nodes (34): 10. IMAGE-FIRST CODEX WEBSITE WORKFLOW, 11. WHEN TO TRIGGER IMAGE GENERATION FIRST, 13. WEBSITE REFERENCE RULE, 15. RESPONSIVE FIRST-VIEW RULE, 16. ANTI-NESTED-BOX RULE, 17. REDUCE MICRO-UI CLUTTER RULE, 18. SECTION IMAGE GENERATION RULE, 19. WEBSITE IMAGE SYSTEM RULE (+26 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.15
-Nodes (7): style, WatchTogetherModal, searchShow(), db, QuixDB, SyncStore, WatchTogetherStore
+Cohesion: 0.09
+Nodes (17): style, WatchTogetherModal, apiClient, buildImageURL(), getLatestMovies(), getPopularAnime(), getSeriesDetails(), getSeriesEpisodes() (+9 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.26
-Nodes (8): runTextContentAnalyzers(), checkHtmlPatterns(), checkPageLayout(), isFullPage(), buildStaticWindow(), collectStaticCssText(), detectHtml(), STATIC_ELEMENT_RULES
+Cohesion: 0.36
+Nodes (8): checkLayout(), checkPageLayout(), isCardLike(), isCardLikeDOM(), isCardLikeFromProps(), parseRadiusToPx(), resolveBorderRadiusPx(), isCardLike()
 
 ### Community 55 - "Community 55"
 Cohesion: 0.30
@@ -580,10 +584,6 @@ Nodes (31): Apply Clarity Principles, Assess Current Copy, Avoid Redundant Copy,
 Cohesion: 0.22
 Nodes (9): Brand Register, Assess Current Copy, UX Writing Principles, Brand Palette Generation, Visual Direction & Asset Production, Color Strategy, OKLCH Color Space, Craft Flow (+1 more)
 
-### Community 66 - "Community 66"
-Cohesion: 0.42
-Nodes (7): __dirname, ensureServerRunning(), resolveFiles(), liveCli(), runScript(), safeParse(), scanForDrift()
-
 ### Community 67 - "Community 67"
 Cohesion: 0.28
 Nodes (9): broadcast(), clearManualApplyTransaction(), manualApplyTransactionPath(), normalizeProjectFile(), readManualApplyTransaction(), recordManualEditActivity(), rollbackManualApplyTransaction(), summarizeManualDiagnostics() (+1 more)
@@ -601,16 +601,16 @@ Cohesion: 0.06
 Nodes (30): 10. FINAL PRE-FLIGHT CHECK, 1. ACTIVE BASELINE CONFIGURATION, 2. DEFAULT ARCHITECTURE & CONVENTIONS, 3. DESIGN ENGINEERING DIRECTIVES (Bias Correction), 4. CREATIVE PROACTIVITY (Anti-Slop Implementation), 5. PERFORMANCE GUARDRAILS, 6. TECHNICAL REFERENCE (Dial Definitions), 7. AI TELLS (Forbidden Patterns) (+22 more)
 
 ### Community 71 - "Community 71"
-Cohesion: 0.21
-Nodes (12): checkRepeatedSectionKickers(), checkRepeatedSectionKickersDOM(), checkRepeatedSectionKickersFromDoc(), cleanInlineText(), collectRepeatedSectionKickerCandidates(), isRepeatedKickerCandidate(), checkRepeatedSectionKickers(), checkRepeatedSectionKickersDOM() (+4 more)
+Cohesion: 0.38
+Nodes (7): checkRepeatedSectionKickers(), checkRepeatedSectionKickersDOM(), checkRepeatedSectionKickersFromDoc(), cleanInlineText(), collectRepeatedSectionKickerCandidates(), isRepeatedKickerCandidate(), checkRepeatedSectionKickers()
 
 ### Community 72 - "Community 72"
 Cohesion: 0.32
 Nodes (5): checkLinksForEpisode(), checkLinksForShow(), checkLinkValidity(), InvalidLinkInfo, LinkValidationResult
 
 ### Community 73 - "Community 73"
-Cohesion: 0.12
-Nodes (28): hasGeneratedHeader(), HEADER_MARKERS, isGeneratedFile(), isGitIgnored(), analyzeSourceHint(), buildCandidatesForOp(), buildContextHintsByRef(), collectSearchFiles() (+20 more)
+Cohesion: 0.14
+Nodes (24): analyzeSourceHint(), buildCandidatesForOp(), buildContextHintsByRef(), collectSearchFiles(), countOps(), escapeRegExp(), findContextMatches(), findLiteralMatches() (+16 more)
 
 ### Community 74 - "Community 74"
 Cohesion: 0.07
@@ -649,8 +649,8 @@ Cohesion: 0.09
 Nodes (22): Assess Onboarding Needs, Context Over Ceremony, Contextual Help, Design Onboarding Experiences, Documentation & Help, Empty State Design, Feature Discovery & Adoption, Guided Tours & Walkthroughs (+14 more)
 
 ### Community 125 - "Community 125"
-Cohesion: 0.11
-Nodes (22): browserFindingsFromMap(), checkClippedOverflow(), checkElementClippedOverflow(), checkElementClippedOverflowDOM(), checkElementMotion(), checkElementMotionDOM(), checkElementTextOverflowDOM(), checkHtmlPatterns() (+14 more)
+Cohesion: 0.14
+Nodes (17): browserFindingsFromMap(), checkClippedOverflow(), checkCreamPalette(), checkElementClippedOverflow(), checkElementClippedOverflowDOM(), checkElementTextOverflowDOM(), checkHtmlPatterns(), checkPageQualityDOM() (+9 more)
 
 ### Community 126 - "Community 126"
 Cohesion: 0.09
@@ -757,8 +757,8 @@ Cohesion: 0.12
 Nodes (15): Code Examples, Common Rationalizations for Skipping Testing, Directory Structure, Discovery Workflow, Flowchart Usage, Overview, Skill Creation Checklist (TDD Adapted), SKILL.md Structure (+7 more)
 
 ### Community 152 - "Community 152"
-Cohesion: 0.15
-Nodes (9): StoreProvider(), App, baseThemeOptions, themePalettes, root, rootElement, BrowserHistoryHandler(), ScrollLockManager() (+1 more)
+Cohesion: 0.08
+Nodes (18): App, baseThemeOptions, cinematicTheme, themePalettes, root, rootElement, AmbientCanvas, DEFAULT_PALETTE (+10 more)
 
 ### Community 153 - "Community 153"
 Cohesion: 0.13
@@ -795,10 +795,6 @@ Nodes (13): Assess Current Layout, Break Card Grid Monotony, Choose the Right La
 ### Community 161 - "Community 161"
 Cohesion: 0.14
 Nodes (13): Animation Performance, Assess Performance Issues, Core Web Vitals Optimization, Cumulative Layout Shift (CLS < 0.1), First Input Delay (FID < 100ms) / INP (< 200ms), Largest Contentful Paint (LCP < 2.5s), Loading Performance, Network Optimization (+5 more)
-
-### Community 162 - "Community 162"
-Cohesion: 0.18
-Nodes (14): buildManualApplyAgentAction(), collectManualApplyFiles(), compactManualApplyBatch(), compactManualApplyCandidates(), compactManualApplyContext(), compactManualApplyEntry(), compactManualApplyOp(), compactNearbyManualEditTexts() (+6 more)
 
 ### Community 163 - "Community 163"
 Cohesion: 0.15
@@ -868,10 +864,6 @@ Nodes (11): Avoid assuming tools are installed, Create verifiable intermediate o
 Cohesion: 0.20
 Nodes (10): 10. REFERENCE VOCABULARY (Pattern Names the Agent Should Know), Animation Library Choice, Cards & Containers, Galleries & Media, Hero Paradigms, Layout & Grids, Micro-Interactions & Effects, Navigation & Menus (+2 more)
 
-### Community 180 - "Community 180"
-Cohesion: 0.27
-Nodes (10): borderWidthsFromStyle(), checkElementGptBorderShadow(), checkElementGptBorderShadowDOM(), checkGptThinBorderWideShadow(), shadowMaxBlurPx(), borderWidthsFromStyle(), checkElementGptBorderShadow(), checkElementGptBorderShadowDOM() (+2 more)
-
 ### Community 181 - "Community 181"
 Cohesion: 0.20
 Nodes (9): 1. PYTHON-DRIVEN TRUE RANDOMIZATION (BREAKING THE LOOP), 2. AIDA STRUCTURE & SPACING, 3. HERO ARCHITECTURE & THE 2-LINE IRON RULE, 4. THE GAPLESS BENTO GRID, 5. ADVANCED GSAP MOTION & HOVER PHYSICS, 6. COMPONENT ARSENAL & CREATIVITY, 7. CONTENT, ASSETS & STRICT BANS, 8. MANDATORY PRE-FLIGHT <design_plan> (+1 more)
@@ -903,10 +895,6 @@ Nodes (9): Adverbs, Business Jargon, Emphasis Crutches, Meta-Commentary, Perform
 ### Community 188 - "Community 188"
 Cohesion: 0.22
 Nodes (10): cursorForInsertAxis(), ensureInsertLine(), handleMouseMove(), hideInsertLine(), layoutFlowChildren(), notePagePointerDown(), own(), pageHasHostTextSelection() (+2 more)
-
-### Community 189 - "Community 189"
-Cohesion: 0.20
-Nodes (9): BORDER_SAFE_TAGS, BRAND_FONT_DOMAINS, GENERIC_FONTS, GITHUB_DOMAINS, GOOGLE_DOMAINS, KNOWN_SERIF_FONTS, OVERUSED_FONTS, SAFE_TAGS (+1 more)
 
 ### Community 190 - "Community 190"
 Cohesion: 0.20
@@ -999,10 +987,6 @@ Nodes (7): 13. COLOR & MATERIAL RULES, Background Confidence Rule, Background-im
 ### Community 212 - "Community 212"
 Cohesion: 0.29
 Nodes (7): 4. HERO MINIMALISM RULES, Absolute Hero Rules, Graphic Restraint, Headline Rule, Hero Composition Bias, Pre-output check, Typography Execution
-
-### Community 213 - "Community 213"
-Cohesion: 0.29
-Nodes (5): DetailView, SwipeableEpisodeCardDetailView, AddLinkTabs, LinkEpisodesModal, style
 
 ### Community 214 - "Community 214"
 Cohesion: 0.29
@@ -1229,24 +1213,24 @@ Cohesion: 0.67
 Nodes (3): typeset, argumentHint, description
 
 ## Knowledge Gaps
-- **1673 isolated node(s):** `start-server.sh script`, `stop-server.sh script`, `DEPRECATED_NAMES`, `HARNESS_DIRS`, `SKILL_FINGERPRINTS` (+1668 more)
+- **1694 isolated node(s):** `start-server.sh script`, `stop-server.sh script`, `DEPRECATED_NAMES`, `HARNESS_DIRS`, `SKILL_FINGERPRINTS` (+1689 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **43 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **52 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `confirm()` connect `Community 20` to `Community 19`, `Community 23`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **Why does `forbiddenManualTextChars()` connect `Community 19` to `Community 0`, `Community 14`?**
-  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
 - **Why does `onPendingRollbackClick()` connect `Community 23` to `Community 0`, `Community 20`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+  _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **What connects `start-server.sh script`, `stop-server.sh script`, `DEPRECATED_NAMES` to the rest of the system?**
-  _1704 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1725 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.0455480458419042 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.054244306418219465 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05242566510172144 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.13781512605042018 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06892010535557506 - nodes in this community are weakly interconnected._

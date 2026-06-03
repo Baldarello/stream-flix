@@ -1,10 +1,10 @@
 /**
  * @fileoverview ViewSwitch - Main View Orchestrator
- * 
+ *
  * This component acts as the middleware orchestrator using the Observable Components Pattern.
  * It uses MobX's observer pattern to reactively render the appropriate view based on
  * application state. Each conditional branch is tracked by MobX for reactive updates.
- * 
+ *
  * Rendering Priority Order:
  * 1. Loading state (loading, isReloadingData, isGoogleAuthLoading)
  * 2. Error state
@@ -15,11 +15,16 @@
  * 7. Local playback
  * 8. Search view
  * 9. Feature Router (Home/Grid/Library)
+ *
+ * Cinematic rework: every branch wraps its result in a `data-view-key`
+ * attribute and the orchestrator reports the active key to `fxStore` so the
+ * `TransitionPortal` can pick a timeline for the previous -> next switch.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../context/StoreContext.jsx';
+import { fxStore } from '../store/fxStore.js';
 
 // System Views
 import { LoadingView } from './system/LoadingView.jsx';
@@ -38,69 +43,95 @@ import { SmartTVPairingView } from './appMode/SmartTVPairingView.jsx';
 import { SearchView } from './features/SearchView.jsx';
 import { FeatureRouter } from './features/FeatureRouter.jsx';
 
+const wrap = (key, node) => (
+    <div data-view-key={key} data-testid="view-branch" style={{ minHeight: '100%' }}>
+        {node}
+    </div>
+);
+
+/**
+ * Resolves a view key from the current mediaStore + remoteStore state.
+ * Kept pure so the transition portal can use the same string the next
+ * render will mount.
+ */
+const resolveViewKey = ({ mediaStore, remoteStore }) => {
+    if (mediaStore.loading || mediaStore.isReloadingData || mediaStore.isGoogleAuthLoading) return 'loading';
+    if (mediaStore.error) return 'error';
+    if (remoteStore.isQRScannerOpen) return 'qr';
+    if (remoteStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) return 'pairing';
+    if (remoteStore.isRemoteMaster && remoteStore.remoteSlaveState?.nowPlayingItem) return 'master';
+    if (remoteStore.isSmartTV && mediaStore.nowPlayingItem) return 'slave';
+    if (mediaStore.nowPlayingItem) return 'player';
+    if (mediaStore.isSearchActive) return 'search';
+    return 'home';
+};
+
 /**
  * ViewSwitch Component
- * 
+ *
  * Main orchestrator that reactively renders views based on application state.
  * All dependencies are tracked by MobX's observer for automatic re-rendering.
- * 
+ *
  * @returns {React.ReactElement} The appropriate view component based on state
  */
 export const ViewSwitch = observer(() => {
     const { mediaStore, remoteStore } = useStores();
-    
+    const currentKey = resolveViewKey({ mediaStore, remoteStore });
+
+    // Push the active view key into the fxStore so the transition portal
+    // can pick a matching timeline. The portal itself decides whether to
+    // actually run the timeline (it skips on first paint).
+    useEffect(() => {
+        if (fxStore.targetViewKey !== currentKey) {
+            const prev = fxStore.targetViewKey || 'home';
+            if (prev !== currentKey) {
+                fxStore.beginTransition(prev, currentKey);
+            }
+        }
+    }, [currentKey]);
+
     // System: Loading State
-    // Show loading spinner during initial load, data reload, or Google Auth
     if (mediaStore.loading || mediaStore.isReloadingData || mediaStore.isGoogleAuthLoading) {
-        return <LoadingView />;
+        return wrap('loading', <LoadingView />);
     }
-    
+
     // System: Error State
-    // Show error message if any error exists
     if (mediaStore.error) {
-        return <ErrorView />;
+        return wrap('error', <ErrorView />);
     }
-    
+
     // Playback: QR Scanner
-    // Show QR scanner when remote is looking for a master
     if (remoteStore.isQRScannerOpen) {
-        return <QRScannerView />;
+        return wrap('qr', <QRScannerView />);
     }
-    
+
     // App Mode: SmartTV Pairing
-    // Show SmartTV pairing screen when visible and no content is playing
-    // When nowPlayingItem is set (e.g., slave receiving playback), show player instead
     if (remoteStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) {
-        return <SmartTVPairingView />;
+        return wrap('pairing', <SmartTVPairingView />);
     }
-    
+
     // Playback: Remote Master
-    // When this device is a master and slave is playing content
     if (remoteStore.isRemoteMaster && remoteStore.remoteSlaveState?.nowPlayingItem) {
-        return <MasterPlaybackView />;
+        return wrap('master', <MasterPlaybackView />);
     }
-    
+
     // Playback: SmartTV Slave
-    // When this device is a SmartTV slave receiving playback from master
     if (remoteStore.isSmartTV && mediaStore.nowPlayingItem) {
-        return <SlavePlaybackView />;
+        return wrap('slave', <SlavePlaybackView />);
     }
-    
+
     // Playback: Local Player
-    // When local content is playing
     if (mediaStore.nowPlayingItem) {
-        return <LocalPlaybackView />;
+        return wrap('player', <LocalPlaybackView />);
     }
-    
+
     // Feature: Search
-    // Show search interface when search is active
     if (mediaStore.isSearchActive) {
-        return <SearchView />;
+        return wrap('search', <SearchView />);
     }
-    
+
     // Feature: Home/Grid/Library
-    // Default routing to feature views based on currentActiveView
-    return <FeatureRouter />;
+    return wrap('home', <FeatureRouter />);
 });
 
 ViewSwitch.displayName = 'ViewSwitch';

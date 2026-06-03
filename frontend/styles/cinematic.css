@@ -1,0 +1,314 @@
+/**
+ * Cinematic / Futuristic Design Tokens
+ *
+ * Imported from `frontend/index.css`. Defines:
+ * - The single futuristic color palette (deep space + neon accent + holographic fill).
+ * - The typography stack (Space Grotesk display, Inter body, JetBrains Mono).
+ * - Effect tokens (neon edge, holo gradient, glow shadows).
+ * - Motion keyframes (holo sweep, kinetic reveal, scanline, light leak).
+ *
+ * The legacy theme variables (--glow-seriestv-color, --glow-film-color,
+ * --glow-anime-color) and the three body gradients (--serietv-gradient,
+ * --film-gradient, --anime-gradient) are aliased in `index.css` so that any
+ * third-party code that still reads them continues to receive a valid color
+ * even after the rework.
+ */
+
+:root {
+  /* Color tokens */
+  --bg-void: #05060d;
+  --bg-deep: #0a0d1a;
+  --bg-glass: rgba(10, 14, 28, 0.55);
+  --bg-glass-strong: rgba(10, 14, 28, 0.78);
+  --neon-accent: #4cd2ff;
+  --neon-accent-hot: #7af0ff;
+  --neon-warn: #ff5e9b;
+  --text-primary: #eaf2ff;
+  --text-secondary: #8a99b8;
+  --text-dim: #4b5772;
+
+  /* Effect tokens */
+  --edge-glow: 0 0 12px rgba(76, 210, 255, 0.55);
+  --edge-glow-hot: 0 0 16px rgba(122, 240, 255, 0.7);
+  --holo-grad: linear-gradient(135deg, rgba(76, 210, 255, 0.18), rgba(255, 94, 155, 0.12) 60%, rgba(122, 240, 255, 0.18));
+  --holo-grad-soft: linear-gradient(135deg, rgba(76, 210, 255, 0.08), rgba(255, 94, 155, 0.05) 60%, rgba(122, 240, 255, 0.08));
+  --cinematic-grad: radial-gradient(ellipse at 20% 0%, rgba(76, 210, 255, 0.18), transparent 55%),
+                    radial-gradient(ellipse at 80% 100%, rgba(255, 94, 155, 0.12), transparent 60%),
+                    linear-gradient(180deg, #05060d 0%, #0a0d1a 60%, #05060d 100%);
+
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Poppins', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+  --text-scale-xs: 12px;
+  --text-scale-sm: 14px;
+  --text-scale-md: 16px;
+  --text-scale-lg: 20px;
+  --text-scale-xl: 28px;
+  --text-scale-2xl: 40px;
+  --text-scale-3xl: 64px;
+  --text-scale-4xl: 96px;
+  --hologram-shadow: 0 0 24px rgba(122, 240, 255, 0.35), 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* Motion tokens (seconds) */
+  --motion-fast: 180ms;
+  --motion-med: 320ms;
+  --motion-cinematic: 720ms;
+  --motion-easing-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-easing-cinematic: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+/* Holographic effect class - applied to panels, cards, dock surfaces */
+.holo-surface {
+  position: relative;
+  background: var(--bg-glass);
+  border: 1px solid rgba(76, 210, 255, 0.18);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  overflow: hidden;
+}
+
+.holo-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--holo-grad);
+  pointer-events: none;
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  z-index: 0;
+}
+
+.holo-surface::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.08) 45%, rgba(255, 255, 255, 0.16) 50%, rgba(255, 255, 255, 0.08) 55%, transparent 100%);
+  transform: skewX(-18deg);
+  transition: left 700ms var(--motion-easing-standard);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.holo-surface:hover::after {
+  left: 130%;
+}
+
+.holo-surface > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Neon edge - applied to interactive elements */
+.neon-edge {
+  border: 1px solid rgba(76, 210, 255, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(122, 240, 255, 0.18), var(--edge-glow);
+  transition: box-shadow var(--motion-fast) var(--motion-easing-standard), border-color var(--motion-fast) var(--motion-easing-standard);
+}
+
+.neon-edge:hover,
+.neon-edge:focus-visible {
+  border-color: rgba(122, 240, 255, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(122, 240, 255, 0.35), var(--edge-glow-hot);
+}
+
+.neon-edge:focus-visible {
+  outline: none;
+}
+
+/* Kinetic text - applied to spans within hero titles */
+.kinetic-reveal {
+  display: inline-block;
+  transform: translateY(110%);
+  opacity: 0;
+  animation: kinetic-rise var(--motion-cinematic) var(--motion-easing-cinematic) forwards;
+}
+
+@keyframes kinetic-rise {
+  0% {
+    transform: translateY(110%);
+    opacity: 0;
+    filter: blur(8px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* Holographic sweep - background-position animation used on cards */
+@keyframes holo-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.holo-sweep {
+  background-image: linear-gradient(110deg, transparent 30%, rgba(76, 210, 255, 0.18) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: holo-sweep 2.4s linear infinite;
+}
+
+/* Scanline overlay - used during loading and inside the transition portal */
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(76, 210, 255, 0.04) 0px,
+    rgba(76, 210, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: screen;
+  z-index: 5;
+}
+
+@keyframes scanline-sweep {
+  0% { transform: translateY(-110%); }
+  100% { transform: translateY(110%); }
+}
+
+.scanline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24%;
+  background: linear-gradient(180deg, transparent, rgba(76, 210, 255, 0.18), transparent);
+  animation: scanline-sweep 2.6s linear infinite;
+  pointer-events: none;
+  z-index: 6;
+}
+
+/* Light leak - slow drifting radial bloom for ambient surfaces */
+@keyframes light-leak-drift {
+  0% { transform: translate3d(-10%, 5%, 0) scale(1); }
+  50% { transform: translate3d(8%, -6%, 0) scale(1.08); }
+  100% { transform: translate3d(-10%, 5%, 0) scale(1); }
+}
+
+.light-leak {
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at 30% 30%, rgba(76, 210, 255, 0.16), transparent 60%),
+              radial-gradient(circle at 70% 80%, rgba(255, 94, 155, 0.12), transparent 65%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: light-leak-drift 18s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* Shimmer - used by Skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(110deg, rgba(76, 210, 255, 0.06) 0%, rgba(122, 240, 255, 0.18) 50%, rgba(76, 210, 255, 0.06) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Floating dock transitions */
+.dock-morph {
+  transition: transform var(--motion-med) var(--motion-easing-standard),
+              width var(--motion-med) var(--motion-easing-standard),
+              border-radius var(--motion-med) var(--motion-easing-standard),
+              background var(--motion-med) var(--motion-easing-standard);
+}
+
+/* 3D tilt wrapper - applied to HoloCard */
+.card-3d-wrap {
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.card-3d-wrap > .card-3d-inner {
+  transform-style: preserve-3d;
+  transition: transform var(--motion-fast) var(--motion-easing-standard);
+  will-change: transform;
+}
+
+/* Focus ring - replace MUI default with neon accent */
+:focus-visible {
+  outline: 2px solid var(--neon-accent);
+  outline-offset: 2px;
+}
+
+/* WebGL canvas host - fixed background layer */
+.fx-canvas-host {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#fx-ambient-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  display: block;
+}
+
+#fx-scene-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1400;
+  display: block;
+}
+
+#fx-ambient-fallback {
+  position: fixed;
+  inset: 0;
+  background: var(--cinematic-grad);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .holo-surface::after,
+  .holo-sweep,
+  .light-leak,
+  .scanline::before,
+  .scanline::after,
+  .shimmer,
+  .kinetic-reveal {
+    animation: none !important;
+  }
+  .kinetic-reveal {
+    transform: none;
+    opacity: 1;
+  }
+  #fx-ambient-canvas,
+  #fx-scene-canvas {
+    display: none;
+  }
+}
+
+/* Hide ambient canvas on tab hidden via class toggle (visibilitychange) */
+.fx-paused #fx-ambient-canvas {
+  visibility: hidden;
+}

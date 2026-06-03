@@ -1,111 +1,12 @@
-import React from 'react';
+/**
+ * @fileoverview Hero - Deprecated re-export shim.
+ *
+ * The cinematic-futuristic rework replaces the legacy ken-burns splash
+ * with `CinematicHero`. This file remains as a thin re-export so feature
+ * folders that still import `Hero` continue to work during the migration.
+ *
+ * New code should import `CinematicHero` directly.
+ */
 
-import {Box, Button, Stack, Typography} from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PermDeviceInformationIcon from '@mui/icons-material/PermDeviceInformation';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {observer} from 'mobx-react-lite';
-// FIX: mediaStore is now a named export, not a default one.
-import {mediaStore} from '../../store/mediaStore.js';
-
-export const Hero = observer(({item, onMoreInfoClick, onPlayClick, id}) => {
-    const {t} = useTranslations();
-    const title = item.title || item.name;
-    const overview = item.overview.length > 200 ? `${item.overview.substring(0, 200)}...` : item.overview;
-
-    const getGlowColor = () => {
-        switch (mediaStore.activeTheme) {
-            case 'Film':
-                return 'rgba(255, 171, 0, 0.5)';
-            case 'Anime':
-                return 'rgba(171, 71, 188, 0.5)';
-            case 'SerieTV':
-            default:
-                return 'rgba(0, 163, 255, 0.5)';
-        }
-    }
-
-    return (
-        <Box
-            id={id}
-            sx={{
-                position: 'relative',
-                isolation: 'isolate',
-                height: {xs: '70vh', md: '56.25vw'},
-                minHeight: '400px',
-                maxHeight: {xs: '600px', md: '800px'},
-                width: '100%',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                overflow: 'hidden',
-                zIndex: 100,
-                pointerEvents: 'none', // Disable pointer events on the entire Hero
-            }}
-        >
-            {/* Background image */}
-            <Box
-                sx={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundImage: `url(${item.backdrop_path})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    animation: 'kenburns 30s ease-in-out infinite',
-                    zIndex: 1,
-                    pointerEvents: 'none',
-                }}
-            />
-            {/* Gradient overlay */}
-            <Box
-                sx={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(to right, rgba(20, 20, 20, 0.9) 30%, transparent 70%), linear-gradient(to top, rgba(20, 20, 20, 1) 10%, transparent 50%)',
-                    zIndex: 2,
-                    pointerEvents: 'none',
-                }}
-            />
-            {/* Content - enable pointer events here */}
-            <Box sx={{
-                position: 'relative',
-                zIndex: 3,
-                p: {xs: 2, md: 8},
-                pt: {xs: 'calc(6rem + env(safe-area-inset-top))', md: 'calc(2rem + env(safe-area-inset-top))'},
-                width: {xs: '100%', md: '50%', lg: '40%'},
-                pointerEvents: 'auto' // Re-enable pointer events for content
-            }}>
-                <Stack spacing={2}>
-                    <Typography variant="h2" component="h1" fontWeight="bold"
-                                sx={{textShadow: '2px 2px 4px rgba(0,0,0,0.7)'}}>
-                        {title}
-                    </Typography>
-                    <Typography variant="body1" sx={{textShadow: '1px 1px 2px rgba(0,0,0,0.7)'}}>
-                        {overview}
-                    </Typography>
-                    {/* FIX: The `pt` prop is a system prop and should be passed inside the `sx` object. */}
-                    <Stack direction="row" spacing={2} sx={{pt: 2}}>
-                        <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon/>} size="large" sx={{
-                            bgcolor: 'white',
-                            color: 'black',
-                            '&:hover': {bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)'}
-                        }} onClick={onPlayClick}>
-                            {t('hero.play')}
-                        </Button>
-                        <Button variant="contained" startIcon={<PermDeviceInformationIcon/>} size="large"
-                                onClick={onMoreInfoClick} sx={{
-                            bgcolor: 'rgba(109, 109, 110, 0.7)',
-                            backdropFilter: 'blur(5px)',
-                            '&:hover': {
-                                bgcolor: 'rgba(109, 109, 110, 0.5)',
-                                boxShadow: `0 0 15px 5px ${getGlowColor()}`
-                            }
-                        }}>
-                            {t('hero.moreInfo')}
-                        </Button>
-                    </Stack>
-                </Stack>
-            </Box>
-        </Box>
-    );
-});
+export { CinematicHero as Hero } from './CinematicHero.jsx';
+export { CinematicHero } from './CinematicHero.jsx';
