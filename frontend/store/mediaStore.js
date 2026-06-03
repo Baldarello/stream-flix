@@ -52,7 +52,6 @@ class MediaStore {
     cachedItems = new Map();
     episodeProgress = new Map();
     preferredSources = new Map();
-    preferredLabels = [];
     selectedSeasons = new Map();
     showFilterPreferences = new Map();
 
@@ -82,6 +81,15 @@ class MediaStore {
     linkSelectionContext = 'local';
     expandedLinkAccordionId = false;
 
+    // Detail view / link episodes screen-level state
+    // (extracted from useState in LinkEpisodesModal.jsx and
+    // DetailView.jsx to comply with the "no useState in screens"
+    // project rule).
+    expandedEpisodeId = null;
+    episodeDetailsDialogOpenForEpisodeId = null;
+    linkEpisodesTab = 'add';
+    linkEpisodesSeason = '';
+
     // Player Drawers State
     isEpisodesDrawerOpen = false;
     isEpisodeInfoModalOpen = false;
@@ -106,7 +114,6 @@ class MediaStore {
     showIntroDurations = new Map();
 
     // Theme & Translation State
-    activeTheme = 'Anime';
     language = 'it';
 
     // Snackbar State
@@ -793,16 +800,6 @@ class MediaStore {
         } else {
             this.activeView = view;
         }
-
-        if (view === 'Serie TV') this.setActiveTheme('SerieTV');
-        else if (view === 'Film') this.setActiveTheme('Film');
-        else if (view === 'Anime') this.setActiveTheme('Anime');
-        else if (view === 'Libreria') this.setActiveTheme('Anime');
-    };
-
-    setActiveTheme = (theme) => {
-        this.activeTheme = theme;
-        db.preferences.put({key: 'activeTheme', value: theme});
     };
 
     setLanguage = (lang) => {
@@ -899,6 +896,26 @@ class MediaStore {
         this.expandedLinkAccordionId = id;
     };
 
+    setExpandedEpisodeId = (id) => {
+        this.expandedEpisodeId = id;
+    };
+
+    openEpisodeDetails = (episodeId) => {
+        this.episodeDetailsDialogOpenForEpisodeId = episodeId;
+    };
+
+    closeEpisodeDetails = () => {
+        this.episodeDetailsDialogOpenForEpisodeId = null;
+    };
+
+    setLinkEpisodesTab = (tab) => {
+        this.linkEpisodesTab = tab;
+    };
+
+    setLinkEpisodesSeason = (season) => {
+        this.linkEpisodesSeason = season;
+    };
+
 
     setJoinRoomIdFromUrl = (roomId) => {
         watchTogetherStore.joinRoomIdFromUrl = roomId;
@@ -932,16 +949,8 @@ class MediaStore {
             return this.myListItems[0];
         }
 
-        // Priority 2: Theme-based content
-        switch (this.activeTheme) {
-            case 'Film':
-                return this.latestMovies.length > 0 ? this.latestMovies[0] : this.trending[0];
-            case 'Anime':
-                return this.popularAnime.length > 0 ? this.popularAnime[0] : this.trending[0];
-            case 'SerieTV':
-            default:
-                return this.topSeries.length > 0 ? this.topSeries[0] : this.trending[0];
-        }
+        // Priority 2: Top series, then trending
+        return this.topSeries.length > 0 ? this.topSeries[0] : this.trending[0];
     }
 
     get allMovies() {
@@ -1005,27 +1014,10 @@ class MediaStore {
             ...(this.myListItems.length > 0 ? [{titleKey: 'misc.myList', items: this.myListItems}] : []),
         ];
 
-        switch (this.activeTheme) {
-            case 'Film':
-                rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
-                rows.push({titleKey: 'misc.topRated', items: this.trending});
-                rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
-                rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
-                break;
-            case 'Anime':
-                rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
-                rows.push({titleKey: 'misc.topRated', items: this.trending});
-                rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
-                rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
-                break;
-            case 'SerieTV':
-            default:
-                rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
-                rows.push({titleKey: 'misc.topRated', items: this.trending});
-                rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
-                rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
-                break;
-        }
+        rows.push({titleKey: 'misc.popularSeries', items: this.topSeries});
+        rows.push({titleKey: 'misc.topRated', items: this.trending});
+        rows.push({titleKey: 'misc.latestReleases', items: this.latestMovies});
+        rows.push({titleKey: 'misc.mustWatchAnime', items: this.popularAnime});
 
         return rows;
     }
@@ -1090,8 +1082,8 @@ class MediaStore {
     loadPersistedData = async () => {
         const [
             myListItems, cachedItems, mediaLinksData, introDurations, languagePref,
-            progress, preferredSourcesData, usernamePref, activeThemePref,
-            selectedSeasonsData, preferredLabelsPref, showFilterPreferencesData,
+            progress, preferredSourcesData, usernamePref,
+            selectedSeasonsData, showFilterPreferencesData,
             remoteMasterSlaveId
         ] = await Promise.all([
             db.myList.orderBy('order').toArray(),
@@ -1102,9 +1094,7 @@ class MediaStore {
             db.episodeProgress.toArray(),
             db.preferredSources.toArray(),
             db.preferences.get('username'),
-            db.preferences.get('activeTheme'),
             db.selectedSeasons.toArray(),
-            db.preferences.get('preferredLabels'),
             db.showFilterPreferences.toArray(),
             db.preferences.get('remoteMasterForSlaveId'),
         ]);
@@ -1123,11 +1113,9 @@ class MediaStore {
 
             this.showIntroDurations = new Map(introDurations.map(item => [item.id, item.duration]));
             if (languagePref?.value) this.language = languagePref.value;
-            if (activeThemePref?.value) this.activeTheme = activeThemePref.value;
             this.episodeProgress = new Map(progress.map(p => [p.episodeId, p]));
             this.preferredSources = new Map(preferredSourcesData.map(p => [p.showId, p.origin]));
             this.selectedSeasons = new Map(selectedSeasonsData.map(s => [s.showId, s.seasonNumber]));
-            if (preferredLabelsPref?.value) this.preferredLabels = preferredLabelsPref.value;
             if (usernamePref?.value) this.username = usernamePref.value;
             this.showFilterPreferences = new Map(showFilterPreferencesData.map(p => [p.showId, {
                 language: p.language,
@@ -1357,17 +1345,6 @@ class MediaStore {
         const newPrefs = {...currentPrefs, ...preference};
         this.showFilterPreferences.set(showId, newPrefs);
         db.showFilterPreferences.put({showId, ...newPrefs});
-    }
-
-    togglePreferredLabel = async (label) => {
-        const isPreferred = this.preferredLabels.includes(label);
-        if (isPreferred) {
-            this.preferredLabels = this.preferredLabels.filter(l => l !== label);
-        } else {
-            this.preferredLabels.push(label);
-        }
-        await db.preferences.put({key: 'preferredLabels', value: this.preferredLabels});
-        this.showSnackbar(isPreferred ? 'notifications.preferredLabelRemoved' : 'notifications.preferredLabelSet', 'success', true, {label});
     }
 
     setPreferredSource = async (showId, origin) => {

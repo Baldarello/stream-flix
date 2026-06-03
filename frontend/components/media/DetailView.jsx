@@ -6,7 +6,6 @@ import {
     Box,
     Button,
     CardMedia,
-    Chip,
     CircularProgress,
     Dialog,
     DialogActions,
@@ -39,24 +38,62 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LinkEpisodesModal from '../modals/LinkEpisodesModal.jsx';
 
+import {gsap} from 'gsap';
+import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 import {useTranslations} from '../../hooks/useTranslations.js';
+import {HoloChip} from '../feedback/HoloChip.jsx';
+import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
+
+// Visual recipe for holo-themed field controls, mirrored from
+// EpisodesDrawer.jsx so that the detail screen uses the same palette.
+const holoFieldSx = {
+    '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'rgba(76,210,255,0.35)',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'var(--neon-accent-hot)',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'var(--neon-accent)',
+        boxShadow: 'var(--edge-glow)',
+    },
+    '& .MuiInputLabel-root': {
+        color: 'var(--text-secondary)',
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+        color: 'var(--neon-accent)',
+    },
+    '& .MuiInputBase-input': {
+        color: 'var(--text-primary)',
+        fontFamily: "'Inter', sans-serif",
+    },
+    '& .MuiFormHelperText-root': {
+        color: 'var(--text-secondary)',
+    },
+};
 
 
 const SwipeableEpisodeCardDetailView = observer(({
-                                                                                          episode,
-                                                                                          isCurrentEpisode,
-                                                                                          hasPlayableLinks,
-                                                                                          onPlay,
-                                                                                          seasonNumber,
-                                                                                          languageFilter,
-                                                                                          typeFilter
-                                                                                      }) => {
-    const {episodeProgress, toggleEpisodeWatchedStatus} = mediaStore;
+                                                     episode,
+                                                     isCurrentEpisode,
+                                                     hasPlayableLinks,
+                                                     onPlay,
+                                                     seasonNumber,
+                                                     languageFilter,
+                                                     typeFilter
+                                                 }) => {
+    const {
+        episodeProgress,
+        toggleEpisodeWatchedStatus,
+        episodeDetailsDialogOpenForEpisodeId,
+        openEpisodeDetails,
+        closeEpisodeDetails
+    } = mediaStore;
     const {t} = useTranslations();
     const [swipeX, setSwipeX] = useState(0);
     const [startX, setStartX] = useState(0);
-    const [detailsOpen, setDetailsOpen] = useState(false);
     const cardRef = useRef(null);
+    const detailsOpen = episodeDetailsDialogOpenForEpisodeId === episode.id;
     const progress = episodeProgress.get(episode.id);
     const watchedPercentage = progress ? (progress.currentTime / progress.duration) * 100 : 0;
     const isWatched = progress?.watched;
@@ -107,7 +144,7 @@ const SwipeableEpisodeCardDetailView = observer(({
 
     const handleShowDetails = (e) => {
         e.stopPropagation();
-        setDetailsOpen(true);
+        openEpisodeDetails(episode.id);
         handleCloseSwipe();
     };
 
@@ -118,12 +155,23 @@ const SwipeableEpisodeCardDetailView = observer(({
 
     const handleDesktopShowDetails = (e) => {
         e.stopPropagation();
-        setDetailsOpen(true);
+        openEpisodeDetails(episode.id);
     };
 
     return (
         <>
-            <Box sx={{position: 'relative', overflow: 'hidden', borderRadius: 2, mb: 1.5}}>
+            <Box
+                id={`episode-card-detail-${episode.id}`}
+                data-component="episode-card-detail"
+                className="holo-surface"
+                sx={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderRadius: 2,
+                    mb: 1.5,
+                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.18)'
+                }}
+            >
                 {/* Swipe action buttons */}
                 <Box sx={{
                     position: 'absolute',
@@ -133,7 +181,7 @@ const SwipeableEpisodeCardDetailView = observer(({
                     width: 120,
                     display: 'flex',
                     flexDirection: 'column',
-                    bgcolor: 'rgba(0,0,0,0.8)',
+                    bgcolor: 'var(--bg-deep)',
                     transform: swipeX < -20 ? 'translateX(0)' : 'translateX(100%)',
                     transition: 'transform 0.2s ease-out',
                     zIndex: 1
@@ -146,8 +194,12 @@ const SwipeableEpisodeCardDetailView = observer(({
                             flex: 1,
                             flexDirection: 'column',
                             borderRadius: 0,
-                            color: isWatched ? 'warning.main' : 'success.main',
-                            '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                            color: isWatched ? 'var(--neon-warn)' : 'var(--neon-accent)',
+                            transition: 'transform 200ms ease, color 200ms ease',
+                            '&:hover': {
+                                bgcolor: 'rgba(76, 210, 255, 0.12)',
+                                transform: 'scale(1.1) rotate(-2deg)'
+                            }
                         }}
                     >
                         {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
@@ -160,8 +212,12 @@ const SwipeableEpisodeCardDetailView = observer(({
                             flex: 1,
                             flexDirection: 'column',
                             borderRadius: 0,
-                            color: 'info.main',
-                            '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                            color: 'var(--neon-accent)',
+                            transition: 'transform 200ms ease, color 200ms ease',
+                            '&:hover': {
+                                bgcolor: 'rgba(76, 210, 255, 0.12)',
+                                transform: 'scale(1.1) rotate(90deg)'
+                            }
                         }}
                     >
                         {t('episodesDrawer.details')}
@@ -174,7 +230,7 @@ const SwipeableEpisodeCardDetailView = observer(({
                     sx={{
                         transform: `translateX(${swipeX}px)`,
                         transition: swipeX < -20 ? 'none' : 'transform 0.2s ease-out',
-                        bgcolor: 'rgba(20, 20, 30, 0.6)',
+                        bgcolor: 'var(--holo-grad)',
                         borderRadius: 2,
                         cursor: hasPlayableLinks ? 'pointer' : 'default'
                     }}
@@ -198,7 +254,7 @@ const SwipeableEpisodeCardDetailView = observer(({
                         width: 90,
                         display: {xs: 'none', md: 'flex'},
                         flexDirection: 'column',
-                        bgcolor: 'rgba(0,0,0,0.5)',
+                        bgcolor: 'rgba(0, 0, 0, 0.55)',
                         borderRadius: 2,
                         zIndex: 1
                     }}>
@@ -210,8 +266,12 @@ const SwipeableEpisodeCardDetailView = observer(({
                                 flex: 1,
                                 flexDirection: 'column',
                                 borderRadius: 0,
-                                color: isWatched ? 'warning.main' : 'success.main',
-                                '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                                color: isWatched ? 'var(--neon-warn)' : 'var(--neon-accent)',
+                                transition: 'transform 200ms ease, color 200ms ease',
+                                '&:hover': {
+                                    bgcolor: 'rgba(76, 210, 255, 0.12)',
+                                    transform: 'scale(1.05) rotate(-3deg)'
+                                }
                             }}
                         >
                             {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
@@ -224,8 +284,12 @@ const SwipeableEpisodeCardDetailView = observer(({
                                 flex: 1,
                                 flexDirection: 'column',
                                 borderRadius: 0,
-                                color: 'info.main',
-                                '&:hover': {bgcolor: 'rgba(255,255,255,0.1)'}
+                                color: 'var(--neon-accent)',
+                                transition: 'transform 200ms ease, color 200ms ease',
+                                '&:hover': {
+                                    bgcolor: 'rgba(76, 210, 255, 0.12)',
+                                    transform: 'scale(1.05) rotate(90deg)'
+                                }
                             }}
                         >
                             {t('episodesDrawer.details')}
@@ -240,7 +304,13 @@ const SwipeableEpisodeCardDetailView = observer(({
                             opacity: hasPlayableLinks ? 1 : 0.5,
                         }}
                     >
-                        <Typography sx={{mr: 2, fontWeight: 'bold'}}>{episode.episode_number}</Typography>
+                        <Typography sx={{
+                            mr: 2,
+                            fontWeight: 'bold',
+                            fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                            color: 'var(--neon-accent)',
+                            textShadow: '0 0 10px rgba(76, 210, 255, 0.4)'
+                        }}>{episode.episode_number}</Typography>
                         <Box sx={{
                             position: 'relative',
                             width: 150,
@@ -261,12 +331,12 @@ const SwipeableEpisodeCardDetailView = observer(({
                                 <Box sx={{
                                     width: '100%',
                                     height: '100%',
-                                    bgcolor: 'rgba(255,255,255,0.05)',
+                                    bgcolor: 'rgba(76, 210, 255, 0.06)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <TheatersIcon color="disabled" sx={{fontSize: '3rem'}}/>
+                                    <TheatersIcon sx={{fontSize: '3rem', color: 'var(--text-secondary)'}}/>
                                 </Box>
                             )}
                             {watchedPercentage > 0 && !isWatched && (
@@ -284,94 +354,148 @@ const SwipeableEpisodeCardDetailView = observer(({
                                 <Box sx={{
                                     position: 'absolute',
                                     inset: 0,
-                                    bgcolor: 'rgba(0,0,0,0.5)',
+                                    bgcolor: 'rgba(0, 0, 0, 0.55)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}>
-                                    <CheckCircleIcon color="success" sx={{fontSize: '3rem'}}/>
+                                    <CheckCircleIcon sx={{fontSize: '3rem', color: 'var(--neon-accent)'}}/>
                                 </Box>
                             )}
                         </Box>
                         <ListItemText
                             primary={episode.name}
                             secondary={episode.overview}
-                            primaryTypographyProps={{fontWeight: 'bold'}}
-                            secondaryTypographyProps={{
+                            primaryTypographyProps={{
+                                fontWeight: 700,
+                                fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                                color: 'var(--text-primary)',
+                                textShadow: '0 0 10px rgba(76, 210, 255, 0.25)',
                                 noWrap: true,
                                 textOverflow: 'ellipsis'
                             }}
+                            secondaryTypographyProps={{
+                                noWrap: true,
+                                textOverflow: 'ellipsis',
+                                color: 'var(--text-secondary)'
+                            }}
                         />
                     </ListItemButton>
+                    <Box
+                        data-component="episode-card-detail-languages"
+                        sx={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 0.5,
+                            px: 2,
+                            pb: 1.5,
+                            pl: {xs: 2, md: '100px'}
+                        }}
+                    >
+                        {uniqueLanguages.map(({lang, type}) => (
+                            <HoloChip
+                                key={`${lang}-${type}`}
+                                id={`episode-card-detail-lang-${episode.id}-${lang}-${type}`}
+                                label={`${lang.toUpperCase()} ${type === 'dub' ? 'Dubbed' : 'Subtitled'}`}
+                                sx={{height: 22, fontSize: '0.65rem'}}
+                            />
+                        ))}
+                    </Box>
                 </Box>
             </Box>
 
             {/* Episode Details Dialog */}
             <Dialog
+                id={`episode-details-dialog-${episode.id}`}
+                data-component="episode-details-dialog"
                 open={detailsOpen}
-                onClose={() => setDetailsOpen(false)}
+                onClose={closeEpisodeDetails}
                 maxWidth="sm"
                 fullWidth
                 slotProps={{
                     paper: {
+                        className: 'holo-surface',
                         sx: {
-                            zIndex: 1300 // Above DetailView zIndex 1200
+                            zIndex: 1300, // Above DetailView zIndex 1200
+                            position: 'relative',
+                            backgroundColor: 'var(--bg-deep)',
+                            backgroundImage: 'var(--holo-grad)',
+                            color: 'var(--text-primary)',
+                            border: '1px solid rgba(76, 210, 255, 0.35)',
+                            borderRadius: '14px',
+                            boxShadow: '0 0 24px rgba(76, 210, 255, 0.35), 0 24px 60px rgba(0, 0, 0, 0.7)',
+                            overflow: 'hidden'
                         }
                     }
                 }}
             >
-                <DialogTitle>
+                <DialogTitle sx={{
+                    fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    textShadow: '0 0 12px rgba(76, 210, 255, 0.25)'
+                }}>
                     {episode.name}
-                    <Typography variant="caption" color="text.secondary" sx={{display: 'block'}}>
+                    <Typography variant="caption" sx={{display: 'block', color: 'var(--text-secondary)'}}>
                         {t('episodesDrawer.season', {number: seasonNumber})} - {t('episodesDrawer.episode', {number: episode.episode_number})}
                     </Typography>
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent dividers sx={{borderColor: 'rgba(76, 210, 255, 0.18)'}}>
                     {episode.overview && (
-                        <Typography variant="body2" sx={{mb: 2}}>
+                        <Typography variant="body2" sx={{mb: 2, color: 'var(--text-primary)'}}>
                             {episode.overview}
                         </Typography>
                     )}
-                    <Typography variant="subtitle2" sx={{mt: 2, mb: 1}}>
+                    <Typography variant="subtitle2" sx={{mt: 2, mb: 1, color: 'var(--text-secondary)'}}>
                         {t('episodesDrawer.availableLanguages')}:
                     </Typography>
                     <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
                         {uniqueLanguages.map(({lang, type}) => (
-                            <Chip
+                            <HoloChip
                                 key={`${lang}-${type}`}
+                                id={`episode-details-lang-${episode.id}-${lang}-${type}`}
                                 label={`${lang.toUpperCase()} ${type === 'dub' ? 'Dubbed' : 'Subtitled'}`}
-                                color={type === 'dub' ? 'primary' : 'secondary'}
-                                variant="outlined"
                             />
                         ))}
                     </Stack>
                     <Box sx={{mt: 2}}>
-                        <Typography variant="subtitle2">
+                        <Typography variant="subtitle2" sx={{color: 'var(--text-primary)'}}>
                             {t('episodesDrawer.airDate')}: {episode.air_date || 'N/A'}
                         </Typography>
-                        <Typography variant="subtitle2" sx={{mt: 1}}>
+                        <Typography variant="subtitle2" sx={{mt: 1, color: 'var(--text-primary)'}}>
                             {t('episodesDrawer.runtime')}: {episode.runtime || 'N/A'} min
                         </Typography>
                     </Box>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDetailsOpen(false)}>{t('common.close')}</Button>
+                <DialogActions sx={{borderTop: '1px solid rgba(76, 210, 255, 0.18)'}}>
+                    <Button onClick={closeEpisodeDetails} sx={{color: 'var(--text-secondary)'}}>
+                        {t('common.close')}
+                    </Button>
                     <Button
+                        className="neon-edge"
                         variant="contained"
                         startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <CheckCircleIcon/>}
                         onClick={() => {
                             toggleEpisodeWatchedStatus(episode.id);
-                            setDetailsOpen(false);
+                            closeEpisodeDetails();
                         }}
-                        color={isWatched ? 'warning' : 'success'}
+                        sx={{
+                            background: 'var(--neon-accent)',
+                            color: 'var(--bg-deep)',
+                            fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                            fontWeight: 700,
+                            '&:hover': {background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)'}
+                        }}
                     >
                         {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
                     </Button>
                 </DialogActions>
+                <ScanlineOverlay id="episode-details-scanline" intensity={0.1}/>
             </Dialog>
         </>
     );
 });
+SwipeableEpisodeCardDetailView.displayName = 'SwipeableEpisodeCardDetailView';
 
 const DetailView = observer(() => {
     const {
@@ -387,9 +511,7 @@ const DetailView = observer(() => {
         setShowFilterPreference
     } = mediaStore;
     const {t} = useTranslations();
-
-    // Track which episode details panel is expanded
-    const [expandedEpisodeId, setExpandedEpisodeId] = useState(null);
+    const headerRef = useRef(null);
 
     if (!item) return null;
 
@@ -454,6 +576,31 @@ const DetailView = observer(() => {
         }
     }, [item, isDetailLoading]);
 
+    // GSAP entry timeline for the season/episodes header.
+    useEffect(() => {
+        if (!item) return undefined;
+        const target = headerRef.current;
+        if (!target) return undefined;
+        if (reducedMotion()) {
+            gsap.fromTo(target,
+                {autoAlpha: 0},
+                {autoAlpha: 1, duration: durations.fadeFallback, ease: 'none', overwrite: 'auto'});
+            return undefined;
+        }
+        const tl = gsap.timeline();
+        tl.fromTo(target,
+            {autoAlpha: 0, scale: 0.96, filter: 'blur(4px)'},
+            {
+                autoAlpha: 1,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: durations.med,
+                ease: easings.emphasized,
+                overwrite: 'auto'
+            });
+        return () => tl.kill();
+    }, [item?.id, currentSeason?.season_number]);
+
 
     const handleIntroDurationChange = (event) => {
         const value = event.target.value;
@@ -467,24 +614,12 @@ const DetailView = observer(() => {
 
     const listActionLabel = isInMyList ? t('detail.removeFromList') : t('detail.addToList');
 
-    const getGlowColor = () => {
-        switch (mediaStore.activeTheme) {
-            case 'Film':
-                return 'var(--glow-film-color)';
-            case 'Anime':
-                return 'var(--glow-anime-color)';
-            case 'SerieTV':
-            default:
-                return 'var(--glow-seriestv-color)';
-        }
-    }
-
-    const toggleEpisodeDetails = (episodeId) => {
-        setExpandedEpisodeId(prev => prev === episodeId ? null : episodeId);
-    };
-
     return (
-        <Box sx={{position: 'fixed', inset: 0, zIndex: 1200, animation: 'fadeIn 0.5s ease-in-out'}}>
+        <Box
+            id="detail-view"
+            data-component="detail-view"
+            sx={{position: 'fixed', inset: 0, zIndex: 1200, animation: 'fadeIn 0.5s ease-in-out'}}
+        >
             {backgroundImage ? (
                 <Box sx={{
                     position: 'absolute',
@@ -499,20 +634,26 @@ const DetailView = observer(() => {
                 <Box sx={{
                     position: 'absolute',
                     inset: 0,
-                    bgcolor: '#141414',
+                    bgcolor: 'var(--bg-deep)',
                 }}/>
             )}
 
             <IconButton
                 id="master-remote-detail-close-button"
+                data-component="master-remote-detail-close-button"
                 onClick={() => mediaStore.closeDetail()}
                 aria-label={t('detail.close')}
                 sx={{
                     position: 'absolute', top: 16, right: 16, zIndex: 1300,
-                    bgcolor: 'rgba(0,0,0,0.5)',
+                    bgcolor: 'rgba(0, 0, 0, 0.5)',
+                    color: 'var(--neon-accent)',
                     transform: 'scale(1.2)',
-                    transition: 'transform 0.3s ease, background-color 0.3s ease',
-                    '&:hover': {bgcolor: 'rgba(0,0,0,0.8)', transform: 'scale(1.3) rotate(90deg)'}
+                    transition: 'transform 200ms cubic-bezier(0.22,1,0.36,1), color 200ms ease, background-color 200ms ease',
+                    '&:hover': {
+                        bgcolor: 'rgba(0, 0, 0, 0.8)',
+                        color: 'var(--neon-accent-hot)',
+                        transform: 'scale(1.3) rotate(90deg)'
+                    }
                 }}
             >
                 <CloseIcon/>
@@ -561,20 +702,39 @@ const DetailView = observer(() => {
                     )}
                     <Stack spacing={2} sx={{
                         p: {xs: 2, md: 4},
-                        bgcolor: 'background.paper',
+                        position: 'relative',
+                        borderRadius: '14px',
+                        backgroundColor: 'var(--bg-deep)',
+                        backgroundImage: 'var(--holo-grad)',
                         backdropFilter: 'blur(10px)',
-                        borderRadius: 3,
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(76, 210, 255, 0.25)',
+                        boxShadow: '0 0 24px rgba(76, 210, 255, 0.18), 0 18px 48px rgba(0, 0, 0, 0.55)',
+                        color: 'var(--text-primary)'
                     }}>
                         {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                         <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
                             <Typography variant="h2" component="h1" fontWeight="bold"
-                                        sx={{fontSize: {xs: '2rem', sm: '3.75rem'}}}>{title}</Typography>
+                                        sx={{
+                                            fontSize: {xs: '2rem', sm: '3.75rem'},
+                                            fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                                            color: 'var(--text-primary)',
+                                            textShadow: '0 0 14px rgba(76, 210, 255, 0.35)'
+                                        }}>{title}</Typography>
                             {item.media_type === 'movie' && (
                                 // FIX: (line 198) Wrap IconButton with Tooltip component
                                 <Tooltip title={t('detail.linkEpisodesTooltip')}>
                                     {/* FIX: openLinkMovieModal will be added to mediaStore */}
-                                    <IconButton id={"link-episode"} onClick={() => mediaStore.openLinkMovieModal(item)}>
+                                    <IconButton
+                                        id="link-episode"
+                                        className="neon-edge"
+                                        data-component="link-episode-movie"
+                                        onClick={() => mediaStore.openLinkMovieModal(item)}
+                                        sx={{
+                                            color: 'var(--neon-accent)',
+                                            transition: 'color 200ms ease, box-shadow 200ms ease',
+                                            '&:hover': {color: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow)'}
+                                        }}
+                                    >
                                         <LinkIcon/>
                                     </IconButton>
                                 </Tooltip>
@@ -583,16 +743,19 @@ const DetailView = observer(() => {
                         {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                         <Stack direction="row" spacing={3}
                                sx={{alignItems: 'center', fontSize: {xs: '0.8rem', sm: '1rem'}}}>
-                            <Typography sx={{color: 'success.main'}}
+                            <Typography sx={{color: 'var(--neon-accent)'}}
                                         fontWeight="bold">{t('detail.vote')}: {item.vote_average?.toFixed(1)}</Typography>
-                            <Typography>{releaseDate?.substring(0, 4)}</Typography>
+                            <Typography
+                                sx={{color: 'var(--text-secondary)'}}>{releaseDate?.substring(0, 4)}</Typography>
                             {item.media_type === 'tv' && item.seasons &&
-                                <Typography>{item.seasons.length} {t('detail.seasons')}</Typography>}
+                                <Typography
+                                    sx={{color: 'var(--text-secondary)'}}>{item.seasons.length} {t('detail.seasons')}</Typography>}
                         </Stack>
                         <Typography variant="body1" sx={{
                             maxHeight: '200px',
                             overflowY: 'auto',
-                            fontSize: {xs: '0.85rem', sm: '1rem'}
+                            fontSize: {xs: '0.85rem', sm: '1rem'},
+                            color: 'var(--text-primary)'
                         }}>{item.overview}</Typography>
                         {/* FIX: The `pt` and `alignItems` props are system props and should be passed inside the `sx` object. */}
                         <Stack
@@ -603,11 +766,18 @@ const DetailView = observer(() => {
                                 alignItems: {xs: 'stretch', sm: 'center'}
                             }}
                         >
-                            <Button variant="contained" color="inherit" startIcon={<PlayArrowIcon/>} size="large" sx={{
-                                bgcolor: 'white',
-                                color: 'black',
-                                '&:hover': {bgcolor: 'white', boxShadow: '0 0 15px 5px rgba(255, 255, 255, 0.5)'}
-                            }} onClick={() => {
+                            <Button
+                                className="neon-edge"
+                                variant="contained"
+                                startIcon={<PlayArrowIcon/>}
+                                size="large"
+                                sx={{
+                                    bgcolor: 'white',
+                                    color: 'black',
+                                    fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                                    fontWeight: 700,
+                                    '&:hover': {bgcolor: 'white', boxShadow: 'var(--edge-glow-hot)'}
+                                }} onClick={() => {
                                 // For TV series, find the first unwatched episode
                                 if (item.media_type === 'tv' && item.seasons) {
                                     const firstUnwatchedEpisode = mediaStore.findFirstUnwatchedEpisode(item);
@@ -633,12 +803,15 @@ const DetailView = observer(() => {
                                     onClick={() => mediaStore.toggleMyList(item)}
                                     aria-label={listActionLabel}
                                     sx={{
-                                        border: '2px solid rgba(255,255,255,0.7)',
-                                        color: 'white',
+                                        border: '2px solid rgba(76, 210, 255, 0.5)',
+                                        color: 'var(--neon-accent)',
                                         alignSelf: {xs: 'flex-start'},
                                         width: 48,
                                         height: 48,
-                                        '&:hover': {borderColor: 'white', boxShadow: `0 0 10px ${getGlowColor()}`}
+                                        '&:hover': {
+                                            borderColor: 'var(--neon-accent)',
+                                            boxShadow: `0 0 10px var(--neon-accent)`
+                                        }
                                     }}
                                 >
                                     {isInMyList ? <CheckIcon/> : <AddIcon/>}
@@ -650,12 +823,12 @@ const DetailView = observer(() => {
                                 size="large"
                                 onClick={() => mediaStore.openWatchTogetherModal(item)}
                                 sx={{
-                                    borderColor: 'rgba(255,255,255,0.7)',
-                                    color: 'white',
+                                    borderColor: 'rgba(76, 210, 255, 0.5)',
+                                    color: 'var(--text-primary)',
                                     '&:hover': {
-                                        borderColor: 'white',
-                                        bgcolor: 'rgba(255,255,255,0.1)',
-                                        boxShadow: `0 0 10px ${getGlowColor()}`
+                                        borderColor: 'var(--neon-accent)',
+                                        bgcolor: 'rgba(76, 210, 255, 0.12)',
+                                        boxShadow: `0 0 10px var(--neon-accent)`
                                     }
                                 }}
                             >
@@ -667,20 +840,38 @@ const DetailView = observer(() => {
 
                 {item.media_type === 'tv' && (
                     <Box sx={{p: {xs: 2, md: 8}, pt: 0}}>
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 4,
-                            flexWrap: 'wrap',
-                            gap: 2
-                        }}>
+                        <Box
+                            ref={headerRef}
+                            data-component="episodes-header-row"
+                            id="episodes-header-row"
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 4,
+                                flexWrap: 'wrap',
+                                gap: 2
+                            }}
+                        >
                             <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                <Typography variant="h4" component="h2"
-                                            fontWeight="bold">{t('detail.episodes')}</Typography>
+                                <Typography variant="h4" component="h2" fontWeight="bold" sx={{
+                                    fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                                    color: 'var(--text-primary)',
+                                    textShadow: '0 0 12px rgba(76, 210, 255, 0.3)'
+                                }}>{t('detail.episodes')}</Typography>
                                 {/* FIX: (line 259) Wrap IconButton with Tooltip component */}
                                 <Tooltip title={t('detail.linkEpisodesTooltip')}>
-                                    <IconButton id={"link-episode"} onClick={() => mediaStore.openLinkEpisodesModal(item)}>
+                                    <IconButton
+                                        id="link-episode"
+                                        className="neon-edge"
+                                        data-component="link-episode"
+                                        onClick={() => mediaStore.openLinkEpisodesModal(item)}
+                                        sx={{
+                                            color: 'var(--neon-accent)',
+                                            transition: 'color 200ms ease, box-shadow 200ms ease',
+                                            '&:hover': {color: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow)'}
+                                        }}
+                                    >
                                         <LinkIcon/>
                                     </IconButton>
                                 </Tooltip>
@@ -691,12 +882,12 @@ const DetailView = observer(() => {
                                         <FormControl sx={{minWidth: 120}} size="small">
                                             {/* FIX: (line 269) Pass label text as children to InputLabel */}
                                             <InputLabel>{t('detail.filterLanguage')}</InputLabel>
-                                            <Select value={languageFilter || ''} label={t('detail.filterLanguage')}
-                                                    onChange={(e) => setShowFilterPreference(item.id, {language: e.target.value})}
-                                                    sx={{
-                                                        bgcolor: 'rgba(20, 20, 30, 0.7)',
-                                                        '.MuiOutlinedInput-notchedOutline': {borderColor: 'rgba(255,255,255,0.2)'}
-                                                    }}>
+                                            <Select
+                                                value={languageFilter || ''}
+                                                label={t('detail.filterLanguage')}
+                                                onChange={(e) => setShowFilterPreference(item.id, {language: e.target.value})}
+                                                sx={holoFieldSx}
+                                            >
                                                 {availableLanguages.map(lang => <MenuItem key={lang}
                                                                                           value={lang}>{lang}</MenuItem>)}
                                             </Select>
@@ -706,12 +897,12 @@ const DetailView = observer(() => {
                                         <FormControl sx={{minWidth: 120}} size="small">
                                             {/* FIX: (line 277) Pass label text as children to InputLabel */}
                                             <InputLabel>{t('detail.filterType')}</InputLabel>
-                                            <Select value={typeFilter || ''} label={t('detail.filterType')}
-                                                    onChange={(e) => setShowFilterPreference(item.id, {type: e.target.value})}
-                                                    sx={{
-                                                        bgcolor: 'rgba(20, 20, 30, 0.7)',
-                                                        '.MuiOutlinedInput-notchedOutline': {borderColor: 'rgba(255,255,255,0.2)'}
-                                                    }}>
+                                            <Select
+                                                value={typeFilter || ''}
+                                                label={t('detail.filterType')}
+                                                onChange={(e) => setShowFilterPreference(item.id, {type: e.target.value})}
+                                                sx={holoFieldSx}
+                                            >
                                                 {availableTypes.map(type => <MenuItem key={type}
                                                                                       value={type}>{t(`linkEpisodesModal.add.${type}`)}</MenuItem>)}
                                             </Select>
@@ -725,7 +916,7 @@ const DetailView = observer(() => {
                                         value={introDuration}
                                         onChange={handleIntroDurationChange}
                                         onFocus={(event) => event.target.select()}
-                                        sx={{width: 150}}
+                                        sx={{width: 150, ...holoFieldSx}}
                                         InputProps={{
                                             endAdornment: <InputAdornment position="end">sec</InputAdornment>,
                                             inputProps: {min: 0}
@@ -739,10 +930,7 @@ const DetailView = observer(() => {
                                             value={selectedSeason}
                                             label={t('detail.season')}
                                             onChange={(e) => setSelectedSeasonForShow(item.id, Number(e.target.value))}
-                                            sx={{
-                                                bgcolor: 'rgba(20, 20, 30, 0.7)',
-                                                '.MuiOutlinedInput-notchedOutline': {borderColor: 'rgba(255,255,255,0.2)'}
-                                            }}
+                                            sx={holoFieldSx}
                                         >
                                             {item.seasons.map(season => (
                                                 <MenuItem key={season.id} value={season.season_number}>
@@ -756,10 +944,10 @@ const DetailView = observer(() => {
                         </Box>
                         {isDetailLoading ? (
                             <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '20vh'}}>
-                                <CircularProgress/>
+                                <CircularProgress sx={{color: 'var(--neon-accent)'}}/>
                             </Box>
                         ) : (
-                            <List sx={{px: 2}}>
+                            <List className="scanline" sx={{px: 2}}>
                                 {(currentSeason?.episodes || []).map((episode) => {
                                     const hasPlayableLinks = (episode.video_urls || []).some(link => {
                                         const langMatch = !languageFilter || (link.language.toUpperCase() === languageFilter.toUpperCase());
@@ -811,5 +999,6 @@ const DetailView = observer(() => {
         </Box>
     );
 });
+DetailView.displayName = 'DetailView';
 
 export default DetailView;

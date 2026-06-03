@@ -6,7 +6,6 @@ import {
     Avatar,
     Box,
     CircularProgress,
-    colors,
     Divider,
     Drawer,
     IconButton,
@@ -27,17 +26,12 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import GoogleIcon from '@mui/icons-material/Google';
 import CloseIcon from '@mui/icons-material/Close';
 import TvIcon from '@mui/icons-material/Tv';
-import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
-import LiveTvIcon from '@mui/icons-material/LiveTv';
-import AnimationIcon from '@mui/icons-material/Animation';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ShareIcon from '@mui/icons-material/Share';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import HistoryIcon from '@mui/icons-material/History';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckIcon from '@mui/icons-material/Check';
@@ -63,14 +57,6 @@ const ProfileDrawer = observer(() => {
         openQRScanner();
     };
 
-    const handleThemeChange = (event, newTheme) => {
-        if (newTheme !== null) {
-            mediaStore.setActiveTheme(newTheme);
-            mediaStore.setActiveView('Home'); // Navigate to home to see the changes
-            toggleProfileDrawer(false); // Close the drawer
-        }
-    };
-
     const handleLanguageChange = (event, newLang) => {
         if (newLang !== null) {
             setLanguage(newLang);
@@ -92,12 +78,6 @@ const ProfileDrawer = observer(() => {
             updateSlaveName(editingSlaveId, editedName.trim());
             handleCancelEdit();
         }
-    };
-
-    const themeColors = {
-        SerieTV: '#E50914',
-        Film: colors.amber[500],
-        Anime: colors.deepPurple[300],
     };
 
     const drawerContent = (
@@ -136,86 +116,6 @@ const ProfileDrawer = observer(() => {
                 </ToggleButtonGroup>
             </Box>
             <Divider/>
-
-
-            <Box sx={{p: 2}}>
-                <Typography variant="overline" color="text.secondary">{t('profileDrawer.siteStyle')}</Typography>
-                <ToggleButtonGroup
-                    value={mediaStore.activeTheme}
-                    exclusive
-                    onChange={handleThemeChange}
-                    aria-label="site theme"
-                    fullWidth
-                    orientation="vertical"
-                    sx={{
-                        mt: 1,
-                        '& .MuiToggleButtonGroup-grouped': {
-                            border: 0,
-                            '&:not(:first-of-type)': {borderRadius: '4px'},
-                            '&:first-of-type': {borderRadius: '4px'}
-                        }
-                    }}
-                >
-                    <ToggleButton
-                        value="SerieTV"
-                        aria-label="serie tv theme"
-                        sx={{
-                            justifyContent: 'space-between',
-                            p: 1.5,
-                            '&.Mui-selected, &.Mui-selected:hover': {
-                                backgroundColor: 'rgba(229, 9, 20, 0.15)',
-                                borderLeft: `4px solid ${themeColors.SerieTV}`,
-                            },
-                        }}
-                    >
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                            <LiveTvIcon/>
-                            <Typography component="span"
-                                        sx={{fontWeight: 'inherit'}}>{t('profileDrawer.theme.series')}</Typography>
-                        </Box>
-                        <Box sx={{width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.SerieTV}}/>
-                    </ToggleButton>
-                    <ToggleButton
-                        value="Film"
-                        aria-label="film theme"
-                        sx={{
-                            justifyContent: 'space-between',
-                            p: 1.5,
-                            '&.Mui-selected, &.Mui-selected:hover': {
-                                backgroundColor: `${colors.amber[500]}26`,
-                                borderLeft: `4px solid ${themeColors.Film}`,
-                            },
-                        }}
-                    >
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                            <LocalMoviesIcon/>
-                            <Typography component="span"
-                                        sx={{fontWeight: 'inherit'}}>{t('profileDrawer.theme.movies')}</Typography>
-                        </Box>
-                        <Box sx={{width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Film}}/>
-                    </ToggleButton>
-                    <ToggleButton
-                        value="Anime"
-                        aria-label="anime theme"
-                        sx={{
-                            justifyContent: 'space-between',
-                            p: 1.5,
-                            '&.Mui-selected, &.Mui-selected:hover': {
-                                backgroundColor: `${colors.deepPurple[300]}26`,
-                                borderLeft: `4px solid ${themeColors.Anime}`,
-                            },
-                        }}
-                    >
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                            <AnimationIcon/>
-                            <Typography component="span"
-                                        sx={{fontWeight: 'inherit'}}>{t('profileDrawer.theme.anime')}</Typography>
-                        </Box>
-                        <Box sx={{width: 24, height: 24, borderRadius: '50%', bgcolor: themeColors.Anime}}/>
-                    </ToggleButton>
-                </ToggleButtonGroup>
-            </Box>
-            <Divider/>
             <List>
                 {isLoggedIn ? (
                     <>
@@ -250,46 +150,6 @@ const ProfileDrawer = observer(() => {
                 )}
             </List>
             <Divider/>
-            <Box sx={{p: 2, pb: 0}}>
-                <Typography variant="overline"
-                            color="text.secondary">{t('profileDrawer.playbackPreferences')}</Typography>
-                <Typography variant="body2" color="text.secondary"
-                            sx={{mt: 1}}>{t('profileDrawer.preferredLabelsDesc')}</Typography>
-                <Box sx={{
-                    maxHeight: '20vh',
-                    overflowY: 'auto',
-                    mt: 1,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    borderRadius: 1
-                }}>
-                    <List dense disablePadding>
-                        {mediaStore.allUniqueLabels.length > 0 ? mediaStore.allUniqueLabels.map(label => (
-                            <ListItem
-                                key={label}
-                                secondaryAction={
-                                    <IconButton edge="end" onClick={() => mediaStore.togglePreferredLabel(label)}
-                                                aria-label={`Toggle preference for ${label}`}>
-                                        {mediaStore.preferredLabels.includes(label) ? <StarIcon color="warning"/> :
-                                            <StarBorderIcon/>}
-                                    </IconButton>
-                                }
-                                disablePadding
-                            >
-                                <ListItemButton dense onClick={() => mediaStore.togglePreferredLabel(label)}>
-                                    <ListItemText primary={label}/>
-                                </ListItemButton>
-                            </ListItem>
-                        )) : (
-                            <ListItem>
-                                <ListItemText primary={t('profileDrawer.noLabelsFound')}
-                                              secondary={t('profileDrawer.noLabelsFoundDesc')}/>
-                            </ListItem>
-                        )}
-                    </List>
-                </Box>
-            </Box>
-            <Divider sx={{my: 1}}/>
             <Box sx={{px: 2, pt: 1}}>
                 <Typography variant="overline" color="text.secondary">{t('profileDrawer.savedDevices')}</Typography>
             </Box>
