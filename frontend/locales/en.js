@@ -388,7 +388,79 @@ export const en = {
             "title": "Delete all invalid links",
             "message": "Are you sure you want to delete all {count} invalid links? This action cannot be undone."
         },
-        "deletedAllInvalid": "{count} invalid links deleted successfully."
+        "deletedAllInvalid": "{count} invalid links deleted successfully.",
+        "dashboard": {
+            "searchPlaceholder": "Search the library…",
+            "searchAriaLabel": "Search the library",
+            "counters": {
+                "myList": "My list",
+                "continueWatching": "Continue",
+                "links": "Links",
+                "invalid": "Expired"
+            },
+            "noResults": "No results for \"{query}\""
+        },
+        "common": {
+            "lastEdited": "Last edited: {date}",
+            "editLink": "Edit link",
+            "copyUrl": "Copy URL",
+            "delete": "Delete"
+        },
+        "myList": {
+            "lastEdited": "Last edited {date}",
+            "removeConfirm": "Remove \"{name}\" from your list?",
+            "exploreCta": "Explore the catalog"
+        },
+        "continueWatching": {
+            "removeConfirm": "Remove \"{name}\" from Continue Watching?",
+            "emptyCta": "Browse the catalog"
+        },
+        "videoLinks": {
+            "bulkBar": {
+                "selected": "{count} selected",
+                "changeLanguage": "Change language",
+                "changeType": "Change type",
+                "deleteN": "Delete {count}",
+                "clearSelection": "Clear selection",
+                "selectAll": "Select all",
+                "languagePrompt": "Language (3 chars)",
+                "apply": "Apply",
+                "type": "Type"
+            },
+            "showInfo": {
+                "title": "Show info",
+                "episodes": "{count} episodes",
+                "links": "{count} links",
+                "invalid": "{count} expired",
+                "lastEdited": "Last edited: {date}",
+                "preferredSource": "Preferred source"
+            },
+            "emptySearch": "No links match \"{query}\""
+        },
+        "linkEdit": {
+            "title": "Edit link",
+            "showContext": "{show} - S{season}E{episode}",
+            "urlLabel": "URL",
+            "urlPreview": "Preview: {preview}",
+            "labelLabel": "Label",
+            "languageLabel": "Language (3 chars)",
+            "typeLabel": "Type",
+            "preferredSwitch": "Mark as preferred source for this show",
+            "validateNow": "Validate now",
+            "validating": "Validating...",
+            "valid": "Link is valid",
+            "invalid": "Link is not valid",
+            "save": "Save",
+            "cancel": "Cancel",
+            "missingUrl": "Please enter a valid URL.",
+            "savedSuccess": "Link saved successfully.",
+            "validatedSuccess": "Link is valid.",
+            "validatedInvalid": "The link does not respond or cannot be reached."
+        },
+        "preferredSources": {
+            "linksAvailable": "{count} links available",
+            "emptySearch": "No preferred source matches \"{query}\""
+        }
     },
     "notifications": {
         "roomCreated": "Room created! Share the code to invite friends.",
@@ -469,6 +541,9 @@ export const en = {
         "dismiss": "Dismiss",
         "new": "New",
         "season": "Season",
-        "episode": "Episode"
+        "episode": "Episode",
+        "bulkLinksUpdated": "{count} links updated ({language}/{type}).",
+        "bulkLinksDeleted": "{count} links deleted.",
+        "linkValidatedSuccess": "Link validated successfully."
     }
 }

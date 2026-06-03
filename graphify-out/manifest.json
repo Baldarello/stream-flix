@@ -739,14 +739,19 @@
     "ast_hash": "8a668ff76d1a7a6821f063605f308a13",
     "semantic_hash": ""
   },
-  "E:\\Lavoro\\TND\\stream-flix\\.output.txt": {
-    "mtime": 1780501220.9698987,
-    "ast_hash": "7eaa1027486ccd1f5fc05be6acf63d01",
-    "semantic_hash": ""
-  },
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\tests\\detail-link-episodes-holo.spec.js": {
     "mtime": 1780501538.8167758,
     "ast_hash": "8b94b14543203392295fda6f94c43d27",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.output.json": {
+    "mtime": 1780502068.7150135,
+    "ast_hash": "72b6af6a896b32e5afddce717e1ef792",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.output.txt": {
+    "mtime": 1780502164.3251462,
+    "ast_hash": "01f9f41d889a971c0ac3cd81ac5498d7",
     "semantic_hash": ""
   }
 }

@@ -113,6 +113,16 @@ class MediaStore {
     // Custom Intro Durations
     showIntroDurations = new Map();
 
+    // Library refresh state (search, last-edited, link selection).
+    // Session-only: never persisted in Dexie, see plan
+    // refresh-library-management.md for the rationale.
+    librarySearchQuery = '';
+    libraryLastEdited = new Map(); // mediaId -> timestamp (ms epoch)
+    librarySelectedLinkIds = new Set(); // bulk-selection set
+    libraryBulkMode = false; // sticky bulk-action bar visibility
+    libraryEditingLinkId = null; // id of the link currently open in LinkEditModal
+    _searchDebounceTimer = null;
+
     // Theme & Translation State
     language = 'it';
 
@@ -1046,6 +1056,19 @@ class MediaStore {
         return Array.from(showIds).map(id => this.cachedItems.get(id)).filter((item) => !!item);
     }
 
+    // ===== LIBRARY DASHBOARD COUNTERS =====
+    // Aggregates the live totals shown in the sticky library header.
+    // Kept as a MobX getter so any observable change re-renders the
+    // dashboard chips automatically.
+    get libraryCounts() {
+        return {
+            myList: this.myListItems.length,
+            continueWatching: this.continueWatchingItems.length,
+            links: this.mediaLinks.size,
+            invalid: this.invalidLinkIds.size,
+        };
+    }
+
     // ===== DATA FETCHING =====
 
     fetchAllData = async () => {
@@ -1618,6 +1641,158 @@ class MediaStore {
         this.activeLibraryTab = tab;
     }
 
+    // ===== LIBRARY DASHBOARD / SEARCH =====
+
+    setLibrarySearchQuery = (q) => {
+        // Debounce the input by 200ms to avoid thrashing filters on
+        // every keystroke. The intermediate value still gets echoed
+        // in the controlled TextField, only the store read is
+        // debounced – this keeps the input responsive while the
+        // derived selectors stay O(n) per debounced tick.
+        if (this._searchDebounceTimer) {
+            clearTimeout(this._searchDebounceTimer);
+            this._searchDebounceTimer = null;
+        }
+        this._searchDebounceTimer = setTimeout(() => {
+            runInAction(() => {
+                this.librarySearchQuery = q || '';
+            });
+        }, 200);
+    }
+
+    // Test-friendly immediate setter (no debounce). Used by automated
+    // checks that need to assert the post-debounce state.
+    setLibrarySearchQueryImmediate = (q) => {
+        if (this._searchDebounceTimer) {
+            clearTimeout(this._searchDebounceTimer);
+            this._searchDebounceTimer = null;
+        }
+        this.librarySearchQuery = q || '';
+    }
+
+    markLinkEdited = (mediaId) => {
+        if (mediaId == null) return;
+        this.libraryLastEdited.set(mediaId, Date.now());
+    }
+
+    // ===== LIBRARY: LINK EDIT MODAL =====
+    openLinkEditModal = (linkId) => {
+        this.libraryEditingLinkId = linkId;
+    }
+
+    closeLinkEditModal = () => {
+        this.libraryEditingLinkId = null;
+    }
+
+    // ===== LIBRARY: BULK SELECTION =====
+
+    toggleLinkSelection = (linkId) => {
+        if (linkId == null) return;
+        if (this.librarySelectedLinkIds.has(linkId)) {
+            this.librarySelectedLinkIds.delete(linkId);
+        } else {
+            this.librarySelectedLinkIds.add(linkId);
+        }
+        this.libraryBulkMode = this.librarySelectedLinkIds.size > 0;
+    }
+
+    clearLinkSelection = () => {
+        this.librarySelectedLinkIds.clear();
+        this.libraryBulkMode = false;
+    }
+
+    setBulkLinkLanguage = async (linkIds, language) => {
+        const ids = Array.isArray(linkIds) ? linkIds : Array.from(linkIds);
+        if (ids.length === 0) return;
+        const normalised = String(language || '').toUpperCase().slice(0, 3);
+        let updated = 0;
+        for (const linkId of ids) {
+            try {
+                await db.mediaLinks.update(linkId, {language: normalised});
+                const link = await db.mediaLinks.get(linkId);
+                if (link) {
+                    this.markLinkEdited(link.mediaId);
+                    updated++;
+                }
+            } catch (e) {
+                console.error('bulk update language error', e);
+            }
+        }
+        // Refresh any affected media ids to re-render the list.
+        const mediaIds = new Set();
+        for (const linkId of ids) {
+            const link = await db.mediaLinks.get(linkId).catch(() => null);
+            if (link?.mediaId != null) mediaIds.add(link.mediaId);
+        }
+        for (const mediaId of mediaIds) {
+            await this.refreshLinksForMediaId(mediaId);
+        }
+        this.showSnackbar('notifications.bulkLinksUpdated', 'success', true, {count: updated, language: normalised});
+    }
+
+    setBulkLinkType = async (linkIds, type) => {
+        const ids = Array.isArray(linkIds) ? linkIds : Array.from(linkIds);
+        if (ids.length === 0) return;
+        let updated = 0;
+        for (const linkId of ids) {
+            try {
+                await db.mediaLinks.update(linkId, {type});
+                const link = await db.mediaLinks.get(linkId);
+                if (link) {
+                    this.markLinkEdited(link.mediaId);
+                    updated++;
+                }
+            } catch (e) {
+                console.error('bulk update type error', e);
+            }
+        }
+        const mediaIds = new Set();
+        for (const linkId of ids) {
+            const link = await db.mediaLinks.get(linkId).catch(() => null);
+            if (link?.mediaId != null) mediaIds.add(link.mediaId);
+        }
+        for (const mediaId of mediaIds) {
+            await this.refreshLinksForMediaId(mediaId);
+        }
+        this.showSnackbar('notifications.bulkLinksUpdated', 'success', true, {count: updated, type});
+    }
+
+    bulkDeleteLinks = async (linkIds) => {
+        const ids = Array.isArray(linkIds) ? linkIds : Array.from(linkIds);
+        if (ids.length === 0) return;
+        const mediaIds = new Set();
+        for (const linkId of ids) {
+            try {
+                const link = await db.mediaLinks.get(linkId);
+                if (link?.mediaId != null) mediaIds.add(link.mediaId);
+                await db.mediaLinks.delete(linkId);
+            } catch (e) {
+                console.error('bulk delete link error', e);
+            }
+        }
+        for (const mediaId of mediaIds) {
+            await this.refreshLinksForMediaId(mediaId);
+        }
+        this.clearLinkSelection();
+        this.showSnackbar('notifications.bulkLinksDeleted', 'success', true, {count: ids.length});
+    }
+
+    // Single-link validation used by LinkEditModal. Wraps the
+    // lower-level linkValidator so the UI does not need to import
+    // services directly.
+    validateLink = async (linkId) => {
+        const link = await db.mediaLinks.get(linkId);
+        if (!link) return false;
+        const isValid = await checkLinkValidity(link.url);
+        await db.mediaLinks.update(linkId, {isValid});
+        if (!isValid) {
+            this.invalidLinkIds.add(linkId);
+        } else {
+            this.invalidLinkIds.delete(linkId);
+        }
+        return isValid;
+    }
+
     navigateToLibraryLinksTab = async (showId) => {
         this.activeLibraryTab = 2;
         this.linksFilterShowId = showId;
@@ -1635,6 +1810,9 @@ class MediaStore {
             if (link) {
                 await db.mediaLinks.update(linkId, updates);
                 await this.refreshLinksForMediaId(link.mediaId);
+                // Track the edit timestamp for the per-show "last
+                // edited" chip in the library dashboard.
+                this.markLinkEdited(link.mediaId);
                 this.showSnackbar('notifications.linkUpdatedSuccess', 'success', true);
             }
         } catch (error) {

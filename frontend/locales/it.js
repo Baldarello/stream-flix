@@ -388,7 +388,79 @@ export const it = {
             "title": "Cancella tutti i link scaduti",
             "message": "Sei sicuro di voler eliminare tutti i {count} link scaduti? Questa azione non può essere annullata."
         },
-        "deletedAllInvalid": "{count} link scaduti eliminati con successo."
+        "deletedAllInvalid": "{count} link scaduti eliminati con successo.",
+        "dashboard": {
+            "searchPlaceholder": "Cerca nella libreria…",
+            "searchAriaLabel": "Cerca nella libreria",
+            "counters": {
+                "myList": "La mia lista",
+                "continueWatching": "Continua",
+                "links": "Link",
+                "invalid": "Scaduti"
+            },
+            "noResults": "Nessun risultato per \"{query}\""
+        },
+        "common": {
+            "lastEdited": "Ultima modifica: {date}",
+            "editLink": "Modifica link",
+            "copyUrl": "Copia URL",
+            "delete": "Elimina"
+        },
+        "myList": {
+            "lastEdited": "Ultima modifica {date}",
+            "removeConfirm": "Rimuovere \"{name}\" dalla tua lista?",
+            "exploreCta": "Esplora il catalogo"
+        },
+        "continueWatching": {
+            "removeConfirm": "Rimuovere \"{name}\" da Continua a guardare?",
+            "emptyCta": "Vai al catalogo"
+        },
+        "videoLinks": {
+            "bulkBar": {
+                "selected": "{count} selezionati",
+                "changeLanguage": "Cambia lingua",
+                "changeType": "Cambia tipo",
+                "deleteN": "Elimina {count}",
+                "clearSelection": "Pulisci selezione",
+                "selectAll": "Seleziona tutti",
+                "languagePrompt": "Lingua (3 caratteri)",
+                "apply": "Applica",
+                "type": "Tipo"
+            },
+            "showInfo": {
+                "title": "Info per show",
+                "episodes": "{count} episodi",
+                "links": "{count} link",
+                "invalid": "{count} scaduti",
+                "lastEdited": "Ultima modifica: {date}",
+                "preferredSource": "Fonte preferita"
+            },
+            "emptySearch": "Nessun link corrisponde a \"{query}\""
+        },
+        "linkEdit": {
+            "title": "Modifica link",
+            "showContext": "{show} - S{season}E{episode}",
+            "urlLabel": "URL",
+            "urlPreview": "Anteprima: {preview}",
+            "labelLabel": "Etichetta",
+            "languageLabel": "Lingua (3 caratteri)",
+            "typeLabel": "Tipo",
+            "preferredSwitch": "Imposta come fonte preferita per questo show",
+            "validateNow": "Valida ora",
+            "validating": "Validazione...",
+            "valid": "Link valido",
+            "invalid": "Link non valido",
+            "save": "Salva",
+            "cancel": "Annulla",
+            "missingUrl": "Inserisci un URL valido.",
+            "savedSuccess": "Link salvato con successo.",
+            "validatedSuccess": "Link valido.",
+            "validatedInvalid": "Il link non risponde o non è raggiungibile."
+        },
+        "preferredSources": {
+            "linksAvailable": "{count} link disponibili",
+            "emptySearch": "Nessuna fonte preferita corrisponde a \"{query}\""
+        }
     },
     "notifications": {
         "roomCreated": "Stanza creata! Condividi il codice per invitare amici.",
@@ -470,6 +542,9 @@ export const it = {
         "dismiss": "Ignora",
         "new": "Nuovo",
         "season": "Stagione",
-        "episode": "Episodio"
+        "episode": "Episodio",
+        "bulkLinksUpdated": "{count} link aggiornati ({language}/{type}).",
+        "bulkLinksDeleted": "{count} link eliminati.",
+        "linkValidatedSuccess": "Link validato con successo."
     }
 }
