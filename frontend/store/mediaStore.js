@@ -43,6 +43,11 @@ class MediaStore {
     isDetailLoading = false;
     
     myList = [];
+    // Whether the user is in the inline "edit order" mode for
+    // "La mia lista". Flipped by the "Edit order" button in
+    // CinematicRow (which calls `toggleReorderMode` defensively
+    // – this method used to be missing on the store).
+    isReorderMode = false;
     isPlaying = false;
     nowPlayingItem = null;
     nowPlayingShowDetails = null;
@@ -1006,6 +1011,10 @@ class MediaStore {
 
         const itemsToUpdate = this.myList.map((id, index) => ({id, order: index}));
         await db.myList.bulkPut(itemsToUpdate);
+    }
+
+    toggleReorderMode = () => {
+        this.isReorderMode = !this.isReorderMode;
     }
 
     setMyListOrder = async (orderedIds) => {
