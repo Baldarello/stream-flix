@@ -1,0 +1,9 @@
+{
+  "*.{js,jsx}": [
+    "eslint --config frontend/eslint.config.js --max-warnings=0",
+    "prettier --config frontend/.prettierrc.json --write"
+  ],
+  "*.{json,md,yml,yaml}": [
+    "prettier --config frontend/.prettierrc.json --write"
+  ]
+}

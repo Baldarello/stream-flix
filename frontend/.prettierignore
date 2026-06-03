@@ -1,0 +1,7 @@
+dist
+node_modules
+coverage
+.junie
+.playwright-mcp
+bun.lock
+package-lock.json
