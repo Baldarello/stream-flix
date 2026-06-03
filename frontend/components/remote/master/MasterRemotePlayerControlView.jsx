@@ -285,7 +285,7 @@ const MasterRemotePlayerControlView = observer(() => {
                         id="master-remote-current-time"
                         variant="caption"
                         data-testid="master-remote-current-time"
-                        sx={{fontFamily: 'monospace', minWidth: 50, textAlign: 'left', flexShrink: 0}}>
+                        sx={{fontFamily: 'monospace', minWidth: 50, textAlign: 'left', flexShrink: 0,zIndex:1}}>
                         {formatTime(currentTime)}
                     </Typography>
                     <Box sx={{flex: 1, minWidth: 0}}>
@@ -300,7 +300,7 @@ const MasterRemotePlayerControlView = observer(() => {
                         id="master-remote-remaining-time"
                         variant="caption"
                         data-testid="master-remote-remaining-time"
-                        sx={{fontFamily: 'monospace', minWidth: 50, textAlign: 'right', flexShrink: 0}}>
+                        sx={{fontFamily: 'monospace', minWidth: 50, textAlign: 'right', flexShrink: 0,zIndex:1}}>
                         -{formatTime(remainingTime)}
                     </Typography>
                 </Box>

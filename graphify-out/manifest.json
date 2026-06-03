@@ -790,7 +790,7 @@
     "semantic_hash": "6314a62f78f7a07ffed6c0a9b678d116"
   },
   "E:\\Lavoro\\TND\\stream-flix\\test-results\\.last-run.json": {
-    "mtime": 1780476415.940358,
+    "mtime": 1780476732.810041,
     "ast_hash": "f196824657d8858bc7fa44eecbba38b1",
     "semantic_hash": "f196824657d8858bc7fa44eecbba38b1"
   },
@@ -1269,14 +1269,9 @@
     "ast_hash": "73635015d80a7386419d1b5cffc53aea",
     "semantic_hash": ""
   },
-  "E:\\Lavoro\\TND\\stream-flix\\.output.txt": {
-    "mtime": 1780475852.6983607,
-    "ast_hash": "15b065fc0dcf350ce670a2f99e19dca2",
-    "semantic_hash": ""
-  },
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\cinematic-rework.spec.js": {
-    "mtime": 1780476397.4368174,
-    "ast_hash": "79466a5618ea263b0f1d6dd0d8003c4a",
+    "mtime": 1780476704.3887956,
+    "ast_hash": "ddb73b3900f177d8e97582fae1bd3fd9",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\stages\\01-design-system.spec.js": {
@@ -1435,8 +1430,8 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\master-remote-progress-time-layout.png": {
-    "mtime": 1780476415.8165548,
-    "ast_hash": "74692e7792962a41957918b7327a4607",
+    "mtime": 1780476602.5689754,
+    "ast_hash": "899dcfae549caad555ddfe534f670273",
     "semantic_hash": ""
   }
 }
