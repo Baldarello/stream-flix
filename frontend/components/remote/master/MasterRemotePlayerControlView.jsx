@@ -9,7 +9,6 @@ import {
     Button,
     CircularProgress,
     IconButton,
-    Slider,
     Stack,
     Toolbar,
     Tooltip,
@@ -28,24 +27,8 @@ import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import {useTranslations} from '../../../hooks/useTranslations.js';
 import ConnectionIndicator from '../../utilities/ConnectionIndicator.jsx';
 import EpisodesDrawer from './EpisodesDrawer.jsx';
-
-const formatTime = (timeInSeconds) => {
-    if (isNaN(timeInSeconds) || timeInSeconds < 0) {
-        return '00:00';
-    }
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedSeconds = String(seconds).padStart(2, '0');
-
-    if (hours > 0) {
-        return `${hours}:${formattedMinutes}:${formattedSeconds}`;
-    }
-    return `${formattedMinutes}:${formattedSeconds}`;
-};
-
+import {formatTime} from './formatTime';
+import {MasterRemoteProgressSlider} from './MasterRemoteProgressSlider';
 
 const MasterRemotePlayerControlView = observer(() => {
     const {
@@ -289,11 +272,10 @@ const MasterRemotePlayerControlView = observer(() => {
                         {formatTime(currentTime)}
                     </Typography>
                     <Box sx={{flex: 1, minWidth: 0}}>
-                        <Slider
-                            className="video-player-slider"
-                            aria-label="progress"
-                            value={progress}
-                            onChangeCommitted={handleSeek}
+                        <MasterRemoteProgressSlider
+                            progress={progress}
+                            duration={duration}
+                            onSeek={handleSeek}
                         />
                     </Box>
                     <Typography
