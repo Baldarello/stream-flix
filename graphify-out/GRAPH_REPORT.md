@@ -1,16 +1,16 @@
 # Graph Report - stream-flix  (2026-06-03)
 
 ## Corpus Check
-- 136 files · ~95,322 words
+- 138 files · ~167,297 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2368 nodes · 2812 edges · 212 communities (160 shown, 52 thin omitted)
+- 2406 nodes · 2860 edges · 213 communities (161 shown, 52 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5b4b3d6a`
+- Built from commit: `1e2c9699`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,6 +22,9 @@
 - [[_COMMUNITY_Community 4|Community 4]]
 - [[_COMMUNITY_Community 5|Community 5]]
 - [[_COMMUNITY_Community 6|Community 6]]
+- [[_COMMUNITY_Community 7|Community 7]]
+- [[_COMMUNITY_Community 8|Community 8]]
+- [[_COMMUNITY_Community 9|Community 9]]
 - [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 12|Community 12]]
 - [[_COMMUNITY_Community 15|Community 15]]
@@ -36,7 +39,6 @@
 - [[_COMMUNITY_Community 33|Community 33]]
 - [[_COMMUNITY_Community 34|Community 34]]
 - [[_COMMUNITY_Community 35|Community 35]]
-- [[_COMMUNITY_Community 42|Community 42]]
 - [[_COMMUNITY_Community 45|Community 45]]
 - [[_COMMUNITY_Community 52|Community 52]]
 - [[_COMMUNITY_Community 53|Community 53]]
@@ -125,7 +127,6 @@
 - [[_COMMUNITY_Community 159|Community 159]]
 - [[_COMMUNITY_Community 160|Community 160]]
 - [[_COMMUNITY_Community 161|Community 161]]
-- [[_COMMUNITY_Community 162|Community 162]]
 - [[_COMMUNITY_Community 163|Community 163]]
 - [[_COMMUNITY_Community 164|Community 164]]
 - [[_COMMUNITY_Community 165|Community 165]]
@@ -227,35 +228,35 @@
 ## God Nodes (most connected - your core abstractions)
 1. `MediaStore` - 108 edges
 2. `RemoteStore` - 55 edges
-3. `useTranslations()` - 51 edges
+3. `useTranslations()` - 52 edges
 4. `WebSocketService` - 39 edges
 5. `CORE DIRECTIVE: IMAGE-FIRST WEBSITE DESIGN TO CODE` - 39 edges
 6. `CORE DIRECTIVE: PREMIUM MOBILE APP IMAGE DIRECTION` - 39 edges
-7. `reducedMotion()` - 23 edges
+7. `reducedMotion()` - 24 edges
 8. `CORE DIRECTIVE: AWWWARDS-LEVEL IMAGE ART DIRECTION` - 22 edges
 9. `Writing Skills` - 22 edges
 10. `tasteskill: Anti-Slop Frontend Skill` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `LinkSelectionModal()` --calls--> `useTranslations()`  [EXTRACTED]
+  frontend/components/modals/LinkSelectionModal.jsx → frontend/hooks/useTranslations.js
+- `EpisodeEmptyState()` --calls--> `useTranslations()`  [EXTRACTED]
+  frontend/components/remote/master/EpisodesDrawer.jsx → frontend/hooks/useTranslations.js
 - `Craft Flow` --references--> `Assess Current Copy`  [INFERRED]
   .agents/skills/impeccable/reference/craft.md → .agents/skills/impeccable/reference/clarify.md
 - `Craft Flow` --references--> `Color Strategy`  [INFERRED]
   .agents/skills/impeccable/reference/craft.md → .agents/skills/impeccable/reference/colorize.md
 - `CinematicFooterInner()` --calls--> `reducedMotion()`  [EXTRACTED]
   frontend/components/layout/CinematicFooter.jsx → frontend/motion/grammar.js
-- `CinematicGridInner()` --calls--> `useTranslations()`  [EXTRACTED]
-  frontend/components/layout/CinematicGrid.jsx → frontend/hooks/useTranslations.js
-- `CinematicRowInner()` --calls--> `useTranslations()`  [EXTRACTED]
-  frontend/components/layout/CinematicRow.jsx → frontend/hooks/useTranslations.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (212 total, 52 thin omitted)
+## Communities (213 total, 52 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.14
-Nodes (8): EpisodesDrawer, SwipeableEpisodeCard, EpisodesDrawer, SlaveVideoPlayer, playbackRates, VideoControlsContainer, VideoPlayer, Chat
+Cohesion: 0.09
+Nodes (15): HoloChip, EpisodesDrawer, SwipeableEpisodeCard, EpisodeEmptyState(), EpisodeRow, EpisodesDrawer, HoloDrawerHeader, holoFieldSx (+7 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
@@ -266,8 +267,8 @@ Cohesion: 0.27
 Nodes (7): ImportLibraryModal, style, ShareLibraryModal, style, createShareLink(), extractFileIdFromUrl(), parseDataFromLink()
 
 ### Community 3 - "Community 3"
-Cohesion: 0.22
-Nodes (6): ManageLinksView, DetailView, SwipeableEpisodeCardDetailView, AddLinkTabs, LinkEpisodesModal, style
+Cohesion: 0.29
+Nodes (5): DetailView, SwipeableEpisodeCardDetailView, AddLinkTabs, LinkEpisodesModal, style
 
 ### Community 4 - "Community 4"
 Cohesion: 0.29
@@ -277,13 +278,21 @@ Nodes (3): FOCUSABLE_SELECTOR, TransitionPortal, FxStore
 Cohesion: 0.40
 Nodes (5): 0.A Read these signals first, 0.B Output a one-line "Design Read" before generating, 0. BRIEF INFERENCE (Read the Room Before Anything Else), 0.C If the brief is ambiguous, ask one question, do not guess, 0.D Anti-Default Discipline
 
+### Community 7 - "Community 7"
+Cohesion: 0.08
+Nodes (25): Architecture Diagram, Components, Current Implementation, Data Models / Contracts, Delivery Steps, Edge Cases, File Structure, Functional Requirements (+17 more)
+
+### Community 8 - "Community 8"
+Cohesion: 0.29
+Nodes (4): formatTime(), MasterRemotePlayerControlView, MasterRemoteProgressSlider(), ConnectionIndicator
+
 ### Community 12 - "Community 12"
-Cohesion: 0.07
-Nodes (17): formatTime(), MasterRemotePlayerControlView, MasterRemoteProgressSlider(), checkAuthPopupClosed(), handleSignIn(), handleSignOut(), initGoogleAuth(), refreshAccessToken() (+9 more)
+Cohesion: 0.09
+Nodes (14): checkAuthPopupClosed(), handleSignIn(), handleSignOut(), initGoogleAuth(), refreshAccessToken(), refreshAccessTokenWithRetry(), scheduleTokenRefresh(), stopPopupPolling() (+6 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.10
-Nodes (18): HomeView, useTranslations(), Card, CinematicHero, CinematicRow, ContentRow, Hero, HoloCardInner() (+10 more)
+Cohesion: 0.09
+Nodes (24): SkeletonCard(), HomeView, useTranslations(), Card, CinematicGrid, CinematicGridInner(), CinematicHero, CinematicRow (+16 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.12
@@ -298,8 +307,8 @@ Cohesion: 0.40
 Nodes (5): Adapt Reference, Animate Reference, Audit Reference, Bolder Reference, Impeccable Frontend Skill
 
 ### Community 21 - "Community 21"
-Cohesion: 0.07
-Nodes (32): ScanlineOverlay, SkeletonCard(), AmbientCanvas, DEFAULT_PALETTE, SceneCanvas, CinematicFooterInner(), socialIcons, CinematicGridInner() (+24 more)
+Cohesion: 0.08
+Nodes (26): ScanlineOverlay, AmbientCanvas, DEFAULT_PALETTE, SceneCanvas, CinematicFooterInner(), socialIcons, CinematicDetail, CinematicDetailInner() (+18 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.07
@@ -314,8 +323,8 @@ Cohesion: 0.05
 Nodes (41): 1. Read the screenshot (if present), 2. Wrap the element, 3. Load the action's reference, 4. Plan three variants: identity first, then mode, then axes, 5. Apply the freeform prompt (if present), 6. Write all variants in a single edit, 7. Parameters (composition-sized, 0–4 per variant), 8. Signal done (+33 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.12
-Nodes (10): EpisodeInfoModal, GoogleDriveSyncConflictModal, LinkMovieModal, style, MediaSyncModal, NotificationsModal, iconMap, RevisionsModal (+2 more)
+Cohesion: 0.08
+Nodes (22): StoreContext, useStores(), CinematicFooter, FloatingDock, NAV_KEYS, Footer(), Header, navKeys (+14 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.05
@@ -329,10 +338,6 @@ Nodes (36): API Integration, Architecture, Backend, Configuration, Core Streamin
 Cohesion: 0.10
 Nodes (19): dependencies, dotenv, elysia, @elysiajs/cors, @elysiajs/static, @elysiajs/websocket, description, devDependencies (+11 more)
 
-### Community 42 - "Community 42"
-Cohesion: 0.18
-Nodes (11): StoreContext, useStores(), CinematicFooter, CinematicGrid, FloatingDock, NAV_KEYS, Footer(), GridView (+3 more)
-
 ### Community 45 - "Community 45"
 Cohesion: 0.12
 Nodes (15): dependencies, @mui/icons-material, description, devDependencies, @playwright/test, name, private, scripts (+7 more)
@@ -342,8 +347,8 @@ Cohesion: 0.06
 Nodes (34): 10. IMAGE-FIRST CODEX WEBSITE WORKFLOW, 11. WHEN TO TRIGGER IMAGE GENERATION FIRST, 13. WEBSITE REFERENCE RULE, 15. RESPONSIVE FIRST-VIEW RULE, 16. ANTI-NESTED-BOX RULE, 17. REDUCE MICRO-UI CLUTTER RULE, 18. SECTION IMAGE GENERATION RULE, 19. WEBSITE IMAGE SYSTEM RULE (+26 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.11
-Nodes (17): style, WatchTogetherModal, MasterScreen, apiClient, buildImageURL(), getLatestMovies(), getPopularAnime(), getSeriesDetails() (+9 more)
+Cohesion: 0.12
+Nodes (16): style, WatchTogetherModal, MasterScreen, apiClient, buildImageURL(), getLatestMovies(), getPopularAnime(), getSeriesDetails() (+8 more)
 
 ### Community 56 - "Community 56"
 Cohesion: 0.06
@@ -878,24 +883,24 @@ Cohesion: 0.50
 Nodes (4): Pattern, Reference, Skill Types, Technique
 
 ## Knowledge Gaps
-- **1561 isolated node(s):** `name`, `version`, `description`, `type`, `dev` (+1556 more)
+- **1586 isolated node(s):** `name`, `version`, `description`, `type`, `dev` (+1581 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **52 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `MediaStore` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 69`, `Community 42`, `Community 12`, `Community 15`, `Community 21`, `Community 53`, `Community 152`, `Community 31`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `RemoteStore` connect `Community 11` to `Community 0`, `Community 1`, `Community 42`, `Community 12`, `Community 15`, `Community 53`, `Community 152`, `Community 31`?**
+- **Why does `MediaStore` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 69`, `Community 8`, `Community 12`, `Community 15`, `Community 21`, `Community 53`, `Community 152`, `Community 31`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `WebSocketService` connect `Community 12` to `Community 1`, `Community 15`, `Community 53`, `Community 152`, `Community 31`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `RemoteStore` connect `Community 11` to `Community 0`, `Community 1`, `Community 8`, `Community 15`, `Community 53`, `Community 152`, `Community 31`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `WebSocketService` connect `Community 12` to `Community 1`, `Community 8`, `Community 15`, `Community 53`, `Community 152`, `Community 31`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `description` to the rest of the system?**
-  _1566 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1591 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.13970588235294118 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08923076923076922 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.05242566510172144 - nodes in this community are weakly interconnected._
-- **Should `Community 11` be split into smaller, more focused modules?**
-  _Cohesion score 0.05405405405405406 - nodes in this community are weakly interconnected._
+- **Should `Community 7` be split into smaller, more focused modules?**
+  _Cohesion score 0.07692307692307693 - nodes in this community are weakly interconnected._

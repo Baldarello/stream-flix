@@ -37,3 +37,5 @@ graphify-extract.log
 /temp-bundle.js
 /skills-lock.json
 /.env
+/.playwright-mcp/
+/frontend/.playwright-mcp/

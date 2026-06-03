@@ -25,10 +25,6 @@ const allTranslations = {it, en};
 // Types for sharing functionality
 
 
-
-
-
-
 class MediaStore {
     // ===== CORE STATE =====
     trending = [];
@@ -37,11 +33,11 @@ class MediaStore {
     popularAnime = [];
     loading = true;
     error = null;
-    
+
     selectedItem = null;
     playbackOriginItem = null;
     isDetailLoading = false;
-    
+
     myList = [];
     // Whether the user is in the inline "edit order" mode for
     // "La mia lista". Flipped by the "Edit order" button in
@@ -59,19 +55,19 @@ class MediaStore {
     preferredLabels = [];
     selectedSeasons = new Map();
     showFilterPreferences = new Map();
-    
+
     // Search State
     searchQuery = '';
     searchResults = [];
     isSearchActive = false;
     isSearching = false;
     searchDebounceTimer = null;
-    
+
     // Links State
     mediaLinks = new Map();
     invalidLinkIds = new Set();
     invalidLinksLoading = false;
-    
+
     // Library State
     activeLibraryTab = 0;
     linksFilterShowId = null;
@@ -85,21 +81,21 @@ class MediaStore {
     linksForSelection = [];
     linkSelectionContext = 'local';
     expandedLinkAccordionId = false;
-    
+
     // Player Drawers State
     isEpisodesDrawerOpen = false;
     isEpisodeInfoModalOpen = false;
     episodeInfoModalData = null;
-    
+
     // Profile & QR State
     isProfileDrawerOpen = false;
-    
+
     // Sharing State
     isShareModalOpen = false;
     isImportModalOpen = false;
     isImportingLibrary = false;
     importUrl = null;
-    
+
     // Revisions State
     isRevisionsModalOpen = false;
     isRevisionsLoading = false;
@@ -108,48 +104,120 @@ class MediaStore {
 
     // Custom Intro Durations
     showIntroDurations = new Map();
-    
+
     // Theme & Translation State
     activeTheme = 'Anime';
     language = 'it';
-    
+
     // Snackbar State
     snackbarMessage = null;
-    
+
     // Notifications State
     notifications = [];
     isNotificationsModalOpen = false;
-    
+
     // Debug Mode State
     isDebugModeActive = false;
     debugMessages = [];
 
     // ===== WATCH TOGETHER STATE (delegated from watchTogetherStore) =====
     // These are exposed for components that access watchTogether state through mediaStore
-    get watchTogetherModalOpen() { return watchTogetherStore.watchTogetherModalOpen; }
-    set watchTogetherModalOpen(v) { watchTogetherStore.watchTogetherModalOpen = v; }
-    get roomId() { return watchTogetherStore.roomId; }
-    set roomId(v) { watchTogetherStore.roomId = v; }
-    get hostId() { return watchTogetherStore.hostId; }
-    set hostId(v) { watchTogetherStore.hostId = v; }
-    get isHost() { return watchTogetherStore.isHost; }
-    set isHost(v) { watchTogetherStore.isHost = v; }
-    get participants() { return watchTogetherStore.participants; }
-    set participants(v) { watchTogetherStore.participants = v; }
-    get username() { return watchTogetherStore.username; }
-    set username(v) { watchTogetherStore.username = v; }
-    get watchTogetherError() { return watchTogetherStore.watchTogetherError; }
-    set watchTogetherError(v) { watchTogetherStore.watchTogetherError = v; }
-    get playbackState() { return watchTogetherStore.playbackState; }
-    set playbackState(v) { watchTogetherStore.playbackState = v; }
-    get chatHistory() { return watchTogetherStore.chatHistory; }
-    set chatHistory(v) { watchTogetherStore.chatHistory = v; }
-    get joinRoomIdFromUrl() { return watchTogetherStore.joinRoomIdFromUrl; }
-    set joinRoomIdFromUrl(v) { watchTogetherStore.joinRoomIdFromUrl = v; }
-    get watchTogetherSelectedItem() { return watchTogetherStore.watchTogetherSelectedItem; }
-    set watchTogetherSelectedItem(v) { watchTogetherStore.watchTogetherSelectedItem = v; }
-    get myClientId() { return watchTogetherStore.myClientId; }
-    set myClientId(v) { watchTogetherStore.myClientId = v; }
+    get watchTogetherModalOpen() {
+        return watchTogetherStore.watchTogetherModalOpen;
+    }
+
+    set watchTogetherModalOpen(v) {
+        watchTogetherStore.watchTogetherModalOpen = v;
+    }
+
+    get roomId() {
+        return watchTogetherStore.roomId;
+    }
+
+    set roomId(v) {
+        watchTogetherStore.roomId = v;
+    }
+
+    get hostId() {
+        return watchTogetherStore.hostId;
+    }
+
+    set hostId(v) {
+        watchTogetherStore.hostId = v;
+    }
+
+    get isHost() {
+        return watchTogetherStore.isHost;
+    }
+
+    set isHost(v) {
+        watchTogetherStore.isHost = v;
+    }
+
+    get participants() {
+        return watchTogetherStore.participants;
+    }
+
+    set participants(v) {
+        watchTogetherStore.participants = v;
+    }
+
+    get username() {
+        return watchTogetherStore.username;
+    }
+
+    set username(v) {
+        watchTogetherStore.username = v;
+    }
+
+    get watchTogetherError() {
+        return watchTogetherStore.watchTogetherError;
+    }
+
+    set watchTogetherError(v) {
+        watchTogetherStore.watchTogetherError = v;
+    }
+
+    get playbackState() {
+        return watchTogetherStore.playbackState;
+    }
+
+    set playbackState(v) {
+        watchTogetherStore.playbackState = v;
+    }
+
+    get chatHistory() {
+        return watchTogetherStore.chatHistory;
+    }
+
+    set chatHistory(v) {
+        watchTogetherStore.chatHistory = v;
+    }
+
+    get joinRoomIdFromUrl() {
+        return watchTogetherStore.joinRoomIdFromUrl;
+    }
+
+    set joinRoomIdFromUrl(v) {
+        watchTogetherStore.joinRoomIdFromUrl = v;
+    }
+
+    get watchTogetherSelectedItem() {
+        return watchTogetherStore.watchTogetherSelectedItem;
+    }
+
+    set watchTogetherSelectedItem(v) {
+        watchTogetherStore.watchTogetherSelectedItem = v;
+    }
+
+    get myClientId() {
+        return watchTogetherStore.myClientId;
+    }
+
+    set myClientId(v) {
+        watchTogetherStore.myClientId = v;
+    }
+
     // WatchTogether methods delegated
     openWatchTogetherModal = watchTogetherStore.openWatchTogetherModal;
     closeWatchTogetherModal = watchTogetherStore.closeWatchTogetherModal;
@@ -165,20 +233,62 @@ class MediaStore {
 
     // ===== SYNC STORE STATE (delegated from syncStore) =====
     // These are exposed for components that access sync state through mediaStore
-    get googleUser() { return syncStore.googleUser; }
-    set googleUser(v) { syncStore.googleUser = v; }
-    get isSyncing() { return syncStore.isSyncing; }
-    set isSyncing(v) { syncStore.isSyncing = v; }
-    get isReloadingData() { return syncStore.isReloadingData; }
-    set isReloadingData(v) { syncStore.isReloadingData = v; }
-    get isGoogleAuthLoading() { return syncStore.isGoogleAuthLoading; }
-    set isGoogleAuthLoading(v) { syncStore.isGoogleAuthLoading = v; }
-    get isSyncConflictModalOpen() { return syncStore.isSyncConflictModalOpen; }
-    set isSyncConflictModalOpen(v) { syncStore.isSyncConflictModalOpen = v; }
-    get syncConflictData() { return syncStore.syncConflictData; }
-    set syncConflictData(v) { syncStore.syncConflictData = v; }
-    get isProcessingSyncConflict() { return syncStore.isProcessingSyncConflict; }
-    set isProcessingSyncConflict(v) { syncStore.isProcessingSyncConflict = v; }
+    get googleUser() {
+        return syncStore.googleUser;
+    }
+
+    set googleUser(v) {
+        syncStore.googleUser = v;
+    }
+
+    get isSyncing() {
+        return syncStore.isSyncing;
+    }
+
+    set isSyncing(v) {
+        syncStore.isSyncing = v;
+    }
+
+    get isReloadingData() {
+        return syncStore.isReloadingData;
+    }
+
+    set isReloadingData(v) {
+        syncStore.isReloadingData = v;
+    }
+
+    get isGoogleAuthLoading() {
+        return syncStore.isGoogleAuthLoading;
+    }
+
+    set isGoogleAuthLoading(v) {
+        syncStore.isGoogleAuthLoading = v;
+    }
+
+    get isSyncConflictModalOpen() {
+        return syncStore.isSyncConflictModalOpen;
+    }
+
+    set isSyncConflictModalOpen(v) {
+        syncStore.isSyncConflictModalOpen = v;
+    }
+
+    get syncConflictData() {
+        return syncStore.syncConflictData;
+    }
+
+    set syncConflictData(v) {
+        syncStore.syncConflictData = v;
+    }
+
+    get isProcessingSyncConflict() {
+        return syncStore.isProcessingSyncConflict;
+    }
+
+    set isProcessingSyncConflict(v) {
+        syncStore.isProcessingSyncConflict = v;
+    }
+
     // SyncStore methods delegated
     reloadAllData = syncStore.reloadAllData;
     synchronizeWithDrive = syncStore.synchronizeWithDrive;
@@ -194,56 +304,206 @@ class MediaStore {
 
     // ===== REMOTE STORE STATE (delegated from remoteStore) =====
     // These are exposed for components that access remote state through mediaStore
-    get isRemoteMaster() { return remoteStore.isRemoteMaster; }
-    set isRemoteMaster(v) { remoteStore.isRemoteMaster = v; }
-    get isRemoteMasterConnected() { return remoteStore.isRemoteMasterConnected; }
-    set isRemoteMasterConnected(v) { remoteStore.isRemoteMasterConnected = v; }
-    get slaveId() { return remoteStore.slaveId; }
-    set slaveId(v) { remoteStore.slaveId = v; }
-    get slaveShortCode() { return remoteStore.slaveShortCode; }
-    set slaveShortCode(v) { remoteStore.slaveShortCode = v; }
-    get hasLoadedInitialData() { return remoteStore.hasLoadedInitialData; }
-    set hasLoadedInitialData(v) { remoteStore.hasLoadedInitialData = v; }
-    get masterReconnectAttempts() { return remoteStore.masterReconnectAttempts; }
-    set masterReconnectAttempts(v) { remoteStore.masterReconnectAttempts = v; }
-    get masterReconnectTimer() { return remoteStore.masterReconnectTimer; }
-    set masterReconnectTimer(v) { remoteStore.masterReconnectTimer = v; }
-    get isReconnecting() { return remoteStore.isReconnecting; }
-    set isReconnecting(v) { remoteStore.isReconnecting = v; }
-    get remoteSlaveState() { return remoteStore.remoteSlaveState; }
-    set remoteSlaveState(v) { remoteStore.remoteSlaveState = v; }
-    get remoteSelectedItem() { return remoteStore.remoteSelectedItem; }
-    set remoteSelectedItem(v) { remoteStore.remoteSelectedItem = v; }
-    get isRemoteDetailLoading() { return remoteStore.isRemoteDetailLoading; }
-    set isRemoteDetailLoading(v) { remoteStore.isRemoteDetailLoading = v; }
-    get remoteAction() { return remoteStore.remoteAction; }
-    set remoteAction(v) { remoteStore.remoteAction = v; }
-    get remoteFullItem() { return remoteStore.remoteFullItem; }
-    set remoteFullItem(v) { remoteStore.remoteFullItem = v; }
-    get isRemoteFullItemLoading() { return remoteStore.isRemoteFullItemLoading; }
-    set isRemoteFullItemLoading(v) { remoteStore.isRemoteFullItemLoading = v; }
-    get isIntroSkippableOnSlave() { return remoteStore.isIntroSkippableOnSlave; }
-    set isIntroSkippableOnSlave(v) { remoteStore.isIntroSkippableOnSlave = v; }
-    get shouldAutoFullscreen() { return remoteStore.shouldAutoFullscreen; }
-    set shouldAutoFullscreen(v) { remoteStore.shouldAutoFullscreen = v; }
-    get knownSlaves() { return remoteStore.knownSlaves; }
-    set knownSlaves(v) { remoteStore.knownSlaves = v; }
-    get missedPings() { return remoteStore.missedPings; }
-    set missedPings(v) { remoteStore.missedPings = v; }
-    get connectionHealth() { return remoteStore.connectionHealth; }
-    set connectionHealth(v) { remoteStore.connectionHealth = v; }
-    get pingInterval() { return remoteStore.pingInterval; }
-    set pingInterval(v) { remoteStore.pingInterval = v; }
-    get lastPingTime() { return remoteStore.lastPingTime; }
-    set lastPingTime(v) { remoteStore.lastPingTime = v; }
-    get isMediaSyncModalOpen() { return remoteStore.isMediaSyncModalOpen; }
-    set isMediaSyncModalOpen(v) { remoteStore.isMediaSyncModalOpen = v; }
-    get mediaSyncTargetSlaveId() { return remoteStore.mediaSyncTargetSlaveId; }
-    set mediaSyncTargetSlaveId(v) { remoteStore.mediaSyncTargetSlaveId = v; }
-    get _masterUiActiveView() { return remoteStore._masterUiActiveView; }
-    set _masterUiActiveView(v) { remoteStore._masterUiActiveView = v; }
-    get _masterUiSelectedItem() { return remoteStore._masterUiSelectedItem; }
-    set _masterUiSelectedItem(v) { remoteStore._masterUiSelectedItem = v; }
+    get isRemoteMaster() {
+        return remoteStore.isRemoteMaster;
+    }
+
+    set isRemoteMaster(v) {
+        remoteStore.isRemoteMaster = v;
+    }
+
+    get isRemoteMasterConnected() {
+        return remoteStore.isRemoteMasterConnected;
+    }
+
+    set isRemoteMasterConnected(v) {
+        remoteStore.isRemoteMasterConnected = v;
+    }
+
+    get slaveId() {
+        return remoteStore.slaveId;
+    }
+
+    set slaveId(v) {
+        remoteStore.slaveId = v;
+    }
+
+    get slaveShortCode() {
+        return remoteStore.slaveShortCode;
+    }
+
+    set slaveShortCode(v) {
+        remoteStore.slaveShortCode = v;
+    }
+
+    get hasLoadedInitialData() {
+        return remoteStore.hasLoadedInitialData;
+    }
+
+    set hasLoadedInitialData(v) {
+        remoteStore.hasLoadedInitialData = v;
+    }
+
+    get masterReconnectAttempts() {
+        return remoteStore.masterReconnectAttempts;
+    }
+
+    set masterReconnectAttempts(v) {
+        remoteStore.masterReconnectAttempts = v;
+    }
+
+    get masterReconnectTimer() {
+        return remoteStore.masterReconnectTimer;
+    }
+
+    set masterReconnectTimer(v) {
+        remoteStore.masterReconnectTimer = v;
+    }
+
+    get isReconnecting() {
+        return remoteStore.isReconnecting;
+    }
+
+    set isReconnecting(v) {
+        remoteStore.isReconnecting = v;
+    }
+
+    get remoteSlaveState() {
+        return remoteStore.remoteSlaveState;
+    }
+
+    set remoteSlaveState(v) {
+        remoteStore.remoteSlaveState = v;
+    }
+
+    get remoteSelectedItem() {
+        return remoteStore.remoteSelectedItem;
+    }
+
+    set remoteSelectedItem(v) {
+        remoteStore.remoteSelectedItem = v;
+    }
+
+    get isRemoteDetailLoading() {
+        return remoteStore.isRemoteDetailLoading;
+    }
+
+    set isRemoteDetailLoading(v) {
+        remoteStore.isRemoteDetailLoading = v;
+    }
+
+    get remoteAction() {
+        return remoteStore.remoteAction;
+    }
+
+    set remoteAction(v) {
+        remoteStore.remoteAction = v;
+    }
+
+    get remoteFullItem() {
+        return remoteStore.remoteFullItem;
+    }
+
+    set remoteFullItem(v) {
+        remoteStore.remoteFullItem = v;
+    }
+
+    get isRemoteFullItemLoading() {
+        return remoteStore.isRemoteFullItemLoading;
+    }
+
+    set isRemoteFullItemLoading(v) {
+        remoteStore.isRemoteFullItemLoading = v;
+    }
+
+    get isIntroSkippableOnSlave() {
+        return remoteStore.isIntroSkippableOnSlave;
+    }
+
+    set isIntroSkippableOnSlave(v) {
+        remoteStore.isIntroSkippableOnSlave = v;
+    }
+
+    get shouldAutoFullscreen() {
+        return remoteStore.shouldAutoFullscreen;
+    }
+
+    set shouldAutoFullscreen(v) {
+        remoteStore.shouldAutoFullscreen = v;
+    }
+
+    get knownSlaves() {
+        return remoteStore.knownSlaves;
+    }
+
+    set knownSlaves(v) {
+        remoteStore.knownSlaves = v;
+    }
+
+    get missedPings() {
+        return remoteStore.missedPings;
+    }
+
+    set missedPings(v) {
+        remoteStore.missedPings = v;
+    }
+
+    get connectionHealth() {
+        return remoteStore.connectionHealth;
+    }
+
+    set connectionHealth(v) {
+        remoteStore.connectionHealth = v;
+    }
+
+    get pingInterval() {
+        return remoteStore.pingInterval;
+    }
+
+    set pingInterval(v) {
+        remoteStore.pingInterval = v;
+    }
+
+    get lastPingTime() {
+        return remoteStore.lastPingTime;
+    }
+
+    set lastPingTime(v) {
+        remoteStore.lastPingTime = v;
+    }
+
+    get isMediaSyncModalOpen() {
+        return remoteStore.isMediaSyncModalOpen;
+    }
+
+    set isMediaSyncModalOpen(v) {
+        remoteStore.isMediaSyncModalOpen = v;
+    }
+
+    get mediaSyncTargetSlaveId() {
+        return remoteStore.mediaSyncTargetSlaveId;
+    }
+
+    set mediaSyncTargetSlaveId(v) {
+        remoteStore.mediaSyncTargetSlaveId = v;
+    }
+
+    get _masterUiActiveView() {
+        return remoteStore._masterUiActiveView;
+    }
+
+    set _masterUiActiveView(v) {
+        remoteStore._masterUiActiveView = v;
+    }
+
+    get _masterUiSelectedItem() {
+        return remoteStore._masterUiSelectedItem;
+    }
+
+    set _masterUiSelectedItem(v) {
+        remoteStore._masterUiSelectedItem = v;
+    }
+
     // RemoteStore methods delegated
     connectAsRemoteMaster = remoteStore.connectAsRemoteMaster;
     disconnectRemoteMaster = remoteStore.disconnectRemoteMaster;
@@ -487,7 +747,7 @@ class MediaStore {
     checkAndNotifyInvalidLinks = async (item) => {
         try {
             const invalidLinks = await checkLinksForShow(item, this.mediaLinks);
-            
+
             if (invalidLinks.length > 0) {
                 const showName = item.title || item.name || 'Unknown';
                 this.addNotification({
@@ -829,8 +1089,8 @@ class MediaStore {
 
     loadPersistedData = async () => {
         const [
-            myListItems, cachedItems, mediaLinksData, introDurations, languagePref, 
-            progress, preferredSourcesData, usernamePref, activeThemePref, 
+            myListItems, cachedItems, mediaLinksData, introDurations, languagePref,
+            progress, preferredSourcesData, usernamePref, activeThemePref,
             selectedSeasonsData, preferredLabelsPref, showFilterPreferencesData,
             remoteMasterSlaveId
         ] = await Promise.all([
@@ -1293,28 +1553,28 @@ class MediaStore {
         this.invalidLinksLoading = true;
         const newInvalidIds = new Set();
         const linksToUpdate = [];
-        
+
         try {
             for (const [, links] of this.mediaLinks.entries()) {
                 for (const link of links) {
                     if (link.id) {
                         const isValid = await checkLinkValidity(link.url);
-                        linksToUpdate.push({ id: link.id, isValid });
+                        linksToUpdate.push({id: link.id, isValid});
                         if (!isValid) {
                             newInvalidIds.add(link.id);
                         }
                     }
                 }
             }
-            
+
             if (linksToUpdate.length > 0) {
                 await (db).transaction('rw', db.mediaLinks, async () => {
                     for (const linkUpdate of linksToUpdate) {
-                        await db.mediaLinks.update(linkUpdate.id, { isValid: linkUpdate.isValid });
+                        await db.mediaLinks.update(linkUpdate.id, {isValid: linkUpdate.isValid});
                     }
                 });
             }
-            
+
             runInAction(() => {
                 this.invalidLinkIds = newInvalidIds;
                 this.invalidLinksLoading = false;
@@ -1332,14 +1592,14 @@ class MediaStore {
         let deletedCount = 0;
         let errorCount = 0;
         const total = invalidIds.length;
-        
+
         if (total === 0) {
             this.showSnackbar('notifications.noInvalidLinks', 'info', true);
             return;
         }
-        
+
         this.showSnackbar(`Eliminazione link in corso... (0/${total})`, 'info', false);
-        
+
         for (let i = 0; i < invalidIds.length; i++) {
             const linkId = invalidIds[i];
             try {
@@ -1349,20 +1609,23 @@ class MediaStore {
                 console.error(`Error deleting link ${linkId}:`, error);
                 errorCount++;
             }
-            
+
             if ((i + 1) % 5 === 0 || i === invalidIds.length - 1) {
                 this.showSnackbar(`Eliminazione link in corso... (${i + 1}/${total})`, 'info', false);
             }
         }
-        
+
         runInAction(() => {
             this.invalidLinkIds.clear();
         });
-        
+
         if (errorCount > 0) {
-            this.showSnackbar(`Eliminati ${deletedCount} link, ${errorCount} errori`, 'warning', true, { deletedCount, errorCount });
+            this.showSnackbar(`Eliminati ${deletedCount} link, ${errorCount} errori`, 'warning', true, {
+                deletedCount,
+                errorCount
+            });
         } else {
-            this.showSnackbar('notifications.deletedAllInvalid', 'success', true, { count: deletedCount });
+            this.showSnackbar('notifications.deletedAllInvalid', 'success', true, {count: deletedCount});
         }
     }
 
@@ -1974,7 +2237,10 @@ class MediaStore {
                         if (context) {
                             rev.description = this.t('revisions.descriptions.episodeLinks.' + (rev.type === 1 ? 'add' : rev.type === 2 ? 'update' : 'remove'), context);
                         } else {
-                            rev.description = this.t('revisions.descriptions.unknown', {type: rev.type, table: rev.table});
+                            rev.description = this.t('revisions.descriptions.unknown', {
+                                type: rev.type,
+                                table: rev.table
+                            });
                         }
                         break;
                     case 'showIntroDurations':
@@ -1989,7 +2255,10 @@ class MediaStore {
                         if (vhContext) {
                             rev.description = this.t('revisions.descriptions.viewingHistory.add', vhContext);
                         } else {
-                            rev.description = this.t('revisions.descriptions.unknown', {type: rev.type, table: rev.table});
+                            rev.description = this.t('revisions.descriptions.unknown', {
+                                type: rev.type,
+                                table: rev.table
+                            });
                         }
                         break;
                     default:
