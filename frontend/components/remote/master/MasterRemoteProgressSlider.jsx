@@ -3,45 +3,19 @@ import {Slider, sliderClasses} from '@mui/material';
 import {formatTime} from './formatTime';
 
 /**
- * ValueLabel wrapper that injects a stable `data-testid` on the rendered
- * value-label element and forwards the `open` state to the MUI open class.
- *
- * MUI 5.18's default `SliderValueLabel` only extracts `children`,
- * `className`, and `value` from props, silently dropping
- * `componentsProps.valueLabel['data-testid']`. By providing our own
- * component we can append the testid and the `MuiSlider-valueLabelOpen`
- * class (driven by the `open` prop MUI passes us) to the label element
- * directly while still reusing MUI's positioning/styling.
- */
-const ValueLabel = (props) => {
-    const {children, className, value, open} = props;
-    if (!children) return null;
-    const openClass = open ? sliderClasses.valueLabelOpen : '';
-    const finalClassName = [className, openClass].filter(Boolean).join(' ');
-    return cloneElement(
-        children,
-        {className: children.props.className},
-        children.props.children,
-        <span
-            className={finalClassName}
-            data-testid="master-remote-slider-value-label"
-            aria-hidden
-        >
-            <span className={sliderClasses.valueLabelCircle}>
-                <span className={sliderClasses.valueLabelLabel}>{value}</span>
-            </span>
-        </span>,
-    );
-};
-
-/**
  * Atomic progress slider for the master remote control view.
  *
  * Owns the in-progress drag state so the thumb follows the user in real
- * time and the parent view is not re-rendered by MobX on every tick. The
- * value label is rendered by MUI's built-in mechanism (positioned above
- * the thumb) and the slider exposes `aria-valuetext` with the formatted
- * time so assistive tech and the e2e test can read it.
+ * time and the parent view is not re-rendered by MobX on every tick.
+ *
+ * The value label is rendered by MUI's built-in mechanism (positioned
+ * above the thumb) but its visibility is gated on the local drag state
+ * rather than MUI's default `auto` behavior. This guarantees the label
+ * is shown **only** while the user is actively sliding the thumb, and
+ * never on idle/hover/focus/keyboard events. The final resting position
+ * of the label above the slider track is controlled by a scoped rule in
+ * `frontend/index.css` so it stays clear of the cursor on desktop and
+ * the finger on mobile touch devices.
  *
  * Props:
  * - progress: current playback percentage in 0..100.
@@ -51,6 +25,44 @@ const ValueLabel = (props) => {
 export function MasterRemoteProgressSlider({progress, duration, onSeek}) {
     const [dragValue, setDragValue] = useState(null);
     const displayValue = dragValue !== null ? dragValue : progress;
+
+    /**
+     * ValueLabel wrapper that injects a stable `data-testid` on the
+     * rendered value-label element and drives the MUI open class from
+     * the component-local drag state instead of MUI's own `open` prop.
+     *
+     * Defined inside the component so it can close over `dragValue`.
+     * That means the `MuiSlider-valueLabelOpen` class — and therefore
+     * the visible label — appears **only** while the user is dragging,
+     * regardless of hover or focus on the thumb.
+     *
+     * MUI's default `SliderValueLabel` only extracts `children`,
+     * `className`, and `value` from props, silently dropping
+     * `componentsProps.valueLabel['data-testid']`. By providing our own
+     * component we can append the testid and the open class directly
+     * while still reusing MUI's positioning/styling.
+     */
+    const ValueLabel = (props) => {
+        const {children, className, value} = props;
+        if (!children) return null;
+        const isDragging = dragValue !== null;
+        const openClass = isDragging ? sliderClasses.valueLabelOpen : '';
+        const finalClassName = [className, openClass].filter(Boolean).join(' ');
+        return cloneElement(
+            children,
+            {className: children.props.className},
+            children.props.children,
+            <span
+                className={finalClassName}
+                data-testid="master-remote-slider-value-label"
+                aria-hidden
+            >
+                <span className={sliderClasses.valueLabelCircle}>
+                    <span className={sliderClasses.valueLabelLabel}>{value}</span>
+                </span>
+            </span>,
+        );
+    };
 
     return (
         <Slider
@@ -64,7 +76,7 @@ export function MasterRemoteProgressSlider({progress, duration, onSeek}) {
                 setDragValue(null);
                 onSeek(_, value);
             }}
-            valueLabelDisplay="auto"
+            valueLabelDisplay="on"
             valueLabelFormat={(value) => formatTime((value / 100) * duration)}
             components={{ValueLabel}}
         />

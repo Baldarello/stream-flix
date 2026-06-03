@@ -1,7 +1,13 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 
 // Test configuration
 const BASE_URL = 'http://localhost:3002';
+
+// All Playwright screenshots produced by this test must live under
+// `frontend/.playwright-mcp/` per the project rules in AGENTS.md.
+const SCREENSHOT_DIR = path.join(__dirname, '..', '..', 'frontend', '.playwright-mcp');
+const SCREENSHOT_PATH = path.join(SCREENSHOT_DIR, 'master-remote-slider-drag-preview.png');
 
 /**
  * Helper: returns whether the value label is in the "open" state
@@ -134,13 +140,39 @@ test.describe('Master Remote Progress Slider Drag Preview', () => {
     expect(openBefore).toBe(false);
     console.log('PASS: Value label is closed (hidden) before drag');
 
-    // ===== STEP 4: SIMULATE A DRAG TO THE MIDDLE OF THE SLIDER =====
-    console.log('\n=== STEP 4: Drag the slider to the middle ===');
-
-    // Get the slider's bounding box to compute pixel coordinates
+    // Capture the slider's bounding box once so both the hover and
+    // drag steps below can compute pixel coordinates from the same
+    // reference frame.
     const sliderBox = await sliderLocator.boundingBox();
     expect(sliderBox).not.toBeNull();
     console.log(`Slider box: x=${sliderBox.x.toFixed(1)} y=${sliderBox.y.toFixed(1)} w=${sliderBox.width.toFixed(1)} h=${sliderBox.height.toFixed(1)}`);
+
+    // ===== STEP 3.5: HOVER WITHOUT DRAG MUST NOT OPEN THE LABEL =====
+    console.log('\n=== STEP 3.5: Hover without drag (label must stay closed) ===');
+
+    // Move the mouse to the slider's middle WITHOUT pressing, so the
+    // label is not in a drag state. The label must remain closed
+    // (no `MuiSlider-valueLabelOpen` class) — this locks in the
+    // "only on slide" requirement of the new behavior.
+    const hoverX = sliderBox.x + sliderBox.width / 2;
+    const hoverY = sliderBox.y + sliderBox.height / 2;
+    await page.mouse.move(hoverX, hoverY);
+    await page.waitForTimeout(150);
+
+    const openAfterHover = await isValueLabelOpen(page);
+    expect(openAfterHover).toBe(false);
+    console.log('PASS: Value label is closed (hidden) when only hovering');
+
+    // Move the mouse away so the next drag starts from a neutral
+    // position and not from a hover-on-thumb state.
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(50);
+
+    // ===== STEP 4: SIMULATE A DRAG TO THE MIDDLE OF THE SLIDER =====
+    console.log('\n=== STEP 4: Drag the slider to the middle ===');
+
+    // (sliderBox was already captured before Step 3.5 above so the
+    // hover and drag steps share the same reference frame.)
 
     // Target the middle of the slider (targetPct = 0.5 -> 20:00)
     const targetPct = 0.5;
@@ -167,6 +199,19 @@ test.describe('Master Remote Progress Slider Drag Preview', () => {
     // 20:00 is the expected formatted time for 50% of 40:00
     expect(dragLabelText).toBe('20:00');
     console.log('PASS: Value label is open and shows the expected time (20:00) mid-drag');
+
+    // The label must be rendered above the slider track, with at
+    // least a 30px gap between the label's bottom and the slider
+    // track's top. This prevents the label from being hidden by the
+    // mouse cursor (desktop) or the user's finger (mobile touch).
+    const labelBox = await valueLabelLocator.boundingBox();
+    expect(labelBox).not.toBeNull();
+    const sliderTop = sliderBox.y;
+    const labelBottom = labelBox.y + labelBox.height;
+    const gap = sliderTop - labelBottom;
+    console.log(`Label box: y=${labelBox.y.toFixed(1)} height=${labelBox.height.toFixed(1)} bottom=${labelBottom.toFixed(1)}; slider top=${sliderTop.toFixed(1)}; gap=${gap.toFixed(1)}px`);
+    expect(gap).toBeGreaterThanOrEqual(30);
+    console.log('PASS: Value label is positioned at least 30px above the slider track');
 
     // The side time labels must still reflect the LIVE playback (not the drag position)
     const currentTimeDuringDrag = (await currentTimeLocator.textContent() || '').trim();
@@ -198,8 +243,8 @@ test.describe('Master Remote Progress Slider Drag Preview', () => {
 
     // ===== STEP 8: TAKE A SCREENSHOT =====
     console.log('\n=== STEP 8: Take screenshot ===');
-    await page.screenshot({ path: 'master-remote-slider-drag-preview.png', fullPage: true });
-    console.log('Screenshot saved: master-remote-slider-drag-preview.png');
+    await page.screenshot({ path: SCREENSHOT_PATH, fullPage: true });
+    console.log(`Screenshot saved: ${SCREENSHOT_PATH}`);
 
     // ===== STEP 9: VERIFY NO CONSOLE ERRORS =====
     console.log('\n=== STEP 9: Verify no console errors ===');
