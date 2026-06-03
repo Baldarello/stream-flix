@@ -93,7 +93,8 @@ export const en = {
         "availableLanguages": "Available Languages",
         "airDate": "Air Date",
         "runtime": "Runtime",
-        "episode": "Episode"
+        "episode": "Episode",
+        "empty": "No episodes available for this season."
     },
     "linkMovieModal": {
         "title": "Link Videos for {title}",

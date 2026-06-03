@@ -93,7 +93,8 @@ export const it = {
         "availableLanguages": "Lingue Disponibili",
         "airDate": "Data di Messa in Onda",
         "runtime": "Durata",
-        "episode": "Episodio"
+        "episode": "Episodio",
+        "empty": "Nessun episodio disponibile per questa stagione."
     },
     "linkMovieModal": {
         "title": "Collega Video per {title}",

@@ -39,3 +39,4 @@ graphify-extract.log
 /.env
 /.playwright-mcp/
 /frontend/.playwright-mcp/
+/frontend/.junie/
