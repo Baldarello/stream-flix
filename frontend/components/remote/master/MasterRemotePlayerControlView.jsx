@@ -200,6 +200,7 @@ const MasterRemotePlayerControlView = observer(() => {
     const currentTime = remoteSlaveState?.currentTime || 0;
     const duration = remoteSlaveState?.duration || 0;
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+    const remainingTime = duration > 0 ? Math.max(0, duration - currentTime) : 0;
 
     return (
         <Box sx={{
@@ -277,25 +278,31 @@ const MasterRemotePlayerControlView = observer(() => {
             <Box
                 sx={{p: {xs: 2, sm: 3}, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', flex: 1}}>
                 {/* Progress Bar - at the bottom */}
-                <Box sx={{mb: 4}}>
-                    <Slider
-                        className="video-player-slider"
-                        aria-label="progress"
-                        value={progress}
-                        onChangeCommitted={handleSeek}
-                    />
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: "space-between",
-                        flexDirection: "row",
-                        gap: 2,
-                    }}>
-                        <Typography variant="caption"
-                                    sx={{fontFamily: 'monospace'}}>{formatTime(currentTime)}</Typography>
-
-                        <Typography variant="caption" sx={{fontFamily: 'monospace'}}>{formatTime(duration)}</Typography>
+                <Box
+                    id="master-remote-progress-container"
+                    sx={{mb: 4, display: 'flex', alignItems: 'center', gap: 2}}>
+                    <Typography
+                        id="master-remote-current-time"
+                        variant="caption"
+                        data-testid="master-remote-current-time"
+                        sx={{fontFamily: 'monospace', minWidth: 50, textAlign: 'left', flexShrink: 0}}>
+                        {formatTime(currentTime)}
+                    </Typography>
+                    <Box sx={{flex: 1, minWidth: 0}}>
+                        <Slider
+                            className="video-player-slider"
+                            aria-label="progress"
+                            value={progress}
+                            onChangeCommitted={handleSeek}
+                        />
                     </Box>
+                    <Typography
+                        id="master-remote-remaining-time"
+                        variant="caption"
+                        data-testid="master-remote-remaining-time"
+                        sx={{fontFamily: 'monospace', minWidth: 50, textAlign: 'right', flexShrink: 0}}>
+                        -{formatTime(remainingTime)}
+                    </Typography>
                 </Box>
 
                 {/* Main Controls */}
