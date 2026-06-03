@@ -14,7 +14,6 @@
  * the upstream `syncConflictData` changes or when the modal re-opens.
  */
 import {makeAutoObservable} from 'mobx';
-import {mediaStore} from './mediaStore';
 
 class GoogleDriveSyncConflictStore {
     /**
@@ -101,14 +100,23 @@ class GoogleDriveSyncConflictStore {
         conflictData.myList.remote.forEach(id => allIds.add(id));
 
         if (conflictData.shows) {
-            conflictData.shows.forEach((_, id) => allIds.add(id));
+            if (typeof conflictData.shows.forEach === 'function') {
+                // Native Map or other iterable with forEach
+                conflictData.shows.forEach((_, id) => allIds.add(id));
+            } else {
+                // Plain object keyed by id (e.g. from a test fixture)
+                Object.keys(conflictData.shows).forEach(id => allIds.add(id));
+            }
         }
 
         allIds.forEach(id => {
             const localInList = conflictData.myList.local.includes(id);
             const remoteInList = conflictData.myList.remote.includes(id);
-            const localShow = conflictData.shows?.get(id)?.local;
-            const remoteShow = conflictData.shows?.get(id)?.remote;
+            const showEntry = (typeof conflictData.shows?.get === 'function')
+                ? conflictData.shows.get(id)
+                : conflictData.shows?.[id];
+            const localShow = showEntry?.local;
+            const remoteShow = showEntry?.remote;
 
             const localLinks = conflictData.mediaLinks.local.filter(l => {
                 if (localShow?.seasons) {
@@ -167,14 +175,6 @@ class GoogleDriveSyncConflictStore {
             if (!aHasConflict && bHasConflict) return 1;
             return a.title.localeCompare(b.title);
         });
-    }
-
-    /**
-     * Convenience: re-initialize the choices from whatever the upstream
-     * `mediaStore.syncConflictData` currently holds.
-     */
-    reinitializeFromMediaStore() {
-        this.initializeFromConflictData(mediaStore.syncConflictData);
     }
 
     /**

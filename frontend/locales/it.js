@@ -136,7 +136,19 @@ export const it = {
             "language": "Lingua",
             "type": "Tipo",
             "sub": "Sottotitolato",
-            "dub": "Doppiato"
+            "dub": "Doppiato",
+            "method": "Metodo",
+            "errors": {
+                "emptyPattern": "Il pattern non può essere vuoto.",
+                "missingPlaceholder": "Il pattern deve includere il segnaposto [@EP].",
+                "emptyList": "La lista non può essere vuota.",
+                "emptyJson": "Il JSON non può essere vuoto."
+            },
+            "preview": {
+                "title": "Anteprima URL generati",
+                "empty": "Compila il pattern per vedere l'anteprima.",
+                "more": "e altri {count}…"
+            }
         },
         "manage": {
             "deleteAllSeasonLinks": "Elimina tutti i link per questa stagione",
@@ -342,6 +354,57 @@ export const it = {
                 "add": "Visto episodio: {show} S{s}E{e}"
             },
             "unknown": "Azione '{type}' sulla tabella '{table}'"
+        }
+    },
+    "syncConflict": {
+        "title": "Conflitto Sincronizzazione",
+        "overviewInfo": "Sono state trovate differenze tra i dati locali e quelli nel cloud. Clicca \"Continua\" per scegliere cosa prendere da dove per ogni show, oppure usa una delle azioni rapide qui sotto.",
+        "chooseInfo": "Seleziona per ogni show cosa prendere da dove. Puoi anche eliminare show che non vuoi mantenere.",
+        "stepOverview": "Panoramica",
+        "stepChoose": "Scegli",
+        "bulkLocal": "Prendi tutto da Locale",
+        "bulkRemote": "Prendi tutto da Remoto",
+        "bulkBoth": "Prendi da entrambi",
+        "deleteLocalOnly": "Elimina show solo locali ({count})",
+        "deleteRemoteOnly": "Elimina show solo remoti ({count})",
+        "stats": {
+            "total": "Totale: {count}",
+            "conflicts": "Con conflitti: {count}",
+            "localOnly": "Solo locale: {count}",
+            "remoteOnly": "Solo remoto: {count}",
+            "toDelete": "Da eliminare: {count}"
+        },
+        "rowsCount": "{count} show",
+        "rowsCountWithDelete": "{count} show ({toDelete} da eliminare)",
+        "noConflict": "Nessun conflitto",
+        "myList": "La mia lista",
+        "links": "Link ({local} local / {remote} remote)",
+        "progress": "Progresso ({local} local / {remote} remote)",
+        "actions": {
+            "continue": "Continua e scegli per ogni show",
+            "mergeAuto": "Unisci automaticamente (mantiene tutto)",
+            "overwriteLocal": "Sovrascrivi dati locali con quelli remoti",
+            "overwriteRemote": "Sovrascrivi dati remoti con quelli locali",
+            "cancel": "Annulla sync (logout)",
+            "back": "Indietro",
+            "confirmMerge": "Conferma Merge ({count} show)"
+        },
+        "processing": "Elaborazione in corso...",
+        "showId": "ID: {id}",
+        "deleted": "ELIMINATO",
+        "labels": {
+            "myListBadge": "My List",
+            "linksBadge": "Links",
+            "progressBadge": "Progress"
+        },
+        "options": {
+            "locale": "Locale",
+            "remote": "Remoto",
+            "both": "Entrambi",
+            "notIncluded": "Non incluso",
+            "inBoth": "In entrambi",
+            "onlyLocal": "Solo locale",
+            "onlyRemote": "Solo remoto"
         }
     },
     "libraryManagement": {

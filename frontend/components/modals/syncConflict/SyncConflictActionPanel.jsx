@@ -71,11 +71,11 @@ const errorButtonSx = {
  * @returns {React.ReactElement} Action panel
  */
 export const SyncConflictActionPanel = observer(({
-    onMerge,
-    onOverwriteLocal,
-    onOverwriteRemote,
-    onCancel
-}) => {
+                                                     onMerge,
+                                                     onOverwriteLocal,
+                                                     onOverwriteRemote,
+                                                     onCancel
+                                                 }) => {
     const {t} = useTranslations();
     const {syncConflictStep: step, setSyncConflictStep, syncConflictStats: stats} = mediaStore;
 

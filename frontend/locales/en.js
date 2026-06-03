@@ -136,7 +136,19 @@ export const en = {
             "language": "Language",
             "type": "Type",
             "sub": "Subtitled",
-            "dub": "Dubbed"
+            "dub": "Dubbed",
+            "method": "Method",
+            "errors": {
+                "emptyPattern": "The pattern cannot be empty.",
+                "missingPlaceholder": "The pattern must include the [@EP] placeholder.",
+                "emptyList": "The list cannot be empty.",
+                "emptyJson": "The JSON cannot be empty."
+            },
+            "preview": {
+                "title": "Generated URL preview",
+                "empty": "Fill in the pattern to see the preview.",
+                "more": "and {count} more…"
+            }
         },
         "manage": {
             "deleteAllSeasonLinks": "Delete all links for this season",
@@ -342,6 +354,57 @@ export const en = {
                 "add": "Watched episode: {show} S{s}E{e}"
             },
             "unknown": "Action '{type}' on table '{table}'"
+        }
+    },
+    "syncConflict": {
+        "title": "Sync Conflict",
+        "overviewInfo": "Differences were found between the local data and the cloud. Click \"Continue\" to pick what to take from where for each show, or use one of the quick actions below.",
+        "chooseInfo": "Pick for each show what to take from where. You can also delete shows you don't want to keep.",
+        "stepOverview": "Overview",
+        "stepChoose": "Choose",
+        "bulkLocal": "Take all from Local",
+        "bulkRemote": "Take all from Remote",
+        "bulkBoth": "Take from both",
+        "deleteLocalOnly": "Delete local-only shows ({count})",
+        "deleteRemoteOnly": "Delete remote-only shows ({count})",
+        "stats": {
+            "total": "Total: {count}",
+            "conflicts": "With conflicts: {count}",
+            "localOnly": "Local only: {count}",
+            "remoteOnly": "Remote only: {count}",
+            "toDelete": "To delete: {count}"
+        },
+        "rowsCount": "{count} shows",
+        "rowsCountWithDelete": "{count} shows ({toDelete} to delete)",
+        "noConflict": "No conflict",
+        "myList": "My list",
+        "links": "Links ({local} local / {remote} remote)",
+        "progress": "Progress ({local} local / {remote} remote)",
+        "actions": {
+            "continue": "Continue and choose for each show",
+            "mergeAuto": "Merge automatically (keep everything)",
+            "overwriteLocal": "Overwrite local with remote",
+            "overwriteRemote": "Overwrite remote with local",
+            "cancel": "Cancel sync (logout)",
+            "back": "Back",
+            "confirmMerge": "Confirm Merge ({count} shows)"
+        },
+        "processing": "Processing...",
+        "showId": "ID: {id}",
+        "deleted": "DELETED",
+        "labels": {
+            "myListBadge": "My List",
+            "linksBadge": "Links",
+            "progressBadge": "Progress"
+        },
+        "options": {
+            "locale": "Local",
+            "remote": "Remote",
+            "both": "Both",
+            "notIncluded": "Not included",
+            "inBoth": "In both",
+            "onlyLocal": "Local only",
+            "onlyRemote": "Remote only"
         }
     },
     "libraryManagement": {

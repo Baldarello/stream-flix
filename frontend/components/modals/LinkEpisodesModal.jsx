@@ -21,6 +21,7 @@ import {
 import ManageLinksView from '../library/ManageLinksView.jsx';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {ModalShell} from './ModalShell.jsx';
+import {previewPattern} from '../../utils/patternResolver.js';
 
 // Visual recipe for holo-themed field controls, mirrored from
 // EpisodesDrawer.jsx so the modal uses the same palette.
@@ -87,9 +88,11 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
         switch (addMethod) {
             case 'pattern':
                 if (!pattern) {
-                    error = "Il pattern non può essere vuoto.";
+                    error = 'linkEpisodesModal.add.errors.emptyPattern';
+                    isErrorKey = true;
                 } else if (!pattern.includes('[@EP]')) {
-                    error = "Il pattern deve includere il segnaposto [@EP].";
+                    error = 'linkEpisodesModal.add.errors.missingPlaceholder';
+                    isErrorKey = true;
                 } else {
                     data = {pattern, padding: parseInt(padding, 10), label};
                     if (isAdvanced) {
@@ -114,12 +117,16 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                 }
                 break;
             case 'list':
-                if (!linkList.trim()) error = "La lista non può essere vuota.";
-                else data = {list: linkList};
+                if (!linkList.trim()) {
+                    error = 'linkEpisodesModal.add.errors.emptyList';
+                    isErrorKey = true;
+                } else data = {list: linkList};
                 break;
             case 'json':
-                if (!json.trim()) error = "Il JSON non può essere vuoto.";
-                else data = {json};
+                if (!json.trim()) {
+                    error = 'linkEpisodesModal.add.errors.emptyJson';
+                    isErrorKey = true;
+                } else data = {json};
                 break;
         }
 
@@ -176,6 +183,25 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
         }
     };
 
+    // Live preview for the pattern builder. Re-runs whenever the user
+    // edits the inputs, giving them a quick visual confirmation that
+    // the resulting URLs are correct.
+    const patternPreview = (() => {
+        if (addMethod !== 'pattern' || !pattern || !pattern.includes('[@EP]')) return [];
+        const startEp = parseInt(startEpisode, 10);
+        const endEp = parseInt(endEpisode, 10);
+        const startNum = parseInt(startNumber, 10);
+        const endNum = parseInt(endNumber, 10);
+        return previewPattern({
+            pattern,
+            padding: parseInt(padding, 10),
+            start: startEp,
+            end: endEp,
+            startNum,
+            endNum,
+        });
+    })();
+
     const renderAddContent = () => {
         switch (addMethod) {
             case 'pattern':
@@ -209,6 +235,29 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                 )
                             }}
                         />
+                        {patternPreview.length > 0 && (
+                            <Box
+                                data-testid="pattern-preview"
+                                sx={{
+                                    p: 1.5,
+                                    borderRadius: 1,
+                                    border: '1px dashed rgba(76, 210, 255, 0.35)',
+                                    background: 'rgba(76, 210, 255, 0.04)',
+                                }}
+                            >
+                                <Box sx={{fontSize: 12, color: 'var(--text-secondary)', mb: 0.5}}>
+                                    {t('linkEpisodesModal.add.preview.title')}
+                                </Box>
+                                <Box
+                                    component="ul"
+                                    sx={{m: 0, pl: 2, fontFamily: 'monospace', fontSize: 12, color: 'var(--text-primary)'}}
+                                >
+                                    {patternPreview.map((url, idx) => (
+                                        <Box component="li" key={idx} sx={{wordBreak: 'break-all'}}>{url}</Box>
+                                    ))}
+                                </Box>
+                            </Box>
+                        )}
                         <FormControlLabel
                             control={<Switch
                                 checked={isAdvanced}
@@ -350,10 +399,10 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                     required
                     sx={{display: {xs: 'block', md: 'none'}, ...holoFieldSx}}
                 >
-                    <InputLabel>Metodo</InputLabel>
+                    <InputLabel>{t('linkEpisodesModal.add.method')}</InputLabel>
                     <Select
                         value={addMethod}
-                        label="Metodo"
+                        label={t('linkEpisodesModal.add.method')}
                         onChange={(e) => setAddMethod(e.target.value)}
                     >
                         <MenuItem value="pattern">{t('linkEpisodesModal.add.pattern')}</MenuItem>

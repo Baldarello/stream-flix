@@ -1,4 +1,4 @@
-import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {makeAutoObservable, runInAction} from 'mobx';
 
 import {websocketService} from '../services/websocketService.js';
 import {db} from '../services/db';
@@ -8,97 +8,47 @@ import {isSmartTV as detectSmartTV} from '../utils/device.js';
 
 
 class RemoteStore {
-    // ===== PRIVATE FIELDS =====
-    _isSmartTV = false;
-    _isSmartTVPairingVisible = false;
-    _isRemoteMaster = false;
-    _slaveId = null;
-    _slaveShortCode = null;
-    _isRemoteMasterConnected = false;
-    _hasLoadedInitialData = false;
-    _masterReconnectAttempts = 0;
-    _masterReconnectTimer = null;
-    _isReconnecting = false;
-    _remoteSlaveState = null;
-    _remoteSelectedItem = null;
-    _isRemoteDetailLoading = false;
-    _remoteAction = null;
-    _remoteFullItem = null;
-    _isRemoteFullItemLoading = false;
-    _isIntroSkippableOnSlave = false;
-    _shouldAutoFullscreen = false;
-    _knownSlaves = [];
-    _missedPings = 0;
-    _connectionHealth = 'good';
-    _pingInterval = null;
-    _lastPingTime = null;
-    _isMediaSyncModalOpen = false;
-    _mediaSyncTargetSlaveId = null;
-    __masterUiActiveView = 'Home';
-    __masterUiSelectedItem = null;
-    _isQRScannerOpen = false;
-    _pendingRemoteSessionInit = false; // Flag to track if we need to re-init after data loads
-    _isStoppingRemotePlayback = false; // Flag to ignore stale nowPlayingItem from slave after user pressed back
+    // ===== OBSERVABLE STATE =====
+    // All of these were previously declared as `_foo` private fields
+    // with explicit getter/setter pairs; `makeAutoObservable` now
+    // makes every instance field observable automatically, so the
+    // boilerplate is gone. The public field names are unchanged so
+    // no consumer needs to be touched.
 
-    // ===== PUBLIC GETTERS/SETTERS (for backwards compatibility) =====
-    get isSmartTV() { return this._isSmartTV; }
-    set isSmartTV(v) { this._isSmartTV = v; }
-    get isSmartTVPairingVisible() { return this._isSmartTVPairingVisible; }
-    set isSmartTVPairingVisible(v) { this._isSmartTVPairingVisible = v; }
-    get isRemoteMaster() { return this._isRemoteMaster; }
-    set isRemoteMaster(v) { this._isRemoteMaster = v; }
-    get slaveId() { return this._slaveId; }
-    set slaveId(v) { this._slaveId = v; }
-    get slaveShortCode() { return this._slaveShortCode; }
-    set slaveShortCode(v) { this._slaveShortCode = v; }
-    get isRemoteMasterConnected() { return this._isRemoteMasterConnected; }
-    set isRemoteMasterConnected(v) { this._isRemoteMasterConnected = v; }
-    get hasLoadedInitialData() { return this._hasLoadedInitialData; }
-    set hasLoadedInitialData(v) { this._hasLoadedInitialData = v; }
-    get masterReconnectAttempts() { return this._masterReconnectAttempts; }
-    set masterReconnectAttempts(v) { this._masterReconnectAttempts = v; }
-    get masterReconnectTimer() { return this._masterReconnectTimer; }
-    set masterReconnectTimer(v) { this._masterReconnectTimer = v; }
-    get isReconnecting() { return this._isReconnecting; }
-    set isReconnecting(v) { this._isReconnecting = v; }
-    get remoteSlaveState() { return this._remoteSlaveState; }
-    set remoteSlaveState(v) { this._remoteSlaveState = v; }
-    get remoteSelectedItem() { return this._remoteSelectedItem; }
-    set remoteSelectedItem(v) { this._remoteSelectedItem = v; }
-    get isRemoteDetailLoading() { return this._isRemoteDetailLoading; }
-    set isRemoteDetailLoading(v) { this._isRemoteDetailLoading = v; }
-    get remoteAction() { return this._remoteAction; }
-    set remoteAction(v) { this._remoteAction = v; }
-    get remoteFullItem() { return this._remoteFullItem; }
-    set remoteFullItem(v) { this._remoteFullItem = v; }
-    get isRemoteFullItemLoading() { return this._isRemoteFullItemLoading; }
-    set isRemoteFullItemLoading(v) { this._isRemoteFullItemLoading = v; }
-    get isIntroSkippableOnSlave() { return this._isIntroSkippableOnSlave; }
-    set isIntroSkippableOnSlave(v) { this._isIntroSkippableOnSlave = v; }
-    get shouldAutoFullscreen() { return this._shouldAutoFullscreen; }
-    set shouldAutoFullscreen(v) { this._shouldAutoFullscreen = v; }
-    get knownSlaves() { return this._knownSlaves; }
-    set knownSlaves(v) { this._knownSlaves = v; }
-    get missedPings() { return this._missedPings; }
-    set missedPings(v) { this._missedPings = v; }
-    get connectionHealth() { return this._connectionHealth; }
-    set connectionHealth(v) { this._connectionHealth = v; }
-    get pingInterval() { return this._pingInterval; }
-    set pingInterval(v) { this._pingInterval = v; }
-    get lastPingTime() { return this._lastPingTime; }
-    set lastPingTime(v) { this._lastPingTime = v; }
-    get isMediaSyncModalOpen() { return this._isMediaSyncModalOpen; }
-    set isMediaSyncModalOpen(v) { this._isMediaSyncModalOpen = v; }
-    get mediaSyncTargetSlaveId() { return this._mediaSyncTargetSlaveId; }
-    set mediaSyncTargetSlaveId(v) { this._mediaSyncTargetSlaveId = v; }
-    get _masterUiActiveView() { return this.__masterUiActiveView; }
-    set _masterUiActiveView(v) { this.__masterUiActiveView = v; }
-    get _masterUiSelectedItem() { return this.__masterUiSelectedItem; }
-    set _masterUiSelectedItem(v) { this.__masterUiSelectedItem = v; }
-    get isQRScannerOpen() { return this._isQRScannerOpen; }
-    set isQRScannerOpen(v) { this._isQRScannerOpen = v; }
-    get isStoppingRemotePlayback() { return this._isStoppingRemotePlayback; }
-    set isStoppingRemotePlayback(v) { this._isStoppingRemotePlayback = v; }
+    isSmartTV = false;
+    isSmartTVPairingVisible = false;
+    isRemoteMaster = false;
+    slaveId = null;
+    slaveShortCode = null;
+    isRemoteMasterConnected = false;
+    hasLoadedInitialData = false;
+    masterReconnectAttempts = 0;
+    masterReconnectTimer = null;
+    isReconnecting = false;
+    remoteSlaveState = null;
+    remoteSelectedItem = null;
+    isRemoteDetailLoading = false;
+    remoteAction = null;
+    remoteFullItem = null;
+    isRemoteFullItemLoading = false;
+    isIntroSkippableOnSlave = false;
+    shouldAutoFullscreen = false;
+    knownSlaves = [];
+    missedPings = 0;
+    connectionHealth = 'good';
+    pingInterval = null;
+    lastPingTime = null;
+    isMediaSyncModalOpen = false;
+    mediaSyncTargetSlaveId = null;
+    _masterUiActiveView = 'Home';
+    _masterUiSelectedItem = null;
+    isQRScannerOpen = false;
+    isStoppingRemotePlayback = false;
+
+    // ===== NON-OBSERVABLE INTERNAL FLAGS =====
+    // These need to be excluded from the auto-observable set so MobX
+    // does not try to track timer handles or one-shot init flags.
+    _pendingRemoteSessionInit = false;
 
     // Expose showSnackbar for methods that need to show notifications
     get showSnackbar() { return mediaStore.showSnackbar; }
@@ -106,9 +56,9 @@ class RemoteStore {
 
     constructor() {
         makeAutoObservable(this, {
-            _knownSlaves: observable,
-            __masterUiActiveView: observable,
-            __masterUiSelectedItem: observable,
+            _pendingRemoteSessionInit: false,
+            masterReconnectTimer: false,
+            pingInterval: false,
         });
         if (detectSmartTV()) {
             this.isSmartTV = true;
@@ -238,7 +188,7 @@ class RemoteStore {
             this.isRemoteMaster = false;
             this.slaveId = null;
             this.remoteSlaveState = null;
-            this._isStoppingRemotePlayback = false;
+            this.isStoppingRemotePlayback = false;
             this._masterUiActiveView = 'Home';
             this._masterUiSelectedItem = null;
             db.preferences.delete('remoteMasterForSlaveId');
@@ -383,7 +333,7 @@ class RemoteStore {
     sendPlayCommandAndOptimisticallyUpdate = (item) => {
         this.sendRemoteCommand({command: 'play_item', item: item});
         runInAction(() => {
-            this._isStoppingRemotePlayback = false;
+            this.isStoppingRemotePlayback = false;
             this.remoteSlaveState = {
                 ...(this.remoteSlaveState ?? {}),
                 isPlaying: true,

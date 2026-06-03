@@ -213,7 +213,10 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                 <Card variant="outlined" sx={cardSx(choice.deleteShow)}>
                     <CardContent sx={{p: 1.5, '&:last-child': {pb: 1.5}}}>
                         <Typography sx={labelSx}>
-                            {t('syncConflict.progress', {local: choice.localProgressCount, remote: choice.remoteProgressCount})}
+                            {t('syncConflict.progress', {
+                                local: choice.localProgressCount,
+                                remote: choice.remoteProgressCount
+                            })}
                         </Typography>
                         <FormControl fullWidth size="small" sx={selectSx}>
                             <Select

@@ -2,9 +2,10 @@
  * Google Drive sync conflict modal - holo rework end-to-end validation.
  *
  * Mounts the upgraded modal with a synthetic `syncConflictData`
- * fixture, asserts the new ModalShell paper, data-component
- * attributes, the overview → choose step navigation, the bulk-action
- * buttons and the "no console errors" contract.
+ * fixture via the `?testMode=stores` test hook exposed in `App.jsx`,
+ * asserts the new ModalShell paper, data-component attributes, the
+ * overview → choose step navigation, the bulk-action buttons and
+ * the "no console errors" contract.
  *
  * Screenshots are saved to `frontend/.playwright-mcp/` per the
  * project rule.
@@ -37,21 +38,41 @@ const buildFixture = () => ({
             {episodeId: 'ep-103-s1e1', watched: true}
         ]
     },
-    shows: new Map([
-        [101, {
+    shows: {
+        101: {
             local: {id: 101, name: 'Show A', media_type: 'tv', seasons: []},
             remote: {id: 101, name: 'Show A', media_type: 'tv', seasons: []}
-        }],
-        [102, {
+        },
+        102: {
             local: {id: 102, name: 'Show B', media_type: 'movie', seasons: []},
             remote: null
-        }],
-        [103, {
+        },
+        103: {
             local: null,
             remote: {id: 103, name: 'Show C', media_type: 'tv', seasons: []}
-        }]
-    ])
+        }
+    }
 });
+
+const openModalWithFixture = async (page, fixture) => {
+    await page.evaluate((data) => {
+        const test = window.__quixTest;
+        if (!test || !test.mediaStore) return false;
+        // Wrap cancelSyncAndLogout to count invocations.
+        if (!window.__cancelWrapped) {
+            const orig = test.mediaStore.cancelSyncAndLogout;
+            window.__syncConflictCancelCalls = 0;
+            test.mediaStore.cancelSyncAndLogout = function () {
+                window.__syncConflictCancelCalls = (window.__syncConflictCancelCalls || 0) + 1;
+                if (typeof orig === 'function') return orig.apply(this, arguments);
+            };
+            window.__cancelWrapped = true;
+        }
+        test.mediaStore.syncConflictData = data;
+        test.mediaStore.isSyncConflictModalOpen = true;
+        return true;
+    }, fixture);
+};
 
 test.describe('Google Drive sync conflict modal - holo rework', () => {
     let context;
@@ -81,30 +102,11 @@ test.describe('Google Drive sync conflict modal - holo rework', () => {
     test.setTimeout(90000);
 
     test('overview step mounts with ModalShell + new data-component attributes', async () => {
-        await page.goto(BASE_URL, {waitUntil: 'networkidle'});
+        await page.goto(`${BASE_URL}/?testMode=stores`, {waitUntil: 'networkidle'});
         await page.waitForSelector('#home-hero', {timeout: 15000});
+        await page.waitForFunction(() => window.__quixTest && window.__quixTest.mediaStore, undefined, {timeout: 15000});
 
-        // Expose a dev-only fixture injector on the window so the test
-        // can mount the modal without a real Google Drive sync flow.
-        await page.evaluate((fixture) => {
-            window.__openSyncConflictModal = (data) => {
-                const mod = window.__mediaStore;
-                if (!mod) return false;
-                mod.syncConflictData = data;
-                mod.isSyncConflictModalOpen = true;
-                window.__syncConflictCancelCalls = 0;
-                const origCancel = mod.cancelSyncAndLogout;
-                if (!window.__cancelWrapped) {
-                    mod.cancelSyncAndLogout = function () {
-                        window.__syncConflictCancelCalls = (window.__syncConflictCancelCalls || 0) + 1;
-                        if (typeof origCancel === 'function') return origCancel.apply(this, arguments);
-                    };
-                    window.__cancelWrapped = true;
-                }
-                return true;
-            };
-            window.__openSyncConflictModal(fixture);
-        }, buildFixture());
+        await openModalWithFixture(page, buildFixture());
 
         // The modal must mount inside the ModalShell.
         const modal = page.locator('#google-drive-sync-conflict-modal');
@@ -126,22 +128,16 @@ test.describe('Google Drive sync conflict modal - holo rework', () => {
 
         // Overview snapshot.
         await page.screenshot({path: 'frontend/.playwright-mcp/google-drive-sync-conflict-holo-overview.png', fullPage: true});
+
+        expect(consoleErrors).toEqual([]);
     });
 
     test('continue navigates to choose step and back to overview', async () => {
-        await page.goto(BASE_URL, {waitUntil: 'networkidle'});
+        await page.goto(`${BASE_URL}/?testMode=stores`, {waitUntil: 'networkidle'});
         await page.waitForSelector('#home-hero', {timeout: 15000});
+        await page.waitForFunction(() => window.__quixTest && window.__quixTest.mediaStore, undefined, {timeout: 15000});
 
-        await page.evaluate((fixture) => {
-            window.__openSyncConflictModal = (data) => {
-                const mod = window.__mediaStore;
-                if (!mod) return false;
-                mod.syncConflictData = data;
-                mod.isSyncConflictModalOpen = true;
-                return true;
-            };
-            window.__openSyncConflictModal(fixture);
-        }, buildFixture());
+        await openModalWithFixture(page, buildFixture());
 
         await page.waitForSelector('#sync-conflict-overview-step', {timeout: 10000});
         const modal = page.locator('#google-drive-sync-conflict-modal');
@@ -164,31 +160,16 @@ test.describe('Google Drive sync conflict modal - holo rework', () => {
         const backButton = page.locator('#sync-conflict-action-back');
         await backButton.click();
         await page.waitForSelector('#sync-conflict-overview-step', {timeout: 10000});
+
+        expect(consoleErrors).toEqual([]);
     });
 
     test('cancel CTA fires onCancel callback', async () => {
-        await page.goto(BASE_URL, {waitUntil: 'networkidle'});
+        await page.goto(`${BASE_URL}/?testMode=stores`, {waitUntil: 'networkidle'});
         await page.waitForSelector('#home-hero', {timeout: 15000});
+        await page.waitForFunction(() => window.__quixTest && window.__quixTest.mediaStore, undefined, {timeout: 15000});
 
-        await page.evaluate((fixture) => {
-            window.__syncConflictCancelCalls = 0;
-            window.__openSyncConflictModal = (data) => {
-                const mod = window.__mediaStore;
-                if (!mod) return false;
-                mod.syncConflictData = data;
-                mod.isSyncConflictModalOpen = true;
-                const origCancel = mod.cancelSyncAndLogout;
-                if (!window.__cancelWrapped) {
-                    mod.cancelSyncAndLogout = function () {
-                        window.__syncConflictCancelCalls = (window.__syncConflictCancelCalls || 0) + 1;
-                        if (typeof origCancel === 'function') return origCancel.apply(this, arguments);
-                    };
-                    window.__cancelWrapped = true;
-                }
-                return true;
-            };
-            window.__openSyncConflictModal(fixture);
-        }, buildFixture());
+        await openModalWithFixture(page, buildFixture());
 
         await page.waitForSelector('#sync-conflict-overview-step', {timeout: 10000});
         const cancelButton = page.locator('#sync-conflict-action-cancel');
@@ -196,9 +177,7 @@ test.describe('Google Drive sync conflict modal - holo rework', () => {
 
         const calls = await page.evaluate(() => window.__syncConflictCancelCalls || 0);
         expect(calls).toBeGreaterThanOrEqual(1);
-    });
 
-    test.afterAll(async () => {
-        expect(consoleErrors || []).toEqual([]);
+        expect(consoleErrors).toEqual([]);
     });
 });

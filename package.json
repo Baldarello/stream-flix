@@ -12,7 +12,17 @@
     "dev:be": "cd backend && bun run dev",
     "dev:fe": "cd frontend && bun run dev",
     "docker:build": "docker build -t quix:latest .",
-    "docker:start": "docker run --name quix-local -p 3000:3000 quix:latest"
+    "docker:start": "docker run --name quix-local -p 3000:3000 quix:latest",
+    "lint": "cd frontend && bun run lint",
+    "lint:fix": "cd frontend && bun run lint:fix",
+    "format": "cd frontend && bun run format",
+    "format:check": "cd frontend && bun run format:check",
+    "test": "cd frontend && bun run test",
+    "test:watch": "cd frontend && bun run test:watch",
+    "test:coverage": "cd frontend && bun run test:coverage",
+    "e2e": "cd frontend && bun run e2e",
+    "e2e:install": "cd frontend && bun run e2e:install",
+    "ci": "bun run lint && bun run test && bun run build"
   },
   "dependencies": {
     "@mui/icons-material": "7.3.11"

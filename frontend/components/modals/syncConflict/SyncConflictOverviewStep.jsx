@@ -100,21 +100,36 @@ export const SyncConflictOverviewStep = observer(() => {
                                     <HoloChip
                                         id={`sync-conflict-overview-row-${choice.id}-my-list`}
                                         label={t('syncConflict.labels.myListBadge')}
-                                        sx={{height: 20, fontSize: '0.6rem', borderColor: 'var(--neon-accent-hot)', color: 'var(--neon-accent-hot)'}}
+                                        sx={{
+                                            height: 20,
+                                            fontSize: '0.6rem',
+                                            borderColor: 'var(--neon-accent-hot)',
+                                            color: 'var(--neon-accent-hot)'
+                                        }}
                                     />
                                 )}
                                 {hasLinksConflict && (
                                     <HoloChip
                                         id={`sync-conflict-overview-row-${choice.id}-links`}
                                         label={t('syncConflict.labels.linksBadge')}
-                                        sx={{height: 20, fontSize: '0.6rem', borderColor: 'var(--neon-accent-hot)', color: 'var(--neon-accent-hot)'}}
+                                        sx={{
+                                            height: 20,
+                                            fontSize: '0.6rem',
+                                            borderColor: 'var(--neon-accent-hot)',
+                                            color: 'var(--neon-accent-hot)'
+                                        }}
                                     />
                                 )}
                                 {hasProgressConflict && (
                                     <HoloChip
                                         id={`sync-conflict-overview-row-${choice.id}-progress`}
                                         label={t('syncConflict.labels.progressBadge')}
-                                        sx={{height: 20, fontSize: '0.6rem', borderColor: 'var(--neon-accent-hot)', color: 'var(--neon-accent-hot)'}}
+                                        sx={{
+                                            height: 20,
+                                            fontSize: '0.6rem',
+                                            borderColor: 'var(--neon-accent-hot)',
+                                            color: 'var(--neon-accent-hot)'
+                                        }}
                                     />
                                 )}
                                 {!hasAnyConflict && (
