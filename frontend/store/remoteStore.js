@@ -434,25 +434,13 @@ class RemoteStore {
             return;
         }
 
-        // More than one candidate, try preferred labels.
-        const preferredLabels = mediaStore.preferredLabels;
-        let bestLink;
-
-        if (preferredLabels.length > 0) {
-            bestLink = candidateLinks.find(l => l.label && preferredLabels.includes(l.label));
-        }
-
-        if (bestLink) {
-            this.sendPlayCommandAndOptimisticallyUpdate({...item, video_url: bestLink.url});
-        } else {
-            // More than one link, no preferred label, must ask user.
-            runInAction(() => {
-                mediaStore.linksForSelection = candidateLinks;
-                mediaStore.itemForLinkSelection = item;
-                mediaStore.linkSelectionContext = 'remote';
-                mediaStore.isLinkSelectionModalOpen = true;
-            });
-        }
+        // More than one candidate; ask user to pick.
+        runInAction(() => {
+            mediaStore.linksForSelection = candidateLinks;
+            mediaStore.itemForLinkSelection = item;
+            mediaStore.linkSelectionContext = 'remote';
+            mediaStore.isLinkSelectionModalOpen = true;
+        });
     };
 
     stopRemotePlayback = () => {

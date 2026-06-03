@@ -1,22 +1,5 @@
 @import './styles/cinematic.css';
 
-:root {
-  /* Legacy glow variables - kept as aliases for backward compatibility.
-     The cinematic palette uses cyan as the unified accent; per-category
-     tints can still be applied via the *--neon-accent* CSS variable and
-     the row accent strips. */
-  --glow-seriestv-color: var(--neon-accent);
-  --glow-film-color: var(--neon-accent);
-  --glow-anime-color: var(--neon-accent);
-
-  /* Legacy theme gradients - mapped to the unified futuristic backdrop
-     so the body never flashes a different color when the activeTheme
-     observable is read by legacy code. */
-  --serietv-gradient: var(--cinematic-grad);
-  --film-gradient: var(--cinematic-grad);
-  --anime-gradient: var(--cinematic-grad);
-}
-
 @keyframes kenburns {
   0%, 100% {
     transform: scale(1) translate(0, 0);
@@ -215,12 +198,3 @@ body {
   min-height: 100vh;
 }
 
-/* The three body classes are kept for backward compatibility (legacy
-   components still emit them from `App.jsx`). All three now map to the
-   single futuristic backdrop. */
-body.theme-serietv,
-body.theme-film,
-body.theme-anime {
-  background: var(--cinematic-grad);
-  color: var(--text-primary);
-}

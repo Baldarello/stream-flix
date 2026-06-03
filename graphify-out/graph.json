@@ -652,6 +652,24 @@
       "norm_label": "{ test, expect, chromium }"
     },
     {
+      "label": "detail-link-episodes-holo.spec.js",
+      "file_type": "code",
+      "source_file": "e2e-tests/tests/detail-link-episodes-holo.spec.js",
+      "source_location": "L1",
+      "id": "tests_detail_link_episodes_holo_spec",
+      "community": 29,
+      "norm_label": "detail-link-episodes-holo.spec.js"
+    },
+    {
+      "label": "{test, expect}",
+      "file_type": "code",
+      "source_file": "e2e-tests/tests/detail-link-episodes-holo.spec.js",
+      "source_location": "L11",
+      "id": "tests_detail_link_episodes_holo_spec_test_expect",
+      "community": 29,
+      "norm_label": "{test, expect}"
+    },
+    {
       "label": "google-auth-persistence.spec.js",
       "file_type": "code",
       "source_file": "e2e-tests/tests/google-auth-persistence.spec.js",
@@ -1017,7 +1035,7 @@
       "source_file": "frontend/components/feedback/ScanlineOverlay.jsx",
       "source_location": "L1",
       "id": "feedback_scanlineoverlay",
-      "community": 0,
+      "community": 8,
       "norm_label": "scanlineoverlay.jsx"
     },
     {
@@ -1026,7 +1044,7 @@
       "source_file": "frontend/components/feedback/ScanlineOverlay.jsx",
       "source_location": "L11",
       "id": "feedback_scanlineoverlay_scanlineoverlay",
-      "community": 0,
+      "community": 8,
       "norm_label": "scanlineoverlay"
     },
     {
@@ -1035,7 +1053,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L1",
       "id": "feedback_skeleton",
-      "community": 0,
+      "community": 13,
       "norm_label": "skeleton.jsx"
     },
     {
@@ -1044,7 +1062,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L12",
       "id": "feedback_skeleton_skeletoninner",
-      "community": 0,
+      "community": 13,
       "norm_label": "skeletoninner()"
     },
     {
@@ -1053,7 +1071,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L35",
       "id": "feedback_skeleton_skeletoncard",
-      "community": 0,
+      "community": 13,
       "norm_label": "skeletoncard()"
     },
     {
@@ -1062,7 +1080,7 @@
       "source_file": "frontend/components/layout/Card.jsx",
       "source_location": "L1",
       "id": "layout_card",
-      "community": 21,
+      "community": 13,
       "norm_label": "card.jsx"
     },
     {
@@ -1098,7 +1116,7 @@
       "source_file": "frontend/components/layout/CinematicFooter.jsx",
       "source_location": "L92",
       "id": "layout_cinematicfooter_cinematicfooter",
-      "community": 31,
+      "community": 2,
       "norm_label": "cinematicfooter"
     },
     {
@@ -1107,7 +1125,7 @@
       "source_file": "frontend/components/layout/CinematicGrid.jsx",
       "source_location": "L1",
       "id": "layout_cinematicgrid",
-      "community": 21,
+      "community": 13,
       "norm_label": "cinematicgrid.jsx"
     },
     {
@@ -1116,7 +1134,7 @@
       "source_file": "frontend/components/layout/CinematicGrid.jsx",
       "source_location": "L19",
       "id": "layout_cinematicgrid_cinematicgridinner",
-      "community": 21,
+      "community": 13,
       "norm_label": "cinematicgridinner()"
     },
     {
@@ -1125,7 +1143,7 @@
       "source_file": "frontend/components/layout/CinematicGrid.jsx",
       "source_location": "L96",
       "id": "layout_cinematicgrid_cinematicgrid",
-      "community": 21,
+      "community": 13,
       "norm_label": "cinematicgrid"
     },
     {
@@ -1134,7 +1152,7 @@
       "source_file": "frontend/components/layout/CinematicHero.jsx",
       "source_location": "L1",
       "id": "layout_cinematichero",
-      "community": 15,
+      "community": 14,
       "norm_label": "cinematichero.jsx"
     },
     {
@@ -1143,7 +1161,7 @@
       "source_file": "frontend/components/layout/CinematicHero.jsx",
       "source_location": "L29",
       "id": "layout_cinematichero_splittitle",
-      "community": 15,
+      "community": 14,
       "norm_label": "splittitle()"
     },
     {
@@ -1152,7 +1170,7 @@
       "source_file": "frontend/components/layout/CinematicHero.jsx",
       "source_location": "L46",
       "id": "layout_cinematichero_cinematichero",
-      "community": 15,
+      "community": 14,
       "norm_label": "cinematichero"
     },
     {
@@ -1161,7 +1179,7 @@
       "source_file": "frontend/components/layout/CinematicRow.jsx",
       "source_location": "L1",
       "id": "layout_cinematicrow",
-      "community": 15,
+      "community": 14,
       "norm_label": "cinematicrow.jsx"
     },
     {
@@ -1170,7 +1188,7 @@
       "source_file": "frontend/components/layout/CinematicRow.jsx",
       "source_location": "L23",
       "id": "layout_cinematicrow_cinematicrowinner",
-      "community": 15,
+      "community": 14,
       "norm_label": "cinematicrowinner()"
     },
     {
@@ -1179,7 +1197,7 @@
       "source_file": "frontend/components/layout/CinematicRow.jsx",
       "source_location": "L301",
       "id": "layout_cinematicrow_cinematicrow",
-      "community": 15,
+      "community": 14,
       "norm_label": "cinematicrow"
     },
     {
@@ -1213,7 +1231,7 @@
       "label": "FloatingDock",
       "file_type": "code",
       "source_file": "frontend/components/layout/FloatingDock.jsx",
-      "source_location": "L51",
+      "source_location": "L49",
       "id": "layout_floatingdock_floatingdock",
       "community": 31,
       "norm_label": "floatingdock"
@@ -1224,7 +1242,7 @@
       "source_file": "frontend/components/layout/Footer.jsx",
       "source_location": "L1",
       "id": "layout_footer",
-      "community": 31,
+      "community": 2,
       "norm_label": "footer.jsx"
     },
     {
@@ -1233,7 +1251,7 @@
       "source_file": "frontend/components/layout/GridView.jsx",
       "source_location": "L1",
       "id": "layout_gridview",
-      "community": 21,
+      "community": 13,
       "norm_label": "gridview.jsx"
     },
     {
@@ -1251,7 +1269,7 @@
       "source_file": "frontend/components/layout/Hero.jsx",
       "source_location": "L1",
       "id": "layout_hero",
-      "community": 15,
+      "community": 14,
       "norm_label": "hero.jsx"
     },
     {
@@ -1260,7 +1278,7 @@
       "source_file": "frontend/components/layout/HoloCard.jsx",
       "source_location": "L1",
       "id": "layout_holocard",
-      "community": 21,
+      "community": 13,
       "norm_label": "holocard.jsx"
     },
     {
@@ -1269,7 +1287,7 @@
       "source_file": "frontend/components/layout/HoloCard.jsx",
       "source_location": "L34",
       "id": "layout_holocard_holocardinner",
-      "community": 21,
+      "community": 13,
       "norm_label": "holocardinner()"
     },
     {
@@ -1278,7 +1296,7 @@
       "source_file": "frontend/components/layout/HoloCard.jsx",
       "source_location": "L425",
       "id": "layout_holocard_holocard",
-      "community": 21,
+      "community": 13,
       "norm_label": "holocard"
     },
     {
@@ -1377,7 +1395,7 @@
       "source_file": "frontend/components/library/ManageLinksView.jsx",
       "source_location": "L1",
       "id": "library_managelinksview",
-      "community": 15,
+      "community": 24,
       "norm_label": "managelinksview.jsx"
     },
     {
@@ -1386,7 +1404,7 @@
       "source_file": "frontend/components/library/ManageLinksView.jsx",
       "source_location": "L35",
       "id": "library_managelinksview_managelinksview",
-      "community": 15,
+      "community": 24,
       "norm_label": "managelinksview"
     },
     {
@@ -1395,7 +1413,7 @@
       "source_file": "frontend/components/media/CinematicDetail.jsx",
       "source_location": "L1",
       "id": "media_cinematicdetail",
-      "community": 21,
+      "community": 8,
       "norm_label": "cinematicdetail.jsx"
     },
     {
@@ -1404,7 +1422,7 @@
       "source_file": "frontend/components/media/CinematicDetail.jsx",
       "source_location": "L21",
       "id": "media_cinematicdetail_cinematicdetailinner",
-      "community": 21,
+      "community": 8,
       "norm_label": "cinematicdetailinner()"
     },
     {
@@ -1413,7 +1431,7 @@
       "source_file": "frontend/components/media/CinematicDetail.jsx",
       "source_location": "L85",
       "id": "media_cinematicdetail_cinematicdetail",
-      "community": 21,
+      "community": 8,
       "norm_label": "cinematicdetail"
     },
     {
@@ -1422,25 +1440,34 @@
       "source_file": "frontend/components/media/DetailView.jsx",
       "source_location": "L1",
       "id": "media_detailview",
-      "community": 31,
+      "community": 8,
       "norm_label": "detailview.jsx"
+    },
+    {
+      "label": "holoFieldSx",
+      "file_type": "code",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L49",
+      "id": "media_detailview_holofieldsx",
+      "community": 8,
+      "norm_label": "holofieldsx"
     },
     {
       "label": "SwipeableEpisodeCardDetailView",
       "file_type": "code",
       "source_file": "frontend/components/media/DetailView.jsx",
-      "source_location": "L45",
+      "source_location": "L76",
       "id": "media_detailview_swipeableepisodecarddetailview",
-      "community": 31,
+      "community": 8,
       "norm_label": "swipeableepisodecarddetailview"
     },
     {
       "label": "DetailView",
       "file_type": "code",
       "source_file": "frontend/components/media/DetailView.jsx",
-      "source_location": "L376",
+      "source_location": "L500",
       "id": "media_detailview_detailview",
-      "community": 31,
+      "community": 8,
       "norm_label": "detailview"
     },
     {
@@ -1449,7 +1476,7 @@
       "source_file": "frontend/components/media/HoloPlayerControls.jsx",
       "source_location": "L1",
       "id": "media_holoplayercontrols",
-      "community": 0,
+      "community": 8,
       "norm_label": "holoplayercontrols.jsx"
     },
     {
@@ -1458,7 +1485,7 @@
       "source_file": "frontend/components/media/HoloPlayerControls.jsx",
       "source_location": "L32",
       "id": "media_holoplayercontrols_holoplayercontrols",
-      "community": 0,
+      "community": 8,
       "norm_label": "holoplayercontrols"
     },
     {
@@ -1575,7 +1602,7 @@
       "source_file": "frontend/components/modals/ImportLibraryModal.jsx",
       "source_location": "L1",
       "id": "modals_importlibrarymodal",
-      "community": 2,
+      "community": 69,
       "norm_label": "importlibrarymodal.jsx"
     },
     {
@@ -1584,7 +1611,7 @@
       "source_file": "frontend/components/modals/ImportLibraryModal.jsx",
       "source_location": "L10",
       "id": "modals_importlibrarymodal_style",
-      "community": 2,
+      "community": 69,
       "norm_label": "style"
     },
     {
@@ -1593,7 +1620,7 @@
       "source_file": "frontend/components/modals/ImportLibraryModal.jsx",
       "source_location": "L22",
       "id": "modals_importlibrarymodal_importlibrarymodal",
-      "community": 2,
+      "community": 69,
       "norm_label": "importlibrarymodal"
     },
     {
@@ -1602,34 +1629,34 @@
       "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
       "source_location": "L1",
       "id": "modals_linkepisodesmodal",
-      "community": 15,
+      "community": 8,
       "norm_label": "linkepisodesmodal.jsx"
     },
     {
-      "label": "style",
+      "label": "holoFieldSx",
       "file_type": "code",
       "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
-      "source_location": "L31",
-      "id": "modals_linkepisodesmodal_style",
-      "community": 15,
-      "norm_label": "style"
+      "source_location": "L27",
+      "id": "modals_linkepisodesmodal_holofieldsx",
+      "community": 8,
+      "norm_label": "holofieldsx"
     },
     {
       "label": "AddLinkTabs",
       "file_type": "code",
       "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
-      "source_location": "L49",
+      "source_location": "L53",
       "id": "modals_linkepisodesmodal_addlinktabs",
-      "community": 15,
+      "community": 8,
       "norm_label": "addlinktabs"
     },
     {
       "label": "LinkEpisodesModal",
       "file_type": "code",
       "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
-      "source_location": "L337",
+      "source_location": "L446",
       "id": "modals_linkepisodesmodal_linkepisodesmodal",
-      "community": 15,
+      "community": 8,
       "norm_label": "linkepisodesmodal"
     },
     {
@@ -1692,7 +1719,7 @@
       "source_file": "frontend/components/modals/MediaSyncModal.jsx",
       "source_location": "L1",
       "id": "modals_mediasyncmodal",
-      "community": 2,
+      "community": 12,
       "norm_label": "mediasyncmodal.jsx"
     },
     {
@@ -1701,7 +1728,7 @@
       "source_file": "frontend/components/modals/MediaSyncModal.jsx",
       "source_location": "L32",
       "id": "modals_mediasyncmodal_mediasyncmodal",
-      "community": 2,
+      "community": 12,
       "norm_label": "mediasyncmodal"
     },
     {
@@ -1710,7 +1737,7 @@
       "source_file": "frontend/components/modals/ModalShell.jsx",
       "source_location": "L1",
       "id": "modals_modalshell",
-      "community": 21,
+      "community": 8,
       "norm_label": "modalshell.jsx"
     },
     {
@@ -1719,7 +1746,7 @@
       "source_file": "frontend/components/modals/ModalShell.jsx",
       "source_location": "L41",
       "id": "modals_modalshell_modalshell",
-      "community": 21,
+      "community": 8,
       "norm_label": "modalshell()"
     },
     {
@@ -1782,7 +1809,7 @@
       "source_file": "frontend/components/modals/ShareLibraryModal.jsx",
       "source_location": "L1",
       "id": "modals_sharelibrarymodal",
-      "community": 2,
+      "community": 69,
       "norm_label": "sharelibrarymodal.jsx"
     },
     {
@@ -1791,7 +1818,7 @@
       "source_file": "frontend/components/modals/ShareLibraryModal.jsx",
       "source_location": "L26",
       "id": "modals_sharelibrarymodal_style",
-      "community": 2,
+      "community": 69,
       "norm_label": "style"
     },
     {
@@ -1800,7 +1827,7 @@
       "source_file": "frontend/components/modals/ShareLibraryModal.jsx",
       "source_location": "L41",
       "id": "modals_sharelibrarymodal_sharelibrarymodal",
-      "community": 2,
+      "community": 69,
       "norm_label": "sharelibrarymodal"
     },
     {
@@ -1854,7 +1881,7 @@
       "source_file": "frontend/components/remote/MasterScreen.jsx",
       "source_location": "L1",
       "id": "remote_masterscreen",
-      "community": 53,
+      "community": 15,
       "norm_label": "masterscreen.jsx"
     },
     {
@@ -1863,7 +1890,7 @@
       "source_file": "frontend/components/remote/MasterScreen.jsx",
       "source_location": "L11",
       "id": "remote_masterscreen_masterscreen",
-      "community": 53,
+      "community": 15,
       "norm_label": "masterscreen"
     },
     {
@@ -2133,7 +2160,7 @@
       "source_file": "frontend/components/utilities/Chat.jsx",
       "source_location": "L1",
       "id": "utilities_chat",
-      "community": 0,
+      "community": 19,
       "norm_label": "chat.jsx"
     },
     {
@@ -2142,7 +2169,7 @@
       "source_file": "frontend/components/utilities/Chat.jsx",
       "source_location": "L33",
       "id": "utilities_chat_compressimage",
-      "community": 0,
+      "community": 19,
       "norm_label": "compressimage()"
     },
     {
@@ -2151,7 +2178,7 @@
       "source_file": "frontend/components/utilities/Chat.jsx",
       "source_location": "L56",
       "id": "utilities_chat_filetobase64",
-      "community": 0,
+      "community": 19,
       "norm_label": "filetobase64()"
     },
     {
@@ -2160,7 +2187,7 @@
       "source_file": "frontend/components/utilities/Chat.jsx",
       "source_location": "L65",
       "id": "utilities_chat_chat",
-      "community": 0,
+      "community": 19,
       "norm_label": "chat"
     },
     {
@@ -2169,7 +2196,7 @@
       "source_file": "frontend/components/utilities/ConnectionIndicator.jsx",
       "source_location": "L1",
       "id": "utilities_connectionindicator",
-      "community": 53,
+      "community": 31,
       "norm_label": "connectionindicator.jsx"
     },
     {
@@ -2178,7 +2205,7 @@
       "source_file": "frontend/components/utilities/ConnectionIndicator.jsx",
       "source_location": "L6",
       "id": "utilities_connectionindicator_connectionindicator",
-      "community": 53,
+      "community": 31,
       "norm_label": "connectionindicator"
     },
     {
@@ -2187,7 +2214,7 @@
       "source_file": "frontend/components/utilities/DebugOverlay.jsx",
       "source_location": "L1",
       "id": "utilities_debugoverlay",
-      "community": 1,
+      "community": 30,
       "norm_label": "debugoverlay.jsx"
     },
     {
@@ -2196,7 +2223,7 @@
       "source_file": "frontend/components/utilities/DebugOverlay.jsx",
       "source_location": "L6",
       "id": "utilities_debugoverlay_debugoverlay",
-      "community": 1,
+      "community": 30,
       "norm_label": "debugoverlay()"
     },
     {
@@ -2230,7 +2257,7 @@
       "label": "ProfileDrawer",
       "file_type": "code",
       "source_file": "frontend/components/utilities/ProfileDrawer.jsx",
-      "source_location": "L47",
+      "source_location": "L41",
       "id": "utilities_profiledrawer_profiledrawer",
       "community": 31,
       "norm_label": "profiledrawer"
@@ -2259,7 +2286,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L1",
       "id": "context_storecontext",
-      "community": 31,
+      "community": 18,
       "norm_label": "storecontext.jsx"
     },
     {
@@ -2268,7 +2295,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L21",
       "id": "context_storecontext_storecontext",
-      "community": 31,
+      "community": 18,
       "norm_label": "storecontext"
     },
     {
@@ -2277,7 +2304,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L40",
       "id": "context_storecontext_usestores",
-      "community": 16,
+      "community": 18,
       "norm_label": "usestores()"
     },
     {
@@ -2286,7 +2313,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L56",
       "id": "context_storecontext_storeprovider",
-      "community": 152,
+      "community": 18,
       "norm_label": "storeprovider()"
     },
     {
@@ -2295,7 +2322,7 @@
       "source_file": "frontend/features/home/HomeView.jsx",
       "source_location": "L1",
       "id": "home_homeview",
-      "community": 15,
+      "community": 14,
       "norm_label": "homeview.jsx"
     },
     {
@@ -2304,7 +2331,7 @@
       "source_file": "frontend/features/home/HomeView.jsx",
       "source_location": "L25",
       "id": "home_homeview_homeview",
-      "community": 31,
+      "community": 8,
       "norm_label": "homeview"
     },
     {
@@ -2313,7 +2340,7 @@
       "source_file": "frontend/features/shared/AppInitializer.jsx",
       "source_location": "L1",
       "id": "shared_appinitializer",
-      "community": 13,
+      "community": 12,
       "norm_label": "appinitializer.jsx"
     },
     {
@@ -2322,7 +2349,7 @@
       "source_file": "frontend/features/shared/AppInitializer.jsx",
       "source_location": "L23",
       "id": "shared_appinitializer_ensurescrolltrigger",
-      "community": 13,
+      "community": 12,
       "norm_label": "ensurescrolltrigger()"
     },
     {
@@ -2331,7 +2358,7 @@
       "source_file": "frontend/features/shared/AppInitializer.jsx",
       "source_location": "L43",
       "id": "shared_appinitializer_appinitializer",
-      "community": 13,
+      "community": 152,
       "norm_label": "appinitializer()"
     },
     {
@@ -2358,7 +2385,7 @@
       "source_file": "frontend/features/shared/MainLayout.jsx",
       "source_location": "L1",
       "id": "shared_mainlayout",
-      "community": 31,
+      "community": 2,
       "norm_label": "mainlayout.jsx"
     },
     {
@@ -2367,7 +2394,7 @@
       "source_file": "frontend/features/shared/MainLayout.jsx",
       "source_location": "L38",
       "id": "shared_mainlayout_mainlayout",
-      "community": 31,
+      "community": 2,
       "norm_label": "mainlayout()"
     },
     {
@@ -2565,7 +2592,7 @@
       "source_file": "frontend/index.jsx",
       "source_location": "L1",
       "id": "frontend_index",
-      "community": 152,
+      "community": 23,
       "norm_label": "index.jsx"
     },
     {
@@ -2574,7 +2601,7 @@
       "source_file": "frontend/index.jsx",
       "source_location": "L5",
       "id": "frontend_index_rootelement",
-      "community": 152,
+      "community": 23,
       "norm_label": "rootelement"
     },
     {
@@ -2583,7 +2610,7 @@
       "source_file": "frontend/index.jsx",
       "source_location": "L10",
       "id": "frontend_index_root",
-      "community": 152,
+      "community": 23,
       "norm_label": "root"
     },
     {
@@ -2592,7 +2619,7 @@
       "source_file": "frontend/locales/en.js",
       "source_location": "L1",
       "id": "locales_en",
-      "community": 1,
+      "community": 25,
       "norm_label": "en.js"
     },
     {
@@ -2601,7 +2628,7 @@
       "source_file": "frontend/locales/en.js",
       "source_location": "L1",
       "id": "locales_en_en",
-      "community": 1,
+      "community": 25,
       "norm_label": "en"
     },
     {
@@ -2610,7 +2637,7 @@
       "source_file": "frontend/locales/it.js",
       "source_location": "L1",
       "id": "locales_it",
-      "community": 1,
+      "community": 26,
       "norm_label": "it.js"
     },
     {
@@ -2619,7 +2646,7 @@
       "source_file": "frontend/locales/it.js",
       "source_location": "L1",
       "id": "locales_it_it",
-      "community": 1,
+      "community": 26,
       "norm_label": "it"
     },
     {
@@ -2682,7 +2709,7 @@
       "source_file": "frontend/motion/grammar.js",
       "source_location": "L21",
       "id": "motion_grammar_easings",
-      "community": 21,
+      "community": 8,
       "norm_label": "easings"
     },
     {
@@ -2691,7 +2718,7 @@
       "source_file": "frontend/motion/grammar.js",
       "source_location": "L30",
       "id": "motion_grammar_stagger",
-      "community": 21,
+      "community": 14,
       "norm_label": "stagger"
     },
     {
@@ -2772,7 +2799,7 @@
       "source_file": "frontend/motion/grammar.js",
       "source_location": "L111",
       "id": "motion_grammar_reducedmotioncondition",
-      "community": 8,
+      "community": 21,
       "norm_label": "reducedmotioncondition()"
     },
     {
@@ -2781,7 +2808,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L1",
       "id": "motion_registry",
-      "community": 8,
+      "community": 21,
       "norm_label": "registry.js"
     },
     {
@@ -2790,7 +2817,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L18",
       "id": "motion_registry_view_keys",
-      "community": 8,
+      "community": 21,
       "norm_label": "view_keys"
     },
     {
@@ -2799,7 +2826,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L32",
       "id": "motion_registry_ensurematchmedia",
-      "community": 8,
+      "community": 21,
       "norm_label": "ensurematchmedia()"
     },
     {
@@ -2808,7 +2835,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L42",
       "id": "motion_registry_fadeonlytimeline",
-      "community": 8,
+      "community": 21,
       "norm_label": "fadeonlytimeline()"
     },
     {
@@ -2817,7 +2844,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L50",
       "id": "motion_registry_morphexpand",
-      "community": 8,
+      "community": 21,
       "norm_label": "morphexpand()"
     },
     {
@@ -2826,7 +2853,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L72",
       "id": "motion_registry_cameradive",
-      "community": 8,
+      "community": 21,
       "norm_label": "cameradive()"
     },
     {
@@ -2835,7 +2862,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L93",
       "id": "motion_registry_swipeswap",
-      "community": 8,
+      "community": 21,
       "norm_label": "swipeswap()"
     },
     {
@@ -2844,7 +2871,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L106",
       "id": "motion_registry_registry",
-      "community": 8,
+      "community": 21,
       "norm_label": "registry"
     },
     {
@@ -2853,7 +2880,7 @@
       "source_file": "frontend/motion/registry.js",
       "source_location": "L124",
       "id": "motion_registry_buildtransition",
-      "community": 8,
+      "community": 21,
       "norm_label": "buildtransition()"
     },
     {
@@ -3231,7 +3258,7 @@
       "source_file": "frontend/services/db.js",
       "source_location": "L1",
       "id": "services_db",
-      "community": 53,
+      "community": 6,
       "norm_label": "db.js"
     },
     {
@@ -3276,7 +3303,7 @@
       "source_file": "frontend/services/db.js",
       "source_location": "L225",
       "id": "services_db_db",
-      "community": 53,
+      "community": 6,
       "norm_label": "db"
     },
     {
@@ -3285,7 +3312,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L1",
       "id": "services_googleauthservice",
-      "community": 13,
+      "community": 12,
       "norm_label": "googleauthservice.js"
     },
     {
@@ -3294,7 +3321,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L19",
       "id": "services_googleauthservice_token_refresh_retry_delays",
-      "community": 13,
+      "community": 12,
       "norm_label": "token_refresh_retry_delays"
     },
     {
@@ -3303,7 +3330,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L24",
       "id": "services_googleauthservice_stoppopuppolling",
-      "community": 13,
+      "community": 12,
       "norm_label": "stoppopuppolling()"
     },
     {
@@ -3312,7 +3339,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L36",
       "id": "services_googleauthservice_checkauthpopupclosed",
-      "community": 13,
+      "community": 12,
       "norm_label": "checkauthpopupclosed()"
     },
     {
@@ -3321,7 +3348,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L54",
       "id": "services_googleauthservice_refreshaccesstoken",
-      "community": 13,
+      "community": 12,
       "norm_label": "refreshaccesstoken()"
     },
     {
@@ -3330,7 +3357,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L103",
       "id": "services_googleauthservice_refreshaccesstokenwithretry",
-      "community": 13,
+      "community": 12,
       "norm_label": "refreshaccesstokenwithretry()"
     },
     {
@@ -3339,7 +3366,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L133",
       "id": "services_googleauthservice_scheduletokenrefresh",
-      "community": 13,
+      "community": 12,
       "norm_label": "scheduletokenrefresh()"
     },
     {
@@ -3348,7 +3375,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L183",
       "id": "services_googleauthservice_tryrestoringsession",
-      "community": 13,
+      "community": 12,
       "norm_label": "tryrestoringsession()"
     },
     {
@@ -3357,7 +3384,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L281",
       "id": "services_googleauthservice_initgoogleauth",
-      "community": 13,
+      "community": 12,
       "norm_label": "initgoogleauth()"
     },
     {
@@ -3366,7 +3393,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L384",
       "id": "services_googleauthservice_handlesignin",
-      "community": 13,
+      "community": 12,
       "norm_label": "handlesignin()"
     },
     {
@@ -3375,7 +3402,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L415",
       "id": "services_googleauthservice_handlesignout",
-      "community": 13,
+      "community": 12,
       "norm_label": "handlesignout()"
     },
     {
@@ -3528,7 +3555,7 @@
       "source_file": "frontend/services/shareService.js",
       "source_location": "L1",
       "id": "services_shareservice",
-      "community": 2,
+      "community": 69,
       "norm_label": "shareservice.js"
     },
     {
@@ -3537,7 +3564,7 @@
       "source_file": "frontend/services/shareService.js",
       "source_location": "L9",
       "id": "services_shareservice_createsharelink",
-      "community": 2,
+      "community": 69,
       "norm_label": "createsharelink()"
     },
     {
@@ -3546,7 +3573,7 @@
       "source_file": "frontend/services/shareService.js",
       "source_location": "L26",
       "id": "services_shareservice_parsedatafromlink",
-      "community": 2,
+      "community": 69,
       "norm_label": "parsedatafromlink()"
     },
     {
@@ -3555,7 +3582,7 @@
       "source_file": "frontend/services/shareService.js",
       "source_location": "L84",
       "id": "services_shareservice_extractfileidfromurl",
-      "community": 2,
+      "community": 69,
       "norm_label": "extractfileidfromurl()"
     },
     {
@@ -3958,7 +3985,7 @@
       "label": ".watchTogetherModalOpen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L125",
+      "source_location": "L132",
       "id": "store_mediastore_mediastore_watchtogethermodalopen",
       "community": 1,
       "norm_label": ".watchtogethermodalopen()"
@@ -3967,7 +3994,7 @@
       "label": ".roomId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L133",
+      "source_location": "L140",
       "id": "store_mediastore_mediastore_roomid",
       "community": 1,
       "norm_label": ".roomid()"
@@ -3976,7 +4003,7 @@
       "label": ".hostId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L141",
+      "source_location": "L148",
       "id": "store_mediastore_mediastore_hostid",
       "community": 1,
       "norm_label": ".hostid()"
@@ -3985,7 +4012,7 @@
       "label": ".isHost()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L149",
+      "source_location": "L156",
       "id": "store_mediastore_mediastore_ishost",
       "community": 1,
       "norm_label": ".ishost()"
@@ -3994,7 +4021,7 @@
       "label": ".participants()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L157",
+      "source_location": "L164",
       "id": "store_mediastore_mediastore_participants",
       "community": 1,
       "norm_label": ".participants()"
@@ -4003,7 +4030,7 @@
       "label": ".username()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L165",
+      "source_location": "L172",
       "id": "store_mediastore_mediastore_username",
       "community": 1,
       "norm_label": ".username()"
@@ -4012,7 +4039,7 @@
       "label": ".watchTogetherError()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L173",
+      "source_location": "L180",
       "id": "store_mediastore_mediastore_watchtogethererror",
       "community": 1,
       "norm_label": ".watchtogethererror()"
@@ -4021,7 +4048,7 @@
       "label": ".playbackState()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L181",
+      "source_location": "L188",
       "id": "store_mediastore_mediastore_playbackstate",
       "community": 1,
       "norm_label": ".playbackstate()"
@@ -4030,7 +4057,7 @@
       "label": ".chatHistory()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L189",
+      "source_location": "L196",
       "id": "store_mediastore_mediastore_chathistory",
       "community": 1,
       "norm_label": ".chathistory()"
@@ -4039,7 +4066,7 @@
       "label": ".joinRoomIdFromUrl()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L197",
+      "source_location": "L204",
       "id": "store_mediastore_mediastore_joinroomidfromurl",
       "community": 1,
       "norm_label": ".joinroomidfromurl()"
@@ -4048,7 +4075,7 @@
       "label": ".watchTogetherSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L205",
+      "source_location": "L212",
       "id": "store_mediastore_mediastore_watchtogetherselecteditem",
       "community": 1,
       "norm_label": ".watchtogetherselecteditem()"
@@ -4057,7 +4084,7 @@
       "label": ".myClientId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L213",
+      "source_location": "L220",
       "id": "store_mediastore_mediastore_myclientid",
       "community": 1,
       "norm_label": ".myclientid()"
@@ -4066,7 +4093,7 @@
       "label": ".googleUser()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L236",
+      "source_location": "L243",
       "id": "store_mediastore_mediastore_googleuser",
       "community": 1,
       "norm_label": ".googleuser()"
@@ -4075,7 +4102,7 @@
       "label": ".isSyncing()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L244",
+      "source_location": "L251",
       "id": "store_mediastore_mediastore_issyncing",
       "community": 1,
       "norm_label": ".issyncing()"
@@ -4084,7 +4111,7 @@
       "label": ".isReloadingData()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L252",
+      "source_location": "L259",
       "id": "store_mediastore_mediastore_isreloadingdata",
       "community": 1,
       "norm_label": ".isreloadingdata()"
@@ -4093,7 +4120,7 @@
       "label": ".isGoogleAuthLoading()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L260",
+      "source_location": "L267",
       "id": "store_mediastore_mediastore_isgoogleauthloading",
       "community": 1,
       "norm_label": ".isgoogleauthloading()"
@@ -4102,7 +4129,7 @@
       "label": ".isSyncConflictModalOpen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L268",
+      "source_location": "L275",
       "id": "store_mediastore_mediastore_issyncconflictmodalopen",
       "community": 1,
       "norm_label": ".issyncconflictmodalopen()"
@@ -4111,7 +4138,7 @@
       "label": ".syncConflictData()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L276",
+      "source_location": "L283",
       "id": "store_mediastore_mediastore_syncconflictdata",
       "community": 1,
       "norm_label": ".syncconflictdata()"
@@ -4120,7 +4147,7 @@
       "label": ".isProcessingSyncConflict()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L284",
+      "source_location": "L291",
       "id": "store_mediastore_mediastore_isprocessingsyncconflict",
       "community": 1,
       "norm_label": ".isprocessingsyncconflict()"
@@ -4129,7 +4156,7 @@
       "label": ".isRemoteMaster()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L307",
+      "source_location": "L314",
       "id": "store_mediastore_mediastore_isremotemaster",
       "community": 1,
       "norm_label": ".isremotemaster()"
@@ -4138,7 +4165,7 @@
       "label": ".isRemoteMasterConnected()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L315",
+      "source_location": "L322",
       "id": "store_mediastore_mediastore_isremotemasterconnected",
       "community": 1,
       "norm_label": ".isremotemasterconnected()"
@@ -4147,7 +4174,7 @@
       "label": ".slaveId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L323",
+      "source_location": "L330",
       "id": "store_mediastore_mediastore_slaveid",
       "community": 1,
       "norm_label": ".slaveid()"
@@ -4156,7 +4183,7 @@
       "label": ".slaveShortCode()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L331",
+      "source_location": "L338",
       "id": "store_mediastore_mediastore_slaveshortcode",
       "community": 1,
       "norm_label": ".slaveshortcode()"
@@ -4165,7 +4192,7 @@
       "label": ".hasLoadedInitialData()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L339",
+      "source_location": "L346",
       "id": "store_mediastore_mediastore_hasloadedinitialdata",
       "community": 1,
       "norm_label": ".hasloadedinitialdata()"
@@ -4174,7 +4201,7 @@
       "label": ".masterReconnectAttempts()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L347",
+      "source_location": "L354",
       "id": "store_mediastore_mediastore_masterreconnectattempts",
       "community": 1,
       "norm_label": ".masterreconnectattempts()"
@@ -4183,7 +4210,7 @@
       "label": ".masterReconnectTimer()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L355",
+      "source_location": "L362",
       "id": "store_mediastore_mediastore_masterreconnecttimer",
       "community": 1,
       "norm_label": ".masterreconnecttimer()"
@@ -4192,7 +4219,7 @@
       "label": ".isReconnecting()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L363",
+      "source_location": "L370",
       "id": "store_mediastore_mediastore_isreconnecting",
       "community": 1,
       "norm_label": ".isreconnecting()"
@@ -4201,7 +4228,7 @@
       "label": ".remoteSlaveState()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L371",
+      "source_location": "L378",
       "id": "store_mediastore_mediastore_remoteslavestate",
       "community": 1,
       "norm_label": ".remoteslavestate()"
@@ -4210,7 +4237,7 @@
       "label": ".remoteSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L379",
+      "source_location": "L386",
       "id": "store_mediastore_mediastore_remoteselecteditem",
       "community": 1,
       "norm_label": ".remoteselecteditem()"
@@ -4219,7 +4246,7 @@
       "label": ".isRemoteDetailLoading()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L387",
+      "source_location": "L394",
       "id": "store_mediastore_mediastore_isremotedetailloading",
       "community": 1,
       "norm_label": ".isremotedetailloading()"
@@ -4228,7 +4255,7 @@
       "label": ".remoteAction()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L395",
+      "source_location": "L402",
       "id": "store_mediastore_mediastore_remoteaction",
       "community": 1,
       "norm_label": ".remoteaction()"
@@ -4237,7 +4264,7 @@
       "label": ".remoteFullItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L403",
+      "source_location": "L410",
       "id": "store_mediastore_mediastore_remotefullitem",
       "community": 1,
       "norm_label": ".remotefullitem()"
@@ -4246,7 +4273,7 @@
       "label": ".isRemoteFullItemLoading()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L411",
+      "source_location": "L418",
       "id": "store_mediastore_mediastore_isremotefullitemloading",
       "community": 1,
       "norm_label": ".isremotefullitemloading()"
@@ -4255,7 +4282,7 @@
       "label": ".isIntroSkippableOnSlave()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L419",
+      "source_location": "L426",
       "id": "store_mediastore_mediastore_isintroskippableonslave",
       "community": 1,
       "norm_label": ".isintroskippableonslave()"
@@ -4264,7 +4291,7 @@
       "label": ".shouldAutoFullscreen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L427",
+      "source_location": "L434",
       "id": "store_mediastore_mediastore_shouldautofullscreen",
       "community": 1,
       "norm_label": ".shouldautofullscreen()"
@@ -4273,7 +4300,7 @@
       "label": ".knownSlaves()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L435",
+      "source_location": "L442",
       "id": "store_mediastore_mediastore_knownslaves",
       "community": 1,
       "norm_label": ".knownslaves()"
@@ -4282,7 +4309,7 @@
       "label": ".missedPings()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L443",
+      "source_location": "L450",
       "id": "store_mediastore_mediastore_missedpings",
       "community": 1,
       "norm_label": ".missedpings()"
@@ -4291,7 +4318,7 @@
       "label": ".connectionHealth()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L451",
+      "source_location": "L458",
       "id": "store_mediastore_mediastore_connectionhealth",
       "community": 1,
       "norm_label": ".connectionhealth()"
@@ -4300,7 +4327,7 @@
       "label": ".pingInterval()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L459",
+      "source_location": "L466",
       "id": "store_mediastore_mediastore_pinginterval",
       "community": 1,
       "norm_label": ".pinginterval()"
@@ -4309,7 +4336,7 @@
       "label": ".lastPingTime()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L467",
+      "source_location": "L474",
       "id": "store_mediastore_mediastore_lastpingtime",
       "community": 1,
       "norm_label": ".lastpingtime()"
@@ -4318,7 +4345,7 @@
       "label": ".isMediaSyncModalOpen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L475",
+      "source_location": "L482",
       "id": "store_mediastore_mediastore_ismediasyncmodalopen",
       "community": 1,
       "norm_label": ".ismediasyncmodalopen()"
@@ -4327,7 +4354,7 @@
       "label": ".mediaSyncTargetSlaveId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L483",
+      "source_location": "L490",
       "id": "store_mediastore_mediastore_mediasynctargetslaveid",
       "community": 1,
       "norm_label": ".mediasynctargetslaveid()"
@@ -4336,7 +4363,7 @@
       "label": "._masterUiActiveView()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L491",
+      "source_location": "L498",
       "id": "store_mediastore_mediastore_masteruiactiveview",
       "community": 1,
       "norm_label": "._masteruiactiveview()"
@@ -4345,7 +4372,7 @@
       "label": "._masterUiSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L499",
+      "source_location": "L506",
       "id": "store_mediastore_mediastore_masteruiselecteditem",
       "community": 1,
       "norm_label": "._masteruiselecteditem()"
@@ -4354,7 +4381,7 @@
       "label": ".translations()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L526",
+      "source_location": "L533",
       "id": "store_mediastore_mediastore_translations",
       "community": 1,
       "norm_label": ".translations()"
@@ -4363,7 +4390,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L530",
+      "source_location": "L537",
       "id": "store_mediastore_mediastore_constructor",
       "community": 1,
       "norm_label": ".constructor()"
@@ -4372,7 +4399,7 @@
       "label": ".currentActiveView()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L558",
+      "source_location": "L565",
       "id": "store_mediastore_mediastore_currentactiveview",
       "community": 1,
       "norm_label": ".currentactiveview()"
@@ -4381,7 +4408,7 @@
       "label": ".currentSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L562",
+      "source_location": "L569",
       "id": "store_mediastore_mediastore_currentselecteditem",
       "community": 1,
       "norm_label": ".currentselecteditem()"
@@ -4390,7 +4417,7 @@
       "label": ".unreadNotificationsCount()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L743",
+      "source_location": "L750",
       "id": "store_mediastore_mediastore_unreadnotificationscount",
       "community": 1,
       "norm_label": ".unreadnotificationscount()"
@@ -4399,7 +4426,7 @@
       "label": ".isLoggedIn()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L913",
+      "source_location": "L930",
       "id": "store_mediastore_mediastore_isloggedin",
       "community": 1,
       "norm_label": ".isloggedin()"
@@ -4408,7 +4435,7 @@
       "label": ".allUniqueLabels()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L917",
+      "source_location": "L934",
       "id": "store_mediastore_mediastore_alluniquelabels",
       "community": 1,
       "norm_label": ".alluniquelabels()"
@@ -4417,7 +4444,7 @@
       "label": ".heroContent()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L929",
+      "source_location": "L946",
       "id": "store_mediastore_mediastore_herocontent",
       "community": 1,
       "norm_label": ".herocontent()"
@@ -4426,7 +4453,7 @@
       "label": ".allMovies()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L947",
+      "source_location": "L956",
       "id": "store_mediastore_mediastore_allmovies",
       "community": 1,
       "norm_label": ".allmovies()"
@@ -4435,7 +4462,7 @@
       "label": ".currentShow()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L951",
+      "source_location": "L960",
       "id": "store_mediastore_mediastore_currentshow",
       "community": 1,
       "norm_label": ".currentshow()"
@@ -4444,7 +4471,7 @@
       "label": ".currentSeasonEpisodes()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L955",
+      "source_location": "L964",
       "id": "store_mediastore_mediastore_currentseasonepisodes",
       "community": 1,
       "norm_label": ".currentseasonepisodes()"
@@ -4453,7 +4480,7 @@
       "label": ".nextEpisode()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L961",
+      "source_location": "L970",
       "id": "store_mediastore_mediastore_nextepisode",
       "community": 1,
       "norm_label": ".nextepisode()"
@@ -4462,7 +4489,7 @@
       "label": ".myListItems()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L971",
+      "source_location": "L980",
       "id": "store_mediastore_mediastore_mylistitems",
       "community": 1,
       "norm_label": ".mylistitems()"
@@ -4471,7 +4498,7 @@
       "label": ".continueWatchingItems()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L975",
+      "source_location": "L984",
       "id": "store_mediastore_mediastore_continuewatchingitems",
       "community": 1,
       "norm_label": ".continuewatchingitems()"
@@ -4480,7 +4507,7 @@
       "label": ".homePageRows()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L999",
+      "source_location": "L1008",
       "id": "store_mediastore_mediastore_homepagerows",
       "community": 1,
       "norm_label": ".homepagerows()"
@@ -4489,7 +4516,7 @@
       "label": ".shareableShows()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L1033",
+      "source_location": "L1025",
       "id": "store_mediastore_mediastore_shareableshows",
       "community": 1,
       "norm_label": ".shareableshows()"
@@ -4498,7 +4525,7 @@
       "label": ".showsWithLinks()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L1037",
+      "source_location": "L1029",
       "id": "store_mediastore_mediastore_showswithlinks",
       "community": 1,
       "norm_label": ".showswithlinks()"
@@ -4507,7 +4534,7 @@
       "label": "getNestedValue()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L2299",
+      "source_location": "L2276",
       "id": "store_mediastore_getnestedvalue",
       "community": 1,
       "norm_label": "getnestedvalue()"
@@ -4516,7 +4543,7 @@
       "label": "interpolate()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L2303",
+      "source_location": "L2280",
       "id": "store_mediastore_interpolate",
       "community": 1,
       "norm_label": "interpolate()"
@@ -4527,7 +4554,7 @@
       "source_file": "frontend/store/remoteStore.js",
       "source_location": "L1",
       "id": "store_remotestore",
-      "community": 53,
+      "community": 31,
       "norm_label": "remotestore.js"
     },
     {
@@ -4869,7 +4896,7 @@
       "source_file": "frontend/store/syncStore.js",
       "source_location": "L1",
       "id": "store_syncstore",
-      "community": 69,
+      "community": 6,
       "norm_label": "syncstore.js"
     },
     {
@@ -4878,7 +4905,7 @@
       "source_file": "frontend/store/syncStore.js",
       "source_location": "L8",
       "id": "store_syncstore_syncstore",
-      "community": 69,
+      "community": 6,
       "norm_label": "syncstore"
     },
     {
@@ -4887,7 +4914,7 @@
       "source_file": "frontend/store/syncStore.js",
       "source_location": "L24",
       "id": "store_syncstore_syncstore_showsnackbar",
-      "community": 69,
+      "community": 6,
       "norm_label": ".showsnackbar()"
     },
     {
@@ -4896,7 +4923,7 @@
       "source_file": "frontend/store/syncStore.js",
       "source_location": "L25",
       "id": "store_syncstore_syncstore_hidesnackbar",
-      "community": 69,
+      "community": 6,
       "norm_label": ".hidesnackbar()"
     },
     {
@@ -4905,7 +4932,7 @@
       "source_file": "frontend/store/syncStore.js",
       "source_location": "L27",
       "id": "store_syncstore_syncstore_constructor",
-      "community": 69,
+      "community": 6,
       "norm_label": ".constructor()"
     },
     {
@@ -4914,7 +4941,7 @@
       "source_file": "frontend/store/syncStore.js",
       "source_location": "L32",
       "id": "store_syncstore_syncstore_isloggedin",
-      "community": 69,
+      "community": 6,
       "norm_label": ".isloggedin()"
     },
     {
@@ -4923,7 +4950,7 @@
       "source_file": "frontend/store/watchTogetherStore.js",
       "source_location": "L1",
       "id": "store_watchtogetherstore",
-      "community": 53,
+      "community": 6,
       "norm_label": "watchtogetherstore.js"
     },
     {
@@ -4932,7 +4959,7 @@
       "source_file": "frontend/store/watchTogetherStore.js",
       "source_location": "L8",
       "id": "store_watchtogetherstore_watchtogetherstore",
-      "community": 53,
+      "community": 6,
       "norm_label": "watchtogetherstore"
     },
     {
@@ -4941,7 +4968,7 @@
       "source_file": "frontend/store/watchTogetherStore.js",
       "source_location": "L27",
       "id": "store_watchtogetherstore_watchtogetherstore_constructor",
-      "community": 53,
+      "community": 6,
       "norm_label": ".constructor()"
     },
     {
@@ -4950,7 +4977,7 @@
       "source_file": "frontend/utils/device.js",
       "source_location": "L1",
       "id": "utils_device",
-      "community": 53,
+      "community": 31,
       "norm_label": "device.js"
     },
     {
@@ -4959,7 +4986,7 @@
       "source_file": "frontend/utils/device.js",
       "source_location": "L1",
       "id": "utils_device_issmarttv",
-      "community": 53,
+      "community": 31,
       "norm_label": "issmarttv()"
     },
     {
@@ -5067,7 +5094,7 @@
       "source_file": "frontend/views/features/FeatureRouter.jsx",
       "source_location": "L1",
       "id": "features_featurerouter",
-      "community": 31,
+      "community": 8,
       "norm_label": "featurerouter.jsx"
     },
     {
@@ -5175,7 +5202,7 @@
       "source_file": "frontend/views/system/ErrorView.jsx",
       "source_location": "L1",
       "id": "system_errorview",
-      "community": 16,
+      "community": 18,
       "norm_label": "errorview.jsx"
     },
     {
@@ -5184,7 +5211,7 @@
       "source_file": "frontend/views/system/ErrorView.jsx",
       "source_location": "L20",
       "id": "system_errorview_errorview",
-      "community": 16,
+      "community": 18,
       "norm_label": "errorview"
     },
     {
@@ -6169,480 +6196,12 @@
       "norm_label": "database schema (indexeddb)"
     },
     {
-      "label": "upgrade-library-episodes-drawer.md",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L1",
-      "id": "plans_upgrade_library_episodes_drawer",
-      "community": 4,
-      "norm_label": "upgrade-library-episodes-drawer.md"
-    },
-    {
-      "label": "Requirements",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L5",
-      "id": "plans_upgrade_library_episodes_drawer_requirements",
-      "community": 4,
-      "norm_label": "requirements"
-    },
-    {
-      "label": "Overview & Goals",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L7",
-      "id": "plans_upgrade_library_episodes_drawer_overview_goals",
-      "community": 4,
-      "norm_label": "overview & goals"
-    },
-    {
-      "label": "Scope",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L11",
-      "id": "plans_upgrade_library_episodes_drawer_scope",
-      "community": 4,
-      "norm_label": "scope"
-    },
-    {
-      "label": "User Stories",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L29",
-      "id": "plans_upgrade_library_episodes_drawer_user_stories",
-      "community": 4,
-      "norm_label": "user stories"
-    },
-    {
-      "label": "Functional Requirements",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L37",
-      "id": "plans_upgrade_library_episodes_drawer_functional_requirements",
-      "community": 4,
-      "norm_label": "functional requirements"
-    },
-    {
-      "label": "Non-Functional Requirements",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L49",
-      "id": "plans_upgrade_library_episodes_drawer_non_functional_requirements",
-      "community": 4,
-      "norm_label": "non-functional requirements"
-    },
-    {
-      "label": "Technical Design",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L56",
-      "id": "plans_upgrade_library_episodes_drawer_technical_design",
-      "community": 4,
-      "norm_label": "technical design"
-    },
-    {
-      "label": "Current Implementation",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L58",
-      "id": "plans_upgrade_library_episodes_drawer_current_implementation",
-      "community": 4,
-      "norm_label": "current implementation"
-    },
-    {
-      "label": "Key Decisions",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L80",
-      "id": "plans_upgrade_library_episodes_drawer_key_decisions",
-      "community": 4,
-      "norm_label": "key decisions"
-    },
-    {
-      "label": "Proposed Changes",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L90",
-      "id": "plans_upgrade_library_episodes_drawer_proposed_changes",
-      "community": 4,
-      "norm_label": "proposed changes"
-    },
-    {
-      "label": "Data Models / Contracts",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L111",
-      "id": "plans_upgrade_library_episodes_drawer_data_models_contracts",
-      "community": 4,
-      "norm_label": "data models / contracts"
-    },
-    {
-      "label": "Components",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L118",
-      "id": "plans_upgrade_library_episodes_drawer_components",
-      "community": 4,
-      "norm_label": "components"
-    },
-    {
-      "label": "File Structure",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L127",
-      "id": "plans_upgrade_library_episodes_drawer_file_structure",
-      "community": 4,
-      "norm_label": "file structure"
-    },
-    {
-      "label": "Architecture Diagram",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L133",
-      "id": "plans_upgrade_library_episodes_drawer_architecture_diagram",
-      "community": 4,
-      "norm_label": "architecture diagram"
-    },
-    {
-      "label": "Translation Notes",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L153",
-      "id": "plans_upgrade_library_episodes_drawer_translation_notes",
-      "community": 4,
-      "norm_label": "translation notes"
-    },
-    {
-      "label": "Risks",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L159",
-      "id": "plans_upgrade_library_episodes_drawer_risks",
-      "community": 4,
-      "norm_label": "risks"
-    },
-    {
-      "label": "Testing",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L166",
-      "id": "plans_upgrade_library_episodes_drawer_testing",
-      "community": 4,
-      "norm_label": "testing"
-    },
-    {
-      "label": "Validation Approach",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L168",
-      "id": "plans_upgrade_library_episodes_drawer_validation_approach",
-      "community": 4,
-      "norm_label": "validation approach"
-    },
-    {
-      "label": "Key Scenarios",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L177",
-      "id": "plans_upgrade_library_episodes_drawer_key_scenarios",
-      "community": 4,
-      "norm_label": "key scenarios"
-    },
-    {
-      "label": "Edge Cases",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L191",
-      "id": "plans_upgrade_library_episodes_drawer_edge_cases",
-      "community": 4,
-      "norm_label": "edge cases"
-    },
-    {
-      "label": "Delivery Steps",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L200",
-      "id": "plans_upgrade_library_episodes_drawer_delivery_steps",
-      "community": 4,
-      "norm_label": "delivery steps"
-    },
-    {
-      "label": "\u2713 Step 1: Rewrite drawer shell + entry animation to the holo system",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L202",
-      "id": "plans_upgrade_library_episodes_drawer_step_1_rewrite_drawer_shell_entry_animation_to_the_holo_system",
-      "community": 4,
-      "norm_label": "\u2713 step 1: rewrite drawer shell + entry animation to the holo system"
-    },
-    {
-      "label": "\u2713 Step 2: Rewrite HoloDrawerHeader with display typography + neon close + total chip",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L218",
-      "id": "plans_upgrade_library_episodes_drawer_step_2_rewrite_holodrawerheader_with_display_typography_neon_close_total_chip",
-      "community": 4,
-      "norm_label": "\u2713 step 2: rewrite holodrawerheader with display typography + neon close + total chip"
-    },
-    {
-      "label": "\u2713 Step 3: Rewrite EpisodeRow with thumbnail, chips, progress, watched, runtime, playing indicator",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L232",
-      "id": "plans_upgrade_library_episodes_drawer_step_3_rewrite_episoderow_with_thumbnail_chips_progress_watched_runtime_playing_indicator",
-      "community": 4,
-      "norm_label": "\u2713 step 3: rewrite episoderow with thumbnail, chips, progress, watched, runtime, playing indicator"
-    },
-    {
-      "label": "\u2713 Step 4: Add Skeleton loading state, empty state, row stagger reveal, and locales",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
-      "source_location": "L248",
-      "id": "plans_upgrade_library_episodes_drawer_step_4_add_skeleton_loading_state_empty_state_row_stagger_reveal_and_locales",
-      "community": 4,
-      "norm_label": "\u2713 step 4: add skeleton loading state, empty state, row stagger reveal, and locales"
-    },
-    {
-      "label": "upgrade-remote-episodes-drawer.md",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L1",
-      "id": "plans_upgrade_remote_episodes_drawer",
-      "community": 7,
-      "norm_label": "upgrade-remote-episodes-drawer.md"
-    },
-    {
-      "label": "Requirements",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L5",
-      "id": "plans_upgrade_remote_episodes_drawer_requirements",
-      "community": 7,
-      "norm_label": "requirements"
-    },
-    {
-      "label": "Overview & Goals",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L7",
-      "id": "plans_upgrade_remote_episodes_drawer_overview_goals",
-      "community": 7,
-      "norm_label": "overview & goals"
-    },
-    {
-      "label": "Scope",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L11",
-      "id": "plans_upgrade_remote_episodes_drawer_scope",
-      "community": 7,
-      "norm_label": "scope"
-    },
-    {
-      "label": "User Stories",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L26",
-      "id": "plans_upgrade_remote_episodes_drawer_user_stories",
-      "community": 7,
-      "norm_label": "user stories"
-    },
-    {
-      "label": "Functional Requirements",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L33",
-      "id": "plans_upgrade_remote_episodes_drawer_functional_requirements",
-      "community": 7,
-      "norm_label": "functional requirements"
-    },
-    {
-      "label": "Non-Functional Requirements",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L45",
-      "id": "plans_upgrade_remote_episodes_drawer_non_functional_requirements",
-      "community": 7,
-      "norm_label": "non-functional requirements"
-    },
-    {
-      "label": "Technical Design",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L52",
-      "id": "plans_upgrade_remote_episodes_drawer_technical_design",
-      "community": 7,
-      "norm_label": "technical design"
-    },
-    {
-      "label": "Current Implementation",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L54",
-      "id": "plans_upgrade_remote_episodes_drawer_current_implementation",
-      "community": 7,
-      "norm_label": "current implementation"
-    },
-    {
-      "label": "Key Decisions",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L73",
-      "id": "plans_upgrade_remote_episodes_drawer_key_decisions",
-      "community": 7,
-      "norm_label": "key decisions"
-    },
-    {
-      "label": "Proposed Changes",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L81",
-      "id": "plans_upgrade_remote_episodes_drawer_proposed_changes",
-      "community": 7,
-      "norm_label": "proposed changes"
-    },
-    {
-      "label": "Data Models / Contracts",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L102",
-      "id": "plans_upgrade_remote_episodes_drawer_data_models_contracts",
-      "community": 7,
-      "norm_label": "data models / contracts"
-    },
-    {
-      "label": "Components",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L110",
-      "id": "plans_upgrade_remote_episodes_drawer_components",
-      "community": 7,
-      "norm_label": "components"
-    },
-    {
-      "label": "File Structure",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L120",
-      "id": "plans_upgrade_remote_episodes_drawer_file_structure",
-      "community": 7,
-      "norm_label": "file structure"
-    },
-    {
-      "label": "Architecture Diagram",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L125",
-      "id": "plans_upgrade_remote_episodes_drawer_architecture_diagram",
-      "community": 7,
-      "norm_label": "architecture diagram"
-    },
-    {
-      "label": "Risks",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L146",
-      "id": "plans_upgrade_remote_episodes_drawer_risks",
-      "community": 7,
-      "norm_label": "risks"
-    },
-    {
-      "label": "Testing",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L154",
-      "id": "plans_upgrade_remote_episodes_drawer_testing",
-      "community": 7,
-      "norm_label": "testing"
-    },
-    {
-      "label": "Validation Approach",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L156",
-      "id": "plans_upgrade_remote_episodes_drawer_validation_approach",
-      "community": 7,
-      "norm_label": "validation approach"
-    },
-    {
-      "label": "Key Scenarios",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L160",
-      "id": "plans_upgrade_remote_episodes_drawer_key_scenarios",
-      "community": 7,
-      "norm_label": "key scenarios"
-    },
-    {
-      "label": "Edge Cases",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L167",
-      "id": "plans_upgrade_remote_episodes_drawer_edge_cases",
-      "community": 7,
-      "norm_label": "edge cases"
-    },
-    {
-      "label": "Test Changes",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L179",
-      "id": "plans_upgrade_remote_episodes_drawer_test_changes",
-      "community": 7,
-      "norm_label": "test changes"
-    },
-    {
-      "label": "Delivery Steps",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L184",
-      "id": "plans_upgrade_remote_episodes_drawer_delivery_steps",
-      "community": 7,
-      "norm_label": "delivery steps"
-    },
-    {
-      "label": "\u2713 Step 1: Refactor the drawer shell + header with holographic surface and GSAP entry animation",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L186",
-      "id": "plans_upgrade_remote_episodes_drawer_step_1_refactor_the_drawer_shell_header_with_holographic_surface_and_gsap_entry_animation",
-      "community": 7,
-      "norm_label": "\u2713 step 1: refactor the drawer shell + header with holographic surface and gsap entry animation"
-    },
-    {
-      "label": "\u2713 Step 2: Refactor the season selector and intro duration controls with the holographic form style",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L195",
-      "id": "plans_upgrade_remote_episodes_drawer_step_2_refactor_the_season_selector_and_intro_duration_controls_with_the_holographic_form_style",
-      "community": 7,
-      "norm_label": "\u2713 step 2: refactor the season selector and intro duration controls with the holographic form style"
-    },
-    {
-      "label": "\u2713 Step 3: Refactor the episode rows with thumbnail, language chips, progress, watched badge, runtime, and playing indicator",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L203",
-      "id": "plans_upgrade_remote_episodes_drawer_step_3_refactor_the_episode_rows_with_thumbnail_language_chips_progress_watched_badge_runtime_and_playing_indicator",
-      "community": 7,
-      "norm_label": "\u2713 step 3: refactor the episode rows with thumbnail, language chips, progress, watched badge, runtime, and playing indicator"
-    },
-    {
-      "label": "\u2713 Step 4: Polish loading/empty states, accessibility, reduced motion, and add the row stagger reveal",
-      "file_type": "document",
-      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
-      "source_location": "L214",
-      "id": "plans_upgrade_remote_episodes_drawer_step_4_polish_loading_empty_states_accessibility_reduced_motion_and_add_the_row_stagger_reveal",
-      "community": 7,
-      "norm_label": "\u2713 step 4: polish loading/empty states, accessibility, reduced motion, and add the row stagger reveal"
-    },
-    {
       "label": "Skeleton",
       "file_type": "code",
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L32",
       "id": "feedback_skeleton_skeleton",
-      "community": 16,
+      "community": 0,
       "norm_label": "skeleton"
     },
     {
@@ -6653,6 +6212,483 @@
       "id": "motion_registry_reducedmotionmediacondition",
       "community": 280,
       "norm_label": "reducedmotionmediacondition"
+    },
+    {
+      "label": "style",
+      "file_type": "code",
+      "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
+      "source_location": "L31",
+      "community": 8,
+      "norm_label": "style",
+      "id": "modals_linkepisodesmodal_style"
+    },
+    {
+      "label": "upgrade-library-episodes-drawer.md",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L1",
+      "community": 4,
+      "norm_label": "upgrade-library-episodes-drawer.md",
+      "id": "plans_upgrade_library_episodes_drawer"
+    },
+    {
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L5",
+      "community": 4,
+      "norm_label": "requirements",
+      "id": "plans_upgrade_library_episodes_drawer_requirements"
+    },
+    {
+      "label": "Overview & Goals",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L7",
+      "community": 4,
+      "norm_label": "overview & goals",
+      "id": "plans_upgrade_library_episodes_drawer_overview_goals"
+    },
+    {
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L11",
+      "community": 4,
+      "norm_label": "scope",
+      "id": "plans_upgrade_library_episodes_drawer_scope"
+    },
+    {
+      "label": "User Stories",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L29",
+      "community": 4,
+      "norm_label": "user stories",
+      "id": "plans_upgrade_library_episodes_drawer_user_stories"
+    },
+    {
+      "label": "Functional Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L37",
+      "community": 4,
+      "norm_label": "functional requirements",
+      "id": "plans_upgrade_library_episodes_drawer_functional_requirements"
+    },
+    {
+      "label": "Non-Functional Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L49",
+      "community": 4,
+      "norm_label": "non-functional requirements",
+      "id": "plans_upgrade_library_episodes_drawer_non_functional_requirements"
+    },
+    {
+      "label": "Technical Design",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L56",
+      "community": 4,
+      "norm_label": "technical design",
+      "id": "plans_upgrade_library_episodes_drawer_technical_design"
+    },
+    {
+      "label": "Current Implementation",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L58",
+      "community": 4,
+      "norm_label": "current implementation",
+      "id": "plans_upgrade_library_episodes_drawer_current_implementation"
+    },
+    {
+      "label": "Key Decisions",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L80",
+      "community": 4,
+      "norm_label": "key decisions",
+      "id": "plans_upgrade_library_episodes_drawer_key_decisions"
+    },
+    {
+      "label": "Proposed Changes",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L90",
+      "community": 4,
+      "norm_label": "proposed changes",
+      "id": "plans_upgrade_library_episodes_drawer_proposed_changes"
+    },
+    {
+      "label": "Data Models / Contracts",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L111",
+      "community": 4,
+      "norm_label": "data models / contracts",
+      "id": "plans_upgrade_library_episodes_drawer_data_models_contracts"
+    },
+    {
+      "label": "Components",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L118",
+      "community": 4,
+      "norm_label": "components",
+      "id": "plans_upgrade_library_episodes_drawer_components"
+    },
+    {
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L127",
+      "community": 4,
+      "norm_label": "file structure",
+      "id": "plans_upgrade_library_episodes_drawer_file_structure"
+    },
+    {
+      "label": "Architecture Diagram",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L133",
+      "community": 4,
+      "norm_label": "architecture diagram",
+      "id": "plans_upgrade_library_episodes_drawer_architecture_diagram"
+    },
+    {
+      "label": "Translation Notes",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L153",
+      "community": 4,
+      "norm_label": "translation notes",
+      "id": "plans_upgrade_library_episodes_drawer_translation_notes"
+    },
+    {
+      "label": "Risks",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L159",
+      "community": 4,
+      "norm_label": "risks",
+      "id": "plans_upgrade_library_episodes_drawer_risks"
+    },
+    {
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L166",
+      "community": 4,
+      "norm_label": "testing",
+      "id": "plans_upgrade_library_episodes_drawer_testing"
+    },
+    {
+      "label": "Validation Approach",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L168",
+      "community": 4,
+      "norm_label": "validation approach",
+      "id": "plans_upgrade_library_episodes_drawer_validation_approach"
+    },
+    {
+      "label": "Key Scenarios",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L177",
+      "community": 4,
+      "norm_label": "key scenarios",
+      "id": "plans_upgrade_library_episodes_drawer_key_scenarios"
+    },
+    {
+      "label": "Edge Cases",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L191",
+      "community": 4,
+      "norm_label": "edge cases",
+      "id": "plans_upgrade_library_episodes_drawer_edge_cases"
+    },
+    {
+      "label": "Delivery Steps",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L200",
+      "community": 4,
+      "norm_label": "delivery steps",
+      "id": "plans_upgrade_library_episodes_drawer_delivery_steps"
+    },
+    {
+      "label": "\u2713 Step 1: Rewrite drawer shell + entry animation to the holo system",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L202",
+      "community": 4,
+      "norm_label": "\u2713 step 1: rewrite drawer shell + entry animation to the holo system",
+      "id": "plans_upgrade_library_episodes_drawer_step_1_rewrite_drawer_shell_entry_animation_to_the_holo_system"
+    },
+    {
+      "label": "\u2713 Step 2: Rewrite HoloDrawerHeader with display typography + neon close + total chip",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L218",
+      "community": 4,
+      "norm_label": "\u2713 step 2: rewrite holodrawerheader with display typography + neon close + total chip",
+      "id": "plans_upgrade_library_episodes_drawer_step_2_rewrite_holodrawerheader_with_display_typography_neon_close_total_chip"
+    },
+    {
+      "label": "\u2713 Step 3: Rewrite EpisodeRow with thumbnail, chips, progress, watched, runtime, playing indicator",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L232",
+      "community": 4,
+      "norm_label": "\u2713 step 3: rewrite episoderow with thumbnail, chips, progress, watched, runtime, playing indicator",
+      "id": "plans_upgrade_library_episodes_drawer_step_3_rewrite_episoderow_with_thumbnail_chips_progress_watched_runtime_playing_indicator"
+    },
+    {
+      "label": "\u2713 Step 4: Add Skeleton loading state, empty state, row stagger reveal, and locales",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L248",
+      "community": 4,
+      "norm_label": "\u2713 step 4: add skeleton loading state, empty state, row stagger reveal, and locales",
+      "id": "plans_upgrade_library_episodes_drawer_step_4_add_skeleton_loading_state_empty_state_row_stagger_reveal_and_locales"
+    },
+    {
+      "label": "upgrade-remote-episodes-drawer.md",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L1",
+      "community": 7,
+      "norm_label": "upgrade-remote-episodes-drawer.md",
+      "id": "plans_upgrade_remote_episodes_drawer"
+    },
+    {
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L5",
+      "community": 7,
+      "norm_label": "requirements",
+      "id": "plans_upgrade_remote_episodes_drawer_requirements"
+    },
+    {
+      "label": "Overview & Goals",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L7",
+      "community": 7,
+      "norm_label": "overview & goals",
+      "id": "plans_upgrade_remote_episodes_drawer_overview_goals"
+    },
+    {
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L11",
+      "community": 7,
+      "norm_label": "scope",
+      "id": "plans_upgrade_remote_episodes_drawer_scope"
+    },
+    {
+      "label": "User Stories",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L26",
+      "community": 7,
+      "norm_label": "user stories",
+      "id": "plans_upgrade_remote_episodes_drawer_user_stories"
+    },
+    {
+      "label": "Functional Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L33",
+      "community": 7,
+      "norm_label": "functional requirements",
+      "id": "plans_upgrade_remote_episodes_drawer_functional_requirements"
+    },
+    {
+      "label": "Non-Functional Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L45",
+      "community": 7,
+      "norm_label": "non-functional requirements",
+      "id": "plans_upgrade_remote_episodes_drawer_non_functional_requirements"
+    },
+    {
+      "label": "Technical Design",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L52",
+      "community": 7,
+      "norm_label": "technical design",
+      "id": "plans_upgrade_remote_episodes_drawer_technical_design"
+    },
+    {
+      "label": "Current Implementation",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L54",
+      "community": 7,
+      "norm_label": "current implementation",
+      "id": "plans_upgrade_remote_episodes_drawer_current_implementation"
+    },
+    {
+      "label": "Key Decisions",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L73",
+      "community": 7,
+      "norm_label": "key decisions",
+      "id": "plans_upgrade_remote_episodes_drawer_key_decisions"
+    },
+    {
+      "label": "Proposed Changes",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L81",
+      "community": 7,
+      "norm_label": "proposed changes",
+      "id": "plans_upgrade_remote_episodes_drawer_proposed_changes"
+    },
+    {
+      "label": "Data Models / Contracts",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L102",
+      "community": 7,
+      "norm_label": "data models / contracts",
+      "id": "plans_upgrade_remote_episodes_drawer_data_models_contracts"
+    },
+    {
+      "label": "Components",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L110",
+      "community": 7,
+      "norm_label": "components",
+      "id": "plans_upgrade_remote_episodes_drawer_components"
+    },
+    {
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L120",
+      "community": 7,
+      "norm_label": "file structure",
+      "id": "plans_upgrade_remote_episodes_drawer_file_structure"
+    },
+    {
+      "label": "Architecture Diagram",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L125",
+      "community": 7,
+      "norm_label": "architecture diagram",
+      "id": "plans_upgrade_remote_episodes_drawer_architecture_diagram"
+    },
+    {
+      "label": "Risks",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L146",
+      "community": 7,
+      "norm_label": "risks",
+      "id": "plans_upgrade_remote_episodes_drawer_risks"
+    },
+    {
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L154",
+      "community": 7,
+      "norm_label": "testing",
+      "id": "plans_upgrade_remote_episodes_drawer_testing"
+    },
+    {
+      "label": "Validation Approach",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L156",
+      "community": 7,
+      "norm_label": "validation approach",
+      "id": "plans_upgrade_remote_episodes_drawer_validation_approach"
+    },
+    {
+      "label": "Key Scenarios",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L160",
+      "community": 7,
+      "norm_label": "key scenarios",
+      "id": "plans_upgrade_remote_episodes_drawer_key_scenarios"
+    },
+    {
+      "label": "Edge Cases",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L167",
+      "community": 7,
+      "norm_label": "edge cases",
+      "id": "plans_upgrade_remote_episodes_drawer_edge_cases"
+    },
+    {
+      "label": "Test Changes",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L179",
+      "community": 7,
+      "norm_label": "test changes",
+      "id": "plans_upgrade_remote_episodes_drawer_test_changes"
+    },
+    {
+      "label": "Delivery Steps",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L184",
+      "community": 7,
+      "norm_label": "delivery steps",
+      "id": "plans_upgrade_remote_episodes_drawer_delivery_steps"
+    },
+    {
+      "label": "\u2713 Step 1: Refactor the drawer shell + header with holographic surface and GSAP entry animation",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L186",
+      "community": 7,
+      "norm_label": "\u2713 step 1: refactor the drawer shell + header with holographic surface and gsap entry animation",
+      "id": "plans_upgrade_remote_episodes_drawer_step_1_refactor_the_drawer_shell_header_with_holographic_surface_and_gsap_entry_animation"
+    },
+    {
+      "label": "\u2713 Step 2: Refactor the season selector and intro duration controls with the holographic form style",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L195",
+      "community": 7,
+      "norm_label": "\u2713 step 2: refactor the season selector and intro duration controls with the holographic form style",
+      "id": "plans_upgrade_remote_episodes_drawer_step_2_refactor_the_season_selector_and_intro_duration_controls_with_the_holographic_form_style"
+    },
+    {
+      "label": "\u2713 Step 3: Refactor the episode rows with thumbnail, language chips, progress, watched badge, runtime, and playing indicator",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L203",
+      "community": 7,
+      "norm_label": "\u2713 step 3: refactor the episode rows with thumbnail, language chips, progress, watched badge, runtime, and playing indicator",
+      "id": "plans_upgrade_remote_episodes_drawer_step_3_refactor_the_episode_rows_with_thumbnail_language_chips_progress_watched_badge_runtime_and_playing_indicator"
+    },
+    {
+      "label": "\u2713 Step 4: Polish loading/empty states, accessibility, reduced motion, and add the row stagger reveal",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
+      "source_location": "L214",
+      "community": 7,
+      "norm_label": "\u2713 step 4: polish loading/empty states, accessibility, reduced motion, and add the row stagger reveal",
+      "id": "plans_upgrade_remote_episodes_drawer_step_4_polish_loading_empty_states_accessibility_reduced_motion_and_add_the_row_stagger_reveal"
     },
     {
       "label": "SwipeableEpisodeCard",
@@ -21509,7 +21545,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Card.jsx",
       "source_location": "L15",
-      "community": 21,
+      "community": 13,
       "norm_label": "card",
       "id": "layout_card_card"
     },
@@ -21518,7 +21554,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/ContentRow.jsx",
       "source_location": "L14",
-      "community": 15,
+      "community": 14,
       "norm_label": "contentrow",
       "id": "layout_contentrow_contentrow"
     },
@@ -21527,7 +21563,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Footer.jsx",
       "source_location": "L8",
-      "community": 31,
+      "community": 2,
       "norm_label": "footer()",
       "id": "layout_footer_footer"
     },
@@ -21536,7 +21572,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/GridView.jsx",
       "source_location": "L12",
-      "community": 21,
+      "community": 13,
       "norm_label": "gridview",
       "id": "layout_gridview_gridview"
     },
@@ -21563,7 +21599,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Hero.jsx",
       "source_location": "L11",
-      "community": 15,
+      "community": 14,
       "norm_label": "hero",
       "id": "layout_hero_hero"
     },
@@ -22915,6 +22951,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "e2e-tests/tests/detail-link-episodes-holo.spec.js",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "tests_detail_link_episodes_holo_spec",
+      "target": "tests_detail_link_episodes_holo_spec_test_expect",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "e2e-tests/tests/google-auth-persistence.spec.js",
       "source_location": "L1",
       "weight": 1.0,
@@ -22988,9 +23034,9 @@
       "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_master_remote_slider_drag_preview_spec",
-      "target": "tests_master_remote_slider_drag_preview_spec_path",
-      "confidence_score": 1.0
+      "target": "tests_master_remote_slider_drag_preview_spec_path"
     },
     {
       "relation": "contains",
@@ -22998,9 +23044,9 @@
       "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_master_remote_slider_drag_preview_spec",
-      "target": "tests_master_remote_slider_drag_preview_spec_screenshot_dir",
-      "confidence_score": 1.0
+      "target": "tests_master_remote_slider_drag_preview_spec_screenshot_dir"
     },
     {
       "relation": "contains",
@@ -23008,9 +23054,9 @@
       "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tests_master_remote_slider_drag_preview_spec",
-      "target": "tests_master_remote_slider_drag_preview_spec_screenshot_path",
-      "confidence_score": 1.0
+      "target": "tests_master_remote_slider_drag_preview_spec_screenshot_path"
     },
     {
       "relation": "contains",
@@ -23457,9 +23503,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "feedback_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip"
     },
     {
       "relation": "imports_from",
@@ -23473,15 +23519,26 @@
       "target": "feedback_holochip"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "feedback_holochip",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "feedback_holochip_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip_holochip"
     },
     {
       "relation": "imports",
@@ -23493,6 +23550,17 @@
       "confidence_score": 1.0,
       "source": "master_episodesdrawer",
       "target": "feedback_holochip_holochip"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "feedback_holochip_holochip",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -23511,9 +23579,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "feedback_scanlineoverlay",
-      "confidence_score": 1.0
+      "target": "feedback_scanlineoverlay"
     },
     {
       "relation": "imports_from",
@@ -23536,6 +23604,17 @@
       "confidence_score": 1.0,
       "source": "media_cinematicdetail",
       "target": "feedback_scanlineoverlay"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "feedback_scanlineoverlay",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -23566,9 +23645,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "feedback_scanlineoverlay_scanlineoverlay",
-      "confidence_score": 1.0
+      "target": "feedback_scanlineoverlay_scanlineoverlay"
     },
     {
       "relation": "imports",
@@ -23591,6 +23670,17 @@
       "confidence_score": 1.0,
       "source": "media_cinematicdetail",
       "target": "feedback_scanlineoverlay_scanlineoverlay"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "feedback_scanlineoverlay_scanlineoverlay",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -23652,9 +23742,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "feedback_skeleton",
-      "confidence_score": 1.0
+      "target": "feedback_skeleton"
     },
     {
       "relation": "imports_from",
@@ -25106,9 +25196,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "feedback_skeleton_skeleton",
-      "confidence_score": 1.0
+      "target": "feedback_skeleton_skeleton"
     },
     {
       "relation": "imports_from",
@@ -25138,9 +25228,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L637",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "library_episodesdrawer_episodeemptystate",
-      "confidence_score": 1.0
+      "target": "library_episodesdrawer_episodeemptystate"
     },
     {
       "relation": "contains",
@@ -25148,9 +25238,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L578",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "library_episodesdrawer_episodelistskeleton",
-      "confidence_score": 1.0
+      "target": "library_episodesdrawer_episodelistskeleton"
     },
     {
       "relation": "contains",
@@ -25158,9 +25248,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "library_episodesdrawer_episoderow",
-      "confidence_score": 1.0
+      "target": "library_episodesdrawer_episoderow"
     },
     {
       "relation": "contains",
@@ -25178,9 +25268,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "library_episodesdrawer_holodrawerheader",
-      "confidence_score": 1.0
+      "target": "library_episodesdrawer_holodrawerheader"
     },
     {
       "relation": "contains",
@@ -25188,9 +25278,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "library_episodesdrawer_holofieldsx",
-      "confidence_score": 1.0
+      "target": "library_episodesdrawer_holofieldsx"
     },
     {
       "relation": "contains",
@@ -25209,9 +25299,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "motion_grammar",
-      "confidence_score": 1.0
+      "target": "motion_grammar"
     },
     {
       "relation": "imports",
@@ -25220,9 +25310,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "motion_grammar_durations",
-      "confidence_score": 1.0
+      "target": "motion_grammar_durations"
     },
     {
       "relation": "imports",
@@ -25231,9 +25321,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "motion_grammar_easings",
-      "confidence_score": 1.0
+      "target": "motion_grammar_easings"
     },
     {
       "relation": "imports",
@@ -25242,9 +25332,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "motion_grammar_reducedmotion",
-      "confidence_score": 1.0
+      "target": "motion_grammar_reducedmotion"
     },
     {
       "relation": "imports",
@@ -25253,9 +25343,9 @@
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_episodesdrawer",
-      "target": "motion_grammar_stagger",
-      "confidence_score": 1.0
+      "target": "motion_grammar_stagger"
     },
     {
       "relation": "imports_from",
@@ -25596,6 +25686,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "media_detailview_holofieldsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
       "source_location": "L45",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -25612,6 +25712,50 @@
       "confidence_score": 1.0,
       "source": "media_detailview",
       "target": "modals_linkepisodesmodal"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "motion_grammar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "motion_grammar_durations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "motion_grammar_easings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/media/DetailView.jsx",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "media_detailview",
+      "target": "motion_grammar_reducedmotion",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -26200,6 +26344,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "modals_linkepisodesmodal",
+      "target": "modals_linkepisodesmodal_holofieldsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
       "source_location": "L337",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26215,6 +26369,28 @@
       "confidence_score": 1.0,
       "source": "modals_linkepisodesmodal",
       "target": "modals_linkepisodesmodal_style"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "modals_linkepisodesmodal",
+      "target": "modals_modalshell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/modals/LinkEpisodesModal.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "modals_linkepisodesmodal",
+      "target": "modals_modalshell_modalshell",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -35433,9 +35609,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L200",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer",
-      "target": "plans_upgrade_library_episodes_drawer_delivery_steps",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_delivery_steps"
     },
     {
       "relation": "contains",
@@ -35443,9 +35619,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer",
-      "target": "plans_upgrade_library_episodes_drawer_requirements",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_requirements"
     },
     {
       "relation": "contains",
@@ -35453,9 +35629,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer",
-      "target": "plans_upgrade_library_episodes_drawer_technical_design",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_technical_design"
     },
     {
       "relation": "contains",
@@ -35463,9 +35639,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L166",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer",
-      "target": "plans_upgrade_library_episodes_drawer_testing",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_testing"
     },
     {
       "relation": "contains",
@@ -35473,9 +35649,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_requirements",
-      "target": "plans_upgrade_library_episodes_drawer_functional_requirements",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_functional_requirements"
     },
     {
       "relation": "contains",
@@ -35483,9 +35659,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_requirements",
-      "target": "plans_upgrade_library_episodes_drawer_non_functional_requirements",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_non_functional_requirements"
     },
     {
       "relation": "contains",
@@ -35493,9 +35669,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_requirements",
-      "target": "plans_upgrade_library_episodes_drawer_overview_goals",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_overview_goals"
     },
     {
       "relation": "contains",
@@ -35503,9 +35679,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_requirements",
-      "target": "plans_upgrade_library_episodes_drawer_scope",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_scope"
     },
     {
       "relation": "contains",
@@ -35513,9 +35689,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_requirements",
-      "target": "plans_upgrade_library_episodes_drawer_user_stories",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_user_stories"
     },
     {
       "relation": "contains",
@@ -35523,9 +35699,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_architecture_diagram",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_architecture_diagram"
     },
     {
       "relation": "contains",
@@ -35533,9 +35709,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_components",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_components"
     },
     {
       "relation": "contains",
@@ -35543,9 +35719,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_current_implementation",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_current_implementation"
     },
     {
       "relation": "contains",
@@ -35553,9 +35729,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_data_models_contracts",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_data_models_contracts"
     },
     {
       "relation": "contains",
@@ -35563,9 +35739,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_file_structure",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_file_structure"
     },
     {
       "relation": "contains",
@@ -35573,9 +35749,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_key_decisions",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_key_decisions"
     },
     {
       "relation": "contains",
@@ -35583,9 +35759,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L90",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_proposed_changes",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_proposed_changes"
     },
     {
       "relation": "contains",
@@ -35593,9 +35769,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_risks",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_risks"
     },
     {
       "relation": "contains",
@@ -35603,9 +35779,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L153",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_technical_design",
-      "target": "plans_upgrade_library_episodes_drawer_translation_notes",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_translation_notes"
     },
     {
       "relation": "contains",
@@ -35613,9 +35789,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_testing",
-      "target": "plans_upgrade_library_episodes_drawer_edge_cases",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_edge_cases"
     },
     {
       "relation": "contains",
@@ -35623,9 +35799,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L177",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_testing",
-      "target": "plans_upgrade_library_episodes_drawer_key_scenarios",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_key_scenarios"
     },
     {
       "relation": "contains",
@@ -35633,9 +35809,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_testing",
-      "target": "plans_upgrade_library_episodes_drawer_validation_approach",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_validation_approach"
     },
     {
       "relation": "contains",
@@ -35643,9 +35819,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
-      "target": "plans_upgrade_library_episodes_drawer_step_1_rewrite_drawer_shell_entry_animation_to_the_holo_system",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_step_1_rewrite_drawer_shell_entry_animation_to_the_holo_system"
     },
     {
       "relation": "contains",
@@ -35653,9 +35829,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L218",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
-      "target": "plans_upgrade_library_episodes_drawer_step_2_rewrite_holodrawerheader_with_display_typography_neon_close_total_chip",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_step_2_rewrite_holodrawerheader_with_display_typography_neon_close_total_chip"
     },
     {
       "relation": "contains",
@@ -35663,9 +35839,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L232",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
-      "target": "plans_upgrade_library_episodes_drawer_step_3_rewrite_episoderow_with_thumbnail_chips_progress_watched_runtime_playing_indicator",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_step_3_rewrite_episoderow_with_thumbnail_chips_progress_watched_runtime_playing_indicator"
     },
     {
       "relation": "contains",
@@ -35673,9 +35849,9 @@
       "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
       "source_location": "L248",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
-      "target": "plans_upgrade_library_episodes_drawer_step_4_add_skeleton_loading_state_empty_state_row_stagger_reveal_and_locales",
-      "confidence_score": 1.0
+      "target": "plans_upgrade_library_episodes_drawer_step_4_add_skeleton_loading_state_empty_state_row_stagger_reveal_and_locales"
     },
     {
       "relation": "contains",
@@ -51829,5 +52005,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ca324e6c4f23b8851f2ec77cf508867fa0397533"
+  "built_at_commit": "4afc7f535018464a553af9c32f11dfa72aa861e8"
 }

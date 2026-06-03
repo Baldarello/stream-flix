@@ -7,8 +7,6 @@ export const en = {
         "series": "TV Series",
         "movies": "Movies",
         "anime": "Anime",
-        "myList": "My List",
-        "library": "Library",
         "searchPlaceholder": "Search titles..."
     },
     "hero": {
@@ -167,12 +165,6 @@ export const en = {
     },
     "profileDrawer": {
         "profile": "Profile",
-        "siteStyle": "Site Style",
-        "theme": {
-            "series": "TV Series",
-            "movies": "Movies",
-            "anime": "Anime"
-        },
         "backup": "Backup to Google Drive",
         "restore": "Restore from Google Drive",
         "logout": "Logout",
@@ -185,10 +177,6 @@ export const en = {
         "import": "Import Library",
         "history": "Change History",
         "manageLibrary": "Manage Library",
-        "playbackPreferences": "Playback Preferences",
-        "preferredLabelsDesc": "Prioritize links with these labels during auto-selection.",
-        "noLabelsFound": "No labels found",
-        "noLabelsFoundDesc": "Add links with labels to manage them here.",
         "savedDevices": "Saved TV Devices",
         "noSavedDevices": "No saved TV devices found.",
         "connect": "Connect",
@@ -462,8 +450,6 @@ export const en = {
         "markedAsUnwatched": "Episode marked as unwatched.",
         "invalidEpisodeRange": "Invalid episode range.",
         "episodeNumberRangeMismatch": "The episode range ({epRange}) and the numbering range ({numRange}) must have the same length.",
-        "preferredLabelSet": "Label '{label}' set as preferred.",
-        "preferredLabelRemoved": "Preference removed for label '{label}'.",
         "linkUpdatedSuccess": "Link updated successfully.",
         "linksFromDomainDeletedSuccess": "{count} links from {domain} deleted successfully.",
         "syncMergeComplete": "Merge completed successfully!",

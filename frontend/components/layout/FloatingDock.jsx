@@ -2,7 +2,7 @@
  * @fileoverview FloatingDock - cinematic morphing navigation shell.
  *
  * Replaces the legacy `Header.jsx` with a floating, contextual dock that:
- *  - Anchors the primary navigation (Home / Series / Movies / Anime / List / Library).
+ *  - Anchors the primary navigation (Home / Series / Movies / Anime).
  *  - Anchors the secondary actions (Search, Notifications, QR, SmartTV, Profile).
  *  - On mobile, collapses into a slim bottom bar; the primary items remain
  *    accessible via a single FAB that morphs the dock open.
@@ -43,9 +43,7 @@ const NAV_KEYS = [
     { key: 'home', view: 'Home', icon: HomeIcon },
     { key: 'series', view: 'Serie TV' },
     { key: 'movies', view: 'Film' },
-    { key: 'anime', view: 'Anime' },
-    { key: 'myList', view: 'La mia lista' },
-    { key: 'library', view: 'Libreria' }
+    { key: 'anime', view: 'Anime' }
 ];
 
 export const FloatingDock = observer(() => {

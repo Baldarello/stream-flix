@@ -88,18 +88,6 @@ const MasterScreen = observer(() => {
         }
     };
 
-    const getGlowColor = () => {
-        switch (mediaStore.activeTheme) {
-            case 'Film':
-                return 'var(--glow-film-color)';
-            case 'Anime':
-                return 'var(--glow-anime-color)';
-            case 'SerieTV':
-            default:
-                return 'var(--glow-seriestv-color)';
-        }
-    };
-
     const isConnecting = isRemoteMasterConnected || scanSuccess;
 
     // Don't render if not open
@@ -197,7 +185,7 @@ const MasterScreen = observer(() => {
                         height: 30,
                         borderTop: '3px solid',
                         borderLeft: '3px solid',
-                        borderColor: getGlowColor(),
+                        borderColor: 'var(--neon-accent)',
                         borderRadius: '4px 0 0 0',
                         zIndex: 10
                     }} />
@@ -209,7 +197,7 @@ const MasterScreen = observer(() => {
                         height: 30,
                         borderTop: '3px solid',
                         borderRight: '3px solid',
-                        borderColor: getGlowColor(),
+                        borderColor: 'var(--neon-accent)',
                         borderRadius: '0 4px 0 0',
                         zIndex: 10
                     }} />
@@ -221,7 +209,7 @@ const MasterScreen = observer(() => {
                         height: 30,
                         borderBottom: '3px solid',
                         borderLeft: '3px solid',
-                        borderColor: getGlowColor(),
+                        borderColor: 'var(--neon-accent)',
                         borderRadius: '0 0 0 4px',
                         zIndex: 10
                     }} />
@@ -233,7 +221,7 @@ const MasterScreen = observer(() => {
                         height: 30,
                         borderBottom: '3px solid',
                         borderRight: '3px solid',
-                        borderColor: getGlowColor(),
+                        borderColor: 'var(--neon-accent)',
                         borderRadius: '0 0 4px 0',
                         zIndex: 10
                     }} />
@@ -259,7 +247,7 @@ const MasterScreen = observer(() => {
                                 p: 2
                             },
                             '& #qr-reader__scan_button': {
-                                bgcolor: `${getGlowColor()} !important`,
+                                bgcolor: 'var(--neon-accent) !important',
                                 color: 'black !important',
                                 border: 'none !important',
                                 borderRadius: '8px !important',
@@ -334,7 +322,7 @@ const MasterScreen = observer(() => {
                                 '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
                                 '&:hover fieldset': { borderColor: 'white' },
                                 '&.Mui-focused fieldset': { 
-                                    borderColor: getGlowColor()
+                                    borderColor: 'var(--neon-accent)'
                                 },
                             },
                             '& .MuiInputLabel-root': { 

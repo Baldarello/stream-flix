@@ -7,8 +7,6 @@ export const it = {
         "series": "Serie TV",
         "movies": "Film",
         "anime": "Anime",
-        "myList": "La mia lista",
-        "library": "Libreria",
         "searchPlaceholder": "Cerca titoli..."
     },
     "hero": {
@@ -167,12 +165,6 @@ export const it = {
     },
     "profileDrawer": {
         "profile": "Profilo",
-        "siteStyle": "Stile Sito",
-        "theme": {
-            "series": "Serie TV",
-            "movies": "Film",
-            "anime": "Anime"
-        },
         "backup": "Backup su Google Drive",
         "restore": "Ripristina da Google Drive",
         "logout": "Logout",
@@ -185,10 +177,6 @@ export const it = {
         "import": "Importa Libreria",
         "history": "Cronologia Modifiche",
         "manageLibrary": "Gestisci Libreria",
-        "playbackPreferences": "Preferenze di Riproduzione",
-        "preferredLabelsDesc": "Dai priorità ai link con queste etichette durante la selezione automatica.",
-        "noLabelsFound": "Nessuna etichetta trovata",
-        "noLabelsFoundDesc": "Aggiungi link con etichette per gestirle qui.",
         "savedDevices": "Dispositivi TV Salvati",
         "noSavedDevices": "Nessun dispositivo TV salvato.",
         "connect": "Connetti",
@@ -463,8 +451,6 @@ export const it = {
         "markedAsUnwatched": "Episodio segnato come non visto.",
         "invalidEpisodeRange": "Intervallo episodi non valido.",
         "episodeNumberRangeMismatch": "L'intervallo di episodi ({epRange}) e l'intervallo di numerazione ({numRange}) devono avere la stessa lunghezza.",
-        "preferredLabelSet": "Etichetta '{label}' impostata come preferita.",
-        "preferredLabelRemoved": "Preferenza rimossa per l'etichetta '{label}'.",
         "linkUpdatedSuccess": "Link aggiornato con successo.",
         "linksFromDomainDeletedSuccess": "{count} link da {domain} eliminati con successo.",
         "syncMergeComplete": "Unione completata con successo!",

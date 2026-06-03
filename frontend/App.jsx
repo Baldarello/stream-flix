@@ -119,20 +119,6 @@ const cinematicTheme = createTheme(baseThemeOptions);
  * reactively renders the appropriate view based on MobX store state.
  */
 const App = observer(() => {
-    const { activeTheme } = mediaStore;
-
-    // Theme body class effect - preserved for backward compat. The class
-    // is still applied (so any CSS that keys off it keeps working) but every
-    // body class now maps to the unified futuristic backdrop via index.css.
-    useEffect(() => {
-        const themeClassMap = {
-            'SerieTV': 'theme-serietv',
-            'Film': 'theme-film',
-            'Anime': 'theme-anime',
-        };
-        document.body.className = themeClassMap[activeTheme] || 'theme-serietv';
-    }, [activeTheme]);
-
     // Websocket visibility handling
     useEffect(() => {
         const handleVisibilityChange = () => {

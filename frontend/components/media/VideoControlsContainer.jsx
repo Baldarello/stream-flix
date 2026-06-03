@@ -63,7 +63,7 @@ const VideoControlsContainer = observer(({
                                                                                 }) => {
 
     const {t} = useTranslations();
-    const {roomId, isHost, activeTheme} = mediaStore;
+    const {roomId, isHost} = mediaStore;
     const [volumeAnchorEl, setVolumeAnchorEl] = useState(null);
     const [speedAnchorEl, setSpeedAnchorEl] = useState(null);
 
@@ -71,11 +71,7 @@ const VideoControlsContainer = observer(({
         if (videoRef.current) videoRef.current.playbackRate = rate;
         setSpeedAnchorEl(null);
     }, []);
-    const themeColor = {
-        SerieTV: 'var(--glow-seriestv-color)',
-        Film: 'var(--glow-film-color)',
-        Anime: 'var(--glow-anime-color)'
-    }[activeTheme];
+    const themeColor = 'var(--neon-accent)';
 
     // Minimal controls (portrait mobile): only play/pause, rewind, forward, and progress
     if (isMinimal) {
