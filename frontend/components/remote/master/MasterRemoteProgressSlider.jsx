@@ -41,6 +41,11 @@ export function MasterRemoteProgressSlider({progress, duration, onSeek}) {
      * `componentsProps.valueLabel['data-testid']`. By providing our own
      * component we can append the testid and the open class directly
      * while still reusing MUI's positioning/styling.
+     *
+     * The label is rendered as a single span containing the formatted
+     * time text (e.g. `20:00`); the visual pill background, padding,
+     * and text color are defined in `frontend/index.css` under
+     * `#master-remote-progress-slider .MuiSlider-valueLabel`.
      */
     const ValueLabel = (props) => {
         const {children, className, value} = props;
@@ -57,9 +62,7 @@ export function MasterRemoteProgressSlider({progress, duration, onSeek}) {
                 data-testid="master-remote-slider-value-label"
                 aria-hidden
             >
-                <span className={sliderClasses.valueLabelCircle}>
-                    <span className={sliderClasses.valueLabelLabel}>{value}</span>
-                </span>
+                {value}
             </span>,
         );
     };

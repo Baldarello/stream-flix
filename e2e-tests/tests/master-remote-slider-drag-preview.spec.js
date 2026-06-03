@@ -213,6 +213,72 @@ test.describe('Master Remote Progress Slider Drag Preview', () => {
     expect(gap).toBeGreaterThanOrEqual(30);
     console.log('PASS: Value label is positioned at least 30px above the slider track');
 
+    // The label must also be visually readable: dark background, light
+    // text. MUI's default `currentColor` background trick renders white
+    // text on a white background, which is invisible on the page.
+    // Lock in the contract: the computed `background-color` is a
+    // non-transparent dark color, the text is light, and the label is
+    // tall enough to comfortably show a 5-character time like `20:00`.
+    const labelStyle = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="master-remote-slider-value-label"]');
+      if (!el) return null;
+      const cs = window.getComputedStyle(el);
+      return {
+        backgroundColor: cs.backgroundColor,
+        color: cs.color,
+        fontSize: cs.fontSize,
+        height: cs.height,
+        width: cs.width,
+        borderRadius: cs.borderRadius,
+      };
+    });
+    expect(labelStyle).not.toBeNull();
+    console.log('Label style mid-drag:', JSON.stringify(labelStyle));
+    // Background must be a non-transparent dark color (alpha > 0 and
+    // luminance well below 0.5). White-on-white = "rgba(0, 0, 0, 0)".
+    expect(labelStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(labelStyle.backgroundColor).not.toBe('transparent');
+    const bgMatch = labelStyle.backgroundColor.match(
+      /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/,
+    );
+    expect(bgMatch).not.toBeNull();
+    if (bgMatch) {
+      const r = parseInt(bgMatch[1], 10);
+      const g = parseInt(bgMatch[2], 10);
+      const b = parseInt(bgMatch[3], 10);
+      const max = Math.max(r, g, b);
+      expect(max).toBeLessThan(80);
+    }
+    // Text must be light (close to white) for contrast against the
+    // dark background.
+    const fgMatch = labelStyle.color.match(
+      /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/,
+    );
+    expect(fgMatch).not.toBeNull();
+    if (fgMatch) {
+      const r = parseInt(fgMatch[1], 10);
+      const g = parseInt(fgMatch[2], 10);
+      const b = parseInt(fgMatch[3], 10);
+      const min = Math.min(r, g, b);
+      expect(min).toBeGreaterThan(200);
+    }
+    // The label must be tall enough to comfortably show "MM:SS" — at
+    // least 20px.
+    const labelHeightPx = parseFloat(labelStyle.height);
+    expect(labelHeightPx).toBeGreaterThanOrEqual(20);
+    // The label must be wide enough to fit "20:00" — at least 40px.
+    const labelWidthPx = parseFloat(labelStyle.width);
+    expect(labelWidthPx).toBeGreaterThanOrEqual(40);
+    console.log('PASS: Value label is visually readable (dark bg, light text, big enough)');
+
+    // Take a screenshot WHILE the label is open so the visual fix is
+    // verifiable in the committed artifact. The earlier "Step 8"
+    // screenshot is captured after release (label closed), which is
+    // not useful to inspect the open-label styling.
+    const openScreenshotPath = path.join(SCREENSHOT_DIR, 'master-remote-slider-drag-preview-open.png');
+    await page.screenshot({ path: openScreenshotPath, fullPage: true });
+    console.log(`Open-state screenshot saved: ${openScreenshotPath}`);
+
     // The side time labels must still reflect the LIVE playback (not the drag position)
     const currentTimeDuringDrag = (await currentTimeLocator.textContent() || '').trim();
     const remainingTimeDuringDrag = (await remainingTimeLocator.textContent() || '').trim();

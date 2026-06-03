@@ -84,46 +84,34 @@
    inline element at the same level as the rail/thumb. We therefore
    re-apply the necessary positioning and open/close scale animation
    here, plus raise the resting `top` so the label's bottom is
-   clearly above the slider track. */
+   clearly above the slider track. The label is styled as a small
+   dark pill with white text so it is always readable, regardless of
+   the page background. */
 #master-remote-progress-slider .MuiSlider-valueLabel {
   position: absolute;
   top: -50px;
   left: 50%;
-  width: 24px;
-  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: currentColor;
+  padding: 4px 10px;
+  background-color: rgba(0, 0, 0, 0.85);
   color: #fff;
-  border-radius: 50%;
-  font-size: 12px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1;
+  white-space: nowrap;
   pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   transform: translate(-50%, -50%) scale(0);
-  transform-origin: center;
+  transform-origin: center bottom;
   transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
+  z-index: 2;
 }
 
 #master-remote-progress-slider .MuiSlider-valueLabelOpen {
   transform: translate(-50%, -50%) scale(1);
-}
-
-#master-remote-progress-slider .MuiSlider-valueLabelCircle {
-  display: flex;
-  align-items: inherit;
-  justify-content: inherit;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-#master-remote-progress-slider .MuiSlider-valueLabelLabel {
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
 }
 
 /* Drag and Drop Styles */
