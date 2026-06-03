@@ -1,16 +1,16 @@
 # Graph Report - stream-flix  (2026-06-03)
 
 ## Corpus Check
-- 148 files · ~114,191 words
+- 149 files · ~111,816 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2478 nodes · 3007 edges · 216 communities (163 shown, 53 thin omitted)
+- 2482 nodes · 3018 edges · 219 communities (167 shown, 52 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e0edb572`
+- Built from commit: `50113387`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -33,10 +33,13 @@
 - [[_COMMUNITY_Community 15|Community 15]]
 - [[_COMMUNITY_Community 16|Community 16]]
 - [[_COMMUNITY_Community 17|Community 17]]
+- [[_COMMUNITY_Community 18|Community 18]]
 - [[_COMMUNITY_Community 19|Community 19]]
 - [[_COMMUNITY_Community 20|Community 20]]
 - [[_COMMUNITY_Community 21|Community 21]]
 - [[_COMMUNITY_Community 22|Community 22]]
+- [[_COMMUNITY_Community 23|Community 23]]
+- [[_COMMUNITY_Community 24|Community 24]]
 - [[_COMMUNITY_Community 27|Community 27]]
 - [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
@@ -229,8 +232,8 @@
 - [[_COMMUNITY_Community 280|Community 280]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `MediaStore` - 117 edges
-2. `useTranslations()` - 60 edges
+1. `MediaStore` - 118 edges
+2. `useTranslations()` - 61 edges
 3. `RemoteStore` - 55 edges
 4. `WebSocketService` - 39 edges
 5. `CORE DIRECTIVE: IMAGE-FIRST WEBSITE DESIGN TO CODE` - 39 edges
@@ -255,19 +258,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (216 total, 53 thin omitted)
+## Communities (219 total, 52 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.10
-Nodes (29): SkeletonCard(), HomeView, CinematicFooter, CinematicFooterInner(), socialIcons, CinematicGridInner(), CinematicHero, CinematicRow (+21 more)
+Cohesion: 0.18
+Nodes (18): CinematicFooterInner(), socialIcons, CinematicGridInner(), CinematicRowInner(), HoloCard, HoloCardInner(), CinematicDetail, CinematicDetailInner() (+10 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.05
 Nodes (4): en, it, allTranslations, MediaStore
 
 ### Community 2 - "Community 2"
-Cohesion: 0.08
-Nodes (21): EpisodeInfoModal, GoogleDriveSyncConflictModal, ImportLibraryModal, style, LinkMovieModal, style, LinkSelectionModal(), style (+13 more)
+Cohesion: 0.09
+Nodes (20): CinematicFooter, Footer(), EpisodeInfoModal, GoogleDriveSyncConflictModal, ImportLibraryModal, style, LinkMovieModal, style (+12 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.20
@@ -282,40 +285,48 @@ Cohesion: 0.40
 Nodes (5): 0.A Read these signals first, 0.B Output a one-line "Design Read" before generating, 0. BRIEF INFERENCE (Read the Room Before Anything Else), 0.C If the brief is ambiguous, ask one question, do not guess, 0.D Anti-Default Discipline
 
 ### Community 6 - "Community 6"
-Cohesion: 0.11
-Nodes (13): HoloChip, LibraryManagementView, TABS, EmptyState(), CounterChip, LibraryDashboard, ContinueWatchingTab, MyListTab (+5 more)
+Cohesion: 0.09
+Nodes (13): LibraryManagementView, TABS, holoFieldSx, LinkEditModal, EmptyState(), CounterChip, LibraryDashboard, ContinueWatchingTab (+5 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.08
 Nodes (25): Architecture Diagram, Components, Current Implementation, Data Models / Contracts, Delivery Steps, Edge Cases, File Structure, Functional Requirements (+17 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.16
-Nodes (8): holoFieldSx, LinkEditModal, ManageLinksView, AddLinkTabs, holoFieldSx, LinkEpisodesModal, style, ModalShell()
+Cohesion: 0.22
+Nodes (7): holoFieldSx, PreferredSourceEditModal, AddLinkTabs, holoFieldSx, LinkEpisodesModal, style, ModalShell()
 
 ### Community 12 - "Community 12"
-Cohesion: 0.06
-Nodes (19): formatTime(), MasterRemotePlayerControlView, MasterRemoteProgressSlider(), MediaSyncModal, SlaveScreen, apiClient, buildImageURL(), getLatestMovies() (+11 more)
+Cohesion: 0.10
+Nodes (7): formatTime(), MasterRemotePlayerControlView, MasterRemoteProgressSlider(), MediaSyncModal, EventEmitter, ICE_SERVERS, WebSocketService
 
 ### Community 13 - "Community 13"
-Cohesion: 0.20
-Nodes (12): checkAuthPopupClosed(), handleSignIn(), handleSignOut(), initGoogleAuth(), refreshAccessToken(), refreshAccessTokenWithRetry(), scheduleTokenRefresh(), stopPopupPolling() (+4 more)
+Cohesion: 0.22
+Nodes (11): checkAuthPopupClosed(), handleSignIn(), handleSignOut(), initGoogleAuth(), refreshAccessToken(), refreshAccessTokenWithRetry(), scheduleTokenRefresh(), stopPopupPolling() (+3 more)
+
+### Community 14 - "Community 14"
+Cohesion: 0.11
+Nodes (17): style, WatchTogetherModal, apiClient, buildImageURL(), getLatestMovies(), getPopularAnime(), getSeriesDetails(), getSeriesEpisodes() (+9 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.12
-Nodes (16): useTranslations(), Card, CinematicGrid, FloatingDock, NAV_KEYS, GridView, Header, navKeys (+8 more)
+Cohesion: 0.08
+Nodes (21): HomeView, useTranslations(), Card, CinematicHero, CinematicRow, ContentRow, Hero, ManageLinksView (+13 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.11
-Nodes (13): SmartTVPairingView(), StoreContext, StoreProvider(), useStores(), FeatureRouter, SearchView, Skeleton, LocalPlaybackView() (+5 more)
+Cohesion: 0.16
+Nodes (8): SmartTVPairingView(), FeatureRouter, SearchView, LocalPlaybackView(), MasterPlaybackView(), QRScannerView(), SlavePlaybackView(), ErrorView
 
 ### Community 17 - "Community 17"
 Cohesion: 0.05
 Nodes (43): 1. Logo Cover, 1. Monogram + Meaning, 2 × 3 REFERENCE-STYLE LAYOUT, 2. Logo Construction, 2. Product Action, 3. Digital Application, 3. Metaphor Fusion, 4. Brand Essence (+35 more)
 
+### Community 18 - "Community 18"
+Cohesion: 0.12
+Nodes (10): Skeleton, SkeletonCard(), EpisodeEmptyState(), EpisodeRow, EpisodesDrawer, HoloDrawerHeader, holoFieldSx, IntroDurationField (+2 more)
+
 ### Community 19 - "Community 19"
-Cohesion: 0.09
-Nodes (19): ScanlineOverlay, EpisodeEmptyState, EpisodeRow, EpisodesDrawer, HoloDrawerHeader, holoFieldSx, SwipeableEpisodeCard, EpisodeEmptyState() (+11 more)
+Cohesion: 0.12
+Nodes (13): HoloChip, ScanlineOverlay, EpisodeEmptyState, EpisodeRow, EpisodesDrawer, HoloDrawerHeader, holoFieldSx, SwipeableEpisodeCard (+5 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.40
@@ -328,6 +339,14 @@ Nodes (6): reducedMotionCondition(), buildTransition(), ensureMatchMedia(), fade
 ### Community 22 - "Community 22"
 Cohesion: 0.07
 Nodes (28): dependencies, axios, dexie, @emotion/react, @emotion/styled, gsap, html5-qrcode, mobx (+20 more)
+
+### Community 23 - "Community 23"
+Cohesion: 0.25
+Nodes (8): StoreContext, useStores(), CinematicGrid, FloatingDock, NAV_KEYS, GridView, Header, navKeys
+
+### Community 24 - "Community 24"
+Cohesion: 0.29
+Nodes (3): FOCUSABLE_SELECTOR, TransitionPortal, FxStore
 
 ### Community 27 - "Community 27"
 Cohesion: 0.11
@@ -382,8 +401,8 @@ Cohesion: 0.22
 Nodes (9): Brand Register, Assess Current Copy, UX Writing Principles, Brand Palette Generation, Visual Direction & Asset Production, Color Strategy, OKLCH Color Space, Craft Flow (+1 more)
 
 ### Community 69 - "Community 69"
-Cohesion: 0.14
-Nodes (11): db, QuixDB, createHeaders(), createPublicShareFile(), deleteOldBackups(), findLatestBackupFile(), listBackupFiles(), readBackupFile() (+3 more)
+Cohesion: 0.18
+Nodes (9): QuixDB, createHeaders(), createPublicShareFile(), deleteOldBackups(), findLatestBackupFile(), listBackupFiles(), readBackupFile(), writeBackupFile() (+1 more)
 
 ### Community 70 - "Community 70"
 Cohesion: 0.06
@@ -522,8 +541,8 @@ Cohesion: 0.12
 Nodes (15): Code Examples, Common Rationalizations for Skipping Testing, Directory Structure, Discovery Workflow, Flowchart Usage, Overview, Skill Creation Checklist (TDD Adapted), SKILL.md Structure (+7 more)
 
 ### Community 152 - "Community 152"
-Cohesion: 0.14
-Nodes (11): App, baseThemeOptions, cinematicTheme, themePalettes, FOCUSABLE_SELECTOR, TransitionPortal, OverlayLayer, BrowserHistoryHandler() (+3 more)
+Cohesion: 0.15
+Nodes (11): StoreProvider(), App, baseThemeOptions, cinematicTheme, themePalettes, root, rootElement, OverlayLayer (+3 more)
 
 ### Community 153 - "Community 153"
 Cohesion: 0.20
@@ -894,24 +913,24 @@ Cohesion: 0.50
 Nodes (4): Pattern, Reference, Skill Types, Technique
 
 ## Knowledge Gaps
-- **1622 isolated node(s):** `name`, `version`, `description`, `type`, `dev` (+1617 more)
+- **1623 isolated node(s):** `name`, `version`, `description`, `type`, `dev` (+1618 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **53 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **52 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `MediaStore` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 69`, `Community 6`, `Community 8`, `Community 12`, `Community 13`, `Community 15`, `Community 16`, `Community 19`, `Community 152`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `RemoteStore` connect `Community 11` to `Community 1`, `Community 2`, `Community 12`, `Community 13`, `Community 15`, `Community 16`, `Community 19`, `Community 152`?**
+- **Why does `MediaStore` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 69`, `Community 6`, `Community 8`, `Community 12`, `Community 13`, `Community 14`, `Community 15`, `Community 18`, `Community 19`, `Community 23`, `Community 152`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `RemoteStore` connect `Community 11` to `Community 1`, `Community 2`, `Community 12`, `Community 14`, `Community 15`, `Community 18`, `Community 23`, `Community 152`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `reducedMotion()` connect `Community 0` to `Community 2`, `Community 3`, `Community 8`, `Community 19`, `Community 21`, `Community 152`?**
+- **Why does `useTranslations()` connect `Community 15` to `Community 0`, `Community 2`, `Community 6`, `Community 8`, `Community 12`, `Community 14`, `Community 18`, `Community 19`, `Community 23`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `description` to the rest of the system?**
-  _1627 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.09758454106280193 - nodes in this community are weakly interconnected._
+  _1628 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.05136986301369863 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.08235294117647059 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0873440285204991 - nodes in this community are weakly interconnected._
+- **Should `Community 4` be split into smaller, more focused modules?**
+  _Cohesion score 0.07692307692307693 - nodes in this community are weakly interconnected._

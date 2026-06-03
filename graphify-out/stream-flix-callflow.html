@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>stream-flix — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 2478 nodes, 3007 edges, 216 communities. Commit: e0edb57</p>
+<p class="subtitle">Generated from graphify knowledge graph: 2482 nodes, 3018 edges, 219 communities. Commit: 5011338</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -73,11 +73,11 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#tests-fixtures">Tests &amp; Fixtures</a>
     <a href="#community-1">Community 1</a>
     <a href="#community-12">Community 12</a>
-    <a href="#community-0">Community 0</a>
+    <a href="#community-15">Community 15</a>
     <a href="#community-11">Community 11</a>
     <a href="#community-2">Community 2</a>
-    <a href="#community-15">Community 15</a>
     <a href="#community-64">Community 64</a>
+    <a href="#community-6">Community 6</a>
     <a href="#other">Other</a>
 </div>
 
@@ -104,32 +104,32 @@ flowchart LR
     class TESTS_FIXTURES_B84B1DCC module;
     COMMUNITY_1_3073A0DB("Community 1<br/><small>73 nodes</small>")
     class COMMUNITY_1_3073A0DB module;
-    COMMUNITY_12_82F13F05("Community 12<br/><small>69 nodes</small>")
+    COMMUNITY_12_82F13F05("Community 12<br/><small>48 nodes</small>")
     class COMMUNITY_12_82F13F05 module;
-    COMMUNITY_0_B056AD3D("Community 0<br/><small>46 nodes</small>")
-    class COMMUNITY_0_B056AD3D module;
+    COMMUNITY_15_4BECAAD7("Community 15<br/><small>48 nodes</small>")
+    class COMMUNITY_15_4BECAAD7 module;
     COMMUNITY_11_DE018FC2("Community 11<br/><small>37 nodes</small>")
     class COMMUNITY_11_DE018FC2 module;
-    COMMUNITY_2_8C8DF7B9("Community 2<br/><small>35 nodes</small>")
+    COMMUNITY_2_8C8DF7B9("Community 2<br/><small>34 nodes</small>")
     class COMMUNITY_2_8C8DF7B9 module;
-    COMMUNITY_15_4BECAAD7("Community 15<br/><small>34 nodes</small>")
-    class COMMUNITY_15_4BECAAD7 module;
     COMMUNITY_64_0821645F("Community 64<br/><small>32 nodes</small>")
     class COMMUNITY_64_0821645F module;
-    OTHER_D0941E68("Other<br/><small>805 nodes</small>")
+    COMMUNITY_6_7D637A07("Community 6<br/><small>30 nodes</small>")
+    class COMMUNITY_6_7D637A07 module;
+    OTHER_D0941E68("Other<br/><small>833 nodes</small>")
     class OTHER_D0941E68 module;
     OTHER_D0941E68 -->|imports x54| COMMUNITY_1_3073A0DB
     OTHER_D0941E68 -->|imports x39| COMMUNITY_15_4BECAAD7
-    OTHER_D0941E68 -->|imports x33| COMMUNITY_0_B056AD3D
-    COMMUNITY_2_8C8DF7B9 -->|imports x23| COMMUNITY_1_3073A0DB
-    COMMUNITY_0_B056AD3D -->|imports x22| COMMUNITY_15_4BECAAD7
-    COMMUNITY_2_8C8DF7B9 -->|imports x20| COMMUNITY_15_4BECAAD7
-    COMMUNITY_15_4BECAAD7 -->|imports x16| COMMUNITY_1_3073A0DB
-    OTHER_D0941E68 -->|imports x14| COMMUNITY_12_82F13F05
-    COMMUNITY_12_82F13F05 -->|imports x13| COMMUNITY_1_3073A0DB
-    COMMUNITY_0_B056AD3D -->|imports x11| OTHER_D0941E68
-    COMMUNITY_15_4BECAAD7 -->|imports x10| COMMUNITY_0_B056AD3D
-    COMMUNITY_0_B056AD3D -->|imports x10| COMMUNITY_1_3073A0DB
+    COMMUNITY_15_4BECAAD7 -->|imports x25| OTHER_D0941E68
+    COMMUNITY_15_4BECAAD7 -->|imports x22| COMMUNITY_1_3073A0DB
+    COMMUNITY_2_8C8DF7B9 -->|imports x20| COMMUNITY_1_3073A0DB
+    COMMUNITY_2_8C8DF7B9 -->|imports x17| COMMUNITY_15_4BECAAD7
+    COMMUNITY_6_7D637A07 -->|imports x16| COMMUNITY_15_4BECAAD7
+    COMMUNITY_6_7D637A07 -->|imports x16| COMMUNITY_1_3073A0DB
+    OTHER_D0941E68 -->|imports x11| COMMUNITY_2_8C8DF7B9
+    OTHER_D0941E68 -->|imports x10| COMMUNITY_11_DE018FC2
+    COMMUNITY_2_8C8DF7B9 -->|imports x10| OTHER_D0941E68
+    COMMUNITY_6_7D637A07 -->|imports x9| OTHER_D0941E68
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -146,7 +146,7 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>33</td><td><code>123, 203</code></td></tr><tr><td>Graph Build</td><td>72</td><td><code>22, 35, 45, 75, 79</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>79</td><td><code>57, 27, 134</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>907</td><td><code>17, 52, 56, 70, 119, 74, 154, 128, 130, 135, 136, 137, 140, 141, 142, 143, 144, 145, 146, 150, 151, 159, 163, 164, 169, 170, 172, 177, 153, 179, 181, 182, 183, 184, 187, 191, 193, 194, 195, 197, 65, 199, 200, 201, 206, 207, 208, 209, 210, 211, 212, 215, 216, 218, 219, 220, 222, 223, 224, 20, 225, 226, 227, 228, 229, 235, 236, 5, 237, 238, 239, 240, 241, 242, 243, 244, 246, 247, 250, 251, 252, 86, 106</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>76</td><td><code>33, 34</code></td></tr><tr><td>Serving API</td><td>42</td><td><code>28</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>138</td><td><code>126, 133, 139, 54, 231, 232, 233, 9, 10, 100, 101, 125, 180, 189, 213, 275, 277, 278, 279, 29, 66, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 102, 103</code></td></tr><tr><td>Community 1</td><td>73</td><td><code>1</code></td></tr><tr><td>Community 12</td><td>69</td><td><code>12</code></td></tr><tr><td>Community 0</td><td>46</td><td><code>0</code></td></tr><tr><td>Community 11</td><td>37</td><td><code>11</code></td></tr><tr><td>Community 2</td><td>35</td><td><code>2</code></td></tr><tr><td>Community 15</td><td>34</td><td><code>15</code></td></tr><tr><td>Community 64</td><td>32</td><td><code>64</code></td></tr><tr><td>Other</td><td>805</td><td><code>6, 19, 120, 122, 16, 4, 7, 124, 69, 127, 129, 131, 132, 152, 138, 13, 147, 149, 155, 156, 157, 158, 160, 161, 3, 8, 165, 166, 167, 168, 171, 173, 174, 175, 176, 178, 59, 185, 186, 190, 192, 21, 196, 198, 202, 72, 204, 214, 221, 234, 245, 248, 249, 14, 253, 105, 271, 272, 273, 274, 276, 80, 81, 82, 104, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 280</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>33</td><td><code>123, 203</code></td></tr><tr><td>Graph Build</td><td>72</td><td><code>22, 35, 45, 75, 79</code></td></tr><tr><td>Analysis &amp; Clustering</td><td>79</td><td><code>57, 27, 134</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>907</td><td><code>17, 52, 56, 70, 119, 74, 154, 128, 130, 135, 136, 137, 140, 141, 142, 143, 144, 145, 146, 150, 151, 159, 163, 164, 169, 170, 172, 177, 153, 179, 181, 182, 183, 184, 187, 191, 193, 194, 195, 197, 65, 199, 200, 201, 206, 207, 208, 209, 210, 211, 212, 215, 216, 218, 219, 220, 222, 223, 224, 20, 225, 226, 227, 228, 229, 235, 236, 5, 237, 238, 239, 240, 241, 242, 243, 244, 246, 247, 250, 251, 252, 86, 106</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>76</td><td><code>33, 34</code></td></tr><tr><td>Serving API</td><td>42</td><td><code>28</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>138</td><td><code>126, 133, 139, 54, 231, 232, 233, 9, 10, 100, 101, 125, 180, 189, 213, 275, 277, 278, 279, 29, 66, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 102, 103</code></td></tr><tr><td>Community 1</td><td>73</td><td><code>1</code></td></tr><tr><td>Community 12</td><td>48</td><td><code>12</code></td></tr><tr><td>Community 15</td><td>48</td><td><code>15</code></td></tr><tr><td>Community 11</td><td>37</td><td><code>11</code></td></tr><tr><td>Community 2</td><td>34</td><td><code>2</code></td></tr><tr><td>Community 64</td><td>32</td><td><code>64</code></td></tr><tr><td>Community 6</td><td>30</td><td><code>6</code></td></tr><tr><td>Other</td><td>833</td><td><code>120, 14, 0, 122, 4, 7, 124, 19, 127, 129, 131, 132, 138, 69, 16, 18, 147, 149, 152, 155, 156, 157, 158, 13, 160, 161, 23, 3, 165, 166, 167, 168, 171, 173, 174, 175, 176, 178, 59, 8, 185, 186, 190, 192, 21, 196, 198, 202, 24, 72, 204, 214, 221, 234, 245, 248, 249, 253, 105, 271, 272, 273, 274, 276, 80, 81, 82, 104, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 280</code></td></tr>
     </table>
   </div>
   <div class="card">
@@ -158,11 +158,11 @@ flowchart LR
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>2478 nodes · 3007 edges · 216 communities (163 shown, 53 thin omitted)</li>
+      <li>2482 nodes · 3018 edges · 219 communities (167 shown, 52 thin omitted)</li>
       <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.88)</li>
       <li>Token cost: 0 input · 0 output</li>
-      <li>1. `MediaStore` - 117 edges</li>
-      <li>2. `useTranslations()` - 60 edges</li>
+      <li>1. `MediaStore` - 118 edges</li>
+      <li>2. `useTranslations()` - 61 edges</li>
       <li>3. `RemoteStore` - 55 edges</li>
     </ul>
   </div>
@@ -2937,12 +2937,12 @@ flowchart LR
 
 <!-- ====== 10. Community 12 ====== -->
 <h2 id="community-12">10. Community 12</h2>
-<p>Community 12 groups implementation around frontend, services, websocketservicejs, components, mostly in frontend/services/websocketService.js, frontend/services/apiCall.jsx, remote/master/MasterRemotePlayerControlView.jsx. This section covers 69 nodes and 142 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Community 12 groups implementation around frontend, websocketservicejs, services, components, mostly in frontend/services/websocketService.js, remote/master/MasterRemotePlayerControlView.jsx, remote/master/MasterRemoteProgressSlider.jsx. This section covers 48 nodes and 109 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Community 12 (69 nodes, 142 edges)
+    %% Section: Community 12 (48 nodes, 109 edges)
     subgraph community_12_frontend_services_websocketService_7cfb9ebc["frontend/services/websocketService.js"]
         services_websocketservice_37443750("websocketService.js")
         services_websocketservice_websocketservice_2776e8c6("WebSocketService<br/><small>frontend/services/websocketService.js</small>")
@@ -2957,16 +2957,12 @@ flowchart LR
         services_websocketservice_websocketservice_disco_6211342c("disconnect()<br/><small>frontend/services/websocketService.js</small>")
         services_websocketservice_websocketservice_getic_6ce0d075("getIceServers()<br/><small>frontend/services/websocketService.js</small>")
         services_websocketservice_websocketservice_joinr_c035e663("joinRoom()<br/><small>frontend/services/websocketService.js</small>")
+        services_websocketservice_websocketservice_leave_3e2c0e41("leaveRoom()<br/><small>frontend/services/websocketService.js</small>")
+        services_websocketservice_websocketservice_maste_1a2519e5("masterDisconnecting()<br/><small>frontend/services/websocketService.js</small>")
+        services_websocketservice_websocketservice_ping_0a64d9a9("ping()<br/><small>frontend/services/websocketService.js</small>")
     end
-    subgraph community_12_frontend_services_apiCall_jsx_0cd9695e["frontend/services/apiCall.jsx"]
-        services_apicall_buildimageurl_2185c86c("buildImageURL()<br/><small>frontend/services/apiCall.jsx</small>")
-        services_apicall_tmdbtomediaitem_1d346094("tmdbToMediaItem()<br/><small>frontend/services/apiCall.jsx</small>")
-        services_apicall_getseriesdetails_e7e5a12a("getSeriesDetails()<br/><small>frontend/services/apiCall.jsx</small>")
-    end
-    remote_slavescreen_8efa67f3("SlaveScreen.jsx")
+    modals_mediasyncmodal_f8374923("MediaSyncModal.jsx")
     master_masterremoteplayercontrolview_275e5f7a("MasterRemotePlayerControlView.jsx")
-    services_apicall_buildimageurl_2185c86c -->|calls| services_apicall_tmdbtomediaitem_1d346094
-    services_apicall_tmdbtomediaitem_1d346094 -->|calls| services_apicall_getseriesdetails_e7e5a12a
     services_websocketservice_37443750 -->|method| services_websocketservice_eventemitter_construct_9761fb58
     services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_chang_00f1e332
     services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_chang_05a48b82
@@ -2976,6 +2972,9 @@ flowchart LR
     services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_disco_6211342c
     services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_getic_6ce0d075
     services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_joinr_c035e663
+    services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_leave_3e2c0e41
+    services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_maste_1a2519e5
+    services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_ping_0a64d9a9
     services_websocketservice_37443750 -->|method| services_websocketservice_websocketservice_sendm_40fd645a
     services_websocketservice_eventemitter_c5669b64 -->|method| services_websocketservice_eventemitter_construct_9761fb58
     services_websocketservice_eventemitter_construct_9761fb58 -->|calls| services_websocketservice_websocketservice_conne_a002cecc
@@ -2987,9 +2986,8 @@ flowchart LR
     services_websocketservice_websocketservice_2776e8c6 -->|method| services_websocketservice_websocketservice_disco_6211342c
     services_websocketservice_websocketservice_2776e8c6 -->|method| services_websocketservice_websocketservice_getic_6ce0d075
     services_websocketservice_websocketservice_2776e8c6 -->|method| services_websocketservice_websocketservice_joinr_c035e663
-    services_websocketservice_websocketservice_2776e8c6 -->|method| services_websocketservice_websocketservice_sendm_40fd645a
-    services_websocketservice_websocketservice_sendm_40fd645a -->|calls| services_websocketservice_websocketservice_chang_00f1e332
-    %% Omitted for readability: 51 nodes, 7 edges
+    services_websocketservice_websocketservice_2776e8c6 -->|method| services_websocketservice_websocketservice_leave_3e2c0e41
+    %% Omitted for readability: 30 nodes, 14 edges
     class services_websocketservice_37443750 module;
     class services_websocketservice_websocketservice_2776e8c6 klass;
     class services_websocketservice_websocketservice_sendm_40fd645a function;
@@ -3003,10 +3001,10 @@ flowchart LR
     class services_websocketservice_websocketservice_disco_6211342c function;
     class services_websocketservice_websocketservice_getic_6ce0d075 function;
     class services_websocketservice_websocketservice_joinr_c035e663 function;
-    class services_apicall_buildimageurl_2185c86c ui;
-    class services_apicall_tmdbtomediaitem_1d346094 ui;
-    class services_apicall_getseriesdetails_e7e5a12a ui;
-    class remote_slavescreen_8efa67f3 ui;
+    class services_websocketservice_websocketservice_leave_3e2c0e41 function;
+    class services_websocketservice_websocketservice_maste_1a2519e5 function;
+    class services_websocketservice_websocketservice_ping_0a64d9a9 function;
+    class modals_mediasyncmodal_f8374923 async;
     class master_masterremoteplayercontrolview_275e5f7a ui;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -3047,30 +3045,14 @@ flowchart LR
 </tr>
 <tr>
   <td>3</td>
-  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>remoteStore.js</code><br><small style="color:var(--muted)">frontend/store/remoteStore.js</small><br><code>SlaveBackground.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveBackground.jsx</small><br><code>SlaveConnectedView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small><br>+2 more</td>
-  <td>SlaveScreen.jsx node in components/remote/SlaveScreen.jsx.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>SlaveScreen</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>SlaveScreen node in components/remote/SlaveScreen.jsx.</td>
-</tr>
-<tr>
-  <td>5</td>
   <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ConnectionIndicator.jsx</code><br><small style="color:var(--muted)">components/utilities/ConnectionIndicator.jsx</small><br><code>formatTime()</code><br><small style="color:var(--muted)">remote/master/formatTime.js</small><br><code>formatTime.js</code><br><small style="color:var(--muted)">remote/master/formatTime.js</small><br>+5 more</td>
+  <td><code>formatTime()</code><br><small style="color:var(--muted)">remote/master/formatTime.js</small><br><code>formatTime.js</code><br><small style="color:var(--muted)">remote/master/formatTime.js</small><br><code>MasterRemoteProgressSlider()</code><br><small style="color:var(--muted)">remote/master/MasterRemoteProgressSlider.jsx</small><br>+3 more</td>
   <td>MasterRemotePlayerControlView.jsx node in remote/master/MasterRemotePlayerControlView.jsx.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>4</td>
   <td><code>MasterRemotePlayerControlView</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -3078,7 +3060,7 @@ flowchart LR
   <td>MasterRemotePlayerControlView node in remote/master/MasterRemotePlayerControlView.jsx.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>5</td>
   <td><code>MasterRemoteProgressSlider.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemoteProgressSlider.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small></td>
@@ -3086,7 +3068,7 @@ flowchart LR
   <td>MasterRemoteProgressSlider.jsx node in remote/master/MasterRemoteProgressSlider.jsx.</td>
 </tr>
 <tr>
-  <td>8</td>
+  <td>6</td>
   <td><code>MasterRemoteProgressSlider()</code><br><small style="color:var(--muted)">remote/master/MasterRemoteProgressSlider.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small></td>
@@ -3094,7 +3076,7 @@ flowchart LR
   <td>MasterRemoteProgressSlider() node in remote/master/MasterRemoteProgressSlider.jsx.</td>
 </tr>
 <tr>
-  <td>9</td>
+  <td>7</td>
   <td><code>formatTime.js</code><br><small style="color:var(--muted)">remote/master/formatTime.js</small></td>
   <td><span class="tag tag-class">Module</span></td>
   <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small><br><code>MasterRemoteProgressSlider.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemoteProgressSlider.jsx</small></td>
@@ -3102,7 +3084,7 @@ flowchart LR
   <td>formatTime.js node in remote/master/formatTime.js.</td>
 </tr>
 <tr>
-  <td>10</td>
+  <td>8</td>
   <td><code>formatTime()</code><br><small style="color:var(--muted)">remote/master/formatTime.js</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small><br><code>MasterRemoteProgressSlider.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemoteProgressSlider.jsx</small></td>
@@ -3110,143 +3092,15 @@ flowchart LR
   <td>formatTime() node in remote/master/formatTime.js.</td>
 </tr>
 <tr>
-  <td>11</td>
-  <td><code>SlaveBackground.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveBackground.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>SlaveBackground.jsx node in remote/slave/SlaveBackground.jsx.</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>SmartTVBackground()</code><br><small style="color:var(--muted)">remote/slave/SlaveBackground.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>SmartTVBackground() node in remote/slave/SlaveBackground.jsx.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>SlaveConnectedView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
-  <td><code>ConnectionIndicator.jsx</code><br><small style="color:var(--muted)">components/utilities/ConnectionIndicator.jsx</small><br><code>remoteStore.js</code><br><small style="color:var(--muted)">frontend/store/remoteStore.js</small></td>
-  <td>SlaveConnectedView.jsx node in remote/slave/SlaveConnectedView.jsx.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>ConnectionIndicator.jsx</code><br><small style="color:var(--muted)">components/utilities/ConnectionIndicator.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small><br><code>SlaveConnectedView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small></td>
-  <td><code>remoteStore.js</code><br><small style="color:var(--muted)">frontend/store/remoteStore.js</small></td>
-  <td>ConnectionIndicator.jsx node in components/utilities/ConnectionIndicator.jsx.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>ConnectionIndicator</code><br><small style="color:var(--muted)">components/utilities/ConnectionIndicator.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>ConnectionIndicator node in components/utilities/ConnectionIndicator.jsx.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>apiCall.jsx</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-endpoint">API</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>remoteStore.js</code><br><small style="color:var(--muted)">frontend/store/remoteStore.js</small></td>
-  <td>apiCall.jsx node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>apiClient</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-endpoint">API</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>apiClient node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>buildImageURL()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>tmdbToMediaItem()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td>buildImageURL() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>tmdbToMediaItem()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>buildImageURL()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><code>getSeriesDetails()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td>tmdbToMediaItem() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>getTrending()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>getTrending() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>getLatestMovies()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Verifies imports, entry points, or version behavior.</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>getTopRatedSeries()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>getTopRatedSeries() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>getPopularAnime()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>getPopularAnime() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>getSeriesDetails()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>tmdbToMediaItem()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><code>remoteStore.js</code><br><small style="color:var(--muted)">frontend/store/remoteStore.js</small></td>
-  <td>getSeriesDetails() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>getSeriesEpisodes()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>remoteStore.js</code><br><small style="color:var(--muted)">frontend/store/remoteStore.js</small></td>
-  <td>getSeriesEpisodes() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>getSeriesImages()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>getSeriesImages() node in frontend/services/apiCall.jsx.</td>
-</tr>
-<tr>
-  <td>27</td>
+  <td>9</td>
   <td><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
   <td><span class="tag tag-class">Module</span></td>
-  <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small><br><code>MediaSyncModal.jsx</code><br><small style="color:var(--muted)">components/modals/MediaSyncModal.jsx</small><br><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
-  <td><code>changeName()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>changeRoomCode()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>clientId()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br>+28 more</td>
+  <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small><br><code>MediaSyncModal.jsx</code><br><small style="color:var(--muted)">components/modals/MediaSyncModal.jsx</small></td>
+  <td><code>changeName()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>changeRoomCode()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>clientId()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br>+27 more</td>
   <td>websocketService.js node in frontend/services/websocketService.js.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>10</td>
   <td><code>ICE_SERVERS</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3254,7 +3108,7 @@ flowchart LR
   <td>ICE_SERVERS node in frontend/services/websocketService.js.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>11</td>
   <td><code>EventEmitter</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -3262,12 +3116,156 @@ flowchart LR
   <td>EventEmitter node in frontend/services/websocketService.js.</td>
 </tr>
 <tr>
-  <td>30</td>
+  <td>12</td>
   <td><code>.constructor()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>EventEmitter</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
   <td><code>connect()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
   <td>.constructor() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>.on()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>EventEmitter</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.on() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>.off()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>EventEmitter</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.off() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>.emit()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>EventEmitter</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><code>connect()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>.emit() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>MasterRemotePlayerControlView.jsx</code><br><small style="color:var(--muted)">remote/master/MasterRemotePlayerControlView.jsx</small><br><code>MediaSyncModal.jsx</code><br><small style="color:var(--muted)">components/modals/MediaSyncModal.jsx</small></td>
+  <td><code>changeName()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>changeRoomCode()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>clientId()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br>+27 more</td>
+  <td>WebSocketService node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>.constructor()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><code>connect()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>.constructor() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>.clientId()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-cmd">Entry</span></td>
+  <td><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.clientId() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>.getIceServers()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.getIceServers() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>.connect()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>constructor()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>constructor()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>emit()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br>+2 more</td>
+  <td>No direct outbound edge</td>
+  <td>.connect() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>.sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><code>changeName()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>changeRoomCode()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>createRoom()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br>+18 more</td>
+  <td>.sendMessage() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>.registerSlave()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.registerSlave() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>.leaveRoom()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.leaveRoom() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>.createRoom()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.createRoom() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>.joinRoom()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.joinRoom() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>.selectMedia()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.selectMedia() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>.changeRoomCode()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.changeRoomCode() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>.registerMaster()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.registerMaster() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>.playbackControl()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>.playbackControl() node in frontend/services/websocketService.js.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>.sendChatMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>sendMessage()</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>WebSocketService</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small><br><code>websocketService.js</code><br><small style="color:var(--muted)">frontend/services/websocketService.js</small></td>
+  <td>No direct outbound edge</td>
+  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
 </tr>
 </table>
 
@@ -3277,95 +3275,96 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>frontend/services/websocketService.js</code></td><td>38 nodes</td></tr>
-<tr><td><code>frontend/services/apiCall.jsx</code></td><td>11 nodes</td></tr>
 <tr><td><code>remote/master/MasterRemotePlayerControlView.jsx</code></td><td>3 nodes</td></tr>
 <tr><td><code>remote/master/MasterRemoteProgressSlider.jsx</code></td><td>3 nodes</td></tr>
 <tr><td><code>components/modals/MediaSyncModal.jsx</code></td><td>2 nodes</td></tr>
-<tr><td><code>components/remote/SlaveScreen.jsx</code></td><td>2 nodes</td></tr>
 <tr><td><code>remote/master/formatTime.js</code></td><td>2 nodes</td></tr>
-<tr><td><code>remote/slave/SlaveBackground.jsx</code></td><td>2 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: method x64, calls x28, contains x23, imports x17. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: method x64, calls x26, contains x9, imports x5. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 11. Community 0 ====== -->
-<h2 id="community-0">11. Community 0</h2>
-<p>Community 0 groups implementation around frontend, components, layout, grammarjs, mostly in frontend/motion/grammar.js, components/layout/CinematicFooter.jsx, components/media/DetailView.jsx. This section covers 46 nodes and 101 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 11. Community 15 ====== -->
+<h2 id="community-15">11. Community 15</h2>
+<p>Community 15 groups implementation around frontend, components, remote, slave, mostly in components/media/VideoControlsContainer.jsx, components/utilities/Chat.jsx, frontend/hooks/useTranslations.js. This section covers 48 nodes and 92 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Community 0 (46 nodes, 101 edges)
-    subgraph community_0_frontend_motion_grammar_js_5e5ef14e["frontend/motion/grammar.js"]
-        motion_grammar_reducedmotion_db33a3ee("reducedMotion()<br/><small>frontend/motion/grammar.js</small>")
-        motion_grammar_computematch_e191d723("computeMatch()<br/><small>frontend/motion/grammar.js</small>")
-        motion_grammar_ensurecached_82155094("ensureCached()<br/><small>frontend/motion/grammar.js</small>")
-        motion_grammar_onreducedmotionchange_e9407751("onReducedMotionChange()<br/><small>frontend/motion/grammar.js</small>")
-        motion_grammar_motionenabled_a1d77dbe("motionEnabled()<br/><small>frontend/motion/grammar.js</small>")
-        motion_grammar_resolveduration_970c0ff3("resolveDuration()<br/><small>frontend/motion/grammar.js</small>")
+    %% Section: Community 15 (48 nodes, 92 edges)
+    subgraph community_15_components_layout_Card_jsx_a0977a41["components/layout/Card.jsx"]
+        layout_card_a0d7ca42("Card.jsx")
+        layout_card_card_e9db8030("Card<br/><small>components/layout/Card.jsx</small>")
     end
-    subgraph community_0_components_layout_CinematicFooter_js_d4e973c1["components/layout/CinematicFooter.jsx"]
-        layout_cinematicfooter_24db785b("CinematicFooter.jsx")
-        layout_cinematicfooter_cinematicfooterinner_902cb1be("CinematicFooterInner()<br/><small>components/layout/CinematicFooter.jsx</small>")
+    subgraph community_15_components_layout_CinematicHero_jsx_dcc2b4d1["components/layout/CinematicHero.jsx"]
+        layout_cinematichero_d71749e6("CinematicHero.jsx")
+        layout_cinematichero_cinematichero_5b291233("CinematicHero<br/><small>components/layout/CinematicHero.jsx</small>")
     end
-    subgraph community_0_components_layout_CinematicGrid_jsx_e33bc25b["components/layout/CinematicGrid.jsx"]
-        layout_cinematicgrid_ff6a6631("CinematicGrid.jsx")
-        layout_cinematicgrid_cinematicgridinner_bfaf9c29("CinematicGridInner()<br/><small>components/layout/CinematicGrid.jsx</small>")
+    subgraph community_15_components_utilities_ReorderDrawer_418ea34f["components/utilities/ReorderDrawer.jsx"]
+        utilities_reorderdrawer_reorderdrawer_869d45bf("ReorderDrawer()<br/><small>components/utilities/ReorderDrawer.jsx</small>")
+        utilities_reorderdrawer_e4b5a4b2("ReorderDrawer.jsx")
     end
-    subgraph community_0_components_layout_CinematicRow_jsx_4e4f2750["components/layout/CinematicRow.jsx"]
-        layout_cinematicrow_895d0edf("CinematicRow.jsx")
-        layout_cinematicrow_cinematicrowinner_e6b3b1d4("CinematicRowInner()<br/><small>components/layout/CinematicRow.jsx</small>")
+    subgraph community_15_frontend_hooks_useTranslations_js_cdd27ab0["frontend/hooks/useTranslations.js"]
+        hooks_usetranslations_848f2b92("useTranslations.js")
+        hooks_usetranslations_usetranslations_2aabf8c1("useTranslations()<br/><small>frontend/hooks/useTranslations.js</small>")
     end
-    subgraph community_0_components_media_CinematicDetail_jsx_9460e101["components/media/CinematicDetail.jsx"]
-        media_cinematicdetail_9756d3bf("CinematicDetail.jsx")
-        media_cinematicdetail_cinematicdetailinner_920006eb("CinematicDetailInner()<br/><small>components/media/CinematicDetail.jsx</small>")
-    end
-    feedback_skeleton_af3b0e9d("Skeleton.jsx")
-    layout_cinematichero_d71749e6("CinematicHero.jsx")
-    layout_holocard_holocardinner_09175738("HoloCardInner()<br/><small>components/layout/HoloCard.jsx</small>")
-    media_detailview_9de61f18("DetailView.jsx")
-    layout_cinematicfooter_cinematicfooterinner_902cb1be -->|calls| motion_grammar_reducedmotion_db33a3ee
-    layout_cinematicgrid_cinematicgridinner_bfaf9c29 -->|calls| motion_grammar_reducedmotion_db33a3ee
-    layout_cinematicrow_cinematicrowinner_e6b3b1d4 -->|calls| motion_grammar_reducedmotion_db33a3ee
-    layout_holocard_holocardinner_09175738 -->|calls| motion_grammar_reducedmotion_db33a3ee
-    media_cinematicdetail_cinematicdetailinner_920006eb -->|calls| motion_grammar_reducedmotion_db33a3ee
-    motion_grammar_computematch_e191d723 -->|calls| motion_grammar_ensurecached_82155094
-    motion_grammar_ensurecached_82155094 -->|calls| motion_grammar_onreducedmotionchange_e9407751
-    motion_grammar_ensurecached_82155094 -->|calls| motion_grammar_reducedmotion_db33a3ee
-    motion_grammar_reducedmotion_db33a3ee -->|calls| motion_grammar_motionenabled_a1d77dbe
-    motion_grammar_reducedmotion_db33a3ee -->|calls| motion_grammar_resolveduration_970c0ff3
-    feedback_skeleton_af3b0e9d -->|imports| layout_cinematicgrid_ff6a6631
-    layout_cinematicfooter_24db785b -->|imports| motion_grammar_reducedmotion_db33a3ee
-    layout_cinematicgrid_ff6a6631 -->|imports| motion_grammar_reducedmotion_db33a3ee
-    layout_cinematichero_d71749e6 -->|imports| motion_grammar_reducedmotion_db33a3ee
-    layout_cinematicrow_895d0edf -->|imports| motion_grammar_reducedmotion_db33a3ee
-    media_cinematicdetail_9756d3bf -->|imports| media_detailview_9de61f18
-    media_cinematicdetail_9756d3bf -->|imports| motion_grammar_reducedmotion_db33a3ee
-    media_detailview_9de61f18 -->|imports| motion_grammar_reducedmotion_db33a3ee
-    %% Omitted for readability: 28 nodes, 0 edges
-    class motion_grammar_reducedmotion_db33a3ee function;
-    class motion_grammar_computematch_e191d723 function;
-    class motion_grammar_ensurecached_82155094 function;
-    class motion_grammar_onreducedmotionchange_e9407751 function;
-    class motion_grammar_motionenabled_a1d77dbe function;
-    class motion_grammar_resolveduration_970c0ff3 function;
-    class layout_cinematicfooter_24db785b ui;
-    class layout_cinematicfooter_cinematicfooterinner_902cb1be ui;
-    class layout_cinematicgrid_ff6a6631 ui;
-    class layout_cinematicgrid_cinematicgridinner_bfaf9c29 ui;
-    class layout_cinematicrow_895d0edf ui;
-    class layout_cinematicrow_cinematicrowinner_e6b3b1d4 ui;
-    class media_cinematicdetail_9756d3bf ui;
-    class media_cinematicdetail_cinematicdetailinner_920006eb ui;
-    class feedback_skeleton_af3b0e9d ui;
+    layout_cinematicrow_cinematicrow_196645c7("CinematicRow<br/><small>components/layout/CinematicRow.jsx</small>")
+    layout_contentrow_5db7adec("ContentRow.jsx")
+    layout_hero_f3a332bf("Hero.jsx")
+    media_slavevideoplayer_3713855c("SlaveVideoPlayer.jsx")
+    remote_slavescreen_8efa67f3("SlaveScreen.jsx")
+    home_homeview_8f0e434e("HomeView.jsx")
+    slave_slaveconnectedview_slaveconnectedview_7fe22074("SlaveConnectedView()<br/><small>remote/slave/SlaveConnectedView.jsx</small>")
+    slave_slaveloadingview_slaveloadingview_4c7b8ed4("SlaveLoadingView()<br/><small>remote/slave/SlaveLoadingView.jsx</small>")
+    slave_slaveqrcodecard_qrcodecard_5d621226("QRCodeCard()<br/><small>remote/slave/SlaveQRCodeCard.jsx</small>")
+    slave_slavereconnectingview_slavereconnectingvie_215a72ef("SlaveReconnectingView()<br/><small>remote/slave/SlaveReconnectingView.jsx</small>")
+    slave_slaveconnectedview_slaveconnectedview_7fe22074 -->|calls| hooks_usetranslations_848f2b92
+    slave_slaveconnectedview_slaveconnectedview_7fe22074 -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
+    slave_slaveloadingview_slaveloadingview_4c7b8ed4 -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
+    slave_slaveqrcodecard_qrcodecard_5d621226 -->|calls| hooks_usetranslations_848f2b92
+    slave_slaveqrcodecard_qrcodecard_5d621226 -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
+    slave_slavereconnectingview_slavereconnectingvie_215a72ef -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
+    utilities_reorderdrawer_reorderdrawer_869d45bf -->|calls| hooks_usetranslations_848f2b92
+    utilities_reorderdrawer_reorderdrawer_869d45bf -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
+    layout_card_a0d7ca42 -->|imports| hooks_usetranslations_848f2b92
+    layout_card_a0d7ca42 -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
+    layout_card_a0d7ca42 -->|imports| layout_contentrow_5db7adec
+    layout_cinematichero_d71749e6 -->|imports| home_homeview_8f0e434e
+    layout_cinematichero_d71749e6 -->|imports| hooks_usetranslations_848f2b92
+    layout_cinematichero_d71749e6 -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
+    layout_cinematichero_cinematichero_5b291233 -->|imports| home_homeview_8f0e434e
+    layout_cinematicrow_cinematicrow_196645c7 -->|imports| home_homeview_8f0e434e
+    layout_contentrow_5db7adec -->|imports| home_homeview_8f0e434e
+    layout_contentrow_5db7adec -->|imports| hooks_usetranslations_848f2b92
+    layout_contentrow_5db7adec -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
+    layout_contentrow_5db7adec -->|imports| layout_card_card_e9db8030
+    layout_contentrow_5db7adec -->|imports| utilities_reorderdrawer_e4b5a4b2
+    layout_contentrow_5db7adec -->|imports| utilities_reorderdrawer_reorderdrawer_869d45bf
+    layout_hero_f3a332bf -->|imports| home_homeview_8f0e434e
+    layout_hero_f3a332bf -->|imports| hooks_usetranslations_848f2b92
+    %% Omitted for readability: 30 nodes, 7 edges
+    class layout_card_a0d7ca42 ui;
+    class layout_card_card_e9db8030 ui;
     class layout_cinematichero_d71749e6 ui;
-    class layout_holocard_holocardinner_09175738 ui;
-    class media_detailview_9de61f18 ui;
+    class layout_cinematichero_cinematichero_5b291233 ui;
+    class utilities_reorderdrawer_reorderdrawer_869d45bf ui;
+    class utilities_reorderdrawer_e4b5a4b2 ui;
+    class hooks_usetranslations_848f2b92 ui;
+    class hooks_usetranslations_usetranslations_2aabf8c1 ui;
+    class layout_cinematicrow_cinematicrow_196645c7 ui;
+    class layout_contentrow_5db7adec ui;
+    class layout_hero_f3a332bf ui;
+    class media_slavevideoplayer_3713855c ui;
+    class remote_slavescreen_8efa67f3 ui;
+    class home_homeview_8f0e434e ui;
+    class slave_slaveconnectedview_slaveconnectedview_7fe22074 ui;
+    class slave_slaveloadingview_slaveloadingview_4c7b8ed4 ui;
+    class slave_slaveqrcodecard_qrcodecard_5d621226 ui;
+    class slave_slavereconnectingview_slavereconnectingvie_215a72ef ui;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -3389,86 +3388,22 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>Skeleton.jsx</code><br><small style="color:var(--muted)">components/feedback/Skeleton.jsx</small></td>
+  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>CinematicGrid.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small></td>
-  <td>Skeleton.jsx node in components/feedback/Skeleton.jsx.</td>
+  <td><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>Card.jsx node in components/layout/Card.jsx.</td>
 </tr>
 <tr>
   <td>2</td>
-  <td><code>SkeletonInner()</code><br><small style="color:var(--muted)">components/feedback/Skeleton.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>SkeletonInner() node in components/feedback/Skeleton.jsx.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>SkeletonCard()</code><br><small style="color:var(--muted)">components/feedback/Skeleton.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>CinematicGrid.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small></td>
-  <td>SkeletonCard() node in components/feedback/Skeleton.jsx.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>CinematicFooter.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>durations</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>easings</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>grammar.js</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br>+1 more</td>
-  <td>CinematicFooter.jsx node in components/layout/CinematicFooter.jsx.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>socialIcons</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>socialIcons node in components/layout/CinematicFooter.jsx.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>CinematicFooterInner()</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>reducedMotion()</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small></td>
-  <td>CinematicFooterInner() node in components/layout/CinematicFooter.jsx.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>CinematicFooter</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small></td>
-  <td>CinematicFooter node in components/layout/CinematicFooter.jsx.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>CinematicGrid.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>Skeleton.jsx</code><br><small style="color:var(--muted)">components/feedback/Skeleton.jsx</small><br><code>SkeletonCard()</code><br><small style="color:var(--muted)">components/feedback/Skeleton.jsx</small></td>
-  <td><code>durations</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>easings</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small><br>+5 more</td>
-  <td>CinematicGrid.jsx node in components/layout/CinematicGrid.jsx.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>CinematicGridInner()</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>reducedMotion()</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small></td>
-  <td>CinematicGridInner() node in components/layout/CinematicGrid.jsx.</td>
-</tr>
-<tr>
-  <td>10</td>
   <td><code>CinematicHero.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicHero.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>durations</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>easings</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>grammar.js</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br>+3 more</td>
+  <td><code>HomeView.jsx</code><br><small style="color:var(--muted)">features/home/HomeView.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
   <td>CinematicHero.jsx node in components/layout/CinematicHero.jsx.</td>
 </tr>
 <tr>
-  <td>11</td>
+  <td>3</td>
   <td><code>splitTitle()</code><br><small style="color:var(--muted)">components/layout/CinematicHero.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -3476,7 +3411,7 @@ flowchart LR
   <td>splitTitle() node in components/layout/CinematicHero.jsx.</td>
 </tr>
 <tr>
-  <td>12</td>
+  <td>4</td>
   <td><code>CinematicHero</code><br><small style="color:var(--muted)">components/layout/CinematicHero.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -3484,23 +3419,7 @@ flowchart LR
   <td>CinematicHero node in components/layout/CinematicHero.jsx.</td>
 </tr>
 <tr>
-  <td>13</td>
-  <td><code>CinematicRow.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicRow.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>durations</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>easings</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>grammar.js</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br>+5 more</td>
-  <td>CinematicRow.jsx node in components/layout/CinematicRow.jsx.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>CinematicRowInner()</code><br><small style="color:var(--muted)">components/layout/CinematicRow.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>reducedMotion()</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small></td>
-  <td>CinematicRowInner() node in components/layout/CinematicRow.jsx.</td>
-</tr>
-<tr>
-  <td>15</td>
+  <td>5</td>
   <td><code>CinematicRow</code><br><small style="color:var(--muted)">components/layout/CinematicRow.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -3508,124 +3427,204 @@ flowchart LR
   <td>CinematicRow node in components/layout/CinematicRow.jsx.</td>
 </tr>
 <tr>
-  <td>16</td>
-  <td><code>Footer.jsx</code><br><small style="color:var(--muted)">components/layout/Footer.jsx</small></td>
+  <td>6</td>
+  <td><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small></td>
-  <td>Footer.jsx node in components/layout/Footer.jsx.</td>
+  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small></td>
+  <td><code>Card</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small><br><code>HomeView.jsx</code><br><small style="color:var(--muted)">features/home/HomeView.jsx</small><br><code>ReorderDrawer()</code><br><small style="color:var(--muted)">components/utilities/ReorderDrawer.jsx</small><br>+3 more</td>
+  <td>ContentRow.jsx node in components/layout/ContentRow.jsx.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>7</td>
   <td><code>Hero.jsx</code><br><small style="color:var(--muted)">components/layout/Hero.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>HomeView.jsx</code><br><small style="color:var(--muted)">features/home/HomeView.jsx</small></td>
+  <td><code>HomeView.jsx</code><br><small style="color:var(--muted)">features/home/HomeView.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
   <td>Hero.jsx node in components/layout/Hero.jsx.</td>
 </tr>
 <tr>
-  <td>18</td>
-  <td><code>HoloCard.jsx</code><br><small style="color:var(--muted)">components/layout/HoloCard.jsx</small></td>
+  <td>8</td>
+  <td><code>ManageLinksView.jsx</code><br><small style="color:var(--muted)">components/library/ManageLinksView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>CinematicGrid.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small><br><code>CinematicRow.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicRow.jsx</small></td>
-  <td><code>reducedMotion()</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>reducedMotion.js</code><br><small style="color:var(--muted)">frontend/utils/reducedMotion.js</small></td>
-  <td>HoloCard.jsx node in components/layout/HoloCard.jsx.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>ManageLinksView.jsx node in components/library/ManageLinksView.jsx.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>ManageLinksView</code><br><small style="color:var(--muted)">components/library/ManageLinksView.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>ManageLinksView node in components/library/ManageLinksView.jsx.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>SlaveVideoPlayer.jsx</code><br><small style="color:var(--muted)">components/media/SlaveVideoPlayer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>VideoControlsContainer.jsx</code><br><small style="color:var(--muted)">components/media/VideoControlsContainer.jsx</small></td>
+  <td>SlaveVideoPlayer.jsx node in components/media/SlaveVideoPlayer.jsx.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>SlaveVideoPlayer</code><br><small style="color:var(--muted)">components/media/SlaveVideoPlayer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>SlaveVideoPlayer node in components/media/SlaveVideoPlayer.jsx.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>VideoControlsContainer.jsx</code><br><small style="color:var(--muted)">components/media/VideoControlsContainer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>SlaveVideoPlayer.jsx</code><br><small style="color:var(--muted)">components/media/SlaveVideoPlayer.jsx</small></td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>VideoPlayer.jsx</code><br><small style="color:var(--muted)">components/media/VideoPlayer.jsx</small></td>
+  <td>VideoControlsContainer.jsx node in components/media/VideoControlsContainer.jsx.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>formatTime()</code><br><small style="color:var(--muted)">components/media/VideoControlsContainer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>formatTime() node in components/media/VideoControlsContainer.jsx.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>playbackRates</code><br><small style="color:var(--muted)">components/media/VideoControlsContainer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>playbackRates node in components/media/VideoControlsContainer.jsx.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>VideoControlsContainer</code><br><small style="color:var(--muted)">components/media/VideoControlsContainer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>VideoControlsContainer node in components/media/VideoControlsContainer.jsx.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>VideoPlayer.jsx</code><br><small style="color:var(--muted)">components/media/VideoPlayer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>VideoControlsContainer.jsx</code><br><small style="color:var(--muted)">components/media/VideoControlsContainer.jsx</small></td>
+  <td><code>Chat.jsx</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>VideoPlayer.jsx node in components/media/VideoPlayer.jsx.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>VideoPlayer</code><br><small style="color:var(--muted)">components/media/VideoPlayer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>VideoPlayer node in components/media/VideoPlayer.jsx.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>MasterScreen.jsx</code><br><small style="color:var(--muted)">components/remote/MasterScreen.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>MasterScreen.jsx node in components/remote/MasterScreen.jsx.</td>
 </tr>
 <tr>
   <td>19</td>
-  <td><code>HoloCardInner()</code><br><small style="color:var(--muted)">components/layout/HoloCard.jsx</small></td>
+  <td><code>MasterScreen</code><br><small style="color:var(--muted)">components/remote/MasterScreen.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>reducedMotion()</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small></td>
-  <td>HoloCardInner() node in components/layout/HoloCard.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>MasterScreen node in components/remote/MasterScreen.jsx.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>HoloCard</code><br><small style="color:var(--muted)">components/layout/HoloCard.jsx</small></td>
+  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>CinematicGrid.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small><br><code>CinematicRow.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicRow.jsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>HoloCard node in components/layout/HoloCard.jsx.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>SlaveBackground.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveBackground.jsx</small><br><code>SlaveConnectedView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small><br><code>SlaveLoadingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveLoadingView.jsx</small><br>+2 more</td>
+  <td>SlaveScreen.jsx node in components/remote/SlaveScreen.jsx.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>CinematicDetail.jsx</code><br><small style="color:var(--muted)">components/media/CinematicDetail.jsx</small></td>
+  <td><code>SlaveScreen</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>DetailView.jsx</code><br><small style="color:var(--muted)">components/media/DetailView.jsx</small><br><code>durations</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>easings</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br>+3 more</td>
-  <td>CinematicDetail.jsx node in components/media/CinematicDetail.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>SlaveScreen node in components/remote/SlaveScreen.jsx.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>CinematicDetailInner()</code><br><small style="color:var(--muted)">components/media/CinematicDetail.jsx</small></td>
+  <td><code>SlaveBackground.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveBackground.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>reducedMotion()</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small></td>
-  <td>CinematicDetailInner() node in components/media/CinematicDetail.jsx.</td>
+  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>SlaveBackground.jsx node in remote/slave/SlaveBackground.jsx.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>CinematicDetail</code><br><small style="color:var(--muted)">components/media/CinematicDetail.jsx</small></td>
+  <td><code>SmartTVBackground()</code><br><small style="color:var(--muted)">remote/slave/SlaveBackground.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small></td>
-  <td>CinematicDetail node in components/media/CinematicDetail.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>SmartTVBackground() node in remote/slave/SlaveBackground.jsx.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>DetailView.jsx</code><br><small style="color:var(--muted)">components/media/DetailView.jsx</small></td>
+  <td><code>SlaveConnectedView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>CinematicDetail.jsx</code><br><small style="color:var(--muted)">components/media/CinematicDetail.jsx</small></td>
-  <td><code>durations</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>easings</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small><br><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small><br>+2 more</td>
-  <td>DetailView.jsx node in components/media/DetailView.jsx.</td>
+  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>SlaveConnectedView.jsx node in remote/slave/SlaveConnectedView.jsx.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>holoFieldSx</code><br><small style="color:var(--muted)">components/media/DetailView.jsx</small></td>
+  <td><code>SlaveConnectedView()</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>holoFieldSx node in components/media/DetailView.jsx.</td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>SlaveConnectedView() node in remote/slave/SlaveConnectedView.jsx.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>SwipeableEpisodeCardDetailView</code><br><small style="color:var(--muted)">components/media/DetailView.jsx</small></td>
+  <td><code>SlaveLoadingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveLoadingView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>SwipeableEpisodeCardDetailView node in components/media/DetailView.jsx.</td>
+  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>SlaveLoadingView.jsx node in remote/slave/SlaveLoadingView.jsx.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>DetailView</code><br><small style="color:var(--muted)">components/media/DetailView.jsx</small></td>
+  <td><code>SlaveLoadingView()</code><br><small style="color:var(--muted)">remote/slave/SlaveLoadingView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>DetailView node in components/media/DetailView.jsx.</td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>SlaveLoadingView() node in remote/slave/SlaveLoadingView.jsx.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>HomeView.jsx</code><br><small style="color:var(--muted)">features/home/HomeView.jsx</small></td>
+  <td><code>SlavePairingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlavePairingView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>CinematicHero</code><br><small style="color:var(--muted)">components/layout/CinematicHero.jsx</small><br><code>CinematicHero.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicHero.jsx</small><br><code>CinematicRow</code><br><small style="color:var(--muted)">components/layout/CinematicRow.jsx</small><br>+2 more</td>
-  <td><code>ContentRow</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small><br><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small><br><code>Hero</code><br><small style="color:var(--muted)">components/layout/Hero.jsx</small></td>
-  <td>HomeView.jsx node in features/home/HomeView.jsx.</td>
+  <td><code>SlaveScreen.jsx</code><br><small style="color:var(--muted)">components/remote/SlaveScreen.jsx</small></td>
+  <td><code>SlaveQRCodeCard.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveQRCodeCard.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>SlavePairingView.jsx node in remote/slave/SlavePairingView.jsx.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>HomeView</code><br><small style="color:var(--muted)">features/home/HomeView.jsx</small></td>
+  <td><code>SlavePairingView</code><br><small style="color:var(--muted)">remote/slave/SlavePairingView.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>FeatureRouter.jsx</code><br><small style="color:var(--muted)">views/features/FeatureRouter.jsx</small></td>
-  <td>HomeView node in features/home/HomeView.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>SlavePairingView node in remote/slave/SlavePairingView.jsx.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>grammar.js</code><br><small style="color:var(--muted)">frontend/motion/grammar.js</small></td>
-  <td><span class="tag tag-class">Module</span></td>
-  <td><code>CinematicDetail.jsx</code><br><small style="color:var(--muted)">components/media/CinematicDetail.jsx</small><br><code>CinematicFooter.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small><br><code>CinematicGrid.jsx</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small><br>+3 more</td>
-  <td>No direct outbound edge</td>
-  <td>grammar.js node in frontend/motion/grammar.js.</td>
+  <td><code>SlaveQRCodeCard.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveQRCodeCard.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>SlavePairingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlavePairingView.jsx</small></td>
+  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
+  <td>SlaveQRCodeCard.jsx node in remote/slave/SlaveQRCodeCard.jsx.</td>
 </tr>
 </table>
 
@@ -3634,19 +3633,19 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>frontend/motion/grammar.js</code></td><td>12 nodes</td></tr>
-<tr><td><code>components/layout/CinematicFooter.jsx</code></td><td>4 nodes</td></tr>
-<tr><td><code>components/media/DetailView.jsx</code></td><td>4 nodes</td></tr>
-<tr><td><code>components/feedback/Skeleton.jsx</code></td><td>3 nodes</td></tr>
+      <tr><td><code>components/media/VideoControlsContainer.jsx</code></td><td>4 nodes</td></tr>
+<tr><td><code>components/utilities/Chat.jsx</code></td><td>4 nodes</td></tr>
+<tr><td><code>frontend/hooks/useTranslations.js</code></td><td>4 nodes</td></tr>
 <tr><td><code>components/layout/CinematicHero.jsx</code></td><td>3 nodes</td></tr>
-<tr><td><code>components/layout/CinematicRow.jsx</code></td><td>3 nodes</td></tr>
-<tr><td><code>components/layout/HoloCard.jsx</code></td><td>3 nodes</td></tr>
-<tr><td><code>components/media/CinematicDetail.jsx</code></td><td>3 nodes</td></tr>
+<tr><td><code>components/layout/Card.jsx</code></td><td>2 nodes</td></tr>
+<tr><td><code>components/layout/ContentRow.jsx</code></td><td>2 nodes</td></tr>
+<tr><td><code>components/layout/Hero.jsx</code></td><td>2 nodes</td></tr>
+<tr><td><code>components/library/ManageLinksView.jsx</code></td><td>2 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: imports x33, contains x31, imports x19, calls x10. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: imports x31, contains x27, imports x23, calls x8. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -3993,12 +3992,12 @@ flowchart LR
 
 <!-- ====== 13. Community 2 ====== -->
 <h2 id="community-2">13. Community 2</h2>
-<p>Community 2 groups implementation around frontend, components, modals, style, mostly in components/modals/RevisionsModal.jsx, frontend/services/shareService.js, components/modals/ImportLibraryModal.jsx. This section covers 35 nodes and 49 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Community 2 groups implementation around frontend, components, modals, style, mostly in components/modals/RevisionsModal.jsx, frontend/services/shareService.js, components/modals/ImportLibraryModal.jsx. This section covers 34 nodes and 49 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Community 2 (35 nodes, 49 edges)
+    %% Section: Community 2 (34 nodes, 49 edges)
     subgraph community_2_frontend_services_shareService_js_57aaca5e["frontend/services/shareService.js"]
         services_shareservice_parsedatafromlink_384a224c("parseDataFromLink()<br/><small>frontend/services/shareService.js</small>")
         services_shareservice_extractfileidfromurl_e7a257fa("extractFileIdFromUrl()<br/><small>frontend/services/shareService.js</small>")
@@ -4009,6 +4008,8 @@ flowchart LR
         utilities_notificationsnackbar_89193ba9("NotificationSnackbar.jsx")
         utilities_notificationsnackbar_notificationsnack_f8e02e11("NotificationSnackbar<br/><small>components/utilities/NotificationSnackbar.jsx</small>")
     end
+    layout_cinematicfooter_cinematicfooter_2327f2db("CinematicFooter<br/><small>components/layout/CinematicFooter.jsx</small>")
+    layout_footer_835a6c99("Footer.jsx")
     modals_episodeinfomodal_f9c7813c("EpisodeInfoModal.jsx")
     modals_googledrivesyncconflictmodal_9e579e44("GoogleDriveSyncConflictModal.jsx")
     modals_importlibrarymodal_e2377c1a("ImportLibraryModal.jsx")
@@ -4017,11 +4018,11 @@ flowchart LR
     modals_notificationsmodal_2037120c("NotificationsModal.jsx")
     modals_revisionsmodal_920bfc67("RevisionsModal.jsx")
     modals_sharelibrarymodal_76c7caa0("ShareLibraryModal.jsx")
-    modals_watchtogethermodal_b25c7128("WatchTogetherModal.jsx")
     overlay_overlaylayer_e702b994("OverlayLayer.jsx")
     shared_mainlayout_1400a421("MainLayout.jsx")
-    services_apicall_searchshow_d3b9f1c4("searchShow()<br/><small>frontend/services/apiCall.jsx</small>")
     services_shareservice_parsedatafromlink_384a224c -->|calls| services_shareservice_extractfileidfromurl_e7a257fa
+    layout_cinematicfooter_cinematicfooter_2327f2db -->|imports| shared_mainlayout_1400a421
+    layout_footer_835a6c99 -->|imports| shared_mainlayout_1400a421
     modals_episodeinfomodal_f9c7813c -->|imports| overlay_overlaylayer_e702b994
     modals_episodeinfomodal_f9c7813c -->|imports| shared_mainlayout_1400a421
     modals_googledrivesyncconflictmodal_9e579e44 -->|imports| overlay_overlaylayer_e702b994
@@ -4042,16 +4043,16 @@ flowchart LR
     modals_sharelibrarymodal_76c7caa0 -->|imports| services_shareservice_createsharelink_3c65174a
     modals_sharelibrarymodal_76c7caa0 -->|imports| overlay_overlaylayer_e702b994
     modals_sharelibrarymodal_76c7caa0 -->|imports| shared_mainlayout_1400a421
-    modals_watchtogethermodal_b25c7128 -->|imports| services_apicall_searchshow_d3b9f1c4
-    modals_watchtogethermodal_b25c7128 -->|imports| overlay_overlaylayer_e702b994
-    modals_watchtogethermodal_b25c7128 -->|imports| shared_mainlayout_1400a421
-    %% Omitted for readability: 17 nodes, 4 edges
+    overlay_overlaylayer_e702b994 -->|imports| utilities_notificationsnackbar_89193ba9
+    %% Omitted for readability: 16 nodes, 3 edges
     class services_shareservice_parsedatafromlink_384a224c function;
     class services_shareservice_extractfileidfromurl_e7a257fa function;
     class services_shareservice_80eac05e module;
     class services_shareservice_createsharelink_3c65174a function;
     class utilities_notificationsnackbar_89193ba9 ui;
     class utilities_notificationsnackbar_notificationsnack_f8e02e11 ui;
+    class layout_cinematicfooter_cinematicfooter_2327f2db ui;
+    class layout_footer_835a6c99 ui;
     class modals_episodeinfomodal_f9c7813c ui;
     class modals_googledrivesyncconflictmodal_9e579e44 ui;
     class modals_importlibrarymodal_e2377c1a ui;
@@ -4060,10 +4061,8 @@ flowchart LR
     class modals_notificationsmodal_2037120c ui;
     class modals_revisionsmodal_920bfc67 ui;
     class modals_sharelibrarymodal_76c7caa0 ui;
-    class modals_watchtogethermodal_b25c7128 ui;
     class overlay_overlaylayer_e702b994 ui;
     class shared_mainlayout_1400a421 ui;
-    class services_apicall_searchshow_d3b9f1c4 ui;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -4087,6 +4086,22 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
+  <td><code>CinematicFooter</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>MainLayout.jsx</code><br><small style="color:var(--muted)">features/shared/MainLayout.jsx</small></td>
+  <td>CinematicFooter node in components/layout/CinematicFooter.jsx.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Footer.jsx</code><br><small style="color:var(--muted)">components/layout/Footer.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>MainLayout.jsx</code><br><small style="color:var(--muted)">features/shared/MainLayout.jsx</small></td>
+  <td>Footer.jsx node in components/layout/Footer.jsx.</td>
+</tr>
+<tr>
+  <td>3</td>
   <td><code>EpisodeInfoModal.jsx</code><br><small style="color:var(--muted)">components/modals/EpisodeInfoModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4094,7 +4109,7 @@ flowchart LR
   <td>EpisodeInfoModal.jsx node in components/modals/EpisodeInfoModal.jsx.</td>
 </tr>
 <tr>
-  <td>2</td>
+  <td>4</td>
   <td><code>EpisodeInfoModal</code><br><small style="color:var(--muted)">components/modals/EpisodeInfoModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4102,7 +4117,7 @@ flowchart LR
   <td>EpisodeInfoModal node in components/modals/EpisodeInfoModal.jsx.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>5</td>
   <td><code>GoogleDriveSyncConflictModal.jsx</code><br><small style="color:var(--muted)">components/modals/GoogleDriveSyncConflictModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4110,7 +4125,7 @@ flowchart LR
   <td>GoogleDriveSyncConflictModal.jsx node in components/modals/GoogleDriveSyncConflictModal.jsx.</td>
 </tr>
 <tr>
-  <td>4</td>
+  <td>6</td>
   <td><code>GoogleDriveSyncConflictModal</code><br><small style="color:var(--muted)">components/modals/GoogleDriveSyncConflictModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4118,7 +4133,7 @@ flowchart LR
   <td>GoogleDriveSyncConflictModal node in components/modals/GoogleDriveSyncConflictModal.jsx.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>7</td>
   <td><code>ImportLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4126,7 +4141,7 @@ flowchart LR
   <td>ImportLibraryModal.jsx node in components/modals/ImportLibraryModal.jsx.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>8</td>
   <td><code>style</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4134,7 +4149,7 @@ flowchart LR
   <td>style node in components/modals/ImportLibraryModal.jsx.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>9</td>
   <td><code>ImportLibraryModal</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4142,7 +4157,7 @@ flowchart LR
   <td>ImportLibraryModal node in components/modals/ImportLibraryModal.jsx.</td>
 </tr>
 <tr>
-  <td>8</td>
+  <td>10</td>
   <td><code>LinkMovieModal.jsx</code><br><small style="color:var(--muted)">components/modals/LinkMovieModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4150,7 +4165,7 @@ flowchart LR
   <td>LinkMovieModal.jsx node in components/modals/LinkMovieModal.jsx.</td>
 </tr>
 <tr>
-  <td>9</td>
+  <td>11</td>
   <td><code>style</code><br><small style="color:var(--muted)">components/modals/LinkMovieModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4158,7 +4173,7 @@ flowchart LR
   <td>style node in components/modals/LinkMovieModal.jsx.</td>
 </tr>
 <tr>
-  <td>10</td>
+  <td>12</td>
   <td><code>LinkMovieModal</code><br><small style="color:var(--muted)">components/modals/LinkMovieModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4166,7 +4181,7 @@ flowchart LR
   <td>LinkMovieModal node in components/modals/LinkMovieModal.jsx.</td>
 </tr>
 <tr>
-  <td>11</td>
+  <td>13</td>
   <td><code>LinkSelectionModal.jsx</code><br><small style="color:var(--muted)">components/modals/LinkSelectionModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4174,7 +4189,7 @@ flowchart LR
   <td>LinkSelectionModal.jsx node in components/modals/LinkSelectionModal.jsx.</td>
 </tr>
 <tr>
-  <td>12</td>
+  <td>14</td>
   <td><code>style</code><br><small style="color:var(--muted)">components/modals/LinkSelectionModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4182,7 +4197,7 @@ flowchart LR
   <td>style node in components/modals/LinkSelectionModal.jsx.</td>
 </tr>
 <tr>
-  <td>13</td>
+  <td>15</td>
   <td><code>LinkSelectionModal()</code><br><small style="color:var(--muted)">components/modals/LinkSelectionModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4190,7 +4205,7 @@ flowchart LR
   <td>LinkSelectionModal() node in components/modals/LinkSelectionModal.jsx.</td>
 </tr>
 <tr>
-  <td>14</td>
+  <td>16</td>
   <td><code>NotificationsModal.jsx</code><br><small style="color:var(--muted)">components/modals/NotificationsModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4198,7 +4213,7 @@ flowchart LR
   <td>NotificationsModal.jsx node in components/modals/NotificationsModal.jsx.</td>
 </tr>
 <tr>
-  <td>15</td>
+  <td>17</td>
   <td><code>NotificationsModal</code><br><small style="color:var(--muted)">components/modals/NotificationsModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4206,7 +4221,7 @@ flowchart LR
   <td>NotificationsModal node in components/modals/NotificationsModal.jsx.</td>
 </tr>
 <tr>
-  <td>16</td>
+  <td>18</td>
   <td><code>RevisionsModal.jsx</code><br><small style="color:var(--muted)">components/modals/RevisionsModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4214,7 +4229,7 @@ flowchart LR
   <td>RevisionsModal.jsx node in components/modals/RevisionsModal.jsx.</td>
 </tr>
 <tr>
-  <td>17</td>
+  <td>19</td>
   <td><code>style</code><br><small style="color:var(--muted)">components/modals/RevisionsModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4222,7 +4237,7 @@ flowchart LR
   <td>style node in components/modals/RevisionsModal.jsx.</td>
 </tr>
 <tr>
-  <td>18</td>
+  <td>20</td>
   <td><code>iconMap</code><br><small style="color:var(--muted)">components/modals/RevisionsModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4230,7 +4245,7 @@ flowchart LR
   <td>iconMap node in components/modals/RevisionsModal.jsx.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>21</td>
   <td><code>RevisionsModal</code><br><small style="color:var(--muted)">components/modals/RevisionsModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4238,7 +4253,7 @@ flowchart LR
   <td>RevisionsModal node in components/modals/RevisionsModal.jsx.</td>
 </tr>
 <tr>
-  <td>20</td>
+  <td>22</td>
   <td><code>ShareLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ShareLibraryModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4246,7 +4261,7 @@ flowchart LR
   <td>ShareLibraryModal.jsx node in components/modals/ShareLibraryModal.jsx.</td>
 </tr>
 <tr>
-  <td>21</td>
+  <td>23</td>
   <td><code>style</code><br><small style="color:var(--muted)">components/modals/ShareLibraryModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4254,7 +4269,7 @@ flowchart LR
   <td>style node in components/modals/ShareLibraryModal.jsx.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>24</td>
   <td><code>ShareLibraryModal</code><br><small style="color:var(--muted)">components/modals/ShareLibraryModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
@@ -4262,39 +4277,15 @@ flowchart LR
   <td>ShareLibraryModal node in components/modals/ShareLibraryModal.jsx.</td>
 </tr>
 <tr>
-  <td>23</td>
-  <td><code>WatchTogetherModal.jsx</code><br><small style="color:var(--muted)">components/modals/WatchTogetherModal.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>MainLayout.jsx</code><br><small style="color:var(--muted)">features/shared/MainLayout.jsx</small><br><code>OverlayLayer.jsx</code><br><small style="color:var(--muted)">components/overlay/OverlayLayer.jsx</small><br><code>searchShow()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small></td>
-  <td>WatchTogetherModal.jsx node in components/modals/WatchTogetherModal.jsx.</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>style</code><br><small style="color:var(--muted)">components/modals/WatchTogetherModal.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>style node in components/modals/WatchTogetherModal.jsx.</td>
-</tr>
-<tr>
   <td>25</td>
-  <td><code>WatchTogetherModal</code><br><small style="color:var(--muted)">components/modals/WatchTogetherModal.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>WatchTogetherModal node in components/modals/WatchTogetherModal.jsx.</td>
-</tr>
-<tr>
-  <td>26</td>
   <td><code>OverlayLayer.jsx</code><br><small style="color:var(--muted)">components/overlay/OverlayLayer.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>EpisodeInfoModal.jsx</code><br><small style="color:var(--muted)">components/modals/EpisodeInfoModal.jsx</small><br><code>GoogleDriveSyncConflictModal.jsx</code><br><small style="color:var(--muted)">components/modals/GoogleDriveSyncConflictModal.jsx</small><br><code>ImportLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small><br>+6 more</td>
+  <td><code>EpisodeInfoModal.jsx</code><br><small style="color:var(--muted)">components/modals/EpisodeInfoModal.jsx</small><br><code>GoogleDriveSyncConflictModal.jsx</code><br><small style="color:var(--muted)">components/modals/GoogleDriveSyncConflictModal.jsx</small><br><code>ImportLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small><br>+5 more</td>
   <td><code>NotificationSnackbar</code><br><small style="color:var(--muted)">components/utilities/NotificationSnackbar.jsx</small><br><code>NotificationSnackbar.jsx</code><br><small style="color:var(--muted)">components/utilities/NotificationSnackbar.jsx</small></td>
   <td>OverlayLayer.jsx node in components/overlay/OverlayLayer.jsx.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>26</td>
   <td><code>NotificationSnackbar.jsx</code><br><small style="color:var(--muted)">components/utilities/NotificationSnackbar.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td><code>OverlayLayer.jsx</code><br><small style="color:var(--muted)">components/overlay/OverlayLayer.jsx</small></td>
@@ -4302,7 +4293,7 @@ flowchart LR
   <td>NotificationSnackbar.jsx node in components/utilities/NotificationSnackbar.jsx.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>27</td>
   <td><code>NotificationSnackbar</code><br><small style="color:var(--muted)">components/utilities/NotificationSnackbar.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td><code>OverlayLayer.jsx</code><br><small style="color:var(--muted)">components/overlay/OverlayLayer.jsx</small></td>
@@ -4310,20 +4301,28 @@ flowchart LR
   <td>NotificationSnackbar node in components/utilities/NotificationSnackbar.jsx.</td>
 </tr>
 <tr>
-  <td>29</td>
+  <td>28</td>
   <td><code>MainLayout.jsx</code><br><small style="color:var(--muted)">features/shared/MainLayout.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>EpisodeInfoModal.jsx</code><br><small style="color:var(--muted)">components/modals/EpisodeInfoModal.jsx</small><br><code>GoogleDriveSyncConflictModal.jsx</code><br><small style="color:var(--muted)">components/modals/GoogleDriveSyncConflictModal.jsx</small><br><code>ImportLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small><br>+8 more</td>
-  <td>No direct outbound edge</td>
+  <td><code>CinematicFooter</code><br><small style="color:var(--muted)">components/layout/CinematicFooter.jsx</small><br><code>EpisodeInfoModal.jsx</code><br><small style="color:var(--muted)">components/modals/EpisodeInfoModal.jsx</small><br><code>Footer.jsx</code><br><small style="color:var(--muted)">components/layout/Footer.jsx</small><br>+9 more</td>
+  <td><code>Footer()</code><br><small style="color:var(--muted)">components/layout/Footer.jsx</small></td>
   <td>MainLayout.jsx node in features/shared/MainLayout.jsx.</td>
 </tr>
 <tr>
-  <td>30</td>
+  <td>29</td>
   <td><code>MainLayout()</code><br><small style="color:var(--muted)">features/shared/MainLayout.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>MainLayout() node in features/shared/MainLayout.jsx.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>shareService.js</code><br><small style="color:var(--muted)">frontend/services/shareService.js</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td><code>ImportLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ImportLibraryModal.jsx</small><br><code>ShareLibraryModal.jsx</code><br><small style="color:var(--muted)">components/modals/ShareLibraryModal.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>shareService.js node in frontend/services/shareService.js.</td>
 </tr>
 </table>
 
@@ -4338,381 +4337,19 @@ flowchart LR
 <tr><td><code>components/modals/LinkMovieModal.jsx</code></td><td>3 nodes</td></tr>
 <tr><td><code>components/modals/LinkSelectionModal.jsx</code></td><td>3 nodes</td></tr>
 <tr><td><code>components/modals/ShareLibraryModal.jsx</code></td><td>3 nodes</td></tr>
-<tr><td><code>components/modals/WatchTogetherModal.jsx</code></td><td>3 nodes</td></tr>
+<tr><td><code>components/layout/Footer.jsx</code></td><td>2 nodes</td></tr>
 <tr><td><code>components/modals/EpisodeInfoModal.jsx</code></td><td>2 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: imports x22, contains x21, imports x5, calls x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: imports x21, contains x20, imports x6, re exports x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 14. Community 15 ====== -->
-<h2 id="community-15">14. Community 15</h2>
-<p>Community 15 groups implementation around frontend, components, layout, remote, mostly in components/utilities/Chat.jsx, frontend/hooks/useTranslations.js, components/layout/FloatingDock.jsx. This section covers 34 nodes and 66 internal edges; the diagram shows only representative relationships to stay readable.</p>
-
-<div class="mermaid">
-%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
-flowchart LR
-    %% Section: Community 15 (34 nodes, 66 edges)
-    subgraph community_15_components_layout_Card_jsx_a0977a41["components/layout/Card.jsx"]
-        layout_card_a0d7ca42("Card.jsx")
-        layout_card_card_e9db8030("Card<br/><small>components/layout/Card.jsx</small>")
-    end
-    subgraph community_15_components_layout_FloatingDock_jsx_5748fb0c["components/layout/FloatingDock.jsx"]
-        layout_floatingdock_1be28ce3("FloatingDock.jsx")
-        layout_floatingdock_floatingdock_1d38a543("FloatingDock<br/><small>components/layout/FloatingDock.jsx</small>")
-    end
-    subgraph community_15_components_utilities_ReorderDrawer_418ea34f["components/utilities/ReorderDrawer.jsx"]
-        utilities_reorderdrawer_reorderdrawer_869d45bf("ReorderDrawer()<br/><small>components/utilities/ReorderDrawer.jsx</small>")
-        utilities_reorderdrawer_e4b5a4b2("ReorderDrawer.jsx")
-    end
-    subgraph community_15_frontend_hooks_useTranslations_js_cdd27ab0["frontend/hooks/useTranslations.js"]
-        hooks_usetranslations_848f2b92("useTranslations.js")
-        hooks_usetranslations_usetranslations_2aabf8c1("useTranslations()<br/><small>frontend/hooks/useTranslations.js</small>")
-    end
-    layout_contentrow_5db7adec("ContentRow.jsx")
-    layout_gridview_4c09a669("GridView.jsx")
-    layout_header_1d2d255b("Header.jsx")
-    remote_masterscreen_014492df("MasterScreen.jsx")
-    slave_slaveconnectedview_slaveconnectedview_7fe22074("SlaveConnectedView()<br/><small>remote/slave/SlaveConnectedView.jsx</small>")
-    slave_slaveloadingview_slaveloadingview_4c7b8ed4("SlaveLoadingView()<br/><small>remote/slave/SlaveLoadingView.jsx</small>")
-    slave_slavepairingview_4275e344("SlavePairingView.jsx")
-    slave_slaveqrcodecard_qrcodecard_5d621226("QRCodeCard()<br/><small>remote/slave/SlaveQRCodeCard.jsx</small>")
-    slave_slavereconnectingview_slavereconnectingvie_215a72ef("SlaveReconnectingView()<br/><small>remote/slave/SlaveReconnectingView.jsx</small>")
-    features_searchview_3368a529("SearchView.jsx")
-    slave_slaveconnectedview_slaveconnectedview_7fe22074 -->|calls| hooks_usetranslations_848f2b92
-    slave_slaveconnectedview_slaveconnectedview_7fe22074 -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
-    slave_slaveloadingview_slaveloadingview_4c7b8ed4 -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
-    slave_slaveqrcodecard_qrcodecard_5d621226 -->|calls| hooks_usetranslations_848f2b92
-    slave_slaveqrcodecard_qrcodecard_5d621226 -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
-    slave_slavereconnectingview_slavereconnectingvie_215a72ef -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
-    utilities_reorderdrawer_reorderdrawer_869d45bf -->|calls| hooks_usetranslations_848f2b92
-    utilities_reorderdrawer_reorderdrawer_869d45bf -->|calls| hooks_usetranslations_usetranslations_2aabf8c1
-    layout_card_a0d7ca42 -->|imports| hooks_usetranslations_848f2b92
-    layout_card_a0d7ca42 -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
-    layout_card_a0d7ca42 -->|imports| layout_contentrow_5db7adec
-    layout_card_a0d7ca42 -->|imports| layout_gridview_4c09a669
-    layout_contentrow_5db7adec -->|imports| hooks_usetranslations_848f2b92
-    layout_contentrow_5db7adec -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
-    layout_contentrow_5db7adec -->|imports| layout_card_card_e9db8030
-    layout_contentrow_5db7adec -->|imports| utilities_reorderdrawer_e4b5a4b2
-    layout_contentrow_5db7adec -->|imports| utilities_reorderdrawer_reorderdrawer_869d45bf
-    layout_floatingdock_1be28ce3 -->|imports| hooks_usetranslations_848f2b92
-    layout_floatingdock_1be28ce3 -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
-    layout_floatingdock_floatingdock_1d38a543 -->|imports| features_searchview_3368a529
-    layout_gridview_4c09a669 -->|imports| features_searchview_3368a529
-    layout_gridview_4c09a669 -->|imports| hooks_usetranslations_848f2b92
-    layout_gridview_4c09a669 -->|imports| hooks_usetranslations_usetranslations_2aabf8c1
-    layout_gridview_4c09a669 -->|imports| layout_card_card_e9db8030
-    %% Omitted for readability: 16 nodes, 11 edges
-    class layout_card_a0d7ca42 ui;
-    class layout_card_card_e9db8030 ui;
-    class layout_floatingdock_1be28ce3 ui;
-    class layout_floatingdock_floatingdock_1d38a543 ui;
-    class utilities_reorderdrawer_reorderdrawer_869d45bf ui;
-    class utilities_reorderdrawer_e4b5a4b2 ui;
-    class hooks_usetranslations_848f2b92 ui;
-    class hooks_usetranslations_usetranslations_2aabf8c1 ui;
-    class layout_contentrow_5db7adec ui;
-    class layout_gridview_4c09a669 ui;
-    class layout_header_1d2d255b ui;
-    class remote_masterscreen_014492df ui;
-    class slave_slaveconnectedview_slaveconnectedview_7fe22074 ui;
-    class slave_slaveloadingview_slaveloadingview_4c7b8ed4 ui;
-    class slave_slavepairingview_4275e344 ui;
-    class slave_slaveqrcodecard_qrcodecard_5d621226 ui;
-    class slave_slavereconnectingview_slavereconnectingvie_215a72ef ui;
-    class features_searchview_3368a529 ui;
-    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
-    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
-    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
-    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
-    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
-    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
-    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
-    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
-    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
-</div>
-
-<h3>Call Details</h3>
-<table class="call-table">
-<tr>
-  <th style="width:5%">#</th>
-  <th style="width:28%">Node</th>
-  <th style="width:10%">Type</th>
-  <th style="width:17%">Caller</th>
-  <th style="width:20%">Callees</th>
-  <th style="width:20%">Description</th>
-</tr>
-<tr>
-  <td>1</td>
-  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small><br><code>GridView.jsx</code><br><small style="color:var(--muted)">components/layout/GridView.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br>+1 more</td>
-  <td>Card.jsx node in components/layout/Card.jsx.</td>
-</tr>
-<tr>
-  <td>2</td>
-  <td><code>CinematicGrid</code><br><small style="color:var(--muted)">components/layout/CinematicGrid.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>CinematicGrid node in components/layout/CinematicGrid.jsx.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small></td>
-  <td><code>Card</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small><br><code>ReorderDrawer()</code><br><small style="color:var(--muted)">components/utilities/ReorderDrawer.jsx</small><br><code>ReorderDrawer.jsx</code><br><small style="color:var(--muted)">components/utilities/ReorderDrawer.jsx</small><br>+2 more</td>
-  <td>ContentRow.jsx node in components/layout/ContentRow.jsx.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>FloatingDock.jsx</code><br><small style="color:var(--muted)">components/layout/FloatingDock.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>FloatingDock.jsx node in components/layout/FloatingDock.jsx.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>NAV_KEYS</code><br><small style="color:var(--muted)">components/layout/FloatingDock.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>NAV_KEYS node in components/layout/FloatingDock.jsx.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>FloatingDock</code><br><small style="color:var(--muted)">components/layout/FloatingDock.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>SearchView.jsx</code><br><small style="color:var(--muted)">views/features/SearchView.jsx</small></td>
-  <td>FloatingDock node in components/layout/FloatingDock.jsx.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>GridView.jsx</code><br><small style="color:var(--muted)">components/layout/GridView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small></td>
-  <td><code>Card</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small><br><code>SearchView.jsx</code><br><small style="color:var(--muted)">views/features/SearchView.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br>+1 more</td>
-  <td>GridView.jsx node in components/layout/GridView.jsx.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>Header.jsx</code><br><small style="color:var(--muted)">components/layout/Header.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>SearchView.jsx</code><br><small style="color:var(--muted)">views/features/SearchView.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>Header.jsx node in components/layout/Header.jsx.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>MasterScreen.jsx</code><br><small style="color:var(--muted)">components/remote/MasterScreen.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>MasterScreen.jsx node in components/remote/MasterScreen.jsx.</td>
-</tr>
-<tr>
-  <td>10</td>
-  <td><code>MasterScreen</code><br><small style="color:var(--muted)">components/remote/MasterScreen.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>MasterScreen node in components/remote/MasterScreen.jsx.</td>
-</tr>
-<tr>
-  <td>11</td>
-  <td><code>SlaveConnectedView()</code><br><small style="color:var(--muted)">remote/slave/SlaveConnectedView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlaveConnectedView() node in remote/slave/SlaveConnectedView.jsx.</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>SlaveLoadingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveLoadingView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlaveLoadingView.jsx node in remote/slave/SlaveLoadingView.jsx.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>SlaveLoadingView()</code><br><small style="color:var(--muted)">remote/slave/SlaveLoadingView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlaveLoadingView() node in remote/slave/SlaveLoadingView.jsx.</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>SlavePairingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlavePairingView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>SlaveQRCodeCard.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveQRCodeCard.jsx</small><br><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlavePairingView.jsx node in remote/slave/SlavePairingView.jsx.</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>SlavePairingView</code><br><small style="color:var(--muted)">remote/slave/SlavePairingView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>SlavePairingView node in remote/slave/SlavePairingView.jsx.</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>SlaveQRCodeCard.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveQRCodeCard.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>SlavePairingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlavePairingView.jsx</small></td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlaveQRCodeCard.jsx node in remote/slave/SlaveQRCodeCard.jsx.</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>QRCodeCard()</code><br><small style="color:var(--muted)">remote/slave/SlaveQRCodeCard.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>QRCodeCard() node in remote/slave/SlaveQRCodeCard.jsx.</td>
-</tr>
-<tr>
-  <td>18</td>
-  <td><code>SlaveReconnectingView.jsx</code><br><small style="color:var(--muted)">remote/slave/SlaveReconnectingView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlaveReconnectingView.jsx node in remote/slave/SlaveReconnectingView.jsx.</td>
-</tr>
-<tr>
-  <td>19</td>
-  <td><code>SlaveReconnectingView()</code><br><small style="color:var(--muted)">remote/slave/SlaveReconnectingView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>SlaveReconnectingView() node in remote/slave/SlaveReconnectingView.jsx.</td>
-</tr>
-<tr>
-  <td>20</td>
-  <td><code>Chat.jsx</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
-</tr>
-<tr>
-  <td>21</td>
-  <td><code>compressImage()</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>compressImage() node in components/utilities/Chat.jsx.</td>
-</tr>
-<tr>
-  <td>22</td>
-  <td><code>fileToBase64()</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>fileToBase64() node in components/utilities/Chat.jsx.</td>
-</tr>
-<tr>
-  <td>23</td>
-  <td><code>Chat</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Supports retrieval-augmented Q&amp;A or streaming chat.</td>
-</tr>
-<tr>
-  <td>24</td>
-  <td><code>ReorderDrawer.jsx</code><br><small style="color:var(--muted)">components/utilities/ReorderDrawer.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small></td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>ReorderDrawer.jsx node in components/utilities/ReorderDrawer.jsx.</td>
-</tr>
-<tr>
-  <td>25</td>
-  <td><code>ReorderDrawer()</code><br><small style="color:var(--muted)">components/utilities/ReorderDrawer.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small></td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small><br><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td>ReorderDrawer() node in components/utilities/ReorderDrawer.jsx.</td>
-</tr>
-<tr>
-  <td>26</td>
-  <td><code>useTranslations.js</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small><br><code>Chat.jsx</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small><br><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small><br>+12 more</td>
-  <td><code>SearchView.jsx</code><br><small style="color:var(--muted)">views/features/SearchView.jsx</small></td>
-  <td>useTranslations.js node in frontend/hooks/useTranslations.js.</td>
-</tr>
-<tr>
-  <td>27</td>
-  <td><code>getNestedValue()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>getNestedValue() node in frontend/hooks/useTranslations.js.</td>
-</tr>
-<tr>
-  <td>28</td>
-  <td><code>interpolate()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>interpolate() node in frontend/hooks/useTranslations.js.</td>
-</tr>
-<tr>
-  <td>29</td>
-  <td><code>useTranslations()</code><br><small style="color:var(--muted)">frontend/hooks/useTranslations.js</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>Card.jsx</code><br><small style="color:var(--muted)">components/layout/Card.jsx</small><br><code>Chat.jsx</code><br><small style="color:var(--muted)">components/utilities/Chat.jsx</small><br><code>ContentRow.jsx</code><br><small style="color:var(--muted)">components/layout/ContentRow.jsx</small><br>+14 more</td>
-  <td><code>SearchView.jsx</code><br><small style="color:var(--muted)">views/features/SearchView.jsx</small></td>
-  <td>useTranslations() node in frontend/hooks/useTranslations.js.</td>
-</tr>
-<tr>
-  <td>30</td>
-  <td><code>SearchView.jsx</code><br><small style="color:var(--muted)">views/features/SearchView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>FloatingDock</code><br><small style="color:var(--muted)">components/layout/FloatingDock.jsx</small><br><code>GridView.jsx</code><br><small style="color:var(--muted)">components/layout/GridView.jsx</small><br><code>Header.jsx</code><br><small style="color:var(--muted)">components/layout/Header.jsx</small><br>+2 more</td>
-  <td><code>Header</code><br><small style="color:var(--muted)">components/layout/Header.jsx</small></td>
-  <td>SearchView.jsx node in views/features/SearchView.jsx.</td>
-</tr>
-</table>
-
-<div class="grid">
-  <div class="card">
-    <h4>Key Files</h4>
-    <table style="width:100%;font-size:0.85rem;">
-      <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>components/utilities/Chat.jsx</code></td><td>4 nodes</td></tr>
-<tr><td><code>frontend/hooks/useTranslations.js</code></td><td>4 nodes</td></tr>
-<tr><td><code>components/layout/FloatingDock.jsx</code></td><td>3 nodes</td></tr>
-<tr><td><code>components/layout/Header.jsx</code></td><td>3 nodes</td></tr>
-<tr><td><code>components/layout/Card.jsx</code></td><td>2 nodes</td></tr>
-<tr><td><code>components/layout/GridView.jsx</code></td><td>2 nodes</td></tr>
-<tr><td><code>components/remote/MasterScreen.jsx</code></td><td>2 nodes</td></tr>
-<tr><td><code>remote/slave/SlaveLoadingView.jsx</code></td><td>2 nodes</td></tr>
-    </table>
-  </div>
-  <div class="card">
-    <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: imports x19, imports x18, contains x18, calls x8. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
-  </div>
-</div>
-<hr>
-
-<!-- ====== 15. Community 64 ====== -->
-<h2 id="community-64">15. Community 64</h2>
+<!-- ====== 14. Community 64 ====== -->
+<h2 id="community-64">14. Community 64</h2>
 <p>Community 64 groups implementation around clarifymd, reference, agents, skills, mostly in impeccable/reference/clarify.md. This section covers 32 nodes and 31 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -5051,67 +4688,440 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 16. Other ====== -->
-<h2 id="other">16. Other</h2>
-<p>Other groups implementation around skills, agents, reference, impeccable, mostly in impeccable/reference/critique.md, skills/writing-skills/anthropic-best-practices.md, impeccable/reference/typeset.md. This section covers 805 nodes and 849 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 15. Community 6 ====== -->
+<h2 id="community-6">15. Community 6</h2>
+<p>Community 6 groups implementation around frontend, components, library, tabs, mostly in components/library/LinkEditModal.jsx, components/library/LibraryManagementView.jsx, library/tabs/ContinueWatchingTab.jsx. This section covers 30 nodes and 41 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Other (805 nodes, 849 edges)
-    subgraph other_frontend_services_googleAuthService_js_ab43f131["frontend/services/googleAuthService.js"]
-        services_googleauthservice_stoppopuppolling_caf2e768("stopPopupPolling()<br/><small>frontend/services/googleAuthService.js</small>")
-        services_googleauthservice_checkauthpopupclosed_84a81d63("checkAuthPopupClosed()<br/><small>frontend/services/googleAuthService.js</small>")
-        services_googleauthservice_refreshaccesstoken_ab4a695c("refreshAccessToken()<br/><small>frontend/services/googleAuthService.js</small>")
-        services_googleauthservice_refreshaccesstokenwit_8ba6ef8a("refreshAccessTokenWithRetry()<br/><small>frontend/services/googleAuthService.js</small>")
-        services_googleauthservice_scheduletokenrefresh_c0b06030("scheduleTokenRefresh()<br/><small>frontend/services/googleAuthService.js</small>")
+    %% Section: Community 6 (30 nodes, 41 edges)
+    subgraph community_6_components_library_LibraryManagement_06d9a6bb["components/library/LibraryManagementView.jsx"]
+        library_librarymanagementview_9f1f7771("LibraryManagementView.jsx")
+        library_librarymanagementview_librarymanagementv_78367940("LibraryManagementView<br/><small>components/library/LibraryManagementView.jsx</small>")
     end
-    subgraph other_frontend_services_db_js_c431e07d["frontend/services/db.js"]
-        services_db_quixdb_d0747185("QuixDB<br/><small>frontend/services/db.js</small>")
-        services_db_quixdb_constructor_611661d3("constructor()<br/><small>frontend/services/db.js</small>")
-        services_db_quixdb_handledbchanges_31ff600c("handleDbChanges()<br/><small>frontend/services/db.js</small>")
-        services_db_quixdb_importdata_9ac39f3f("importData()<br/><small>frontend/services/db.js</small>")
+    subgraph community_6_components_library_LinkEditModal_jsx_78598400["components/library/LinkEditModal.jsx"]
+        library_linkeditmodal_a988bfb3("LinkEditModal.jsx")
+        library_linkeditmodal_linkeditmodal_5e5a5c41("LinkEditModal<br/><small>components/library/LinkEditModal.jsx</small>")
     end
-    subgraph other_frontend_motion_registry_js_c1310fb5["frontend/motion/registry.js"]
-        motion_registry_ensurematchmedia_e39b1bc8("ensureMatchMedia()<br/><small>frontend/motion/registry.js</small>")
-        motion_registry_buildtransition_a2fbbbcb("buildTransition()<br/><small>frontend/motion/registry.js</small>")
-        motion_registry_fadeonlytimeline_6fd50b2d("fadeOnlyTimeline()<br/><small>frontend/motion/registry.js</small>")
+    subgraph community_6_library_shared_EmptyState_jsx_e8b1f4a7["library/shared/EmptyState.jsx"]
+        shared_emptystate_026ab145("EmptyState.jsx")
+        shared_emptystate_emptystate_85ea230c("EmptyState()<br/><small>library/shared/EmptyState.jsx</small>")
     end
-    subgraph other_components_feedback_HoloChip_jsx_a3981b0d["components/feedback/HoloChip.jsx"]
-        feedback_holochip_592b57e4("HoloChip.jsx")
-        feedback_holochip_holochip_9e3768b8("HoloChip<br/><small>components/feedback/HoloChip.jsx</small>")
+    subgraph community_6_library_shared_LibraryDashboard_jsx_e7716895["library/shared/LibraryDashboard.jsx"]
+        shared_librarydashboard_6c15f507("LibraryDashboard.jsx")
+        shared_librarydashboard_librarydashboard_cd658229("LibraryDashboard<br/><small>library/shared/LibraryDashboard.jsx</small>")
     end
-    library_librarymanagementview_9f1f7771("LibraryManagementView.jsx")
-    frontend_app_ecde7d2e("App.jsx")
-    services_googledriveservice_createheaders_45a6eb6f("createHeaders()<br/><small>frontend/services/googleDriveService.js</small>")
-    views_viewswitch_46301883("ViewSwitch.jsx")
-    motion_registry_ensurematchmedia_e39b1bc8 -->|calls| motion_registry_buildtransition_a2fbbbcb
-    motion_registry_fadeonlytimeline_6fd50b2d -->|calls| motion_registry_buildtransition_a2fbbbcb
-    services_db_quixdb_d0747185 -->|method| services_db_quixdb_constructor_611661d3
-    services_db_quixdb_d0747185 -->|method| services_db_quixdb_handledbchanges_31ff600c
-    services_db_quixdb_d0747185 -->|method| services_db_quixdb_importdata_9ac39f3f
-    services_googleauthservice_stoppopuppolling_caf2e768 -->|calls| services_googleauthservice_checkauthpopupclosed_84a81d63
-    services_googleauthservice_refreshaccesstoken_ab4a695c -->|calls| services_googleauthservice_refreshaccesstokenwit_8ba6ef8a
-    services_googleauthservice_refreshaccesstokenwit_8ba6ef8a -->|calls| services_googleauthservice_scheduletokenrefresh_c0b06030
-    frontend_app_ecde7d2e -->|imports| views_viewswitch_46301883
-    %% Omitted for readability: 787 nodes, 0 edges
-    class services_googleauthservice_stoppopuppolling_caf2e768 function;
-    class services_googleauthservice_checkauthpopupclosed_84a81d63 function;
-    class services_googleauthservice_refreshaccesstoken_ab4a695c function;
-    class services_googleauthservice_refreshaccesstokenwit_8ba6ef8a function;
-    class services_googleauthservice_scheduletokenrefresh_c0b06030 function;
-    class services_db_quixdb_d0747185 klass;
-    class services_db_quixdb_constructor_611661d3 function;
-    class services_db_quixdb_handledbchanges_31ff600c function;
-    class services_db_quixdb_importdata_9ac39f3f function;
-    class motion_registry_ensurematchmedia_e39b1bc8 function;
-    class motion_registry_buildtransition_a2fbbbcb function;
-    class motion_registry_fadeonlytimeline_6fd50b2d function;
-    class feedback_holochip_592b57e4 ui;
-    class feedback_holochip_holochip_9e3768b8 ui;
+    subgraph community_6_library_tabs_ContinueWatchingTab_jsx_aabf151d["library/tabs/ContinueWatchingTab.jsx"]
+        tabs_continuewatchingtab_2415d057("ContinueWatchingTab.jsx")
+        tabs_continuewatchingtab_continuewatchingtab_1a2de277("ContinueWatchingTab<br/><small>library/tabs/ContinueWatchingTab.jsx</small>")
+    end
+    subgraph community_6_library_tabs_PreferredSourcesTab_jsx_31ac50dc["library/tabs/PreferredSourcesTab.jsx"]
+        tabs_preferredsourcestab_2261895b("PreferredSourcesTab.jsx")
+        tabs_preferredsourcestab_preferredsourcestab_4af3891d("PreferredSourcesTab<br/><small>library/tabs/PreferredSourcesTab.jsx</small>")
+    end
+    subgraph community_6_library_tabs_ShowInfoPanel_jsx_6a950595["library/tabs/ShowInfoPanel.jsx"]
+        tabs_showinfopanel_56d9af10("ShowInfoPanel.jsx")
+        tabs_showinfopanel_showinfopanel_dfbd97fd("ShowInfoPanel<br/><small>library/tabs/ShowInfoPanel.jsx</small>")
+    end
+    subgraph community_6_library_tabs_VideoLinksBulkBar_jsx_875998f5["library/tabs/VideoLinksBulkBar.jsx"]
+        tabs_videolinksbulkbar_317fd447("VideoLinksBulkBar.jsx")
+        tabs_videolinksbulkbar_videolinksbulkbar_1b83fee8("VideoLinksBulkBar<br/><small>library/tabs/VideoLinksBulkBar.jsx</small>")
+    end
+    subgraph community_6_library_tabs_VideoLinksTab_jsx_5fce8b47["library/tabs/VideoLinksTab.jsx"]
+        tabs_videolinkstab_5cb5bd85("VideoLinksTab.jsx")
+        tabs_videolinkstab_videolinkstab_f5dd287c("VideoLinksTab<br/><small>library/tabs/VideoLinksTab.jsx</small>")
+    end
+    library_librarymanagementview_9f1f7771 -->|imports| library_linkeditmodal_a988bfb3
+    library_librarymanagementview_9f1f7771 -->|imports| library_linkeditmodal_linkeditmodal_5e5a5c41
+    library_librarymanagementview_9f1f7771 -->|imports| shared_librarydashboard_6c15f507
+    library_librarymanagementview_9f1f7771 -->|imports| shared_librarydashboard_librarydashboard_cd658229
+    library_librarymanagementview_9f1f7771 -->|imports| tabs_continuewatchingtab_2415d057
+    library_librarymanagementview_9f1f7771 -->|imports| tabs_continuewatchingtab_continuewatchingtab_1a2de277
+    library_librarymanagementview_9f1f7771 -->|imports| tabs_preferredsourcestab_2261895b
+    library_librarymanagementview_9f1f7771 -->|imports| tabs_preferredsourcestab_preferredsourcestab_4af3891d
+    library_librarymanagementview_9f1f7771 -->|imports| tabs_videolinkstab_5cb5bd85
+    library_librarymanagementview_9f1f7771 -->|imports| tabs_videolinkstab_videolinkstab_f5dd287c
+    shared_emptystate_026ab145 -->|imports| tabs_continuewatchingtab_2415d057
+    shared_emptystate_026ab145 -->|imports| tabs_preferredsourcestab_2261895b
+    shared_emptystate_026ab145 -->|imports| tabs_videolinkstab_5cb5bd85
+    shared_emptystate_emptystate_85ea230c -->|imports| tabs_continuewatchingtab_2415d057
+    shared_emptystate_emptystate_85ea230c -->|imports| tabs_preferredsourcestab_2261895b
+    shared_emptystate_emptystate_85ea230c -->|imports| tabs_videolinkstab_5cb5bd85
+    tabs_showinfopanel_56d9af10 -->|imports| tabs_videolinkstab_5cb5bd85
+    tabs_showinfopanel_showinfopanel_dfbd97fd -->|imports| tabs_videolinkstab_5cb5bd85
+    tabs_videolinksbulkbar_317fd447 -->|imports| tabs_videolinkstab_5cb5bd85
+    tabs_videolinksbulkbar_videolinksbulkbar_1b83fee8 -->|imports| tabs_videolinkstab_5cb5bd85
+    %% Omitted for readability: 12 nodes, 0 edges
     class library_librarymanagementview_9f1f7771 ui;
+    class library_librarymanagementview_librarymanagementv_78367940 ui;
+    class library_linkeditmodal_a988bfb3 ui;
+    class library_linkeditmodal_linkeditmodal_5e5a5c41 ui;
+    class shared_emptystate_026ab145 ui;
+    class shared_emptystate_emptystate_85ea230c ui;
+    class shared_librarydashboard_6c15f507 ui;
+    class shared_librarydashboard_librarydashboard_cd658229 ui;
+    class tabs_continuewatchingtab_2415d057 ui;
+    class tabs_continuewatchingtab_continuewatchingtab_1a2de277 ui;
+    class tabs_preferredsourcestab_2261895b ui;
+    class tabs_preferredsourcestab_preferredsourcestab_4af3891d ui;
+    class tabs_showinfopanel_56d9af10 ui;
+    class tabs_showinfopanel_showinfopanel_dfbd97fd ui;
+    class tabs_videolinksbulkbar_317fd447 ui;
+    class tabs_videolinksbulkbar_videolinksbulkbar_1b83fee8 ui;
+    class tabs_videolinkstab_5cb5bd85 ui;
+    class tabs_videolinkstab_videolinkstab_f5dd287c ui;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>ContinueWatchingTab</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>LibraryDashboard</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small><br>+7 more</td>
+  <td>LibraryManagementView.jsx node in components/library/LibraryManagementView.jsx.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>LibraryManagementView</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>LibraryManagementView node in components/library/LibraryManagementView.jsx.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>LinkEditModal.jsx</code><br><small style="color:var(--muted)">components/library/LinkEditModal.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>LinkEditModal.jsx node in components/library/LinkEditModal.jsx.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>holoFieldSx</code><br><small style="color:var(--muted)">components/library/LinkEditModal.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>holoFieldSx node in components/library/LinkEditModal.jsx.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>buildPreview()</code><br><small style="color:var(--muted)">components/library/LinkEditModal.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>buildPreview() node in components/library/LinkEditModal.jsx.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>getContextForLink()</code><br><small style="color:var(--muted)">components/library/LinkEditModal.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>getContextForLink() node in components/library/LinkEditModal.jsx.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>LinkEditModal</code><br><small style="color:var(--muted)">components/library/LinkEditModal.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>LinkEditModal node in components/library/LinkEditModal.jsx.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>PreferredSourcesTab.jsx</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small><br><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td>EmptyState.jsx node in library/shared/EmptyState.jsx.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>PreferredSourcesTab.jsx</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small><br><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td>EmptyState() node in library/shared/EmptyState.jsx.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>LibraryDashboard.jsx</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>LibraryDashboard.jsx node in library/shared/LibraryDashboard.jsx.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>CounterChip</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>CounterChip node in library/shared/LibraryDashboard.jsx.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>LibraryDashboard</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>LibraryDashboard node in library/shared/LibraryDashboard.jsx.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>ContinueWatchingTab.jsx node in library/tabs/ContinueWatchingTab.jsx.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>formatDuration()</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>formatDuration() node in library/tabs/ContinueWatchingTab.jsx.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>matchesQuery()</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>matchesQuery() node in library/tabs/ContinueWatchingTab.jsx.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>ContinueWatchingTab</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>ContinueWatchingTab node in library/tabs/ContinueWatchingTab.jsx.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>PreferredSourcesTab.jsx</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>PreferredSourcesTab.jsx node in library/tabs/PreferredSourcesTab.jsx.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>countLinksForShow()</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>countLinksForShow() node in library/tabs/PreferredSourcesTab.jsx.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>PreferredSourcesTab</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>PreferredSourcesTab node in library/tabs/PreferredSourcesTab.jsx.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>ShowInfoPanel.jsx</code><br><small style="color:var(--muted)">library/tabs/ShowInfoPanel.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td>ShowInfoPanel.jsx node in library/tabs/ShowInfoPanel.jsx.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>formatDate()</code><br><small style="color:var(--muted)">library/tabs/ShowInfoPanel.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>formatDate() node in library/tabs/ShowInfoPanel.jsx.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>ShowInfoPanel</code><br><small style="color:var(--muted)">library/tabs/ShowInfoPanel.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td>ShowInfoPanel node in library/tabs/ShowInfoPanel.jsx.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>VideoLinksBulkBar.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksBulkBar.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td>VideoLinksBulkBar.jsx node in library/tabs/VideoLinksBulkBar.jsx.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>VideoLinksBulkBar</code><br><small style="color:var(--muted)">library/tabs/VideoLinksBulkBar.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td>VideoLinksBulkBar node in library/tabs/VideoLinksBulkBar.jsx.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small><br>+4 more</td>
+  <td>No direct outbound edge</td>
+  <td>VideoLinksTab.jsx node in library/tabs/VideoLinksTab.jsx.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>matchesQuery()</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>matchesQuery() node in library/tabs/VideoLinksTab.jsx.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>VideoLinksTab</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td>No direct outbound edge</td>
+  <td>VideoLinksTab node in library/tabs/VideoLinksTab.jsx.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>__test__</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>TABS</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>TABS node in components/library/LibraryManagementView.jsx.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>TabPanel()</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><span class="tag tag-hook">UI</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>TabPanel() node in components/library/LibraryManagementView.jsx.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>components/library/LinkEditModal.jsx</code></td><td>5 nodes</td></tr>
+<tr><td><code>components/library/LibraryManagementView.jsx</code></td><td>4 nodes</td></tr>
+<tr><td><code>library/tabs/ContinueWatchingTab.jsx</code></td><td>4 nodes</td></tr>
+<tr><td><code>library/tabs/VideoLinksTab.jsx</code></td><td>4 nodes</td></tr>
+<tr><td><code>library/shared/LibraryDashboard.jsx</code></td><td>3 nodes</td></tr>
+<tr><td><code>library/tabs/PreferredSourcesTab.jsx</code></td><td>3 nodes</td></tr>
+<tr><td><code>library/tabs/ShowInfoPanel.jsx</code></td><td>3 nodes</td></tr>
+<tr><td><code>library/shared/EmptyState.jsx</code></td><td>2 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x21, imports x10, imports x10. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 16. Other ====== -->
+<h2 id="other">16. Other</h2>
+<p>Other groups implementation around skills, agents, reference, impeccable, mostly in impeccable/reference/critique.md, skills/writing-skills/anthropic-best-practices.md, impeccable/reference/typeset.md. This section covers 833 nodes and 961 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Other (833 nodes, 961 edges)
+    subgraph other_frontend_motion_grammar_js_990fc49a["frontend/motion/grammar.js"]
+        motion_grammar_reducedmotion_db33a3ee("reducedMotion()<br/><small>frontend/motion/grammar.js</small>")
+        motion_grammar_computematch_e191d723("computeMatch()<br/><small>frontend/motion/grammar.js</small>")
+        motion_grammar_ensurecached_82155094("ensureCached()<br/><small>frontend/motion/grammar.js</small>")
+        motion_grammar_onreducedmotionchange_e9407751("onReducedMotionChange()<br/><small>frontend/motion/grammar.js</small>")
+        motion_grammar_motionenabled_a1d77dbe("motionEnabled()<br/><small>frontend/motion/grammar.js</small>")
+        motion_grammar_resolveduration_970c0ff3("resolveDuration()<br/><small>frontend/motion/grammar.js</small>")
+    end
+    subgraph other_components_layout_CinematicGrid_jsx_02648ceb["components/layout/CinematicGrid.jsx"]
+        layout_cinematicgrid_ff6a6631("CinematicGrid.jsx")
+        layout_cinematicgrid_cinematicgridinner_bfaf9c29("CinematicGridInner()<br/><small>components/layout/CinematicGrid.jsx</small>")
+    end
+    subgraph other_components_layout_CinematicRow_jsx_e8ad36ed["components/layout/CinematicRow.jsx"]
+        layout_cinematicrow_895d0edf("CinematicRow.jsx")
+        layout_cinematicrow_cinematicrowinner_e6b3b1d4("CinematicRowInner()<br/><small>components/layout/CinematicRow.jsx</small>")
+    end
+    feedback_scanlineoverlay_99927cf7("ScanlineOverlay.jsx")
+    layout_cinematicfooter_cinematicfooterinner_902cb1be("CinematicFooterInner()<br/><small>components/layout/CinematicFooter.jsx</small>")
+    layout_holocard_holocardinner_09175738("HoloCardInner()<br/><small>components/layout/HoloCard.jsx</small>")
+    media_cinematicdetail_cinematicdetailinner_920006eb("CinematicDetailInner()<br/><small>components/media/CinematicDetail.jsx</small>")
+    frontend_app_ecde7d2e("App.jsx")
+    fx_scenecanvas_e64ee5c0("SceneCanvas.jsx")
+    motion_registry_buildtransition_a2fbbbcb("buildTransition()<br/><small>frontend/motion/registry.js</small>")
+    views_viewswitch_46301883("ViewSwitch.jsx")
+    layout_cinematicfooter_cinematicfooterinner_902cb1be -->|calls| motion_grammar_reducedmotion_db33a3ee
+    layout_cinematicgrid_cinematicgridinner_bfaf9c29 -->|calls| motion_grammar_reducedmotion_db33a3ee
+    layout_cinematicrow_cinematicrowinner_e6b3b1d4 -->|calls| motion_grammar_reducedmotion_db33a3ee
+    layout_holocard_holocardinner_09175738 -->|calls| motion_grammar_reducedmotion_db33a3ee
+    media_cinematicdetail_cinematicdetailinner_920006eb -->|calls| motion_grammar_reducedmotion_db33a3ee
+    motion_grammar_computematch_e191d723 -->|calls| motion_grammar_ensurecached_82155094
+    motion_grammar_ensurecached_82155094 -->|calls| motion_grammar_onreducedmotionchange_e9407751
+    motion_grammar_ensurecached_82155094 -->|calls| motion_grammar_reducedmotion_db33a3ee
+    motion_grammar_reducedmotion_db33a3ee -->|calls| motion_grammar_motionenabled_a1d77dbe
+    motion_grammar_reducedmotion_db33a3ee -->|calls| motion_grammar_resolveduration_970c0ff3
+    motion_grammar_reducedmotion_db33a3ee -->|calls| motion_registry_buildtransition_a2fbbbcb
+    frontend_app_ecde7d2e -->|imports| fx_scenecanvas_e64ee5c0
+    frontend_app_ecde7d2e -->|imports| views_viewswitch_46301883
+    layout_cinematicgrid_ff6a6631 -->|imports| motion_grammar_reducedmotion_db33a3ee
+    layout_cinematicrow_895d0edf -->|imports| motion_grammar_reducedmotion_db33a3ee
+    fx_scenecanvas_e64ee5c0 -->|imports| motion_grammar_reducedmotion_db33a3ee
+    %% Omitted for readability: 815 nodes, 0 edges
+    class motion_grammar_reducedmotion_db33a3ee function;
+    class motion_grammar_computematch_e191d723 function;
+    class motion_grammar_ensurecached_82155094 function;
+    class motion_grammar_onreducedmotionchange_e9407751 function;
+    class motion_grammar_motionenabled_a1d77dbe function;
+    class motion_grammar_resolveduration_970c0ff3 function;
+    class layout_cinematicgrid_ff6a6631 ui;
+    class layout_cinematicgrid_cinematicgridinner_bfaf9c29 ui;
+    class layout_cinematicrow_895d0edf ui;
+    class layout_cinematicrow_cinematicrowinner_e6b3b1d4 ui;
+    class feedback_scanlineoverlay_99927cf7 ui;
+    class layout_cinematicfooter_cinematicfooterinner_902cb1be ui;
+    class layout_holocard_holocardinner_09175738 ui;
+    class media_cinematicdetail_cinematicdetailinner_920006eb ui;
     class frontend_app_ecde7d2e ui;
-    class services_googledriveservice_createheaders_45a6eb6f function;
+    class fx_scenecanvas_e64ee5c0 ui;
+    class motion_registry_buildtransition_a2fbbbcb function;
     class views_viewswitch_46301883 ui;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
@@ -5136,243 +5146,243 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>HoloChip.jsx</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>typeset.md</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>EpisodesDrawer.jsx</code><br><small style="color:var(--muted)">components/library/EpisodesDrawer.jsx</small><br><code>EpisodesDrawer.jsx</code><br><small style="color:var(--muted)">remote/master/EpisodesDrawer.jsx</small><br><code>LibraryDashboard.jsx</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small><br>+3 more</td>
-  <td>HoloChip.jsx node in components/feedback/HoloChip.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing typeset.md.</td>
 </tr>
 <tr>
   <td>2</td>
-  <td><code>HoloChip</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Register</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>EpisodesDrawer.jsx</code><br><small style="color:var(--muted)">components/library/EpisodesDrawer.jsx</small><br><code>EpisodesDrawer.jsx</code><br><small style="color:var(--muted)">remote/master/EpisodesDrawer.jsx</small><br><code>LibraryDashboard.jsx</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small><br>+3 more</td>
-  <td>HoloChip node in components/feedback/HoloChip.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Register.</td>
 </tr>
 <tr>
   <td>3</td>
-  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Assess Current Typography</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContinueWatchingTab</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>LibraryDashboard</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small><br>+9 more</td>
-  <td>LibraryManagementView.jsx node in components/library/LibraryManagementView.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Assess Current Typography.</td>
 </tr>
 <tr>
   <td>4</td>
-  <td><code>TABS</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Plan Typography Improvements</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>TABS node in components/library/LibraryManagementView.jsx.</td>
+  <td>Documentation node describing Plan Typography Improvements.</td>
 </tr>
 <tr>
   <td>5</td>
-  <td><code>LibraryManagementView</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Improve Typography Systematically</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>LibraryManagementView node in components/library/LibraryManagementView.jsx.</td>
+  <td>Documentation node describing Improve Typography Systematically.</td>
 </tr>
 <tr>
   <td>6</td>
-  <td><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Font Selection</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>MyListTab.jsx</code><br><small style="color:var(--muted)">library/tabs/MyListTab.jsx</small><br><code>PreferredSourcesTab.jsx</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small><br>+1 more</td>
-  <td>EmptyState.jsx node in library/shared/EmptyState.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Font Selection.</td>
 </tr>
 <tr>
   <td>7</td>
-  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Establish Hierarchy</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small><br><code>MyListTab.jsx</code><br><small style="color:var(--muted)">library/tabs/MyListTab.jsx</small><br><code>PreferredSourcesTab.jsx</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small><br>+1 more</td>
-  <td>EmptyState() node in library/shared/EmptyState.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Establish Hierarchy.</td>
 </tr>
 <tr>
   <td>8</td>
-  <td><code>LibraryDashboard.jsx</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>HoloChip</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small><br><code>HoloChip.jsx</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small><br><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><code>Fix Readability</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>LibraryDashboard.jsx node in library/shared/LibraryDashboard.jsx.</td>
+  <td>Documentation node describing Fix Readability.</td>
 </tr>
 <tr>
   <td>9</td>
-  <td><code>CounterChip</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Refine Details</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>CounterChip node in library/shared/LibraryDashboard.jsx.</td>
+  <td>Documentation node describing Refine Details.</td>
 </tr>
 <tr>
   <td>10</td>
-  <td><code>LibraryDashboard</code><br><small style="color:var(--muted)">library/shared/LibraryDashboard.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><code>Weight Consistency</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>LibraryDashboard node in library/shared/LibraryDashboard.jsx.</td>
+  <td>Documentation node describing Weight Consistency.</td>
 </tr>
 <tr>
   <td>11</td>
-  <td><code>ContinueWatchingTab.jsx</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><code>Verify Typography Improvements</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ContinueWatchingTab.jsx node in library/tabs/ContinueWatchingTab.jsx.</td>
+  <td>Documentation node describing Verify Typography Improvements.</td>
 </tr>
 <tr>
   <td>12</td>
-  <td><code>formatDuration()</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Live-mode signature params</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>formatDuration() node in library/tabs/ContinueWatchingTab.jsx.</td>
+  <td>Documentation node describing Live-mode signature params.</td>
 </tr>
 <tr>
   <td>13</td>
-  <td><code>matchesQuery()</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Reference Material</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>matchesQuery() node in library/tabs/ContinueWatchingTab.jsx.</td>
+  <td>Documentation node describing Reference Material.</td>
 </tr>
 <tr>
   <td>14</td>
-  <td><code>ContinueWatchingTab</code><br><small style="color:var(--muted)">library/tabs/ContinueWatchingTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><code>Typography</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>ContinueWatchingTab node in library/tabs/ContinueWatchingTab.jsx.</td>
+  <td>Documentation node describing Typography.</td>
 </tr>
 <tr>
   <td>15</td>
-  <td><code>MyListTab.jsx</code><br><small style="color:var(--muted)">library/tabs/MyListTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>HoloChip</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small><br>+2 more</td>
+  <td><code>Classic Typography Principles</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>MyListTab.jsx node in library/tabs/MyListTab.jsx.</td>
+  <td>Documentation node describing Classic Typography Principles.</td>
 </tr>
 <tr>
   <td>16</td>
-  <td><code>formatDate()</code><br><small style="color:var(--muted)">library/tabs/MyListTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Vertical Rhythm</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>formatDate() node in library/tabs/MyListTab.jsx.</td>
+  <td>Documentation node describing Vertical Rhythm.</td>
 </tr>
 <tr>
   <td>17</td>
-  <td><code>matchesQuery()</code><br><small style="color:var(--muted)">library/tabs/MyListTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Modular Scale &amp; Hierarchy</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>matchesQuery() node in library/tabs/MyListTab.jsx.</td>
+  <td>Documentation node describing Modular Scale &amp; Hierarchy.</td>
 </tr>
 <tr>
   <td>18</td>
-  <td><code>MyListTab</code><br><small style="color:var(--muted)">library/tabs/MyListTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><code>Readability &amp; Measure</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>MyListTab node in library/tabs/MyListTab.jsx.</td>
+  <td>Documentation node describing Readability &amp; Measure.</td>
 </tr>
 <tr>
   <td>19</td>
-  <td><code>PreferredSourcesTab.jsx</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>HoloChip</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small><br>+2 more</td>
+  <td><code>Font Selection &amp; Pairing</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>PreferredSourcesTab.jsx node in library/tabs/PreferredSourcesTab.jsx.</td>
+  <td>Documentation node describing Font Selection &amp; Pairing.</td>
 </tr>
 <tr>
   <td>20</td>
-  <td><code>countLinksForShow()</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Anti-reflexes worth defending against</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>countLinksForShow() node in library/tabs/PreferredSourcesTab.jsx.</td>
+  <td>Documentation node describing Anti-reflexes worth defending against.</td>
 </tr>
 <tr>
   <td>21</td>
-  <td><code>PreferredSourcesTab</code><br><small style="color:var(--muted)">library/tabs/PreferredSourcesTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
+  <td><code>Pairing Principles</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>PreferredSourcesTab node in library/tabs/PreferredSourcesTab.jsx.</td>
+  <td>Documentation node describing Pairing Principles.</td>
 </tr>
 <tr>
   <td>22</td>
-  <td><code>ShowInfoPanel.jsx</code><br><small style="color:var(--muted)">library/tabs/ShowInfoPanel.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>HoloChip</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small><br><code>HoloChip.jsx</code><br><small style="color:var(--muted)">components/feedback/HoloChip.jsx</small></td>
-  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
-  <td>ShowInfoPanel.jsx node in library/tabs/ShowInfoPanel.jsx.</td>
+  <td><code>Web Font Loading</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Web Font Loading.</td>
 </tr>
 <tr>
   <td>23</td>
-  <td><code>formatDate()</code><br><small style="color:var(--muted)">library/tabs/ShowInfoPanel.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Modern Web Typography</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>formatDate() node in library/tabs/ShowInfoPanel.jsx.</td>
+  <td>Documentation node describing Modern Web Typography.</td>
 </tr>
 <tr>
   <td>24</td>
-  <td><code>ShowInfoPanel</code><br><small style="color:var(--muted)">library/tabs/ShowInfoPanel.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Fluid Type</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
-  <td>ShowInfoPanel node in library/tabs/ShowInfoPanel.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Fluid Type.</td>
 </tr>
 <tr>
   <td>25</td>
-  <td><code>VideoLinksBulkBar.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksBulkBar.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>OpenType Features</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
-  <td>VideoLinksBulkBar.jsx node in library/tabs/VideoLinksBulkBar.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing OpenType Features.</td>
 </tr>
 <tr>
   <td>26</td>
-  <td><code>VideoLinksBulkBar</code><br><small style="color:var(--muted)">library/tabs/VideoLinksBulkBar.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Rendering polish</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
-  <td>VideoLinksBulkBar node in library/tabs/VideoLinksBulkBar.jsx.</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Rendering polish.</td>
 </tr>
 <tr>
   <td>27</td>
-  <td><code>VideoLinksTab.jsx</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
-  <td><code>EmptyState()</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>EmptyState.jsx</code><br><small style="color:var(--muted)">library/shared/EmptyState.jsx</small><br><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small><br>+4 more</td>
+  <td><code>Typography System Architecture</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>VideoLinksTab.jsx node in library/tabs/VideoLinksTab.jsx.</td>
+  <td>Documentation node describing Typography System Architecture.</td>
 </tr>
 <tr>
   <td>28</td>
-  <td><code>matchesQuery()</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
-  <td><span class="tag tag-hook">UI</span></td>
+  <td><code>Accessibility Considerations</code><br><small style="color:var(--muted)">impeccable/reference/typeset.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>matchesQuery() node in library/tabs/VideoLinksTab.jsx.</td>
+  <td>Documentation node describing Accessibility Considerations.</td>
 </tr>
 <tr>
   <td>29</td>
-  <td><code>VideoLinksTab</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td><code>WatchTogetherModal.jsx</code><br><small style="color:var(--muted)">components/modals/WatchTogetherModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
-  <td><code>LibraryManagementView.jsx</code><br><small style="color:var(--muted)">components/library/LibraryManagementView.jsx</small></td>
-  <td>No direct outbound edge</td>
-  <td>VideoLinksTab node in library/tabs/VideoLinksTab.jsx.</td>
+  <td>External entry / no inbound edge</td>
+  <td><code>apiCall.jsx</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small><br><code>searchShow()</code><br><small style="color:var(--muted)">frontend/services/apiCall.jsx</small><br><code>WatchTogetherStore</code><br><small style="color:var(--muted)">frontend/store/watchTogetherStore.js</small><br>+1 more</td>
+  <td>WatchTogetherModal.jsx node in components/modals/WatchTogetherModal.jsx.</td>
 </tr>
 <tr>
   <td>30</td>
-  <td><code>__test__</code><br><small style="color:var(--muted)">library/tabs/VideoLinksTab.jsx</small></td>
+  <td><code>style</code><br><small style="color:var(--muted)">components/modals/WatchTogetherModal.jsx</small></td>
   <td><span class="tag tag-hook">UI</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
-  <td>Verifies imports, entry points, or version behavior.</td>
+  <td>style node in components/modals/WatchTogetherModal.jsx.</td>
 </tr>
 </table>
 
@@ -5393,7 +5403,7 @@ flowchart LR
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x671, imports x67, imports x59, calls x18. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x695, imports x100, imports x92, calls x31. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -5404,17 +5414,17 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>2478</td></tr>
-      <tr><td>Edges</td><td>3007</td></tr>
+      <tr><td>Nodes</td><td>2482</td></tr>
+      <tr><td>Edges</td><td>3018</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>216</td></tr>
+      <tr><td>Communities</td><td>219</td></tr>
       <tr><td>Documented Sections</td><td>15</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>3001</td></tr>
+      <tr><td>EXTRACTED</td><td>3012</td></tr>
       <tr><td>INFERRED</td><td>6</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -5423,7 +5433,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>stream-flix — Architecture Documentation</p>
-  <p>Generated: 2026-06-03 17:41 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-06-03 18:14 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\LibraryManagementView.jsx": {
-    "mtime": 1780507437.1969059,
-    "ast_hash": "707d670f928b86e036cef4d47363b426",
+    "mtime": 1780508910.9841783,
+    "ast_hash": "1d693ded773f7897559208c5a01fe84e",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\ManageLinksView.jsx": {
@@ -345,13 +345,13 @@
     "semantic_hash": "a8c0ded750535c229baaa57b8175a973"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\locales\\en.js": {
-    "mtime": 1780507356.2599013,
-    "ast_hash": "baf0d93b38abb061c71bff63dd346c07",
+    "mtime": 1780508862.8670108,
+    "ast_hash": "50c51cc2338c63f10076d886d1aecf60",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\locales\\it.js": {
-    "mtime": 1780507333.334441,
-    "ast_hash": "d3652e76d812aedde0af1933211ee92a",
+    "mtime": 1780508839.1111646,
+    "ast_hash": "ffc7594612ed623d225c7e1da559eb01",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\metadata.json": {
@@ -400,8 +400,8 @@
     "semantic_hash": "76c132b21c4305f5c2e46b070300c265"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\mediaStore.js": {
-    "mtime": 1780507304.9462867,
-    "ast_hash": "4640a7cb8b03900ff8303c6d7edd2c18",
+    "mtime": 1780508787.4742193,
+    "ast_hash": "22894f13ca1d5c26ae928d061c82ea8f",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\remoteStore.js": {
@@ -744,11 +744,6 @@
     "ast_hash": "8b94b14543203392295fda6f94c43d27",
     "semantic_hash": ""
   },
-  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.output.txt": {
-    "mtime": 1780508484.750619,
-    "ast_hash": "ac2bba3976fc3a29a1bb47e14fd2eefc",
-    "semantic_hash": ""
-  },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\LinkEditModal.jsx": {
     "mtime": 1780507730.7379248,
     "ast_hash": "5b33ee4f354d355ed1fc9ef39cdb6af4",
@@ -760,13 +755,13 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\shared\\LibraryDashboard.jsx": {
-    "mtime": 1780508040.6815789,
-    "ast_hash": "a5ca0df48e1c2705f6b8b9f39235d0d3",
+    "mtime": 1780508894.6110427,
+    "ast_hash": "acb72ad4325e9462fc04cf98a1bfb52f",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\ContinueWatchingTab.jsx": {
-    "mtime": 1780507493.2032752,
-    "ast_hash": "0f889bad1118af17ac1f081abc454a11",
+    "mtime": 1780508936.3280532,
+    "ast_hash": "f3bc8595de9b1aee4b7bd4a7381e195f",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\MyListTab.jsx": {
@@ -775,8 +770,8 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\PreferredSourcesTab.jsx": {
-    "mtime": 1780508081.479663,
-    "ast_hash": "55b7004072a78024bebe99406eff0a9b",
+    "mtime": 1780508961.665156,
+    "ast_hash": "0c8678a0f8203566cc9783199f86283a",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\ShowInfoPanel.jsx": {
@@ -792,6 +787,11 @@
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\VideoLinksTab.jsx": {
     "mtime": 1780508060.6830661,
     "ast_hash": "da09c96f67ce3849700fed6abf01f3e3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\PreferredSourceEditModal.jsx": {
+    "mtime": 1780508809.157146,
+    "ast_hash": "fbd7e0f6feb0c9f404402f3007fbbc38",
     "semantic_hash": ""
   }
 }

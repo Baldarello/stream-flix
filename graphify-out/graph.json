@@ -1017,7 +1017,7 @@
       "source_file": "frontend/components/feedback/HoloChip.jsx",
       "source_location": "L1",
       "id": "feedback_holochip",
-      "community": 6,
+      "community": 19,
       "norm_label": "holochip.jsx"
     },
     {
@@ -1026,7 +1026,7 @@
       "source_file": "frontend/components/feedback/HoloChip.jsx",
       "source_location": "L25",
       "id": "feedback_holochip_holochip",
-      "community": 6,
+      "community": 19,
       "norm_label": "holochip"
     },
     {
@@ -1053,7 +1053,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L1",
       "id": "feedback_skeleton",
-      "community": 0,
+      "community": 18,
       "norm_label": "skeleton.jsx"
     },
     {
@@ -1062,7 +1062,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L12",
       "id": "feedback_skeleton_skeletoninner",
-      "community": 0,
+      "community": 18,
       "norm_label": "skeletoninner()"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L35",
       "id": "feedback_skeleton_skeletoncard",
-      "community": 0,
+      "community": 18,
       "norm_label": "skeletoncard()"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_file": "frontend/components/layout/CinematicFooter.jsx",
       "source_location": "L92",
       "id": "layout_cinematicfooter_cinematicfooter",
-      "community": 0,
+      "community": 2,
       "norm_label": "cinematicfooter"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "frontend/components/layout/CinematicGrid.jsx",
       "source_location": "L96",
       "id": "layout_cinematicgrid_cinematicgrid",
-      "community": 15,
+      "community": 23,
       "norm_label": "cinematicgrid"
     },
     {
@@ -1152,7 +1152,7 @@
       "source_file": "frontend/components/layout/CinematicHero.jsx",
       "source_location": "L1",
       "id": "layout_cinematichero",
-      "community": 0,
+      "community": 15,
       "norm_label": "cinematichero.jsx"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "frontend/components/layout/CinematicHero.jsx",
       "source_location": "L29",
       "id": "layout_cinematichero_splittitle",
-      "community": 0,
+      "community": 15,
       "norm_label": "splittitle()"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_file": "frontend/components/layout/CinematicHero.jsx",
       "source_location": "L46",
       "id": "layout_cinematichero_cinematichero",
-      "community": 0,
+      "community": 15,
       "norm_label": "cinematichero"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "frontend/components/layout/CinematicRow.jsx",
       "source_location": "L301",
       "id": "layout_cinematicrow_cinematicrow",
-      "community": 0,
+      "community": 15,
       "norm_label": "cinematicrow"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "frontend/components/layout/FloatingDock.jsx",
       "source_location": "L1",
       "id": "layout_floatingdock",
-      "community": 15,
+      "community": 23,
       "norm_label": "floatingdock.jsx"
     },
     {
@@ -1224,7 +1224,7 @@
       "source_file": "frontend/components/layout/FloatingDock.jsx",
       "source_location": "L42",
       "id": "layout_floatingdock_nav_keys",
-      "community": 15,
+      "community": 23,
       "norm_label": "nav_keys"
     },
     {
@@ -1233,7 +1233,7 @@
       "source_file": "frontend/components/layout/FloatingDock.jsx",
       "source_location": "L49",
       "id": "layout_floatingdock_floatingdock",
-      "community": 15,
+      "community": 23,
       "norm_label": "floatingdock"
     },
     {
@@ -1242,7 +1242,7 @@
       "source_file": "frontend/components/layout/Footer.jsx",
       "source_location": "L1",
       "id": "layout_footer",
-      "community": 0,
+      "community": 2,
       "norm_label": "footer.jsx"
     },
     {
@@ -1251,7 +1251,7 @@
       "source_file": "frontend/components/layout/GridView.jsx",
       "source_location": "L1",
       "id": "layout_gridview",
-      "community": 15,
+      "community": 23,
       "norm_label": "gridview.jsx"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_file": "frontend/components/layout/Header.jsx",
       "source_location": "L1",
       "id": "layout_header",
-      "community": 15,
+      "community": 23,
       "norm_label": "header.jsx"
     },
     {
@@ -1269,7 +1269,7 @@
       "source_file": "frontend/components/layout/Hero.jsx",
       "source_location": "L1",
       "id": "layout_hero",
-      "community": 0,
+      "community": 15,
       "norm_label": "hero.jsx"
     },
     {
@@ -1372,19 +1372,10 @@
       "norm_label": "librarymanagementview.jsx"
     },
     {
-      "label": "TABS",
-      "file_type": "code",
-      "source_file": "frontend/components/library/LibraryManagementView.jsx",
-      "source_location": "L31",
-      "id": "library_librarymanagementview_tabs",
-      "community": 6,
-      "norm_label": "tabs"
-    },
-    {
       "label": "LibraryManagementView",
       "file_type": "code",
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
-      "source_location": "L38",
+      "source_location": "L27",
       "id": "library_librarymanagementview_librarymanagementview",
       "community": 6,
       "norm_label": "librarymanagementview"
@@ -1395,7 +1386,7 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L1",
       "id": "library_linkeditmodal",
-      "community": 8,
+      "community": 6,
       "norm_label": "linkeditmodal.jsx"
     },
     {
@@ -1404,7 +1395,7 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L43",
       "id": "library_linkeditmodal_holofieldsx",
-      "community": 8,
+      "community": 6,
       "norm_label": "holofieldsx"
     },
     {
@@ -1413,7 +1404,7 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L69",
       "id": "library_linkeditmodal_buildpreview",
-      "community": 8,
+      "community": 6,
       "norm_label": "buildpreview()"
     },
     {
@@ -1422,7 +1413,7 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L80",
       "id": "library_linkeditmodal_getcontextforlink",
-      "community": 8,
+      "community": 6,
       "norm_label": "getcontextforlink()"
     },
     {
@@ -1431,7 +1422,7 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L104",
       "id": "library_linkeditmodal_linkeditmodal",
-      "community": 8,
+      "community": 6,
       "norm_label": "linkeditmodal"
     },
     {
@@ -1440,7 +1431,7 @@
       "source_file": "frontend/components/library/ManageLinksView.jsx",
       "source_location": "L1",
       "id": "library_managelinksview",
-      "community": 8,
+      "community": 15,
       "norm_label": "managelinksview.jsx"
     },
     {
@@ -1449,8 +1440,44 @@
       "source_file": "frontend/components/library/ManageLinksView.jsx",
       "source_location": "L35",
       "id": "library_managelinksview_managelinksview",
-      "community": 8,
+      "community": 15,
       "norm_label": "managelinksview"
+    },
+    {
+      "label": "PreferredSourceEditModal.jsx",
+      "file_type": "code",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L1",
+      "id": "library_preferredsourceeditmodal",
+      "community": 8,
+      "norm_label": "preferredsourceeditmodal.jsx"
+    },
+    {
+      "label": "holoFieldSx",
+      "file_type": "code",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L31",
+      "id": "library_preferredsourceeditmodal_holofieldsx",
+      "community": 8,
+      "norm_label": "holofieldsx"
+    },
+    {
+      "label": "buildPreview()",
+      "file_type": "code",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L57",
+      "id": "library_preferredsourceeditmodal_buildpreview",
+      "community": 8,
+      "norm_label": "buildpreview()"
+    },
+    {
+      "label": "PreferredSourceEditModal",
+      "file_type": "code",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L67",
+      "id": "library_preferredsourceeditmodal_preferredsourceeditmodal",
+      "community": 8,
+      "norm_label": "preferredsourceeditmodal"
     },
     {
       "label": "EmptyState.jsx",
@@ -1510,7 +1537,7 @@
       "label": "formatDuration()",
       "file_type": "code",
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
-      "source_location": "L35",
+      "source_location": "L36",
       "id": "tabs_continuewatchingtab_formatduration",
       "community": 6,
       "norm_label": "formatduration()"
@@ -1519,7 +1546,7 @@
       "label": "matchesQuery()",
       "file_type": "code",
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
-      "source_location": "L42",
+      "source_location": "L43",
       "id": "tabs_continuewatchingtab_matchesquery",
       "community": 6,
       "norm_label": "matchesquery()"
@@ -1528,7 +1555,7 @@
       "label": "ContinueWatchingTab",
       "file_type": "code",
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
-      "source_location": "L48",
+      "source_location": "L49",
       "id": "tabs_continuewatchingtab_continuewatchingtab",
       "community": 6,
       "norm_label": "continuewatchingtab"
@@ -1539,7 +1566,7 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L1",
       "id": "tabs_mylisttab",
-      "community": 6,
+      "community": 19,
       "norm_label": "mylisttab.jsx"
     },
     {
@@ -1548,7 +1575,7 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L40",
       "id": "tabs_mylisttab_formatdate",
-      "community": 6,
+      "community": 19,
       "norm_label": "formatdate()"
     },
     {
@@ -1557,7 +1584,7 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L52",
       "id": "tabs_mylisttab_matchesquery",
-      "community": 6,
+      "community": 19,
       "norm_label": "matchesquery()"
     },
     {
@@ -1566,7 +1593,7 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L58",
       "id": "tabs_mylisttab_mylisttab",
-      "community": 6,
+      "community": 19,
       "norm_label": "mylisttab"
     },
     {
@@ -1582,7 +1609,7 @@
       "label": "countLinksForShow()",
       "file_type": "code",
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "id": "tabs_preferredsourcestab_countlinksforshow",
       "community": 6,
       "norm_label": "countlinksforshow()"
@@ -1591,7 +1618,7 @@
       "label": "PreferredSourcesTab",
       "file_type": "code",
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
-      "source_location": "L47",
+      "source_location": "L48",
       "id": "tabs_preferredsourcestab_preferredsourcestab",
       "community": 6,
       "norm_label": "preferredsourcestab"
@@ -1710,7 +1737,7 @@
       "source_file": "frontend/components/media/DetailView.jsx",
       "source_location": "L1",
       "id": "media_detailview",
-      "community": 0,
+      "community": 19,
       "norm_label": "detailview.jsx"
     },
     {
@@ -1719,7 +1746,7 @@
       "source_file": "frontend/components/media/DetailView.jsx",
       "source_location": "L49",
       "id": "media_detailview_holofieldsx",
-      "community": 0,
+      "community": 19,
       "norm_label": "holofieldsx"
     },
     {
@@ -1728,7 +1755,7 @@
       "source_file": "frontend/components/media/DetailView.jsx",
       "source_location": "L76",
       "id": "media_detailview_swipeableepisodecarddetailview",
-      "community": 0,
+      "community": 19,
       "norm_label": "swipeableepisodecarddetailview"
     },
     {
@@ -1737,7 +1764,7 @@
       "source_file": "frontend/components/media/DetailView.jsx",
       "source_location": "L500",
       "id": "media_detailview_detailview",
-      "community": 0,
+      "community": 19,
       "norm_label": "detailview"
     },
     {
@@ -1764,7 +1791,7 @@
       "source_file": "frontend/components/media/SlaveVideoPlayer.jsx",
       "source_location": "L1",
       "id": "media_slavevideoplayer",
-      "community": 19,
+      "community": 15,
       "norm_label": "slavevideoplayer.jsx"
     },
     {
@@ -1773,7 +1800,7 @@
       "source_file": "frontend/components/media/SlaveVideoPlayer.jsx",
       "source_location": "L36",
       "id": "media_slavevideoplayer_slavevideoplayer",
-      "community": 19,
+      "community": 15,
       "norm_label": "slavevideoplayer"
     },
     {
@@ -1782,7 +1809,7 @@
       "source_file": "frontend/components/media/VideoControlsContainer.jsx",
       "source_location": "L1",
       "id": "media_videocontrolscontainer",
-      "community": 19,
+      "community": 15,
       "norm_label": "videocontrolscontainer.jsx"
     },
     {
@@ -1791,7 +1818,7 @@
       "source_file": "frontend/components/media/VideoControlsContainer.jsx",
       "source_location": "L29",
       "id": "media_videocontrolscontainer_formattime",
-      "community": 19,
+      "community": 15,
       "norm_label": "formattime()"
     },
     {
@@ -1800,7 +1827,7 @@
       "source_file": "frontend/components/media/VideoControlsContainer.jsx",
       "source_location": "L43",
       "id": "media_videocontrolscontainer_playbackrates",
-      "community": 19,
+      "community": 15,
       "norm_label": "playbackrates"
     },
     {
@@ -1809,7 +1836,7 @@
       "source_file": "frontend/components/media/VideoControlsContainer.jsx",
       "source_location": "L51",
       "id": "media_videocontrolscontainer_videocontrolscontainer",
-      "community": 19,
+      "community": 15,
       "norm_label": "videocontrolscontainer"
     },
     {
@@ -1818,7 +1845,7 @@
       "source_file": "frontend/components/media/VideoPlayer.jsx",
       "source_location": "L1",
       "id": "media_videoplayer",
-      "community": 19,
+      "community": 15,
       "norm_label": "videoplayer.jsx"
     },
     {
@@ -1827,7 +1854,7 @@
       "source_file": "frontend/components/media/VideoPlayer.jsx",
       "source_location": "L30",
       "id": "media_videoplayer_videoplayer",
-      "community": 19,
+      "community": 15,
       "norm_label": "videoplayer"
     },
     {
@@ -2106,7 +2133,7 @@
       "source_file": "frontend/components/modals/WatchTogetherModal.jsx",
       "source_location": "L1",
       "id": "modals_watchtogethermodal",
-      "community": 2,
+      "community": 14,
       "norm_label": "watchtogethermodal.jsx"
     },
     {
@@ -2115,7 +2142,7 @@
       "source_file": "frontend/components/modals/WatchTogetherModal.jsx",
       "source_location": "L43",
       "id": "modals_watchtogethermodal_style",
-      "community": 2,
+      "community": 14,
       "norm_label": "style"
     },
     {
@@ -2124,7 +2151,7 @@
       "source_file": "frontend/components/modals/WatchTogetherModal.jsx",
       "source_location": "L58",
       "id": "modals_watchtogethermodal_watchtogethermodal",
-      "community": 2,
+      "community": 14,
       "norm_label": "watchtogethermodal"
     },
     {
@@ -2169,7 +2196,7 @@
       "source_file": "frontend/components/remote/SlaveScreen.jsx",
       "source_location": "L1",
       "id": "remote_slavescreen",
-      "community": 12,
+      "community": 15,
       "norm_label": "slavescreen.jsx"
     },
     {
@@ -2178,7 +2205,7 @@
       "source_file": "frontend/components/remote/SlaveScreen.jsx",
       "source_location": "L12",
       "id": "remote_slavescreen_slavescreen",
-      "community": 12,
+      "community": 15,
       "norm_label": "slavescreen"
     },
     {
@@ -2187,7 +2214,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L1",
       "id": "master_episodesdrawer",
-      "community": 19,
+      "community": 18,
       "norm_label": "episodesdrawer.jsx"
     },
     {
@@ -2196,7 +2223,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L37",
       "id": "master_episodesdrawer_holofieldsx",
-      "community": 19,
+      "community": 18,
       "norm_label": "holofieldsx"
     },
     {
@@ -2205,7 +2232,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L63",
       "id": "master_episodesdrawer_holodrawerheader",
-      "community": 19,
+      "community": 18,
       "norm_label": "holodrawerheader"
     },
     {
@@ -2214,7 +2241,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L138",
       "id": "master_episodesdrawer_seasonselector",
-      "community": 19,
+      "community": 18,
       "norm_label": "seasonselector"
     },
     {
@@ -2223,7 +2250,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L189",
       "id": "master_episodesdrawer_introdurationfield",
-      "community": 19,
+      "community": 18,
       "norm_label": "introdurationfield"
     },
     {
@@ -2232,7 +2259,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L215",
       "id": "master_episodesdrawer_episoderow",
-      "community": 19,
+      "community": 18,
       "norm_label": "episoderow"
     },
     {
@@ -2241,7 +2268,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L405",
       "id": "master_episodesdrawer_episodelistskeleton",
-      "community": 19,
+      "community": 18,
       "norm_label": "episodelistskeleton()"
     },
     {
@@ -2250,7 +2277,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L454",
       "id": "master_episodesdrawer_episodeemptystate",
-      "community": 19,
+      "community": 18,
       "norm_label": "episodeemptystate()"
     },
     {
@@ -2259,7 +2286,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L488",
       "id": "master_episodesdrawer_episodesdrawer",
-      "community": 19,
+      "community": 18,
       "norm_label": "episodesdrawer"
     },
     {
@@ -2322,7 +2349,7 @@
       "source_file": "frontend/components/remote/slave/SlaveBackground.jsx",
       "source_location": "L1",
       "id": "slave_slavebackground",
-      "community": 12,
+      "community": 15,
       "norm_label": "slavebackground.jsx"
     },
     {
@@ -2331,7 +2358,7 @@
       "source_file": "frontend/components/remote/slave/SlaveBackground.jsx",
       "source_location": "L4",
       "id": "slave_slavebackground_smarttvbackground",
-      "community": 12,
+      "community": 15,
       "norm_label": "smarttvbackground()"
     },
     {
@@ -2340,7 +2367,7 @@
       "source_file": "frontend/components/remote/slave/SlaveConnectedView.jsx",
       "source_location": "L1",
       "id": "slave_slaveconnectedview",
-      "community": 12,
+      "community": 15,
       "norm_label": "slaveconnectedview.jsx"
     },
     {
@@ -2466,7 +2493,7 @@
       "source_file": "frontend/components/utilities/ConnectionIndicator.jsx",
       "source_location": "L1",
       "id": "utilities_connectionindicator",
-      "community": 12,
+      "community": 14,
       "norm_label": "connectionindicator.jsx"
     },
     {
@@ -2475,7 +2502,7 @@
       "source_file": "frontend/components/utilities/ConnectionIndicator.jsx",
       "source_location": "L6",
       "id": "utilities_connectionindicator_connectionindicator",
-      "community": 12,
+      "community": 14,
       "norm_label": "connectionindicator"
     },
     {
@@ -2520,7 +2547,7 @@
       "source_file": "frontend/components/utilities/ProfileDrawer.jsx",
       "source_location": "L1",
       "id": "utilities_profiledrawer",
-      "community": 13,
+      "community": 14,
       "norm_label": "profiledrawer.jsx"
     },
     {
@@ -2529,7 +2556,7 @@
       "source_file": "frontend/components/utilities/ProfileDrawer.jsx",
       "source_location": "L41",
       "id": "utilities_profiledrawer_profiledrawer",
-      "community": 13,
+      "community": 14,
       "norm_label": "profiledrawer"
     },
     {
@@ -2556,7 +2583,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L1",
       "id": "context_storecontext",
-      "community": 16,
+      "community": 23,
       "norm_label": "storecontext.jsx"
     },
     {
@@ -2565,7 +2592,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L21",
       "id": "context_storecontext_storecontext",
-      "community": 16,
+      "community": 23,
       "norm_label": "storecontext"
     },
     {
@@ -2574,7 +2601,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L40",
       "id": "context_storecontext_usestores",
-      "community": 16,
+      "community": 23,
       "norm_label": "usestores()"
     },
     {
@@ -2583,7 +2610,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L56",
       "id": "context_storecontext_storeprovider",
-      "community": 16,
+      "community": 152,
       "norm_label": "storeprovider()"
     },
     {
@@ -2592,7 +2619,7 @@
       "source_file": "frontend/features/home/HomeView.jsx",
       "source_location": "L1",
       "id": "home_homeview",
-      "community": 0,
+      "community": 15,
       "norm_label": "homeview.jsx"
     },
     {
@@ -2601,7 +2628,7 @@
       "source_file": "frontend/features/home/HomeView.jsx",
       "source_location": "L25",
       "id": "home_homeview_homeview",
-      "community": 0,
+      "community": 15,
       "norm_label": "homeview"
     },
     {
@@ -2754,7 +2781,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L1",
       "id": "fx_transitionportal",
-      "community": 152,
+      "community": 24,
       "norm_label": "transitionportal.jsx"
     },
     {
@@ -2763,7 +2790,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L22",
       "id": "fx_transitionportal_focusable_selector",
-      "community": 152,
+      "community": 24,
       "norm_label": "focusable_selector"
     },
     {
@@ -2772,7 +2799,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L31",
       "id": "fx_transitionportal_getfocusable",
-      "community": 152,
+      "community": 24,
       "norm_label": "getfocusable()"
     },
     {
@@ -2781,7 +2808,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L40",
       "id": "fx_transitionportal_focustrap",
-      "community": 152,
+      "community": 24,
       "norm_label": "focustrap()"
     },
     {
@@ -2790,7 +2817,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L93",
       "id": "fx_transitionportal_transitionportal",
-      "community": 152,
+      "community": 24,
       "norm_label": "transitionportal"
     },
     {
@@ -2862,7 +2889,7 @@
       "source_file": "frontend/index.jsx",
       "source_location": "L1",
       "id": "frontend_index",
-      "community": 14,
+      "community": 152,
       "norm_label": "index.jsx"
     },
     {
@@ -2871,7 +2898,7 @@
       "source_file": "frontend/index.jsx",
       "source_location": "L5",
       "id": "frontend_index_rootelement",
-      "community": 14,
+      "community": 152,
       "norm_label": "rootelement"
     },
     {
@@ -2880,7 +2907,7 @@
       "source_file": "frontend/index.jsx",
       "source_location": "L10",
       "id": "frontend_index_root",
-      "community": 14,
+      "community": 152,
       "norm_label": "root"
     },
     {
@@ -3420,7 +3447,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L1",
       "id": "services_apicall",
-      "community": 12,
+      "community": 14,
       "norm_label": "apicall.jsx"
     },
     {
@@ -3429,7 +3456,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L10",
       "id": "services_apicall_apiclient",
-      "community": 12,
+      "community": 14,
       "norm_label": "apiclient"
     },
     {
@@ -3438,7 +3465,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L34",
       "id": "services_apicall_buildimageurl",
-      "community": 12,
+      "community": 14,
       "norm_label": "buildimageurl()"
     },
     {
@@ -3447,7 +3474,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L38",
       "id": "services_apicall_tmdbtomediaitem",
-      "community": 12,
+      "community": 14,
       "norm_label": "tmdbtomediaitem()"
     },
     {
@@ -3456,7 +3483,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L55",
       "id": "services_apicall_gettrending",
-      "community": 12,
+      "community": 14,
       "norm_label": "gettrending()"
     },
     {
@@ -3465,7 +3492,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L64",
       "id": "services_apicall_getlatestmovies",
-      "community": 12,
+      "community": 14,
       "norm_label": "getlatestmovies()"
     },
     {
@@ -3474,7 +3501,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L72",
       "id": "services_apicall_gettopratedseries",
-      "community": 12,
+      "community": 14,
       "norm_label": "gettopratedseries()"
     },
     {
@@ -3483,7 +3510,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L80",
       "id": "services_apicall_getpopularanime",
-      "community": 12,
+      "community": 14,
       "norm_label": "getpopularanime()"
     },
     {
@@ -3492,7 +3519,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L89",
       "id": "services_apicall_getseriesdetails",
-      "community": 12,
+      "community": 14,
       "norm_label": "getseriesdetails()"
     },
     {
@@ -3501,7 +3528,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L117",
       "id": "services_apicall_getseriesepisodes",
-      "community": 12,
+      "community": 14,
       "norm_label": "getseriesepisodes()"
     },
     {
@@ -3510,7 +3537,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L144",
       "id": "services_apicall_getseriesimages",
-      "community": 12,
+      "community": 14,
       "norm_label": "getseriesimages()"
     },
     {
@@ -3519,7 +3546,7 @@
       "source_file": "frontend/services/apiCall.jsx",
       "source_location": "L154",
       "id": "services_apicall_searchshow",
-      "community": 2,
+      "community": 14,
       "norm_label": "searchshow()"
     },
     {
@@ -3528,7 +3555,7 @@
       "source_file": "frontend/services/db.js",
       "source_location": "L1",
       "id": "services_db",
-      "community": 69,
+      "community": 14,
       "norm_label": "db.js"
     },
     {
@@ -3573,7 +3600,7 @@
       "source_file": "frontend/services/db.js",
       "source_location": "L225",
       "id": "services_db_db",
-      "community": 69,
+      "community": 14,
       "norm_label": "db"
     },
     {
@@ -4203,7 +4230,7 @@
       "source_file": "frontend/store/fxStore.js",
       "source_location": "L1",
       "id": "store_fxstore",
-      "community": 152,
+      "community": 24,
       "norm_label": "fxstore.js"
     },
     {
@@ -4212,7 +4239,7 @@
       "source_file": "frontend/store/fxStore.js",
       "source_location": "L17",
       "id": "store_fxstore_fxstore",
-      "community": 152,
+      "community": 24,
       "norm_label": "fxstore"
     },
     {
@@ -4221,7 +4248,7 @@
       "source_file": "frontend/store/fxStore.js",
       "source_location": "L25",
       "id": "store_fxstore_fxstore_constructor",
-      "community": 152,
+      "community": 24,
       "norm_label": ".constructor()"
     },
     {
@@ -4255,7 +4282,7 @@
       "label": ".watchTogetherModalOpen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L142",
+      "source_location": "L143",
       "id": "store_mediastore_mediastore_watchtogethermodalopen",
       "community": 1,
       "norm_label": ".watchtogethermodalopen()"
@@ -4264,7 +4291,7 @@
       "label": ".roomId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L150",
+      "source_location": "L151",
       "id": "store_mediastore_mediastore_roomid",
       "community": 1,
       "norm_label": ".roomid()"
@@ -4273,7 +4300,7 @@
       "label": ".hostId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L158",
+      "source_location": "L159",
       "id": "store_mediastore_mediastore_hostid",
       "community": 1,
       "norm_label": ".hostid()"
@@ -4282,7 +4309,7 @@
       "label": ".isHost()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L166",
+      "source_location": "L167",
       "id": "store_mediastore_mediastore_ishost",
       "community": 1,
       "norm_label": ".ishost()"
@@ -4291,7 +4318,7 @@
       "label": ".participants()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L174",
+      "source_location": "L175",
       "id": "store_mediastore_mediastore_participants",
       "community": 1,
       "norm_label": ".participants()"
@@ -4300,7 +4327,7 @@
       "label": ".username()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L182",
+      "source_location": "L183",
       "id": "store_mediastore_mediastore_username",
       "community": 1,
       "norm_label": ".username()"
@@ -4309,7 +4336,7 @@
       "label": ".watchTogetherError()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L190",
+      "source_location": "L191",
       "id": "store_mediastore_mediastore_watchtogethererror",
       "community": 1,
       "norm_label": ".watchtogethererror()"
@@ -4318,7 +4345,7 @@
       "label": ".playbackState()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L198",
+      "source_location": "L199",
       "id": "store_mediastore_mediastore_playbackstate",
       "community": 1,
       "norm_label": ".playbackstate()"
@@ -4327,7 +4354,7 @@
       "label": ".chatHistory()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L206",
+      "source_location": "L207",
       "id": "store_mediastore_mediastore_chathistory",
       "community": 1,
       "norm_label": ".chathistory()"
@@ -4336,7 +4363,7 @@
       "label": ".joinRoomIdFromUrl()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L214",
+      "source_location": "L215",
       "id": "store_mediastore_mediastore_joinroomidfromurl",
       "community": 1,
       "norm_label": ".joinroomidfromurl()"
@@ -4345,7 +4372,7 @@
       "label": ".watchTogetherSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L222",
+      "source_location": "L223",
       "id": "store_mediastore_mediastore_watchtogetherselecteditem",
       "community": 1,
       "norm_label": ".watchtogetherselecteditem()"
@@ -4354,7 +4381,7 @@
       "label": ".myClientId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L230",
+      "source_location": "L231",
       "id": "store_mediastore_mediastore_myclientid",
       "community": 1,
       "norm_label": ".myclientid()"
@@ -4363,7 +4390,7 @@
       "label": ".googleUser()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L253",
+      "source_location": "L254",
       "id": "store_mediastore_mediastore_googleuser",
       "community": 1,
       "norm_label": ".googleuser()"
@@ -4372,7 +4399,7 @@
       "label": ".isSyncing()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L261",
+      "source_location": "L262",
       "id": "store_mediastore_mediastore_issyncing",
       "community": 1,
       "norm_label": ".issyncing()"
@@ -4381,7 +4408,7 @@
       "label": ".isReloadingData()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L269",
+      "source_location": "L270",
       "id": "store_mediastore_mediastore_isreloadingdata",
       "community": 1,
       "norm_label": ".isreloadingdata()"
@@ -4390,7 +4417,7 @@
       "label": ".isGoogleAuthLoading()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L277",
+      "source_location": "L278",
       "id": "store_mediastore_mediastore_isgoogleauthloading",
       "community": 1,
       "norm_label": ".isgoogleauthloading()"
@@ -4399,7 +4426,7 @@
       "label": ".isSyncConflictModalOpen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L285",
+      "source_location": "L286",
       "id": "store_mediastore_mediastore_issyncconflictmodalopen",
       "community": 1,
       "norm_label": ".issyncconflictmodalopen()"
@@ -4408,7 +4435,7 @@
       "label": ".syncConflictData()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L293",
+      "source_location": "L294",
       "id": "store_mediastore_mediastore_syncconflictdata",
       "community": 1,
       "norm_label": ".syncconflictdata()"
@@ -4417,7 +4444,7 @@
       "label": ".isProcessingSyncConflict()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L301",
+      "source_location": "L302",
       "id": "store_mediastore_mediastore_isprocessingsyncconflict",
       "community": 1,
       "norm_label": ".isprocessingsyncconflict()"
@@ -4426,7 +4453,7 @@
       "label": ".isRemoteMaster()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L324",
+      "source_location": "L325",
       "id": "store_mediastore_mediastore_isremotemaster",
       "community": 1,
       "norm_label": ".isremotemaster()"
@@ -4435,7 +4462,7 @@
       "label": ".isRemoteMasterConnected()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L332",
+      "source_location": "L333",
       "id": "store_mediastore_mediastore_isremotemasterconnected",
       "community": 1,
       "norm_label": ".isremotemasterconnected()"
@@ -4444,7 +4471,7 @@
       "label": ".slaveId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L340",
+      "source_location": "L341",
       "id": "store_mediastore_mediastore_slaveid",
       "community": 1,
       "norm_label": ".slaveid()"
@@ -4453,7 +4480,7 @@
       "label": ".slaveShortCode()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L348",
+      "source_location": "L349",
       "id": "store_mediastore_mediastore_slaveshortcode",
       "community": 1,
       "norm_label": ".slaveshortcode()"
@@ -4462,7 +4489,7 @@
       "label": ".hasLoadedInitialData()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L356",
+      "source_location": "L357",
       "id": "store_mediastore_mediastore_hasloadedinitialdata",
       "community": 1,
       "norm_label": ".hasloadedinitialdata()"
@@ -4471,7 +4498,7 @@
       "label": ".masterReconnectAttempts()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L364",
+      "source_location": "L365",
       "id": "store_mediastore_mediastore_masterreconnectattempts",
       "community": 1,
       "norm_label": ".masterreconnectattempts()"
@@ -4480,7 +4507,7 @@
       "label": ".masterReconnectTimer()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L372",
+      "source_location": "L373",
       "id": "store_mediastore_mediastore_masterreconnecttimer",
       "community": 1,
       "norm_label": ".masterreconnecttimer()"
@@ -4489,7 +4516,7 @@
       "label": ".isReconnecting()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L380",
+      "source_location": "L381",
       "id": "store_mediastore_mediastore_isreconnecting",
       "community": 1,
       "norm_label": ".isreconnecting()"
@@ -4498,7 +4525,7 @@
       "label": ".remoteSlaveState()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L388",
+      "source_location": "L389",
       "id": "store_mediastore_mediastore_remoteslavestate",
       "community": 1,
       "norm_label": ".remoteslavestate()"
@@ -4507,7 +4534,7 @@
       "label": ".remoteSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L396",
+      "source_location": "L397",
       "id": "store_mediastore_mediastore_remoteselecteditem",
       "community": 1,
       "norm_label": ".remoteselecteditem()"
@@ -4516,7 +4543,7 @@
       "label": ".isRemoteDetailLoading()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L404",
+      "source_location": "L405",
       "id": "store_mediastore_mediastore_isremotedetailloading",
       "community": 1,
       "norm_label": ".isremotedetailloading()"
@@ -4525,7 +4552,7 @@
       "label": ".remoteAction()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L412",
+      "source_location": "L413",
       "id": "store_mediastore_mediastore_remoteaction",
       "community": 1,
       "norm_label": ".remoteaction()"
@@ -4534,7 +4561,7 @@
       "label": ".remoteFullItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L420",
+      "source_location": "L421",
       "id": "store_mediastore_mediastore_remotefullitem",
       "community": 1,
       "norm_label": ".remotefullitem()"
@@ -4543,7 +4570,7 @@
       "label": ".isRemoteFullItemLoading()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L428",
+      "source_location": "L429",
       "id": "store_mediastore_mediastore_isremotefullitemloading",
       "community": 1,
       "norm_label": ".isremotefullitemloading()"
@@ -4552,7 +4579,7 @@
       "label": ".isIntroSkippableOnSlave()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L436",
+      "source_location": "L437",
       "id": "store_mediastore_mediastore_isintroskippableonslave",
       "community": 1,
       "norm_label": ".isintroskippableonslave()"
@@ -4561,7 +4588,7 @@
       "label": ".shouldAutoFullscreen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L444",
+      "source_location": "L445",
       "id": "store_mediastore_mediastore_shouldautofullscreen",
       "community": 1,
       "norm_label": ".shouldautofullscreen()"
@@ -4570,7 +4597,7 @@
       "label": ".knownSlaves()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L452",
+      "source_location": "L453",
       "id": "store_mediastore_mediastore_knownslaves",
       "community": 1,
       "norm_label": ".knownslaves()"
@@ -4579,7 +4606,7 @@
       "label": ".missedPings()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L460",
+      "source_location": "L461",
       "id": "store_mediastore_mediastore_missedpings",
       "community": 1,
       "norm_label": ".missedpings()"
@@ -4588,7 +4615,7 @@
       "label": ".connectionHealth()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L468",
+      "source_location": "L469",
       "id": "store_mediastore_mediastore_connectionhealth",
       "community": 1,
       "norm_label": ".connectionhealth()"
@@ -4597,7 +4624,7 @@
       "label": ".pingInterval()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L476",
+      "source_location": "L477",
       "id": "store_mediastore_mediastore_pinginterval",
       "community": 1,
       "norm_label": ".pinginterval()"
@@ -4606,7 +4633,7 @@
       "label": ".lastPingTime()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L484",
+      "source_location": "L485",
       "id": "store_mediastore_mediastore_lastpingtime",
       "community": 1,
       "norm_label": ".lastpingtime()"
@@ -4615,7 +4642,7 @@
       "label": ".isMediaSyncModalOpen()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L492",
+      "source_location": "L493",
       "id": "store_mediastore_mediastore_ismediasyncmodalopen",
       "community": 1,
       "norm_label": ".ismediasyncmodalopen()"
@@ -4624,7 +4651,7 @@
       "label": ".mediaSyncTargetSlaveId()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L500",
+      "source_location": "L501",
       "id": "store_mediastore_mediastore_mediasynctargetslaveid",
       "community": 1,
       "norm_label": ".mediasynctargetslaveid()"
@@ -4633,7 +4660,7 @@
       "label": "._masterUiActiveView()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L508",
+      "source_location": "L509",
       "id": "store_mediastore_mediastore_masteruiactiveview",
       "community": 1,
       "norm_label": "._masteruiactiveview()"
@@ -4642,7 +4669,7 @@
       "label": "._masterUiSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L516",
+      "source_location": "L517",
       "id": "store_mediastore_mediastore_masteruiselecteditem",
       "community": 1,
       "norm_label": "._masteruiselecteditem()"
@@ -4651,7 +4678,7 @@
       "label": ".translations()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L543",
+      "source_location": "L544",
       "id": "store_mediastore_mediastore_translations",
       "community": 1,
       "norm_label": ".translations()"
@@ -4660,7 +4687,7 @@
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L547",
+      "source_location": "L548",
       "id": "store_mediastore_mediastore_constructor",
       "community": 1,
       "norm_label": ".constructor()"
@@ -4669,7 +4696,7 @@
       "label": ".currentActiveView()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L575",
+      "source_location": "L576",
       "id": "store_mediastore_mediastore_currentactiveview",
       "community": 1,
       "norm_label": ".currentactiveview()"
@@ -4678,7 +4705,7 @@
       "label": ".currentSelectedItem()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L579",
+      "source_location": "L580",
       "id": "store_mediastore_mediastore_currentselecteditem",
       "community": 1,
       "norm_label": ".currentselecteditem()"
@@ -4687,7 +4714,7 @@
       "label": ".unreadNotificationsCount()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L760",
+      "source_location": "L761",
       "id": "store_mediastore_mediastore_unreadnotificationscount",
       "community": 1,
       "norm_label": ".unreadnotificationscount()"
@@ -4696,7 +4723,7 @@
       "label": ".isLoggedIn()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L940",
+      "source_location": "L941",
       "id": "store_mediastore_mediastore_isloggedin",
       "community": 1,
       "norm_label": ".isloggedin()"
@@ -4705,7 +4732,7 @@
       "label": ".allUniqueLabels()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L944",
+      "source_location": "L945",
       "id": "store_mediastore_mediastore_alluniquelabels",
       "community": 1,
       "norm_label": ".alluniquelabels()"
@@ -4714,7 +4741,7 @@
       "label": ".heroContent()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L956",
+      "source_location": "L957",
       "id": "store_mediastore_mediastore_herocontent",
       "community": 1,
       "norm_label": ".herocontent()"
@@ -4723,7 +4750,7 @@
       "label": ".allMovies()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L966",
+      "source_location": "L967",
       "id": "store_mediastore_mediastore_allmovies",
       "community": 1,
       "norm_label": ".allmovies()"
@@ -4732,7 +4759,7 @@
       "label": ".currentShow()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L970",
+      "source_location": "L971",
       "id": "store_mediastore_mediastore_currentshow",
       "community": 1,
       "norm_label": ".currentshow()"
@@ -4741,7 +4768,7 @@
       "label": ".currentSeasonEpisodes()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L974",
+      "source_location": "L975",
       "id": "store_mediastore_mediastore_currentseasonepisodes",
       "community": 1,
       "norm_label": ".currentseasonepisodes()"
@@ -4750,7 +4777,7 @@
       "label": ".nextEpisode()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L980",
+      "source_location": "L981",
       "id": "store_mediastore_mediastore_nextepisode",
       "community": 1,
       "norm_label": ".nextepisode()"
@@ -4759,7 +4786,7 @@
       "label": ".myListItems()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L990",
+      "source_location": "L991",
       "id": "store_mediastore_mediastore_mylistitems",
       "community": 1,
       "norm_label": ".mylistitems()"
@@ -4768,7 +4795,7 @@
       "label": ".continueWatchingItems()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L994",
+      "source_location": "L995",
       "id": "store_mediastore_mediastore_continuewatchingitems",
       "community": 1,
       "norm_label": ".continuewatchingitems()"
@@ -4777,7 +4804,7 @@
       "label": ".homePageRows()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L1018",
+      "source_location": "L1019",
       "id": "store_mediastore_mediastore_homepagerows",
       "community": 1,
       "norm_label": ".homepagerows()"
@@ -4786,7 +4813,7 @@
       "label": ".shareableShows()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L1035",
+      "source_location": "L1036",
       "id": "store_mediastore_mediastore_shareableshows",
       "community": 1,
       "norm_label": ".shareableshows()"
@@ -4795,7 +4822,7 @@
       "label": ".showsWithLinks()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L1039",
+      "source_location": "L1040",
       "id": "store_mediastore_mediastore_showswithlinks",
       "community": 1,
       "norm_label": ".showswithlinks()"
@@ -4804,7 +4831,7 @@
       "label": ".libraryCounts()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L1063",
+      "source_location": "L1064",
       "id": "store_mediastore_mediastore_librarycounts",
       "community": 1,
       "norm_label": ".librarycounts()"
@@ -4813,7 +4840,7 @@
       "label": "getNestedValue()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L2454",
+      "source_location": "L2467",
       "id": "store_mediastore_getnestedvalue",
       "community": 1,
       "norm_label": "getnestedvalue()"
@@ -4822,7 +4849,7 @@
       "label": "interpolate()",
       "file_type": "code",
       "source_file": "frontend/store/mediaStore.js",
-      "source_location": "L2458",
+      "source_location": "L2471",
       "id": "store_mediastore_interpolate",
       "community": 1,
       "norm_label": "interpolate()"
@@ -4833,7 +4860,7 @@
       "source_file": "frontend/store/remoteStore.js",
       "source_location": "L1",
       "id": "store_remotestore",
-      "community": 12,
+      "community": 14,
       "norm_label": "remotestore.js"
     },
     {
@@ -5229,7 +5256,7 @@
       "source_file": "frontend/store/watchTogetherStore.js",
       "source_location": "L1",
       "id": "store_watchtogetherstore",
-      "community": 69,
+      "community": 14,
       "norm_label": "watchtogetherstore.js"
     },
     {
@@ -5238,7 +5265,7 @@
       "source_file": "frontend/store/watchTogetherStore.js",
       "source_location": "L8",
       "id": "store_watchtogetherstore_watchtogetherstore",
-      "community": 69,
+      "community": 14,
       "norm_label": "watchtogetherstore"
     },
     {
@@ -5247,7 +5274,7 @@
       "source_file": "frontend/store/watchTogetherStore.js",
       "source_location": "L27",
       "id": "store_watchtogetherstore_watchtogetherstore_constructor",
-      "community": 69,
+      "community": 14,
       "norm_label": ".constructor()"
     },
     {
@@ -5256,7 +5283,7 @@
       "source_file": "frontend/utils/device.js",
       "source_location": "L1",
       "id": "utils_device",
-      "community": 12,
+      "community": 14,
       "norm_label": "device.js"
     },
     {
@@ -5265,7 +5292,7 @@
       "source_file": "frontend/utils/device.js",
       "source_location": "L1",
       "id": "utils_device_issmarttv",
-      "community": 12,
+      "community": 14,
       "norm_label": "issmarttv()"
     },
     {
@@ -5373,7 +5400,7 @@
       "source_file": "frontend/views/features/FeatureRouter.jsx",
       "source_location": "L1",
       "id": "features_featurerouter",
-      "community": 0,
+      "community": 23,
       "norm_label": "featurerouter.jsx"
     },
     {
@@ -5391,7 +5418,7 @@
       "source_file": "frontend/views/features/SearchView.jsx",
       "source_location": "L1",
       "id": "features_searchview",
-      "community": 15,
+      "community": 23,
       "norm_label": "searchview.jsx"
     },
     {
@@ -5499,7 +5526,7 @@
       "source_file": "frontend/views/system/LoadingView.jsx",
       "source_location": "L1",
       "id": "system_loadingview",
-      "community": 16,
+      "community": 18,
       "norm_label": "loadingview.jsx"
     },
     {
@@ -5508,7 +5535,7 @@
       "source_file": "frontend/views/system/LoadingView.jsx",
       "source_location": "L24",
       "id": "system_loadingview_typewritercaption",
-      "community": 16,
+      "community": 18,
       "norm_label": "typewritercaption()"
     },
     {
@@ -5517,7 +5544,7 @@
       "source_file": "frontend/views/system/LoadingView.jsx",
       "source_location": "L57",
       "id": "system_loadingview_pulsingorb",
-      "community": 16,
+      "community": 18,
       "norm_label": "pulsingorb()"
     },
     {
@@ -5526,7 +5553,7 @@
       "source_file": "frontend/views/system/LoadingView.jsx",
       "source_location": "L84",
       "id": "system_loadingview_loadingview",
-      "community": 16,
+      "community": 18,
       "norm_label": "loadingview()"
     },
     {
@@ -6480,7 +6507,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L32",
       "id": "feedback_skeleton_skeleton",
-      "community": 16,
+      "community": 18,
       "norm_label": "skeleton"
     },
     {
@@ -6491,6 +6518,15 @@
       "id": "motion_registry_reducedmotionmediacondition",
       "community": 280,
       "norm_label": "reducedmotionmediacondition"
+    },
+    {
+      "label": "TABS",
+      "file_type": "code",
+      "source_file": "frontend/components/library/LibraryManagementView.jsx",
+      "source_location": "L31",
+      "community": 6,
+      "norm_label": "tabs",
+      "id": "library_librarymanagementview_tabs"
     },
     {
       "label": "TabPanel()",
@@ -21842,7 +21878,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/ContentRow.jsx",
       "source_location": "L14",
-      "community": 0,
+      "community": 15,
       "norm_label": "contentrow",
       "id": "layout_contentrow_contentrow"
     },
@@ -21851,7 +21887,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Footer.jsx",
       "source_location": "L8",
-      "community": 0,
+      "community": 2,
       "norm_label": "footer()",
       "id": "layout_footer_footer"
     },
@@ -21860,7 +21896,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/GridView.jsx",
       "source_location": "L12",
-      "community": 15,
+      "community": 23,
       "norm_label": "gridview",
       "id": "layout_gridview_gridview"
     },
@@ -21869,7 +21905,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Header.jsx",
       "source_location": "L26",
-      "community": 15,
+      "community": 23,
       "norm_label": "navkeys",
       "id": "layout_header_navkeys"
     },
@@ -21878,7 +21914,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Header.jsx",
       "source_location": "L35",
-      "community": 15,
+      "community": 23,
       "norm_label": "header",
       "id": "layout_header_header"
     },
@@ -21887,7 +21923,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Hero.jsx",
       "source_location": "L11",
-      "community": 0,
+      "community": 15,
       "norm_label": "hero",
       "id": "layout_hero_hero"
     },
@@ -23824,9 +23860,9 @@
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "feedback_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip"
     },
     {
       "relation": "imports_from",
@@ -23835,9 +23871,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "feedback_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip"
     },
     {
       "relation": "imports_from",
@@ -23846,9 +23882,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "feedback_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip"
     },
     {
       "relation": "imports_from",
@@ -23857,9 +23893,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "feedback_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip"
     },
     {
       "relation": "imports",
@@ -23901,9 +23937,9 @@
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "feedback_holochip_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip_holochip"
     },
     {
       "relation": "imports",
@@ -23912,9 +23948,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "feedback_holochip_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip_holochip"
     },
     {
       "relation": "imports",
@@ -23923,9 +23959,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "feedback_holochip_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip_holochip"
     },
     {
       "relation": "imports",
@@ -23934,9 +23970,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "feedback_holochip_holochip",
-      "confidence_score": 1.0
+      "target": "feedback_holochip_holochip"
     },
     {
       "relation": "contains",
@@ -25826,9 +25862,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "library_librarymanagementview_tabs",
-      "confidence_score": 1.0
+      "target": "library_librarymanagementview_tabs"
     },
     {
       "relation": "imports_from",
@@ -25837,9 +25873,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "library_linkeditmodal",
-      "confidence_score": 1.0
+      "target": "library_linkeditmodal"
     },
     {
       "relation": "imports",
@@ -25848,8 +25884,30 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "library_linkeditmodal_linkeditmodal",
+      "target": "library_linkeditmodal_linkeditmodal"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/LibraryManagementView.jsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "library_librarymanagementview",
+      "target": "library_preferredsourceeditmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/LibraryManagementView.jsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "library_librarymanagementview",
+      "target": "library_preferredsourceeditmodal_preferredsourceeditmodal",
       "confidence_score": 1.0
     },
     {
@@ -25859,9 +25917,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "shared_librarydashboard",
-      "confidence_score": 1.0
+      "target": "shared_librarydashboard"
     },
     {
       "relation": "imports",
@@ -25870,9 +25928,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "shared_librarydashboard_librarydashboard",
-      "confidence_score": 1.0
+      "target": "shared_librarydashboard_librarydashboard"
     },
     {
       "relation": "imports_from",
@@ -25903,9 +25961,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_continuewatchingtab",
-      "confidence_score": 1.0
+      "target": "tabs_continuewatchingtab"
     },
     {
       "relation": "imports",
@@ -25914,9 +25972,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_continuewatchingtab_continuewatchingtab",
-      "confidence_score": 1.0
+      "target": "tabs_continuewatchingtab_continuewatchingtab"
     },
     {
       "relation": "imports_from",
@@ -25925,9 +25983,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_mylisttab",
-      "confidence_score": 1.0
+      "target": "tabs_mylisttab"
     },
     {
       "relation": "imports",
@@ -25936,9 +25994,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_mylisttab_mylisttab",
-      "confidence_score": 1.0
+      "target": "tabs_mylisttab_mylisttab"
     },
     {
       "relation": "imports_from",
@@ -25947,9 +26005,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_preferredsourcestab",
-      "confidence_score": 1.0
+      "target": "tabs_preferredsourcestab"
     },
     {
       "relation": "imports",
@@ -25958,9 +26016,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_preferredsourcestab_preferredsourcestab",
-      "confidence_score": 1.0
+      "target": "tabs_preferredsourcestab_preferredsourcestab"
     },
     {
       "relation": "imports_from",
@@ -25969,9 +26027,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_videolinkstab",
-      "confidence_score": 1.0
+      "target": "tabs_videolinkstab"
     },
     {
       "relation": "imports",
@@ -25980,9 +26038,9 @@
       "source_file": "frontend/components/library/LibraryManagementView.jsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_librarymanagementview",
-      "target": "tabs_videolinkstab_videolinkstab",
-      "confidence_score": 1.0
+      "target": "tabs_videolinkstab_videolinkstab"
     },
     {
       "relation": "imports_from",
@@ -25991,9 +26049,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26002,9 +26060,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "contains",
@@ -26012,9 +26070,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "library_linkeditmodal_buildpreview",
-      "confidence_score": 1.0
+      "target": "library_linkeditmodal_buildpreview"
     },
     {
       "relation": "contains",
@@ -26022,9 +26080,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "library_linkeditmodal_getcontextforlink",
-      "confidence_score": 1.0
+      "target": "library_linkeditmodal_getcontextforlink"
     },
     {
       "relation": "contains",
@@ -26032,9 +26090,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "library_linkeditmodal_holofieldsx",
-      "confidence_score": 1.0
+      "target": "library_linkeditmodal_holofieldsx"
     },
     {
       "relation": "contains",
@@ -26042,9 +26100,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "library_linkeditmodal_linkeditmodal",
-      "confidence_score": 1.0
+      "target": "library_linkeditmodal_linkeditmodal"
     },
     {
       "relation": "imports_from",
@@ -26053,9 +26111,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "modals_modalshell",
-      "confidence_score": 1.0
+      "target": "modals_modalshell"
     },
     {
       "relation": "imports",
@@ -26064,9 +26122,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "modals_modalshell_modalshell",
-      "confidence_score": 1.0
+      "target": "modals_modalshell_modalshell"
     },
     {
       "relation": "imports_from",
@@ -26075,9 +26133,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26086,9 +26144,9 @@
       "source_file": "frontend/components/library/LinkEditModal.jsx",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "library_linkeditmodal",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "imports_from",
@@ -26156,111 +26214,13 @@
       "target": "library_managelinksview"
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/shared/EmptyState.jsx",
-      "source_location": "L26",
-      "weight": 1.0,
-      "source": "shared_emptystate",
-      "target": "shared_emptystate_emptystate",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
-      "source_location": "L33",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L28",
       "weight": 1.0,
-      "source": "tabs_continuewatchingtab",
-      "target": "shared_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/MyListTab.jsx",
-      "source_location": "L38",
-      "weight": 1.0,
-      "source": "tabs_mylisttab",
-      "target": "shared_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
-      "source_location": "L22",
-      "weight": 1.0,
-      "source": "tabs_preferredsourcestab",
-      "target": "shared_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
-      "source_location": "L45",
-      "weight": 1.0,
-      "source": "tabs_videolinkstab",
-      "target": "shared_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
-      "source_location": "L33",
-      "weight": 1.0,
-      "source": "tabs_continuewatchingtab",
-      "target": "shared_emptystate_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/MyListTab.jsx",
-      "source_location": "L38",
-      "weight": 1.0,
-      "source": "tabs_mylisttab",
-      "target": "shared_emptystate_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
-      "source_location": "L22",
-      "weight": 1.0,
-      "source": "tabs_preferredsourcestab",
-      "target": "shared_emptystate_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
-      "source_location": "L45",
-      "weight": 1.0,
-      "source": "tabs_videolinkstab",
-      "target": "shared_emptystate_emptystate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
-      "source_location": "L20",
-      "weight": 1.0,
-      "source": "shared_librarydashboard",
+      "source": "library_preferredsourceeditmodal",
       "target": "hooks_usetranslations",
       "confidence_score": 1.0
     },
@@ -26268,12 +26228,206 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "hooks_usetranslations_usetranslations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "library_preferredsourceeditmodal_buildpreview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "library_preferredsourceeditmodal_holofieldsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "library_preferredsourceeditmodal_preferredsourceeditmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "modals_modalshell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "modals_modalshell_modalshell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "store_mediastore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/PreferredSourceEditModal.jsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "library_preferredsourceeditmodal",
+      "target": "store_mediastore_mediastore",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/shared/EmptyState.jsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_emptystate",
+      "target": "shared_emptystate_emptystate"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_continuewatchingtab",
+      "target": "shared_emptystate"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/MyListTab.jsx",
+      "source_location": "L38",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_mylisttab",
+      "target": "shared_emptystate"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_preferredsourcestab",
+      "target": "shared_emptystate"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_videolinkstab",
+      "target": "shared_emptystate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_continuewatchingtab",
+      "target": "shared_emptystate_emptystate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/MyListTab.jsx",
+      "source_location": "L38",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_mylisttab",
+      "target": "shared_emptystate_emptystate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_preferredsourcestab",
+      "target": "shared_emptystate_emptystate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tabs_videolinkstab",
+      "target": "shared_emptystate_emptystate"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "shared_librarydashboard",
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "contains",
@@ -26281,9 +26435,9 @@
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "shared_librarydashboard_counterchip",
-      "confidence_score": 1.0
+      "target": "shared_librarydashboard_counterchip"
     },
     {
       "relation": "contains",
@@ -26291,9 +26445,9 @@
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "shared_librarydashboard_librarydashboard",
-      "confidence_score": 1.0
+      "target": "shared_librarydashboard_librarydashboard"
     },
     {
       "relation": "imports_from",
@@ -26302,9 +26456,9 @@
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26313,9 +26467,9 @@
       "source_file": "frontend/components/library/shared/LibraryDashboard.jsx",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_librarydashboard",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "imports_from",
@@ -26324,9 +26478,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26335,9 +26489,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "imports_from",
@@ -26346,9 +26500,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26357,9 +26511,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "contains",
@@ -26367,9 +26521,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "tabs_continuewatchingtab_continuewatchingtab",
-      "confidence_score": 1.0
+      "target": "tabs_continuewatchingtab_continuewatchingtab"
     },
     {
       "relation": "contains",
@@ -26377,9 +26531,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "tabs_continuewatchingtab_formatduration",
-      "confidence_score": 1.0
+      "target": "tabs_continuewatchingtab_formatduration"
     },
     {
       "relation": "contains",
@@ -26387,9 +26541,9 @@
       "source_file": "frontend/components/library/tabs/ContinueWatchingTab.jsx",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_continuewatchingtab",
-      "target": "tabs_continuewatchingtab_matchesquery",
-      "confidence_score": 1.0
+      "target": "tabs_continuewatchingtab_matchesquery"
     },
     {
       "relation": "imports_from",
@@ -26398,9 +26552,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26409,9 +26563,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "imports_from",
@@ -26420,9 +26574,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26431,9 +26585,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "contains",
@@ -26441,9 +26595,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "tabs_mylisttab_formatdate",
-      "confidence_score": 1.0
+      "target": "tabs_mylisttab_formatdate"
     },
     {
       "relation": "contains",
@@ -26451,9 +26605,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "tabs_mylisttab_matchesquery",
-      "confidence_score": 1.0
+      "target": "tabs_mylisttab_matchesquery"
     },
     {
       "relation": "contains",
@@ -26461,9 +26615,9 @@
       "source_file": "frontend/components/library/tabs/MyListTab.jsx",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_mylisttab",
-      "target": "tabs_mylisttab_mylisttab",
-      "confidence_score": 1.0
+      "target": "tabs_mylisttab_mylisttab"
     },
     {
       "relation": "imports_from",
@@ -26472,9 +26626,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26483,9 +26637,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "imports_from",
@@ -26494,9 +26648,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26505,9 +26659,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "contains",
@@ -26515,9 +26669,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "tabs_preferredsourcestab_countlinksforshow",
-      "confidence_score": 1.0
+      "target": "tabs_preferredsourcestab_countlinksforshow"
     },
     {
       "relation": "contains",
@@ -26525,9 +26679,9 @@
       "source_file": "frontend/components/library/tabs/PreferredSourcesTab.jsx",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_preferredsourcestab",
-      "target": "tabs_preferredsourcestab_preferredsourcestab",
-      "confidence_score": 1.0
+      "target": "tabs_preferredsourcestab_preferredsourcestab"
     },
     {
       "relation": "imports_from",
@@ -26536,9 +26690,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26547,9 +26701,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "imports_from",
@@ -26558,9 +26712,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26569,9 +26723,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "contains",
@@ -26579,9 +26733,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "tabs_showinfopanel_formatdate",
-      "confidence_score": 1.0
+      "target": "tabs_showinfopanel_formatdate"
     },
     {
       "relation": "contains",
@@ -26589,9 +26743,9 @@
       "source_file": "frontend/components/library/tabs/ShowInfoPanel.jsx",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_showinfopanel",
-      "target": "tabs_showinfopanel_showinfopanel",
-      "confidence_score": 1.0
+      "target": "tabs_showinfopanel_showinfopanel"
     },
     {
       "relation": "imports_from",
@@ -26600,9 +26754,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_showinfopanel",
-      "confidence_score": 1.0
+      "target": "tabs_showinfopanel"
     },
     {
       "relation": "imports",
@@ -26611,9 +26765,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_showinfopanel_showinfopanel",
-      "confidence_score": 1.0
+      "target": "tabs_showinfopanel_showinfopanel"
     },
     {
       "relation": "imports_from",
@@ -26622,9 +26776,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksBulkBar.jsx",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinksbulkbar",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26633,9 +26787,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksBulkBar.jsx",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinksbulkbar",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "imports_from",
@@ -26644,9 +26798,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksBulkBar.jsx",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinksbulkbar",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26655,9 +26809,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksBulkBar.jsx",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinksbulkbar",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "contains",
@@ -26665,9 +26819,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksBulkBar.jsx",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinksbulkbar",
-      "target": "tabs_videolinksbulkbar_videolinksbulkbar",
-      "confidence_score": 1.0
+      "target": "tabs_videolinksbulkbar_videolinksbulkbar"
     },
     {
       "relation": "imports_from",
@@ -26676,9 +26830,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_videolinksbulkbar",
-      "confidence_score": 1.0
+      "target": "tabs_videolinksbulkbar"
     },
     {
       "relation": "imports",
@@ -26687,9 +26841,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_videolinksbulkbar_videolinksbulkbar",
-      "confidence_score": 1.0
+      "target": "tabs_videolinksbulkbar_videolinksbulkbar"
     },
     {
       "relation": "imports_from",
@@ -26698,9 +26852,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "hooks_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations"
     },
     {
       "relation": "imports",
@@ -26709,9 +26863,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "hooks_usetranslations_usetranslations",
-      "confidence_score": 1.0
+      "target": "hooks_usetranslations_usetranslations"
     },
     {
       "relation": "imports_from",
@@ -26720,9 +26874,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "store_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore"
     },
     {
       "relation": "imports",
@@ -26731,9 +26885,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "store_mediastore_mediastore",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore"
     },
     {
       "relation": "contains",
@@ -26741,9 +26895,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_videolinkstab_matchesquery",
-      "confidence_score": 1.0
+      "target": "tabs_videolinkstab_matchesquery"
     },
     {
       "relation": "contains",
@@ -26751,9 +26905,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_videolinkstab_test",
-      "confidence_score": 1.0
+      "target": "tabs_videolinkstab_test"
     },
     {
       "relation": "contains",
@@ -26761,9 +26915,9 @@
       "source_file": "frontend/components/library/tabs/VideoLinksTab.jsx",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "tabs_videolinkstab",
-      "target": "tabs_videolinkstab_videolinkstab",
-      "confidence_score": 1.0
+      "target": "tabs_videolinkstab_videolinkstab"
     },
     {
       "relation": "imports_from",
@@ -34584,9 +34738,9 @@
       "source_file": "frontend/store/mediaStore.js",
       "source_location": "L1063",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "store_mediastore_mediastore",
-      "target": "store_mediastore_mediastore_librarycounts",
-      "confidence_score": 1.0
+      "target": "store_mediastore_mediastore_librarycounts"
     },
     {
       "relation": "method",
@@ -53249,5 +53403,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e0edb572d2158e69e75492e5c453a11bf00f3b07"
+  "built_at_commit": "50113387ae875d20be851f0b70c6501bc55db576"
 }
