@@ -15,6 +15,7 @@ import {Box, Button, Stack, Tooltip, Typography} from '@mui/material';
 import LinkIcon from '@mui/icons-material/Link';
 import StarIcon from '@mui/icons-material/Star';
 import LanguageIcon from '@mui/icons-material/Language';
+import EditIcon from '@mui/icons-material/Edit';
 
 import {mediaStore} from '../../../store/mediaStore.js';
 import {useTranslations} from '../../../hooks/useTranslations.js';
@@ -141,17 +142,36 @@ const PreferredSourcesTab = observer(() => {
                                 </Typography>
                             </Box>
                         </Box>
-                        <Tooltip title={t('libraryManagement.remove')}>
-                            <Button
-                                id={`preferred-${showId}-remove`}
-                                onClick={() => mediaStore.setPreferredSource(showId, null)}
-                                color="error"
-                                variant="outlined"
-                                size="small"
-                            >
-                                {t('libraryManagement.remove')}
-                            </Button>
-                        </Tooltip>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <Tooltip title={t('libraryManagement.preferredSources.edit')}>
+                                <Button
+                                    id={`preferred-${showId}-edit`}
+                                    aria-label={t('libraryManagement.preferredSources.editAria', {name})}
+                                    onClick={() => mediaStore.openPreferredSourceEditModal(showId)}
+                                    startIcon={<EditIcon/>}
+                                    variant="outlined"
+                                    size="small"
+                                    sx={{
+                                        color: 'var(--neon-accent)',
+                                        borderColor: 'rgba(76, 210, 255, 0.45)',
+                                        '&:hover': {borderColor: 'var(--neon-accent)'},
+                                    }}
+                                >
+                                    {t('libraryManagement.preferredSources.edit')}
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title={t('libraryManagement.remove')}>
+                                <Button
+                                    id={`preferred-${showId}-remove`}
+                                    onClick={() => mediaStore.setPreferredSource(showId, null)}
+                                    color="error"
+                                    variant="outlined"
+                                    size="small"
+                                >
+                                    {t('libraryManagement.remove')}
+                                </Button>
+                            </Tooltip>
+                        </Stack>
                     </Box>
                 );
             })}

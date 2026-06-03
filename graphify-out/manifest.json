@@ -135,9 +135,9 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\LibraryManagementView.jsx": {
-    "mtime": 1780228471.7331336,
-    "ast_hash": "0fce6406feb05adf57c5d3141ca8c852",
-    "semantic_hash": "0fce6406feb05adf57c5d3141ca8c852"
+    "mtime": 1780507437.1969059,
+    "ast_hash": "707d670f928b86e036cef4d47363b426",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\ManageLinksView.jsx": {
     "mtime": 1780228471.7331336,
@@ -345,13 +345,13 @@
     "semantic_hash": "a8c0ded750535c229baaa57b8175a973"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\locales\\en.js": {
-    "mtime": 1780500391.3832686,
-    "ast_hash": "a49956ed4196661b1a470914b6f0b35f",
+    "mtime": 1780507356.2599013,
+    "ast_hash": "baf0d93b38abb061c71bff63dd346c07",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\locales\\it.js": {
-    "mtime": 1780500349.0733912,
-    "ast_hash": "3e9e56bea81f825d60ada78599c9d549",
+    "mtime": 1780507333.334441,
+    "ast_hash": "d3652e76d812aedde0af1933211ee92a",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\metadata.json": {
@@ -400,8 +400,8 @@
     "semantic_hash": "76c132b21c4305f5c2e46b070300c265"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\mediaStore.js": {
-    "mtime": 1780499922.3694668,
-    "ast_hash": "cf6546ef86e00cfb9853575076c26f02",
+    "mtime": 1780507304.9462867,
+    "ast_hash": "4640a7cb8b03900ff8303c6d7edd2c18",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\store\\remoteStore.js": {
@@ -744,14 +744,54 @@
     "ast_hash": "8b94b14543203392295fda6f94c43d27",
     "semantic_hash": ""
   },
-  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.output.json": {
-    "mtime": 1780502068.7150135,
-    "ast_hash": "72b6af6a896b32e5afddce717e1ef792",
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.output.txt": {
+    "mtime": 1780508484.750619,
+    "ast_hash": "ac2bba3976fc3a29a1bb47e14fd2eefc",
     "semantic_hash": ""
   },
-  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.output.txt": {
-    "mtime": 1780502164.3251462,
-    "ast_hash": "01f9f41d889a971c0ac3cd81ac5498d7",
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\LinkEditModal.jsx": {
+    "mtime": 1780507730.7379248,
+    "ast_hash": "5b33ee4f354d355ed1fc9ef39cdb6af4",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\shared\\EmptyState.jsx": {
+    "mtime": 1780508040.6720605,
+    "ast_hash": "52411b98bcf3f6502def5f42a3ac4eeb",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\shared\\LibraryDashboard.jsx": {
+    "mtime": 1780508040.6815789,
+    "ast_hash": "a5ca0df48e1c2705f6b8b9f39235d0d3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\ContinueWatchingTab.jsx": {
+    "mtime": 1780507493.2032752,
+    "ast_hash": "0f889bad1118af17ac1f081abc454a11",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\MyListTab.jsx": {
+    "mtime": 1780507465.0856497,
+    "ast_hash": "54eb85fb71cb90f7a5629913c126a27a",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\PreferredSourcesTab.jsx": {
+    "mtime": 1780508081.479663,
+    "ast_hash": "55b7004072a78024bebe99406eff0a9b",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\ShowInfoPanel.jsx": {
+    "mtime": 1780508060.656973,
+    "ast_hash": "0786b413945bc0f1ac568a24d6232377",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\VideoLinksBulkBar.jsx": {
+    "mtime": 1780508060.6740205,
+    "ast_hash": "c5d74a28166aa94326bc1c8403bb0dd6",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\tabs\\VideoLinksTab.jsx": {
+    "mtime": 1780508060.6830661,
+    "ast_hash": "da09c96f67ce3849700fed6abf01f3e3",
     "semantic_hash": ""
   }
 }

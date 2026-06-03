@@ -121,6 +121,7 @@ class MediaStore {
     librarySelectedLinkIds = new Set(); // bulk-selection set
     libraryBulkMode = false; // sticky bulk-action bar visibility
     libraryEditingLinkId = null; // id of the link currently open in LinkEditModal
+    libraryEditingPreferredSourceShowId = null; // showId currently open in PreferredSourceEditModal
     _searchDebounceTimer = null;
 
     // Theme & Translation State
@@ -1682,6 +1683,18 @@ class MediaStore {
 
     closeLinkEditModal = () => {
         this.libraryEditingLinkId = null;
+    }
+
+    // ===== LIBRARY: PREFERRED SOURCE EDIT MODAL =====
+    // The modal edits the origin (URL host) that should be preferred
+    // for the show. The user enters a full URL, we extract the origin
+    // and call `setPreferredSource(showId, origin)`.
+    openPreferredSourceEditModal = (showId) => {
+        this.libraryEditingPreferredSourceShowId = showId;
+    }
+
+    closePreferredSourceEditModal = () => {
+        this.libraryEditingPreferredSourceShowId = null;
     }
 
     // ===== LIBRARY: BULK SELECTION =====

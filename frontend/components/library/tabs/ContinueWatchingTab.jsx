@@ -27,6 +27,7 @@ import {
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DeleteIcon from '@mui/icons-material/Delete';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 import {mediaStore} from '../../../store/mediaStore.js';
 import {useTranslations} from '../../../hooks/useTranslations.js';
@@ -155,7 +156,26 @@ const ContinueWatchingTab = observer(() => {
                                     </Typography>
                                 </Box>
                             </Box>
-                            <Stack direction="row" spacing={1}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <Tooltip title={t('libraryManagement.continueWatching.play')}>
+                                    <IconButton
+                                        id={`continue-watching-${item.id}-play`}
+                                        aria-label={t('libraryManagement.continueWatching.playAria', {
+                                            name: item.show_title || item.name || item.title,
+                                        })}
+                                        onClick={() => mediaStore.startPlayback(item)}
+                                        sx={{
+                                            color: 'var(--bg-deep)',
+                                            background: 'var(--neon-accent)',
+                                            '&:hover': {
+                                                background: 'var(--neon-accent-hot)',
+                                                boxShadow: 'var(--edge-glow-hot)',
+                                            },
+                                        }}
+                                    >
+                                        <PlayArrowIcon/>
+                                    </IconButton>
+                                </Tooltip>
                                 <Tooltip
                                     title={
                                         progress?.watched

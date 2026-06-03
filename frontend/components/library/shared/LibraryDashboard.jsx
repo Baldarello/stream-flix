@@ -14,7 +14,7 @@
 
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Box, InputAdornment, Stack, TextField, Typography} from '@mui/material';
+import {Box, InputAdornment, Stack, Tab, Tabs, TextField, Typography} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import {mediaStore} from '../../../store/mediaStore.js';
 import {useTranslations} from '../../../hooks/useTranslations.js';
@@ -170,6 +170,45 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                     accent="var(--neon-accent-hot)"
                 />
             </Stack>
+            <Tabs
+                id={`${id}-tabs`}
+                value={mediaStore.activeLibraryTab}
+                onChange={(_, v) => mediaStore.setActiveLibraryTab(v)}
+                variant="scrollable"
+                allowScrollButtonsMobile
+                aria-label={t('libraryManagement.title')}
+                sx={{
+                    minHeight: 42,
+                    borderTop: '1px solid rgba(76, 210, 255, 0.18)',
+                    pt: 1,
+                    '& .MuiTab-root': {
+                        color: 'var(--text-secondary)',
+                        minHeight: 42,
+                        textTransform: 'none',
+                        fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+                        fontWeight: 600,
+                        letterSpacing: '0.02em',
+                    },
+                    '& .Mui-selected': {color: 'var(--neon-accent)'},
+                    '& .MuiTabs-indicator': {
+                        backgroundColor: 'var(--neon-accent)',
+                        boxShadow: 'var(--edge-glow)',
+                    },
+                }}
+            >
+                <Tab id={`${id}-tab-my-list`} label={t('libraryManagement.tabs.myList')} value={0}/>
+                <Tab
+                    id={`${id}-tab-continue`}
+                    label={t('libraryManagement.tabs.continueWatching')}
+                    value={1}
+                />
+                <Tab id={`${id}-tab-links`} label={t('libraryManagement.tabs.links')} value={2}/>
+                <Tab
+                    id={`${id}-tab-preferred`}
+                    label={t('libraryManagement.tabs.preferredSources')}
+                    value={3}
+                />
+            </Tabs>
         </Box>
     );
 });

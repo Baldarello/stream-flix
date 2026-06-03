@@ -413,7 +413,9 @@ export const it = {
         },
         "continueWatching": {
             "removeConfirm": "Rimuovere \"{name}\" da Continua a guardare?",
-            "emptyCta": "Vai al catalogo"
+            "emptyCta": "Vai al catalogo",
+            "play": "Riproduci",
+            "playAria": "Riproduci {name}"
         },
         "videoLinks": {
             "bulkBar": {
@@ -459,7 +461,16 @@ export const it = {
         },
         "preferredSources": {
             "linksAvailable": "{count} link disponibili",
-            "emptySearch": "Nessuna fonte preferita corrisponde a \"{query}\""
+            "emptySearch": "Nessuna fonte preferita corrisponde a \"{query}\"",
+            "edit": "Modifica",
+            "editAria": "Modifica fonte preferita per {name}",
+            "editTitle": "Modifica fonte preferita - {name}",
+            "editInfo": "Inserisci l'URL completo della fonte. L'origine (schema + host) verrà salvata come preferita per questo show.",
+            "editUrl": "URL della fonte",
+            "editPreview": "Anteprima: {preview}",
+            "editSave": "Salva",
+            "editCancel": "Annulla",
+            "editInvalidUrl": "Inserisci un URL valido (es. https://esempio.com/...)."
         }
     },
     "notifications": {

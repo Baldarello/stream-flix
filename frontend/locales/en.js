@@ -413,7 +413,9 @@ export const en = {
         },
         "continueWatching": {
             "removeConfirm": "Remove \"{name}\" from Continue Watching?",
-            "emptyCta": "Browse the catalog"
+            "emptyCta": "Browse the catalog",
+            "play": "Play",
+            "playAria": "Play {name}"
         },
         "videoLinks": {
             "bulkBar": {
@@ -459,7 +461,16 @@ export const en = {
         },
         "preferredSources": {
             "linksAvailable": "{count} links available",
-            "emptySearch": "No preferred source matches \"{query}\""
+            "emptySearch": "No preferred source matches \"{query}\"",
+            "edit": "Edit",
+            "editAria": "Edit preferred source for {name}",
+            "editTitle": "Edit preferred source - {name}",
+            "editInfo": "Enter the full source URL. The origin (scheme + host) will be saved as the preferred source for this show.",
+            "editUrl": "Source URL",
+            "editPreview": "Preview: {preview}",
+            "editSave": "Save",
+            "editCancel": "Cancel",
+            "editInvalidUrl": "Please enter a valid URL (e.g. https://example.com/...)."
         }
     },
     "notifications": {
