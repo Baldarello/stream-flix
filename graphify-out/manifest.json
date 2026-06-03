@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\EpisodesDrawer.jsx": {
-    "mtime": 1780488773.863401,
-    "ast_hash": "26bd19fd5116f856aed1b5e8f51b72e6",
+    "mtime": 1780492560.128866,
+    "ast_hash": "5978061e53838a6d269e7982bf74398f",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\library\\LibraryManagementView.jsx": {
@@ -345,14 +345,14 @@
     "semantic_hash": "a8c0ded750535c229baaa57b8175a973"
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\locales\\en.js": {
-    "mtime": 1780228471.757663,
-    "ast_hash": "60cf5ffff9229695bf4a2a7a4e1cbba9",
-    "semantic_hash": "60cf5ffff9229695bf4a2a7a4e1cbba9"
+    "mtime": 1780492448.1463337,
+    "ast_hash": "72f981763fbdd460f3c3e4545eb1e953",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\locales\\it.js": {
-    "mtime": 1780228471.7581632,
-    "ast_hash": "092a8d85a60c306200d43cb9d146144f",
-    "semantic_hash": "092a8d85a60c306200d43cb9d146144f"
+    "mtime": 1780492456.2975156,
+    "ast_hash": "e6ba825e9dd8132aa4bcd7cc26cae3ce",
+    "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\metadata.json": {
     "mtime": 1758191784.407929,
@@ -490,7 +490,7 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\test-results\\.last-run.json": {
-    "mtime": 1780489563.4772398,
+    "mtime": 1780493302.820997,
     "ast_hash": "f196824657d8858bc7fa44eecbba38b1",
     "semantic_hash": "f196824657d8858bc7fa44eecbba38b1"
   },
@@ -685,13 +685,13 @@
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\tests\\master-remote-slider-drag-preview.spec.js": {
-    "mtime": 1780480412.4612355,
-    "ast_hash": "899de49af646959a7c514e82fe42d70c",
+    "mtime": 1780492445.207512,
+    "ast_hash": "f0aab07e531eb3713e3ed33b662fb758",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\remote\\master\\MasterRemoteProgressSlider.jsx": {
-    "mtime": 1780480549.6949942,
-    "ast_hash": "6cd9da2511333f381a5c6f07555ed4c9",
+    "mtime": 1780492225.3495443,
+    "ast_hash": "cfc3239b971d463405e5cedf881274ab",
     "semantic_hash": ""
   },
   "E:\\Lavoro\\TND\\stream-flix\\frontend\\components\\remote\\master\\formatTime.js": {
@@ -727,6 +727,21 @@
   "E:\\Lavoro\\TND\\stream-flix\\e2e-tests\\mui-v7-upgrade.spec.js": {
     "mtime": 1780489291.538791,
     "ast_hash": "558649b992836b9556c25ff808c814bd",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\.output.txt": {
+    "mtime": 1780492972.5847554,
+    "ast_hash": "e5bd203892def6e27cee3851015932e1",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\frontend\\.junie\\plans\\upgrade-library-episodes-drawer.md": {
+    "mtime": 1780492607.2823498,
+    "ast_hash": "a2153813ca728ffdd17256f08776ade3",
+    "semantic_hash": ""
+  },
+  "E:\\Lavoro\\TND\\stream-flix\\master-remote-progress-time-layout.png": {
+    "mtime": 1780493301.9284093,
+    "ast_hash": "25e302cfe6a37f3d5b712163577f5b41",
     "semantic_hash": ""
   }
 }

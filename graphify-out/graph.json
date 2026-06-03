@@ -778,10 +778,37 @@
       "norm_label": "{ test, expect }"
     },
     {
+      "label": "path",
+      "file_type": "code",
+      "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
+      "source_location": "L2",
+      "id": "tests_master_remote_slider_drag_preview_spec_path",
+      "community": 54,
+      "norm_label": "path"
+    },
+    {
+      "label": "SCREENSHOT_DIR",
+      "file_type": "code",
+      "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
+      "source_location": "L9",
+      "id": "tests_master_remote_slider_drag_preview_spec_screenshot_dir",
+      "community": 54,
+      "norm_label": "screenshot_dir"
+    },
+    {
+      "label": "SCREENSHOT_PATH",
+      "file_type": "code",
+      "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
+      "source_location": "L10",
+      "id": "tests_master_remote_slider_drag_preview_spec_screenshot_path",
+      "community": 54,
+      "norm_label": "screenshot_path"
+    },
+    {
       "label": "isValueLabelOpen()",
       "file_type": "code",
       "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
-      "source_location": "L12",
+      "source_location": "L18",
       "id": "tests_master_remote_slider_drag_preview_spec_isvaluelabelopen",
       "community": 54,
       "norm_label": "isvaluelabelopen()"
@@ -972,7 +999,7 @@
       "source_file": "frontend/components/feedback/HoloChip.jsx",
       "source_location": "L1",
       "id": "feedback_holochip",
-      "community": 21,
+      "community": 0,
       "norm_label": "holochip.jsx"
     },
     {
@@ -981,7 +1008,7 @@
       "source_file": "frontend/components/feedback/HoloChip.jsx",
       "source_location": "L25",
       "id": "feedback_holochip_holochip",
-      "community": 21,
+      "community": 0,
       "norm_label": "holochip"
     },
     {
@@ -990,7 +1017,7 @@
       "source_file": "frontend/components/feedback/ScanlineOverlay.jsx",
       "source_location": "L1",
       "id": "feedback_scanlineoverlay",
-      "community": 21,
+      "community": 0,
       "norm_label": "scanlineoverlay.jsx"
     },
     {
@@ -999,7 +1026,7 @@
       "source_file": "frontend/components/feedback/ScanlineOverlay.jsx",
       "source_location": "L11",
       "id": "feedback_scanlineoverlay_scanlineoverlay",
-      "community": 21,
+      "community": 0,
       "norm_label": "scanlineoverlay"
     },
     {
@@ -1008,7 +1035,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L1",
       "id": "feedback_skeleton",
-      "community": 21,
+      "community": 0,
       "norm_label": "skeleton.jsx"
     },
     {
@@ -1017,7 +1044,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L12",
       "id": "feedback_skeleton_skeletoninner",
-      "community": 21,
+      "community": 0,
       "norm_label": "skeletoninner()"
     },
     {
@@ -1026,7 +1053,7 @@
       "source_file": "frontend/components/feedback/Skeleton.jsx",
       "source_location": "L35",
       "id": "feedback_skeleton_skeletoncard",
-      "community": 21,
+      "community": 0,
       "norm_label": "skeletoncard()"
     },
     {
@@ -1035,7 +1062,7 @@
       "source_file": "frontend/components/layout/Card.jsx",
       "source_location": "L1",
       "id": "layout_card",
-      "community": 15,
+      "community": 21,
       "norm_label": "card.jsx"
     },
     {
@@ -1098,7 +1125,7 @@
       "source_file": "frontend/components/layout/CinematicGrid.jsx",
       "source_location": "L96",
       "id": "layout_cinematicgrid_cinematicgrid",
-      "community": 15,
+      "community": 21,
       "norm_label": "cinematicgrid"
     },
     {
@@ -1134,7 +1161,7 @@
       "source_file": "frontend/components/layout/CinematicRow.jsx",
       "source_location": "L1",
       "id": "layout_cinematicrow",
-      "community": 21,
+      "community": 15,
       "norm_label": "cinematicrow.jsx"
     },
     {
@@ -1143,7 +1170,7 @@
       "source_file": "frontend/components/layout/CinematicRow.jsx",
       "source_location": "L23",
       "id": "layout_cinematicrow_cinematicrowinner",
-      "community": 21,
+      "community": 15,
       "norm_label": "cinematicrowinner()"
     },
     {
@@ -1206,7 +1233,7 @@
       "source_file": "frontend/components/layout/GridView.jsx",
       "source_location": "L1",
       "id": "layout_gridview",
-      "community": 15,
+      "community": 21,
       "norm_label": "gridview.jsx"
     },
     {
@@ -1264,19 +1291,55 @@
       "norm_label": "episodesdrawer.jsx"
     },
     {
-      "label": "SwipeableEpisodeCard",
+      "label": "holoFieldSx",
       "file_type": "code",
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
-      "source_location": "L29",
-      "id": "library_episodesdrawer_swipeableepisodecard",
+      "source_location": "L32",
+      "id": "library_episodesdrawer_holofieldsx",
       "community": 0,
-      "norm_label": "swipeableepisodecard"
+      "norm_label": "holofieldsx"
+    },
+    {
+      "label": "HoloDrawerHeader",
+      "file_type": "code",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L63",
+      "id": "library_episodesdrawer_holodrawerheader",
+      "community": 0,
+      "norm_label": "holodrawerheader"
+    },
+    {
+      "label": "EpisodeRow",
+      "file_type": "code",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L156",
+      "id": "library_episodesdrawer_episoderow",
+      "community": 0,
+      "norm_label": "episoderow"
+    },
+    {
+      "label": "EpisodeListSkeleton()",
+      "file_type": "code",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L578",
+      "id": "library_episodesdrawer_episodelistskeleton",
+      "community": 0,
+      "norm_label": "episodelistskeleton()"
+    },
+    {
+      "label": "EpisodeEmptyState",
+      "file_type": "code",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L637",
+      "id": "library_episodesdrawer_episodeemptystate",
+      "community": 0,
+      "norm_label": "episodeemptystate"
     },
     {
       "label": "EpisodesDrawer",
       "file_type": "code",
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
-      "source_location": "L326",
+      "source_location": "L706",
       "id": "library_episodesdrawer_episodesdrawer",
       "community": 0,
       "norm_label": "episodesdrawer"
@@ -1386,7 +1449,7 @@
       "source_file": "frontend/components/media/HoloPlayerControls.jsx",
       "source_location": "L1",
       "id": "media_holoplayercontrols",
-      "community": 21,
+      "community": 0,
       "norm_label": "holoplayercontrols.jsx"
     },
     {
@@ -1395,7 +1458,7 @@
       "source_file": "frontend/components/media/HoloPlayerControls.jsx",
       "source_location": "L32",
       "id": "media_holoplayercontrols_holoplayercontrols",
-      "community": 21,
+      "community": 0,
       "norm_label": "holoplayercontrols"
     },
     {
@@ -1476,7 +1539,7 @@
       "source_file": "frontend/components/modals/EpisodeInfoModal.jsx",
       "source_location": "L1",
       "id": "modals_episodeinfomodal",
-      "community": 15,
+      "community": 2,
       "norm_label": "episodeinfomodal.jsx"
     },
     {
@@ -1485,7 +1548,7 @@
       "source_file": "frontend/components/modals/EpisodeInfoModal.jsx",
       "source_location": "L9",
       "id": "modals_episodeinfomodal_episodeinfomodal",
-      "community": 15,
+      "community": 2,
       "norm_label": "episodeinfomodal"
     },
     {
@@ -1827,7 +1890,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L1",
       "id": "master_episodesdrawer",
-      "community": 21,
+      "community": 0,
       "norm_label": "episodesdrawer.jsx"
     },
     {
@@ -1836,7 +1899,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L37",
       "id": "master_episodesdrawer_holofieldsx",
-      "community": 21,
+      "community": 0,
       "norm_label": "holofieldsx"
     },
     {
@@ -1845,7 +1908,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L63",
       "id": "master_episodesdrawer_holodrawerheader",
-      "community": 21,
+      "community": 0,
       "norm_label": "holodrawerheader"
     },
     {
@@ -1854,7 +1917,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L138",
       "id": "master_episodesdrawer_seasonselector",
-      "community": 21,
+      "community": 0,
       "norm_label": "seasonselector"
     },
     {
@@ -1863,7 +1926,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L189",
       "id": "master_episodesdrawer_introdurationfield",
-      "community": 21,
+      "community": 0,
       "norm_label": "introdurationfield"
     },
     {
@@ -1872,7 +1935,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L215",
       "id": "master_episodesdrawer_episoderow",
-      "community": 21,
+      "community": 0,
       "norm_label": "episoderow"
     },
     {
@@ -1881,7 +1944,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L405",
       "id": "master_episodesdrawer_episodelistskeleton",
-      "community": 21,
+      "community": 0,
       "norm_label": "episodelistskeleton()"
     },
     {
@@ -1890,7 +1953,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L454",
       "id": "master_episodesdrawer_episodeemptystate",
-      "community": 21,
+      "community": 0,
       "norm_label": "episodeemptystate()"
     },
     {
@@ -1899,7 +1962,7 @@
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L488",
       "id": "master_episodesdrawer_episodesdrawer",
-      "community": 21,
+      "community": 0,
       "norm_label": "episodesdrawer"
     },
     {
@@ -1908,7 +1971,7 @@
       "source_file": "frontend/components/remote/master/MasterRemotePlayerControlView.jsx",
       "source_location": "L1",
       "id": "master_masterremoteplayercontrolview",
-      "community": 11,
+      "community": 12,
       "norm_label": "masterremoteplayercontrolview.jsx"
     },
     {
@@ -1917,7 +1980,7 @@
       "source_file": "frontend/components/remote/master/MasterRemotePlayerControlView.jsx",
       "source_location": "L33",
       "id": "master_masterremoteplayercontrolview_masterremoteplayercontrolview",
-      "community": 11,
+      "community": 12,
       "norm_label": "masterremoteplayercontrolview"
     },
     {
@@ -1926,25 +1989,16 @@
       "source_file": "frontend/components/remote/master/MasterRemoteProgressSlider.jsx",
       "source_location": "L1",
       "id": "master_masterremoteprogressslider",
-      "community": 11,
+      "community": 12,
       "norm_label": "masterremoteprogressslider.jsx"
-    },
-    {
-      "label": "ValueLabel()",
-      "file_type": "code",
-      "source_file": "frontend/components/remote/master/MasterRemoteProgressSlider.jsx",
-      "source_location": "L16",
-      "id": "master_masterremoteprogressslider_valuelabel",
-      "community": 11,
-      "norm_label": "valuelabel()"
     },
     {
       "label": "MasterRemoteProgressSlider()",
       "file_type": "code",
       "source_file": "frontend/components/remote/master/MasterRemoteProgressSlider.jsx",
-      "source_location": "L51",
+      "source_location": "L25",
       "id": "master_masterremoteprogressslider_masterremoteprogressslider",
-      "community": 11,
+      "community": 12,
       "norm_label": "masterremoteprogressslider()"
     },
     {
@@ -1953,7 +2007,7 @@
       "source_file": "frontend/components/remote/master/formatTime.js",
       "source_location": "L1",
       "id": "master_formattime",
-      "community": 11,
+      "community": 12,
       "norm_label": "formattime.js"
     },
     {
@@ -1962,7 +2016,7 @@
       "source_file": "frontend/components/remote/master/formatTime.js",
       "source_location": "L11",
       "id": "master_formattime_formattime",
-      "community": 11,
+      "community": 12,
       "norm_label": "formattime()"
     },
     {
@@ -2115,7 +2169,7 @@
       "source_file": "frontend/components/utilities/ConnectionIndicator.jsx",
       "source_location": "L1",
       "id": "utilities_connectionindicator",
-      "community": 11,
+      "community": 53,
       "norm_label": "connectionindicator.jsx"
     },
     {
@@ -2124,7 +2178,7 @@
       "source_file": "frontend/components/utilities/ConnectionIndicator.jsx",
       "source_location": "L6",
       "id": "utilities_connectionindicator_connectionindicator",
-      "community": 11,
+      "community": 53,
       "norm_label": "connectionindicator"
     },
     {
@@ -2223,7 +2277,7 @@
       "source_file": "frontend/context/StoreContext.jsx",
       "source_location": "L40",
       "id": "context_storecontext_usestores",
-      "community": 31,
+      "community": 16,
       "norm_label": "usestores()"
     },
     {
@@ -2250,7 +2304,7 @@
       "source_file": "frontend/features/home/HomeView.jsx",
       "source_location": "L25",
       "id": "home_homeview_homeview",
-      "community": 15,
+      "community": 31,
       "norm_label": "homeview"
     },
     {
@@ -2259,7 +2313,7 @@
       "source_file": "frontend/features/shared/AppInitializer.jsx",
       "source_location": "L1",
       "id": "shared_appinitializer",
-      "community": 12,
+      "community": 13,
       "norm_label": "appinitializer.jsx"
     },
     {
@@ -2268,7 +2322,7 @@
       "source_file": "frontend/features/shared/AppInitializer.jsx",
       "source_location": "L23",
       "id": "shared_appinitializer_ensurescrolltrigger",
-      "community": 12,
+      "community": 13,
       "norm_label": "ensurescrolltrigger()"
     },
     {
@@ -2277,7 +2331,7 @@
       "source_file": "frontend/features/shared/AppInitializer.jsx",
       "source_location": "L43",
       "id": "shared_appinitializer_appinitializer",
-      "community": 12,
+      "community": 13,
       "norm_label": "appinitializer()"
     },
     {
@@ -2286,7 +2340,7 @@
       "source_file": "frontend/features/shared/BrowserHistoryHandler.jsx",
       "source_location": "L1",
       "id": "shared_browserhistoryhandler",
-      "community": 53,
+      "community": 152,
       "norm_label": "browserhistoryhandler.jsx"
     },
     {
@@ -2322,7 +2376,7 @@
       "source_file": "frontend/features/shared/ScrollLockManager.jsx",
       "source_location": "L1",
       "id": "shared_scrolllockmanager",
-      "community": 53,
+      "community": 152,
       "norm_label": "scrolllockmanager.jsx"
     },
     {
@@ -2403,7 +2457,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L1",
       "id": "fx_transitionportal",
-      "community": 4,
+      "community": 152,
       "norm_label": "transitionportal.jsx"
     },
     {
@@ -2412,7 +2466,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L22",
       "id": "fx_transitionportal_focusable_selector",
-      "community": 4,
+      "community": 152,
       "norm_label": "focusable_selector"
     },
     {
@@ -2421,7 +2475,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L31",
       "id": "fx_transitionportal_getfocusable",
-      "community": 4,
+      "community": 152,
       "norm_label": "getfocusable()"
     },
     {
@@ -2430,7 +2484,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L40",
       "id": "fx_transitionportal_focustrap",
-      "community": 4,
+      "community": 152,
       "norm_label": "focustrap()"
     },
     {
@@ -2439,7 +2493,7 @@
       "source_file": "frontend/fx/TransitionPortal.jsx",
       "source_location": "L93",
       "id": "fx_transitionportal_transitionportal",
-      "community": 4,
+      "community": 152,
       "norm_label": "transitionportal"
     },
     {
@@ -3231,7 +3285,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L1",
       "id": "services_googleauthservice",
-      "community": 12,
+      "community": 13,
       "norm_label": "googleauthservice.js"
     },
     {
@@ -3240,7 +3294,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L19",
       "id": "services_googleauthservice_token_refresh_retry_delays",
-      "community": 12,
+      "community": 13,
       "norm_label": "token_refresh_retry_delays"
     },
     {
@@ -3249,7 +3303,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L24",
       "id": "services_googleauthservice_stoppopuppolling",
-      "community": 12,
+      "community": 13,
       "norm_label": "stoppopuppolling()"
     },
     {
@@ -3258,7 +3312,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L36",
       "id": "services_googleauthservice_checkauthpopupclosed",
-      "community": 12,
+      "community": 13,
       "norm_label": "checkauthpopupclosed()"
     },
     {
@@ -3267,7 +3321,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L54",
       "id": "services_googleauthservice_refreshaccesstoken",
-      "community": 12,
+      "community": 13,
       "norm_label": "refreshaccesstoken()"
     },
     {
@@ -3276,7 +3330,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L103",
       "id": "services_googleauthservice_refreshaccesstokenwithretry",
-      "community": 12,
+      "community": 13,
       "norm_label": "refreshaccesstokenwithretry()"
     },
     {
@@ -3285,7 +3339,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L133",
       "id": "services_googleauthservice_scheduletokenrefresh",
-      "community": 12,
+      "community": 13,
       "norm_label": "scheduletokenrefresh()"
     },
     {
@@ -3294,7 +3348,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L183",
       "id": "services_googleauthservice_tryrestoringsession",
-      "community": 12,
+      "community": 13,
       "norm_label": "tryrestoringsession()"
     },
     {
@@ -3303,7 +3357,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L281",
       "id": "services_googleauthservice_initgoogleauth",
-      "community": 12,
+      "community": 13,
       "norm_label": "initgoogleauth()"
     },
     {
@@ -3312,7 +3366,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L384",
       "id": "services_googleauthservice_handlesignin",
-      "community": 31,
+      "community": 13,
       "norm_label": "handlesignin()"
     },
     {
@@ -3321,7 +3375,7 @@
       "source_file": "frontend/services/googleAuthService.js",
       "source_location": "L415",
       "id": "services_googleauthservice_handlesignout",
-      "community": 31,
+      "community": 13,
       "norm_label": "handlesignout()"
     },
     {
@@ -3852,7 +3906,7 @@
       "source_file": "frontend/store/fxStore.js",
       "source_location": "L1",
       "id": "store_fxstore",
-      "community": 4,
+      "community": 152,
       "norm_label": "fxstore.js"
     },
     {
@@ -3861,7 +3915,7 @@
       "source_file": "frontend/store/fxStore.js",
       "source_location": "L17",
       "id": "store_fxstore_fxstore",
-      "community": 4,
+      "community": 152,
       "norm_label": "fxstore"
     },
     {
@@ -3870,7 +3924,7 @@
       "source_file": "frontend/store/fxStore.js",
       "source_location": "L25",
       "id": "store_fxstore_fxstore_constructor",
-      "community": 4,
+      "community": 152,
       "norm_label": ".constructor()"
     },
     {
@@ -4986,7 +5040,7 @@
       "source_file": "frontend/views/ViewSwitch.jsx",
       "source_location": "L77",
       "id": "views_viewswitch_viewswitch",
-      "community": 152,
+      "community": 16,
       "norm_label": "viewswitch"
     },
     {
@@ -6115,6 +6169,240 @@
       "norm_label": "database schema (indexeddb)"
     },
     {
+      "label": "upgrade-library-episodes-drawer.md",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L1",
+      "id": "plans_upgrade_library_episodes_drawer",
+      "community": 4,
+      "norm_label": "upgrade-library-episodes-drawer.md"
+    },
+    {
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L5",
+      "id": "plans_upgrade_library_episodes_drawer_requirements",
+      "community": 4,
+      "norm_label": "requirements"
+    },
+    {
+      "label": "Overview & Goals",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L7",
+      "id": "plans_upgrade_library_episodes_drawer_overview_goals",
+      "community": 4,
+      "norm_label": "overview & goals"
+    },
+    {
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L11",
+      "id": "plans_upgrade_library_episodes_drawer_scope",
+      "community": 4,
+      "norm_label": "scope"
+    },
+    {
+      "label": "User Stories",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L29",
+      "id": "plans_upgrade_library_episodes_drawer_user_stories",
+      "community": 4,
+      "norm_label": "user stories"
+    },
+    {
+      "label": "Functional Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L37",
+      "id": "plans_upgrade_library_episodes_drawer_functional_requirements",
+      "community": 4,
+      "norm_label": "functional requirements"
+    },
+    {
+      "label": "Non-Functional Requirements",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L49",
+      "id": "plans_upgrade_library_episodes_drawer_non_functional_requirements",
+      "community": 4,
+      "norm_label": "non-functional requirements"
+    },
+    {
+      "label": "Technical Design",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L56",
+      "id": "plans_upgrade_library_episodes_drawer_technical_design",
+      "community": 4,
+      "norm_label": "technical design"
+    },
+    {
+      "label": "Current Implementation",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L58",
+      "id": "plans_upgrade_library_episodes_drawer_current_implementation",
+      "community": 4,
+      "norm_label": "current implementation"
+    },
+    {
+      "label": "Key Decisions",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L80",
+      "id": "plans_upgrade_library_episodes_drawer_key_decisions",
+      "community": 4,
+      "norm_label": "key decisions"
+    },
+    {
+      "label": "Proposed Changes",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L90",
+      "id": "plans_upgrade_library_episodes_drawer_proposed_changes",
+      "community": 4,
+      "norm_label": "proposed changes"
+    },
+    {
+      "label": "Data Models / Contracts",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L111",
+      "id": "plans_upgrade_library_episodes_drawer_data_models_contracts",
+      "community": 4,
+      "norm_label": "data models / contracts"
+    },
+    {
+      "label": "Components",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L118",
+      "id": "plans_upgrade_library_episodes_drawer_components",
+      "community": 4,
+      "norm_label": "components"
+    },
+    {
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L127",
+      "id": "plans_upgrade_library_episodes_drawer_file_structure",
+      "community": 4,
+      "norm_label": "file structure"
+    },
+    {
+      "label": "Architecture Diagram",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L133",
+      "id": "plans_upgrade_library_episodes_drawer_architecture_diagram",
+      "community": 4,
+      "norm_label": "architecture diagram"
+    },
+    {
+      "label": "Translation Notes",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L153",
+      "id": "plans_upgrade_library_episodes_drawer_translation_notes",
+      "community": 4,
+      "norm_label": "translation notes"
+    },
+    {
+      "label": "Risks",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L159",
+      "id": "plans_upgrade_library_episodes_drawer_risks",
+      "community": 4,
+      "norm_label": "risks"
+    },
+    {
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L166",
+      "id": "plans_upgrade_library_episodes_drawer_testing",
+      "community": 4,
+      "norm_label": "testing"
+    },
+    {
+      "label": "Validation Approach",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L168",
+      "id": "plans_upgrade_library_episodes_drawer_validation_approach",
+      "community": 4,
+      "norm_label": "validation approach"
+    },
+    {
+      "label": "Key Scenarios",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L177",
+      "id": "plans_upgrade_library_episodes_drawer_key_scenarios",
+      "community": 4,
+      "norm_label": "key scenarios"
+    },
+    {
+      "label": "Edge Cases",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L191",
+      "id": "plans_upgrade_library_episodes_drawer_edge_cases",
+      "community": 4,
+      "norm_label": "edge cases"
+    },
+    {
+      "label": "Delivery Steps",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L200",
+      "id": "plans_upgrade_library_episodes_drawer_delivery_steps",
+      "community": 4,
+      "norm_label": "delivery steps"
+    },
+    {
+      "label": "\u2713 Step 1: Rewrite drawer shell + entry animation to the holo system",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L202",
+      "id": "plans_upgrade_library_episodes_drawer_step_1_rewrite_drawer_shell_entry_animation_to_the_holo_system",
+      "community": 4,
+      "norm_label": "\u2713 step 1: rewrite drawer shell + entry animation to the holo system"
+    },
+    {
+      "label": "\u2713 Step 2: Rewrite HoloDrawerHeader with display typography + neon close + total chip",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L218",
+      "id": "plans_upgrade_library_episodes_drawer_step_2_rewrite_holodrawerheader_with_display_typography_neon_close_total_chip",
+      "community": 4,
+      "norm_label": "\u2713 step 2: rewrite holodrawerheader with display typography + neon close + total chip"
+    },
+    {
+      "label": "\u2713 Step 3: Rewrite EpisodeRow with thumbnail, chips, progress, watched, runtime, playing indicator",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L232",
+      "id": "plans_upgrade_library_episodes_drawer_step_3_rewrite_episoderow_with_thumbnail_chips_progress_watched_runtime_playing_indicator",
+      "community": 4,
+      "norm_label": "\u2713 step 3: rewrite episoderow with thumbnail, chips, progress, watched, runtime, playing indicator"
+    },
+    {
+      "label": "\u2713 Step 4: Add Skeleton loading state, empty state, row stagger reveal, and locales",
+      "file_type": "document",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L248",
+      "id": "plans_upgrade_library_episodes_drawer_step_4_add_skeleton_loading_state_empty_state_row_stagger_reveal_and_locales",
+      "community": 4,
+      "norm_label": "\u2713 step 4: add skeleton loading state, empty state, row stagger reveal, and locales"
+    },
+    {
       "label": "upgrade-remote-episodes-drawer.md",
       "file_type": "document",
       "source_file": "frontend/.junie/plans/upgrade-remote-episodes-drawer.md",
@@ -6365,6 +6653,24 @@
       "id": "motion_registry_reducedmotionmediacondition",
       "community": 280,
       "norm_label": "reducedmotionmediacondition"
+    },
+    {
+      "label": "SwipeableEpisodeCard",
+      "file_type": "code",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L29",
+      "community": 0,
+      "norm_label": "swipeableepisodecard",
+      "id": "library_episodesdrawer_swipeableepisodecard"
+    },
+    {
+      "label": "ValueLabel()",
+      "file_type": "code",
+      "source_file": "frontend/components/remote/master/MasterRemoteProgressSlider.jsx",
+      "source_location": "L16",
+      "community": 12,
+      "norm_label": "valuelabel()",
+      "id": "master_masterremoteprogressslider_valuelabel"
     },
     {
       "label": "SKILL.md",
@@ -21185,7 +21491,7 @@
       "file_type": "code",
       "source_file": "frontend/components/remote/master/MasterRemotePlayerControlView.jsx",
       "source_location": "L32",
-      "community": 11,
+      "community": 12,
       "norm_label": "formattime()",
       "id": "master_masterremoteplayercontrolview_formattime"
     },
@@ -21203,7 +21509,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/Card.jsx",
       "source_location": "L15",
-      "community": 15,
+      "community": 21,
       "norm_label": "card",
       "id": "layout_card_card"
     },
@@ -21230,7 +21536,7 @@
       "file_type": "code",
       "source_file": "frontend/components/layout/GridView.jsx",
       "source_location": "L12",
-      "community": 15,
+      "community": 21,
       "norm_label": "gridview",
       "id": "layout_gridview_gridview"
     },
@@ -22482,9 +22788,9 @@
       "source_file": "e2e-tests/mui-v7-upgrade.spec.js",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "e2e_tests_mui_v7_upgrade_spec",
-      "target": "e2e_tests_mui_v7_upgrade_spec_test_expect",
-      "confidence_score": 1.0
+      "target": "e2e_tests_mui_v7_upgrade_spec_test_expect"
     },
     {
       "relation": "contains",
@@ -22675,6 +22981,36 @@
       "confidence_score": 1.0,
       "source": "tests_master_remote_slider_drag_preview_spec",
       "target": "tests_master_remote_slider_drag_preview_spec_isvaluelabelopen"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "tests_master_remote_slider_drag_preview_spec",
+      "target": "tests_master_remote_slider_drag_preview_spec_path",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "tests_master_remote_slider_drag_preview_spec",
+      "target": "tests_master_remote_slider_drag_preview_spec_screenshot_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "e2e-tests/tests/master-remote-slider-drag-preview.spec.js",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "tests_master_remote_slider_drag_preview_spec",
+      "target": "tests_master_remote_slider_drag_preview_spec_screenshot_path",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -23118,12 +23454,34 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "feedback_holochip",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "frontend/components/remote/master/EpisodesDrawer.jsx",
       "source_location": "L33",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "master_episodesdrawer",
       "target": "feedback_holochip"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "feedback_holochip_holochip",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -23145,6 +23503,17 @@
       "confidence_score": 1.0,
       "source": "feedback_scanlineoverlay",
       "target": "feedback_scanlineoverlay_scanlineoverlay"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "feedback_scanlineoverlay",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -23189,6 +23558,17 @@
       "confidence_score": 1.0,
       "source": "modals_modalshell",
       "target": "feedback_scanlineoverlay"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "feedback_scanlineoverlay_scanlineoverlay",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -23264,6 +23644,17 @@
       "confidence_score": 1.0,
       "source": "layout_cinematicgrid",
       "target": "feedback_skeleton"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "feedback_skeleton",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24709,6 +25100,17 @@
       "target": "motion_grammar_reducedmotion"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "feedback_skeleton_skeleton",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -24734,6 +25136,36 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L637",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "library_episodesdrawer_episodeemptystate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L578",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "library_episodesdrawer_episodelistskeleton",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L156",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "library_episodesdrawer_episoderow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L326",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -24744,11 +25176,86 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "library_episodesdrawer_holodrawerheader",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "library_episodesdrawer_holofieldsx",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
       "source_location": "L29",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "library_episodesdrawer",
       "target": "library_episodesdrawer_swipeableepisodecard"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "motion_grammar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "motion_grammar_durations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "motion_grammar_easings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "motion_grammar_reducedmotion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "library_episodesdrawer",
+      "target": "motion_grammar_stagger",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24793,16 +25300,6 @@
       "confidence_score": 1.0,
       "source": "media_videoplayer",
       "target": "library_episodesdrawer"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
-      "source_location": "L29",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "master_episodesdrawer",
-      "target": "library_episodesdrawer_swipeableepisodecard"
     },
     {
       "relation": "imports_from",
@@ -26757,6 +27254,16 @@
       "confidence_score": 1.0,
       "source": "master_episodesdrawer",
       "target": "hooks_usetranslations_usetranslations"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/components/library/EpisodesDrawer.jsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "master_episodesdrawer",
+      "target": "library_episodesdrawer_swipeableepisodecard"
     },
     {
       "relation": "contains",
@@ -34919,6 +35426,256 @@
       "confidence_score": 1.0,
       "source": "user_flow_technical_notes",
       "target": "user_flow_websocket_message_types"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L200",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer",
+      "target": "plans_upgrade_library_episodes_drawer_delivery_steps",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer",
+      "target": "plans_upgrade_library_episodes_drawer_requirements",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer",
+      "target": "plans_upgrade_library_episodes_drawer_technical_design",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer",
+      "target": "plans_upgrade_library_episodes_drawer_testing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_requirements",
+      "target": "plans_upgrade_library_episodes_drawer_functional_requirements",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_requirements",
+      "target": "plans_upgrade_library_episodes_drawer_non_functional_requirements",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_requirements",
+      "target": "plans_upgrade_library_episodes_drawer_overview_goals",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_requirements",
+      "target": "plans_upgrade_library_episodes_drawer_scope",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_requirements",
+      "target": "plans_upgrade_library_episodes_drawer_user_stories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_architecture_diagram",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L118",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_components",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_current_implementation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_data_models_contracts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L127",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_file_structure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L80",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_key_decisions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_proposed_changes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L159",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_risks",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L153",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_technical_design",
+      "target": "plans_upgrade_library_episodes_drawer_translation_notes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L191",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_testing",
+      "target": "plans_upgrade_library_episodes_drawer_edge_cases",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L177",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_testing",
+      "target": "plans_upgrade_library_episodes_drawer_key_scenarios",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L168",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_testing",
+      "target": "plans_upgrade_library_episodes_drawer_validation_approach",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L202",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
+      "target": "plans_upgrade_library_episodes_drawer_step_1_rewrite_drawer_shell_entry_animation_to_the_holo_system",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L218",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
+      "target": "plans_upgrade_library_episodes_drawer_step_2_rewrite_holodrawerheader_with_display_typography_neon_close_total_chip",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L232",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
+      "target": "plans_upgrade_library_episodes_drawer_step_3_rewrite_episoderow_with_thumbnail_chips_progress_watched_runtime_playing_indicator",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.junie/plans/upgrade-library-episodes-drawer.md",
+      "source_location": "L248",
+      "weight": 1.0,
+      "source": "plans_upgrade_library_episodes_drawer_delivery_steps",
+      "target": "plans_upgrade_library_episodes_drawer_step_4_add_skeleton_loading_state_empty_state_row_stagger_reveal_and_locales",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -51072,5 +51829,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "9fafad288bc7f9b756ef2629d157ac24a1607128"
+  "built_at_commit": "ca324e6c4f23b8851f2ec77cf508867fa0397533"
 }
