@@ -18,6 +18,54 @@ const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 const TOKEN_REFRESH_MAX_RETRIES = 3;
 const TOKEN_REFRESH_RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff: 1s, 2s, 4s
 
+// Configuration for waiting on the Google Identity Services (GSI) script.
+// The GSI library is loaded via a `<script async defer>` tag in index.html
+// and may take longer than a few hundred milliseconds to download on slow
+// networks. We poll for the global for up to `GSI_LOAD_TIMEOUT_MS` so
+// initialization does not silently fail when the user is on a slow
+// connection or the script is delayed by other network traffic.
+const GSI_LOAD_TIMEOUT_MS = 10000; // 10 seconds
+const GSI_LOAD_POLL_INTERVAL_MS = 100; // 100ms
+
+/**
+ * Returns true when the Google Identity Services library has finished
+ * loading and is available on the global `google` object.
+ */
+const isGsiLibraryLoaded = () => {
+    return typeof google !== 'undefined'
+        && typeof google.accounts !== 'undefined'
+        && typeof google.accounts.oauth2 !== 'undefined';
+};
+
+/**
+ * Resolves `true` once the GSI library is detected, or `false` if it
+ * does not become available within `timeoutMs`.
+ *
+ * Uses iteration count instead of `Date.now()` so the function works
+ * correctly with fake test timers (which mock `setInterval` but not
+ * `Date.now()` by default).
+ */
+const waitForGsiLibrary = (timeoutMs = GSI_LOAD_TIMEOUT_MS) => {
+    return new Promise((resolve) => {
+        if (isGsiLibraryLoaded()) {
+            resolve(true);
+            return;
+        }
+        const maxIterations = Math.ceil(timeoutMs / GSI_LOAD_POLL_INTERVAL_MS);
+        let iteration = 0;
+        const interval = setInterval(() => {
+            iteration++;
+            if (isGsiLibraryLoaded()) {
+                clearInterval(interval);
+                resolve(true);
+            } else if (iteration >= maxIterations) {
+                clearInterval(interval);
+                resolve(false);
+            }
+        }, GSI_LOAD_POLL_INTERVAL_MS);
+    });
+};
+
 /**
  * Stops the popup polling interval and cleans up.
  */
@@ -278,30 +326,19 @@ const tryRestoringSession = async () => {
 };
 
 
-export const initGoogleAuth = async () => {
-    console.log("[GoogleAuth] Initializing Google Auth...");
-    
-    // If the client ID is not configured, skip all Google authentication logic.
+/**
+ * Creates the Google OAuth2 token client. Returns `null` if the GSI
+ * library has not been loaded or `GOOGLE_CLIENT_ID` is missing.
+ */
+const createTokenClient = () => {
     if (!GOOGLE_CLIENT_ID) {
-        console.warn("[GoogleAuth] Google Client ID is not configured. Skipping Google Auth initialization.");
-        return;
+        return null;
     }
-
-    if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-        // Wait a moment for the GSI script to load from index.html
-        await new Promise(resolve => setTimeout(resolve, 500));
-        if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-            console.error("[GoogleAuth] Google Identity Services library still not loaded after delay.");
-            return;
-        }
+    if (!isGsiLibraryLoaded()) {
+        return null;
     }
-
-    // Attempt to restore session before initializing the client for new logins.
-    await tryRestoringSession();
-
-
     try {
-        tokenClient = google.accounts.oauth2.initTokenClient({
+        return google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
             scope: [
                 'https://www.googleapis.com/auth/drive.appdata',
@@ -315,14 +352,14 @@ export const initGoogleAuth = async () => {
                 // Reset loading state
                 mediaStore.isGoogleAuthLoading = false;
                 stopPopupPolling();
-                
+
                 console.log("[GoogleAuth] Token response received:", {
                     hasAccessToken: !!tokenResponse?.access_token,
                     hasRefreshToken: !!tokenResponse?.refresh_token,
                     expiresIn: tokenResponse?.expires_in,
                     error: tokenResponse?.error
                 });
-                
+
                 if (tokenResponse && tokenResponse.access_token) {
                     // Fetch user profile after getting the token
                     try {
@@ -351,10 +388,10 @@ export const initGoogleAuth = async () => {
                         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(user));
 
                         await mediaStore.setGoogleUser(user);
-                        
+
                         // Schedule automatic token refresh
                         scheduleTokenRefresh(user);
-                        
+
                         // Trigger initial sync
                         await mediaStore.synchronizeWithDrive();
 
@@ -371,22 +408,71 @@ export const initGoogleAuth = async () => {
                 // Reset loading state
                 mediaStore.isGoogleAuthLoading = false;
                 stopPopupPolling();
-                
+
                 console.error("[GoogleAuth] Google Auth Error:", error);
                 mediaStore.showSnackbar(`Authentication Error: ${error.type}`, "error");
             }
         });
     } catch (error) {
         console.error("[GoogleAuth] Failed to initialize Google Token Client:", error);
+        return null;
+    }
+};
+
+export const initGoogleAuth = async () => {
+    console.log("[GoogleAuth] Initializing Google Auth...");
+
+    // If the client ID is not configured, skip all Google authentication logic.
+    if (!GOOGLE_CLIENT_ID) {
+        console.warn("[GoogleAuth] Google Client ID is not configured. Skipping Google Auth initialization.");
+        return;
+    }
+
+    // Wait for the GSI script to load. The script is loaded with
+    // `async defer` in index.html so it may complete after React has
+    // mounted, especially on slow networks. Polling for up to
+    // GSI_LOAD_TIMEOUT_MS gives the script a fair chance to load.
+    if (!isGsiLibraryLoaded()) {
+        console.log("[GoogleAuth] Google Identity Services library not yet loaded, waiting up to", GSI_LOAD_TIMEOUT_MS, "ms...");
+        const loaded = await waitForGsiLibrary();
+        if (!loaded) {
+            console.error("[GoogleAuth] Google Identity Services library failed to load within", GSI_LOAD_TIMEOUT_MS, "ms. Sign-in will not work until the script is available.");
+            return;
+        }
+        console.log("[GoogleAuth] Google Identity Services library loaded.");
+    }
+
+    // Attempt to restore session before initializing the client for new logins.
+    await tryRestoringSession();
+
+    // Initialize the token client for fresh sign-ins.
+    tokenClient = createTokenClient();
+    if (!tokenClient) {
+        console.error("[GoogleAuth] Failed to create Google Token Client. The GSI library may not expose oauth2.");
     }
 };
 
 export const handleSignIn = () => {
     console.log("[GoogleAuth] handleSignIn called");
-    
+
+    // Lazily initialize the token client if it isn't ready. The GSI
+    // library may have finished loading after `initGoogleAuth` returned,
+    // so we try to create the client on demand when it's available.
+    // We intentionally do NOT wait for the library here: that would
+    // block the user interaction for up to 10 seconds with no feedback.
+    if (!tokenClient && isGsiLibraryLoaded()) {
+        console.log("[GoogleAuth] Token client missing but GSI is available, creating it on demand.");
+        tokenClient = createTokenClient();
+    }
+
     if (!tokenClient) {
         console.error("[GoogleAuth] Google Auth not initialized.");
-        mediaStore.showSnackbar("Google Authentication is not ready.", "error");
+        const reason = !GOOGLE_CLIENT_ID
+            ? "Google Client ID is not configured."
+            : !isGsiLibraryLoaded()
+                ? "Google Identity Services script is still loading. Please try again in a moment."
+                : "Google Token Client could not be created.";
+        mediaStore.showSnackbar(reason, "error");
         return;
     }
     
