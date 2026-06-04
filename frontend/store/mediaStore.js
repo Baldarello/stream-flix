@@ -29,6 +29,7 @@ import {makeAutoObservable, runInAction} from 'mobx';
 import {checkLinksForShow} from '../services/linkValidator.js';
 import {websocketService} from '../services/websocketService.js';
 import {db} from '../services/db';
+import {getSeriesDetails, getSeriesEpisodes} from '../services/apiCall';
 import {it as itTranslations} from '../locales/it.js';
 import {en as enTranslations} from '../locales/en.js';
 import {
@@ -1146,6 +1147,369 @@ class MediaStore {
     async refreshLinksForMediaId(mediaId) {
         return this.refreshLinksForShow(mediaId);
     }
+
+    // ===== LIBRARY ACTIONS (delegated to libraryStore) ==============
+    // These are pure re-bindings of the actions that now live in
+    // `libraryStore` so the rest of the app (which imports only
+    // `mediaStore`) keeps working without changing the call sites.
+
+    toggleMyList = libraryStore.toggleMyList.bind(libraryStore);
+    reorderMyList = libraryStore.reorderMyList.bind(libraryStore);
+    setMyListOrder = libraryStore.setMyListOrder.bind(libraryStore);
+    removeFromContinueWatching = libraryStore.removeFromContinueWatching.bind(libraryStore);
+    updateEpisodeProgress = libraryStore.updateEpisodeProgress.bind(libraryStore);
+    toggleEpisodeWatchedStatus = libraryStore.toggleEpisodeWatchedStatus.bind(libraryStore);
+    setShowIntroDuration = libraryStore.setShowIntroDuration.bind(libraryStore);
+    setSelectedSeasonForShow = libraryStore.setSelectedSeasonForShow.bind(libraryStore);
+    setShowFilterPreference = libraryStore.setShowFilterPreference.bind(libraryStore);
+    getLinksForMedia = libraryStore.getLinksForMedia.bind(libraryStore);
+    findEpisodeById = libraryStore.findEpisodeById.bind(libraryStore);
+    hasLinks = libraryStore.hasLinks.bind(libraryStore);
+    findFirstUnwatchedEpisode = libraryStore.findFirstUnwatchedEpisode.bind(libraryStore);
+
+    // ===== CROSS-CUTTING PLAYBACK / SELECTION =======================
+
+    /**
+     * Start playback for an item. This is the central "press play"
+     * entry point used by the home cards, the hero, the continue
+     * watching row, the link selection modal and the watch-together
+     * flow. It owns the link-resolution + preferred-source logic
+     * because that spans the library (where the links live) and
+     * the playback store (where the active item lives).
+     *
+     * Behaviour summary:
+     *  - Remote master: forward the play to the slave.
+     *  - The item has a single link: bind it directly and push the
+     *    detail view into the browser history so back closes the player.
+     *  - The item has multiple links: open the link selection modal
+     *    and bail out (the modal will call back into startPlayback
+     *    with the chosen link as `video_url`).
+     *  - The item has no links: snackbar + early return.
+     *  - The item is an episode: resolve the parent show details so
+     *    the "next episode" UI in the player has the season list.
+     */
+    startPlayback = async (item) => {
+        if (!item) return;
+        if (this.isRemoteMaster) {
+            this.playRemoteItem(item);
+            return;
+        }
+
+        if (!item.video_url) {
+            const mediaId = item.id;
+            let allLinks = item.video_urls || (await this.getLinksForMedia(mediaId));
+            item.video_urls = allLinks;
+
+            if (!allLinks || allLinks.length === 0) {
+                // For a TV show we may have links on the episodes but
+                // not on the show itself. Fall back to the first
+                // episode that has a link.
+                if ('seasons' in item && item.seasons) {
+                    for (const season of item.seasons) {
+                        if (!season.episodes) continue;
+                        for (const ep of season.episodes) {
+                            const episodeLinks = await this.getLinksForMedia(ep.id);
+                            if (episodeLinks.length > 0) {
+                                item.video_urls = episodeLinks;
+                                allLinks = episodeLinks;
+                                item.show_id = item.id;
+                                item.show_title = item.name || item.title || '';
+                                item.season_number = season.season_number;
+                                if (!item.backdrop_path && ep.still_path) {
+                                    item.backdrop_path = ep.still_path;
+                                }
+                                break;
+                            }
+                        }
+                        if (allLinks && allLinks.length > 0) break;
+                    }
+                }
+
+                if (!allLinks || allLinks.length === 0) {
+                    this.showSnackbar('notifications.noVideoLinks', 'warning', true);
+                    return;
+                }
+            }
+
+            let candidateLinks = allLinks;
+            const showId = 'show_id' in item ? item.show_id : item.id;
+            const preferredOrigin = libraryStore.preferredSources.get(showId);
+
+            if (preferredOrigin) {
+                const linksFromPreferred = (allLinks || []).filter((l) => {
+                    try {
+                        return new URL(l.url).origin === preferredOrigin;
+                    } catch {
+                        return false;
+                    }
+                });
+                if (linksFromPreferred.length > 0) {
+                    candidateLinks = linksFromPreferred;
+                }
+            }
+
+            item.video_urls = candidateLinks;
+            let selectedLink;
+            if (candidateLinks.length === 1) {
+                item.video_url = candidateLinks[0].url;
+                selectedLink = candidateLinks[0];
+            } else {
+                this.linksForSelection = candidateLinks;
+                this.itemForLinkSelection = item;
+                this.linkSelectionContext = 'local';
+                this.isLinkSelectionModalOpen = true;
+                return;
+            }
+
+            if (selectedLink && showId) {
+                this.setShowFilterPreference(showId, {
+                    language: selectedLink.language,
+                    type: selectedLink.type,
+                });
+            }
+        }
+
+        if (item.video_url) {
+            runInAction(() => {
+                if (this.selectedItem) {
+                    this.playbackOriginItem = this.selectedItem;
+                    this._closeDetailWithoutHistory();
+                } else {
+                    this.playbackOriginItem = null;
+                }
+
+                if (window.history.state?.playerOpen) {
+                    window.history.replaceState(
+                        {playerOpen: true, itemId: item.id},
+                        '',
+                        window.location.href
+                    );
+                } else {
+                    window.history.pushState(
+                        {playerOpen: true, itemId: item.id},
+                        '',
+                        window.location.href
+                    );
+                }
+
+                this.nowPlayingItem = item;
+
+                if ('show_id' in item) {
+                    let showDetails = libraryStore.cachedItems.get(item.show_id) || null;
+                    if (
+                        !showDetails &&
+                        this.selectedItem &&
+                        'seasons' in this.selectedItem &&
+                        this.selectedItem.id === item.show_id
+                    ) {
+                        showDetails = this.selectedItem;
+                    }
+                    this.nowPlayingShowDetails = showDetails;
+                } else {
+                    this.nowPlayingShowDetails = null;
+                }
+            });
+        }
+    };
+
+    /**
+     * Open a media's detail view. The `context` argument lets the
+     * caller route the selection to the right sub-store:
+     *  - 'detailView'    : normal detail (default; updates history).
+     *  - 'watchTogether' : also load show details so the next-up
+     *                       logic in the player can auto-play.
+     *  - 'remoteControl' : the master UI for the SmartTV pairing.
+     *  - 'cacheOnly'     : refresh the cached entry without opening
+     *                       any detail view.
+     */
+    selectMedia = async (item, context = 'detailView') => {
+        if (!item || item.id == null) return;
+        if (this.isRemoteMaster && context !== 'remoteControl' && context !== 'cacheOnly') {
+            runInAction(() => {
+                this._masterUiSelectedItem = item;
+                this.isDetailLoading = true;
+            });
+
+            this.sendRemoteCommand({command: 'select_item', item: item});
+
+            try {
+                let fullItemDetails = libraryStore.cachedItems.get(item.id) || item;
+                fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
+                runInAction(() => {
+                    if (this._masterUiSelectedItem?.id === item.id) {
+                        this._masterUiSelectedItem = fullItemDetails;
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to load details for remote master UI', error);
+                this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
+            } finally {
+                runInAction(() => {
+                    this.isDetailLoading = false;
+                });
+            }
+            return;
+        }
+
+        switch (context) {
+            case 'detailView':
+                if (this.selectedItem) {
+                    window.history.replaceState(
+                        {detailViewOpen: true, itemId: item.id},
+                        '',
+                        window.location.href
+                    );
+                } else {
+                    window.history.pushState(
+                        {detailViewOpen: true, itemId: item.id},
+                        '',
+                        window.location.href
+                    );
+                }
+                runInAction(() => {
+                    this.selectedItem = item;
+                    this.isDetailLoading = true;
+                });
+                break;
+            case 'watchTogether':
+                runInAction(() => {
+                    this.watchTogetherSelectedItem = item;
+                    if (this.watchTogetherSelectedItem?.id !== item.id) {
+                        this.nowPlayingItem = null;
+                    }
+                });
+                break;
+            case 'remoteControl':
+                remoteStore.remoteSelectedItem = item;
+                remoteStore.isRemoteDetailLoading = true;
+                break;
+            case 'cacheOnly':
+                break;
+            default:
+                break;
+        }
+
+        try {
+            let fullItemDetails = libraryStore.cachedItems.get(item.id) || item;
+            fullItemDetails = await this._fetchAndCacheMediaDetails(item.id, fullItemDetails);
+
+            try {
+                await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
+            } catch (e) {
+                console.warn('[mediaStore] failed to persist cached item', e);
+            }
+            runInAction(() => {
+                libraryStore.cachedItems.set(item.id, fullItemDetails);
+                switch (context) {
+                    case 'detailView':
+                        if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
+                        break;
+                    case 'watchTogether':
+                        if (this.watchTogetherSelectedItem?.id === item.id) {
+                            this.watchTogetherSelectedItem = fullItemDetails;
+                        }
+                        if (
+                            this.roomId &&
+                            !this.isHost &&
+                            !this.nowPlayingItem &&
+                            this.playbackState.status === 'playing'
+                        ) {
+                            this.startPlayback(fullItemDetails);
+                        }
+                        break;
+                    case 'remoteControl':
+                        if (remoteStore.remoteSelectedItem?.id === item.id) {
+                            remoteStore.remoteSelectedItem = fullItemDetails;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
+        } catch (error) {
+            console.error('Failed to load details', error);
+            this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
+        } finally {
+            runInAction(() => {
+                if (context === 'detailView') this.isDetailLoading = false;
+                if (context === 'remoteControl') remoteStore.isRemoteDetailLoading = false;
+            });
+        }
+    };
+
+    /**
+     * Hydrate the cached item with seasons, episodes and per-episode
+     * links. Mirrors the previous monolithic `mediaStore` behaviour:
+     *  - If the cached payload already has full seasons (with episodes)
+     *    we only refresh the per-episode links.
+     *  - Otherwise we hit the TMDB API for the season list and for
+     *    each season's episodes, then merge in any persisted links.
+     *  - Movies just get their `video_urls` array populated.
+     *  - The result is written to the in-memory `cachedItems` map and
+     *    to Dexie so the next reload already has the right data.
+     */
+    _fetchAndCacheMediaDetails = async (itemId, initialItem) => {
+        let fullItemDetails = initialItem;
+        const needsApiFetch =
+            fullItemDetails.media_type === 'tv' &&
+            (!fullItemDetails.seasons ||
+                fullItemDetails.seasons.some((s) => !s.episodes || s.episodes.length === 0));
+
+        if (needsApiFetch) {
+            const apiDetails = await getSeriesDetails(itemId);
+            const seasonsWithEpisodes = await Promise.all(
+                (apiDetails.seasons || []).map(async (season) => {
+                    const episodes = await getSeriesEpisodes(itemId, season.season_number);
+                    const episodesWithLinks = await Promise.all(
+                        episodes.map(async (ep) => {
+                            const links = await this.getLinksForMedia(ep.id);
+                            return {
+                                ...ep,
+                                video_urls: links,
+                                video_url: links[0]?.url,
+                            };
+                        })
+                    );
+                    return {...season, episodes: episodesWithLinks};
+                })
+            );
+            fullItemDetails = {...apiDetails, seasons: seasonsWithEpisodes};
+        } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
+            const seasonsWithFreshLinks = await Promise.all(
+                fullItemDetails.seasons.map(async (season) => {
+                    const episodesWithLinks = await Promise.all(
+                        (season.episodes || []).map(async (ep) => {
+                            const links = await this.getLinksForMedia(ep.id);
+                            return {
+                                ...ep,
+                                video_urls: links,
+                                video_url: links[0]?.url,
+                            };
+                        })
+                    );
+                    return {...season, episodes: episodesWithLinks};
+                })
+            );
+            fullItemDetails = {...fullItemDetails, seasons: seasonsWithFreshLinks};
+        } else if (fullItemDetails.media_type === 'movie') {
+            const links = await this.getLinksForMedia(itemId);
+            fullItemDetails = {
+                ...fullItemDetails,
+                video_urls: links,
+                video_url: links[0]?.url,
+            };
+        }
+
+        try {
+            await db.cachedItems.put(JSON.parse(JSON.stringify(fullItemDetails)));
+        } catch (e) {
+            console.warn('[mediaStore] failed to persist cached item', e);
+        }
+        runInAction(() => {
+            libraryStore.cachedItems.set(itemId, fullItemDetails);
+        });
+        return fullItemDetails;
+    };
 
     handleIncomingMessage = (event) => {
         // The websocket already routes the message to the right

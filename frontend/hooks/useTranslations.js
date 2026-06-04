@@ -44,13 +44,15 @@ const noopSubscribe = () => () => {};
  */
 export const useTranslations = () => {
     // Subscribe to the active language via mediaStore so that any
-    // call to `setLanguage` triggers a re-render.
+    // call to `setLanguage` triggers a re-render. The mediaStore
+    // exposes a DOM EventTarget so we use `addEventListener` /
+    // `removeEventListener` (not the Node EventEmitter `on` / `off`).
     const events = mediaStore.events;
     const subscribe = useCallback(
         (cb) => {
-            if (events && typeof events.on === 'function' && typeof events.off === 'function') {
-                events.on('languagechange', cb);
-                return () => events.off('languagechange', cb);
+            if (events && typeof events.addEventListener === 'function') {
+                events.addEventListener('languagechange', cb);
+                return () => events.removeEventListener('languagechange', cb);
             }
             return noopSubscribe();
         },
@@ -70,6 +72,17 @@ export const useTranslations = () => {
             const translated = getNestedValue(dictionary, key) || getNestedValue(fallback, key);
             if (translated == null) {
                 console.warn(`[Translation] Missing key: "${key}" for language: "${language}"`);
+                return key;
+            }
+            // Defensive: if a developer hands a key that resolves to a
+            // nested object instead of a string (e.g. "gridView.empty"
+            // without a leaf), render the key as-is so React throws a
+            // clear, localizable error instead of a generic "Objects
+            // are not valid as a React child" runtime error.
+            if (typeof translated !== 'string') {
+                console.warn(
+                    `[Translation] Key "${key}" for language "${language}" is not a string (got ${typeof translated}).`
+                );
                 return key;
             }
             return interpolate(translated, values);

@@ -12,6 +12,7 @@
  * store at boot time.
  */
 import { makeAutoObservable } from 'mobx';
+import { db } from '../services/db.js';
 
 class LibraryStore {
     /** @type {number[]} Ordered list of media IDs in the user's library. */
@@ -192,6 +193,234 @@ class LibraryStore {
         );
         this.showIntroDurations = new Map(introDurations.map((i) => [i.id, i.duration]));
         this.episodeContextMap = new Map(episodeContext.map((e) => [e.episodeId, e]));
+    }
+
+    // ===== MUTATIONS =====
+    // Plain MobX actions that mutate the sub-store state and persist the
+    // change to Dexie. They were previously inlined in the monolithic
+    // `mediaStore`; the actions are kept here so the store stays the
+    // single source of truth for the library, while the public facade
+    // (see mediaStore.js) re-exports them for backward compatibility.
+
+    /**
+     * Toggle an item in/out of the user's library. Persists the new
+     * ordering and caches the catalog payload when adding a brand-new
+     * item so the next "My list" view doesn't have to re-fetch it.
+     */
+    toggleMyList(item) {
+        if (!item || item.id == null) return;
+        const itemId = item.id;
+        if (this.myList.includes(itemId)) {
+            this.myList = this.myList.filter((id) => id !== itemId);
+            db.myList.delete(itemId).catch((e) =>
+                console.warn('[libraryStore] failed to delete myList entry', e)
+            );
+        } else {
+            this.myList = [...this.myList, itemId];
+            db.myList.put({ id: itemId, order: this.myList.length - 1 }).catch((e) =>
+                console.warn('[libraryStore] failed to persist myList entry', e)
+            );
+            if (!this.cachedItems.has(itemId)) {
+                this.cachedItems.set(itemId, item);
+                db.cachedItems.put(item).catch((e) =>
+                    console.warn('[libraryStore] failed to cache new myList item', e)
+                );
+            }
+        }
+    }
+
+    /**
+     * Drag-and-drop reorder: move the entry at `dragIndex` to `dropIndex`.
+     * Persists the new ordering in one bulkPut so the next reload renders
+     * the list in the right order.
+     */
+    async reorderMyList(dragIndex, dropIndex) {
+        if (dragIndex === dropIndex) return;
+        const reordered = [...this.myList];
+        const [moved] = reordered.splice(dragIndex, 1);
+        reordered.splice(dropIndex, 0, moved);
+        this.myList = reordered;
+        const itemsToUpdate = reordered.map((id, index) => ({ id, order: index }));
+        try {
+            await db.myList.bulkPut(itemsToUpdate);
+        } catch (e) {
+            console.warn('[libraryStore] failed to persist reordered myList', e);
+        }
+    }
+
+    /**
+     * Persist an explicit ordering (e.g. produced by a drag-end handler
+     * that couldn't use a simple index swap). Same persistence as
+     * `reorderMyList` but accepts a full id list.
+     */
+    async setMyListOrder(orderedIds) {
+        this.myList = [...orderedIds];
+        const itemsToUpdate = orderedIds.map((id, index) => ({ id, order: index }));
+        try {
+            await db.myList.bulkPut(itemsToUpdate);
+        } catch (e) {
+            console.warn('[libraryStore] failed to persist myList order', e);
+        }
+    }
+
+    /**
+     * Remove an episode from "continue watching" by deleting both the
+     * in-memory progress map and the Dexie row. Snackbars are owned by
+     * the caller (mediaStore facade) to keep this store I/O-only.
+     */
+    async removeFromContinueWatching(episodeId) {
+        this.episodeProgress.delete(episodeId);
+        try {
+            await db.episodeProgress.delete(episodeId);
+        } catch (e) {
+            console.warn('[libraryStore] failed to delete episodeProgress', e);
+        }
+    }
+
+    /**
+     * Update the watch progress for an episode. Marks the episode as
+     * "watched" once more than 90% has been consumed. Persists the new
+     * row only when something meaningful changed (progress advanced or
+     * the watched flag flipped) to avoid spamming Dexie on every
+     * `timeupdate` event.
+     */
+    updateEpisodeProgress(progress) {
+        const { episodeId, currentTime, duration } = progress;
+        if (!episodeId || !duration || duration <= 0) return;
+        const watched = currentTime / duration > 0.9;
+        const existing = this.episodeProgress.get(episodeId);
+        if (existing && existing.currentTime >= currentTime && existing.watched === watched) {
+            return;
+        }
+        const newProgress = {
+            episodeId,
+            currentTime,
+            duration,
+            watched,
+            lastWatchedAt: Date.now(),
+        };
+        this.episodeProgress.set(episodeId, newProgress);
+        db.episodeProgress.put(newProgress).catch((e) =>
+            console.warn('[libraryStore] failed to persist episodeProgress', e)
+        );
+    }
+
+    /**
+     * Flip the explicit "watched" flag for an episode. Used by the
+     * "mark watched" button in the episodes drawer; the inverse
+     * (`!existing?.watched`) is the new state.
+     */
+    async toggleEpisodeWatchedStatus(episodeId) {
+        const existing = this.episodeProgress.get(episodeId);
+        const nextWatched = !existing?.watched;
+        const newProgress = {
+            episodeId,
+            currentTime: nextWatched ? existing?.duration || 1 : 0,
+            duration: existing?.duration || 1,
+            watched: nextWatched,
+            lastWatchedAt: Date.now(),
+        };
+        this.episodeProgress.set(episodeId, newProgress);
+        try {
+            await db.episodeProgress.put(newProgress);
+        } catch (e) {
+            console.warn('[libraryStore] failed to persist episodeProgress', e);
+        }
+    }
+
+    /** Persist a custom intro duration (in seconds) for a show. */
+    setShowIntroDuration(showId, duration) {
+        this.showIntroDurations.set(showId, duration);
+        db.showIntroDurations.put({ id: showId, duration }).catch((e) =>
+            console.warn('[libraryStore] failed to persist showIntroDurations', e)
+        );
+    }
+
+    /** Persist the season the user is currently viewing for a show. */
+    setSelectedSeasonForShow(showId, seasonNumber) {
+        this.selectedSeasons.set(showId, seasonNumber);
+        db.selectedSeasons.put({ showId, seasonNumber }).catch((e) =>
+            console.warn('[libraryStore] failed to persist selectedSeasons', e)
+        );
+    }
+
+    /**
+     * Persist the user's link filter preferences for a show (the
+     * language and the type they tend to pick in the link modal).
+     */
+    setShowFilterPreference(showId, preference) {
+        const current = this.showFilterPreferences.get(showId) || {};
+        const merged = { ...current, ...preference };
+        this.showFilterPreferences.set(showId, merged);
+        db.showFilterPreferences.put({ showId, ...merged }).catch((e) =>
+            console.warn('[libraryStore] failed to persist showFilterPreferences', e)
+        );
+    }
+
+    // ===== LINK HELPERS =====
+    // The action layer for the media links map: the in-memory cache
+    // is authoritative for the current session; Dexie is the source
+    // of truth on reload. These methods are used by both the playback
+    // pipeline (startPlayback, _fetchAndCacheMediaDetails) and the
+    // library UI (refresh after add/delete).
+
+    /**
+     * Read the links for a media from the in-memory map, lazily
+     * populating from Dexie on first access. Returns the array of
+     * link records (or an empty array).
+     */
+    async getLinksForMedia(mediaId) {
+        if (this.mediaLinks.has(mediaId)) {
+            return this.mediaLinks.get(mediaId) || [];
+        }
+        let links = [];
+        try {
+            links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
+        } catch (e) {
+            console.warn('[libraryStore] failed to load mediaLinks', e);
+            return [];
+        }
+        this.mediaLinks.set(mediaId, links);
+        return links;
+    }
+
+    /**
+     * Find the first episode of a show that hasn't been watched yet
+     * AND has at least one link. Returns the bare episode record.
+     */
+    findFirstUnwatchedEpisode(item) {
+        if (!item || !item.seasons) return null;
+        for (const season of item.seasons) {
+            if (!season.episodes) continue;
+            for (const episode of season.episodes) {
+                const progress = this.episodeProgress.get(episode.id);
+                if (progress?.watched) continue;
+                if (this.hasLinks(episode.id)) return episode;
+            }
+        }
+        // Fallback: any episode that has links, watched or not.
+        for (const season of item.seasons) {
+            if (!season.episodes) continue;
+            for (const episode of season.episodes) {
+                if (this.hasLinks(episode.id)) return episode;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Reload the links for a media from Dexie into the in-memory map.
+     * Called after add/delete operations in the link editor.
+     */
+    async refreshLinksForMediaId(mediaId) {
+        let links = [];
+        try {
+            links = await db.mediaLinks.where('mediaId').equals(mediaId).toArray();
+        } catch (e) {
+            console.warn('[libraryStore] failed to refresh mediaLinks', e);
+            return;
+        }
+        this.mediaLinks.set(mediaId, links);
     }
 }
 

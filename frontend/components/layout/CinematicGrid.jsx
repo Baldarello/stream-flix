@@ -13,10 +13,17 @@ import { Box, Typography } from '@mui/material';
 import { gsap } from 'gsap';
 import { useTranslations } from '../../hooks/useTranslations.js';
 import { HoloCard } from './HoloCard.jsx';
+import { mediaStore } from '../../store/mediaStore.js';
 import { SkeletonCard } from '../feedback/Skeleton.jsx';
 import { durations, easings, stagger as motionStagger, reducedMotion } from '../../motion/grammar.js';
 
-const CinematicGridInner = ({ id = 'grid-cinematic', title, items = [] }) => {
+const CinematicGridInner = ({
+    id = 'grid-cinematic',
+    title,
+    items = [],
+    onCardClick,
+    emptyKey = 'gridView.empty.default',
+}) => {
     const { t } = useTranslations();
     const gridRef = useRef(null);
 
@@ -29,6 +36,13 @@ const CinematicGridInner = ({ id = 'grid-cinematic', title, items = [] }) => {
             { y: 24, autoAlpha: 0 },
             { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.standard, stagger: motionStagger.grid, overwrite: 'auto' });
     }, [items && items.length]);
+
+    // Cards are clickable when the parent supplies a handler. The
+    // default (no handler) is to open the detail view through
+    // `mediaStore.selectMedia` so search results, the Series/Film/
+    // Anime/MyList grids and any other caller don't have to wire
+    // the same boilerplate.
+    const handleCardClick = onCardClick || ((item) => mediaStore.selectMedia(item));
 
     return (
         <Box id={id} data-component="cinematic-grid" sx={{ pt: 'calc(80px + env(safe-area-inset-top))' }}>
@@ -70,7 +84,7 @@ const CinematicGridInner = ({ id = 'grid-cinematic', title, items = [] }) => {
                         <HoloCard
                             key={item.id}
                             item={item}
-                            onClick={() => { /* handled by parent via mediaStore */ }}
+                            onClick={handleCardClick}
                             displayMode="grid"
                         />
                     ))}
@@ -82,11 +96,22 @@ const CinematicGridInner = ({ id = 'grid-cinematic', title, items = [] }) => {
                             <SkeletonCard index={i} />
                         </Box>
                     ))}
-                    <Typography
-                        sx={{ color: 'var(--text-secondary)', width: '100%', textAlign: 'center', py: 4 }}
+                    <Box
+                        sx={{
+                            width: '100%',
+                            textAlign: 'center',
+                            py: 4,
+                            color: 'var(--text-secondary)',
+                        }}
+                        data-testid="grid-empty"
                     >
-                        {t('gridView.empty')}
-                    </Typography>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {t(`${emptyKey}.title`)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.8, mt: 0.5 }}>
+                            {t(`${emptyKey}.subtitle`)}
+                        </Typography>
+                    </Box>
                 </Box>
             )}
         </Box>

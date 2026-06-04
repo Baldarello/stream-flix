@@ -56,6 +56,7 @@ export const FeatureRouter = observer(() => {
                         id="grid-view-series"
                         title={t('gridView.seriesTitle')}
                         items={topSeries}
+                        emptyKey="gridView.empty.default"
                     />
                 );
             case 'Film':
@@ -64,6 +65,7 @@ export const FeatureRouter = observer(() => {
                         id="grid-view-movies"
                         title={t('gridView.moviesTitle')}
                         items={allMovies}
+                        emptyKey="gridView.empty.default"
                     />
                 );
             case 'Anime':
@@ -72,6 +74,7 @@ export const FeatureRouter = observer(() => {
                         id="grid-view-anime"
                         title={t('gridView.animeTitle')}
                         items={popularAnime}
+                        emptyKey="gridView.empty.default"
                     />
                 );
             case 'La mia lista':
@@ -80,6 +83,7 @@ export const FeatureRouter = observer(() => {
                         id="grid-view-mylist"
                         title={t('gridView.myListTitle')}
                         items={myListItems}
+                        emptyKey="gridView.empty.myList"
                     />
                 );
             case 'Libreria':

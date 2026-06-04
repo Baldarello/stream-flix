@@ -87,10 +87,11 @@ export const SearchView = observer(() => {
                     pt: 'calc(64px + env(safe-area-inset-top))'
                 }}
             >
-                <GridView 
+                <GridView
                     id="search-results-grid"
-                    title={t('gridView.searchResultsFor', { query: searchQuery })} 
-                    items={searchResults} 
+                    title={t('gridView.searchResultsFor', { query: searchQuery })}
+                    items={searchResults}
+                    emptyKey="gridView.empty.search"
                 />
             </Box>
         </>
