@@ -3,7 +3,34 @@ import {mediaStore} from '../store/mediaStore';
 
 // This Client ID should be defined in a .env file for your project
 // You can get one from the Google Cloud Console: https://console.cloud.google.com/apis/credentials
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+//
+// We read it in this order of preference so the same code works whether
+// the value is baked in at build time (`process.env.GOOGLE_CLIENT_ID`
+// replaced by Vite, or `import.meta.env.GOOGLE_CLIENT_ID` exposed by
+// Vite's native env handling) or supplied at runtime (useful for
+// Docker / preview environments where the .env is not available at
+// build time and the operator injects the value into `window`).
+const BUILD_TIME_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || import.meta.env?.GOOGLE_CLIENT_ID || '';
+
+/**
+ * Resolves the Google OAuth client ID at runtime, falling back to a
+ * window-level injection if the build-time value is empty. This lets
+ * operators set the value via a `<script>` tag, a reverse proxy
+ * response header, or devtools without rebuilding the app.
+ *
+ * @returns {string} The resolved client ID, or an empty string if none
+ * is configured.
+ */
+const resolveGoogleClientId = () => {
+    if (BUILD_TIME_CLIENT_ID) {
+        return BUILD_TIME_CLIENT_ID;
+    }
+    if (typeof window !== 'undefined' && typeof window.__QUIX_GOOGLE_CLIENT_ID__ === 'string') {
+        return window.__QUIX_GOOGLE_CLIENT_ID__;
+    }
+    return '';
+};
+
 const LOCAL_STORAGE_KEY = 'QUIX_GOOGLE_USER_SESSION';
 
 let tokenClient = null;
@@ -115,7 +142,7 @@ const refreshAccessToken = async (user) => {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
-                client_id: GOOGLE_CLIENT_ID,
+                client_id: resolveGoogleClientId(),
                 grant_type: 'refresh_token',
                 refresh_token: user.refreshToken,
             }),
@@ -328,10 +355,14 @@ const tryRestoringSession = async () => {
 
 /**
  * Creates the Google OAuth2 token client. Returns `null` if the GSI
- * library has not been loaded or `GOOGLE_CLIENT_ID` is missing.
+ * library has not been loaded or no client ID can be resolved.
  */
 const createTokenClient = () => {
-    if (!GOOGLE_CLIENT_ID) {
+    // Re-resolve on every call so a runtime-injected client ID
+    // (e.g. via `window.__QUIX_GOOGLE_CLIENT_ID__`) is picked up
+    // even if the build-time value is empty.
+    const clientId = resolveGoogleClientId();
+    if (!clientId) {
         return null;
     }
     if (!isGsiLibraryLoaded()) {
@@ -339,7 +370,7 @@ const createTokenClient = () => {
     }
     try {
         return google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
+            client_id: clientId,
             scope: [
                 'https://www.googleapis.com/auth/drive.appdata',
                 'https://www.googleapis.com/auth/drive.file',
@@ -423,8 +454,11 @@ export const initGoogleAuth = async () => {
     console.log("[GoogleAuth] Initializing Google Auth...");
 
     // If the client ID is not configured, skip all Google authentication logic.
-    if (!GOOGLE_CLIENT_ID) {
-        console.warn("[GoogleAuth] Google Client ID is not configured. Skipping Google Auth initialization.");
+    const clientId = resolveGoogleClientId();
+    if (!clientId) {
+        console.warn(
+            "[GoogleAuth] Google Client ID is not configured (set GOOGLE_CLIENT_ID in .env or window.__QUIX_GOOGLE_CLIENT_ID__ at runtime). Skipping Google Auth initialization."
+        );
         return;
     }
 
@@ -466,12 +500,16 @@ export const handleSignIn = () => {
     }
 
     if (!tokenClient) {
-        console.error("[GoogleAuth] Google Auth not initialized.");
-        const reason = !GOOGLE_CLIENT_ID
-            ? "Google Client ID is not configured."
+        // Use the same resolution path as `createTokenClient` so the
+        // snackbar/console messages are consistent with what would
+        // have actually happened if we had tried to create the client.
+        const clientId = resolveGoogleClientId();
+        const reason = !clientId
+            ? "Google Client ID is not configured. Set GOOGLE_CLIENT_ID in .env or define window.__QUIX_GOOGLE_CLIENT_ID__ before the app loads."
             : !isGsiLibraryLoaded()
                 ? "Google Identity Services script is still loading. Please try again in a moment."
                 : "Google Token Client could not be created.";
+        console.error(`[GoogleAuth] Google Auth not initialized: ${reason}`);
         mediaStore.showSnackbar(reason, "error");
         return;
     }

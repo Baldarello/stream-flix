@@ -184,4 +184,42 @@ describe('googleAuthService.handleSignIn', () => {
         expect(requestAccessToken).toHaveBeenCalled();
         expect(mediaStore.isGoogleAuthLoading).toBe(true);
     });
+
+    it('falls back to window.__QUIX_GOOGLE_CLIENT_ID__ when the build-time client ID is empty', async () => {
+        // Simulate an environment (e.g. Docker, preview) where the .env
+        // was not available at build time so the build-time client ID
+        // is empty, but the operator has injected one at runtime.
+        //
+        // We use vi.stubEnv to override the env, then vi.resetModules
+        // so the service re-reads the env at module load time.
+        vi.stubEnv('GOOGLE_CLIENT_ID', '');
+        vi.resetModules();
+        await importService();
+
+        const requestAccessToken = vi.fn();
+        const injectedClientId = 'runtime-injected.apps.googleusercontent.com';
+        globalThis.window = globalThis.window || globalThis;
+        globalThis.window.__QUIX_GOOGLE_CLIENT_ID__ = injectedClientId;
+        globalThis.google = {
+            accounts: {
+                oauth2: {
+                    initTokenClient: vi.fn(() => ({ requestAccessToken })),
+                },
+            },
+        };
+
+        const { handleSignIn } = await importService();
+        handleSignIn();
+
+        // The service should pick up the runtime-injected client ID
+        // and successfully call requestAccessToken on the new client.
+        expect(globalThis.google.accounts.oauth2.initTokenClient).toHaveBeenCalledTimes(1);
+        const initArgs = globalThis.google.accounts.oauth2.initTokenClient.mock.calls[0][0];
+        expect(initArgs.client_id).toBe(injectedClientId);
+        expect(requestAccessToken).toHaveBeenCalled();
+        expect(mediaStore.isGoogleAuthLoading).toBe(true);
+
+        delete globalThis.window.__QUIX_GOOGLE_CLIENT_ID__;
+        vi.unstubAllEnvs();
+    });
 });

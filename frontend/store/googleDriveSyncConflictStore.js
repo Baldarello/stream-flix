@@ -85,6 +85,13 @@ class GoogleDriveSyncConflictStore {
      * projection mirrors the logic that previously lived inside the modal
      * component's `useMemo` block so the visible behaviour is unchanged.
      *
+     * Each candidate id is filtered so that we only surface shows that
+     * the user has actually configured (i.e. added to My List, or that
+     * have a media link / episode progress entry on either side of the
+     * conflict). Shows that are only present as "browsed" cached items
+     * are intentionally dropped: they aren't a real conflict and would
+     * only clutter the modal with rows the user has never set up.
+     *
      * @param {object | null | undefined} conflictData
      */
     initializeFromConflictData(conflictData) {
@@ -93,52 +100,82 @@ class GoogleDriveSyncConflictStore {
             return;
         }
 
-        const result = [];
-        const allIds = new Set();
+        // Coerce every id to a number up-front. The My List arrays may
+        // carry numeric ids while a plain-object `shows` payload exposes
+        // string keys, which would otherwise produce duplicate rows for
+        // the same show (e.g. `1` and `'1'` both ending up in the same
+        // Set before the dedupe in `result.push({id: Number(id)})`).
+        const toIdKey = (rawId) => {
+            const n = Number(rawId);
+            return Number.isFinite(n) ? n : null;
+        };
 
-        conflictData.myList.local.forEach(id => allIds.add(id));
-        conflictData.myList.remote.forEach(id => allIds.add(id));
+        const myListLocalIds = (conflictData.myList?.local || [])
+            .map(toIdKey)
+            .filter((id) => id !== null);
+        const myListRemoteIds = (conflictData.myList?.remote || [])
+            .map(toIdKey)
+            .filter((id) => id !== null);
+        const myListLocalIdSet = new Set(myListLocalIds);
+        const myListRemoteIdSet = new Set(myListRemoteIds);
 
+        // Normalize the candidate show ids. We always start from the
+        // union of My List ids + shows-map ids; the filter step below
+        // drops the ones that have no real conflict / user data.
+        const candidateIds = new Set();
+        myListLocalIds.forEach((id) => candidateIds.add(id));
+        myListRemoteIds.forEach((id) => candidateIds.add(id));
         if (conflictData.shows) {
             if (typeof conflictData.shows.forEach === 'function') {
-                // Native Map or other iterable with forEach
-                conflictData.shows.forEach((_, id) => allIds.add(id));
+                conflictData.shows.forEach((_, id) => {
+                    const n = toIdKey(id);
+                    if (n !== null) candidateIds.add(n);
+                });
             } else {
-                // Plain object keyed by id (e.g. from a test fixture)
-                Object.keys(conflictData.shows).forEach(id => allIds.add(id));
+                Object.keys(conflictData.shows).forEach((id) => {
+                    const n = toIdKey(id);
+                    if (n !== null) candidateIds.add(n);
+                });
             }
         }
 
-        allIds.forEach(id => {
-            const localInList = conflictData.myList.local.includes(id);
-            const remoteInList = conflictData.myList.remote.includes(id);
+        const mediaLinksLocal = conflictData.mediaLinks?.local || [];
+        const mediaLinksRemote = conflictData.mediaLinks?.remote || [];
+        const episodeProgressLocal = conflictData.episodeProgress?.local || [];
+        const episodeProgressRemote = conflictData.episodeProgress?.remote || [];
+
+        const result = [];
+        candidateIds.forEach(id => {
             const showEntry = (typeof conflictData.shows?.get === 'function')
                 ? conflictData.shows.get(id)
                 : conflictData.shows?.[id];
             const localShow = showEntry?.local;
             const remoteShow = showEntry?.remote;
 
-            const localLinks = conflictData.mediaLinks.local.filter(l => {
+            const localLinks = mediaLinksLocal.filter(l => {
                 if (localShow?.seasons) {
                     return localShow.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
                 }
                 return l.mediaId === id;
             });
-            const remoteLinks = conflictData.mediaLinks.remote.filter(l => {
+            const remoteLinks = mediaLinksRemote.filter(l => {
                 if (remoteShow?.seasons) {
                     return remoteShow.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
                 }
                 return l.mediaId === id;
             });
 
-            const localProgress = conflictData.episodeProgress.local.filter(p => {
+            const localProgress = episodeProgressLocal.filter(p => {
                 if (!localShow?.seasons) return false;
                 return localShow.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
             });
-            const remoteProgress = conflictData.episodeProgress.remote.filter(p => {
+            const remoteProgress = episodeProgressRemote.filter(p => {
                 if (!remoteShow?.seasons) return false;
                 return remoteShow.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
             });
+
+            const localInList = myListLocalIdSet.has(id);
+            const remoteInList = myListRemoteIdSet.has(id);
 
             let myListAction = 'none';
             if (localInList && remoteInList) myListAction = 'both';
@@ -153,8 +190,22 @@ class GoogleDriveSyncConflictStore {
             if (localProgress.length > 0 && remoteProgress.length === 0) progressAction = 'local';
             else if (remoteProgress.length > 0 && localProgress.length === 0) progressAction = 'remote';
 
+            // Drop shows that the user has never configured: not in either
+            // My List, and no media links or episode progress on either
+            // side. They are noise in the conflict modal and would only
+            // generate empty / meaningless "no conflict" rows.
+            const hasAnyUserData =
+                myListAction !== 'none' ||
+                localLinks.length > 0 ||
+                remoteLinks.length > 0 ||
+                localProgress.length > 0 ||
+                remoteProgress.length > 0;
+            if (!hasAnyUserData) {
+                return;
+            }
+
             result.push({
-                id: Number(id),
+                id,
                 title: localShow?.name || localShow?.title || remoteShow?.name || remoteShow?.title || `Show #${id}`,
                 mediaType: localShow?.media_type || remoteShow?.media_type || 'tv',
                 myListAction,

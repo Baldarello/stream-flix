@@ -186,7 +186,7 @@ class SyncStore {
                 });
 
                 // For links, combine all unique links (by URL)
-                const mergedLinksMap = new Map()();
+                const mergedLinksMap = new Map();
                 [...mediaLinks.local, ...mediaLinks.remote].forEach((link) => {
                     const key = `${link.mediaId}|${link.url}`;
                     if (!mergedLinksMap.has(key)) {
@@ -196,7 +196,7 @@ class SyncStore {
                 const mergedLinks = Array.from(mergedLinksMap.values());
 
                 // For episode progress, keep the one with more recent timestamp
-                const mergedProgressMap = new Map()();
+                const mergedProgressMap = new Map();
                 [...episodeProgress.local, ...episodeProgress.remote].forEach((progress) => {
                     const existing = mergedProgressMap.get(progress.episodeId);
                     if (!existing || (progress.lastWatchedAt && existing.lastWatchedAt && progress.lastWatchedAt > existing.lastWatchedAt)) {
@@ -240,6 +240,7 @@ class SyncStore {
             const finalShows = [];
             const finalLinks = [];
             const finalProgress = [];
+            const chosenIds = new Set(choices.map((c) => c.id));
 
             // Process each choice
             choices.forEach((choice) => {
@@ -310,7 +311,7 @@ class SyncStore {
                     finalProgress.push(...remoteProgress);
                 } else { // both
                     // For both, merge with timestamp check
-                    const progressMap = new Map()();
+                    const progressMap = new Map();
                     [...localProgress, ...remoteProgress].forEach(p => {
                         const existing = progressMap.get(p.episodeId);
                         if (!existing || (p.lastWatchedAt && existing.lastWatchedAt && p.lastWatchedAt > existing.lastWatchedAt)) {
@@ -321,8 +322,47 @@ class SyncStore {
                 }
             });
 
+            // Preserve shows that are in the conflict payload but NOT in the
+            // user's per-row choices (i.e. shows that the conflict modal
+            // filtered out because the user never added them to My List and
+            // they have no links/progress). Without this loop the merge
+            // would wipe those shows from the local cache because
+            // `db.importData` clears `cachedItems` before re-populating it.
+            shows.forEach((data, id) => {
+                if (chosenIds.has(id)) return;
+                if (data.local) {
+                    finalShows.push(data.local);
+                } else if (data.remote) {
+                    finalShows.push(data.remote);
+                }
+                // Also keep any links / progress attached to the unchosen
+                // show so the user's existing data is preserved.
+                const localLinks = mediaLinks.local.filter(l => {
+                    if (data.local?.seasons) {
+                        return data.local.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                    }
+                    return l.mediaId === id;
+                });
+                const remoteLinks = mediaLinks.remote.filter(l => {
+                    if (data.remote?.seasons) {
+                        return data.remote.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                    }
+                    return l.mediaId === id;
+                });
+                finalLinks.push(...localLinks, ...remoteLinks);
+                const localProgress = episodeProgress.local.filter(p => {
+                    if (!data.local?.seasons) return false;
+                    return data.local.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                });
+                const remoteProgress = episodeProgress.remote.filter(p => {
+                    if (!data.remote?.seasons) return false;
+                    return data.remote.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                });
+                finalProgress.push(...localProgress, ...remoteProgress);
+            });
+
             // Remove duplicate links by URL
-            const uniqueLinksMap = new Map()();
+            const uniqueLinksMap = new Map();
             finalLinks.forEach(link => {
                 const key = `${link.mediaId}|${link.url}`;
                 if (!uniqueLinksMap.has(key)) {
