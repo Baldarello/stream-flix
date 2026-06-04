@@ -18,7 +18,36 @@ export const it = {
         "scrollRight": "scorri a destra",
         "editOrder": "Modifica ordine",
         "reorderInstructions": "Trascina gli elementi per riordinare, oppure usa le frecce",
-        "saveOrder": "Salva ordine"
+        "saveOrder": "Salva ordine",
+        "openDetail": "Apri la schermata di dettaglio"
+    },
+    "myListDetail": {
+        "title": "La mia lista",
+        "subtitle": "{count, plural, one {# contenuto salvato} other {# contenuti salvati}}",
+        "subtitle_one": "{count} contenuto salvato",
+        "subtitle_other": "{count} contenuti salvati",
+        "searchPlaceholder": "Cerca nella tua lista…",
+        "reorderOn": "Modalità riordino",
+        "reorderOff": "Esci dal riordino",
+        "removeTooltip": "Rimuovi dalla lista",
+        "emptyTitle": "La tua lista è vuota",
+        "emptySubtitle": "Aggiungi film e serie TV per vederli qui.",
+        "emptyCta": "Esplora il catalogo",
+        "stats": {
+            "total": "Totale: {count}",
+            "movies": "Film: {count}",
+            "series": "Serie TV: {count}"
+        },
+        "filter": {
+            "all": "Tutto",
+            "movie": "Film",
+            "tv": "Serie TV"
+        },
+        "sort": {
+            "recent": "Più recenti",
+            "title": "Titolo (A-Z)",
+            "edited": "Ultima modifica"
+        }
     },
     "card": {
         "detailsFor": "Vedi dettagli per {title}",

@@ -18,7 +18,36 @@ export const en = {
         "scrollRight": "scroll right",
         "editOrder": "Edit order",
         "reorderInstructions": "Drag items to reorder, or use the arrows",
-        "saveOrder": "Save order"
+        "saveOrder": "Save order",
+        "openDetail": "Open the detail screen"
+    },
+    "myListDetail": {
+        "title": "My List",
+        "subtitle": "{count, plural, one {# saved item} other {# saved items}}",
+        "subtitle_one": "{count} saved item",
+        "subtitle_other": "{count} saved items",
+        "searchPlaceholder": "Search your list…",
+        "reorderOn": "Reorder mode",
+        "reorderOff": "Exit reorder mode",
+        "removeTooltip": "Remove from list",
+        "emptyTitle": "Your list is empty",
+        "emptySubtitle": "Add movies and TV shows to see them here.",
+        "emptyCta": "Explore the catalog",
+        "stats": {
+            "total": "Total: {count}",
+            "movies": "Movies: {count}",
+            "series": "TV Series: {count}"
+        },
+        "filter": {
+            "all": "All",
+            "movie": "Movies",
+            "tv": "TV Series"
+        },
+        "sort": {
+            "recent": "Most recent",
+            "title": "Title (A-Z)",
+            "edited": "Last edited"
+        }
     },
     "card": {
         "detailsFor": "View details for {title}",

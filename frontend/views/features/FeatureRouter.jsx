@@ -17,6 +17,7 @@ import ProfileDrawer from '../../components/utilities/ProfileDrawer.jsx';
 import { HomeView } from '../../features/home/HomeView.jsx';
 import { CinematicGrid } from '../../components/layout/CinematicGrid.jsx';
 import LibraryManagementView from '../../components/library/LibraryManagementView.jsx';
+import { MyListDetailView } from '../../components/library/MyListDetailView.jsx';
 
 /**
  * FeatureRouter Component
@@ -27,6 +28,8 @@ import LibraryManagementView from '../../components/library/LibraryManagementVie
  * - 'Film': GridView with all movies
  * - 'Anime': GridView with popular anime
  * - 'La mia lista': GridView with user's list
+ * - 'MyListDetail': dedicated detail screen for the user's list
+ *   (filtering, sorting, stats, drag-and-drop reorder)
  * - 'Libreria': LibraryManagementView
  * - default: HomeView
  * 
@@ -86,6 +89,8 @@ export const FeatureRouter = observer(() => {
                         emptyKey="gridView.empty.myList"
                     />
                 );
+            case 'MyListDetail':
+                return <MyListDetailView id="my-list-detail-view" />;
             case 'Libreria':
                 return <LibraryManagementView id="library-view" />;
             default:

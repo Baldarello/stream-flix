@@ -10,10 +10,11 @@
 
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {Box, IconButton, Typography, useMediaQuery, useTheme} from '@mui/material';
+import {Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme} from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EditIcon from '@mui/icons-material/Edit';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {gsap} from 'gsap';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {mediaStore} from '../../store/mediaStore.js';
@@ -26,7 +27,9 @@ const CinematicRowInner = ({
                                items = [],
                                onCardClick,
                                isContinueWatching = false,
-                               isReorderable = false
+                               isReorderable = false,
+                               onViewDetail,
+                               viewDetailLabel
                            }) => {
     const scrollContainerRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -196,7 +199,32 @@ const CinematicRowInner = ({
                 >
                     {title}
                 </Typography>
-                {isReorderable && (
+                {isReorderable && typeof onViewDetail === 'function' && (
+                    <Tooltip title={viewDetailLabel || t('contentRow.openDetail')}>
+                        <IconButton
+                            id="row-view-detail"
+                            data-component="row-view-detail"
+                            aria-label={viewDetailLabel || t('contentRow.openDetail')}
+                            onClick={() => onViewDetail && onViewDetail()}
+                            sx={{
+                                color: 'var(--neon-accent)',
+                                border: '1px solid rgba(76, 210, 255, 0.45)',
+                                borderRadius: '999px',
+                                padding: '6px',
+                                transition: 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms cubic-bezier(0.22, 1, 0.36, 1)',
+                                '&:hover': {
+                                    background: 'rgba(76, 210, 255, 0.18)',
+                                    transform: 'translateY(-1px) scale(1.05)',
+                                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.4)'
+                                },
+                                '&:focus-visible': {outline: '2px solid var(--neon-accent)', outlineOffset: 2}
+                            }}
+                        >
+                            <OpenInNewIcon fontSize="small"/>
+                        </IconButton>
+                    </Tooltip>
+                )}
+                {isReorderable && typeof onViewDetail !== 'function' && (
                     <IconButton
                         id="row-reorder-toggle"
                         aria-label="reorder"

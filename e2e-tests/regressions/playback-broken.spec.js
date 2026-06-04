@@ -109,7 +109,13 @@ test.describe('Local playback regression', () => {
                 title: 'Single Source Movie',
                 media_type: 'movie',
                 video_urls: [
-                    {id: 99, url: 'https://example.com/only-source.mp4', language: 'it', type: 'sub', label: 'Only Source'},
+                    {
+                        id: 99,
+                        url: 'https://example.com/only-source.mp4',
+                        language: 'it',
+                        type: 'sub',
+                        label: 'Only Source'
+                    },
                 ],
             };
             await mediaStore.startPlayback(item);

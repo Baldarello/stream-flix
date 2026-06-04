@@ -24,7 +24,16 @@ import { CinematicRow } from '../../components/layout/CinematicRow.jsx';
  */
 export const HomeView = observer(() => {
     const { t } = useTranslations();
-    const { heroContent, homePageRows, startPlayback, selectMedia } = mediaStore;
+    const { heroContent, homePageRows, startPlayback, selectMedia, setActiveView, toggleReorderMode } = mediaStore;
+
+    const handleOpenMyListDetail = () => {
+        // The dedicated detail screen owns the reorder UI, so any
+        // stale reorder flag is cleared before the navigation.
+        if (mediaStore.isReorderMode && typeof toggleReorderMode === 'function') {
+            toggleReorderMode();
+        }
+        setActiveView('MyListDetail');
+    };
 
     return (
         <>
@@ -36,14 +45,15 @@ export const HomeView = observer(() => {
                     onPlayClick={() => startPlayback(heroContent)}
                 />
             )}
-            <Container 
+            <Container
                 id="home-content-rows"
-                maxWidth={false} 
+                maxWidth={false}
                 sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 }, zIndex: 0, position: 'relative' }}
             >
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
                     {homePageRows.map(row => {
                         const isContinueWatching = row.titleKey === 'misc.continueWatching';
+                        const isMyList = row.titleKey === 'misc.myList';
                         const handleCardClick = (item) => {
                             if (isContinueWatching) {
                                 startPlayback(item);
@@ -60,7 +70,9 @@ export const HomeView = observer(() => {
                                 items={row.items}
                                 onCardClick={handleCardClick}
                                 isContinueWatching={isContinueWatching}
-                                isReorderable={row.titleKey === 'misc.myList'}
+                                isReorderable={isMyList}
+                                onViewDetail={isMyList ? handleOpenMyListDetail : undefined}
+                                viewDetailLabel={isMyList ? t('contentRow.openDetail') : undefined}
                             />
                         );
                     })}
