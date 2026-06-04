@@ -364,16 +364,32 @@ class MediaStore {
         return uiStore.isLinkSelectionModalOpen;
     }
 
+    set isLinkSelectionModalOpen(v) {
+        uiStore.isLinkSelectionModalOpen = v;
+    }
+
     get itemForLinkSelection() {
         return uiStore.itemForLinkSelection;
+    }
+
+    set itemForLinkSelection(v) {
+        uiStore.itemForLinkSelection = v;
     }
 
     get linksForSelection() {
         return uiStore.linksForSelection;
     }
 
+    set linksForSelection(v) {
+        uiStore.linksForSelection = v;
+    }
+
     get linkSelectionContext() {
         return uiStore.linkSelectionContext;
+    }
+
+    set linkSelectionContext(v) {
+        uiStore.linkSelectionContext = v;
     }
 
     get expandedLinkAccordionId() {
@@ -511,6 +527,18 @@ class MediaStore {
 
     set playbackOriginItem(v) {
         playbackStore.playbackOriginItem = v;
+    }
+
+    set nowPlayingItem(v) {
+        playbackStore.nowPlayingItem = v;
+    }
+
+    set nowPlayingShowDetails(v) {
+        playbackStore.nowPlayingShowDetails = v;
+    }
+
+    set isPlaying(v) {
+        playbackStore.isPlaying = v;
     }
 
     setNowPlaying = playbackStore.setNowPlaying.bind(playbackStore);
@@ -1254,10 +1282,18 @@ class MediaStore {
                 item.video_url = candidateLinks[0].url;
                 selectedLink = candidateLinks[0];
             } else {
-                this.linksForSelection = candidateLinks;
-                this.itemForLinkSelection = item;
-                this.linkSelectionContext = 'local';
-                this.isLinkSelectionModalOpen = true;
+                // The modal/flag state lives in `uiStore` and the
+                // mediaStore facade only exposes *getters* for those
+                // fields. Setting them on `this` would create
+                // non-observable own properties on the mediaStore
+                // instance and the LinkSelectionModal would never
+                // open (its getters would still read the original
+                // false/null values from uiStore), which silently
+                // breaks the whole "press play" flow. Delegate to
+                // `uiStore.openLinkSelectionModal` so the writes
+                // reach the right store and the modal actually
+                // appears.
+                uiStore.openLinkSelectionModal(item, candidateLinks, 'local');
                 return;
             }
 
