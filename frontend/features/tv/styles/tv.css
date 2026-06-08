@@ -1,0 +1,458 @@
+/**
+ * TV Mode Styles
+ * Lightweight CSS for Smart TV remote control navigation
+ */
+
+/* Base reset for TV mode */
+.tv-root {
+    font-family: 'Roboto', 'Noto', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: #000000;
+    color: #ffffff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+/* Hide scrollbar but keep scrolling functionality */
+.tv-root::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+.tv-root {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Focus ring styles - 4px solid primary color */
+.tv-focusable {
+    outline: none;
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.tv-focusable:focus-visible,
+.tv-focusable.tv-focused {
+    outline: 4px solid #2196f3;
+    outline-offset: 2px;
+    transform: scale(1.02);
+    z-index: 10;
+}
+
+/* TV Quick Action Tile */
+.tv-quick-action-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 240px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease-out, border-color 0.15s ease-out, background 0.15s ease-out;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.tv-quick-action-tile:hover {
+    background: linear-gradient(180deg, #1f1f3a 0%, #1a2744 100%);
+}
+
+.tv-quick-action-tile:focus-visible,
+.tv-quick-action-tile.tv-focused {
+    outline: 4px solid #2196f3;
+    outline-offset: 4px;
+    border-color: #2196f3;
+    transform: scale(1.05);
+}
+
+.tv-quick-action-tile .tile-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tv-quick-action-tile .tile-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.tv-quick-action-tile .tile-title {
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+    color: #ffffff;
+    margin: 0;
+}
+
+.tv-quick-action-tile .tile-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #2196f3;
+    color: white;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* TV Card */
+.tv-card {
+    display: flex;
+    flex-direction: column;
+    width: 240px;
+    height: 360px;
+    background: #1a1a2e;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease-out;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.tv-card:hover {
+    transform: scale(1.03);
+}
+
+.tv-card:focus-visible,
+.tv-card.tv-focused {
+    outline: 4px solid #2196f3;
+    outline-offset: 2px;
+    transform: scale(1.05);
+}
+
+.tv-card .card-image {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    background: #0d0d1a;
+}
+
+.tv-card .card-title {
+    font-size: 16px;
+    font-weight: 400;
+    padding: 12px;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.tv-card .card-progress {
+    position: absolute;
+    bottom: 48px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tv-card .card-progress-bar {
+    height: 100%;
+    background: #2196f3;
+    transition: width 0.3s ease-out;
+}
+
+/* TV List Row */
+.tv-list-row {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+}
+
+.tv-list-row .row-title {
+    font-size: 24px;
+    font-weight: 500;
+    color: #ffffff;
+    margin: 0 24px 12px;
+    padding: 0;
+}
+
+.tv-list-row .row-items {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    padding: 0 24px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+}
+
+.tv-list-row .row-items::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.tv-list-row .row-items {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* TV Empty State */
+.tv-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 48px;
+    text-align: center;
+}
+
+.tv-empty-state .empty-icon {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 24px;
+    opacity: 0.5;
+}
+
+.tv-empty-state .empty-message {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 24px;
+}
+
+.tv-empty-state .empty-cta {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease-out;
+}
+
+.tv-empty-state .empty-cta:hover {
+    background: #1976d2;
+}
+
+.tv-empty-state .empty-cta:focus-visible {
+    outline: 4px solid #2196f3;
+    outline-offset: 2px;
+}
+
+/* TV Quick Action Row */
+.tv-quick-action-row {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    padding: 24px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* TV Screen Container */
+.tv-screen {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #000000;
+}
+
+.tv-screen .tv-header {
+    padding: 24px;
+    text-align: center;
+}
+
+.tv-screen .tv-header h1 {
+    font-size: 32px;
+    font-weight: 500;
+    margin: 0;
+    color: #ffffff;
+}
+
+/* TV Pairing View */
+.tv-pairing-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #000000;
+    padding: 48px;
+}
+
+.tv-pairing-view .pairing-qr {
+    width: 400px;
+    height: 400px;
+    margin-bottom: 32px;
+}
+
+.tv-pairing-view .pairing-qr img {
+    width: 100%;
+    height: 100%;
+}
+
+.tv-pairing-view .pairing-code {
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: 8px;
+    color: #ffffff;
+    margin: 24px 0;
+}
+
+.tv-pairing-view .pairing-instructions {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    margin-top: 24px;
+}
+
+.tv-pairing-view .pairing-instructions ol {
+    list-style-position: inside;
+    padding: 0;
+}
+
+.tv-pairing-view .pairing-instructions li {
+    margin: 8px 0;
+}
+
+/* TV Back Button */
+.tv-back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease-out, border-color 0.15s ease-out;
+    margin: 24px;
+}
+
+.tv-back-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.tv-back-button:focus-visible {
+    outline: 4px solid #2196f3;
+    outline-offset: 2px;
+}
+
+/* TV User Avatar (logged in state) */
+.tv-user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2196f3;
+}
+
+/* TV Confirmation Dialog */
+.tv-confirm-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #1a1a2e;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 32px;
+    min-width: 320px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.tv-confirm-dialog .dialog-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffffff;
+    margin: 0 0 16px;
+}
+
+.tv-confirm-dialog .dialog-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+.tv-confirm-dialog .dialog-btn {
+    padding: 10px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease-out;
+    border: none;
+}
+
+.tv-confirm-dialog .dialog-btn.confirm {
+    background: #f44336;
+    color: white;
+}
+
+.tv-confirm-dialog .dialog-btn.confirm:hover {
+    background: #d32f2f;
+}
+
+.tv-confirm-dialog .dialog-btn.cancel {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.tv-confirm-dialog .dialog-btn.cancel:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.tv-confirm-dialog .dialog-btn:focus-visible {
+    outline: 4px solid #2196f3;
+    outline-offset: 2px;
+}
+
+/* Loading state */
+.tv-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #000000;
+    color: #ffffff;
+    font-size: 18px;
+}
+
+/* Utility classes */
+.tv-text-center {
+    text-align: center;
+}
+
+.tv-mt-4 {
+    margin-top: 16px;
+}
+
+.tv-mb-4 {
+    margin-bottom: 16px;
+}
+
+.tv-flex {
+    display: flex;
+}
+
+.tv-flex-col {
+    flex-direction: column;
+}
+
+.tv-items-center {
+    align-items: center;
+}
+
+.tv-justify-center {
+    justify-content: center;
+}
+
+.tv-gap-4 {
+    gap: 16px;
+}

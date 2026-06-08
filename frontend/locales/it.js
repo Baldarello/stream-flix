@@ -649,5 +649,26 @@ export const it = {
         "bulkLinksUpdated": "{count} link aggiornati ({language}/{type}).",
         "bulkLinksDeleted": "{count} link eliminati.",
         "linkValidatedSuccess": "Link validato con successo."
+    },
+    "tv": {
+        "title": "TV",
+        "signIn": "Accedi con Google",
+        "signOut": "Disconnetti",
+        "signOutConfirm": "Vuoi disconnetterti?",
+        "myList": "La mia lista",
+        "showQR": "QR Code",
+        "continueWatching": "Continua a guardare",
+        "pairingTitle": "Connetti il tuo dispositivo",
+        "pairingStep1": "Apri l'app StreamFlix sul tuo telefono o tablet",
+        "pairingStep2": "Tocca \"Connetti alla TV\" e scansiona il QR code",
+        "orEnterCode": "Oppure inserisci il codice sopra sul tuo dispositivo",
+        "empty": "Nessun contenuto disponibile",
+        "emptyHome": "Accedi con Google e connetti un dispositivo per iniziare",
+        "emptyList": "La tua lista è vuota",
+        "browseCatalog": "Sfoglia il catalogo",
+        "back": "Indietro",
+        "qrCodeAlt": "QR Code per pairing",
+        "exitPlayerTitle": "Vuoi interrompere la riproduzione?",
+        "exit": "Esci"
     }
 }

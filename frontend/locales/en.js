@@ -648,5 +648,26 @@ export const en = {
         "bulkLinksUpdated": "{count} links updated ({language}/{type}).",
         "bulkLinksDeleted": "{count} links deleted.",
         "linkValidatedSuccess": "Link validated successfully."
+    },
+    "tv": {
+        "title": "TV",
+        "signIn": "Sign in with Google",
+        "signOut": "Sign out",
+        "signOutConfirm": "Do you want to sign out?",
+        "myList": "My List",
+        "showQR": "QR Code",
+        "continueWatching": "Continue Watching",
+        "pairingTitle": "Connect your device",
+        "pairingStep1": "Open the StreamFlix app on your phone or tablet",
+        "pairingStep2": "Tap \"Connect to TV\" and scan the QR code",
+        "orEnterCode": "Or enter the code above on your device",
+        "empty": "No content available",
+        "emptyHome": "Sign in with Google and connect a device to get started",
+        "emptyList": "Your list is empty",
+        "browseCatalog": "Browse catalog",
+        "back": "Back",
+        "qrCodeAlt": "QR Code for pairing",
+        "exitPlayerTitle": "Do you want to stop playback?",
+        "exit": "Exit"
     }
 }
