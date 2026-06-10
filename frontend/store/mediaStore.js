@@ -990,25 +990,25 @@ class MediaStore {
         return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
     }
 
-    connectAsRemoteMaster = remoteStore.connectAsRemoteMaster.bind(remoteStore);
-    disconnectRemoteMaster = remoteStore.disconnectRemoteMaster.bind(remoteStore);
-    sendRemoteCommand = remoteStore.sendRemoteCommand.bind(remoteStore);
-    stopRemotePlayback = remoteStore.stopRemotePlayback.bind(remoteStore);
-    startPingInterval = remoteStore.startPingInterval.bind(remoteStore);
-    stopPingInterval = remoteStore.stopPingInterval.bind(remoteStore);
-    openMediaSyncModal = remoteStore.openMediaSyncModal.bind(remoteStore);
-    closeMediaSyncModal = remoteStore.closeMediaSyncModal.bind(remoteStore);
-    handleSlaveDisconnected = remoteStore.handleSlaveDisconnected.bind(remoteStore);
-    startMasterReconnectTimer = remoteStore.startMasterReconnectTimer.bind(remoteStore);
-    stopMasterReconnectTimer = remoteStore.stopMasterReconnectTimer.bind(remoteStore);
-    triggerAutoFullscreen = remoteStore.triggerAutoFullscreen.bind(remoteStore);
-    fetchRemoteFullItem = remoteStore.fetchRemoteFullItem.bind(remoteStore);
-    playRemoteItem = remoteStore.playRemoteItem.bind(remoteStore);
-    syncMediaFromMaster = remoteStore.syncMediaFromMaster.bind(remoteStore);
-    openQRScanner = remoteStore.openQRScanner.bind(remoteStore);
-    closeQRScanner = remoteStore.closeQRScanner.bind(remoteStore);
-    initRemoteSession = remoteStore.initRemoteSession.bind(remoteStore);
-    handleSlavesOffline = remoteStore.handleSlavesOffline.bind(remoteStore);
+    connectAsRemoteMaster(...args) { return remoteStore.connectAsRemoteMaster(...args); }
+    disconnectRemoteMaster(...args) { return remoteStore.disconnectRemoteMaster(...args); }
+    sendRemoteCommand(...args) { return remoteStore.sendRemoteCommand(...args); }
+    stopRemotePlayback(...args) { return remoteStore.stopRemotePlayback(...args); }
+    startPingInterval(...args) { return remoteStore.startPingInterval(...args); }
+    stopPingInterval(...args) { return remoteStore.stopPingInterval(...args); }
+    openMediaSyncModal(...args) { return remoteStore.openMediaSyncModal(...args); }
+    closeMediaSyncModal(...args) { return remoteStore.closeMediaSyncModal(...args); }
+    handleSlaveDisconnected(...args) { return remoteStore.handleSlaveDisconnected(...args); }
+    startMasterReconnectTimer(...args) { return remoteStore.startMasterReconnectTimer(...args); }
+    stopMasterReconnectTimer(...args) { return remoteStore.stopMasterReconnectTimer(...args); }
+    triggerAutoFullscreen(...args) { return remoteStore.triggerAutoFullscreen(...args); }
+    fetchRemoteFullItem(...args) { return remoteStore.fetchRemoteFullItem(...args); }
+    playRemoteItem(...args) { return remoteStore.playRemoteItem(...args); }
+    syncMediaFromMaster(...args) { return remoteStore.syncMediaFromMaster(...args); }
+    openQRScanner(...args) { return remoteStore.openQRScanner(...args); }
+    closeQRScanner(...args) { return remoteStore.closeQRScanner(...args); }
+    initRemoteSession(...args) { return remoteStore.initRemoteSession(...args); }
+    handleSlavesOffline(...args) { return remoteStore.handleSlavesOffline(...args); }
 
     // ===== CROSS-CUTTING ORCHESTRATION ============================
 

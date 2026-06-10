@@ -176,13 +176,22 @@ class RemoteStore {
 
         // Prefer shortCode for reconnection if available, otherwise use full slaveId
         const shortCode = existingSlave?.shortCode;
+        // Remember what the user used at the QR scanner / input box. The
+        // backend will resolve this into a canonical full slaveId in the
+        // quix-master-connected ack; we use the remember-value to migrate
+        // the knownSlaves entry from the shortCode key to the full id.
+        // If the input itself is a 5-character short code, remember it
+        // even when the existing row has no shortCode metadata.
+        this._lastConnectShortCode = shortCode
+            || (slaveId && slaveId.length === 5 ? slaveId : null)
+            || (existingSlave?.id && existingSlave.id.length === 5 ? existingSlave.id : null);
         websocketService.registerMaster({slaveId: shortCode || slaveId});
 
         const slaveData = {
             id: slaveId,
             name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
             lastSeen: Date.now(),
-            shortCode: shortCode
+            shortCode: shortCode || (slaveId.length === 5 ? slaveId : existingSlave?.shortCode)
         };
         await db.knownSlaves.put(slaveData);
 
@@ -230,13 +239,25 @@ class RemoteStore {
 
     // Update the slave ID in knownSlaves (used when backend returns full ID after shortCode was stored)
     updateSlaveId = async (newSlaveId) => {
-        // Find if there's an existing slave with a matching shortCode (likely stored by shortCode)
+        // Look for an existing entry under the shortCode (the QR scanner
+        // input) so we can promote it to the full canonical slaveId. We
+        // query IndexedDB rather than the in-memory `knownSlaves` array
+        // because the connect-as-remote-master flow writes the new
+        // shortCode entry asynchronously, and the quix-master-connected
+        // ack can land before the put() is observable in memory.
+        const shortCode = this._lastConnectShortCode;
         const currentSlaveId = this.slaveId;
-        const existingSlave = this.knownSlaves.find(s => s.id === currentSlaveId);
+        const shortCodeEntry = shortCode
+            ? await db.knownSlaves.get(shortCode)
+            : null;
+        const currentIdEntry = currentSlaveId
+            ? await db.knownSlaves.get(currentSlaveId)
+            : null;
+        const existingSlave = shortCodeEntry || currentIdEntry;
 
-        if (existingSlave && currentSlaveId !== newSlaveId) {
+        if (existingSlave && existingSlave.id !== newSlaveId) {
             // Delete old entry and create new one with full ID
-            await db.knownSlaves.delete(currentSlaveId);
+            await db.knownSlaves.delete(existingSlave.id);
             const updatedSlave = {
                 ...existingSlave,
                 id: newSlaveId,
@@ -251,7 +272,7 @@ class RemoteStore {
                 // Also update this.slaveId to the new full ID
                 this.slaveId = newSlaveId;
             });
-            console.log(`[RemoteStore] Updated slave ID from ${currentSlaveId} to ${newSlaveId}`);
+            console.log(`[RemoteStore] Updated slave ID from ${existingSlave.id} to ${newSlaveId}`);
         }
     };
 
@@ -760,12 +781,52 @@ class RemoteStore {
                     break;
                 case 'quix-master-connected':
                     // This message is sent to the slave when a master connects
+                    // AND to the master as an ack (with the resolved full
+                    // slaveId, since the master may have connected via the
+                    // 5-character short code).
                     console.log(`[RemoteStore] quix-master-connected: master connected to slave ${payload?.slaveId}`);
                     runInAction(() => {
                         this.isRemoteMasterConnected = true;
                         this.isSmartTVPairingVisible = false;
+                        // If the backend resolved a short code into a full
+                        // slaveId, promote it so subsequent commands target
+                        // the canonical session id, not the short code.
+                        if (payload?.slaveId && this.isRemoteMaster) {
+                            this.slaveId = payload.slaveId;
+                        }
                     });
+                    // The master side also needs the heartbeat interval
+                    // running; without it `connectionHealth` never updates
+                    // and the UI shows a stuck "connected" indicator.
+                    if (this.isRemoteMaster) {
+                        this.startPingInterval();
+                        this.stopMasterReconnectTimer();
+                        // Migrate the knownSlaves entry from the shortCode
+                        // used at connect time to the resolved full slaveId
+                        // so future reconnects and UI lookups use the
+                        // canonical id. updateSlaveId is a no-op if there
+                        // is no shortCode-keyed entry to migrate.
+                        if (payload?.slaveId && this._lastConnectShortCode && payload.slaveId !== this._lastConnectShortCode) {
+                            this.updateSlaveId(payload.slaveId);
+                            // Re-run after a tick: connectAsRemoteMaster
+                            // awaits its db.knownSlaves.put() in the same
+                            // microtask as the registerMaster round-trip,
+                            // and the put can land AFTER the migration
+                            // has already run, leaving a stale
+                            // shortCode-keyed row behind. A second pass
+                            // sweeps that one up.
+                            setTimeout(() => this.updateSlaveId(payload.slaveId), 250);
+                        }
+                    }
                     this.showSnackbar('notifications.remoteConnected', 'success', true);
+                    break;
+                case 'quix-remote-command':
+                    // Remote commands from the master are routed to the
+                    // slave's own dispatch (play, pause, select_item,
+                    // request-media-sync, etc.). The handler is shared
+                    // because the slave's local state is what the commands
+                    // mutate.
+                    this.handleRemoteCommand(payload || {});
                     break;
                 case 'quix-master-connection-status':
                     // This message is sent to the master when connection status changes

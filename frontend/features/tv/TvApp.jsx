@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import tvStore from './tvStore.js';
+import { remoteStore } from '../../store/remoteStore.js';
+import { mediaStore } from '../../store/mediaStore.js';
+import { fxStore } from '../../store/fxStore.js';
 import TvScreenRouter from './screens/TvScreenRouter.jsx';
 import './styles/tv.css';
 
@@ -70,9 +73,18 @@ const TvApp = observer(() => {
         };
 
         window.addEventListener('keydown', handleKeyDown);
-        
+
         // Set TV mode flag
         tvStore.isTvMode = true;
+
+        // Test affordance: when the URL carries `?testMode=stores`, expose
+        // the MobX stores on `window.__quixTest` so Playwright (or other
+        // e2e harnesses) can drive the app deterministically. Mirrors the
+        // same affordance in `App.jsx`; TvApp does not import App-level
+        // stores, so the exposure must be repeated here.
+        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('testMode') === 'stores') {
+            window.__quixTest = { mediaStore, remoteStore, fxStore, tvStore };
+        }
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
@@ -81,6 +93,18 @@ const TvApp = observer(() => {
             tvStore.clearFocusRegistry();
         };
     }, []);
+
+    // Keep the TV screen in sync with the remote store state. The contract is
+    // that any path which flips `isSmartTVPairingVisible` to true (UI tile,
+    // store call, restored IndexedDB value, etc.) must surface the pairing
+    // screen so the user actually sees the QR + short code. Conversely, when
+    // a master is connected, leave the home screen and let the slave
+    // playback view take over.
+    useEffect(() => {
+        if (remoteStore.isSmartTVPairingVisible && tvStore.screen !== 'pairing') {
+            tvStore.navigate('pairing');
+        }
+    }, [remoteStore.isSmartTVPairingVisible]);
 
     return (
         <div id="tv-app-root" className="tv-root">
