@@ -36,7 +36,7 @@ export const HomeView = observer(() => {
     };
 
     return (
-        <>
+        <Box id="screen-home" data-testid="screen-home">
             {heroContent && (
                 <CinematicHero
                     id="home-hero"
@@ -78,7 +78,7 @@ export const HomeView = observer(() => {
                     })}
                 </Box>
             </Container>
-        </>
+        </Box>
     );
 });
 
