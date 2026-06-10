@@ -1,0 +1,101 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Avoid running concurrent e2e jobs that would race on shared docker-compose ports.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  APP_PORT: 3002
+  HEALTH_URL: http://localhost:3002/health
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            frontend/node_modules
+            backend/node_modules
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/bun.lockb', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install Bun dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build and start app via docker compose
+        run: docker compose up -d --build
+
+      - name: Wait for app health
+        run: |
+          echo "Waiting for ${HEALTH_URL} to return 200..."
+          for i in $(seq 1 60); do
+            status=$(curl -s -o /tmp/health.json -w "%{http_code}" "${HEALTH_URL}" || echo "000")
+            if [ "${status}" = "200" ]; then
+              echo "App is healthy (attempt ${i})."
+              cat /tmp/health.json || true
+              exit 0
+            fi
+            echo "Attempt ${i}/60: status=${status}, retrying in 2s..."
+            sleep 2
+          done
+          echo "App failed to become healthy in time." >&2
+          docker compose logs --tail 200 || true
+          exit 1
+
+      - name: Run Playwright E2E tests
+        run: bunx playwright test --config=frontend/playwright.config.js frontend/e2e/
+        env:
+          CI: true
+
+      - name: Upload .playwright-mcp artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-mcp
+          path: |
+            .playwright-mcp
+            frontend/.playwright-mcp
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload test-results artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: |
+            frontend/test-results
+            test-results
+            frontend/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Stop docker compose
+        if: always()
+        run: docker compose down --remove-orphans || true
