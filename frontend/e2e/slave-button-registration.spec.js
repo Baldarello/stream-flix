@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import {test, expect} from '@playwright/test';
 
 /**
  * Regression test for the "slave button stays in loading" bug.
@@ -23,7 +23,7 @@ import { test, expect } from '@playwright/test';
  *    pairing view instead of triggering a non-functional Google sign-in.
  */
 test.describe('Slave button opens the QR code pairing view', () => {
-    test('clicking the slave button reveals the QR code + short code (no loading state)', async ({ page, context }) => {
+    test('clicking the slave button reveals the QR code + short code (no loading state)', async ({page, context}) => {
         // Start from a clean storage so the persisted "isConfiguredAsSlave"
         // flag from previous tests does not skip the click flow.
         await context.clearCookies();
@@ -45,14 +45,14 @@ test.describe('Slave button opens the QR code pairing view', () => {
         // We use the dedicated id so the selector is stable across
         // CSS refactors.
         const slaveBtn = page.locator('#slave-button');
-        await slaveBtn.waitFor({ state: 'visible', timeout: 10000 });
+        await slaveBtn.waitFor({state: 'visible', timeout: 10000});
 
         await slaveBtn.click();
 
         // The slave screen must transition out of the loading spinner
         // into the pairing view (which holds the QR code and the code).
         const codeEl = page.locator('#slave-code');
-        await codeEl.waitFor({ state: 'visible', timeout: 10000 });
+        await codeEl.waitFor({state: 'visible', timeout: 10000});
 
         // The short code must be a 5-character identifier, NOT the
         // `...` placeholder we used to see when the response was lost.
@@ -61,19 +61,19 @@ test.describe('Slave button opens the QR code pairing view', () => {
         expect(shortCode).not.toBe('...');
     });
 
-    test('opening TV mode at /?tv=1 then clicking QR Code shows the pairing view with a real short code', async ({ page }) => {
+    test('opening TV mode at /?tv=1 then clicking QR Code shows the pairing view with a real short code', async ({page}) => {
         await page.goto('http://localhost:3002/?tv=1');
-        await page.waitForSelector('#tv-app-root', { timeout: 10000 });
+        await page.waitForSelector('#tv-app-root', {timeout: 10000});
 
         // The QR Code quick action tile is part of TvQuickActionRow.
         const qrTile = page.locator('#tv-tile-qr');
-        await qrTile.waitFor({ state: 'visible', timeout: 10000 });
+        await qrTile.waitFor({state: 'visible', timeout: 10000});
         await qrTile.focus();
         await page.keyboard.press('Enter');
 
         // The pairing view must appear and the short code element must
         // hold a 5-character identifier (not the `------` placeholder).
-        await page.waitForSelector('#tv-pairing-view', { timeout: 10000 });
+        await page.waitForSelector('#tv-pairing-view', {timeout: 10000});
         const codeEl = page.locator('#tv-pairing-view .pairing-code');
         await expect(codeEl).toBeVisible();
         const code = (await codeEl.textContent())?.trim() ?? '';
@@ -81,15 +81,15 @@ test.describe('Slave button opens the QR code pairing view', () => {
         expect(code).not.toBe('------');
     });
 
-    test('"Sfoglia il catalogo" empty-state CTA navigates to the pairing view', async ({ page }) => {
+    test('"Sfoglia il catalogo" empty-state CTA navigates to the pairing view', async ({page}) => {
         await page.goto('http://localhost:3002/?tv=1');
-        await page.waitForSelector('#tv-app-root', { timeout: 10000 });
+        await page.waitForSelector('#tv-app-root', {timeout: 10000});
 
         const cta = page.locator('#tv-empty-cta');
-        await cta.waitFor({ state: 'visible', timeout: 10000 });
+        await cta.waitFor({state: 'visible', timeout: 10000});
         await cta.focus();
         await page.keyboard.press('Enter');
 
-        await page.waitForSelector('#tv-pairing-view', { timeout: 10000 });
+        await page.waitForSelector('#tv-pairing-view', {timeout: 10000});
     });
 });

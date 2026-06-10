@@ -40,3 +40,6 @@ graphify-extract.log
 /.playwright-mcp/
 /frontend/.playwright-mcp/
 /frontend/.junie/
+
+.octogent
+/.claude/

@@ -51,8 +51,13 @@ class RemoteStore {
     _pendingRemoteSessionInit = false;
 
     // Expose showSnackbar for methods that need to show notifications
-    get showSnackbar() { return mediaStore.showSnackbar; }
-    get hideSnackbar() { return mediaStore.hideSnackbar; }
+    get showSnackbar() {
+        return mediaStore.showSnackbar;
+    }
+
+    get hideSnackbar() {
+        return mediaStore.hideSnackbar;
+    }
 
     constructor() {
         makeAutoObservable(this, {
@@ -70,16 +75,16 @@ class RemoteStore {
         // the master↔slave state in sync.
         websocketService.events.on('message', this.handleIncomingMessage);
     }
-    
+
     // Getters
     get currentActiveView() {
         return this.isRemoteMaster ? this._masterUiActiveView : 'Home';
     }
-    
+
     get currentSelectedItem() {
         return this.isRemoteMaster ? this._masterUiSelectedItem : null;
     }
-    
+
     get remoteNextEpisode() {
         const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
         if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
@@ -107,13 +112,13 @@ class RemoteStore {
         }
         return null;
     }
-    
+
     handleSlavesOffline = () => {
         this.knownSlaves.forEach(slave => {
             slave.isOnline = false;
         });
     };
-    
+
     addDebugMessage = (message) => {
         console.log('[RemoteStore]', message);
     };
@@ -228,7 +233,7 @@ class RemoteStore {
         // Find if there's an existing slave with a matching shortCode (likely stored by shortCode)
         const currentSlaveId = this.slaveId;
         const existingSlave = this.knownSlaves.find(s => s.id === currentSlaveId);
-        
+
         if (existingSlave && currentSlaveId !== newSlaveId) {
             // Delete old entry and create new one with full ID
             await db.knownSlaves.delete(currentSlaveId);
@@ -238,7 +243,7 @@ class RemoteStore {
                 lastSeen: Date.now()
             };
             await db.knownSlaves.put(updatedSlave);
-            
+
             // Update in-memory knownSlaves
             const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
             runInAction(() => {
@@ -548,7 +553,7 @@ class RemoteStore {
 
     startPingInterval = () => {
         this.stopPingInterval();
-        
+
         runInAction(() => {
             this.pingInterval = window.setInterval(() => {
                 if (this.isRemoteMaster && this.slaveId && this.isRemoteMasterConnected) {
@@ -604,8 +609,8 @@ class RemoteStore {
         this.masterReconnectTimer = window.setInterval(() => {
             if (!this.isRemoteMasterConnected && this.slaveId && this.masterReconnectAttempts < 12) {
                 // Use shortCode if available, otherwise full slaveId
-                const payload = this.slaveShortCode 
-                    ? {slaveId: this.slaveShortCode} 
+                const payload = this.slaveShortCode
+                    ? {slaveId: this.slaveShortCode}
                     : {slaveId: this.slaveId};
                 websocketService.sendMessage({type: 'quix-register-master', payload});
                 this.masterReconnectAttempts++;

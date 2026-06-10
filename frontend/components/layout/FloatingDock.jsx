@@ -18,8 +18,8 @@
  * effect on the `fxStore.setTargetViewKey` action.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect, useRef, useState} from 'react';
+import {observer} from 'mobx-react-lite';
 import {
     Badge,
     Box,
@@ -35,15 +35,15 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
-import { mediaStore } from '../../store/mediaStore.js';
-import { remoteStore } from '../../store/remoteStore.js';
-import { useTranslations } from '../../hooks/useTranslations.js';
+import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
+import {useTranslations} from '../../hooks/useTranslations.js';
 
 const NAV_KEYS = [
-    { key: 'home', view: 'Home', icon: HomeIcon },
-    { key: 'series', view: 'Serie TV' },
-    { key: 'movies', view: 'Film' },
-    { key: 'anime', view: 'Anime' }
+    {key: 'home', view: 'Home', icon: HomeIcon},
+    {key: 'series', view: 'Serie TV'},
+    {key: 'movies', view: 'Film'},
+    {key: 'anime', view: 'Anime'}
 ];
 
 export const FloatingDock = observer(() => {
@@ -56,7 +56,7 @@ export const FloatingDock = observer(() => {
         openNotificationsModal,
         currentActiveView
     } = mediaStore;
-    const { t } = useTranslations();
+    const {t} = useTranslations();
     const searchInputRef = useRef(null);
     const isMobile = useMediaQuery('(max-width: 720px)');
     const [open, setOpen] = useState(false);
@@ -75,7 +75,7 @@ export const FloatingDock = observer(() => {
         setOpen(false);
         if (remoteStore.isRemoteMaster) {
             remoteStore._masterUiSelectedItem = null;
-            remoteStore.sendRemoteCommand({ command: 'clear_selection' });
+            remoteStore.sendRemoteCommand({command: 'clear_selection'});
             mediaStore.setActiveView(view);
         } else {
             mediaStore.setActiveView(view);
@@ -130,7 +130,7 @@ export const FloatingDock = observer(() => {
             {!isMobile && (
                 <Box
                     id="dock-nav"
-                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 1 }}
+                    sx={{display: 'flex', alignItems: 'center', gap: 0.5, ml: 1}}
                 >
                     {NAV_KEYS.map((item) => {
                         const isActive = currentActiveView === item.view;
@@ -152,8 +152,8 @@ export const FloatingDock = observer(() => {
                                     transition: 'opacity 180ms cubic-bezier(0.22,1,0.36,1), background 180ms cubic-bezier(0.22,1,0.36,1), transform 180ms cubic-bezier(0.22,1,0.36,1)',
                                     background: isActive ? 'rgba(76, 210, 255, 0.12)' : 'transparent',
                                     boxShadow: isActive ? 'inset 0 0 0 1px rgba(76, 210, 255, 0.45), 0 0 12px rgba(76, 210, 255, 0.25)' : 'none',
-                                    '&:hover': { opacity: 1, background: 'rgba(76, 210, 255, 0.08)' },
-                                    '&:focus-visible': { outline: '2px solid var(--neon-accent)', outlineOffset: 2 }
+                                    '&:hover': {opacity: 1, background: 'rgba(76, 210, 255, 0.08)'},
+                                    '&:focus-visible': {outline: '2px solid var(--neon-accent)', outlineOffset: 2}
                                 }}
                             >
                                 {t(`header.${String(item.key)}`)}
@@ -165,7 +165,7 @@ export const FloatingDock = observer(() => {
 
             {/* Mobile expand trigger */}
             {isMobile && !open && !isSearchActive && (
-                <Box sx={{ flex: 1 }} />
+                <Box sx={{flex: 1}}/>
             )}
 
             {/* Mobile open nav */}
@@ -199,7 +199,7 @@ export const FloatingDock = observer(() => {
                                     fontSize: '0.78rem',
                                     background: isActive ? 'rgba(76, 210, 255, 0.18)' : 'rgba(255,255,255,0.04)',
                                     boxShadow: isActive ? 'inset 0 0 0 1px rgba(76, 210, 255, 0.6)' : 'none',
-                                    '&:focus-visible': { outline: '2px solid var(--neon-accent)', outlineOffset: 2 }
+                                    '&:focus-visible': {outline: '2px solid var(--neon-accent)', outlineOffset: 2}
                                 }}
                             >
                                 {t(`header.${String(item.key)}`)}
@@ -221,15 +221,15 @@ export const FloatingDock = observer(() => {
                     inputRef={searchInputRef}
                     sx={{
                         ml: 1,
-                        '& .MuiInput-underline:before': { borderBottomColor: 'rgba(76, 210, 255, 0.45)' },
-                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: 'var(--neon-accent-hot)' },
+                        '& .MuiInput-underline:before': {borderBottomColor: 'rgba(76, 210, 255, 0.45)'},
+                        '& .MuiInput-underline:hover:not(.Mui-disabled):before': {borderBottomColor: 'var(--neon-accent-hot)'},
                         flex: isMobile ? 1 : 'unset',
                         minWidth: isMobile ? 120 : 200
                     }}
                     InputProps={{
                         startAdornment: (
-                            <Box component="span" sx={{ display: 'inline-flex', mr: 1, color: 'var(--neon-accent)' }}>
-                                <SearchIcon fontSize="small" />
+                            <Box component="span" sx={{display: 'inline-flex', mr: 1, color: 'var(--neon-accent)'}}>
+                                <SearchIcon fontSize="small"/>
                             </Box>
                         )
                     }}
@@ -239,15 +239,15 @@ export const FloatingDock = observer(() => {
             {/* Right side actions */}
             <Box
                 id="dock-actions"
-                sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto' }}
+                sx={{display: 'flex', alignItems: 'center', gap: 0.5, ml: 'auto'}}
             >
                 <IconButton
                     id="dock-action-search"
                     aria-label="search"
                     onClick={() => toggleSearch(!isSearchActive)}
-                    sx={{ color: 'var(--text-primary)' }}
+                    sx={{color: 'var(--text-primary)'}}
                 >
-                    {isSearchActive ? <CloseIcon /> : <SearchIcon />}
+                    {isSearchActive ? <CloseIcon/> : <SearchIcon/>}
                 </IconButton>
                 {!isSearchActive && (
                     <>
@@ -255,10 +255,10 @@ export const FloatingDock = observer(() => {
                             id="dock-action-notifications"
                             aria-label="notifications"
                             onClick={openNotificationsModal}
-                            sx={{ color: 'var(--text-primary)' }}
+                            sx={{color: 'var(--text-primary)'}}
                         >
                             <Badge badgeContent={unreadNotificationsCount} color="error">
-                                <NotificationsIcon />
+                                <NotificationsIcon/>
                             </Badge>
                         </IconButton>
                         <IconButton
@@ -266,34 +266,34 @@ export const FloatingDock = observer(() => {
                             data-testid="slave-button"
                             aria-label="smart-tv"
                             onClick={() => remoteStore.enableSmartTVMode()}
-                            sx={{ color: 'var(--text-primary)' }}
+                            sx={{color: 'var(--text-primary)'}}
                         >
-                            <TvIcon />
+                            <TvIcon/>
                         </IconButton>
                         <IconButton
                             id="dock-action-qr"
                             aria-label="qr-scanner"
                             onClick={() => remoteStore.openQRScanner()}
-                            sx={{ color: 'var(--text-primary)' }}
+                            sx={{color: 'var(--text-primary)'}}
                         >
-                            <QrCodeScannerIcon />
+                            <QrCodeScannerIcon/>
                         </IconButton>
                         <IconButton
                             id="dock-action-profile"
                             aria-label="profile"
                             onClick={() => mediaStore.toggleProfileDrawer(true)}
-                            sx={{ color: 'var(--text-primary)' }}
+                            sx={{color: 'var(--text-primary)'}}
                         >
-                            <MenuIcon />
+                            <MenuIcon/>
                         </IconButton>
                         {isMobile && (
                             <IconButton
                                 id="dock-action-toggle"
                                 aria-label="toggle-nav"
                                 onClick={() => setOpen((v) => !v)}
-                                sx={{ color: 'var(--text-primary)' }}
+                                sx={{color: 'var(--text-primary)'}}
                             >
-                                {open ? <CloseIcon /> : <MenuIcon />}
+                                {open ? <CloseIcon/> : <MenuIcon/>}
                             </IconButton>
                         )}
                     </>
