@@ -63,6 +63,12 @@ class RemoteStore {
         if (detectSmartTV()) {
             this.isSmartTV = true;
         }
+        // Wire up WebSocket message routing. The server replies with
+        // `quix-slave-registered` (and other remote-control messages)
+        // after we call `registerSlave`/`registerMaster`; this listener
+        // is what actually populates `slaveId`/`slaveShortCode` and keeps
+        // the master↔slave state in sync.
+        websocketService.events.on('message', this.handleIncomingMessage);
     }
     
     // Getters

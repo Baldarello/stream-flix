@@ -46,8 +46,11 @@ const TvHomeView = observer(() => {
                     message={t('tv.emptyHome', 'Accedi con Google e connetti un dispositivo per iniziare')}
                     ctaLabel={t('tv.browseCatalog', 'Sfoglia il catalogo')}
                     onCtaClick={() => {
-                        // For now, this could navigate to home screen of cinematic mode
-                        // or we could just show a message
+                        // In TV mode the only way to control the TV is to pair
+                        // a phone/tablet as a remote via the QR code screen.
+                        // Sending the user to the pairing view lets them scan
+                        // the QR code and start watching content right away.
+                        tvStore.navigate('pairing');
                     }}
                 />
             </div>

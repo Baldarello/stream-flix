@@ -1067,6 +1067,9 @@ class MediaStore {
             remoteStore.initRemoteSession();
         } else if (remoteStore.isRemoteMaster && remoteStore.slaveId) {
             remoteStore.initRemoteSession();
+        } else if (remoteStore.isSmartTVPairingVisible && !remoteStore.slaveId) {
+            // Smart TV pairing is visible but no slaveId - need to re-register
+            remoteStore.enableSmartTVMode();
         }
     };
 

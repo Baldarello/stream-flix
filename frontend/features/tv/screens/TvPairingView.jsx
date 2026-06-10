@@ -15,10 +15,18 @@ const TvPairingView = observer(() => {
         tvStore.navigate('home');
     };
 
-    // Generate QR code URL
+    // Trigger slave registration if slaveId is not set yet
+    // This ensures the TV mode gets a slaveId to generate the QR code
+    useEffect(() => {
+        if (!remoteStore.slaveId) {
+            remoteStore.enableSmartTVMode();
+        }
+    }, []);
+
+    // Generate QR code URL only when slaveId is available
     const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
     const baseUrl = isLocalhost ? window.location.origin : 'https://q.tnl.one';
-    const remoteUrl = `${baseUrl}/?remote_for=${remoteStore.slaveId}`;
+    const remoteUrl = `${baseUrl}/?remote_for=${remoteStore.slaveId || ''}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(remoteUrl)}`;
 
     const shortCode = remoteStore.slaveShortCode || '------';

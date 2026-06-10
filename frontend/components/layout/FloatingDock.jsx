@@ -262,7 +262,8 @@ export const FloatingDock = observer(() => {
                             </Badge>
                         </IconButton>
                         <IconButton
-                            id="dock-action-slave"
+                            id="slave-button"
+                            data-testid="slave-button"
                             aria-label="smart-tv"
                             onClick={() => remoteStore.enableSmartTVMode()}
                             sx={{ color: 'var(--text-primary)' }}
