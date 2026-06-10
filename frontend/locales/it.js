@@ -1,6 +1,7 @@
 export const it = {
     "common": {
-        "close": "Chiudi"
+        "close": "Chiudi",
+        "loading": "Caricamento..."
     },
     "header": {
         "home": "Home",
@@ -332,6 +333,9 @@ export const it = {
             "title": "Cerca film, serie TV e tanto altro",
             "subtitle": "Trova subito i tuoi contenuti preferiti."
         }
+    },
+    "search": {
+        "resultsCount": "{count, plural, one {# risultato} other {# risultati}}"
     },
     "shareAndImport": {
         "shareTitle": "Condividi Libreria",

@@ -21,6 +21,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { gsap } from 'gsap';
 import { durations, easings, reducedMotion } from '../../motion/grammar.js';
 import { ScanlineOverlay } from '../feedback/ScanlineOverlay.jsx';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 /**
  * ModalShell Component
@@ -51,6 +52,7 @@ export const ModalShell = ({
 }) => {
     const paperRef = useRef(null);
     const lastOpenRef = useRef(false);
+    const { t } = useTranslations();
 
     useEffect(() => {
         if (disableEntryAnimation) return undefined;
@@ -99,6 +101,8 @@ export const ModalShell = ({
             onClose={onClose}
             maxWidth={maxWidth}
             fullWidth={fullWidth}
+            aria-modal="true"
+            aria-labelledby={title ? `${id}-title` : undefined}
             slotProps={{
                 paper: {
                     ref: paperRef,
@@ -144,6 +148,7 @@ export const ModalShell = ({
             />
             {title && (
                 <DialogTitle
+                    id={`${id}-title`}
                     sx={{
                         position: 'relative',
                         zIndex: 2,
@@ -159,7 +164,7 @@ export const ModalShell = ({
                     {onClose && (
                         <IconButton
                             id={`${id}-close`}
-                            aria-label="close"
+                            aria-label={t('common.close')}
                             onClick={onClose}
                             sx={{
                                 position: 'absolute',

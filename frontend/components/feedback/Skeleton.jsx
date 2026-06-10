@@ -32,8 +32,8 @@ const SkeletonInner = ({ id = 'skeleton-shimmer', width = '100%', height = 220, 
 export const Skeleton = SkeletonInner;
 Skeleton.displayName = 'Skeleton';
 
-export const SkeletonCard = ({ index = 0 }) => (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1 }}>
+export const SkeletonCard = ({ id = 'skeleton-default', index = 0 }) => (
+    <Box id={id} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, p: 1 }}>
         <Skeleton id={`skeleton-card-${index}`} height={300} />
         <Skeleton id={`skeleton-card-text-${index}`} width="70%" height={14} borderRadius={6} />
         <Skeleton id={`skeleton-card-sub-${index}`} width="40%" height={10} borderRadius={6} />

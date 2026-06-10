@@ -101,12 +101,29 @@ export const FeatureRouter = observer(() => {
     return (
         <Box id="feature-router" sx={{ color: 'text.primary' }}>
             <Header />
-            <main 
-                id="feature-main"
-                sx={{ pt: 'calc(64px + env(safe-area-inset-top))' }}
-            >
+            <Box component="a" href="#feature-main" id="skip-link" sx={{
+                position: 'absolute',
+                left: '-9999px',
+                top: 'auto',
+                width: '1px',
+                height: '1px',
+                overflow: 'hidden',
+                '&:focus-visible': {
+                    position: 'static',
+                    left: 'auto',
+                    top: 'auto',
+                    width: 'auto',
+                    height: 'auto',
+                    overflow: 'visible',
+                    padding: 1,
+                    zIndex: 9999,
+                },
+            }}>
+                Skip to main content
+            </Box>
+            <Box component="main" id="feature-main" sx={{ pt: 'calc(64px + env(safe-area-inset-top))' }}>
                 {renderFeatureContent()}
-            </main>
+            </Box>
             {currentSelectedItem && <CinematicDetail id="detail-cinematic" />}
             <Footer />
             <ProfileDrawer />

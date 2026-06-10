@@ -116,7 +116,7 @@ export const CinematicHero = observer(function CinematicHeroInner({
     useEffect(() => {
         const root = rootRef.current;
         const backdrop = backdropRef.current;
-        if (!root || !backdrop || reducedMotion()) return undefined;
+        if (!root || !backdrop || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
         const onMove = (event) => {
             const rect = root.getBoundingClientRect();
             const x = (event.clientX - rect.left) / rect.width - 0.5;

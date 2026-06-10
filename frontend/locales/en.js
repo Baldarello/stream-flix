@@ -1,6 +1,7 @@
 export const en = {
     "common": {
-        "close": "Close"
+        "close": "Close",
+        "loading": "Loading..."
     },
     "header": {
         "home": "Home",
@@ -332,6 +333,9 @@ export const en = {
             "title": "Search for movies, series and more",
             "subtitle": "Find your favorite content right away."
         }
+    },
+    "search": {
+        "resultsCount": "{count, plural, one {# result} other {# results}}"
     },
     "shareAndImport": {
         "shareTitle": "Share Library",

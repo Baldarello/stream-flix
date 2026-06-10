@@ -45,7 +45,7 @@ Before making a git commit after completing any task, you must perform the follo
 1. **Build Docker image**: Run `docker build -t stream-flix .` to build the Docker image from the Dockerfile in the project root
 2. **Restart docker**: Run `docker compose down` and then `docker compose up -d --build`;
 3. **Check Docker logs**: Start the containers and verify there are no errors in the logs
-4. **Test frontend with Playwright**: Open the frontend application using Playwright at http://localhost:3000/, login as guest, and verify there are no console errors
+4. **Test frontend with Playwright**: Open the frontend application using Playwright at http://localhost:3002/, login as guest, and verify there are no console errors
 5. **Verify no errors**: Confirm that all verification steps pass before proceeding to commit
 6. **Update Graphify**: For every change run `graphify export callflow-html` to update the structure.
 

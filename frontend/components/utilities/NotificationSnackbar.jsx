@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useId } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Alert, Button, Snackbar } from '@mui/material';
 import { gsap } from 'gsap';
@@ -17,6 +17,13 @@ export const NotificationSnackbar = observer(() => {
     const { t } = useTranslations();
     const alertRef = useRef(null);
     const lastMessageRef = useRef(null);
+    const uniqueId = useId();
+    const snackbarId = 'notification-snackbar';
+    const alertId = snackbarMessage?.message ? `notification-snackbar-alert-${snackbarMessage.message}` : `notification-snackbar-alert-${uniqueId}`;
+
+    const isAssertive = snackbarMessage?.severity === 'error' || snackbarMessage?.severity === 'warning';
+    const role = isAssertive ? 'alert' : 'status';
+    const ariaLive = isAssertive ? 'assertive' : 'polite';
 
     useEffect(() => {
         const alert = alertRef.current;
@@ -68,7 +75,7 @@ export const NotificationSnackbar = observer(() => {
 
     return (
         <Snackbar
-            id="notification-snackbar"
+            id={snackbarId}
             data-component="notification-snackbar"
             open={!!snackbarMessage}
             autoHideDuration={snackbarMessage?.action ? null : 6000}
@@ -77,11 +84,14 @@ export const NotificationSnackbar = observer(() => {
         >
             <Alert
                 ref={alertRef}
-                id="notification-snackbar-alert"
+                id={alertId}
                 data-component="notification-snackbar-alert"
                 onClose={handleClose}
                 severity={snackbarMessage?.severity || 'info'}
                 variant="filled"
+                role={role}
+                aria-live={ariaLive}
+                aria-atomic="true"
                 sx={{
                     width: '100%',
                     color: 'var(--text-primary)',

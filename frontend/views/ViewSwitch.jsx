@@ -21,10 +21,11 @@
  * `TransitionPortal` can pick a timeline for the previous -> next switch.
  */
 
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../context/StoreContext.jsx';
 import { fxStore } from '../store/fxStore.js';
+import { Skeleton } from '../components/feedback/Skeleton.jsx';
 
 // System Views
 import { LoadingView } from './system/LoadingView.jsx';
@@ -41,10 +42,11 @@ import { SmartTVPairingView } from './appMode/SmartTVPairingView.jsx';
 
 // Feature Views
 import { SearchView } from './features/SearchView.jsx';
+import { PreferencesView } from './features/PreferencesView.jsx';
 import { FeatureRouter } from './features/FeatureRouter.jsx';
 
 const wrap = (key, node) => (
-    <div data-view-key={key} data-testid="view-branch" style={{ minHeight: '100%' }}>
+    <div id={`screen-${key.toLowerCase()}`} data-view-key={key} data-testid="view-branch" style={{ minHeight: '100%' }}>
         {node}
     </div>
 );
@@ -63,6 +65,7 @@ const resolveViewKey = ({ mediaStore, remoteStore }) => {
     if (remoteStore.isSmartTV && mediaStore.nowPlayingItem) return 'slave';
     if (mediaStore.nowPlayingItem) return 'player';
     if (mediaStore.isSearchActive) return 'search';
+    if (mediaStore.currentActiveView === 'Preferences') return 'preferences';
     return 'home';
 };
 
@@ -92,46 +95,51 @@ export const ViewSwitch = observer(() => {
 
     // System: Loading State
     if (mediaStore.loading || mediaStore.isReloadingData || mediaStore.isGoogleAuthLoading) {
-        return wrap('loading', <LoadingView />);
+        return wrap('loading', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><LoadingView /></Suspense>);
     }
 
     // System: Error State
     if (mediaStore.error) {
-        return wrap('error', <ErrorView />);
+        return wrap('error', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><ErrorView /></Suspense>);
     }
 
     // Playback: QR Scanner
     if (remoteStore.isQRScannerOpen) {
-        return wrap('qr', <QRScannerView />);
+        return wrap('qr', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><QRScannerView /></Suspense>);
     }
 
     // App Mode: SmartTV Pairing
     if (remoteStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) {
-        return wrap('pairing', <SmartTVPairingView />);
+        return wrap('pairing', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><SmartTVPairingView /></Suspense>);
     }
 
     // Playback: Remote Master
     if (remoteStore.isRemoteMaster && remoteStore.remoteSlaveState?.nowPlayingItem) {
-        return wrap('master', <MasterPlaybackView />);
+        return wrap('master', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><MasterPlaybackView /></Suspense>);
     }
 
     // Playback: SmartTV Slave
     if (remoteStore.isSmartTV && mediaStore.nowPlayingItem) {
-        return wrap('slave', <SlavePlaybackView />);
+        return wrap('slave', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><SlavePlaybackView /></Suspense>);
     }
 
     // Playback: Local Player
     if (mediaStore.nowPlayingItem) {
-        return wrap('player', <LocalPlaybackView />);
+        return wrap('player', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><LocalPlaybackView /></Suspense>);
     }
 
     // Feature: Search
     if (mediaStore.isSearchActive) {
-        return wrap('search', <SearchView />);
+        return wrap('search', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><SearchView /></Suspense>);
+    }
+
+    // Feature: Preferences
+    if (mediaStore.currentActiveView === 'Preferences') {
+        return wrap('preferences', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><PreferencesView /></Suspense>);
     }
 
     // Feature: Home/Grid/Library
-    return wrap('home', <FeatureRouter />);
+    return wrap('home', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><FeatureRouter /></Suspense>);
 });
 
 ViewSwitch.displayName = 'ViewSwitch';
