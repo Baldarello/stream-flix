@@ -16,7 +16,7 @@ export const DetailHero = observer(({ item, backgroundImage, title, releaseDate,
     const { t } = useTranslations();
 
     return (
-        <Box sx={{ position: 'relative', height: '100%', overflowY: 'auto', pt: 'env(safe-area-inset-top)' }}>
+        <Box sx={{ position: 'relative', pt: 'env(safe-area-inset-top)' }}>
             <DetailBackdrop backgroundImage={backgroundImage} />
 
             <Box sx={{

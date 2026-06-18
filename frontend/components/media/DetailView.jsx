@@ -489,32 +489,37 @@ const DetailView = observer(() => {
                 <CloseIcon/>
             </IconButton>
 
-            <DetailHero
-                item={item}
-                backgroundImage={backgroundImage}
-                title={title}
-                releaseDate={releaseDate}
-                isInMyList={isInMyList}
-                listActionLabel={listActionLabel}
-                onPlay={handlePlay}
-                onToggleList={() => mediaStore.toggleMyList(item)}
-            />
+            <Box data-component="detail-view-scroll" sx={{
+                position: 'relative', height: '100%', width: '100%',
+                overflowY: 'auto', overflowX: 'hidden', zIndex: 1,
+            }}>
+                <DetailHero
+                    item={item}
+                    backgroundImage={backgroundImage}
+                    title={title}
+                    releaseDate={releaseDate}
+                    isInMyList={isInMyList}
+                    listActionLabel={listActionLabel}
+                    onPlay={handlePlay}
+                    onToggleList={() => mediaStore.toggleMyList(item)}
+                />
 
-            {item.media_type === 'tv' && (
-                <Box sx={{p: {xs: 2, md: 8}, pt: 0}}>
-                    <EpisodesFilterBar item={item}
-                        availableLanguages={availableLanguages} availableTypes={availableTypes}
-                        languageFilter={languageFilter} typeFilter={typeFilter}
-                        introDuration={introDuration} selectedSeason={selectedSeason}
-                        headerRef={headerRef}
-                        onLanguageChange={(id, val) => setShowFilterPreference(id, {language: val})}
-                        onTypeChange={(id, val) => setShowFilterPreference(id, {type: val})}
-                        onIntroDurationChange={handleIntroDurationChange}
-                        onSeasonChange={setSelectedSeasonForShow}/>
-                    <EpisodeListView currentSeason={currentSeason} isDetailLoading={isDetailLoading}
-                        languageFilter={languageFilter} typeFilter={typeFilter} item={item}/>
-                </Box>
-            )}
+                {item.media_type === 'tv' && (
+                    <Box sx={{p: {xs: 2, md: 8}, pt: 0}}>
+                        <EpisodesFilterBar item={item}
+                            availableLanguages={availableLanguages} availableTypes={availableTypes}
+                            languageFilter={languageFilter} typeFilter={typeFilter}
+                            introDuration={introDuration} selectedSeason={selectedSeason}
+                            headerRef={headerRef}
+                            onLanguageChange={(id, val) => setShowFilterPreference(id, {language: val})}
+                            onTypeChange={(id, val) => setShowFilterPreference(id, {type: val})}
+                            onIntroDurationChange={handleIntroDurationChange}
+                            onSeasonChange={setSelectedSeasonForShow}/>
+                        <EpisodeListView currentSeason={currentSeason} isDetailLoading={isDetailLoading}
+                            languageFilter={languageFilter} typeFilter={typeFilter} item={item}/>
+                    </Box>
+                )}
+            </Box>
             <DetailDialogs />
         </Box>
     );
