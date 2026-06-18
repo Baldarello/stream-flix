@@ -6,10 +6,8 @@
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Box, CardMedia, Stack, Typography, Tooltip, IconButton } from '@mui/material';
-import LinkIcon from '@mui/icons-material/Link';
+import { Box, CardMedia } from '@mui/material';
 import TheatersIcon from '@mui/icons-material/Theaters';
-import { mediaStore } from '../../store/mediaStore.js';
 import { useTranslations } from '../../hooks/useTranslations.js';
 import { DetailBackdrop } from './DetailBackdrop.jsx';
 import { DetailHeader } from './DetailHeader.jsx';

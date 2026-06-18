@@ -16,7 +16,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogTitle, Box, IconButton, Typography } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, Box, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { gsap } from 'gsap';
 import { durations, easings, reducedMotion } from '../../motion/grammar.js';

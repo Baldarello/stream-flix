@@ -10,8 +10,8 @@ import { observer } from 'mobx-react-lite';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { useStores } from '../../context/StoreContext.jsx';
 import { useTranslations } from '../../hooks/useTranslations.js';
-import GridView from '../../components/layout/GridView.jsx';
-import { Header } from '../../components/layout/Header.jsx';
+import { CinematicGrid } from '../../components/layout/CinematicGrid.jsx';
+import { FloatingDock } from '../../components/layout/FloatingDock.jsx';
 
 /**
  * SearchShell - Shared layout wrapper for search branches
@@ -24,7 +24,7 @@ import { Header } from '../../components/layout/Header.jsx';
  */
 const SearchShell = ({ children, minHeight, centered = false }) => (
     <>
-        <Header />
+        <FloatingDock />
         <Box
             sx={{
                 minHeight: minHeight || 'calc(100vh - 64px - 200px)',
@@ -93,7 +93,7 @@ export const SearchView = observer(() => {
                 <div role="status" aria-live="polite" aria-atomic="true">
                     {t('search.resultsCount', { count: searchResults.length })}
                 </div>
-                <GridView
+                <CinematicGrid
                     id="search-results-grid"
                     title={t('gridView.searchResultsFor', { query: searchQuery })}
                     items={searchResults}

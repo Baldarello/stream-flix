@@ -14,7 +14,6 @@ import React, { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { mediaStore } from '../../store/mediaStore.js';
-import { websocketService } from '../../services/websocketService.js';
 import { initGoogleAuth } from '../../services/googleAuthService';
 
 // Register the ScrollTrigger plugin once at app boot. Safe to call multiple

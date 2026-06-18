@@ -10,8 +10,8 @@ import { observer } from 'mobx-react-lite';
 import { Box } from '@mui/material';
 import { useStores } from '../../context/StoreContext.jsx';
 import { useTranslations } from '../../hooks/useTranslations.js';
-import { Header } from '../../components/layout/Header.jsx';
-import { Footer } from '../../components/layout/Footer.jsx';
+import { FloatingDock } from '../../components/layout/FloatingDock.jsx';
+import { CinematicFooter } from '../../components/layout/CinematicFooter.jsx';
 import { CinematicDetail } from '../../components/media/CinematicDetail.jsx';
 import ProfileDrawer from '../../components/utilities/ProfileDrawer.jsx';
 import { HomeView } from '../../features/home/HomeView.jsx';
@@ -100,7 +100,7 @@ export const FeatureRouter = observer(() => {
 
     return (
         <Box id="feature-router" sx={{ color: 'text.primary' }}>
-            <Header />
+            <FloatingDock />
             <Box component="a" href="#feature-main" id="skip-link" sx={{
                 position: 'absolute',
                 left: '-9999px',
@@ -125,7 +125,7 @@ export const FeatureRouter = observer(() => {
                 {renderFeatureContent()}
             </Box>
             {currentSelectedItem && <CinematicDetail id="detail-cinematic" />}
-            <Footer />
+            <CinematicFooter />
             <ProfileDrawer />
         </Box>
     );

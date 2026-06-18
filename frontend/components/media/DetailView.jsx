@@ -26,23 +26,18 @@ import {
     Typography
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
-import GroupIcon from '@mui/icons-material/Group';
-import LinkIcon from '@mui/icons-material/Link';
 import TheatersIcon from '@mui/icons-material/Theaters';
+import LinkIcon from '@mui/icons-material/Link';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InfoIcon from '@mui/icons-material/Info';
-import LinkEpisodesModal from '../modals/LinkEpisodesModal.jsx';
-
 import {gsap} from 'gsap';
 import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {HoloChip} from '../feedback/HoloChip.jsx';
 import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
 import {DetailHero} from './DetailHero.jsx';
+import {DetailBackdrop} from './DetailBackdrop.jsx';
 import {DetailDialogs} from './DetailDialogs.jsx';
 
 // Visual recipe for holo-themed field controls, mirrored from
