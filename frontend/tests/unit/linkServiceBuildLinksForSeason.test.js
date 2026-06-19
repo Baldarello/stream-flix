@@ -210,6 +210,47 @@ describe('buildLinksForSeason – advanced half-season config', () => {
         expect(result.linksToAdd[3].mediaId).toBe(104); // episode 5 in TMDB
     });
 
+    it('caps URL numbers at endNum when explicitly set (half-season source numbering)', async () => {
+        // TMDB has 6 episodes but source only has 5 episodes numbered 7-11.
+        // User sets episode range 1-6 and number range 7-11 (5 numbers for 5 URLs).
+        // The endNum cap ensures we never generate a 6th URL number.
+        const show = makeShow([
+            { id: 101, episode_number: 1 },
+            { id: 102, episode_number: 2 },
+            { id: 103, episode_number: 3 },
+            { id: 104, episode_number: 4 },
+            { id: 105, episode_number: 5 },
+            { id: 106, episode_number: 6 },
+        ]);
+
+        const result = await buildLinksForSeason({
+            show,
+            seasonNumber: 1,
+            method: 'pattern',
+            data: {
+                pattern: 'https://srv18-tsurukusa.sweetpixel.org/Ep_[@EP]_ITA.mp4',
+                padding: 2,
+                label: '',
+                start: 1,
+                end: 6,
+                startNum: 7,
+                endNum: 11,  // ← only 5 numbers available (7,8,9,10,11)
+            },
+            language: 'ITA',
+            type: 'sub',
+            seasonName: 'S1',
+        });
+
+        // Loop i=1: currentNumber=7 (≤11) → link
+        // Loop i=2: currentNumber=8 (≤11) → link
+        // Loop i=3: currentNumber=9 (≤11) → link
+        // Loop i=4: currentNumber=10 (≤11) → link
+        // Loop i=5: currentNumber=11 (≤11) → link
+        // Loop i=6: currentNumber=12 (>11) → BREAK
+        expect(result.linksToAdd).toHaveLength(5);
+        expect(result.linksToAdd[0].url).toBe('https://srv18-tsurukusa.sweetpixel.org/Ep_07_ITA.mp4');
+        expect(result.linksToAdd[4].url).toBe('https://srv18-tsurukusa.sweetpixel.org/Ep_11_ITA.mp4');
+    });
     it('returns link-count-mismatch when list length does not match episode count', async () => {
         const show = makeShow([
             { id: 101, episode_number: 1 },

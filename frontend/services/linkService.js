@@ -112,8 +112,10 @@ export async function buildLinksForSeason({ show, seasonNumber, method, data, la
             const endEpisode = data.end || season.episode_count;
             const safeEndEpisode = Math.min(endEpisode, season.episode_count);
             let currentNumber = data.startNum ?? startEpisode;
+            const endNum = data.endNum ?? endEpisode;
 
             for (let i = startEpisode; i <= safeEndEpisode; i++) {
+                if (currentNumber > endNum) break;
                 const epNum = String(currentNumber).padStart(data.padding, '0');
                 const ep = season.episodes.find((e) => e.episode_number === i);
                 if (ep) {
