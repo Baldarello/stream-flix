@@ -38,16 +38,12 @@ import {
     deleteMediaLink as deleteMediaLinkSvc,
     setPreferredSource as setPreferredSourceSvc,
 } from '../services/linkService.js';
-
-import {catalogStore} from './catalogStore.js';
 import {searchStore} from './searchStore.js';
 import {libraryStore} from './libraryStore.js';
-import {preferencesStore} from './preferencesStore.js';
 import {uiStore} from './uiStore.js';
 import {playbackStore} from './playbackStore.js';
-import {remoteStore} from './remoteStore';
-import {watchTogetherStore} from './watchTogetherStore';
-import {syncStore} from './syncStore';
+import {navigateTo, Routes} from '../services/navigationService.js';
+import {catalogStore} from './catalogStore.js';
 import {googleDriveSyncConflictStore} from './googleDriveSyncConflictStore';
 
 const ALL_TRANSLATIONS = {it: itTranslations, en: enTranslations};
@@ -1334,19 +1330,9 @@ class MediaStore {
                     this.playbackOriginItem = null;
                 }
 
-                if (window.history.state?.playerOpen) {
-                    window.history.replaceState(
-                        {playerOpen: true, itemId: item.id},
-                        '',
-                        window.location.href
-                    );
-                } else {
-                    window.history.pushState(
-                        {playerOpen: true, itemId: item.id},
-                        '',
-                        window.location.href
-                    );
-                }
+                // Navigate to player using react-router
+                const shouldReplace = window.history.state?.playerOpen;
+                navigateTo(Routes.PLAYER, { replace: shouldReplace });
 
                 this.nowPlayingItem = item;
 
@@ -1408,25 +1394,16 @@ class MediaStore {
         }
 
         switch (context) {
-            case 'detailView':
-                if (this.selectedItem) {
-                    window.history.replaceState(
-                        {detailViewOpen: true, itemId: item.id},
-                        '',
-                        window.location.href
-                    );
-                } else {
-                    window.history.pushState(
-                        {detailViewOpen: true, itemId: item.id},
-                        '',
-                        window.location.href
-                    );
-                }
+            case 'detailView': {
+                // Navigate to home (detail view is an overlay on home)
+                const shouldReplace = Boolean(this.selectedItem);
+                navigateTo(Routes.HOME, { replace: shouldReplace });
                 runInAction(() => {
                     this.selectedItem = item;
                     this.isDetailLoading = true;
                 });
                 break;
+            }
             case 'watchTogether':
                 runInAction(() => {
                     this.watchTogetherSelectedItem = item;

@@ -14,9 +14,8 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     workers: process.env.CI ? 1 : undefined,
-    reporter: process.env.CI ? 'github' : 'list',
     use: {
-        baseURL: 'http://localhost:3000',
+        baseURL: 'http://localhost:3002',
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
@@ -28,8 +27,8 @@ export default defineConfig({
         },
     ],
     webServer: {
-        command: 'docker compose up -d --build',
-        url: 'http://localhost:3000/health',
+        command: 'docker compose -f ../docker-compose.yml up -d --build',
+        url: 'http://localhost:3002/health',
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
     },

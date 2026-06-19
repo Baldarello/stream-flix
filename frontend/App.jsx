@@ -1,9 +1,8 @@
 /**
  * @fileoverview StreamFlix App - Main Application Component
  *
- * Refactored to use the ViewSwitch system for reactive view rendering.
- * All rendering decisions are handled by ViewSwitch which uses MobX's
- * observer pattern for reactive updates.
+ * Refactored to use the ViewSwitch system for reactive view rendering with
+ * react-router for URL-based navigation.
  *
  * The cinematic-futuristic rework collapses the three legacy palettes
  * (SerieTV / Film / Anime) into a single dark futuristic theme that reads
@@ -13,6 +12,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { BrowserRouter, useNavigate } from 'react-router';
 import { observer } from 'mobx-react-lite';
 import { Box, createTheme, ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -20,10 +20,10 @@ import { mediaStore } from './store/mediaStore.js';
 import { remoteStore } from './store/remoteStore.js';
 import { fxStore } from './store/fxStore.js';
 import { websocketService } from './services/websocketService.js';
+import { setNavigate } from './services/navigationService.js';
 import { StoreProvider } from './context/StoreContext.jsx';
 import { AppInitializer } from './features/shared/AppInitializer.jsx';
 import { ScrollLockManager } from './features/shared/ScrollLockManager.jsx';
-import { BrowserHistoryHandler } from './features/shared/BrowserHistoryHandler.jsx';
 import { ViewSwitch } from './views/ViewSwitch.jsx';
 import { OverlayLayer } from './components/overlay/OverlayLayer.jsx';
 import { AmbientCanvas } from './fx/AmbientCanvas.jsx';
@@ -112,13 +112,16 @@ const baseThemeOptions = {
 const cinematicTheme = createTheme(baseThemeOptions);
 
 /**
- * Main App Component
- *
- * Sets up the theme, providers, and handlers.
- * The actual view rendering is delegated to ViewSwitch which
- * reactively renders the appropriate view based on MobX store state.
+ * Inner App component that uses hooks requiring React context
  */
-const App = observer(() => {
+const AppInner = observer(() => {
+    const navigate = useNavigate();
+
+    // Initialize navigation service with react-router's navigate
+    useEffect(() => {
+        setNavigate(navigate);
+    }, [navigate]);
+
     // Websocket visibility handling
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -163,7 +166,6 @@ const App = observer(() => {
             <StoreProvider>
                 <AppInitializer />
                 <ScrollLockManager />
-                <BrowserHistoryHandler />
                 <AmbientCanvas />
                 <Box id="app-main" sx={{ color: 'text.primary' }}>
                     <ViewSwitch />
@@ -177,4 +179,15 @@ const App = observer(() => {
     );
 });
 
-export default App;
+/**
+ * Root component that wraps AppInner with BrowserRouter for react-router integration
+ */
+const Root = () => {
+    return (
+        <BrowserRouter>
+            <AppInner />
+        </BrowserRouter>
+    );
+};
+
+export default Root;
