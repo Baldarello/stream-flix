@@ -29,7 +29,7 @@ export default defineConfig({
     webServer: {
         command: 'docker compose -f ../docker-compose.yml up -d --build',
         url: 'http://localhost:3002/health',
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: true,
         timeout: 120_000,
     },
 });
