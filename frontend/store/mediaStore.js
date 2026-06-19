@@ -1161,6 +1161,13 @@ class MediaStore {
         if (mediaId) await this.refreshLinksForMediaId(mediaId);
     };
 
+    updateMediaLink = async (linkId, updates) => {
+        await db.mediaLinks.update(linkId, updates);
+        // Re-read the link to get its mediaId and refresh
+        const link = await db.mediaLinks.get(linkId);
+        if (link) await this.refreshLinksForMediaId(link.mediaId);
+    };
+
     setPreferredSource = async (showId, origin) => {
         await setPreferredSourceSvc(showId, origin);
         runInAction(() => {
@@ -1486,6 +1493,73 @@ class MediaStore {
         }
     };
 
+    clearLinksForSeason = async (seasonNumber, showId) => {
+        const show = this.cachedItems.get(showId);
+        if (!show) return;
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        if (!season) return;
+
+        const episodeIds = season.episodes.map(ep => ep.id);
+        const linksToDelete = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
+        if (linksToDelete.length > 0) {
+            await db.mediaLinks.bulkDelete(linksToDelete.map(l => l.id));
+            await this.refreshLinksForShow(showId);
+            this.showSnackbar('notifications.allSeasonLinksDeleted', 'success', true, {
+                count: linksToDelete.length,
+                season: seasonNumber
+            });
+        } else {
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
+        }
+    }
+
+    clearLinksForDomain = async (showId, seasonNumber, origin) => {
+        const show = this.cachedItems.get(showId);
+        if (!show) return;
+        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        if (!season) return;
+
+        const episodeIds = season.episodes.map(ep => ep.id);
+        const allLinks = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
+
+        const linksToDelete = allLinks.filter(link => {
+            try {
+                return new URL(link.url).origin === origin;
+            } catch {
+                return false;
+            }
+        });
+
+        if (linksToDelete.length > 0) {
+            const linkIdsToDelete = linksToDelete.map(l => l.id);
+            await db.mediaLinks.bulkDelete(linkIdsToDelete);
+            await this.refreshLinksForShow(showId);
+            this.showSnackbar('notifications.linksFromDomainDeletedSuccess', 'success', true, {
+                count: linksToDelete.length,
+                domain: origin
+            });
+        } else {
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
+        }
+    }
+
+    updateLinksDomain = async (payload) => {
+        const {links, newDomain} = payload;
+        try {
+            const updatedLinks = links.map(link => {
+                const url = new URL(link.url);
+                const newUrl = new URL(url.pathname + url.search, newDomain);
+                return {...link, url: newUrl.toString()};
+            });
+            await db.mediaLinks.bulkPut(updatedLinks);
+            if (this.linkingEpisodesForItem) {
+                await this.refreshLinksForShow(this.linkingEpisodesForItem.id);
+            }
+            this.showSnackbar('notifications.linksUpdated', 'success', true, {count: updatedLinks.length});
+        } catch (error) {
+            this.showSnackbar('notifications.domainUpdateError', 'error', true, {error: (error).message});
+        }
+    }
     /**
      * Hydrate the cached item with seasons, episodes and per-episode
      * links. Mirrors the previous monolithic `mediaStore` behaviour:

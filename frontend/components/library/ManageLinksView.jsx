@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
+import {libraryStore} from '../../store/libraryStore.js';
 import {
     Accordion,
     AccordionDetails,
@@ -39,21 +40,22 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
     const [editingLinkId, setEditingLinkId] = useState(null);
     const [editFormData, setEditFormData] = useState({});
 
+    // Reactive: read from libraryStore.mediaLinks so the view updates
+    // immediately after addLinksForSeason / clearLinksForSeason / deleteMediaLink.
+    const allLinks = currentSeason.episodes.flatMap(ep => libraryStore.mediaLinks.get(ep.id) || []);
 
-    const linksByDomain = currentSeason.episodes
-        .flatMap(ep => ep.video_urls || [])
-        .reduce((acc, link) => {
-            try {
-                const origin = new URL(link.url).origin;
-                if (!acc[origin]) {
-                    acc[origin] = [];
-                }
-                acc[origin].push(link);
-            } catch (e) {
-                // Ignore invalid URLs
+    const linksByDomain = allLinks.reduce((acc, link) => {
+        try {
+            const origin = new URL(link.url).origin;
+            if (!acc[origin]) {
+                acc[origin] = [];
             }
-            return acc;
-        }, {});
+            acc[origin].push(link);
+        } catch (e) {
+            // Ignore invalid URLs
+        }
+        return acc;
+    }, {});
 
     useEffect(() => {
         const initialInputs = {};
@@ -61,13 +63,12 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
             initialInputs[origin] = origin;
         });
         setDomainInputs(initialInputs);
-    }, [currentSeason.id]);
-
+    }, [currentSeason.id, allLinks.length]);
 
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
         showSnackbar("notifications.copiedToClipboard", "success", true);
-    }
+    };
 
     const handleDomainInputChange = (origin, value) => {
         setDomainInputs(prev => ({ ...prev, [origin]: value }));
@@ -80,7 +81,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
             updateLinksDomain({ links: linksToUpdate, newDomain });
         }
     };
-    
+
     const handleDeleteDomain = (origin, count) => {
         if (window.confirm(t('linkEpisodesModal.manage.deleteAllFromDomainConfirm', { count, domain: origin }))) {
             clearLinksForDomain(item.id, currentSeason.season_number, origin);
@@ -113,11 +114,12 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    
     const preferredOriginForShow = preferredSources.get(item.id);
 
+    const episodeLinks = (episodeId) => libraryStore.mediaLinks.get(episodeId) || [];
+
     return (
-        <Box sx={{mt: 2, flex: 1, overflowY: 'auto',padding:"10px" }}>
+        <Box sx={{mt: 2, flex: 1, overflowY: 'auto', padding: "10px"}}>
             <Button
                 color="error"
                 variant="outlined"
@@ -128,7 +130,6 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
             </Button>
 
             {Object.keys(linksByDomain).length > 0 && (
-                // FIX: (line 120) Wrap Accordion content
                 <Accordion sx={{ mb: 2, bgcolor: 'rgba(255,255,255,0.05)', backgroundImage: 'none' }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography>{t('linkEpisodesModal.manage.groupOps')}</Typography>
@@ -140,23 +141,22 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                         <Stack spacing={2}>
                             {Object.entries(linksByDomain).map(([origin, links]) => {
                                 const isPreferred = preferredOriginForShow === origin;
-                                const tooltipTitle = isPreferred ? t('linkEpisodesModal.manage.removePreferred') : t('linkEpisodesModal.manage.setAsPreferred');
+                                const tooltipTitle = isPreferred
+                                    ? t('linkEpisodesModal.manage.removePreferred')
+                                    : t('linkEpisodesModal.manage.setAsPreferred');
                                 return (
                                 <Paper key={origin} variant="outlined" sx={{ p: 2, position: 'relative' }}>
-                                    {/* FIX: (line 134) Wrap IconButton with Tooltip component */}
                                     <Tooltip title={tooltipTitle}>
-                                         <IconButton 
+                                         <IconButton
                                             onClick={() => setPreferredSource(item.id, origin)}
                                             sx={{ position: 'absolute', top: 4, right: 4 }}
                                          >
                                             {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
-                                        </IconButton>
+                                         </IconButton>
                                     </Tooltip>
                                     <Typography gutterBottom>
-                                        {/* FIX: Added Array.isArray guard for robustness, preventing errors if 'links' is not an array. */}
                                         {t('linkEpisodesModal.manage.linksFrom', { count: Array.isArray(links) ? links.length : 0 })} <strong>{origin}</strong>
                                     </Typography>
-                                    {/* FIX: The `alignItems` prop is a system prop and should be passed inside the `sx` object. */}
                                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                         <TextField
                                             label={t('linkEpisodesModal.manage.newDomain')}
@@ -169,9 +169,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                         <Button variant="contained" onClick={() => handleUpdateDomain(origin)}>
                                             {t('linkEpisodesModal.manage.update')}
                                         </Button>
-                                        {/* FIX: (line 159) Wrap IconButton with Tooltip component */}
                                         <Tooltip title={t('linkEpisodesModal.manage.deleteAllFromDomainTooltip')}>
-                                            {/* FIX: Added Array.isArray guard for robustness, preventing errors if 'links' is not an array. */}
                                             <IconButton color="error" onClick={() => handleDeleteDomain(origin, Array.isArray(links) ? links.length : 0)}>
                                                 <DeleteIcon />
                                             </IconButton>
@@ -185,9 +183,10 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
             )}
 
             <List>
-                {currentSeason.episodes.map(episode => (
-                    // FIX: (line 175) Wrap Accordion content
-                    <Accordion 
+                {currentSeason.episodes.map(episode => {
+                    const epLinks = episodeLinks(episode.id);
+                    return (
+                    <Accordion
                         key={episode.id}
                         expanded={expandedAccordion === episode.id}
                         onChange={onAccordionChange(episode.id)}
@@ -197,7 +196,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                             expandIcon={<ExpandMoreIcon />}
                             sx={{
                                 '& .MuiAccordionSummary-content': {
-                                    maxWidth: 'calc(100% - 48px)' // Correctly accounts for expand icon width
+                                    maxWidth: 'calc(100% - 48px)'
                                 }
                             }}
                         >
@@ -206,15 +205,14 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                     {episode.episode_number}. {episode.name}
                                 </Typography>
                                 <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
-                                    {t('linkEpisodesModal.manage.linksCount', { count: Array.isArray(episode.video_urls) ? episode.video_urls.length : 0 })}
+                                    {t('linkEpisodesModal.manage.linksCount', { count: epLinks.length })}
                                 </Typography>
                             </Box>
                         </AccordionSummary>
                         <AccordionDetails>
-                            {/* FIX: Add Array.isArray guard to ensure `episode.video_urls` is an array before calling .map() or accessing .length. */}
-                            {(Array.isArray(episode.video_urls) && episode.video_urls.length > 0) ? (
+                            {epLinks.length > 0 ? (
                                 <Stack spacing={1}>
-                                    {episode.video_urls.map((link) => {
+                                    {epLinks.map((link) => {
                                         const isEditing = editingLinkId === link.id;
                                         const truncatedLabel = link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
 
@@ -232,7 +230,6 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                                         inputProps={{ maxLength: 3 }}
                                                     />
                                                     <FormControl fullWidth size="small">
-                                                        {/* FIX: (line 220) Pass label text as children to InputLabel */}
                                                         <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
                                                         <Select value={editFormData.type} label={t('linkEpisodesModal.add.type')} onChange={(e) => handleEditFormChange('type', e.target.value)}>
                                                             <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
@@ -241,11 +238,9 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                                     </FormControl>
                                                 </Stack>
                                                 <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                                                    {/* FIX: (line 228) Wrap IconButton with Tooltip component */}
                                                     <Tooltip title={t('linkEpisodesModal.manage.cancel')}>
                                                         <IconButton onClick={handleCancelEdit}><CancelIcon /></IconButton>
                                                     </Tooltip>
-                                                    {/* FIX: (line 231) Wrap IconButton with Tooltip component */}
                                                     <Tooltip title={t('linkEpisodesModal.manage.save')}>
                                                          <IconButton onClick={handleSaveEdit} color="primary"><SaveIcon /></IconButton>
                                                     </Tooltip>
@@ -256,15 +251,12 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                                 <ListItemText primary={truncatedLabel} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
                                                 <Chip label={link.language} size="small" variant="outlined" sx={{ mr: 1 }} />
                                                 <Chip label={t(`linkEpisodesModal.add.${link.type}`)} size="small" color={link.type === 'dub' ? 'info' : 'primary'} variant="outlined" sx={{ mr: 1 }} />
-                                                {/* FIX: (line 241) Wrap IconButton with Tooltip component */}
                                                 <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
                                                     <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
                                                 </Tooltip>
-                                                {/* FIX: (line 244) Wrap IconButton with Tooltip component */}
                                                 <Tooltip title={t('linkEpisodesModal.manage.editLink')}>
                                                     <IconButton size="small" onClick={() => handleStartEdit(link)}><EditIcon fontSize='small' /></IconButton>
                                                 </Tooltip>
-                                                {/* FIX: (line 247) Wrap IconButton with Tooltip component */}
                                                 <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
                                                     <IconButton size="small" onClick={() => deleteMediaLink(link.id)} color="error"><DeleteIcon fontSize='small'/></IconButton>
                                                 </Tooltip>
@@ -277,7 +269,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                             )}
                         </AccordionDetails>
                     </Accordion>
-                ))}
+                );})}
             </List>
         </Box>
     );
