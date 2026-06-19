@@ -1169,9 +1169,19 @@ class MediaStore {
     };
 
     async refreshLinksForShow(showId) {
-        const links = await db.mediaLinks.where('mediaId').equals(showId).toArray();
+        // Query show-level links AND all episode-level links so the
+        // VideoLinksTab shows links even when they were added via
+        // addLinksForSeason / buildLinksForSeason (which stores them
+        // with mediaId = ep.id instead of show.id).
+        const show = libraryStore.cachedItems.get(String(showId));
+        const episodeIds = show?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ?? [];
+        const allIds = [String(showId), ...episodeIds.map(String)];
+        const allLinks = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
+        const grouped = Object.groupBy(allLinks, (link) => String(link.mediaId));
         runInAction(() => {
-            libraryStore.mediaLinks.set(showId, links);
+            for (const [mediaId, links] of Object.entries(grouped)) {
+                libraryStore.mediaLinks.set(mediaId, links);
+            }
         });
     }
 

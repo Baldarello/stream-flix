@@ -39,7 +39,11 @@ export async function setPreferredSource(showId, origin) {
  */
 export async function addLinksToMedia(mediaId, links) {
     const linksToAdd = links.map((link) => ({
-        mediaId,
+        // Per-link mediaId wins when set (e.g. episode links built
+        // by `buildLinksForSeason`), otherwise fall back to the
+        // parent id passed by callers like `LinkMovieModal` that
+        // attach links directly to a single movie/show.
+        mediaId: link.mediaId ?? mediaId,
         url: link.url,
         label: link.label || safeHostname(link.url),
         language: link.language,
@@ -95,7 +99,7 @@ export async function deleteMediaLink(linkId) {
  * @param {string} args.type
  * @param {string} [args.seasonName]
  */
-export async function buildLinksForSeason({ show, seasonNumber, method, data, language, type, seasonName }) {
+export async function buildLinksForSeason({ show, seasonNumber, method, data, language, type, seasonName: _seasonName }) {
     const season = show.seasons?.find((s) => s.season_number === seasonNumber);
     if (!season) {
         return { error: 'season-not-found' };
@@ -113,10 +117,11 @@ export async function buildLinksForSeason({ show, seasonNumber, method, data, la
                 const epNum = String(currentNumber).padStart(data.padding, '0');
                 const ep = season.episodes.find((e) => e.episode_number === i);
                 if (ep) {
+                    const url = data.pattern.replace(/\[@EP\]/g, epNum);
                     linksToAdd.push({
                         mediaId: ep.id,
-                        url: data.pattern.replace(/\[@EP\]/g, epNum),
-                        label: (data.label || '').replace(/\[@EP\]/g, epNum) || seasonName,
+                        url,
+                        label: data.label ? data.label.replace(/\[@EP\]/g, epNum) : safeHostname(url),
                         language,
                         type,
                     });
