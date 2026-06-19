@@ -35,27 +35,31 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 
 const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
     const { t } = useTranslations();
-    const { deleteMediaLink, updateMediaLink, clearLinksForSeason, showSnackbar, updateLinksDomain, preferredSources, setPreferredSource, clearLinksForDomain } = mediaStore;
     const [domainInputs, setDomainInputs] = useState({});
     const [editingLinkId, setEditingLinkId] = useState(null);
     const [editFormData, setEditFormData] = useState({});
 
-    // Reactive: read from libraryStore.mediaLinks so the view updates
-    // immediately after addLinksForSeason / clearLinksForSeason / deleteMediaLink.
-    const allLinks = currentSeason.episodes.flatMap(ep => libraryStore.mediaLinks.get(ep.id) || []);
-
-    const linksByDomain = allLinks.reduce((acc, link) => {
-        try {
-            const origin = new URL(link.url).origin;
-            if (!acc[origin]) {
-                acc[origin] = [];
-            }
-            acc[origin].push(link);
-        } catch (e) {
-            // Ignore invalid URLs
+    // Derived reactively inside the observer render body.
+    // libraryStore.mediaLinks is an observable MobX Map; accessing it
+    // and calling .get() inside the render creates tracked reads so
+    // the component re-renders whenever the Map is mutated via
+    // refreshLinksForShow / clearLinksForSeason / deleteMediaLink.
+    const linksByDomain = {};
+    for (const ep of currentSeason.episodes) {
+        const epLinks = libraryStore.mediaLinks.get(ep.id) || [];
+        for (const link of epLinks) {
+            try {
+                const origin = new URL(link.url).origin;
+                if (!linksByDomain[origin]) linksByDomain[origin] = [];
+                linksByDomain[origin].push(link);
+            } catch (_) {}
         }
-        return acc;
-    }, {});
+    }
+
+    const episodeLinkMap = {};
+    for (const ep of currentSeason.episodes) {
+        episodeLinkMap[ep.id] = libraryStore.mediaLinks.get(ep.id) || [];
+    }
 
     useEffect(() => {
         const initialInputs = {};
@@ -63,11 +67,11 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
             initialInputs[origin] = origin;
         });
         setDomainInputs(initialInputs);
-    }, [currentSeason.id, allLinks.length]);
+    }, [currentSeason.id, currentSeason.episodes.length]);
 
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
-        showSnackbar("notifications.copiedToClipboard", "success", true);
+        mediaStore.showSnackbar("notifications.copiedToClipboard", "success", true);
     };
 
     const handleDomainInputChange = (origin, value) => {
@@ -78,13 +82,13 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
         const linksToUpdate = linksByDomain[origin];
         const newDomain = domainInputs[origin];
         if (linksToUpdate && newDomain) {
-            updateLinksDomain({ links: linksToUpdate, newDomain });
+            mediaStore.updateLinksDomain({ links: linksToUpdate, newDomain });
         }
     };
 
     const handleDeleteDomain = (origin, count) => {
         if (window.confirm(t('linkEpisodesModal.manage.deleteAllFromDomainConfirm', { count, domain: origin }))) {
-            clearLinksForDomain(item.id, currentSeason.season_number, origin);
+            mediaStore.clearLinksForDomain(item.id, currentSeason.season_number, origin);
         }
     };
 
@@ -105,7 +109,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
 
     const handleSaveEdit = () => {
         if (editingLinkId && editFormData) {
-            updateMediaLink(editingLinkId, editFormData);
+            mediaStore.updateMediaLink(editingLinkId, editFormData);
             handleCancelEdit();
         }
     };
@@ -114,16 +118,14 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const preferredOriginForShow = preferredSources.get(item.id);
-
-    const episodeLinks = (episodeId) => libraryStore.mediaLinks.get(episodeId) || [];
+    const preferredOriginForShow = libraryStore.preferredSources.get(item.id);
 
     return (
         <Box sx={{mt: 2, flex: 1, overflowY: 'auto', padding: "10px"}}>
             <Button
                 color="error"
                 variant="outlined"
-                onClick={() => clearLinksForSeason(currentSeason.season_number, item.id)}
+                onClick={() => mediaStore.clearLinksForSeason(currentSeason.season_number, item.id)}
                 sx={{ mb: 2 }}
             >
                 {t('linkEpisodesModal.manage.deleteAllSeasonLinks')}
@@ -148,14 +150,14 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                 <Paper key={origin} variant="outlined" sx={{ p: 2, position: 'relative' }}>
                                     <Tooltip title={tooltipTitle}>
                                          <IconButton
-                                            onClick={() => setPreferredSource(item.id, origin)}
+                                            onClick={() => mediaStore.setPreferredSource(item.id, origin)}
                                             sx={{ position: 'absolute', top: 4, right: 4 }}
                                          >
                                             {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
                                          </IconButton>
                                     </Tooltip>
                                     <Typography gutterBottom>
-                                        {t('linkEpisodesModal.manage.linksFrom', { count: Array.isArray(links) ? links.length : 0 })} <strong>{origin}</strong>
+                                        {t('linkEpisodesModal.manage.linksFrom', { count: links.length })} <strong>{origin}</strong>
                                     </Typography>
                                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                                         <TextField
@@ -170,7 +172,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                             {t('linkEpisodesModal.manage.update')}
                                         </Button>
                                         <Tooltip title={t('linkEpisodesModal.manage.deleteAllFromDomainTooltip')}>
-                                            <IconButton color="error" onClick={() => handleDeleteDomain(origin, Array.isArray(links) ? links.length : 0)}>
+                                            <IconButton color="error" onClick={() => handleDeleteDomain(origin, links.length)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         </Tooltip>
@@ -184,7 +186,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
 
             <List>
                 {currentSeason.episodes.map(episode => {
-                    const epLinks = episodeLinks(episode.id);
+                    const epLinks = episodeLinkMap[episode.id];
                     return (
                     <Accordion
                         key={episode.id}
@@ -258,7 +260,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                                                     <IconButton size="small" onClick={() => handleStartEdit(link)}><EditIcon fontSize='small' /></IconButton>
                                                 </Tooltip>
                                                 <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
-                                                    <IconButton size="small" onClick={() => deleteMediaLink(link.id)} color="error"><DeleteIcon fontSize='small'/></IconButton>
+                                                    <IconButton size="small" onClick={() => mediaStore.deleteMediaLink(link.id)} color="error"><DeleteIcon fontSize='small'/></IconButton>
                                                 </Tooltip>
                                             </Paper>
                                         );
@@ -269,7 +271,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                             )}
                         </AccordionDetails>
                     </Accordion>
-                );})}
+                )})}
             </List>
         </Box>
     );
