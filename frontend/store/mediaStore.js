@@ -1183,6 +1183,7 @@ class MediaStore {
         const show = libraryStore.cachedItems.get(String(showId));
         const episodeIds = show?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ?? [];
         const allIds = [String(showId), ...episodeIds.map(String)];
+        const allLinks = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
         const grouped = Object.groupBy(allLinks, (link) => String(link.mediaId));
         // ponytail: assign new Map reference so MobX observer re-renders
         const newMediaLinks = new Map(libraryStore.mediaLinks);
