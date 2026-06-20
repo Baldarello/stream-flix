@@ -43,3 +43,5 @@ graphify-extract.log
 
 /.claude/
 /.octogent/worktrees/
+/frontend/test-results/
+/test-results/.last-run.json
