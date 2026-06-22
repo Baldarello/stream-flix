@@ -581,7 +581,7 @@ const LinkEpisodesModal = observer(() => {
                                                                             seasonEpisodeCount={currentSeason.episode_count}
                                                                             seasonName={currentSeason.name}
                                                                             onSave={setEpisodeLinksForSeason}
-                                                                            onSuccess={() => setLinkEpisodesTab('manage')}/>}
+                                                                            onSuccess={() => { mediaStore.refreshLinksForShow(item.id); setLinkEpisodesTab('manage'); }}/>}
                 {linkEpisodesTab === 'manage' && currentSeason && (
                     <ManageLinksView
                         currentSeason={currentSeason}

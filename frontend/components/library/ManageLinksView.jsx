@@ -46,7 +46,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
     // refreshLinksForShow / clearLinksForSeason / deleteMediaLink.
     const linksByDomain = {};
     for (const ep of currentSeason.episodes) {
-        const epLinks = libraryStore.mediaLinks.get(ep.id) || [];
+        const epLinks = libraryStore.mediaLinks.get(String(ep.id)) || [];
         for (const link of epLinks) {
             try {
                 const origin = new URL(link.url).origin;
@@ -58,7 +58,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
 
     const episodeLinkMap = {};
     for (const ep of currentSeason.episodes) {
-        episodeLinkMap[ep.id] = libraryStore.mediaLinks.get(ep.id) || [];
+        episodeLinkMap[ep.id] = libraryStore.mediaLinks.get(String(ep.id)) || [];
     }
 
     useEffect(() => {

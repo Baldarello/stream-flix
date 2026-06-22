@@ -45,3 +45,6 @@ graphify-extract.log
 /.octogent/worktrees/
 /frontend/test-results/
 /test-results/.last-run.json
+
+.omni-dev.config
+.omni-dev-state.json
