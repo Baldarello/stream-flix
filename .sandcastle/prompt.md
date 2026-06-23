@@ -3,7 +3,7 @@
 Devi correggere un bug in questo progetto.
 
 ## Bug
-Quando aggiungo un link tramite `LinkEpisodesModal.jsx` (es. 'https://srv18-tsurukusa.sweetpixel.org/DDL/ANIME/DrStone4ITA/DrStone4_Ep_[@EP]_ITA.mp4'), passando alla tab `ManageLinksView.jsx` i link appena aggiunti non si vedono. Se faccio refresh della pagina, appaiono correttamente. Il refresh realtime non funziona.
+Quando aggiungo un link tramite `LinkEpisodesModal.jsx` (es. 'https://srv18-tsurukusa.sweetpixel.org/DDL/ANIME/DrStone4ITA/DrStone4_Ep_[@EP]_ITA.mp4'), passando alla tab `ManageLinksView.jsx` i link appena aggiunti non si vedono. Se faccio refresh della pagina, non appaiono. Il refresh realtime non funziona.
 
 ## Istruzioni
 1. Trova i file `LinkEpisodesModal.jsx` e `ManageLinksView.jsx`
