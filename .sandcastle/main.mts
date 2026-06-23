@@ -36,7 +36,7 @@ process.stdin.on("end", async () => {
       }
     }
     if (!done) process.stdout.write(JSON.stringify({ type: "text", message: "(no response)" }) + "\\n");
-    process.stdout.write("<promise>COMPLETE</promise>\n");
+    process.stdout.write("<promise>COMPLETE</promise>\\n");
   } catch (err) {
     console.error("Error: " + err.message);
     process.exit(1);
@@ -47,7 +47,7 @@ writeFileSync(scriptPath, scriptContent);
 
 const minimax = () => ({
   name: "minimax",
-  env: {},
+  env: { NODE_PATH: "/usr/local/lib/node_modules" },
   captureSessions: false,
   buildPrintCommand({ prompt }) {
     return { command: "node .sandcastle/minimax-agent.cjs", stdin: prompt };
