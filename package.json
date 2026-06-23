@@ -23,12 +23,14 @@
     "e2e": "cd frontend && bun run e2e",
     "e2e:install": "cd frontend && bun run e2e:install",
     "ci": "bun run lint && bun run test && bun run build",
-    "bundle": "docker compose down && docker compose up -d --build"
+    "bundle": "docker compose down && docker compose up -d --build",
+    "sandcastle": "npx tsx .sandcastle/main.mts"
   },
   "dependencies": {
     "@mui/icons-material": "7.3.11"
   },
   "devDependencies": {
+    "@ai-hero/sandcastle": "^0.10.0",
     "@playwright/test": "^1.60.0"
   }
 }
