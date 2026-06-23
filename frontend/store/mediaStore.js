@@ -1133,6 +1133,8 @@ class MediaStore {
             try {
                 await addLinksToMediaSvc(show.id, linksToAdd);
                 await this.refreshLinksForShow(show.id);
+                // Switch to manage tab only AFTER the store has been updated
+                uiStore.setLinkEpisodesTab('manage');
                 uiStore.showSnackbar('notifications.linksAddedSuccess', 'success', true, {
                     count: linksToAdd.length,
                 });
