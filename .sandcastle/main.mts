@@ -6,13 +6,12 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 
-// Write the MiniMax agent script to .sandcastle/ (gets copied into the sandbox)
 const scriptPath = join(process.cwd(), ".sandcastle", "minimax-agent.cjs");
 const scriptContent = `
 "use strict";
 const { OpenAI } = require("openai");
 const apiKey = process.env.MINIMAX_API_KEY;
-const baseURL = process.env.MINIMAX_BASE_URL || "https://api.minimax.chat/v1";
+const baseURL = process.env.MINIMAX_BASE_URL || "https://api.minimax.io/v1";
 const model = process.env.MODEL || "MiniMax-Text-01";
 if (!apiKey) {
   console.error("MINIMAX_API_KEY not set");
@@ -55,9 +54,10 @@ const minimax = () => ({
   parseStreamLine(line) {
     try {
       const p = JSON.parse(line);
-      return p.type === "text" ? [p] : [];
+      if (p.type === "text") return [{ type: "text", text: p.message }];
+      return [];
     } catch {
-      return line.trim() ? [{ type: "text", message: line }] : [];
+      return line.trim() ? [{ type: "text", text: line }] : [];
     }
   },
 });
@@ -66,5 +66,4 @@ await run({
   agent: minimax(),
   sandbox: docker(),
   promptFile: "./.sandcastle/prompt.md",
-  copyToWorktree: [".sandcastle/"],
 });
