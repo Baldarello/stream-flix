@@ -27,7 +27,8 @@
     "sandcastle": "npx tsx .sandcastle/main.mts"
   },
   "dependencies": {
-    "@mui/icons-material": "7.3.11"
+    "@mui/icons-material": "7.3.11",
+    "openai": "^6.44.0"
   },
   "devDependencies": {
     "@ai-hero/sandcastle": "^0.10.0",

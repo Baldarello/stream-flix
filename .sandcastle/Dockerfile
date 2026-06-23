@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
   jq \
   && rm -rf /var/lib/apt/lists/*
 
+# Install openai package globally for MiniMax agent
+RUN npm install -g openai@^6.44.0 2>/dev/null || true
+
 # TODO: install your issue tracker's CLI here. See .sandcastle/SETUP_ISSUE_TRACKER.md
 
 # Build-args for UID/GID alignment: sandcastle docker build-image
