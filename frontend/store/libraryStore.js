@@ -182,9 +182,10 @@ class LibraryStore {
         this.cachedItems = new Map(items.map((i) => [i.id, i]));
         const linksMap = new Map();
         links.forEach((link) => {
-            const arr = linksMap.get(link.mediaId) || [];
+            const key = String(link.mediaId);
+            const arr = linksMap.get(key) || [];
             arr.push(link);
-            linksMap.set(link.mediaId, arr);
+            linksMap.set(key, arr);
         });
         this.mediaLinks = linksMap;
         this.episodeProgress = new Map(progress.map((p) => [p.episodeId, p]));
@@ -382,7 +383,7 @@ class LibraryStore {
             console.warn('[libraryStore] failed to load mediaLinks', e);
             return [];
         }
-        this.mediaLinks.set(mediaId, links);
+        this.mediaLinks.set(String(mediaId), links);
         return links;
     }
 
@@ -422,7 +423,7 @@ class LibraryStore {
             console.warn('[libraryStore] failed to refresh mediaLinks', e);
             return;
         }
-        this.mediaLinks.set(mediaId, links);
+        this.mediaLinks.set(String(mediaId), links);
     }
 }
 

@@ -1,14 +1,26 @@
 # Task
 
-Devi correggere un bug in questo progetto.
+Fix the real-time link refresh bug in this React + MobX application.
 
 ## Bug
-Quando aggiungo un link tramite `LinkEpisodesModal.jsx` (es. 'https://srv18-tsurukusa.sweetpixel.org/DDL/ANIME/DrStone4ITA/DrStone4_Ep_[@EP]_ITA.mp4'), passando alla tab `ManageLinksView.jsx` i link appena aggiunti non si vedono. Se faccio refresh della pagina, non appaiono. Il refresh realtime non funziona.
+When adding links via `LinkEpisodesModal.jsx`, switching to `ManageLinksView.jsx` tab shows no newly added links. Page refresh doesn't fix it.
 
-## Istruzioni
-1. Trova i file `LinkEpisodesModal.jsx` e `ManageLinksView.jsx`
-2. Capisci come vengono gestiti i link (store, stato, eventi)
-3. Trova la causa del mancato refresh realtime
-4. Correggi il codice per far aggiornare la lista link in tempo reale
-5. NON scrivere spiegazioni o commenti nel codice, solo codice funzionante
-6. Output <promise>COMPLETE</promise> quando hai finito e committato
+## Key files
+- `frontend/store/libraryStore.js` — MobX store with `mediaLinks` Map
+- `frontend/store/mediaStore.js` — has `refreshLinksForShow()` method  
+- `frontend/services/linkService.js` — has `addLinksToMedia()`, `buildLinksForSeason()`
+- `frontend/components/library/ManageLinksView.jsx` — displays links
+- `frontend/components/modals/LinkEpisodesModal.jsx` — where links are added
+
+## Your job
+1. READ these files using shell commands
+2. FIND the bug
+3. FIX it by editing the files
+4. COMMIT with `git add . && git commit -m "fix: description"`
+
+## Important
+- Use shell commands: `$ bash -c "cat file"`, `$ bash -c "grep pattern file"`, etc.
+- Use `$ bash -c "echo 'content' > file"` to WRITE (overwrite) files
+- Do NOT use `>>` (append) — it will break files
+- After fixing, always commit
+- Output `<promise>COMPLETE</promise>` when done
