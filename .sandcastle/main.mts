@@ -36,7 +36,7 @@ process.stdin.on("end", async () => {
       }
     }
     if (!done) process.stdout.write(JSON.stringify({ type: "text", message: "(no response)" }) + "\\n");
-    process.stdout.write("<promise>COMPLETE\\n");
+    process.stdout.write("<promise>COMPLETE</promise>\n");
   } catch (err) {
     console.error("Error: " + err.message);
     process.exit(1);
