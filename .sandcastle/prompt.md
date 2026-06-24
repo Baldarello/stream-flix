@@ -2,25 +2,30 @@
 
 Fix the real-time link refresh bug in this React + MobX application.
 
-## Bug
-When adding links via `LinkEpisodesModal.jsx`, switching to `ManageLinksView.jsx` tab shows no newly added links. Page refresh doesn't fix it.
+## Bug Description
+When adding links via `LinkEpisodesModal.jsx`, switching to `ManageLinksView.jsx` tab shows no newly added links. The links are saved to the database but the UI doesn't update until page refresh.
 
-## Key files
-- `frontend/store/libraryStore.js` — MobX store with `mediaLinks` Map
-- `frontend/store/mediaStore.js` — has `refreshLinksForShow()` method  
-- `frontend/services/linkService.js` — has `addLinksToMedia()`, `buildLinksForSeason()`
-- `frontend/components/library/ManageLinksView.jsx` — displays links
-- `frontend/components/modals/LinkEpisodesModal.jsx` — where links are added
+## Key Files to Investigate
+1. `frontend/store/libraryStore.js` — MobX store with `mediaLinks` Map
+2. `frontend/store/mediaStore.js` — has `refreshLinksForShow()` method  
+3. `frontend/services/linkService.js` — has `addLinksToMedia()`, `buildLinksForSeason()`
+4. `frontend/components/library/ManageLinksView.jsx` — displays links
+5. `frontend/components/modals/LinkEpisodesModal.jsx` — where links are added
 
-## Your job
-1. READ these files using shell commands
-2. FIND the bug
-3. FIX it by editing the files
-4. COMMIT with `git add . && git commit -m "fix: description"`
+## How to Fix
+1. READ files using: `$ cat frontend/store/libraryStore.js`
+2. UNDERSTAND the code flow: LinkEpisodesModal → setEpisodeLinksForSeason → refreshLinksForShow
+3. WRITE fixed files using ONLY this format:
+```
+$ write frontend/path/file.js << 'EOF'
+// full file content here
+EOF
+```
+4. COMMIT when done: `$ bash -c "git add . && git commit -m 'fix: description'"`
 
-## Important
-- Use shell commands: `$ bash -c "cat file"`, `$ bash -c "grep pattern file"`, etc.
-- Use `$ bash -c "echo 'content' > file"` to WRITE (overwrite) files
-- Do NOT use `>>` (append) — it will break files
-- After fixing, always commit
-- Output `<promise>COMPLETE</promise>` when done
+## Important Rules
+- Use `> file` or `tee` for writing files, NEVER `>>` (append)
+- Write the COMPLETE file content, not just snippets
+- Read files with `cat` first to understand the exact structure
+- After fixing, ALWAYS commit
+- Output `<promise>COMPLETE</promise>` when committed
