@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {reaction} from 'mobx';
 import {mediaStore} from '../../store/mediaStore.js';
 import {libraryStore} from '../../store/libraryStore.js';
 import {
@@ -61,23 +60,10 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
     for (const ep of currentSeason.episodes) {
         episodeLinkMap[ep.id] = libraryStore.mediaLinks.get(ep.id) || [];
     }
-    const [, forceRender] = useState(0);
+
     useEffect(() => {
-        // ponytail: force re-read from DB so observable Map updates
-        // and triggers observer re-render. Adding links changes
-        // libraryStore.mediaLinks, but we must ensure a re-render fires.
         mediaStore.refreshLinksForShow(item.id);
     }, [item.id]);
-    useEffect(() => {
-        // Fallback: reaction fires when libraryStore.mediaLinks changes
-        // (size increases after add) to force a re-render in case the
-        // useEffect above didn't trigger one via the observable update.
-        const disp = reaction(
-            () => libraryStore.mediaLinks.size,
-            () => forceRender(n => n + 1)
-        );
-        return () => disp();
-    }, []);
     useEffect(() => {
         const initialInputs = {};
         Object.keys(linksByDomain).forEach(origin => {
