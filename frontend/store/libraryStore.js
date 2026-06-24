@@ -65,8 +65,6 @@ class LibraryStore {
             showIntroDurations: true,
             episodeContextMap: true,
         });
-        // ponytail: debug exposure for e2e testing — remove in production
-        if (typeof window !== 'undefined') window.__libraryStore = this;
     }
 
     // ===== DERIVED DATA =====

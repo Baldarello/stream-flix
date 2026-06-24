@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
-import {libraryStore} from '../../store/libraryStore.js';
 import {
     Accordion,
     AccordionDetails,
@@ -40,13 +39,12 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
     const [editFormData, setEditFormData] = useState({});
 
     // Derived reactively inside the observer render body.
-    // libraryStore.mediaLinks is an observable MobX Map; accessing it
-    // and calling .get() inside the render creates tracked reads so
-    // the component re-renders whenever the Map is mutated via
-    // refreshLinksForShow / clearLinksForSeason / deleteMediaLink.
+    // mediaStore.mediaLinks (via facade) is an observable MobX Map;
+    // accessing it and calling .get() inside the render creates tracked
+    // reads so the component re-renders when the Map is mutated.
     const linksByDomain = {};
     for (const ep of currentSeason.episodes) {
-        const epLinks = libraryStore.mediaLinks.get(ep.id) || [];
+        const epLinks = mediaStore.mediaLinks.get(ep.id) || [];
         for (const link of epLinks) {
             try {
                 const origin = new URL(link.url).origin;
@@ -58,7 +56,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
 
     const episodeLinkMap = {};
     for (const ep of currentSeason.episodes) {
-        episodeLinkMap[ep.id] = libraryStore.mediaLinks.get(ep.id) || [];
+        episodeLinkMap[ep.id] = mediaStore.mediaLinks.get(ep.id) || [];
     }
 
     useEffect(() => {
@@ -121,7 +119,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const preferredOriginForShow = libraryStore.preferredSources.get(item.id);
+    const preferredOriginForShow = mediaStore.preferredSources.get(item.id);
 
     return (
         <Box sx={{mt: 2, flex: 1, overflowY: 'auto', padding: "10px"}}>

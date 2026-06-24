@@ -1,3 +1,4 @@
+    // placeholder
 /**
  * MediaStore (facade)
  *
@@ -218,6 +219,109 @@ class MediaStore {
     get libraryEditingLinkId() {
         return libraryStore.libraryEditingLinkId;
     }
+    set libraryEditingLinkId(v) {
+        libraryStore.libraryEditingLinkId = v;
+    }
+
+    openLinkEditModal = (linkId) => {
+        libraryStore.libraryEditingLinkId = linkId;
+    };
+
+    closeLinkEditModal = () => {
+        libraryStore.libraryEditingLinkId = null;
+    };
+
+    validateLink = async (linkId) => {
+        const link = await db.mediaLinks.get(linkId);
+        if (!link) return false;
+        const {checkLinkValidity} = await import('../services/linkValidator.js');
+        return await checkLinkValidity(link.url);
+    };
+
+    // ===== LIBRARY SELECTION ================================
+    toggleLinkSelection = (linkId) => {
+        if (!linkId) return;
+        if (libraryStore.librarySelectedLinkIds.has(linkId)) {
+            libraryStore.librarySelectedLinkIds.delete(linkId);
+        } else {
+            libraryStore.librarySelectedLinkIds.add(linkId);
+        }
+    };
+
+    clearLinkSelection = () => {
+        libraryStore.librarySelectedLinkIds.clear();
+    };
+
+    // ===== BULK LINK OPERATIONS =============================
+    setBulkLinkLanguage = async (ids, language) => {
+        if (!ids || ids.length === 0) return;
+        await db.mediaLinks.where('id').anyOf(ids).modify({language});
+    };
+
+    setBulkLinkType = async (ids, type) => {
+        if (!ids || ids.length === 0) return;
+        await db.mediaLinks.where('id').anyOf(ids).modify({type});
+    };
+
+    bulkDeleteLinks = async (ids) => {
+        if (!ids || ids.length === 0) return;
+        await db.mediaLinks.bulkDelete(ids);
+        ids.forEach((id) => libraryStore.librarySelectedLinkIds.delete(id));
+        // Refresh affected mediaIds
+        const uniqueMediaIds = new Set();
+        for (const link of await db.mediaLinks.where('id').anyOf(ids).toArray()) {
+            uniqueMediaIds.add(String(link.mediaId));
+        }
+        for (const mediaId of uniqueMediaIds) {
+            await this.refreshLinksForMediaId(mediaId);
+        }
+    };
+
+    deleteAllInvalidLinks = async () => {
+        const invalidIds = Array.from(libraryStore.invalidLinkIds);
+        if (invalidIds.length === 0) return;
+        await db.mediaLinks.bulkDelete(invalidIds);
+        libraryStore.invalidLinkIds.clear();
+        // Refresh affected shows
+        const uniqueShowIds = new Set();
+        for (const link of await db.mediaLinks.where('id').anyOf(invalidIds).toArray()) {
+            uniqueShowIds.add(String(link.mediaId));
+        }
+        for (const showId of uniqueShowIds) {
+            await this.refreshLinksForMediaId(showId);
+        }
+        this.showSnackbar('notifications.invalidLinksDeleted', 'success', true, {count: invalidIds.length});
+    };
+
+    validateAllLinks = async () => {
+        runInAction(() => {
+            libraryStore.invalidLinksLoading = true;
+        });
+        try {
+            const shows = Array.from(libraryStore.cachedItems.values()).filter(
+                (item) => item.media_type === 'tv' || item.media_type === 'movie'
+            );
+            const freshInvalidIds = new Set();
+            for (const show of shows) {
+                const episodeIds = show.seasons?.flatMap((s) => s.episodes?.map((e) => e.id)) ?? [];
+                const allIds = [String(show.id), ...episodeIds.map(String)];
+                const links = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
+                if (links.length === 0) continue;
+                const {checkLinksForShow} = await import('../services/linkValidator.js');
+                const invalid = await checkLinksForShow(show, libraryStore.mediaLinks);
+                for (const inv of invalid) {
+                    if (inv.mediaId) freshInvalidIds.add(String(inv.mediaId));
+                }
+            }
+            runInAction(() => {
+                libraryStore.invalidLinkIds = freshInvalidIds;
+            });
+        } finally {
+            runInAction(() => {
+                libraryStore.invalidLinksLoading = false;
+            });
+        }
+    };
 
     get libraryEditingPreferredSourceShowId() {
         return libraryStore.libraryEditingPreferredSourceShowId;
@@ -273,6 +377,13 @@ class MediaStore {
 
     toggleReorderMode = () => {
         libraryStore.isReorderMode = !libraryStore.isReorderMode;
+    };
+    setShowOnlyInvalidLinks = (v) => {
+        libraryStore.showOnlyInvalidLinks = v;
+    };
+
+    setLinksFilterShowId = (v) => {
+        libraryStore.linksFilterShowId = v;
     };
 
     // ===== PREFERENCES =============================================
