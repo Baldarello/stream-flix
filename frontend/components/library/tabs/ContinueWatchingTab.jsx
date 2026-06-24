@@ -51,7 +51,7 @@ const ContinueWatchingTab = observer(() => {
     const items = mediaStore.continueWatchingItems.filter((item) =>
         matchesQuery(item, mediaStore.librarySearchQuery)
     );
-    const [pendingRemove, setPendingRemove] = useState(null);
+    const [pendingRemove, setPendingRemove] = useState(() => null);
 
     const handleConfirmRemove = async () => {
         if (!pendingRemove) return;

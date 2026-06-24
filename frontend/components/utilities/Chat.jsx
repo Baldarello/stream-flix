@@ -65,19 +65,15 @@ const fileToBase64 = (file) => {
 const Chat = observer(() => {
   const { chatHistory, sendChatMessage, participants, hostId, isHost, myClientId, transferHost, changeName } = mediaStore;
   const { t } = useTranslations();
-  const [text, setText] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  const fileInputRef = useRef(null);
-  const messagesEndRef = useRef(null);
-
-  // Host transfer confirmation modal state
-  const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
-  const [transferTargetParticipant, setTransferTargetParticipant] = useState(null);
-
-  // Name edit dialog state
-  const [nameEditOpen, setNameEditOpen] = useState(false);
-  const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState(null);
-  const [newName, setNewName] = useState('');
+    const [text, setText] = useState(() => '');
+    const [selectedImage, setSelectedImage] = useState(() => null);
+    const fileInputRef = useRef(null);
+    const messagesEndRef = useRef(null);
+    const [transferConfirmOpen, setTransferConfirmOpen] = useState(() => false);
+    const [transferTargetParticipant, setTransferTargetParticipant] = useState(() => null);
+    const [nameEditOpen, setNameEditOpen] = useState(() => false);
+    const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState(() => null);
+    const [newName, setNewName] = useState(() => '');
 
   const handleTransferHostClick = (participant) => {
     setTransferTargetParticipant(participant);

@@ -497,7 +497,7 @@ const EpisodesDrawer = observer(({
     const nowPlayingItem = remoteStore.remoteSlaveState?.nowPlayingItem;
     const isEpisode = nowPlayingItem && 'episode_number' in nowPlayingItem;
 
-    const [selectedSeason, setSelectedSeason] = useState(undefined);
+    const [selectedSeason, setSelectedSeason] = useState(() => undefined);
     const userHasSelectedSeason = useRef(false);
 
     const paperRef = useRef(null);

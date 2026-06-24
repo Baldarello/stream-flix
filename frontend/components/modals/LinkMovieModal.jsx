@@ -56,10 +56,10 @@ const LinkMovieModal = observer(() => {
   } = mediaStore;
   const { t } = useTranslations();
   
-  const [newUrl, setNewUrl] = useState('');
-  const [newLabel, setNewLabel] = useState('');
-  const [newLanguage, setNewLanguage] = useState('ITA');
-  const [newType, setNewType] = useState('sub');
+    const [newUrl, setNewUrl] = useState(() => '');
+    const [newLabel, setNewLabel] = useState(() => '');
+    const [newLanguage, setNewLanguage] = useState(() => 'ITA');
+    const [newType, setNewType] = useState(() => 'sub');
 
   const item = linkingMovieItem;
   

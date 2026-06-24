@@ -42,9 +42,9 @@ const ShareLibraryModal = observer(() => {
     const { isShareModalOpen, closeShareModal, shareableShows, generateShareableData, showSnackbar, isLoggedIn, googleUser } = mediaStore;
     const { t } = useTranslations();
     
-    const [selectedShows, setSelectedShows] = useState(new Set());
-    const [generatedLink, setGeneratedLink] = useState('');
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [selectedShows, setSelectedShows] = useState(() => new Set());
+    const [generatedLink, setGeneratedLink] = useState(() => '');
+    const [isGenerating, setIsGenerating] = useState(() => false);
 
     // Memoize the initial selection to only run once when the modal opens
     useMemo(() => {

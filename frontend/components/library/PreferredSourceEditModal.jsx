@@ -70,8 +70,8 @@ const PreferredSourceEditModal = observer(() => {
     const show = showId != null ? mediaStore.cachedItems.get(showId) : null;
     const currentOrigin = showId != null ? mediaStore.preferredSources.get(showId) : null;
 
-    const [url, setUrl] = useState('');
-    const [debouncedUrl, setDebouncedUrl] = useState('');
+    const [url, setUrl] = useState(() => '');
+    const [debouncedUrl, setDebouncedUrl] = useState(() => '');
 
     useEffect(() => {
         if (open && currentOrigin) {

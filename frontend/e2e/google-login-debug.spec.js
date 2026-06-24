@@ -62,7 +62,7 @@ test('debug google login flow', async ({ page }) => {
             '12998500978-9rk2hki7jntah53m20m9nag4bgk1kr1o.apps.googleusercontent.com';
     });
 
-    const baseUrl = 'http://127.0.0.1:4173/';
+    const baseUrl = 'http://localhost:3002/';
     await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
     // Give the app + GSI script a moment to settle.

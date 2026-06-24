@@ -53,21 +53,21 @@ const holoFieldSx = {
 
 const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, onSave, onSuccess}) => {
     const {t} = useTranslations();
-    const [addMethod, setAddMethod] = useState('pattern');
-    const [pattern, setPattern] = useState('');
-    const [padding, setPadding] = useState('2');
-    const [label, setLabel] = useState('');
-    const [linkList, setLinkList] = useState('');
-    const [json, setJson] = useState('');
+    const [addMethod, setAddMethod] = useState(() => 'pattern');
+    const [pattern, setPattern] = useState(() => '');
+    const [padding, setPadding] = useState(() => '2');
+    const [label, setLabel] = useState(() => '');
+    const [linkList, setLinkList] = useState(() => '');
+    const [json, setJson] = useState(() => '');
     const patternInputRef = useRef(null);
-    const [isAdvanced, setIsAdvanced] = useState(false);
-    const [startEpisode, setStartEpisode] = useState('1');
-    const [endEpisode, setEndEpisode] = useState('12');
-    const [startNumber, setStartNumber] = useState('1');
-    const [endNumber, setEndNumber] = useState('12');
-    const [isSaving, setIsSaving] = useState(false);
-    const [language, setLanguage] = useState('ITA');
-    const [type, setType] = useState('sub');
+    const [isAdvanced, setIsAdvanced] = useState(() => false);
+    const [startEpisode, setStartEpisode] = useState(() => '1');
+    const [endEpisode, setEndEpisode] = useState(() => '12');
+    const [startNumber, setStartNumber] = useState(() => '1');
+    const [endNumber, setEndNumber] = useState(() => '12');
+    const [isSaving, setIsSaving] = useState(() => false);
+    const [language, setLanguage] = useState(() => 'ITA');
+    const [type, setType] = useState(() => 'sub');
 
     useEffect(() => {
         setEndEpisode(seasonEpisodeCount.toString());

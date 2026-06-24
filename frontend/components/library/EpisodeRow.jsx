@@ -44,8 +44,8 @@ const EpisodeRow = observer(({
                              }) => {
     const {episodeProgress, toggleEpisodeWatchedStatus} = mediaStore;
     const {t} = useTranslations();
-    const [swipeX, setSwipeX] = useState(0);
-    const [startX, setStartX] = useState(0);
+    const [swipeX, setSwipeX] = useState(() => 0);
+    const [startX, setStartX] = useState(() => 0);
     const cardRef = useRef(null);
     const progress = episodeProgress.get(episode.id);
     const watchedPercent = progress ? (progress.currentTime / progress.duration) * 100 : 0;

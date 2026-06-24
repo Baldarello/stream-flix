@@ -60,7 +60,7 @@ const MyListTab = observer(() => {
     const items = mediaStore.myListItems.filter((item) =>
         matchesQuery(item, mediaStore.librarySearchQuery)
     );
-    const [pendingRemove, setPendingRemove] = useState(null);
+    const [pendingRemove, setPendingRemove] = useState(() => null);
 
     const handleConfirmRemove = () => {
         if (!pendingRemove) return;

@@ -23,7 +23,7 @@ import {formatTime} from './formatTime';
  * - onSeek: invoked on release with the committed percentage value.
  */
 export function MasterRemoteProgressSlider({progress, duration, onSeek}) {
-    const [dragValue, setDragValue] = useState(null);
+    const [dragValue, setDragValue] = useState(() => null);
     const displayValue = dragValue !== null ? dragValue : progress;
 
     /**

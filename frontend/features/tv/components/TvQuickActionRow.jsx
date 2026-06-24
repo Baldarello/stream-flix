@@ -51,11 +51,11 @@ const TvQuickActionRow = observer(() => {
     const { t } = useTranslations();
     const isLoggedIn = mediaStore.isLoggedIn;
     const googleUser = mediaStore.googleUser;
-    const [showSignOutConfirm, setShowSignOutConfirm] = React.useState(false);
+    const showSignOutConfirm = tvStore.showSignOutConfirm;
 
     const handleGoogleTile = () => {
         if (isLoggedIn) {
-            setShowSignOutConfirm(true);
+            tvStore.setShowSignOutConfirm(true);
         } else {
             handleSignIn();
         }
@@ -63,11 +63,11 @@ const TvQuickActionRow = observer(() => {
 
     const handleSignOutConfirm = () => {
         handleSignOut();
-        setShowSignOutConfirm(false);
+        tvStore.setShowSignOutConfirm(false);
     };
 
     const handleSignOutCancel = () => {
-        setShowSignOutConfirm(false);
+        tvStore.setShowSignOutConfirm(false);
     };
 
     const handleQRTile = () => {

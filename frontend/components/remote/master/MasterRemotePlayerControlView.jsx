@@ -48,7 +48,7 @@ const MasterRemotePlayerControlView = observer(() => {
         disconnectRemoteMaster
     } = remoteStore;
     const {t} = useTranslations();
-    const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(false);
+    const [isEpisodesDrawerOpen, setIsEpisodesDrawerOpen] = useState(() => false);
 
     const nowPlayingItem = remoteSlaveState?.nowPlayingItem;
 

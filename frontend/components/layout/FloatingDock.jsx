@@ -59,7 +59,7 @@ export const FloatingDock = observer(() => {
     const {t} = useTranslations();
     const searchInputRef = useRef(null);
     const isMobile = useMediaQuery('(max-width: 720px)');
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(() => false);
 
     useEffect(() => {
         if (isSearchActive) {

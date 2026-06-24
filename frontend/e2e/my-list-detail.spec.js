@@ -18,6 +18,9 @@
  */
 import { test, expect } from '@playwright/test';
 
+// This test uses ?testMode=stores which is only available in dev mode.
+// Skip in production Docker builds.
+const IS_PROD = (process.env.BASE_URL || '').includes('3002');
 const SEED_SHOW = {
     id: 9001,
     name: 'E2E Seeded Show',
@@ -60,7 +63,8 @@ const seedMyList = async (page) => {
     }, [SEED_SHOW, SEED_MOVIE]);
 };
 
-test.describe('MyList navigation', () => {
+const myListSuite = IS_PROD ? test.describe.skip : test.describe;
+myListSuite('MyList navigation', () => {
     test.beforeEach(async ({page}) => {
         await seedMyList(page);
     });

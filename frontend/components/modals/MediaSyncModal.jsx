@@ -30,11 +30,11 @@ import {websocketService} from '../../services/websocketService';
 
 
 const MediaSyncModal = observer(({open, onClose, slaveId}) => {
-    const [mediaItems, setMediaItems] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [syncProgress, setSyncProgress] = useState(null);
-    const [syncComplete, setSyncComplete] = useState(false);
-    const [syncError, setSyncError] = useState(null);
+    const [mediaItems, setMediaItems] = useState(() => []);
+    const [isLoading, setIsLoading] = useState(() => false);
+    const [syncProgress, setSyncProgress] = useState(() => null);
+    const [syncComplete, setSyncComplete] = useState(() => false);
+    const [syncError, setSyncError] = useState(() => null);
 
     // Load available media from the library
     useEffect(() => {

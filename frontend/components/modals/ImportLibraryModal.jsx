@@ -23,8 +23,8 @@ const ImportLibraryModal = observer(() => {
     const { isImportModalOpen, closeImportModal, importUrl, importSharedLibrary, isImportingLibrary } = mediaStore;
     const { t } = useTranslations();
 
-    const [link, setLink] = useState('');
-    const [error, setError] = useState('');
+    const [link, setLink] = useState(() => '');
+    const [error, setError] = useState(() => '');
 
     useEffect(() => {
         // If the modal is opened with a URL from the address bar, start importing automatically.

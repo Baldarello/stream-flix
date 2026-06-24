@@ -48,19 +48,18 @@ const SlaveVideoPlayer = observer(() => {
     const {t} = useTranslations();
     const videoRef = useRef(null);
     const playerContainerRef = useRef(null);
-    const [isSyncing, setIsSyncing] = useState(false);
-    const [showSkipIntro, setShowSkipIntro] = useState(false);
-    const [isUiVisible, setIsUiVisible] = useState(true);
+    const [isSyncing, setIsSyncing] = useState(() => false);
+    const [showSkipIntro, setShowSkipIntro] = useState(() => false);
+    const [isUiVisible, setIsUiVisible] = useState(() => true);
     const uiTimeoutRef = useRef(null);
     const lastHostUpdateTimeRef = useRef(0);
     const isSeekingRef = useRef(false);
     const lastProgressBeforeLanguageChangeRef = useRef(null);
 
     // Detect if we're in portrait mobile (narrow screen and not fullscreen)
-    const [isPortraitMobile, setIsPortraitMobile] = useState(false);
-    const [languageMenuAnchor, setLanguageMenuAnchor] = useState(null);
-    // Track current video src for filter changes
-    const [currentVideoSrc, setCurrentVideoSrc] = useState('');
+    const [isPortraitMobile, setIsPortraitMobile] = useState(() => false);
+    const [languageMenuAnchor, setLanguageMenuAnchor] = useState(() => null);
+    const [currentVideoSrc, setCurrentVideoSrc] = useState(() => '');
     useEffect(() => {
         const checkPortrait = () => {
             const isPortrait = window.matchMedia('(orientation: portrait)').matches;
@@ -82,7 +81,7 @@ const SlaveVideoPlayer = observer(() => {
         };
     }, []);
 
-    const [playerState, setPlayerState] = useState({
+    const [playerState, setPlayerState] = useState(() => ({
         isPlaying: false,
         progress: 0,
         volume: 1,
@@ -91,7 +90,7 @@ const SlaveVideoPlayer = observer(() => {
         currentTime: 0,
         isFullScreen: false,
         playbackRate: 1,
-    });
+    }));
 
 
     // Effect for resuming playback from startTime

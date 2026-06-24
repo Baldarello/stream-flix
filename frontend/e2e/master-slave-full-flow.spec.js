@@ -29,7 +29,10 @@ import { test, expect, chromium } from '@playwright/test';
 // Dev server is 3012 (Vite exposes `?testMode=stores` for store-level
 // Playwright affordances). Production build at 3002 minifies the affordance
 // away, so we default to 3012 unless overridden.
-const BASE = process.env.BASE_URL || 'http://localhost:3012';
+// NOTE: These tests require ?testMode=stores which is only available in dev mode.
+// Skip entire suite when BASE points to a production Docker build.
+const IS_PROD = (process.env.BASE_URL || '').includes('3002');
+const BASE = IS_PROD ? 'http://localhost:3002' : (process.env.BASE_URL || 'http://localhost:3012');
 
 // Fresh storage helper: clears cookies + local/session storage so the
 // persisted `isConfiguredAsSlave` / `remoteMasterForSlaveId` flags from
@@ -80,7 +83,8 @@ async function waitForShortCode(tvPage, timeout = 10000) {
 
 test.describe.configure({ mode: 'serial' });
 
-test.describe('MASTER ↔ SLAVE end-to-end coverage', () => {
+const masterSlaveSuite = IS_PROD ? test.describe.skip : test.describe;
+masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
     let browser;
     let tvContext;
     let masterContext;

@@ -50,8 +50,8 @@ const ProfileDrawer = observer(() => {
         openQRScanner
     } = remoteStore;
     const {t} = useTranslations();
-    const [editingSlaveId, setEditingSlaveId] = useState(null);
-    const [editedName, setEditedName] = useState('');
+    const [editingSlaveId, setEditingSlaveId] = useState(() => null);
+    const [editedName, setEditedName] = useState(() => '');
 
     const handleScanQRCode = () => {
         openQRScanner();

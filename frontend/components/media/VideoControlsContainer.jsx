@@ -64,8 +64,8 @@ const VideoControlsContainer = observer(({
 
     const {t} = useTranslations();
     const {roomId, isHost} = mediaStore;
-    const [volumeAnchorEl, setVolumeAnchorEl] = useState(null);
-    const [speedAnchorEl, setSpeedAnchorEl] = useState(null);
+    const [volumeAnchorEl, setVolumeAnchorEl] = useState(() => null);
+    const [speedAnchorEl, setSpeedAnchorEl] = useState(() => null);
 
     const handleSpeedChange = useCallback((rate) => {
         if (videoRef.current) videoRef.current.playbackRate = rate;

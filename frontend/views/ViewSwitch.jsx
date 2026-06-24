@@ -55,9 +55,9 @@ import { PreferencesView } from './features/PreferencesView.jsx';
 import { FeatureRouter } from './features/FeatureRouter.jsx';
 
 const wrap = (key, node) => (
-    <div id={`screen-${key.toLowerCase()}`} data-view-key={key} data-testid="view-branch" style={{ minHeight: '100%' }}>
+    <section id={`screen-${key.toLowerCase()}`} aria-label={key} data-view-key={key} data-testid="view-branch" style={{ minHeight: '100%' }}>
         {node}
-    </div>
+    </section>
 );
 
 /**

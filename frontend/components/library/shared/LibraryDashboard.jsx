@@ -52,7 +52,7 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
     const {t} = useTranslations();
     const counts = mediaStore.libraryCounts;
     const storeQuery = mediaStore.librarySearchQuery;
-    const [inputValue, setInputValue] = useState(storeQuery);
+    const [inputValue, setInputValue] = useState(() => storeQuery);
 
     // Keep the local input in sync when the store value changes from
     // outside (e.g. test or programmatic reset).

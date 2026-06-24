@@ -33,8 +33,8 @@ import {useTranslations} from '../../../hooks/useTranslations.js';
 
 const VideoLinksBulkBar = observer(() => {
     const {t} = useTranslations();
-    const [bulkLanguage, setBulkLanguage] = useState('ITA');
-    const [bulkType, setBulkType] = useState('sub');
+    const [bulkLanguage, setBulkLanguage] = useState(() => 'ITA');
+    const [bulkType, setBulkType] = useState(() => 'sub');
 
     const ids = Array.from(mediaStore.librarySelectedLinkIds);
     const count = ids.length;

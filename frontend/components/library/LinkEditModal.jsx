@@ -115,10 +115,10 @@ const LinkEditModal = observer(() => {
     }
     const resolved = linkId != null ? allLinks.find((l) => l.id === linkId) || null : null;
 
-    const [draft, setDraft] = useState(null);
-    const [debouncedUrl, setDebouncedUrl] = useState('');
-    const [validating, setValidating] = useState(false);
-    const [validateResult, setValidateResult] = useState(null);
+    const [draft, setDraft] = useState(() => null);
+    const [debouncedUrl, setDebouncedUrl] = useState(() => '');
+    const [validating, setValidating] = useState(() => false);
+    const [validateResult, setValidateResult] = useState(() => null);
 
     useEffect(() => {
         if (!resolved) {

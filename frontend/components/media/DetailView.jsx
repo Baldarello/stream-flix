@@ -196,8 +196,8 @@ const SwipeableEpisodeCardDetailView = observer(({
     const {episodeProgress, toggleEpisodeWatchedStatus, episodeDetailsDialogOpenForEpisodeId,
         openEpisodeDetails, closeEpisodeDetails} = mediaStore;
     const {t} = useTranslations();
-    const [swipeX, setSwipeX] = useState(0);
-    const [startX, setStartX] = useState(0);
+    const [swipeX, setSwipeX] = useState(() => 0);
+    const [startX, setStartX] = useState(() => 0);
     const cardRef = useRef(null);
     const detailsOpen = episodeDetailsDialogOpenForEpisodeId === episode.id;
     const progress = episodeProgress.get(episode.id);

@@ -22,7 +22,7 @@ import { Skeleton } from '../../components/feedback/Skeleton.jsx';
 const CAPTION = 'INITIALIZING';
 
 const TypewriterCaption = () => {
-    const [shown, setShown] = useState(0);
+    const [shown, setShown] = useState(() => 0);
     useEffect(() => {
         let frame = 0;
         const id = setInterval(() => {

@@ -32,8 +32,8 @@ const CinematicRowInner = ({
                                viewDetailLabel
                            }) => {
     const scrollContainerRef = useRef(null);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(() => false);
+    const [canScrollRight, setCanScrollRight] = useState(() => false);
     // Transient drag-and-drop state for the inline reorder path.
     // Kept as local React state (not MobX) because it is a pure
     // UI concern; the actual persistence is delegated to
@@ -46,8 +46,8 @@ const CinematicRowInner = ({
     // React's batched state updates are not visible to the next
     // handler in the chain. The refs let each handler see the
     // value set by the previous handler.
-    const [dragItemId, setDragItemId] = useState(null);
-    const [dropTargetId, setDropTargetId] = useState(null);
+    const [dragItemId, setDragItemId] = useState(() => null);
+    const [dropTargetId, setDropTargetId] = useState(() => null);
     const dragItemIdRef = useRef(null);
     const dropTargetIdRef = useRef(null);
     const {t} = useTranslations();

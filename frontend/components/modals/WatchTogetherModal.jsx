@@ -68,24 +68,19 @@ const WatchTogetherModal = observer(() => {
   const itemForModal = roomId ? watchTogetherSelectedItem : selectedItem;
   const { t } = useTranslations();
   
-  const [inputRoomId, setInputRoomId] = useState('');
-  const [username, setUsername] = useState('');
-  const [copied, setCopied] = useState(false);
-  // FIX: Add type guard to safely access 'seasons' property.
-  const [selectedSeason, setSelectedSeason] = useState((itemForModal && 'seasons' in itemForModal && itemForModal.seasons?.[0]?.season_number) || 1);
-  const [isChangingContent, setIsChangingContent] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  // Host transfer confirmation modal state
-  const [transferConfirmOpen, setTransferConfirmOpen] = useState(false);
-  const [transferTargetParticipant, setTransferTargetParticipant] = useState(null);
-
-  // Name edit dialog state
-  const [nameEditOpen, setNameEditOpen] = useState(false);
-  const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState(null);
-  const [newName, setNewName] = useState('');
+    const [inputRoomId, setInputRoomId] = useState(() => '');
+    const [username, setUsername] = useState(() => '');
+    const [copied, setCopied] = useState(() => false);
+    const [selectedSeason, setSelectedSeason] = useState(() => (itemForModal && 'seasons' in itemForModal && itemForModal.seasons?.[0]?.season_number) || 1);
+    const [isChangingContent, setIsChangingContent] = useState(() => false);
+    const [searchQuery, setSearchQuery] = useState(() => '');
+    const [searchResults, setSearchResults] = useState(() => []);
+    const [isSearching, setIsSearching] = useState(() => false);
+    const [transferConfirmOpen, setTransferConfirmOpen] = useState(() => false);
+    const [transferTargetParticipant, setTransferTargetParticipant] = useState(() => null);
+    const [nameEditOpen, setNameEditOpen] = useState(() => false);
+    const [nameEditTargetParticipant, setNameEditTargetParticipant] = useState(() => null);
+    const [newName, setNewName] = useState(() => '');
 
   const handleTransferHostClick = (participant) => {
     setTransferTargetParticipant(participant);

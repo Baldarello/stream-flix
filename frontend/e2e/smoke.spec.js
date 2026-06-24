@@ -10,7 +10,7 @@
  */
 import { test, expect } from '@playwright/test';
 
-const APP_URL = process.env.SMOKE_URL || 'http://localhost:3000/';
+const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test('smoke: home page loads cleanly for guest users', async ({ page }) => {
     const consoleErrors = [];

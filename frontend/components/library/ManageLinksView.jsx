@@ -34,9 +34,9 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 
 const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
     const { t } = useTranslations();
-    const [domainInputs, setDomainInputs] = useState({});
-    const [editingLinkId, setEditingLinkId] = useState(null);
-    const [editFormData, setEditFormData] = useState({});
+    const [domainInputs, setDomainInputs] = useState(() => ({}));
+    const [editingLinkId, setEditingLinkId] = useState(() => null);
+    const [editFormData, setEditFormData] = useState(() => ({}));
 
     // Derived reactively inside the observer render body.
     // mediaStore.mediaLinks (via facade) is an observable MobX Map;

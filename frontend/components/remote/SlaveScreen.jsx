@@ -17,7 +17,7 @@ const SlaveScreen = observer(() => {
     const hasSentDisconnecting = useRef(false);
 
     // Track if we're in a reconnection state (between beforeunload and reconnect)
-    const [isReconnecting, setIsReconnecting] = useState(false);
+    const [isReconnecting, setIsReconnecting] = useState(() => false);
 
     // Send disconnecting message before page unload to preserve session for reconnection
     useEffect(() => {

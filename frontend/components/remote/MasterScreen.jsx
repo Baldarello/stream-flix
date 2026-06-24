@@ -11,9 +11,9 @@ const MasterScreen = observer(() => {
     const { isQRScannerOpen, isRemoteMasterConnected } = remoteStore;
     const { closeQRScanner, connectAsRemoteMaster } = remoteStore;
     const { t } = useTranslations();
-    const [scanError, setScanError] = useState(null);
-    const [scanSuccess, setScanSuccess] = useState(false);
-    const [manualCode, setManualCode] = useState('');
+    const [scanError, setScanError] = useState(() => null);
+    const [scanSuccess, setScanSuccess] = useState(() => false);
+    const [manualCode, setManualCode] = useState(() => '');
     const scannerInstanceRef = useRef(null);
 
     const scannerContainerRef = useCallback((node) => {

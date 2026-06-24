@@ -49,7 +49,7 @@ const iconMap = {
 const RevisionsModal = observer(() => {
     const { isRevisionsModalOpen, closeRevisionsModal, revisions, isRevisionsLoading, revertRevision } = mediaStore;
     const { t } = useTranslations();
-    const [expandedId, setExpandedId] = useState(null);
+    const [expandedId, setExpandedId] = useState(() => null);
 
     const handleRevert = (rev) => {
         if (window.confirm(t('revisions.revertConfirm'))) {

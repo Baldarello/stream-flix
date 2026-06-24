@@ -15,8 +15,9 @@ import { useTranslations } from '../../../hooks/useTranslations.js';
  */
 const TvPlayerView = observer(() => {
     const { t } = useTranslations();
-    const [showExitConfirm, setShowExitConfirm] = useState(false);
-    const [PlaybackComponent, setPlaybackComponent] = useState(null);
+    const showExitConfirm = tvStore.showExitConfirm;
+    // ponytail: dynamic component ref, no MobX needed for local-only import
+    const [PlaybackComponent, setPlaybackComponent] = useState(() => null);
 
     // Determine which playback component to use based on remoteStore
     useEffect(() => {
@@ -38,25 +39,24 @@ const TvPlayerView = observer(() => {
 
         loadPlaybackComponent();
     }, []);
-
     const handleBack = () => {
         if (showExitConfirm) {
             // User confirmed exit
             tvStore.navigate('home');
-            setShowExitConfirm(false);
+            tvStore.setShowExitConfirm(false);
         } else {
             // Show confirmation dialog
-            setShowExitConfirm(true);
+            tvStore.setShowExitConfirm(true);
         }
     };
 
     const handleExitConfirm = () => {
         tvStore.navigate('home');
-        setShowExitConfirm(false);
+        tvStore.setShowExitConfirm(false);
     };
 
     const handleExitCancel = () => {
-        setShowExitConfirm(false);
+        tvStore.setShowExitConfirm(false);
     };
 
     // Handle keyboard navigation

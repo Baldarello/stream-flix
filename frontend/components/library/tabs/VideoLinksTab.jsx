@@ -54,7 +54,7 @@ const matchesQuery = (link, query, epInfo) => {
 
 const VideoLinksTab = observer(() => {
     const {t} = useTranslations();
-    const [expandedShowId, setExpandedShowId] = useState(null);
+    const [expandedShowId, setExpandedShowId] = useState(() => null);
 
     const query = mediaStore.librarySearchQuery;
     const showFilterId = mediaStore.linksFilterShowId;

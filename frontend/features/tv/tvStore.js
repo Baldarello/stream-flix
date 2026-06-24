@@ -17,6 +17,12 @@ class TvStore {
     // Flag indicating TV mode is active
     isTvMode = true;
 
+    // Sign-out confirmation dialog visibility
+    showSignOutConfirm = false;
+
+    // Exit confirmation dialog visibility (for player back navigation)
+    showExitConfirm = false;
+
     constructor() {
         makeAutoObservable(this, {
             focusableElements: false, // Map is not observable, we manage it manually
@@ -31,6 +37,13 @@ class TvStore {
         this.screen = newScreen;
         // Reset focus when changing screens
         this.currentFocusId = null;
+    }
+    setShowExitConfirm(value) {
+        this.showExitConfirm = value;
+    }
+
+    setShowSignOutConfirm(value) {
+        this.showSignOutConfirm = value;
     }
 
     /**

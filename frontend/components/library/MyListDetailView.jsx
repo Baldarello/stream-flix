@@ -111,11 +111,11 @@ const MyListDetailView = observer(() => {
         toggleMyList
     } = mediaStore;
 
-    const [filter, setFilter] = useState('all');
-    const [sort, setSort] = useState('recent');
-    const [pendingRemove, setPendingRemove] = useState(null);
-    const [dragItemId, setDragItemId] = useState(null);
-    const [dropTargetId, setDropTargetId] = useState(null);
+    const [filter, setFilter] = useState(() => 'all');
+    const [sort, setSort] = useState(() => 'recent');
+    const [pendingRemove, setPendingRemove] = useState(() => null);
+    const [dragItemId, setDragItemId] = useState(() => null);
+    const [dropTargetId, setDropTargetId] = useState(() => null);
     const dragItemIdRef = useRef(null);
     const dropTargetIdRef = useRef(null);
 
