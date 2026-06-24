@@ -1,14 +1,20 @@
 # Context
 
-<!-- Dynamic context from issue tracker — replace with your tracker commands -->
-<!-- See .sandcastle/SETUP_ISSUE_TRACKER.md -->
+## Open Issues
 
-# Task
+Run the following to list open issues:
+```
+gh issue list --state open --label Sandcastle --limit 100 --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'
+```
 
-<!-- Describe what the agent should do. Example:
-Fix the bug in the MediaCard component where long titles overflow the card.
--->
+To view a specific issue:
+```
+gh issue view <number> --comments
+```
 
-# Done
+## Task
 
-<!-- When the task is complete, output <promise>COMPLETE</promise> to signal early termination. -->
+Work on the open issues one by one. After completing each issue, close it with:
+```
+gh issue close <number> --comment "Completed by Sandcastle"
+```
