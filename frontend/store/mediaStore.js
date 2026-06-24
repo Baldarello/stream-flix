@@ -1194,7 +1194,33 @@ class MediaStore {
         }
         runInAction(() => {
             libraryStore.mediaLinks = newMediaLinks;
+            this._patchCurrentItemVideoUrls(showId);
         });
+    }
+    /**
+     * Patch `currentSelectedItem` and `cachedItems` episodes so their
+     * `video_urls` stays in sync with the observable `libraryStore.mediaLinks`.
+     * Called after every link mutation.
+     */
+    _patchCurrentItemVideoUrls(showId) {
+        const item = this.selectedItem;
+        if (!item || item.id !== showId || !item.seasons) return;
+        item.seasons.forEach(season => {
+            (season.episodes || []).forEach(ep => {
+                ep.video_urls = libraryStore.mediaLinks.get(ep.id) || [];
+                ep.video_url = ep.video_urls[0]?.url || null;
+            });
+        });
+        // Also patch cachedItems so next detail open is warm
+        const cached = libraryStore.cachedItems.get(showId);
+        if (cached && cached.seasons) {
+            cached.seasons.forEach(season => {
+                (season.episodes || []).forEach(ep => {
+                    ep.video_urls = libraryStore.mediaLinks.get(ep.id) || [];
+                    ep.video_url = ep.video_urls[0]?.url || null;
+                });
+            });
+        }
     }
 
     async refreshLinksForMediaId(mediaId) {
