@@ -66,8 +66,8 @@ test.describe('DetailView', () => {
         const backBtn = page.locator('button[aria-label="go back"], button[aria-label="back"], [data-component="back-button"]').first();
         if (await backBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
             await backBtn.click();
-            await page.waitForSelector('#screen-home', { timeout: 10_000, state: 'attached' });
-            await expect(page.locator('#screen-home')).toBeVisible();
+            await page.waitForSelector('section#screen-home', { timeout: 10_000, state: 'attached' });
+            await expect(page.locator('section#screen-home')).toBeVisible();
         }
     });
 
