@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, CardMedia } from '@mui/material';
+import {observer} from 'mobx-react-lite';
+import {Box, CardMedia} from '@mui/material';
 import TheatersIcon from '@mui/icons-material/Theaters';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { DetailBackdrop } from './DetailBackdrop.jsx';
-import { DetailHeader } from './DetailHeader.jsx';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {DetailBackdrop} from './DetailBackdrop.jsx';
+import {DetailHeader} from './DetailHeader.jsx';
 
 export const DetailHero = observer(({ item, backgroundImage, title, releaseDate, isInMyList, listActionLabel, onPlay, onToggleList }) => {
     const { t } = useTranslations();

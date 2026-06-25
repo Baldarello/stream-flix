@@ -5,15 +5,15 @@
  * + status + version, animated on scroll-in via a CSS keyframe.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, Container, IconButton, Typography } from '@mui/material';
+import React, {useEffect, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Box, Container, IconButton, Typography} from '@mui/material';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import { gsap } from 'gsap';
-import { durations, easings, reducedMotion } from '../../motion/grammar.js';
+import {gsap} from 'gsap';
+import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 
 const socialIcons = [
     { icon: <FacebookIcon fontSize="small" />, href: '#', label: 'Facebook' },

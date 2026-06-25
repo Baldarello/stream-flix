@@ -16,7 +16,7 @@
  * shortcut that the app exposes so the suite doesn't have to walk
  * the full add-to-list flow (which is exercised elsewhere).
  */
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 // This test uses ?testMode=stores which is only available in dev mode.
 // Skip in production Docker builds.

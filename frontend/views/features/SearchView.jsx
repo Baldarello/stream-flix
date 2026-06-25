@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, CircularProgress, Typography } from '@mui/material';
-import { useStores } from '../../context/StoreContext.jsx';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { CinematicGrid } from '../../components/layout/CinematicGrid.jsx';
-import { FloatingDock } from '../../components/layout/FloatingDock.jsx';
+import {observer} from 'mobx-react-lite';
+import {Box, CircularProgress, Typography} from '@mui/material';
+import {useStores} from '../../context/StoreContext.jsx';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {CinematicGrid} from '../../components/layout/CinematicGrid.jsx';
+import {FloatingDock} from '../../components/layout/FloatingDock.jsx';
 
 /**
  * SearchShell - Shared layout wrapper for search branches

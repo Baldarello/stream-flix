@@ -5,15 +5,15 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Stack, Typography, Tooltip, IconButton, Button } from '@mui/material';
+import {observer} from 'mobx-react-lite';
+import {Button, IconButton, Stack, Tooltip, Typography} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import GroupIcon from '@mui/icons-material/Group';
 import LinkIcon from '@mui/icons-material/Link';
-import { mediaStore } from '../../store/mediaStore.js';
-import { useTranslations } from '../../hooks/useTranslations.js';
+import {mediaStore} from '../../store/mediaStore.js';
+import {useTranslations} from '../../hooks/useTranslations.js';
 
 export const DetailHeader = observer(({
     item, title, releaseDate, isInMyList, listActionLabel, onPlay, onToggleList

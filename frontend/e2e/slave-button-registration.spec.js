@@ -1,4 +1,4 @@
-import {test, expect} from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 /**
  * Regression test for the "slave button stays in loading" bug.

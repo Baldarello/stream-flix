@@ -11,13 +11,13 @@
  * `prefers-reduced-motion: reduce` is set.
  */
 
-import React, { useEffect, useImperativeHandle, useRef, forwardRef } from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useRef} from 'react';
 import * as THREE from 'three';
-import { holoFragment, holoVertex } from './shaders/holo.glsl.js';
-import { lightleakFragment, lightleakVertex } from './shaders/lightleak.glsl.js';
-import { getWebGLSupport } from '../utils/webglDetect.js';
-import { reducedMotion } from '../utils/reducedMotion.js';
-import { durations } from '../motion/grammar.js';
+import {holoFragment, holoVertex} from './shaders/holo.glsl.js';
+import {lightleakFragment, lightleakVertex} from './shaders/lightleak.glsl.js';
+import {getWebGLSupport} from '../utils/webglDetect.js';
+import {reducedMotion} from '../utils/reducedMotion.js';
+import {durations} from '../motion/grammar.js';
 
 const DEFAULT_INTENSITY = 0.0;
 

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
 import tvStore from '../tvStore.js';
 
 /**

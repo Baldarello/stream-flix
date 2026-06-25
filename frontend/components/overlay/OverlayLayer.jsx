@@ -8,12 +8,12 @@
  * All modals are lazy-loaded via React.lazy for code splitting.
  */
 
-import React, { Suspense, lazy } from 'react';
-import { observer } from 'mobx-react-lite';
-import { mediaStore } from '../../store/mediaStore.js';
-import { remoteStore } from '../../store/remoteStore.js';
-import { NotificationSnackbar } from '../utilities/NotificationSnackbar.jsx';
-import { Skeleton } from '../feedback/Skeleton.jsx';
+import React, {lazy, Suspense} from 'react';
+import {observer} from 'mobx-react-lite';
+import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
+import {NotificationSnackbar} from '../utilities/NotificationSnackbar.jsx';
+import {Skeleton} from '../feedback/Skeleton.jsx';
 
 // Lazy-loaded modals
 const WatchTogetherModal = lazy(() => import('../modals/WatchTogetherModal.jsx'));

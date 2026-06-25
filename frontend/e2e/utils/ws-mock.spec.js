@@ -9,8 +9,8 @@
  * `exposeFunction`-free design, etc.) so future refactors of
  * `ws-mock.js` can be validated here.
  */
-import { test, expect } from '@playwright/test';
-import { mockWebSocket } from './ws-mock';
+import {expect, test} from '@playwright/test';
+import {mockWebSocket} from './ws-mock';
 
 test.describe('ws-mock', () => {
     test('replaces window.WebSocket before app code runs', async ({ page }) => {

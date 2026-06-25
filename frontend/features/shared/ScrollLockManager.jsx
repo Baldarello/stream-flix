@@ -9,9 +9,9 @@
  * - Remote master has a slave playing
  */
 
-import React, { useEffect } from 'react';
-import { mediaStore } from '../../store/mediaStore.js';
-import { remoteStore } from '../../store/remoteStore.js';
+import {useEffect} from 'react';
+import {mediaStore} from '../../store/mediaStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
 
 /**
  * Scroll Lock Manager Component

@@ -15,7 +15,10 @@
  * are still preserved in the merge result so the local cache is not
  * wiped by the import.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {syncStore} from '../../store/syncStore.js';
+import {db} from '../../services/db.js';
+import * as driveService from '../../services/googleDriveService.js';
 
 vi.mock('../../services/googleDriveService', () => ({
     findLatestBackupFile: vi.fn(),
@@ -79,10 +82,6 @@ vi.mock('../../store/mediaStore.js', () => {
         },
     };
 });
-
-import { syncStore } from '../../store/syncStore.js';
-import { db } from '../../services/db.js';
-import * as driveService from '../../services/googleDriveService.js';
 
 describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', () => {
     beforeEach(() => {

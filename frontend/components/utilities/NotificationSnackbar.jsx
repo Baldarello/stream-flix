@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useId } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Alert, Button, Snackbar } from '@mui/material';
-import { gsap } from 'gsap';
-import { mediaStore } from '../../store/mediaStore.js';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { durations, easings, reducedMotion } from '../../motion/grammar.js';
+import React, {useEffect, useId, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Alert, Button, Snackbar} from '@mui/material';
+import {gsap} from 'gsap';
+import {mediaStore} from '../../store/mediaStore.js';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 
 /**
  * @fileoverview NotificationSnackbar - re-skinned futuristic snackbar.

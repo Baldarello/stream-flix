@@ -12,8 +12,8 @@
  * simple opacity fade.
  */
 
-import { gsap } from 'gsap';
-import { durations, easings, reducedMotion, reducedMotionCondition } from './grammar.js';
+import {gsap} from 'gsap';
+import {durations, easings, reducedMotion, reducedMotionCondition} from './grammar.js';
 
 export const VIEW_KEYS = {
     HOME: 'home',

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
 import TvListRow from '../components/TvListRow.jsx';
 import TvEmptyState from '../components/TvEmptyState.jsx';
 import tvStore from '../tvStore.js';
-import { mediaStore } from '../../../store/mediaStore.js';
-import { useTranslations } from '../../../hooks/useTranslations.js';
+import {mediaStore} from '../../../store/mediaStore.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 /**
  * TvMyListView - Full screen My List view

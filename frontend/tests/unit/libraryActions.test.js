@@ -10,7 +10,9 @@
  * calls. Heavy link-resolution / playback flows are exercised by the
  * Playwright smoke test.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {libraryStore} from '../../store/libraryStore.js';
+import {mediaStore} from '../../store/mediaStore.js';
 
 vi.mock('../../services/db.js', () => {
     const tableMock = () => ({
@@ -42,9 +44,6 @@ vi.mock('../../services/db.js', () => {
         },
     };
 });
-
-import { libraryStore } from '../../store/libraryStore.js';
-import { mediaStore } from '../../store/mediaStore.js';
 
 describe('libraryStore actions', () => {
     beforeEach(() => {

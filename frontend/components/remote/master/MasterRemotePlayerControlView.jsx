@@ -3,17 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../../store/mediaStore.js';
 import {remoteStore} from '../../../store/remoteStore.js';
 import {websocketService} from '../../../services/websocketService.js';
-import {
-    AppBar,
-    Box,
-    Button,
-    CircularProgress,
-    IconButton,
-    Stack,
-    Toolbar,
-    Tooltip,
-    Typography
-} from '@mui/material';
+import {AppBar, Box, Button, CircularProgress, IconButton, Stack, Toolbar, Tooltip, Typography} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import Replay10 from '@mui/icons-material/Replay10';

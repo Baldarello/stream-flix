@@ -7,7 +7,7 @@
  * 5. Delete a link and verify it's gone
  * 6. Test advanced config for half-season link sets
  */
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 const IS_PROD = (process.env.SMOKE_URL || 'http://localhost:3002/').includes('localhost:3002');
 

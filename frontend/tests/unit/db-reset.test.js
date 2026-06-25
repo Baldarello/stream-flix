@@ -16,12 +16,8 @@
  *   - The exported database name constant is the literal `quix-db`
  *     requested in the todo.
  */
-import { describe, it, expect, vi } from 'vitest';
-import {
-    QUIX_DB_NAME,
-    resetIndexedDB,
-    seedIndexedDB,
-} from '../../e2e/utils/db-reset.js';
+import {describe, expect, it, vi} from 'vitest';
+import {QUIX_DB_NAME, resetIndexedDB, seedIndexedDB,} from '../../e2e/utils/db-reset.js';
 
 /**
  * Build a fake Playwright Page. The returned object implements the

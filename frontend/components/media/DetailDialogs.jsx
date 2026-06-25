@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
+import {observer} from 'mobx-react-lite';
 import LinkEpisodesModal from '../modals/LinkEpisodesModal.jsx';
 
 export const DetailDialogs = observer(() => {

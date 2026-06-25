@@ -13,16 +13,7 @@
  */
 import React from 'react';
 import {observer} from 'mobx-react-lite';
-import {
-    Box,
-    Card,
-    CardContent,
-    Checkbox,
-    FormControl,
-    MenuItem,
-    Select,
-    Typography
-} from '@mui/material';
+import {Box, Card, CardContent, Checkbox, FormControl, MenuItem, Select, Typography} from '@mui/material';
 import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
 import DeleteIcon from '@mui/icons-material/Delete';

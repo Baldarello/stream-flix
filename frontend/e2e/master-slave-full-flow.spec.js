@@ -24,7 +24,7 @@
  *   §8–9 UX surfaces     → t8_known_slaves_persistence
  */
 
-import { test, expect, chromium } from '@playwright/test';
+import {chromium, expect, test} from '@playwright/test';
 
 // Dev server is 3012 (Vite exposes `?testMode=stores` for store-level
 // Playwright affordances). Production build at 3002 minifies the affordance

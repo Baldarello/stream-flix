@@ -28,34 +28,40 @@
  * `TransitionPortal` can pick a timeline for the previous -> next switch.
  */
 
-import React, { Suspense, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Routes, Route, useLocation } from 'react-router';
-import { useStores } from '../context/StoreContext.jsx';
-import { fxStore } from '../store/fxStore.js';
-import { useAppNavigate, getRouteFromState } from '../hooks/useAppNavigate.js';
-import { Skeleton } from '../components/feedback/Skeleton.jsx';
+import React, {lazy, Suspense, useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Route, Routes, useLocation} from 'react-router';
+import {useStores} from '../context/StoreContext.jsx';
+import {fxStore} from '../store/fxStore.js';
+import {getRouteFromState, useAppNavigate} from '../hooks/useAppNavigate.js';
+import {Skeleton} from '../components/feedback/Skeleton.jsx';
 
 // System Views
-import { LoadingView } from './system/LoadingView.jsx';
-import { ErrorView } from './system/ErrorView.jsx';
+import {LoadingView} from './system/LoadingView.jsx';
+import {ErrorView} from './system/ErrorView.jsx';
 
 // Playback Views
-import { QRScannerView } from './playback/QRScannerView.jsx';
-import { SlavePlaybackView } from './playback/SlavePlaybackView.jsx';
-import { MasterPlaybackView } from './playback/MasterPlaybackView.jsx';
-import { LocalPlaybackView } from './playback/LocalPlaybackView.jsx';
+import {QRScannerView} from './playback/QRScannerView.jsx';
+import {SlavePlaybackView} from './playback/SlavePlaybackView.jsx';
+import {MasterPlaybackView} from './playback/MasterPlaybackView.jsx';
+import {LocalPlaybackView} from './playback/LocalPlaybackView.jsx';
 
 // App Mode Views
-import { SmartTVPairingView } from './appMode/SmartTVPairingView.jsx';
+import {SmartTVPairingView} from './appMode/SmartTVPairingView.jsx';
 
 // Feature Views
-import { SearchView } from './features/SearchView.jsx';
-import { PreferencesView } from './features/PreferencesView.jsx';
-import { FeatureRouter } from './features/FeatureRouter.jsx';
+import {SearchView} from './features/SearchView.jsx';
+import {PreferencesView} from './features/PreferencesView.jsx';
+import {FeatureRouter} from './features/FeatureRouter.jsx';
+import {useMediaQuery} from "@mui/material";
+import {isSmartTV} from "../utils/device.js";
+
+
+const TvApp = lazy(() => import('../features/tv/TvApp.jsx'));
 
 const wrap = (key, node) => (
-    <section id={`screen-${key.toLowerCase()}`} aria-label={key} data-view-key={key} data-testid="view-branch" style={{ minHeight: '100%' }}>
+    <section id={`screen-${key.toLowerCase()}`} aria-label={key} data-view-key={key} data-testid="view-branch"
+             style={{minHeight: '100%'}}>
         {node}
     </section>
 );
@@ -65,7 +71,7 @@ const wrap = (key, node) => (
  * Kept pure so the transition portal can use the same string the next
  * render will mount.
  */
-const resolveViewKey = ({ mediaStore, remoteStore }) => {
+const resolveViewKey = ({mediaStore, remoteStore}) => {
     if (mediaStore.loading || mediaStore.isReloadingData || mediaStore.isGoogleAuthLoading) return 'loading';
     if (mediaStore.error) return 'error';
     if (remoteStore.isQRScannerOpen) return 'qr';
@@ -82,50 +88,50 @@ const resolveViewKey = ({ mediaStore, remoteStore }) => {
  * Route-based view components that receive route params
  */
 const HomeRoute = () => wrap('home', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <FeatureRouter />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <FeatureRouter/>
     </Suspense>
 ));
 
 const SearchRoute = () => wrap('search', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <SearchView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <SearchView/>
     </Suspense>
 ));
 
 const PreferencesRoute = () => wrap('preferences', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <PreferencesView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <PreferencesView/>
     </Suspense>
 ));
 
 const PlayerRoute = () => wrap('player', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <LocalPlaybackView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <LocalPlaybackView/>
     </Suspense>
 ));
 
 const MasterRoute = () => wrap('master', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <MasterPlaybackView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <MasterPlaybackView/>
     </Suspense>
 ));
 
 const SlaveRoute = () => wrap('slave', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <SlavePlaybackView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <SlavePlaybackView/>
     </Suspense>
 ));
 
 const PairingRoute = () => wrap('pairing', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <SmartTVPairingView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <SmartTVPairingView/>
     </Suspense>
 ));
 
 const QRScannerRoute = () => wrap('qr', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <QRScannerView />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <QRScannerView/>
     </Suspense>
 ));
 
@@ -133,8 +139,8 @@ const QRScannerRoute = () => wrap('qr', (
  * Fallback when no route matches - renders home
  */
 const NotFoundRoute = () => wrap('home', (
-    <Suspense fallback={<Skeleton id="view-loading-suspense" />}>
-        <FeatureRouter />
+    <Suspense fallback={<Skeleton id="view-loading-suspense"/>}>
+        <FeatureRouter/>
     </Suspense>
 ));
 
@@ -148,10 +154,12 @@ const NotFoundRoute = () => wrap('home', (
  * @returns {React.ReactElement} The appropriate view component based on state and URL
  */
 export const ViewSwitch = observer(() => {
-    const { mediaStore, remoteStore } = useStores();
+    const {mediaStore, remoteStore} = useStores();
     const location = useLocation();
-    const { syncToUrl } = useAppNavigate();
-    const currentKey = resolveViewKey({ mediaStore, remoteStore });
+    const {syncToUrl} = useAppNavigate();
+    const currentKey = resolveViewKey({mediaStore, remoteStore});
+    const isSmall = useMediaQuery('@media (max-width: 599px)');
+    const tvMode = isSmall || isSmartTV() || new URLSearchParams(window.location.search).get('tv') === '1';
 
     // Determine which route to highlight for transitions
     // When an overlay state is active, use that as the view key
@@ -171,7 +179,7 @@ export const ViewSwitch = observer(() => {
 
     // Sync MobX state changes to URL (for direct state changes not through router)
     useEffect(() => {
-        const { path } = getRouteFromState();
+        const {path} = getRouteFromState();
         syncToUrl(path);
     }, [
         mediaStore.loading,
@@ -187,55 +195,68 @@ export const ViewSwitch = observer(() => {
         mediaStore.currentActiveView,
     ]);
 
+    if (tvMode) {
+        return (
+            <Suspense fallback={null}>
+                <TvApp/>
+            </Suspense>
+        );
+    }
+
     // Overlay states that take precedence over routes
     // System: Loading State
     if (mediaStore.loading || mediaStore.isReloadingData || mediaStore.isGoogleAuthLoading) {
-        return wrap('loading', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><LoadingView /></Suspense>);
+        return wrap('loading', <Suspense fallback={<Skeleton id="view-loading-suspense"/>}><LoadingView/></Suspense>);
     }
 
     // System: Error State
     if (mediaStore.error) {
-        return wrap('error', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><ErrorView /></Suspense>);
+        return wrap('error', <Suspense fallback={<Skeleton id="view-loading-suspense"/>}><ErrorView/></Suspense>);
     }
 
     // Special modes that take precedence over normal routes
     // Playback: QR Scanner
     if (remoteStore.isQRScannerOpen) {
-        return wrap('qr', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><QRScannerView /></Suspense>);
+        return wrap('qr', <Suspense fallback={<Skeleton id="view-loading-suspense"/>}><QRScannerView/></Suspense>);
     }
 
     // App Mode: SmartTV Pairing
     if (remoteStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) {
-        return wrap('pairing', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><SmartTVPairingView /></Suspense>);
+        return wrap('pairing', <Suspense
+            fallback={<Skeleton id="view-loading-suspense"/>}><SmartTVPairingView/></Suspense>);
     }
 
     // Playback: Remote Master
     if (remoteStore.isRemoteMaster && remoteStore.remoteSlaveState?.nowPlayingItem) {
-        return wrap('master', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><MasterPlaybackView /></Suspense>);
+        return wrap('master', <Suspense
+            fallback={<Skeleton id="view-loading-suspense"/>}><MasterPlaybackView/></Suspense>);
     }
 
     // Playback: SmartTV Slave
     if (remoteStore.isSmartTV && mediaStore.nowPlayingItem) {
-        return wrap('slave', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><SlavePlaybackView /></Suspense>);
+        return wrap('slave', <Suspense
+            fallback={<Skeleton id="view-loading-suspense"/>}><SlavePlaybackView/></Suspense>);
     }
 
     // Playback: Local Player
     if (mediaStore.nowPlayingItem) {
-        return wrap('player', <Suspense fallback={<Skeleton id="view-loading-suspense" />}><LocalPlaybackView /></Suspense>);
+        return wrap('player', <Suspense
+            fallback={<Skeleton id="view-loading-suspense"/>}><LocalPlaybackView/></Suspense>);
     }
+
 
     // Route-based content rendering
     return (
         <Routes location={location}>
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/search" element={<SearchRoute />} />
-            <Route path="/preferences" element={<PreferencesRoute />} />
-            <Route path="/player" element={<PlayerRoute />} />
-            <Route path="/master" element={<MasterRoute />} />
-            <Route path="/slave" element={<SlaveRoute />} />
-            <Route path="/pairing" element={<PairingRoute />} />
-            <Route path="/qr" element={<QRScannerRoute />} />
-            <Route path="*" element={<NotFoundRoute />} />
+            <Route path="/" element={<HomeRoute/>}/>
+            <Route path="/search" element={<SearchRoute/>}/>
+            <Route path="/preferences" element={<PreferencesRoute/>}/>
+            <Route path="/player" element={<PlayerRoute/>}/>
+            <Route path="/master" element={<MasterRoute/>}/>
+            <Route path="/slave" element={<SlaveRoute/>}/>
+            <Route path="/pairing" element={<PairingRoute/>}/>
+            <Route path="/qr" element={<QRScannerRoute/>}/>
+            <Route path="*" element={<NotFoundRoute/>}/>
         </Routes>
     );
 });

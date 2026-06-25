@@ -11,8 +11,8 @@
  * for now, which is responsible for calling `bulkImportFromDb` on this
  * store at boot time.
  */
-import { makeAutoObservable } from 'mobx';
-import { db } from '../services/db.js';
+import {makeAutoObservable} from 'mobx';
+import {db} from '../services/db.js';
 
 class LibraryStore {
     /** @type {number[]} Ordered list of media IDs in the user's library. */

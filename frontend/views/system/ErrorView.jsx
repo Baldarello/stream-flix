@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, Alert } from '@mui/material';
-import { useStores } from '../../context/StoreContext.jsx';
+import {observer} from 'mobx-react-lite';
+import {Alert, Box} from '@mui/material';
+import {useStores} from '../../context/StoreContext.jsx';
 
 /**
  * ErrorView Component

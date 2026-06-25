@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import {makeAutoObservable} from 'mobx';
 
 /**
  * TvStore - MobX store for TV mode navigation and focus management

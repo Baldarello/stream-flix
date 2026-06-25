@@ -15,43 +15,13 @@
 
 import React, {useEffect, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {
-    Alert,
-    Button,
-    Stack,
-    TextField,
-    Typography,
-} from '@mui/material';
+import {Alert, Button, Stack, TextField, Typography,} from '@mui/material';
 
 import {mediaStore} from '../../store/mediaStore.js';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {ModalShell} from '../modals/ModalShell.jsx';
+import {holoFieldSx} from "../../styles/style.js"
 
-const holoFieldSx = {
-    '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'rgba(76, 210, 255, 0.35)',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--neon-accent-hot)',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--neon-accent)',
-        boxShadow: 'var(--edge-glow)',
-    },
-    '& .MuiInputLabel-root': {
-        color: 'var(--text-secondary)',
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-        color: 'var(--neon-accent)',
-    },
-    '& .MuiInputBase-input': {
-        color: 'var(--text-primary)',
-        fontFamily: "'Inter', sans-serif",
-    },
-    '& .MuiFormHelperText-root': {
-        color: 'var(--text-secondary)',
-    },
-};
 
 const buildPreview = (rawUrl) => {
     if (!rawUrl) return '';

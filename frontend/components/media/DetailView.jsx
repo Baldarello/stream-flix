@@ -39,34 +39,8 @@ import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
 import {DetailHero} from './DetailHero.jsx';
 import {DetailBackdrop} from './DetailBackdrop.jsx';
 import {DetailDialogs} from './DetailDialogs.jsx';
+import {holoFieldSx} from "../../styles/style.js"
 
-// Visual recipe for holo-themed field controls, mirrored from
-// EpisodesDrawer.jsx so that the detail screen uses the same palette.
-const holoFieldSx = {
-    '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'rgba(76,210,255,0.35)',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--neon-accent-hot)',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--neon-accent)',
-        boxShadow: 'var(--edge-glow)',
-    },
-    '& .MuiInputLabel-root': {
-        color: 'var(--text-secondary)',
-    },
-    '& .MuiInputLabel-root.Mui-focused': {
-        color: 'var(--neon-accent)',
-    },
-    '& .MuiInputBase-input': {
-        color: 'var(--text-primary)',
-        fontFamily: "'Inter', sans-serif",
-    },
-    '& .MuiFormHelperText-root': {
-        color: 'var(--text-secondary)',
-    },
-};
 
 // ─── Subcomponent 3: EpisodesFilterBar ────────────────────────────────────
 export const EpisodesFilterBar = observer(({

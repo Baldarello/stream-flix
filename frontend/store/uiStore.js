@@ -7,7 +7,7 @@
  * no I/O: this is the part of the previous `mediaStore` that
  * was pure view state.
  */
-import { makeAutoObservable } from 'mobx';
+import {makeAutoObservable} from 'mobx';
 
 class UIStore {
     // ===== SNACKBAR =====

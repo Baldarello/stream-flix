@@ -1,13 +1,7 @@
 import React, {useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
-import {
-    Box,
-    CardMedia,
-    ListItemButton,
-    Stack,
-    Typography
-} from '@mui/material';
+import {Box, CardMedia, ListItemButton, Stack, Typography} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';

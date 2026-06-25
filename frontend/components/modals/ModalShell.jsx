@@ -15,13 +15,13 @@
  * `<Dialog open={...} onClose={...}>`.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogTitle, Box, IconButton } from '@mui/material';
+import React, {useEffect, useRef} from 'react';
+import {Box, Dialog, DialogContent, DialogTitle, IconButton} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { gsap } from 'gsap';
-import { durations, easings, reducedMotion } from '../../motion/grammar.js';
-import { ScanlineOverlay } from '../feedback/ScanlineOverlay.jsx';
-import { useTranslations } from '../../hooks/useTranslations.js';
+import {gsap} from 'gsap';
+import {durations, easings, reducedMotion} from '../../motion/grammar.js';
+import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
+import {useTranslations} from '../../hooks/useTranslations.js';
 
 /**
  * ModalShell Component

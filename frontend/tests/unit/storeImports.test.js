@@ -8,15 +8,15 @@
  * this initial pass – the goal is to catch import errors and
  * regressions in the public surface.
  */
-import { describe, it, expect } from 'vitest';
+import {describe, expect, it} from 'vitest';
 
-import { mediaStore } from '../../store/mediaStore.js';
-import { catalogStore } from '../../store/catalogStore.js';
-import { searchStore } from '../../store/searchStore.js';
-import { libraryStore } from '../../store/libraryStore.js';
-import { preferencesStore } from '../../store/preferencesStore.js';
-import { uiStore } from '../../store/uiStore.js';
-import { playbackStore } from '../../store/playbackStore.js';
+import {mediaStore} from '../../store/mediaStore.js';
+import {catalogStore} from '../../store/catalogStore.js';
+import {searchStore} from '../../store/searchStore.js';
+import {libraryStore} from '../../store/libraryStore.js';
+import {preferencesStore} from '../../store/preferencesStore.js';
+import {uiStore} from '../../store/uiStore.js';
+import {playbackStore} from '../../store/playbackStore.js';
 
 describe('store architecture', () => {
     it('exposes the five thematic sub-stores as singletons', () => {

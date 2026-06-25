@@ -17,14 +17,14 @@
  * splash with no movement.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, Button, Stack, Typography } from '@mui/material';
+import React, {useEffect, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Box, Button, Stack, Typography} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { gsap } from 'gsap';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { durations, easings, stagger, reducedMotion } from '../../motion/grammar.js';
+import {gsap} from 'gsap';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {durations, easings, reducedMotion, stagger} from '../../motion/grammar.js';
 
 const splitTitle = (title) => {
     if (!title) return [];

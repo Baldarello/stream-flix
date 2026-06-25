@@ -31,20 +31,35 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import {useTranslations} from '../../hooks/useTranslations.js';
+import {toJS} from "mobx";
 
-const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAccordionChange }) => {
+const ManageLinksView = observer(({    }) => {
     const { t } = useTranslations();
     const [domainInputs, setDomainInputs] = useState(() => ({}));
     const [editingLinkId, setEditingLinkId] = useState(() => null);
     const [editFormData, setEditFormData] = useState(() => ({}));
-
+    const {
+        linkingEpisodesForItem: item,
+        setExpandedLinkAccordionId,
+        expandedLinkAccordionId,
+        linkEpisodesSeason
+    } = mediaStore;
+    
+    const currentSeason = item.seasons?.find(s => s.season_number === linkEpisodesSeason);
+    
+    const onAccordionChange = (panelId) => (event, isExpanded) => {
+        setExpandedLinkAccordionId(isExpanded ? panelId : false);
+    };
     // Derived reactively inside the observer render body.
     // mediaStore.mediaLinks (via facade) is an observable MobX Map;
     // accessing it and calling .get() inside the render creates tracked
     // reads so the component re-renders when the Map is mutated.
+
     const linksByDomain = {};
     for (const ep of currentSeason.episodes) {
         const epLinks = mediaStore.mediaLinks.get(ep.id) || [];
+        console.log("ep", toJS(ep));
+        console.log("epLinks", toJS(epLinks));
         for (const link of epLinks) {
             try {
                 const origin = new URL(link.url).origin;
@@ -58,6 +73,10 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
     for (const ep of currentSeason.episodes) {
         episodeLinkMap[ep.id] = mediaStore.mediaLinks.get(ep.id) || [];
     }
+    console.log("episodeLinkMap", toJS(episodeLinkMap));
+    console.log("linksByDomain", toJS(linksByDomain));
+    console.log("currentSeason", toJS(currentSeason));
+    console.log("item", toJS(item));
 
     useEffect(() => {
         mediaStore.refreshLinksForShow(item.id);
@@ -191,7 +210,7 @@ const ManageLinksView = observer(({ currentSeason, item, expandedAccordion, onAc
                     return (
                     <Accordion
                         key={episode.id}
-                        expanded={expandedAccordion === episode.id}
+                        expanded={expandedLinkAccordionId === episode.id}
                         onChange={onAccordionChange(episode.id)}
                         sx={{ bgcolor: 'background.paper', backgroundImage: 'none', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.12)', '&:before': { display: 'none' } }}
                     >

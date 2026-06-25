@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
 import tvStore from '../tvStore.js';
-import { remoteStore } from '../../../store/remoteStore.js';
-import { useTranslations } from '../../../hooks/useTranslations.js';
+import {remoteStore} from '../../../store/remoteStore.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 /**
  * TvPairingView - QR code pairing screen for connecting phone/tablet as remote

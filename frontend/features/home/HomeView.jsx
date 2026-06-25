@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, Container } from '@mui/material';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { mediaStore } from '../../store/mediaStore.js';
-import { CinematicHero } from '../../components/layout/CinematicHero.jsx';
-import { CinematicRow } from '../../components/layout/CinematicRow.jsx';
+import {observer} from 'mobx-react-lite';
+import {Box, Container} from '@mui/material';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {mediaStore} from '../../store/mediaStore.js';
+import {CinematicHero} from '../../components/layout/CinematicHero.jsx';
+import {CinematicRow} from '../../components/layout/CinematicRow.jsx';
 
 /**
  * Home View Component

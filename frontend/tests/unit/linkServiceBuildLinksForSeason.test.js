@@ -4,7 +4,7 @@
  * 2. Advanced config (half-season ranges with startNum/endNum)
  * 3. URL hostname extraction via safeHostname
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 vi.mock('../../services/db.js', () => {
     const tableMock = () => ({

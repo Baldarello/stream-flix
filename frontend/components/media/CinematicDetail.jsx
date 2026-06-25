@@ -10,13 +10,13 @@
  * (open/close) drive the entry / exit animation.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box } from '@mui/material';
-import { gsap } from 'gsap';
+import React, {useEffect, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Box} from '@mui/material';
+import {gsap} from 'gsap';
 import DetailView from './DetailView.jsx';
-import { ScanlineOverlay } from '../feedback/ScanlineOverlay.jsx';
-import { durations, easings, reducedMotion } from '../../motion/grammar.js';
+import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
+import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 
 const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
     // The morph-in animation (scale + blur) MUST be applied to an

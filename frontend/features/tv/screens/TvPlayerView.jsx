@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect, useState} from 'react';
+import {observer} from 'mobx-react-lite';
 import tvStore from '../tvStore.js';
-import { remoteStore } from '../../../store/remoteStore.js';
-import { mediaStore } from '../../../store/mediaStore.js';
-import { useTranslations } from '../../../hooks/useTranslations.js';
+import {remoteStore} from '../../../store/remoteStore.js';
+import {mediaStore} from '../../../store/mediaStore.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 // Dynamic imports to avoid bundling these in TV mode when not needed
 // These will only be loaded when TvPlayerView is actually mounted

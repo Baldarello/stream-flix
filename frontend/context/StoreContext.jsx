@@ -7,9 +7,9 @@
  * without prop drilling.
  */
 
-import React, { createContext, useContext } from 'react';
-import { mediaStore } from '../store/mediaStore.js';
-import { remoteStore } from '../store/remoteStore.js';
+import React, {createContext, useContext} from 'react';
+import {mediaStore} from '../store/mediaStore.js';
+import {remoteStore} from '../store/remoteStore.js';
 
 /**
  * @typedef {Object} StoreContextValue

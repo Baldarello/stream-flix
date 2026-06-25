@@ -8,7 +8,7 @@
  * fails, the app is either not running, broken at boot, or the home
  * view contract has regressed.
  */
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 

@@ -4,7 +4,7 @@
  * happening at runtime. This is a manual diagnostic, not a regression
  * test. Remove it (or skip it) once the Google login works end-to-end.
  */
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 test('debug google login flow', async ({ page }) => {
     const consoleMessages = [];

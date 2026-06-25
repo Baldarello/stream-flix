@@ -20,14 +20,7 @@
 
 import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
-import {
-    Badge,
-    Box,
-    Button,
-    IconButton,
-    TextField,
-    useMediaQuery
-} from '@mui/material';
+import {Badge, Box, Button, IconButton, TextField, useMediaQuery} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import TvIcon from '@mui/icons-material/Tv';

@@ -17,7 +17,6 @@
  * fall back to direct URL navigation so the test can still exercise
  * URL-navigable routes.
  */
-import { test, expect } from '@playwright/test';
 
 const SEED_DETAIL_ITEM = {
     id: 91002,

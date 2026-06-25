@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslations } from '../../../hooks/useTranslations.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 /**
  * Empty state icon SVG

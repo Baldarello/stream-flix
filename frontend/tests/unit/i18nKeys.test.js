@@ -3,9 +3,9 @@
  * must expose the same top-level namespaces so translators can't
  * silently drop a key in one language.
  */
-import { describe, it, expect } from 'vitest';
-import { it as itLocale } from '../../locales/it.js';
-import { en as enLocale } from '../../locales/en.js';
+import {describe, expect, it} from 'vitest';
+import {it as itLocale} from '../../locales/it.js';
+import {en as enLocale} from '../../locales/en.js';
 
 function flattenKeys(obj, prefix = '') {
     return Object.entries(obj).flatMap(([k, v]) => {

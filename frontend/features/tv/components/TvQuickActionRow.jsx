@@ -1,10 +1,10 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
+import {observer} from 'mobx-react-lite';
 import TvQuickActionTile from './TvQuickActionTile.jsx';
 import tvStore from '../tvStore.js';
-import { mediaStore } from '../../../store/mediaStore.js';
-import { handleSignIn, handleSignOut } from '../../../services/googleAuthService.js';
-import { useTranslations } from '../../../hooks/useTranslations.js';
+import {mediaStore} from '../../../store/mediaStore.js';
+import {handleSignIn, handleSignOut} from '../../../services/googleAuthService.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 // Google SVG Icon
 const GoogleIcon = () => (

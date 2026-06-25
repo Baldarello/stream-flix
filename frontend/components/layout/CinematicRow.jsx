@@ -19,7 +19,7 @@ import {gsap} from 'gsap';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {mediaStore} from '../../store/mediaStore.js';
 import {HoloCard} from './HoloCard.jsx';
-import {durations, easings, stagger as motionStagger, reducedMotion} from '../../motion/grammar.js';
+import {durations, easings, reducedMotion, stagger as motionStagger} from '../../motion/grammar.js';
 
 const CinematicRowInner = ({
                                id = 'row-cinematic',

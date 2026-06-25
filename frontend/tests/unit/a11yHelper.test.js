@@ -3,7 +3,7 @@
  * tests can run without installing the (heavy) browser-driven stack,
  * and we exercise the pure report/formatting logic directly.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 vi.mock('@axe-core/playwright', () => {
     return {

@@ -11,13 +11,13 @@
  * restores.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { observer } from 'mobx-react-lite';
-import { gsap } from 'gsap';
-import { fxStore } from '../store/fxStore.js';
-import { buildTransition } from '../motion/registry.js';
-import { reducedMotion } from '../utils/reducedMotion.js';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
+import {observer} from 'mobx-react-lite';
+import {gsap} from 'gsap';
+import {fxStore} from '../store/fxStore.js';
+import {buildTransition} from '../motion/registry.js';
+import {reducedMotion} from '../utils/reducedMotion.js';
 
 const FOCUSABLE_SELECTOR = [
     'a[href]',

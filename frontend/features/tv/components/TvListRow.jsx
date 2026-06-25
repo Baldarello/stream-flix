@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useRef} from 'react';
+import {observer} from 'mobx-react-lite';
 import TvCard from './TvCard.jsx';
-import { useTranslations } from '../../../hooks/useTranslations.js';
+import {useTranslations} from '../../../hooks/useTranslations.js';
 
 /**
  * TvListRow - Horizontal scrollable row of TV cards

@@ -1,4 +1,4 @@
-    // placeholder
+// placeholder
 /**
  * MediaStore (facade)
  *

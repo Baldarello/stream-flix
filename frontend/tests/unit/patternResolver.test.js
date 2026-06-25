@@ -3,8 +3,8 @@
  * start/end ranges and startNum/endNum all behave as documented in
  * AddLinkTabs.
  */
-import { describe, it, expect } from 'vitest';
-import { expandPattern } from '../../utils/patternResolver.js';
+import {describe, expect, it} from 'vitest';
+import {expandPattern} from '../../utils/patternResolver.js';
 
 describe('expandPattern', () => {
     it('substitutes [@EP] with a zero-padded number', () => {

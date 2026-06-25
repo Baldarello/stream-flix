@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Box } from '@mui/material';
+import {Box} from '@mui/material';
 
 const SkeletonInner = ({ id = 'skeleton-shimmer', width = '100%', height = 220, borderRadius = 12, sx }) => {
     return (

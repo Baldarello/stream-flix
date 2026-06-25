@@ -6,7 +6,7 @@
  *
  * Production-safe: no store seeding needed.
  */
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 

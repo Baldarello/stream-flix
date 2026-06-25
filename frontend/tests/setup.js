@@ -6,8 +6,8 @@
  *   in-memory no-op so store actions can be unit-tested without
  *   a real browser database.
  */
-import { TextEncoder, TextDecoder } from 'node:util';
-import { vi } from 'vitest';
+import {TextDecoder, TextEncoder} from 'node:util';
+import {vi} from 'vitest';
 
 if (typeof globalThis.TextEncoder === 'undefined') {
     globalThis.TextEncoder = TextEncoder;

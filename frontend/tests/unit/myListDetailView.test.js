@@ -14,7 +14,11 @@
  * state transitions can be exercised through the store facade
  * without rendering the full React tree.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {libraryStore} from '../../store/libraryStore.js';
+import {mediaStore} from '../../store/mediaStore.js';
+import {it as itLocale} from '../../locales/it.js';
+import {en as enLocale} from '../../locales/en.js';
 
 vi.mock('../../services/db.js', () => ({
     db: {
@@ -22,11 +26,6 @@ vi.mock('../../services/db.js', () => ({
         cachedItems: {put: vi.fn()},
     },
 }));
-
-import { libraryStore } from '../../store/libraryStore.js';
-import { mediaStore } from '../../store/mediaStore.js';
-import { it as itLocale } from '../../locales/it.js';
-import { en as enLocale } from '../../locales/en.js';
 
 describe('MyListDetailView navigation', () => {
     beforeEach(() => {

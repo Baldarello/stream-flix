@@ -19,9 +19,9 @@ import {mediaStore} from '../../store/mediaStore.js';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {ModalShell} from './ModalShell.jsx';
 import {
-    SyncConflictOverviewStep,
-    SyncConflictChooseStep,
     SyncConflictActionPanel,
+    SyncConflictChooseStep,
+    SyncConflictOverviewStep,
     SyncConflictProcessingOverlay
 } from './syncConflict/index.js';
 

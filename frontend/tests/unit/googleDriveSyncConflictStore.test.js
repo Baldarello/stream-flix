@@ -8,9 +8,9 @@
  * surface shows that are referenced by the My List, by media links or
  * by episode progress on either side of the conflict.
  */
-import { describe, it, expect, beforeEach } from 'vitest';
+import {beforeEach, describe, expect, it} from 'vitest';
 
-import { googleDriveSyncConflictStore } from '../../store/googleDriveSyncConflictStore.js';
+import {googleDriveSyncConflictStore} from '../../store/googleDriveSyncConflictStore.js';
 
 const buildShowsMap = (entries) => {
     const m = new Map();

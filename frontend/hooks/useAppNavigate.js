@@ -15,10 +15,10 @@
  * - `/qr` → QR scanner
  */
 
-import { useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router';
-import { mediaStore } from '../store/mediaStore.js';
-import { remoteStore } from '../store/remoteStore.js';
+import {useCallback, useEffect, useRef} from 'react';
+import {useLocation, useNavigate} from 'react-router';
+import {mediaStore} from '../store/mediaStore.js';
+import {remoteStore} from '../store/remoteStore.js';
 
 /**
  * Get the current route from MobX state

@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
-import { mediaStore } from '../store/mediaStore.js';
-import { it as itLocale } from '../locales/it.js';
-import { en as enLocale } from '../locales/en.js';
+import {useCallback, useMemo, useSyncExternalStore} from 'react';
+import {mediaStore} from '../store/mediaStore.js';
+import {it as itLocale} from '../locales/it.js';
+import {en as enLocale} from '../locales/en.js';
 
 export const AVAILABLE_LANGUAGES = ['it', 'en'];
 export const FALLBACK_LANGUAGE = 'it';

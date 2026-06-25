@@ -7,15 +7,15 @@
  * futuristic `Skeleton` placeholders.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box, Typography } from '@mui/material';
-import { gsap } from 'gsap';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { HoloCard } from './HoloCard.jsx';
-import { mediaStore } from '../../store/mediaStore.js';
-import { SkeletonCard } from '../feedback/Skeleton.jsx';
-import { durations, easings, stagger as motionStagger, reducedMotion } from '../../motion/grammar.js';
+import React, {useEffect, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
+import {Box, Typography} from '@mui/material';
+import {gsap} from 'gsap';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {HoloCard} from './HoloCard.jsx';
+import {mediaStore} from '../../store/mediaStore.js';
+import {SkeletonCard} from '../feedback/Skeleton.jsx';
+import {durations, easings, reducedMotion, stagger as motionStagger} from '../../motion/grammar.js';
 
 const CinematicGridInner = ({
     id = 'grid-cinematic',

@@ -14,7 +14,7 @@
  * to the parameter for callers (like `LinkMovieModal`) that don't
  * set it themselves.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 const bulkAddMock = vi.fn().mockResolvedValue(undefined);
 const putMock = vi.fn().mockResolvedValue(undefined);

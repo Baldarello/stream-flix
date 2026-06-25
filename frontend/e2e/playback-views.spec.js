@@ -18,7 +18,7 @@
  *   - /qr      → needs isQRScannerOpen (only via dock button, tested in qr-scanner.spec.js)
  *   - /pairing → needs isSmartTVPairingVisible
  */
-import { test, expect } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 

@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box } from '@mui/material';
+import {observer} from 'mobx-react-lite';
+import {Box} from '@mui/material';
 
 export const ScanlineOverlay = observer(function ScanlineOverlayInner(props) {
     const { id = 'scanline-overlay', intensity = 0.6, label } = props;

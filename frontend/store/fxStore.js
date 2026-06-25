@@ -12,7 +12,7 @@
  * Kept deliberately small and additive - never touches mediaStore's schema.
  */
 
-import { makeAutoObservable } from 'mobx';
+import {makeAutoObservable} from 'mobx';
 
 class FxStore {
     dockMode = 'extended';

@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react-lite';
 import tvStore from './tvStore.js';
-import { remoteStore } from '../../store/remoteStore.js';
-import { mediaStore } from '../../store/mediaStore.js';
-import { fxStore } from '../../store/fxStore.js';
+import {remoteStore} from '../../store/remoteStore.js';
+import {mediaStore} from '../../store/mediaStore.js';
+import {fxStore} from '../../store/fxStore.js';
 import TvScreenRouter from './screens/TvScreenRouter.jsx';
 import './styles/tv.css';
 

@@ -15,9 +15,9 @@
  * shared `Skeleton` component from the futuristic rework.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
-import { Skeleton } from '../../components/feedback/Skeleton.jsx';
+import React, {useEffect, useState} from 'react';
+import {Box, Stack, Typography} from '@mui/material';
+import {Skeleton} from '../../components/feedback/Skeleton.jsx';
 
 const CAPTION = 'INITIALIZING';
 

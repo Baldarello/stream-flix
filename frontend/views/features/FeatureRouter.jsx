@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import { Box } from '@mui/material';
-import { useStores } from '../../context/StoreContext.jsx';
-import { useTranslations } from '../../hooks/useTranslations.js';
-import { FloatingDock } from '../../components/layout/FloatingDock.jsx';
-import { CinematicFooter } from '../../components/layout/CinematicFooter.jsx';
-import { CinematicDetail } from '../../components/media/CinematicDetail.jsx';
+import {observer} from 'mobx-react-lite';
+import {Box} from '@mui/material';
+import {useStores} from '../../context/StoreContext.jsx';
+import {useTranslations} from '../../hooks/useTranslations.js';
+import {FloatingDock} from '../../components/layout/FloatingDock.jsx';
+import {CinematicFooter} from '../../components/layout/CinematicFooter.jsx';
+import {CinematicDetail} from '../../components/media/CinematicDetail.jsx';
 import ProfileDrawer from '../../components/utilities/ProfileDrawer.jsx';
-import { HomeView } from '../../features/home/HomeView.jsx';
-import { CinematicGrid } from '../../components/layout/CinematicGrid.jsx';
+import {HomeView} from '../../features/home/HomeView.jsx';
+import {CinematicGrid} from '../../components/layout/CinematicGrid.jsx';
 import LibraryManagementView from '../../components/library/LibraryManagementView.jsx';
-import { MyListDetailView } from '../../components/library/MyListDetailView.jsx';
+import {MyListDetailView} from '../../components/library/MyListDetailView.jsx';
 
 /**
  * FeatureRouter Component

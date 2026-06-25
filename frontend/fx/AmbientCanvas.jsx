@@ -14,15 +14,15 @@
  * the palette without forcing a re-render of the React tree.
  */
 
-import React, { useEffect, useImperativeHandle, useRef, forwardRef } from 'react';
-import { observer } from 'mobx-react-lite';
-import { autorun } from 'mobx';
+import React, {forwardRef, useEffect, useImperativeHandle, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
+import {autorun} from 'mobx';
 import * as THREE from 'three';
-import { starfieldFragment, starfieldVertex } from './shaders/starfield.glsl.js';
-import { lightleakFragment, lightleakVertex } from './shaders/lightleak.glsl.js';
-import { getWebGLSupport } from '../utils/webglDetect.js';
-import { reducedMotion } from '../utils/reducedMotion.js';
-import { mediaStore } from '../store/mediaStore.js';
+import {starfieldFragment, starfieldVertex} from './shaders/starfield.glsl.js';
+import {lightleakFragment, lightleakVertex} from './shaders/lightleak.glsl.js';
+import {getWebGLSupport} from '../utils/webglDetect.js';
+import {reducedMotion} from '../utils/reducedMotion.js';
+import {mediaStore} from '../store/mediaStore.js';
 
 const DEFAULT_PALETTE = {
     accent: new THREE.Color('#4cd2ff'),
