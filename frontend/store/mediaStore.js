@@ -1242,12 +1242,23 @@ class MediaStore {
         const {linksToAdd} = result;
         if (linksToAdd.length > 0) {
             try {
-                await addLinksToMediaSvc(show.id, linksToAdd);
+                const savedCount = await addLinksToMediaSvc(show.id, linksToAdd);
+                // ponytail: update libraryStore.mediaLinks directly with the newly added
+                // links so MobX reactivity works even if refreshLinksForShow queries
+                // with mismatched episode IDs (e.g. TVMaze vs TMDB in linkingEpisodesForItem).
+                runInAction(() => {
+                    for (const link of linksToAdd) {
+                        const key = String(link.mediaId);
+                        const existing = libraryStore.mediaLinks.get(key) || [];
+                        libraryStore.mediaLinks.set(key, [...existing, link]);
+                    }
+                    this._patchCurrentItemVideoUrls(show.id);
+                });
                 await this.refreshLinksForShow(show.id);
                 // Switch to manage tab only AFTER the store has been updated
                 uiStore.setLinkEpisodesTab('manage');
                 uiStore.showSnackbar('notifications.linksAddedSuccess', 'success', true, {
-                    count: linksToAdd.length,
+                    count: savedCount,
                 });
                 return true;
             } catch (error) {
@@ -1314,16 +1325,25 @@ class MediaStore {
      * Called after every link mutation.
      */
     _patchCurrentItemVideoUrls(showId) {
-        const item = this.selectedItem;
-        if (!item || item.id !== showId || !item.seasons) return;
-        item.seasons.forEach(season => {
-            (season.episodes || []).forEach(ep => {
-                // ponytail: toString() — Map keys are strings (Object.groupBy
-                // stringifies), ep.id is a number; without conversion get() misses.
-                ep.video_urls = libraryStore.mediaLinks.get(String(ep.id)) || [];
-                ep.video_url = ep.video_urls[0]?.url || null;
+        // ponytail: patch both selectedItem (playbackStore) and currentSelectedItem
+        // (remoteStore in master mode) so the UI always sees fresh video_urls.
+        const targets = [this.selectedItem];
+        if (this.isRemoteMaster && this.currentSelectedItem !== this.selectedItem) {
+            targets.push(this.currentSelectedItem);
+        }
+        // Also patch linkingEpisodesForItem directly — LinkEpisodesModal reads it.
+        if (uiStore.linkingEpisodesForItem?.id === showId) {
+            targets.push(uiStore.linkingEpisodesForItem);
+        }
+        for (const item of targets) {
+            if (!item || item.id !== showId || !item.seasons) continue;
+            item.seasons.forEach(season => {
+                (season.episodes || []).forEach(ep => {
+                    ep.video_urls = libraryStore.mediaLinks.get(String(ep.id)) || [];
+                    ep.video_url = ep.video_urls[0]?.url || null;
+                });
             });
-        });
+        }
         // Also patch cachedItems so next detail open is warm
         const cached = libraryStore.cachedItems.get(showId);
         if (cached && cached.seasons) {
@@ -1529,6 +1549,10 @@ class MediaStore {
                     if (this._masterUiSelectedItem?.id === item.id) {
                         this._masterUiSelectedItem = fullItemDetails;
                     }
+                    // ponytail: keep linkingEpisodesForItem in sync (same fix as non-master path).
+                    if (uiStore.linkingEpisodesForItem?.id === item.id) {
+                        uiStore.linkingEpisodesForItem = fullItemDetails;
+                    }
                 });
             } catch (error) {
                 console.error('Failed to load details for remote master UI', error);
@@ -1584,6 +1608,12 @@ class MediaStore {
                 switch (context) {
                     case 'detailView':
                         if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
+                        // ponytail: keep linkingEpisodesForItem in sync so
+                        // LinkEpisodesModal and _patchCurrentItemVideoUrls use
+                        // the same object reference (avoids TVMaze/TMDB ID mismatch).
+                        if (uiStore.linkingEpisodesForItem?.id === item.id) {
+                            uiStore.linkingEpisodesForItem = fullItemDetails;
+                        }
                         break;
                     case 'watchTogether':
                         if (this.watchTogetherSelectedItem?.id === item.id) {
