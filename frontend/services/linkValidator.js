@@ -85,6 +85,9 @@ export const checkLinksForEpisode = async (links) => {
 export const checkLinksForShow = async (item, existingLinks) => {
     const invalidLinks = [];
     const linksToCheck = [];
+    // ponytail: safeKey — coerces any value to string key without throwing
+    // "Cannot convert object to primitive" if id is unexpectedly an object.
+    const safeKey = (v) => String(v == null ? '' : v);
 
     if (item.media_type === 'tv' && item.seasons) {
         // For TV shows, check all episodes across all seasons
@@ -97,9 +100,9 @@ export const checkLinksForShow = async (item, existingLinks) => {
                             episode,
                             season,
                         });
-                    // ponytail: toString() — Map keys are strings, episode.id is a number.
-                    } else if (existingLinks && existingLinks.has(String(episode.id))) {
-                        const dbLinks = existingLinks.get(String(episode.id)) || [];
+                    // ponytail: safeKey — Map keys are strings, episode.id is a number.
+                    } else if (existingLinks && existingLinks.has(safeKey(episode.id))) {
+                        const dbLinks = existingLinks.get(safeKey(episode.id)) || [];
                         if (dbLinks.length > 0) {
                             linksToCheck.push({ links: dbLinks, episode, season });
                         }
@@ -111,9 +114,9 @@ export const checkLinksForShow = async (item, existingLinks) => {
         // For movies, check direct links
         if (item.video_urls && item.video_urls.length > 0) {
             linksToCheck.push({ links: item.video_urls });
-        // ponytail: toString() — Map keys are strings, item.id may be a number.
-        } else if (existingLinks && existingLinks.has(String(item.id))) {
-            const dbLinks = existingLinks.get(String(item.id)) || [];
+        // ponytail: safeKey — Map keys are strings, item.id may be a number.
+        } else if (existingLinks && existingLinks.has(safeKey(item.id))) {
+            const dbLinks = existingLinks.get(safeKey(item.id)) || [];
             if (dbLinks.length > 0) {
                 linksToCheck.push({ links: dbLinks });
             }

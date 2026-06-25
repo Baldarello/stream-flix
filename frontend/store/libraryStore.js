@@ -142,27 +142,27 @@ class LibraryStore {
         };
     }
 
-    // ===== HELPERS =====
+    // ponytail: safeKey — coerces any value to string key, never throws.
+    // Guards against objects which would throw "Cannot convert to primitive".
+    static safeKey(v) { return String(v == null ? '' : v); }
 
     hasLinks(mediaId) {
-        // ponytail: toString() — Map keys are strings, mediaId may be a number.
-        const links = this.mediaLinks.get(String(mediaId));
+        const links = this.mediaLinks.get(LibraryStore.safeKey(mediaId));
         return Array.isArray(links) && links.length > 0;
     }
 
     findEpisodeById(episodeId) {
+        const key = LibraryStore.safeKey(episodeId);
         for (const show of this.cachedItems.values()) {
             if (!show.seasons) continue;
             for (const season of show.seasons) {
                 if (!season.episodes) continue;
-                // ponytail: toString() on both — episodeId can be number or string.
-                const found = season.episodes.find((e) => String(e.id) === String(episodeId));
+                const found = season.episodes.find((e) => LibraryStore.safeKey(e.id) === key);
                 if (found) return found;
             }
         }
         return null;
     }
-
     // ===== BULK IMPORT FROM DB =====
     // Called once at boot by mediaStore.loadPersistedData so that the
     // sub-store observables are populated in a single runInAction.
@@ -182,13 +182,13 @@ class LibraryStore {
         this.cachedItems = new Map(items.map((i) => [i.id, i]));
         const linksMap = new Map();
         links.forEach((link) => {
-            const key = String(link.mediaId);
+            // ponytail: LibraryStore.safeKey guards against object mediaId.
+            const key = LibraryStore.safeKey(link.mediaId);
             const arr = linksMap.get(key) || [];
             arr.push(link);
             linksMap.set(key, arr);
         });
         this.mediaLinks = linksMap;
-        this.episodeProgress = new Map(progress.map((p) => [p.episodeId, p]));
         this.preferredSources = new Map(preferredSourcesData.map((p) => [p.showId, p.origin]));
         this.selectedSeasons = new Map(selectedSeasonsData.map((s) => [s.showId, s.seasonNumber]));
         this.showFilterPreferences = new Map(
@@ -373,8 +373,7 @@ class LibraryStore {
      * link records (or an empty array).
      */
     async getLinksForMedia(mediaId) {
-        const key = String(mediaId);
-        // ponytail: toString() on key — Map stores under string key.
+        const key = LibraryStore.safeKey(mediaId);
         if (this.mediaLinks.has(key)) {
             return this.mediaLinks.get(key) || [];
         }
