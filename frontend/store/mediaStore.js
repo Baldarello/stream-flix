@@ -1318,7 +1318,9 @@ class MediaStore {
         if (!item || item.id !== showId || !item.seasons) return;
         item.seasons.forEach(season => {
             (season.episodes || []).forEach(ep => {
-                ep.video_urls = libraryStore.mediaLinks.get(ep.id) || [];
+                // ponytail: toString() — Map keys are strings (Object.groupBy
+                // stringifies), ep.id is a number; without conversion get() misses.
+                ep.video_urls = libraryStore.mediaLinks.get(String(ep.id)) || [];
                 ep.video_url = ep.video_urls[0]?.url || null;
             });
         });
@@ -1327,7 +1329,7 @@ class MediaStore {
         if (cached && cached.seasons) {
             cached.seasons.forEach(season => {
                 (season.episodes || []).forEach(ep => {
-                    ep.video_urls = libraryStore.mediaLinks.get(ep.id) || [];
+                    ep.video_urls = libraryStore.mediaLinks.get(String(ep.id)) || [];
                     ep.video_url = ep.video_urls[0]?.url || null;
                 });
             });

@@ -55,9 +55,11 @@ const ManageLinksView = observer(({    }) => {
     // accessing it and calling .get() inside the render creates tracked
     // reads so the component re-renders when the Map is mutated.
 
+    // ponytail: toString() — Object.groupBy stringifies Map keys as strings,
+    // but ep.id is a number (TMDB). Without conversion Map.get() misses the entry.
     const linksByDomain = {};
-    for (const ep of currentSeason.episodes) {
-        const epLinks = mediaStore.mediaLinks.get(ep.id) || [];
+    for (const ep of (currentSeason?.episodes || [])) {
+        const epLinks = mediaStore.mediaLinks.get(String(ep.id)) || [];
         console.log("ep", toJS(ep));
         console.log("epLinks", toJS(epLinks));
         for (const link of epLinks) {
@@ -70,8 +72,8 @@ const ManageLinksView = observer(({    }) => {
     }
 
     const episodeLinkMap = {};
-    for (const ep of currentSeason.episodes) {
-        episodeLinkMap[ep.id] = mediaStore.mediaLinks.get(ep.id) || [];
+    for (const ep of (currentSeason?.episodes || [])) {
+        episodeLinkMap[ep.id] = mediaStore.mediaLinks.get(String(ep.id)) || [];
     }
     console.log("episodeLinkMap", toJS(episodeLinkMap));
     console.log("linksByDomain", toJS(linksByDomain));

@@ -65,7 +65,9 @@ const LinkMovieModal = observer(() => {
   
   const linksByOrigin = useMemo(() => {
     if (!item) return {};
-    const links = mediaLinks.get(item.id) || [];
+    // ponytail: toString() — Map keys are strings (Object.groupBy stringifies),
+    // but item.id may be a number; without conversion get() misses.
+    const links = mediaLinks.get(String(item.id)) || [];
     return links.reduce((acc, link) => {
         try {
             const origin = new URL(link.url).origin;

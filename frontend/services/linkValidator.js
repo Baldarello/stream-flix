@@ -95,16 +95,13 @@ export const checkLinksForShow = async (item, existingLinks) => {
                         linksToCheck.push({
                             links: episode.video_urls,
                             episode,
-                            season
+                            season,
                         });
-                    } else if (existingLinks && existingLinks.has(episode.id)) {
-                        const dbLinks = existingLinks.get(episode.id) || [];
+                    // ponytail: toString() — Map keys are strings, episode.id is a number.
+                    } else if (existingLinks && existingLinks.has(String(episode.id))) {
+                        const dbLinks = existingLinks.get(String(episode.id)) || [];
                         if (dbLinks.length > 0) {
-                            linksToCheck.push({
-                                links: dbLinks,
-                                episode,
-                                season
-                            });
+                            linksToCheck.push({ links: dbLinks, episode, season });
                         }
                     }
                 }
@@ -113,11 +110,12 @@ export const checkLinksForShow = async (item, existingLinks) => {
     } else {
         // For movies, check direct links
         if (item.video_urls && item.video_urls.length > 0) {
-            linksToCheck.push({links: item.video_urls});
-        } else if (existingLinks && existingLinks.has(item.id)) {
-            const dbLinks = existingLinks.get(item.id) || [];
+            linksToCheck.push({ links: item.video_urls });
+        // ponytail: toString() — Map keys are strings, item.id may be a number.
+        } else if (existingLinks && existingLinks.has(String(item.id))) {
+            const dbLinks = existingLinks.get(String(item.id)) || [];
             if (dbLinks.length > 0) {
-                linksToCheck.push({links: dbLinks});
+                linksToCheck.push({ links: dbLinks });
             }
         }
     }

@@ -145,7 +145,8 @@ class LibraryStore {
     // ===== HELPERS =====
 
     hasLinks(mediaId) {
-        const links = this.mediaLinks.get(mediaId);
+        // ponytail: toString() — Map keys are strings, mediaId may be a number.
+        const links = this.mediaLinks.get(String(mediaId));
         return Array.isArray(links) && links.length > 0;
     }
 
@@ -154,7 +155,8 @@ class LibraryStore {
             if (!show.seasons) continue;
             for (const season of show.seasons) {
                 if (!season.episodes) continue;
-                const found = season.episodes.find((e) => e.id === episodeId);
+                // ponytail: toString() on both — episodeId can be number or string.
+                const found = season.episodes.find((e) => String(e.id) === String(episodeId));
                 if (found) return found;
             }
         }
@@ -371,8 +373,10 @@ class LibraryStore {
      * link records (or an empty array).
      */
     async getLinksForMedia(mediaId) {
-        if (this.mediaLinks.has(mediaId)) {
-            return this.mediaLinks.get(mediaId) || [];
+        const key = String(mediaId);
+        // ponytail: toString() on key — Map stores under string key.
+        if (this.mediaLinks.has(key)) {
+            return this.mediaLinks.get(key) || [];
         }
         let links = [];
         try {
@@ -381,7 +385,7 @@ class LibraryStore {
             console.warn('[libraryStore] failed to load mediaLinks', e);
             return [];
         }
-        this.mediaLinks.set(String(mediaId), links);
+        this.mediaLinks.set(key, links);
         return links;
     }
 
