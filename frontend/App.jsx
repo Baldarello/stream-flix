@@ -11,11 +11,12 @@
  * class maps to the unified palette.
  */
 
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, useNavigate } from 'react-router';
 import { observer } from 'mobx-react-lite';
-import { Box, createTheme, ThemeProvider } from '@mui/material';
+import { Box, createTheme, ThemeProvider, useMediaQuery } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
+import { isSmartTV } from './utils/device.js';
 import { mediaStore } from './store/mediaStore.js';
 import { remoteStore } from './store/remoteStore.js';
 import { fxStore } from './store/fxStore.js';
@@ -30,6 +31,8 @@ import { AmbientCanvas } from './fx/AmbientCanvas.jsx';
 import { SceneCanvas } from './fx/SceneCanvas.jsx';
 import { TransitionPortal } from './fx/TransitionPortal.jsx';
 import DebugOverlay from './components/utilities/DebugOverlay.jsx';
+
+const TvApp = lazy(() => import('./features/tv/TvApp.jsx'));
 
 // Theme Configuration - single unified futuristic theme.
 const baseThemeOptions = {
@@ -112,10 +115,20 @@ const baseThemeOptions = {
 const cinematicTheme = createTheme(baseThemeOptions);
 
 /**
+ * useTvMode hook - re-evaluates on resize via useMediaQuery.
+ * Must be called inside ThemeProvider (useMediaQuery needs theme context).
+ */
+const useTvMode = () => {
+    const isSmall = useMediaQuery('@media (max-width: 599px)');
+    return isSmall || isSmartTV() || new URLSearchParams(window.location.search).get('tv') === '1';
+};
+
+/**
  * Inner App component that uses hooks requiring React context
  */
 const AppInner = observer(() => {
     const navigate = useNavigate();
+    const tvMode = useTvMode();
 
     // Initialize navigation service with react-router's navigate
     useEffect(() => {
@@ -159,6 +172,17 @@ const AppInner = observer(() => {
             };
         }
     }, []);
+
+    if (tvMode) {
+        return (
+            <ThemeProvider theme={cinematicTheme}>
+                <CssBaseline />
+                <Suspense fallback={null}>
+                    <TvApp />
+                </Suspense>
+            </ThemeProvider>
+        );
+    }
 
     return (
         <ThemeProvider theme={cinematicTheme}>
