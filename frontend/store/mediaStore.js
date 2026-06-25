@@ -1281,43 +1281,34 @@ class MediaStore {
     };
 
     deleteMediaLink = async (linkId) => {
-        const mediaId = await deleteMediaLinkSvc(linkId);
-        if (mediaId) await this.refreshLinksForMediaId(mediaId);
+        await deleteMediaLinkSvc(linkId);
+        // Always refresh by show ID so linkingEpisodesForItem episode IDs are used
+        // (avoids episode ID mismatch when link.mediaId was an episode ID).
+        const showId = uiStore.linkingEpisodesForItem?.id;
+        if (showId) await this.refreshLinksForShow(showId);
     };
 
     updateMediaLink = async (linkId, updates) => {
         await db.mediaLinks.update(linkId, updates);
-        // Re-read the link to get its mediaId and refresh
-        const link = await db.mediaLinks.get(linkId);
-        if (link) await this.refreshLinksForMediaId(link.mediaId);
+        // Always refresh by show ID so linkingEpisodesForItem episode IDs are used.
+        const showId = uiStore.linkingEpisodesForItem?.id;
+        if (showId) await this.refreshLinksForShow(showId);
     };
-
-    setPreferredSource = async (showId, origin) => {
-        await setPreferredSourceSvc(showId, origin);
-        runInAction(() => {
-            libraryStore.preferredSources.set(showId, origin);
-        });
-    };
-
-    async refreshLinksForShow(showId) {
-        // Query show-level links AND all episode-level links so the
-        // VideoLinksTab shows links even when they were added via
-        // addLinksForSeason / buildLinksForSeason (which stores them
-        // with mediaId = ep.id instead of show.id).
-        const show = libraryStore.cachedItems.get(String(showId));
-        const episodeIds = show?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ?? [];
-        const allIds = [String(showId), ...episodeIds.map(String)];
-        const allLinks = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
-        const grouped = Object.groupBy(allLinks, (link) => String(link.mediaId));
-        // ponytail: assign new Map reference so MobX observer re-renders
-        const newMediaLinks = new Map(libraryStore.mediaLinks);
-        for (const [mediaId, links] of Object.entries(grouped)) {
-            newMediaLinks.set(mediaId, links);
+    updateLinksDomain = async (payload) => {
+        const {links, newDomain} = payload;
+        try {
+            const updatedLinks = links.map(link => {
+                const url = new URL(link.url);
+                const newUrl = new URL(url.pathname + url.search, newDomain);
+                return {...link, url: newUrl.toString()};
+            });
+            await db.mediaLinks.bulkPut(updatedLinks);
+            const showId = uiStore.linkingEpisodesForItem?.id;
+            if (showId) await this.refreshLinksForShow(showId);
+            this.showSnackbar('notifications.linksUpdated', 'success', true, {count: updatedLinks.length});
+        } catch (error) {
+            this.showSnackbar('notifications.domainUpdateError', 'error', true, {error: (error).message});
         }
-        runInAction(() => {
-            libraryStore.mediaLinks = newMediaLinks;
-            this._patchCurrentItemVideoUrls(showId);
-        });
     }
     /**
      * Patch `currentSelectedItem` and `cachedItems` episodes so their
@@ -1354,6 +1345,29 @@ class MediaStore {
                 });
             });
         }
+    }
+    async refreshLinksForShow(showId) {
+        // Use episode IDs from linkingEpisodesForItem (same source that
+        // buildLinksForSeason used to save links) to avoid TVMaze/TMDB
+        // ID mismatch when cachedItems has different episode ID systems.
+        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId
+            ? uiStore.linkingEpisodesForItem
+            : null;
+        const show = libraryStore.cachedItems.get(String(showId));
+        const episodeIds = linkingShow?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ??
+            show?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ?? [];
+        const allIds = [String(showId), ...episodeIds.map(String)];
+        const allLinks = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
+        const grouped = Object.groupBy(allLinks, (link) => String(link.mediaId));
+        // ponytail: assign new Map reference so MobX observer re-renders
+        const newMediaLinks = new Map(libraryStore.mediaLinks);
+        for (const [mediaId, links] of Object.entries(grouped)) {
+            newMediaLinks.set(mediaId, links);
+        }
+        runInAction(() => {
+            libraryStore.mediaLinks = newMediaLinks;
+            this._patchCurrentItemVideoUrls(showId);
+        });
     }
 
     async refreshLinksForMediaId(mediaId) {
@@ -1647,9 +1661,13 @@ class MediaStore {
             });
         }
     };
-
     clearLinksForSeason = async (seasonNumber, showId) => {
-        const show = this.cachedItems.get(showId);
+        // Use linkingEpisodesForItem season (same episode IDs used to save links)
+        // instead of cachedItems to avoid TVMaze/TMDB ID mismatch.
+        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId
+            ? uiStore.linkingEpisodesForItem
+            : null;
+        const show = linkingShow || this.cachedItems.get(showId);
         if (!show) return;
         const season = show.seasons?.find(s => s.season_number === seasonNumber);
         if (!season) return;
@@ -1669,7 +1687,12 @@ class MediaStore {
     }
 
     clearLinksForDomain = async (showId, seasonNumber, origin) => {
-        const show = this.cachedItems.get(showId);
+        // Use linkingEpisodesForItem season (same episode IDs used to save links)
+        // instead of cachedItems to avoid TVMaze/TMDB ID mismatch.
+        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId
+            ? uiStore.linkingEpisodesForItem
+            : null;
+        const show = linkingShow || this.cachedItems.get(showId);
         if (!show) return;
         const season = show.seasons?.find(s => s.season_number === seasonNumber);
         if (!season) return;
@@ -1695,24 +1718,6 @@ class MediaStore {
             });
         } else {
             this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
-        }
-    }
-
-    updateLinksDomain = async (payload) => {
-        const {links, newDomain} = payload;
-        try {
-            const updatedLinks = links.map(link => {
-                const url = new URL(link.url);
-                const newUrl = new URL(url.pathname + url.search, newDomain);
-                return {...link, url: newUrl.toString()};
-            });
-            await db.mediaLinks.bulkPut(updatedLinks);
-            if (this.linkingEpisodesForItem) {
-                await this.refreshLinksForShow(this.linkingEpisodesForItem.id);
-            }
-            this.showSnackbar('notifications.linksUpdated', 'success', true, {count: updatedLinks.length});
-        } catch (error) {
-            this.showSnackbar('notifications.domainUpdateError', 'error', true, {error: (error).message});
         }
     }
     /**
