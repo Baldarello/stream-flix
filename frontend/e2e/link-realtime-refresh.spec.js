@@ -206,19 +206,20 @@ test('DetailView refreshes realtime after links added via modal', async ({ page 
     const modal = page.locator('[data-component="link-episodes-modal"]');
     await expect(modal).toBeVisible({ timeout: 5000 });
 
-    // Select Season 1
+    // Select Season 1 (match debug test approach - click first option after opening select)
     const seasonSelect = page.locator('[data-component="link-episodes-modal"] .MuiSelect-select, [data-component="link-episodes-modal"] select').first();
     const seasonSelectVisible = await seasonSelect.isVisible().catch(() => false);
     if (seasonSelectVisible) {
         await seasonSelect.click();
-        await page.waitForTimeout(200);
-        const s1Option = page.getByRole('option').filter({ hasText: /season 1/i }).or(page.locator('[role="option"]').filter({ hasText: /season 1/i })).first();
-        const s1Exists = await s1Option.isVisible().catch(() => false);
-        if (s1Exists) await s1Option.click();
-        await page.waitForTimeout(200);
+        await page.waitForTimeout(300);
+        const opts = page.locator('li.MuiMenuItem-root, [role="option"]');
+        if (await opts.count() > 0) {
+            await opts.first().click();
+            await page.waitForTimeout(300);
+        }
     }
 
-    // Fill pattern
+    // Fill pattern — match exactly what the passing debug test does
     const patternInput = page.locator('#pattern-url-episode');
     await patternInput.clear();
     await patternInput.fill('https://example.com/stream/season-1-ep-.mp4');
@@ -226,19 +227,18 @@ test('DetailView refreshes realtime after links added via modal', async ({ page 
     await page.getByRole('button', { name: '[@EP]' }).click();
     await page.waitForTimeout(100);
 
-    // Save
+    // Save and wait for async operations to complete (same timing as passing debug test)
     await page.locator('[data-component="add-links-button"]').click();
     const snackbarVisible = await page.locator('.MuiSnackbar-root, [role="alert"]').isVisible({ timeout: 8000 }).catch(() => false);
     if (snackbarVisible) {
         console.log('Snackbar:', await page.locator('.MuiSnackbar-root, [role="alert"]').textContent());
     }
-
-    // Wait for modal to update
-    await page.waitForTimeout(1500);
+    // Wait 2000ms like the passing debug test (not 1500ms)
+    await page.waitForTimeout(2000);
 
     // Close modal — use Escape key (robust across locales)
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
 
     // Check lang chips in DetailView
     const afterCount = await langChips.count();

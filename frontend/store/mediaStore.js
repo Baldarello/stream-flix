@@ -60,6 +60,9 @@ class MediaStore {
      * only need MobX observables should keep using `mobx-react`.
      */
     events = new EventTarget();
+    // ponytail: incremented by _patchCurrentItemVideoUrls so DetailView's
+    // useMemo([currentSeason, linksRefreshVersion]) recomputes languages.
+    linksRefreshVersion = 0;
 
     constructor() {
         makeAutoObservable(this, {events: false});
@@ -1323,28 +1326,40 @@ class MediaStore {
             targets.push(this.currentSelectedItem);
         }
         // Also patch linkingEpisodesForItem directly — LinkEpisodesModal reads it.
-        if (uiStore.linkingEpisodesForItem?.id === showId) {
-            targets.push(uiStore.linkingEpisodesForItem);
-        }
+        // ponytail: patch targets with shallow-copy seasons so that any
+        // MobX observer tracking selectedItem gets a new reference.
+        // Also force playbackStore.selectedItem to a new object so
+        // DetailView (which reads currentSelectedItem) re-renders.
         for (const item of targets) {
             if (!item || item.id !== showId || !item.seasons) continue;
-            item.seasons.forEach(season => {
-                (season.episodes || []).forEach(ep => {
-                    ep.video_urls = libraryStore.mediaLinks.get(String(ep.id)) || [];
-                    ep.video_url = ep.video_urls[0]?.url || null;
-                });
-            });
+            const patchedSeasons = item.seasons.map(season => ({
+                ...season,
+                episodes: (season.episodes || []).map(ep => ({
+                    ...ep,
+                    video_urls: libraryStore.mediaLinks.get(String(ep.id)) || [],
+                    video_url: (libraryStore.mediaLinks.get(String(ep.id)) || [])[0]?.url || null,
+                })),
+            }));
+            item.seasons = patchedSeasons;
+            if (item === this.selectedItem) {
+                // Force a new reference so observer of selectedItem detects change
+                this.selectedItem = {...item, seasons: patchedSeasons};
+            }
         }
         // Also patch cachedItems so next detail open is warm
         const cached = libraryStore.cachedItems.get(showId);
         if (cached && cached.seasons) {
-            cached.seasons.forEach(season => {
-                (season.episodes || []).forEach(ep => {
-                    ep.video_urls = libraryStore.mediaLinks.get(String(ep.id)) || [];
-                    ep.video_url = ep.video_urls[0]?.url || null;
-                });
-            });
+            cached.seasons = cached.seasons.map(season => ({
+                ...season,
+                episodes: (season.episodes || []).map(ep => ({
+                    ...ep,
+                    video_urls: libraryStore.mediaLinks.get(String(ep.id)) || [],
+                    video_url: (libraryStore.mediaLinks.get(String(ep.id)) || [])[0]?.url || null,
+                })),
+            }));
         }
+        // ponytail: force DetailView useMemo to recompute availableLanguages
+        this.linksRefreshVersion++;
     }
     async refreshLinksForShow(showId) {
         // Use episode IDs from linkingEpisodesForItem (same source that

@@ -359,8 +359,10 @@ SwipeableEpisodeCardDetailView.displayName = 'SwipeableEpisodeCardDetailView';
 
 // ─── DetailView (composer, <300L) ───────────────────────────────────────────
 const DetailView = observer(() => {
+    // ponytail: linksRefreshVersion is incremented by _patchCurrentItemVideoUrls
+    // so we track it here to force DetailView re-render when links change.
     const {currentSelectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration,
-        selectedSeasons, setSelectedSeasonForShow, showFilterPreferences, setShowFilterPreference} = mediaStore;
+        selectedSeasons, setSelectedSeasonForShow, showFilterPreferences, setShowFilterPreference, linksRefreshVersion} = mediaStore;
     const {t} = useTranslations();
     const headerRef = useRef(null);
 
@@ -388,7 +390,7 @@ const DetailView = observer(() => {
             if (link.type) typeSet.add(link.type);
         }));
         return {availableLanguages: Array.from(langSet).sort(), availableTypes: Array.from(typeSet).sort()};
-    }, [currentSeason]);
+    }, [currentSeason, mediaStore.linksRefreshVersion]);
 
     const currentPreferences = showFilterPreferences.get(item.id) || {};
     const languageFilter = currentPreferences.language && availableLanguages.includes(currentPreferences.language)
