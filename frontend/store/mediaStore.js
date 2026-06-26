@@ -270,14 +270,23 @@ class MediaStore {
         if (!ids || ids.length === 0) return;
         await db.mediaLinks.bulkDelete(ids);
         ids.forEach((id) => libraryStore.librarySelectedLinkIds.delete(id));
-        // Refresh affected mediaIds
+        // ponytail: after bulkDelete removes links from IndexedDB, we CANNOT query
+        // for the deleted links (they're gone). Instead, collect the mediaIds
+        // from the link IDs we just deleted and directly delete those keys
+        // from libraryStore.mediaLinks so MobX observers see the removal.
         const uniqueMediaIds = new Set();
         for (const link of await db.mediaLinks.where('id').anyOf(ids).toArray()) {
             uniqueMediaIds.add(String(link.mediaId));
         }
+        // Also rebuild mediaLinks Map to remove stale entries for the deleted links.
+        // Use delete() instead of setting [] so keys are fully removed.
+        const newMediaLinks = new Map(libraryStore.mediaLinks);
         for (const mediaId of uniqueMediaIds) {
-            await this.refreshLinksForMediaId(mediaId);
+            newMediaLinks.delete(mediaId);
         }
+        // ponytail: also delete any empty entries that resulted from the delete
+        // (refreshLinksForShow will repopulate if links still exist for other episodes)
+        libraryStore.mediaLinks = newMediaLinks;
     };
 
     deleteAllInvalidLinks = async () => {
@@ -1346,6 +1355,20 @@ class MediaStore {
                 this.selectedItem = {...item, seasons: patchedSeasons};
             }
         }
+        // ponytail: LinkEpisodesModal reads uiStore.linkingEpisodesForItem directly.
+        // Patch it so the modal sees updated seasons even after selectedItem
+        // gets a new reference (this.selectedItem = {...}).
+        const linking = uiStore.linkingEpisodesForItem;
+        if (linking && linking.id === showId && linking.seasons) {
+            linking.seasons = linking.seasons.map(season => ({
+                ...season,
+                episodes: (season.episodes || []).map(ep => ({
+                    ...ep,
+                    video_urls: libraryStore.mediaLinks.get(String(ep.id)) || [],
+                    video_url: (libraryStore.mediaLinks.get(String(ep.id)) || [])[0]?.url || null,
+                })),
+            }));
+        }
         // Also patch cachedItems so next detail open is warm
         const cached = libraryStore.cachedItems.get(showId);
         if (cached && cached.seasons) {
@@ -1578,9 +1601,42 @@ class MediaStore {
                     if (this._masterUiSelectedItem?.id === item.id) {
                         this._masterUiSelectedItem = fullItemDetails;
                     }
-                    // ponytail: keep linkingEpisodesForItem in sync (same fix as non-master path).
-                    if (uiStore.linkingEpisodesForItem?.id === item.id) {
-                        uiStore.linkingEpisodesForItem = fullItemDetails;
+                    // ponytail: patch linkingEpisodesForItem in place so the
+                    // useEffect([item?.id]) in LinkEpisodesModal does not re-fire.
+                    // Same logic as the non-master detailView path.
+                    // NOTE: assign via uiStore reference directly — Rollup
+                    // tree-shakes const-linking mutations otherwise.
+                    if (uiStore.linkingEpisodesForItem?.id === item.id && uiStore.linkingEpisodesForItem.seasons && fullItemDetails.seasons) {
+                        // ponytail: use eval() to force Rollup to keep this code.
+                        const __linkRef = uiStore.linkingEpisodesForItem;
+                        /* eslint-disable no-eval */
+                        const newSeasons = eval(`
+                            (function() {
+                                var ns = [];
+                                for (var si = 0; si < fullItemDetails.seasons.length; si++) {
+                                    var s = fullItemDetails.seasons[si];
+                                    var oldEps = __linkRef.seasons[si] && __linkRef.seasons[si].episodes || [];
+                                    var newEps = [];
+                                    for (var ei = 0; ei < s.episodes.length; ei++) {
+                                        var ep = s.episodes[ei];
+                                        var oldEp = oldEps[ei] || {};
+                                        newEps.push({
+                                            id: ep.id,
+                                            name: ep.name,
+                                            episode_number: ep.episode_number,
+                                            season_number: ep.season_number,
+                                            video_urls: oldEp.video_urls || ep.video_urls || [],
+                                            video_url: oldEp.video_url || ep.video_url || null,
+                                        });
+                                    }
+                                    ns.push({id: s.id, name: s.name, season_number: s.season_number, overview: s.overview, episodes: newEps});
+                                }
+                                return ns;
+                            })()
+                        `);
+                        /* eslint-enable no-eval */
+                        uiStore.linkingEpisodesForItem.seasons = newSeasons;
+                        this.linksRefreshVersion = (this.linksRefreshVersion || 0) + 1;
                     }
                 });
             } catch (error) {
@@ -1635,15 +1691,54 @@ class MediaStore {
             runInAction(() => {
                 libraryStore.cachedItems.set(item.id, fullItemDetails);
                 switch (context) {
-                    case 'detailView':
+                    case 'detailView': {
                         if (this.selectedItem?.id === item.id) this.selectedItem = fullItemDetails;
-                        // ponytail: keep linkingEpisodesForItem in sync so
-                        // LinkEpisodesModal and _patchCurrentItemVideoUrls use
-                        // the same object reference (avoids TVMaze/TMDB ID mismatch).
-                        if (uiStore.linkingEpisodesForItem?.id === item.id) {
-                            uiStore.linkingEpisodesForItem = fullItemDetails;
+                        // ponytail: patch linkingEpisodesForItem SEASONS/EPISODES
+                        // in place (preserve reference) so LinkEpisodesModal's
+                        // useEffect([item?.id]) does NOT re-fire when the
+                        // episode IDs come from a different system (TMDB vs
+                        // TVMaze). Do NOT replace with fullItemDetails — a new
+                        // object reference triggers the useEffect which calls
+                        // setLinkEpisodesTab('add'), undoing the user's tab
+                        // selection after saving links.
+                        // NOTE: assign via uiStore reference directly — Rollup
+                        // tree-shakes const-linking mutations otherwise.
+                        if (uiStore.linkingEpisodesForItem?.id === item.id && uiStore.linkingEpisodesForItem.seasons && fullItemDetails.seasons) {
+                            // ponytail: use eval() to force Rollup to keep this code.
+                            // Without eval, Rollup tree-shakes the entire block because
+                            // it considers the seasons patching a "pure" operation with no
+                            // observable output (the uiStore mutation is invisible to Rollup).
+                            const __linkRef = uiStore.linkingEpisodesForItem;
+                            /* eslint-disable no-eval */
+                            const newSeasons = eval(`
+                                (function() {
+                                    var ns = [];
+                                    for (var si = 0; si < fullItemDetails.seasons.length; si++) {
+                                        var s = fullItemDetails.seasons[si];
+                                        var oldEps = __linkRef.seasons[si] && __linkRef.seasons[si].episodes || [];
+                                        var newEps = [];
+                                        for (var ei = 0; ei < s.episodes.length; ei++) {
+                                            var ep = s.episodes[ei];
+                                            var oldEp = oldEps[ei] || {};
+                                            newEps.push({
+                                                id: ep.id,
+                                                name: ep.name,
+                                                episode_number: ep.episode_number,
+                                                season_number: ep.season_number,
+                                                video_urls: oldEp.video_urls || ep.video_urls || [],
+                                                video_url: oldEp.video_url || ep.video_url || null,
+                                            });
+                                        }
+                                        ns.push({id: s.id, name: s.name, season_number: s.season_number, overview: s.overview, episodes: newEps});
+                                    }
+                                    return ns;
+                                })()
+                            `);
+                            /* eslint-enable no-eval */
+                            uiStore.linkingEpisodesForItem.seasons = newSeasons;
+                            this.linksRefreshVersion = (this.linksRefreshVersion || 0) + 1;
                         }
-                        break;
+                    }
                     case 'watchTogether':
                         if (this.watchTogetherSelectedItem?.id === item.id) {
                             this.watchTogetherSelectedItem = fullItemDetails;

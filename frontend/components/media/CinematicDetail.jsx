@@ -1,7 +1,7 @@
 /**
  * @fileoverview CinematicDetail - cinematic detail-view shell.
  *
- * Wraps the legacy `DetailView` in a futurisic container with a
+ * Wraps the legacy `DetailView` in a futuristic container with a
  * scanline overlay and a GSAP morph-in entry timeline. The existing
  * detail view logic is preserved as-is so all features (episodes
  * drawer, link selection, watch together, etc.) keep working.
@@ -17,8 +17,16 @@ import {gsap} from 'gsap';
 import DetailView from './DetailView.jsx';
 import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
 import {durations, easings, reducedMotion} from '../../motion/grammar.js';
+import {mediaStore} from '../../store/mediaStore.js';
 
 const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
+    // Access linksRefreshVersion here so the outer observer tracks it.
+    // When links are added/deleted, linksRefreshVersion changes → this
+    // component re-renders → DetailView (with key=detailKey) remounts
+    // with fresh data from the patched selectedItem.
+    const linksRefreshVersion = mediaStore.linksRefreshVersion;
+    const detailKey = `detail-${mediaStore.currentSelectedItem?.id ?? 'none'}-v${linksRefreshVersion}`;
+
     // The morph-in animation (scale + blur) MUST be applied to an
     // inner wrapper, NOT the root, because both `transform` and
     // `filter` create a new containing block for descendants. The
@@ -62,7 +70,7 @@ const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
                 pointerEvents: 'auto'
             }}
         >
-            <DetailView />
+            <DetailView key={detailKey} />
             <Box
                 id={`${id}-scanline-wrapper`}
                 ref={animRef}

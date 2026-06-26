@@ -1,3 +1,4 @@
+import {uiStore} from './store/uiStore.js';
 /**
  * @fileoverview StreamFlix App - Main Application Component
  *
@@ -146,13 +147,11 @@ const AppInner = observer(() => {
         }, 200);
         return () => window.clearTimeout(timer);
     }, []);
-
-    // Test hook: expose stores on window when the URL contains the
-    // `?testMode=stores` query parameter. This allows Playwright/E2E tests
-    // to drive the app state without going through the full user flow
-    // (which is fragile when UI refactors change selectors).
     useEffect(() => {
         if (typeof window === 'undefined') return;
+        // ponytail: always expose stores on window for E2E debugging (remove in production)
+        window.__mediaStore = mediaStore;
+        window.__uiStore = uiStore;
         const params = new URLSearchParams(window.location.search);
         if (params.get('testMode') === 'stores') {
             window.__quixTest = {

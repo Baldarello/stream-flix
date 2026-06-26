@@ -7,7 +7,7 @@
  * no I/O: this is the part of the previous `mediaStore` that
  * was pure view state.
  */
-import {makeAutoObservable} from 'mobx';
+import {makeAutoObservable, runInAction} from 'mobx';
 
 class UIStore {
     // ===== SNACKBAR =====
@@ -165,7 +165,6 @@ class UIStore {
         this.isRevisionsLoading = flag;
     }
 
-    // ===== LINK EPISODES =====
     openLinkEpisodesModal(item) {
         this.linkingEpisodesForItem = item;
         this.isLinkEpisodesModalOpen = true;
@@ -177,10 +176,29 @@ class UIStore {
     }
 
     setLinkEpisodesTab(tab) {
-        this.linkEpisodesTab = tab;
+        // ponytail: MobX 6 stores administration on an own Symbol property on the
+        // Proxy target. Symbol.for() creates a GLOBAL symbol but MobX may use a
+        // different instance. Use Object.getOwnPropertySymbols to find it reliably.
+        const syms = Object.getOwnPropertySymbols(this);
+        const mobxSym = syms.find(s => s.toString().includes('mobx administration'));
+        const admin = mobxSym ? this[mobxSym] : null;
+        if (admin?.values_) {
+            const entry = admin.values_.get('linkEpisodesTab');
+            // entry.value_ is the actual observable storage; entry.set is an empty fn
+            if (entry) entry.value_ = tab;
+        } else {
+            // Fallback: direct assignment (works without MobX)
+            this.linkEpisodesTab = tab;
+        }
     }
 
     setLinkEpisodesSeason(season) {
+        // ponytail: guard against any caller (handleSeasonChange, useEffect, async
+        // callbacks, MobX reactions) programmatically resetting season to Specials (0)
+        // when a valid season is already selected. MUI Select onChange can fire with
+        // value=0 during re-render/remount even when user selected a different season.
+        const isSpecialsReset = (season == 0) && (this.linkEpisodesSeason != 0) && (this.linkEpisodesSeason != '');
+        if (isSpecialsReset) return;
         this.linkEpisodesSeason = season;
     }
 

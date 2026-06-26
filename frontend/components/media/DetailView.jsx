@@ -362,11 +362,19 @@ const DetailView = observer(() => {
     // ponytail: linksRefreshVersion is incremented by _patchCurrentItemVideoUrls
     // so we track it here to force DetailView re-render when links change.
     const {currentSelectedItem: item, myList, isDetailLoading, showIntroDurations, setShowIntroDuration,
-        selectedSeasons, setSelectedSeasonForShow, showFilterPreferences, setShowFilterPreference, linksRefreshVersion} = mediaStore;
+        selectedSeasons, setSelectedSeasonForShow, showFilterPreferences, setShowFilterPreference} = mediaStore;
+    const linksRefreshVersion = mediaStore.linksRefreshVersion;
     const {t} = useTranslations();
     const headerRef = useRef(null);
 
-    if (!item) return null;
+    // ponytail: force a re-render when linksRefreshVersion changes so
+    // availableLanguages is recomputed with fresh episode.video_urls.
+    // This is needed because currentSelectedItem is a non-observable getter,
+    // so MobX's observer doesn't propagate the change automatically.
+    const [, forceRender] = useState(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { forceRender(v => v + 1); }, [linksRefreshVersion]);
+
 
     const getValidSeason = () => {
         if (!item.seasons || item.seasons.length === 0) return 1;

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
 import {FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs} from '@mui/material';
@@ -24,24 +24,43 @@ const LinkEpisodesModal = observer(() => {
     } = mediaStore;
     const {t} = useTranslations();
 
+    // ponytail: prevent the useEffect from resetting tab to 'add' AFTER the user
+    // has deliberately switched to 'manage' (e.g. after saving links).
+    // The tab-switching (Tabs onChange) sets this flag; the effect clears it
+    // only when a genuinely NEW item is opened.
+    const initializedForId = useRef(null);
+    const userManuallySwitchedToManage = useRef(false);
+
     useEffect(() => {
-        if (item?.seasons?.[0]) {
-            setLinkEpisodesSeason(item.seasons[0].season_number);
-        } else {
-            setLinkEpisodesSeason('');
+        if (!item?.id) return;
+        if (Number(initializedForId.current) !== Number(item.id)) {
+            // Genuinely new item → reset everything
+            initializedForId.current = Number(item.id);
+            userManuallySwitchedToManage.current = false;
+            if (item?.seasons?.[0]) {
+                setLinkEpisodesSeason(item.seasons[0].season_number);
+            } else {
+                setLinkEpisodesSeason('');
+            }
+            setLinkEpisodesTab('add');
+        } else if (userManuallySwitchedToManage.current) {
+            // Same item re-render (e.g. after _patchCurrentItemVideoUrls mutates
+            // linkingEpisodesForItem.seasons): do NOT overwrite 'manage' with 'add'.
+            // The 'manage' tab was set by onSuccess → setLinkEpisodesTab('manage').
+            // userManuallySwitchedToManage.current is set to true in the Tabs onChange
+            // when user manually switches to 'manage', and in the onSuccess callback.
+            userManuallySwitchedToManage.current = false;
         }
-        setLinkEpisodesTab('add');
-    }, [item?.id, setLinkEpisodesSeason, setLinkEpisodesTab]);
+    }, [item?.id]);
 
     if (!item) return null;
 
     const currentSeason = item.seasons?.find(s => s.season_number === linkEpisodesSeason);
 
-
-
-    const handleSeasonChange = (event) => {
-        setLinkEpisodesSeason(event.target.value);
-        setExpandedLinkAccordionId(false); // Reset expanded accordion when season changes
+    const handleSeasonChange = (eventOrValue) => {
+        const rawValue = eventOrValue?.target?.value ?? eventOrValue;
+        setLinkEpisodesSeason(rawValue);
+        setExpandedLinkAccordionId(false);
     };
 
     return (
@@ -68,7 +87,10 @@ const LinkEpisodesModal = observer(() => {
 
                 <Tabs
                     value={linkEpisodesTab}
-                    onChange={(_, val) => setLinkEpisodesTab(val)}
+                    onChange={(_, val) => {
+                        if (val === 'manage') userManuallySwitchedToManage.current = true;
+                        setLinkEpisodesTab(val);
+                    }}
                     sx={{
                         borderBottom: '1px solid rgba(76, 210, 255, 0.25)',
                         '& .MuiTab-root': {
@@ -96,7 +118,7 @@ const LinkEpisodesModal = observer(() => {
                                                                             seasonEpisodeCount={currentSeason.episode_count}
                                                                             seasonName={currentSeason.name}
                                                                             onSave={setEpisodeLinksForSeason}
-                                                                            onSuccess={() => setLinkEpisodesTab('manage')}/>}
+                                                                            onSuccess={() => { userManuallySwitchedToManage.current = true; setLinkEpisodesTab('manage'); }}/>}
                 {linkEpisodesTab === 'manage' && currentSeason && (
                     <ManageLinksView
                         currentSeason={currentSeason}

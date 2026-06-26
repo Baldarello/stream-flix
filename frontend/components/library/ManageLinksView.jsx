@@ -31,7 +31,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 import {useTranslations} from '../../hooks/useTranslations.js';
-import {toJS} from "mobx";
 
 const ManageLinksView = observer(({    }) => {
     const { t } = useTranslations();
@@ -42,26 +41,29 @@ const ManageLinksView = observer(({    }) => {
         linkingEpisodesForItem: item,
         setExpandedLinkAccordionId,
         expandedLinkAccordionId,
-        linkEpisodesSeason
+        linkEpisodesSeason,
+        linksRefreshVersion
     } = mediaStore;
-    
+
+    // ponytail: force a re-render when linksRefreshVersion changes so that
+    // episodeLinkMap/linksByDomain are guaranteed to be rebuilt after links are
+    // added/deleted, even when the key-based remount already happened.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const [, forceUpdate] = useState(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { forceUpdate(v => v + 1); }, [linksRefreshVersion]);
+
     const currentSeason = item.seasons?.find(s => s.season_number === linkEpisodesSeason);
-    
+
     const onAccordionChange = (panelId) => (event, isExpanded) => {
         setExpandedLinkAccordionId(isExpanded ? panelId : false);
     };
-    // Derived reactively inside the observer render body.
-    // mediaStore.mediaLinks (via facade) is an observable MobX Map;
-    // accessing it and calling .get() inside the render creates tracked
-    // reads so the component re-renders when the Map is mutated.
 
-    // ponytail: toString() — Object.groupBy stringifies Map keys as strings,
-    // but ep.id is a number (TMDB). Without conversion Map.get() misses the entry.
+    // Build linksByDomain and episodeLinkMap from the observable mediaLinks Map.
+    // String keys are used since libraryStore.safeKey converts all keys to string.
     const linksByDomain = {};
     for (const ep of (currentSeason?.episodes || [])) {
         const epLinks = mediaStore.mediaLinks.get(String(ep.id)) || [];
-        console.log("ep", toJS(ep));
-        console.log("epLinks", toJS(epLinks));
         for (const link of epLinks) {
             try {
                 const origin = new URL(link.url).origin;
@@ -75,21 +77,20 @@ const ManageLinksView = observer(({    }) => {
     for (const ep of (currentSeason?.episodes || [])) {
         episodeLinkMap[ep.id] = mediaStore.mediaLinks.get(String(ep.id)) || [];
     }
-    console.log("episodeLinkMap", toJS(episodeLinkMap));
-    console.log("linksByDomain", toJS(linksByDomain));
-    console.log("currentSeason", toJS(currentSeason));
-    console.log("item", toJS(item));
 
-    useEffect(() => {
-        mediaStore.refreshLinksForShow(item.id);
-    }, [item.id]);
+    // NOTE: intentionally omitted linksRefreshVersion from deps — refreshLinksForShow
+    // increments linksRefreshVersion via _patchCurrentItemVideoUrls, creating a loop.
+    // The forceUpdate above (linksRefreshVersion dep) already triggers re-render with
+    // fresh episodeLinkMap/linksByDomain from the observable mediaLinks Map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { mediaStore.refreshLinksForShow(item.id); }, [item.id]);
     useEffect(() => {
         const initialInputs = {};
         Object.keys(linksByDomain).forEach(origin => {
             initialInputs[origin] = origin;
         });
         setDomainInputs(initialInputs);
-    }, [currentSeason.id, currentSeason.episodes.length]);
+    }, [currentSeason?.id, currentSeason?.episodes?.length]);
 
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
