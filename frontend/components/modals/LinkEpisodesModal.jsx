@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {autorun} from 'mobx';
 import {mediaStore} from '../../store/mediaStore.js';
+import {uiStore} from '../../store/uiStore.js';
 import {FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs} from '@mui/material';
 import ManageLinksView from '../library/ManageLinksView.jsx';
 import AddLinkTabs from '../library/AddLinkTabs.jsx';
@@ -8,67 +9,87 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 import {ModalShell} from './ModalShell.jsx';
 import {holoFieldSx} from "../../styles/style.js"
 
+// ponytail: observer HOC from mobx-react-lite 4.1.1 + React 19 does not re-render
+// when linkEpisodesTab changes via the mediaStore getter chain (mediaStore → uiStore).
+// Fix: use useState + autorun to manually sync MobX state with React state.
+// No observer HOC = no MobX React Lite React 19 compatibility issues.
 
-const LinkEpisodesModal = observer(() => {
-    const {
-        isLinkEpisodesModalOpen,
-        closeLinkEpisodesModal,
-        linkingEpisodesForItem: item,
-        setEpisodeLinksForSeason,
-        expandedLinkAccordionId,
-        setExpandedLinkAccordionId,
-        linkEpisodesTab,
-        setLinkEpisodesTab,
-        linkEpisodesSeason,
-        setLinkEpisodesSeason
-    } = mediaStore;
+function useLinkEpisodesTab() {
+    // ponytail: useState holds the tab value from MobX store.
+    // autorun fires on MobX changes → calls setState → triggers React re-render.
+    const [tab, setTab] = useState(() => uiStore.linkEpisodesTab);
+
+    useEffect(() => {
+        const disp = autorun(() => {
+            const currentTab = uiStore.linkEpisodesTab;
+            setTab(currentTab);
+        });
+        return () => disp();
+    }, []);
+
+    return tab;
+}
+
+// ponytail: force re-render when modal open state changes.
+// Without this, the component renders once (when modal closed) and never updates when it opens.
+function useModalOpenRenderTrigger() {
+    const [renderTrigger, setRenderTrigger] = useState(() => mediaStore.isLinkEpisodesModalOpen);
+    useEffect(() => {
+        const disp = autorun(() => {
+            const isOpen = mediaStore.isLinkEpisodesModalOpen;
+            setRenderTrigger(isOpen);
+        });
+        return () => disp();
+    }, []);
+    return renderTrigger;
+}
+
+
+const LinkEpisodesModal = () => {
+    const snapTab = useLinkEpisodesTab();
+    const isModalOpen = useModalOpenRenderTrigger();
+
+    const { setEpisodeLinksForSeason } = mediaStore;
+
     const {t} = useTranslations();
 
-    // ponytail: prevent the useEffect from resetting tab to 'add' AFTER the user
-    // has deliberately switched to 'manage' (e.g. after saving links).
-    // The tab-switching (Tabs onChange) sets this flag; the effect clears it
-    // only when a genuinely NEW item is opened.
     const initializedForId = useRef(null);
     const userManuallySwitchedToManage = useRef(false);
 
     useEffect(() => {
+        const item = mediaStore.linkingEpisodesForItem;
         if (!item?.id) return;
         if (Number(initializedForId.current) !== Number(item.id)) {
-            // Genuinely new item → reset everything
             initializedForId.current = Number(item.id);
             userManuallySwitchedToManage.current = false;
             if (item?.seasons?.[0]) {
-                setLinkEpisodesSeason(item.seasons[0].season_number);
+                mediaStore.setLinkEpisodesSeason(item.seasons[0].season_number);
             } else {
-                setLinkEpisodesSeason('');
+                mediaStore.setLinkEpisodesSeason('');
             }
-            setLinkEpisodesTab('add');
+            uiStore.setLinkEpisodesTab('add');
         } else if (userManuallySwitchedToManage.current) {
-            // Same item re-render (e.g. after _patchCurrentItemVideoUrls mutates
-            // linkingEpisodesForItem.seasons): do NOT overwrite 'manage' with 'add'.
-            // The 'manage' tab was set by onSuccess → setLinkEpisodesTab('manage').
-            // userManuallySwitchedToManage.current is set to true in the Tabs onChange
-            // when user manually switches to 'manage', and in the onSuccess callback.
             userManuallySwitchedToManage.current = false;
         }
-    }, [item?.id]);
+    }, [snapTab, mediaStore.linkingEpisodesForItem?.id]);
 
+    const item = mediaStore.linkingEpisodesForItem;
     if (!item) return null;
 
-    const currentSeason = item.seasons?.find(s => s.season_number === linkEpisodesSeason);
+    const currentSeason = item.seasons?.find(s => s.season_number === mediaStore.linkEpisodesSeason);
 
     const handleSeasonChange = (eventOrValue) => {
         const rawValue = eventOrValue?.target?.value ?? eventOrValue;
-        setLinkEpisodesSeason(rawValue);
-        setExpandedLinkAccordionId(false);
+        mediaStore.setLinkEpisodesSeason(rawValue);
+        mediaStore.setExpandedLinkAccordionId(false);
     };
 
     return (
         <ModalShell
             id="link-episodes-modal"
             data-component="link-episodes-modal"
-            open={isLinkEpisodesModalOpen}
-            onClose={closeLinkEpisodesModal}
+            open={isModalOpen}
+            onClose={() => mediaStore.closeLinkEpisodesModal()}
             title={t('linkEpisodesModal.title', {name: item.name})}
             maxWidth="md"
         >
@@ -76,7 +97,7 @@ const LinkEpisodesModal = observer(() => {
                 <FormControl fullWidth required sx={holoFieldSx}>
                     <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
                     <Select
-                        value={linkEpisodesSeason}
+                        value={mediaStore.linkEpisodesSeason}
                         label={t('linkEpisodesModal.selectSeason')}
                         onChange={handleSeasonChange}
                     >
@@ -86,10 +107,10 @@ const LinkEpisodesModal = observer(() => {
                 </FormControl>
 
                 <Tabs
-                    value={linkEpisodesTab}
+                    value={snapTab}
                     onChange={(_, val) => {
                         if (val === 'manage') userManuallySwitchedToManage.current = true;
-                        setLinkEpisodesTab(val);
+                        uiStore.setLinkEpisodesTab(val);
                     }}
                     sx={{
                         borderBottom: '1px solid rgba(76, 210, 255, 0.25)',
@@ -114,22 +135,22 @@ const LinkEpisodesModal = observer(() => {
                     />
                 </Tabs>
 
-                {linkEpisodesTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number}
+                {snapTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number}
                                                                             seasonEpisodeCount={currentSeason.episode_count}
                                                                             seasonName={currentSeason.name}
                                                                             onSave={setEpisodeLinksForSeason}
-                                                                            onSuccess={() => { userManuallySwitchedToManage.current = true; setLinkEpisodesTab('manage'); }}/>}
-                {linkEpisodesTab === 'manage' && currentSeason && (
+                                                                            onSuccess={() => { userManuallySwitchedToManage.current = true; uiStore.setLinkEpisodesTab('manage'); }}/>}
+                {snapTab === 'manage' && currentSeason && (
                     <ManageLinksView
                         currentSeason={currentSeason}
                         item={item}
-                        expandedAccordion={expandedLinkAccordionId}
+                        expandedAccordion={mediaStore.expandedLinkAccordionId}
                     />
                 )}
             </Stack>
         </ModalShell>
     );
-});
+};
 LinkEpisodesModal.displayName = 'LinkEpisodesModal';
 
 export default LinkEpisodesModal;
