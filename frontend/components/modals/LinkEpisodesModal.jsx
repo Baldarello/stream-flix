@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {autorun} from 'mobx';
 import {mediaStore} from '../../store/mediaStore.js';
 import {uiStore} from '../../store/uiStore.js';
@@ -15,8 +15,6 @@ import {holoFieldSx} from "../../styles/style.js"
 // No observer HOC = no MobX React Lite React 19 compatibility issues.
 
 function useLinkEpisodesTab() {
-    // ponytail: useState holds the tab value from MobX store.
-    // autorun fires on MobX changes → calls setState → triggers React re-render.
     const [tab, setTab] = useState(() => uiStore.linkEpisodesTab);
 
     useEffect(() => {
@@ -30,24 +28,12 @@ function useLinkEpisodesTab() {
     return tab;
 }
 
-// ponytail: force re-render when modal open state changes.
-// Without this, the component renders once (when modal closed) and never updates when it opens.
-function useModalOpenRenderTrigger() {
-    const [renderTrigger, setRenderTrigger] = useState(() => mediaStore.isLinkEpisodesModalOpen);
-    useEffect(() => {
-        const disp = autorun(() => {
-            const isOpen = mediaStore.isLinkEpisodesModalOpen;
-            setRenderTrigger(isOpen);
-        });
-        return () => disp();
-    }, []);
-    return renderTrigger;
-}
-
-
+// ponytail: isModalOpen read directly — React re-renders when parent opens modal
+// via mobx-react-lite observer wrapping the parent or via the store update path.
 const LinkEpisodesModal = () => {
     const snapTab = useLinkEpisodesTab();
-    const isModalOpen = useModalOpenRenderTrigger();
+    // ponytail: read current value; no autorun needed for open state
+    const isModalOpen = mediaStore.isLinkEpisodesModalOpen;
 
     const { setEpisodeLinksForSeason } = mediaStore;
 
@@ -56,8 +42,11 @@ const LinkEpisodesModal = () => {
     const initializedForId = useRef(null);
     const userManuallySwitchedToManage = useRef(false);
 
+    // ponytail: initialize season + tab when modal opens; isModalOpen in deps
+    // ensures re-init even when same item re-opens the modal.
+    const item = mediaStore.linkingEpisodesForItem;
     useEffect(() => {
-        const item = mediaStore.linkingEpisodesForItem;
+        if (!isModalOpen) return;
         if (!item?.id) return;
         if (Number(initializedForId.current) !== Number(item.id)) {
             initializedForId.current = Number(item.id);
@@ -71,18 +60,21 @@ const LinkEpisodesModal = () => {
         } else if (userManuallySwitchedToManage.current) {
             userManuallySwitchedToManage.current = false;
         }
-    }, [snapTab, mediaStore.linkingEpisodesForItem?.id]);
+    }, [isModalOpen, mediaStore.linkingEpisodesForItem?.id]);
 
-    const item = mediaStore.linkingEpisodesForItem;
-    if (!item) return null;
+    // ponytail: linkEpisodesSeason may be empty on first render (useEffect hasn't run yet).
+    // Fall back to item.seasons[0] so AddLinkTabs renders on the first mount.
+    const currentSeason = item?.seasons?.find(s => s.season_number === mediaStore.linkEpisodesSeason)
+        || (!mediaStore.linkEpisodesSeason && item?.seasons?.[0]);
 
-    const currentSeason = item.seasons?.find(s => s.season_number === mediaStore.linkEpisodesSeason);
 
     const handleSeasonChange = (eventOrValue) => {
         const rawValue = eventOrValue?.target?.value ?? eventOrValue;
         mediaStore.setLinkEpisodesSeason(rawValue);
         mediaStore.setExpandedLinkAccordionId(false);
     };
+
+    if (!item) return null;
 
     return (
         <ModalShell
