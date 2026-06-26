@@ -1,5 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {autorun} from 'mobx';
+import React, {useEffect, useRef} from 'react';
+import {observer} from 'mobx-react-lite';
 import {mediaStore} from '../../store/mediaStore.js';
 import {uiStore} from '../../store/uiStore.js';
 import {FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs} from '@mui/material';
@@ -9,30 +9,11 @@ import {useTranslations} from '../../hooks/useTranslations.js';
 import {ModalShell} from './ModalShell.jsx';
 import {holoFieldSx} from "../../styles/style.js"
 
-// ponytail: observer HOC from mobx-react-lite 4.1.1 + React 19 does not re-render
-// when linkEpisodesTab changes via the mediaStore getter chain (mediaStore → uiStore).
-// Fix: use useState + autorun to manually sync MobX state with React state.
-// No observer HOC = no MobX React Lite React 19 compatibility issues.
 
-function useLinkEpisodesTab() {
-    const [tab, setTab] = useState(() => uiStore.linkEpisodesTab);
 
-    useEffect(() => {
-        const disp = autorun(() => {
-            const currentTab = uiStore.linkEpisodesTab;
-            setTab(currentTab);
-        });
-        return () => disp();
-    }, []);
-
-    return tab;
-}
-
-// ponytail: isModalOpen read directly — React re-renders when parent opens modal
-// via mobx-react-lite observer wrapping the parent or via the store update path.
-const LinkEpisodesModal = () => {
-    const snapTab = useLinkEpisodesTab();
-    // ponytail: read current value; no autorun needed for open state
+// ponytail: observer wraps the component — reads uiStore.linkEpisodesTab reactively.
+const LinkEpisodesModal = observer(() => {
+    const snapTab = uiStore.linkEpisodesTab;
     const isModalOpen = mediaStore.isLinkEpisodesModalOpen;
 
     const { setEpisodeLinksForSeason } = mediaStore;
@@ -142,7 +123,7 @@ const LinkEpisodesModal = () => {
             </Stack>
         </ModalShell>
     );
-};
+});
 LinkEpisodesModal.displayName = 'LinkEpisodesModal';
 
 export default LinkEpisodesModal;
