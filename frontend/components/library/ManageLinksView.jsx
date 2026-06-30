@@ -45,14 +45,6 @@ const ManageLinksView = observer(({    }) => {
         linksRefreshVersion
     } = mediaStore;
 
-    // ponytail: force a re-render when linksRefreshVersion changes so that
-    // episodeLinkMap/linksByDomain are guaranteed to be rebuilt after links are
-    // added/deleted, even when the key-based remount already happened.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const [, forceUpdate] = useState(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { forceUpdate(v => v + 1); }, [linksRefreshVersion]);
-
     const currentSeason = item.seasons?.find(s => s.season_number === linkEpisodesSeason);
 
     const onAccordionChange = (panelId) => (event, isExpanded) => {

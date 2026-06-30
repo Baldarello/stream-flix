@@ -176,20 +176,9 @@ class UIStore {
     }
 
     setLinkEpisodesTab(tab) {
-        // ponytail: MobX 6 stores administration on an own Symbol property on the
-        // Proxy target. Symbol.for() creates a GLOBAL symbol but MobX may use a
-        // different instance. Use Object.getOwnPropertySymbols to find it reliably.
-        const syms = Object.getOwnPropertySymbols(this);
-        const mobxSym = syms.find(s => s.toString().includes('mobx administration'));
-        const admin = mobxSym ? this[mobxSym] : null;
-        if (admin?.values_) {
-            const entry = admin.values_.get('linkEpisodesTab');
-            // entry.value_ is the actual observable storage; entry.set is an empty fn
-            if (entry) entry.value_ = tab;
-        } else {
-            // Fallback: direct assignment (works without MobX)
+
             this.linkEpisodesTab = tab;
-        }
+
     }
 
     setLinkEpisodesSeason(season) {

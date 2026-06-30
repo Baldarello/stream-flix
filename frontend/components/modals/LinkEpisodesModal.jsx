@@ -82,7 +82,6 @@ const LinkEpisodesModal = observer(() => {
                 <Tabs
                     value={snapTab}
                     onChange={(_, val) => {
-                        if (val === 'manage') userManuallySwitchedToManage.current = true;
                         uiStore.setLinkEpisodesTab(val);
                     }}
                     sx={{
