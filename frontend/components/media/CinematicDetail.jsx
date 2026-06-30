@@ -19,7 +19,7 @@ import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
 import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 import {mediaStore} from '../../store/mediaStore.js';
 
-const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
+const CinematicDetailInner = ({id = 'detail-cinematic'}) => {
     // ponytail: key only on item id — NOT linksRefreshVersion.
     // Including linksRefreshVersion remounts DetailView (and the
     // LinkEpisodesModal inside it) on every link mutation, which
@@ -28,6 +28,7 @@ const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
     // observer and force-re-renders, so a remount is redundant.
     void mediaStore.linksRefreshVersion;
     const detailKey = `detail-${mediaStore.currentSelectedItem?.id ?? 'none'}`;
+
     // The morph-in animation (scale + blur) MUST be applied to an
     // inner wrapper, NOT the root, because both `transform` and
     // `filter` create a new containing block for descendants. The
@@ -45,13 +46,13 @@ const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
         // The component re-mounts whenever the detail view opens, so a
         // single timeline is enough. Reduced motion collapses to a fade.
         if (reducedMotion()) {
-            gsap.fromTo(root, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none' });
+            gsap.fromTo(root, {autoAlpha: 0}, {autoAlpha: 1, duration: 0.12, ease: 'none'});
             return undefined;
         }
         const tl = gsap.timeline();
         tl.fromTo(anim || root,
-            { autoAlpha: 0, scale: 0.97, filter: 'blur(8px)' },
-            { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: durations.cinematic, ease: easings.cinematic });
+            {autoAlpha: 0, scale: 0.97, filter: 'blur(8px)'},
+            {autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: durations.cinematic, ease: easings.cinematic});
         lastKeyRef.current = Date.now();
         return () => tl.kill();
     }, []);
@@ -71,7 +72,7 @@ const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
                 pointerEvents: 'auto'
             }}
         >
-            <DetailView key={detailKey} />
+            <DetailView key={detailKey}/>
             <Box
                 id={`${id}-scanline-wrapper`}
                 ref={animRef}
@@ -85,7 +86,7 @@ const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
                     willChange: 'transform, filter, opacity'
                 }}
             >
-                <ScanlineOverlay id="detail-scanline" intensity={0.18} />
+                <ScanlineOverlay id="detail-scanline" intensity={0.18}/>
             </Box>
         </Box>
     );
