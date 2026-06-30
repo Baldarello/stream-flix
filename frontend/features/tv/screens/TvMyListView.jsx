@@ -24,7 +24,7 @@ const TvMyListView = observer(() => {
 
     const handleItemActivate = (item) => {
         if (item) {
-            tvStore.navigate('player');
+            mediaStore.playShowOrEpisode(item);
         }
     };
 

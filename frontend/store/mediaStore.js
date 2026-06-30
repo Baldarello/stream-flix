@@ -50,6 +50,7 @@ import {preferencesStore} from './preferencesStore.js';
 import {navigateTo, Routes} from '../services/navigationService.js';
 import {catalogStore} from './catalogStore.js';
 import {googleDriveSyncConflictStore} from './googleDriveSyncConflictStore';
+import {tvStore} from '../features/tv/tvStore.js';
 
 const ALL_TRANSLATIONS = {it: itTranslations, en: enTranslations};
 
@@ -1433,6 +1434,37 @@ class MediaStore {
     hasLinks = libraryStore.hasLinks.bind(libraryStore);
     findFirstUnwatchedEpisode = libraryStore.findFirstUnwatchedEpisode.bind(libraryStore);
 
+
+    // ===== TV / SHARED PLAYBACK HELPERS =============================
+
+    /**
+     * Start playback for a row card: episodes (continue-watching) are
+     * played directly; shows are resolved to the first unwatched or
+     * first linked episode before playback.
+     * @param {object} item - A continue-watching episode or a show with seasons.
+     */
+    playShowOrEpisode = async (item) => {
+        if (!item) return;
+        // Continue-watching items are episodes already enriched with show_id/season_number.
+        if ('show_id' in item || 'episode_number' in item || item.video_url) {
+            await this.startPlayback(item);
+            return;
+        }
+        if (item.seasons) {
+            const ep = this.findFirstUnwatchedEpisode(item);
+            if (ep) {
+                await this.startPlayback({
+                    ...ep,
+                    show_id: item.id,
+                    show_title: item.title || item.name || '',
+                    backdrop_path: item.backdrop_path,
+                    season_number: ep.season_number,
+                });
+                return;
+            }
+        }
+        await this.startPlayback(item);
+    };
     // ===== CROSS-CUTTING PLAYBACK / SELECTION =======================
 
     /**
@@ -1545,16 +1577,19 @@ class MediaStore {
 
         if (item.video_url) {
             runInAction(() => {
+                // Navigate to player: tvStore routes TV mode, react-router otherwise.
+                if (tvStore.isTvMode) {
+                    tvStore.navigate('player');
+                } else {
+                    const shouldReplace = window.history.state?.playerOpen;
+                    navigateTo(Routes.PLAYER, { replace: shouldReplace });
+                }
                 if (this.selectedItem) {
                     this.playbackOriginItem = this.selectedItem;
                     this._closeDetailWithoutHistory();
                 } else {
                     this.playbackOriginItem = null;
                 }
-
-                // Navigate to player using react-router
-                const shouldReplace = window.history.state?.playerOpen;
-                navigateTo(Routes.PLAYER, { replace: shouldReplace });
 
                 this.nowPlayingItem = item;
 

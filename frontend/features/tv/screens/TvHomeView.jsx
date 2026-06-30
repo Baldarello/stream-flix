@@ -22,11 +22,8 @@ const TvHomeView = observer(() => {
     const showEmptyState = continueWatchingItems.length === 0 && myListItems.length === 0;
 
     const handleItemActivate = (item) => {
-        // Navigate to player with the selected item
         if (item) {
-            // Store the selected item and navigate to player
-            // The player view will handle playback
-            tvStore.navigate('player');
+            mediaStore.playShowOrEpisode(item);
         }
     };
 
