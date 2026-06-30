@@ -1399,8 +1399,10 @@ class MediaStore {
         const grouped = Object.groupBy(allLinks, (link) => String(link.mediaId));
         // ponytail: assign new Map reference so MobX observer re-renders
         const newMediaLinks = new Map(libraryStore.mediaLinks);
-        for (const [mediaId, links] of Object.entries(grouped)) {
-            newMediaLinks.set(mediaId, links);
+        // ponytail: reset every queried id so deleted links clear from the Map
+        // (Object.groupBy omits ids with zero links, leaving stale entries).
+        for (const id of allIds) {
+            newMediaLinks.set(String(id), grouped[String(id)] ?? []);
         }
         runInAction(() => {
             libraryStore.mediaLinks = newMediaLinks;
