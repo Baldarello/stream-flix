@@ -223,6 +223,7 @@ class MediaStore {
     get libraryEditingLinkId() {
         return libraryStore.libraryEditingLinkId;
     }
+
     set libraryEditingLinkId(v) {
         libraryStore.libraryEditingLinkId = v;
     }
@@ -1114,25 +1115,81 @@ class MediaStore {
         return this.isRemoteMaster ? this._masterUiSelectedItem : this.selectedItem;
     }
 
-    connectAsRemoteMaster(...args) { return remoteStore.connectAsRemoteMaster(...args); }
-    disconnectRemoteMaster(...args) { return remoteStore.disconnectRemoteMaster(...args); }
-    sendRemoteCommand(...args) { return remoteStore.sendRemoteCommand(...args); }
-    stopRemotePlayback(...args) { return remoteStore.stopRemotePlayback(...args); }
-    startPingInterval(...args) { return remoteStore.startPingInterval(...args); }
-    stopPingInterval(...args) { return remoteStore.stopPingInterval(...args); }
-    openMediaSyncModal(...args) { return remoteStore.openMediaSyncModal(...args); }
-    closeMediaSyncModal(...args) { return remoteStore.closeMediaSyncModal(...args); }
-    handleSlaveDisconnected(...args) { return remoteStore.handleSlaveDisconnected(...args); }
-    startMasterReconnectTimer(...args) { return remoteStore.startMasterReconnectTimer(...args); }
-    stopMasterReconnectTimer(...args) { return remoteStore.stopMasterReconnectTimer(...args); }
-    triggerAutoFullscreen(...args) { return remoteStore.triggerAutoFullscreen(...args); }
-    fetchRemoteFullItem(...args) { return remoteStore.fetchRemoteFullItem(...args); }
-    playRemoteItem(...args) { return remoteStore.playRemoteItem(...args); }
-    syncMediaFromMaster(...args) { return remoteStore.syncMediaFromMaster(...args); }
-    openQRScanner(...args) { return remoteStore.openQRScanner(...args); }
-    closeQRScanner(...args) { return remoteStore.closeQRScanner(...args); }
-    initRemoteSession(...args) { return remoteStore.initRemoteSession(...args); }
-    handleSlavesOffline(...args) { return remoteStore.handleSlavesOffline(...args); }
+    connectAsRemoteMaster(...args) {
+        return remoteStore.connectAsRemoteMaster(...args);
+    }
+
+    disconnectRemoteMaster(...args) {
+        return remoteStore.disconnectRemoteMaster(...args);
+    }
+
+    sendRemoteCommand(...args) {
+        return remoteStore.sendRemoteCommand(...args);
+    }
+
+    stopRemotePlayback(...args) {
+        return remoteStore.stopRemotePlayback(...args);
+    }
+
+    startPingInterval(...args) {
+        return remoteStore.startPingInterval(...args);
+    }
+
+    stopPingInterval(...args) {
+        return remoteStore.stopPingInterval(...args);
+    }
+
+    openMediaSyncModal(...args) {
+        return remoteStore.openMediaSyncModal(...args);
+    }
+
+    closeMediaSyncModal(...args) {
+        return remoteStore.closeMediaSyncModal(...args);
+    }
+
+    handleSlaveDisconnected(...args) {
+        return remoteStore.handleSlaveDisconnected(...args);
+    }
+
+    startMasterReconnectTimer(...args) {
+        return remoteStore.startMasterReconnectTimer(...args);
+    }
+
+    stopMasterReconnectTimer(...args) {
+        return remoteStore.stopMasterReconnectTimer(...args);
+    }
+
+    triggerAutoFullscreen(...args) {
+        return remoteStore.triggerAutoFullscreen(...args);
+    }
+
+    fetchRemoteFullItem(...args) {
+        return remoteStore.fetchRemoteFullItem(...args);
+    }
+
+    playRemoteItem(...args) {
+        return remoteStore.playRemoteItem(...args);
+    }
+
+    syncMediaFromMaster(...args) {
+        return remoteStore.syncMediaFromMaster(...args);
+    }
+
+    openQRScanner(...args) {
+        return remoteStore.openQRScanner(...args);
+    }
+
+    closeQRScanner(...args) {
+        return remoteStore.closeQRScanner(...args);
+    }
+
+    initRemoteSession(...args) {
+        return remoteStore.initRemoteSession(...args);
+    }
+
+    handleSlavesOffline(...args) {
+        return remoteStore.handleSlavesOffline(...args);
+    }
 
     // ===== CROSS-CUTTING ORCHESTRATION ============================
 
@@ -1323,6 +1380,7 @@ class MediaStore {
             this.showSnackbar('notifications.domainUpdateError', 'error', true, {error: (error).message});
         }
     }
+
     /**
      * Patch `currentSelectedItem` and `cachedItems` episodes so their
      * `video_urls` stays in sync with the observable `libraryStore.mediaLinks`.
@@ -1385,6 +1443,7 @@ class MediaStore {
         // ponytail: force DetailView useMemo to recompute availableLanguages
         this.linksRefreshVersion++;
     }
+
     async refreshLinksForShow(showId) {
         // Use episode IDs from linkingEpisodesForItem (same source that
         // buildLinksForSeason used to save links) to avoid TVMaze/TMDB
@@ -1576,13 +1635,43 @@ class MediaStore {
         }
 
         if (item.video_url) {
+            // Resolve show details for episode playback so the episodes
+            // drawer (and next-episode logic) has seasons/episodes. In TV
+            // mode the user launches playback directly from the home rows
+            // without opening the detail view, so cachedItems may not hold
+            // the show yet — fetch on demand.
+            let showDetails = null;
+            if ('show_id' in item) {
+                showDetails = libraryStore.cachedItems.get(item.show_id) || null;
+                if (
+                    !showDetails &&
+                    this.selectedItem &&
+                    'seasons' in this.selectedItem &&
+                    this.selectedItem.id === item.show_id
+                ) {
+                    showDetails = this.selectedItem;
+                }
+                if (!showDetails) {
+                    try {
+                        showDetails = await this._fetchAndCacheMediaDetails(item.show_id, {
+                            id: item.show_id,
+                            media_type: 'tv',
+                            title: item.show_title,
+                            backdrop_path: item.backdrop_path,
+                        });
+                    } catch (e) {
+                        console.warn('[startPlayback] failed to fetch show details for drawer', e);
+                    }
+                }
+            }
+
             runInAction(() => {
                 // Navigate to player: tvStore routes TV mode, react-router otherwise.
                 if (tvStore.isTvMode) {
                     tvStore.navigate('player');
                 } else {
                     const shouldReplace = window.history.state?.playerOpen;
-                    navigateTo(Routes.PLAYER, { replace: shouldReplace });
+                    navigateTo(Routes.PLAYER, {replace: shouldReplace});
                 }
                 if (this.selectedItem) {
                     this.playbackOriginItem = this.selectedItem;
@@ -1592,21 +1681,7 @@ class MediaStore {
                 }
 
                 this.nowPlayingItem = item;
-
-                if ('show_id' in item) {
-                    let showDetails = libraryStore.cachedItems.get(item.show_id) || null;
-                    if (
-                        !showDetails &&
-                        this.selectedItem &&
-                        'seasons' in this.selectedItem &&
-                        this.selectedItem.id === item.show_id
-                    ) {
-                        showDetails = this.selectedItem;
-                    }
-                    this.nowPlayingShowDetails = showDetails;
-                } else {
-                    this.nowPlayingShowDetails = null;
-                }
+                this.nowPlayingShowDetails = showDetails;
             });
         }
     };
@@ -1648,7 +1723,7 @@ class MediaStore {
                         const __linkRef = uiStore.linkingEpisodesForItem;
                         /* eslint-disable no-eval */
                         const newSeasons = eval(`
-                            (function() {
+                            (function () {
                                 var ns = [];
                                 for (var si = 0; si < fullItemDetails.seasons.length; si++) {
                                     var s = fullItemDetails.seasons[si];
@@ -1666,7 +1741,13 @@ class MediaStore {
                                             video_url: oldEp.video_url || ep.video_url || null,
                                         });
                                     }
-                                    ns.push({id: s.id, name: s.name, season_number: s.season_number, overview: s.overview, episodes: newEps});
+                                    ns.push({
+                                        id: s.id,
+                                        name: s.name,
+                                        season_number: s.season_number,
+                                        overview: s.overview,
+                                        episodes: newEps
+                                    });
                                 }
                                 return ns;
                             })()
@@ -1691,7 +1772,7 @@ class MediaStore {
             case 'detailView': {
                 // Navigate to home (detail view is an overlay on home)
                 const shouldReplace = Boolean(this.selectedItem);
-                navigateTo(Routes.HOME, { replace: shouldReplace });
+                navigateTo(Routes.HOME, {replace: shouldReplace});
                 runInAction(() => {
                     this.selectedItem = item;
                     this.isDetailLoading = true;
@@ -1748,7 +1829,7 @@ class MediaStore {
                             const __linkRef = uiStore.linkingEpisodesForItem;
                             /* eslint-disable no-eval */
                             const newSeasons = eval(`
-                                (function() {
+                                (function () {
                                     var ns = [];
                                     for (var si = 0; si < fullItemDetails.seasons.length; si++) {
                                         var s = fullItemDetails.seasons[si];
@@ -1766,7 +1847,13 @@ class MediaStore {
                                                 video_url: oldEp.video_url || ep.video_url || null,
                                             });
                                         }
-                                        ns.push({id: s.id, name: s.name, season_number: s.season_number, overview: s.overview, episodes: newEps});
+                                        ns.push({
+                                            id: s.id,
+                                            name: s.name,
+                                            season_number: s.season_number,
+                                            overview: s.overview,
+                                            episodes: newEps
+                                        });
                                     }
                                     return ns;
                                 })()
