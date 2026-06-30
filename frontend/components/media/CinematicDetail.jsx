@@ -20,13 +20,14 @@ import {durations, easings, reducedMotion} from '../../motion/grammar.js';
 import {mediaStore} from '../../store/mediaStore.js';
 
 const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
-    // Access linksRefreshVersion here so the outer observer tracks it.
-    // When links are added/deleted, linksRefreshVersion changes → this
-    // component re-renders → DetailView (with key=detailKey) remounts
-    // with fresh data from the patched selectedItem.
-    const linksRefreshVersion = mediaStore.linksRefreshVersion;
-    const detailKey = `detail-${mediaStore.currentSelectedItem?.id ?? 'none'}-v${linksRefreshVersion}`;
-
+    // ponytail: key only on item id — NOT linksRefreshVersion.
+    // Including linksRefreshVersion remounts DetailView (and the
+    // LinkEpisodesModal inside it) on every link mutation, which
+    // wipes the modal's useRef state and resets the active tab to
+    // 'add'. DetailView already tracks linksRefreshVersion as an
+    // observer and force-re-renders, so a remount is redundant.
+    void mediaStore.linksRefreshVersion;
+    const detailKey = `detail-${mediaStore.currentSelectedItem?.id ?? 'none'}`;
     // The morph-in animation (scale + blur) MUST be applied to an
     // inner wrapper, NOT the root, because both `transform` and
     // `filter` create a new containing block for descendants. The
