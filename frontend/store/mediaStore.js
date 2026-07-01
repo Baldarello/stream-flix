@@ -1982,6 +1982,8 @@ class MediaStore {
                             const links = await this.getLinksForMedia(ep.id);
                             return {
                                 ...ep,
+                                season_number: season.season_number,
+                                show_id: itemId,
                                 video_urls: links,
                                 video_url: links[0]?.url,
                             };
@@ -1999,6 +2001,8 @@ class MediaStore {
                             const links = await this.getLinksForMedia(ep.id);
                             return {
                                 ...ep,
+                                season_number: season.season_number,
+                                show_id: itemId,
                                 video_urls: links,
                                 video_url: links[0]?.url,
                             };

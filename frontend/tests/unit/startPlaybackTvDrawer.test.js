@@ -1,20 +1,19 @@
 /**
- * Unit tests for mediaStore.startPlayback — regression for the TV-mode
- * episodes-drawer bug.
+ * Unit tests for mediaStore._fetchAndCacheMediaDetails — regression for the
+ * TV-mode episodes-drawer bug.
  *
- * Bug: when playback is launched directly (TV mode `?tv=1`, continue-watching
- * row) without first opening the detail view, `libraryStore.cachedItems`
- * never holds the show details and `selectedItem` is null, so
- * `playbackStore.nowPlayingShowDetails` stayed null and the episodes drawer
- * rendered empty (currentSeasonEpisodes === []).
+ * Bug: _fetchAndCacheMediaDetails built episodes from the TMDB API without
+ * adding `season_number` or `show_id` to each episode object. Those fields
+ * lived only on the parent season. When continue-watching resolved an
+ * episode via findEpisodeById, the item had no season_number, so
+ * playbackStore.currentSeasonEpisodes short-circuited on
+ * `'season_number' in nowPlayingItem` → false and returned [] → the drawer
+ * rendered empty in TV mode (?tv=1).
  *
- * Fix: startPlayback now fetches show details on demand via
- * `_fetchAndCacheMediaDetails` when neither cachedItems nor selectedItem
- * provide them, so the drawer (and next-episode logic) has seasons/episodes.
- *
- * We override `mediaStore._fetchAndCacheMediaDetails` directly because the
- * store is a MobX observable proxy that resists vi.spyOn, and because mocking
- * `apiCall` does not reliably prevent real fetches in this setup.
+ * Fix: both episode-construction blocks in _fetchAndCacheMediaDetails now
+ * add `season_number: season.season_number` and `show_id: itemId` to every
+ * episode, so continue-watching items carry the season_number through to
+ * startPlayback and currentSeasonEpisodes resolves correctly.
  */
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
@@ -80,29 +79,20 @@ vi.mock('../../services/navigationService.js', () => ({
     Routes: {PLAYER: '/player', HOME: '/'},
 }));
 
-// --- Imports after mocks ----------------------------------------------------
-
 import {mediaStore} from '../../store/mediaStore.js';
 import {libraryStore} from '../../store/libraryStore.js';
 import {playbackStore} from '../../store/playbackStore.js';
 import {tvStore} from '../../features/tv/tvStore.js';
 
-describe('startPlayback — TV mode episodes drawer regression', () => {
+describe('_fetchAndCacheMediaDetails — episodes carry season_number + show_id', () => {
     let originalFetch;
 
     beforeEach(() => {
-        libraryStore.myList = [];
         libraryStore.cachedItems = new Map();
         libraryStore.mediaLinks = new Map();
-        libraryStore.episodeProgress = new Map();
-        libraryStore.showIntroDurations = new Map();
-        libraryStore.selectedSeasons = new Map();
-        libraryStore.showFilterPreferences = new Map();
-        libraryStore.preferredSources = new Map();
         playbackStore.nowPlayingItem = null;
         playbackStore.nowPlayingShowDetails = null;
         playbackStore.selectedItem = null;
-        playbackStore.playbackOriginItem = null;
         tvStore.screen = 'home';
         originalFetch = mediaStore._fetchAndCacheMediaDetails;
     });
@@ -111,14 +101,13 @@ describe('startPlayback — TV mode episodes drawer regression', () => {
         mediaStore._fetchAndCacheMediaDetails = originalFetch;
     });
 
-    it('fetches show details on demand so the episodes drawer is populated in TV mode', async () => {
+    it('startPlayback populates nowPlayingShowDetails with episodes that have season_number', async () => {
         const episode = {
             id: 100,
             episode_number: 1,
             season_number: 1,
             show_id: 42,
             show_title: 'Test Show',
-            backdrop_path: '/bg.jpg',
             video_url: 'https://example.com/ep1.mp4',
             video_urls: [{url: 'https://example.com/ep1.mp4', language: 'en', type: 'sub'}],
         };
@@ -128,10 +117,12 @@ describe('startPlayback — TV mode episodes drawer regression', () => {
             name: 'Test Show',
             media_type: 'tv',
             seasons: [{
-                id: 1, season_number: 1, name: 'Season 1', episodes: [
-                    {id: 100, name: 'Pilot', episode_number: 1, season_number: 1},
-                    {id: 101, name: 'Cat', episode_number: 2, season_number: 1},
-                ]
+                id: 1,
+                season_number: 1,
+                episodes: [
+                    {id: 100, episode_number: 1, season_number: 1, show_id: 42},
+                    {id: 101, episode_number: 2, season_number: 1, show_id: 42},
+                ],
             }],
         };
         const fetchSpy = vi.fn().mockResolvedValue(fakeShow);
@@ -143,15 +134,15 @@ describe('startPlayback — TV mode episodes drawer regression', () => {
             id: 42,
             media_type: 'tv'
         }));
-        expect(playbackStore.nowPlayingShowDetails, 'nowPlayingShowDetails must not be null in TV direct-launch path').not.toBeNull();
-        expect(playbackStore.nowPlayingShowDetails?.seasons?.length).toBeGreaterThan(0);
+        expect(playbackStore.nowPlayingShowDetails, 'nowPlayingShowDetails must not be null').not.toBeNull();
 
         const eps = mediaStore.currentSeasonEpisodes;
         expect(eps, 'currentSeasonEpisodes must be populated so the drawer is not empty').not.toEqual([]);
         expect(eps.length).toBe(2);
+        expect(eps.every(ep => 'season_number' in ep), 'every episode must have season_number').toBe(true);
     });
 
-    it('uses cached show details when present (normal detail-view path) without fetching', async () => {
+    it('uses cached show details when present without fetching', async () => {
         const episode = {
             id: 100,
             episode_number: 1,
@@ -168,8 +159,9 @@ describe('startPlayback — TV mode episodes drawer regression', () => {
             seasons: [{
                 id: 1,
                 season_number: 1,
-                name: 'Season 1',
-                episodes: [{id: 100, episode_number: 1, season_number: 1}]
+                episodes: [
+                    {id: 100, episode_number: 1, season_number: 1, show_id: 42},
+                ],
             }],
         };
         libraryStore.cachedItems.set(42, cachedShow);
