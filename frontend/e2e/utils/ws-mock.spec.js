@@ -9,8 +9,8 @@
  * `exposeFunction`-free design, etc.) so future refactors of
  * `ws-mock.js` can be validated here.
  */
-import {expect, test} from '@playwright/test';
-import {mockWebSocket} from './ws-mock';
+import { expect, test } from '@playwright/test';
+import { mockWebSocket } from './ws-mock';
 
 test.describe('ws-mock', () => {
     test('replaces window.WebSocket before app code runs', async ({ page }) => {
@@ -20,9 +20,7 @@ test.describe('ws-mock', () => {
         // init script to be installed on a real browsing context.
         await page.goto('about:blank');
 
-        const replaced = await page.evaluate(
-            () => window.WebSocket?.toString().includes('MockWebSocket'),
-        );
+        const replaced = await page.evaluate(() => window.WebSocket?.toString().includes('MockWebSocket'));
         expect(replaced).toBe(true);
 
         // Constructing a WebSocket from the page should now hit the mock.
@@ -40,9 +38,7 @@ test.describe('ws-mock', () => {
         expect(constructed.sameInstance).toBe(true);
     });
 
-    test('auto-opens the connection and lets the app send messages', async ({
-        page,
-    }) => {
+    test('auto-opens the connection and lets the app send messages', async ({ page }) => {
         const ws = await mockWebSocket(page);
         await page.goto('about:blank');
 
@@ -64,9 +60,7 @@ test.describe('ws-mock', () => {
         expect(sent).toEqual(['hello from app']);
     });
 
-    test('simulateServerMessage delivers a MessageEvent to the app', async ({
-        page,
-    }) => {
+    test('simulateServerMessage delivers a MessageEvent to the app', async ({ page }) => {
         const ws = await mockWebSocket(page);
         await page.goto('about:blank');
 
@@ -84,9 +78,7 @@ test.describe('ws-mock', () => {
         expect(JSON.parse(received)).toEqual({ type: 'greeting', payload: { hi: 1 } });
     });
 
-    test('onSend handler can auto-reply via mockServerMessage', async ({
-        page,
-    }) => {
+    test('onSend handler can auto-reply via mockServerMessage', async ({ page }) => {
         // The handler is a Node-side function but it gets stringified and
         // rehydrated in the page. It receives the real MockWebSocket
         // instance, so it can call mockServerMessage directly.
@@ -117,15 +109,13 @@ test.describe('ws-mock', () => {
                     });
                     // Wait for auto-open before sending.
                     setTimeout(() => sock.send(JSON.stringify({ type: 'ping' })), 5);
-                }),
+                })
         );
 
         expect(replied).toBe('pong');
     });
 
-    test('simulateServerClose fires a close event with the given code', async ({
-        page,
-    }) => {
+    test('simulateServerClose fires a close event with the given code', async ({ page }) => {
         await mockWebSocket(page);
         await page.goto('about:blank');
 
@@ -136,18 +126,13 @@ test.describe('ws-mock', () => {
                     sock.addEventListener('close', (ev) => {
                         resolve({ code: ev.code, reason: ev.reason });
                     });
-                    setTimeout(
-                        () => sock.mockServerClose(4001, 'bye'),
-                        5,
-                    );
-                }),
+                    setTimeout(() => sock.mockServerClose(4001, 'bye'), 5);
+                })
         );
         expect(result).toEqual({ code: 4001, reason: 'bye' });
     });
 
-    test('send() before open throws (matches real WebSocket behavior)', async ({
-        page,
-    }) => {
+    test('send() before open throws (matches real WebSocket behavior)', async ({ page }) => {
         await mockWebSocket(page, { autoOpen: false });
         await page.goto('about:blank');
 
@@ -163,9 +148,7 @@ test.describe('ws-mock', () => {
         expect(threw).toMatch(/send\(\) called before connection was opened/);
     });
 
-    test('messages sent before open are buffered and delivered on open', async ({
-        page,
-    }) => {
+    test('messages sent before open are buffered and delivered on open', async ({ page }) => {
         await mockWebSocket(page, { autoOpen: false });
         await page.goto('about:blank');
 
@@ -183,7 +166,7 @@ test.describe('ws-mock', () => {
                     sock.mockServerMessage('second');
                     // Then it opens — buffered messages should be delivered.
                     sock.mockServerOpen();
-                }),
+                })
         );
         expect(received).toEqual(['first', 'second']);
     });

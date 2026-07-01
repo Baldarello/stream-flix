@@ -5,8 +5,8 @@
  * flag. Side-effect: the debounce timer is held in a private
  * non-observable field so MobX does not try to track it.
  */
-import {makeAutoObservable, runInAction} from 'mobx';
-import {searchShow} from '../services/apiCall';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { searchShow } from '../services/apiCall';
 
 class SearchStore {
     query = '';

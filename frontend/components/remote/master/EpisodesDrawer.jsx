@@ -1,7 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {remoteStore} from '../../../store/remoteStore.js';
+import React, { useEffect, useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { remoteStore } from '../../../store/remoteStore.js';
 import {
     Box,
     CardMedia,
@@ -20,24 +20,23 @@ import {
     Select,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-import {gsap} from 'gsap';
-import {durations, easings, reducedMotion, stagger} from '../../../motion/grammar.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {HoloChip} from '../../feedback/HoloChip.jsx';
-import {Skeleton} from '../../feedback/Skeleton.jsx';
-import {ScanlineOverlay} from '../../feedback/ScanlineOverlay.jsx';
-import {holoFieldSx} from "../../../styles/style.js"
+import { gsap } from 'gsap';
+import { durations, easings, reducedMotion, stagger } from '../../../motion/grammar.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { HoloChip } from '../../feedback/HoloChip.jsx';
+import { Skeleton } from '../../feedback/Skeleton.jsx';
+import { ScanlineOverlay } from '../../feedback/ScanlineOverlay.jsx';
+import { holoFieldSx } from '../../../styles/style.js';
 
-
-const HoloDrawerHeader = observer(({title, subtitle, totalEpisodes, onClose}) => {
-    const {t} = useTranslations();
+const HoloDrawerHeader = observer(({ title, subtitle, totalEpisodes, onClose }) => {
+    const { t } = useTranslations();
     return (
         <Box
             id="episodes-drawer-header"
@@ -52,7 +51,7 @@ const HoloDrawerHeader = observer(({title, subtitle, totalEpisodes, onClose}) =>
                 zIndex: 2,
             }}
         >
-            <Box sx={{flex: 1, minWidth: 0}}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography
                     sx={{
                         fontFamily: "'Space Grotesk', 'Inter', sans-serif",
@@ -83,11 +82,7 @@ const HoloDrawerHeader = observer(({title, subtitle, totalEpisodes, onClose}) =>
                 )}
             </Box>
             {totalEpisodes > 0 && (
-                <HoloChip
-                    id="episodes-drawer-total-chip"
-                    label={`${totalEpisodes}`}
-                    sx={{height: 22, fontSize: '0.65rem'}}
-                />
+                <HoloChip id="episodes-drawer-total-chip" label={`${totalEpisodes}`} sx={{ height: 22, fontSize: '0.65rem' }} />
             )}
             <IconButton
                 id="episodes-drawer-close"
@@ -104,15 +99,15 @@ const HoloDrawerHeader = observer(({title, subtitle, totalEpisodes, onClose}) =>
                     },
                 }}
             >
-                <CloseIcon/>
+                <CloseIcon />
             </IconButton>
         </Box>
     );
 });
 HoloDrawerHeader.displayName = 'HoloDrawerHeader';
 
-const SeasonSelector = observer(({seasons, value, onChange}) => {
-    const {t} = useTranslations();
+const SeasonSelector = observer(({ seasons, value, onChange }) => {
+    const { t } = useTranslations();
     return (
         <FormControl fullWidth margin="normal" size="small" sx={holoFieldSx}>
             <InputLabel id="episodes-drawer-season-label">{t('remote.detail.season')}</InputLabel>
@@ -134,11 +129,11 @@ const SeasonSelector = observer(({seasons, value, onChange}) => {
                             border: '1px solid rgba(76, 210, 255, 0.35)',
                             boxShadow: '0 0 24px rgba(76, 210, 255, 0.3)',
                             color: 'var(--text-primary)',
-                        }
-                    }
+                        },
+                    },
                 }}
             >
-                {seasons.map(season => (
+                {seasons.map((season) => (
                     <MenuItem
                         key={season.id}
                         value={season.season_number}
@@ -162,8 +157,8 @@ const SeasonSelector = observer(({seasons, value, onChange}) => {
 });
 SeasonSelector.displayName = 'SeasonSelector';
 
-const IntroDurationField = observer(({value, onChange}) => {
-    const {t} = useTranslations();
+const IntroDurationField = observer(({ value, onChange }) => {
+    const { t } = useTranslations();
     return (
         <FormControl fullWidth size="small" sx={holoFieldSx}>
             <TextField
@@ -177,45 +172,35 @@ const IntroDurationField = observer(({value, onChange}) => {
                 onFocus={(event) => event.target.select()}
                 InputProps={{
                     endAdornment: <InputAdornment position="end">sec</InputAdornment>,
-                    inputProps: {min: 0}
+                    inputProps: { min: 0 },
                 }}
             />
-            <FormHelperText sx={{mx: 0, mt: 0.5}}>
-                Default 80 sec
-            </FormHelperText>
+            <FormHelperText sx={{ mx: 0, mt: 0.5 }}>Default 80 sec</FormHelperText>
         </FormControl>
     );
 });
 IntroDurationField.displayName = 'IntroDurationField';
 
-const EpisodeRow = observer(({
-                                 episode,
-                                 isCurrent,
-                                 seasonNumber,
-                                 isPlayable,
-                                 onClick,
-                             }) => {
-    const {episodeProgress} = mediaStore;
-    const {t} = useTranslations();
+const EpisodeRow = observer(({ episode, isCurrent, seasonNumber, isPlayable, onClick }) => {
+    const { episodeProgress } = mediaStore;
+    const { t } = useTranslations();
     const progress = episodeProgress.get(episode.id);
-    const watchedPercentage = progress && progress.duration > 0
-        ? (progress.currentTime / progress.duration) * 100
-        : 0;
+    const watchedPercentage = progress && progress.duration > 0 ? (progress.currentTime / progress.duration) * 100 : 0;
     const isWatched = progress?.watched;
 
-    const availableLanguages = (episode.video_urls || []).map(link => ({
+    const availableLanguages = (episode.video_urls || []).map((link) => ({
         lang: link.language,
-        type: link.type
+        type: link.type,
     }));
-    const uniqueLanguages = availableLanguages.reduce((acc, {lang, type}) => {
-        if (!acc.find(l => l.lang === lang && l.type === type)) {
-            acc.push({lang, type});
+    const uniqueLanguages = availableLanguages.reduce((acc, { lang, type }) => {
+        if (!acc.find((l) => l.lang === lang && l.type === type)) {
+            acc.push({ lang, type });
         }
         return acc;
     }, []);
 
     return (
-        <ListItem disablePadding sx={{mb: 0.5}}>
+        <ListItem disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
                 id={`episode-row-${episode.id}`}
                 data-testid={`episode-row-${episode.id}`}
@@ -231,7 +216,8 @@ const EpisodeRow = observer(({
                     borderLeft: isCurrent ? '2px solid var(--neon-accent)' : '2px solid transparent',
                     boxShadow: isCurrent ? 'inset 2px 0 0 var(--neon-accent)' : 'none',
                     background: isCurrent ? 'rgba(76, 210, 255, 0.10)' : 'transparent',
-                    transition: 'background 180ms cubic-bezier(0.22,1,0.36,1), transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms',
+                    transition:
+                        'background 180ms cubic-bezier(0.22,1,0.36,1), transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms',
                     opacity: isPlayable ? 1 : 0.45,
                     '&:hover': {
                         background: 'rgba(76, 210, 255, 0.06)',
@@ -246,11 +232,11 @@ const EpisodeRow = observer(({
                     },
                 }}
             >
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 28}}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 28 }}>
                     {isCurrent && (
                         <PlayArrowIcon
                             data-testid={`episode-playing-${episode.id}`}
-                            sx={{color: 'var(--neon-accent)', fontSize: '1.1rem'}}
+                            sx={{ color: 'var(--neon-accent)', fontSize: '1.1rem' }}
                         />
                     )}
                     <Typography
@@ -282,7 +268,7 @@ const EpisodeRow = observer(({
                             component="img"
                             image={episode.still_path}
                             alt={episode.name}
-                            sx={{width: '100%', height: '100%', objectFit: 'cover'}}
+                            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                     ) : (
                         <Box
@@ -295,7 +281,7 @@ const EpisodeRow = observer(({
                                 justifyContent: 'center',
                             }}
                         >
-                            <TheatersIcon sx={{fontSize: '2.5rem', color: 'var(--text-dim)'}}/>
+                            <TheatersIcon sx={{ fontSize: '2.5rem', color: 'var(--text-dim)' }} />
                         </Box>
                     )}
                     {watchedPercentage > 0 && !isWatched && (
@@ -326,14 +312,12 @@ const EpisodeRow = observer(({
                                 justifyContent: 'center',
                             }}
                         >
-                            <CheckCircleIcon
-                                sx={{fontSize: '2rem', color: 'var(--neon-accent)'}}
-                            />
+                            <CheckCircleIcon sx={{ fontSize: '2rem', color: 'var(--neon-accent)' }} />
                         </Box>
                     )}
                 </Box>
 
-                <Box sx={{flex: 1, minWidth: 0}}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
                         sx={{
                             color: 'var(--text-primary)',
@@ -349,24 +333,17 @@ const EpisodeRow = observer(({
                     >
                         {episode.name}
                     </Typography>
-                    <Typography
-                        variant="caption"
-                        sx={{color: 'var(--text-secondary)', display: 'block', mt: 0.25}}
-                    >
-                        {t('remote.detail.season', {number: seasonNumber})}
+                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block', mt: 0.25 }}>
+                        {t('remote.detail.season', { number: seasonNumber })}
                         {episode.runtime ? ` · ${episode.runtime} min` : ''}
                     </Typography>
                     {uniqueLanguages.length > 0 && (
-                        <Stack
-                            direction="row"
-                            spacing={0.5}
-                            sx={{mt: 0.5, flexWrap: 'wrap', gap: 0.5}}
-                        >
-                            {uniqueLanguages.map(({lang, type}) => (
+                        <Stack direction="row" spacing={0.5} sx={{ mt: 0.5, flexWrap: 'wrap', gap: 0.5 }}>
+                            {uniqueLanguages.map(({ lang, type }) => (
                                 <HoloChip
                                     key={`${lang}-${type}`}
                                     label={`${lang.toUpperCase()} ${type === 'dub' ? 'DUB' : 'SUB'}`}
-                                    sx={{height: 18, fontSize: '0.6rem'}}
+                                    sx={{ height: 18, fontSize: '0.6rem' }}
                                 />
                             ))}
                         </Stack>
@@ -379,7 +356,7 @@ const EpisodeRow = observer(({
 EpisodeRow.displayName = 'EpisodeRow';
 
 const EpisodeListSkeleton = () => {
-    const items = Array.from({length: 6}, (_, idx) => idx);
+    const items = Array.from({ length: 6 }, (_, idx) => idx);
     return (
         <Box
             id="episodes-drawer-skeleton"
@@ -404,21 +381,11 @@ const EpisodeListSkeleton = () => {
                         animation: `episodes-skeleton-stagger 0.32s ease ${idx * 0.04}s backwards`,
                     }}
                 >
-                    <Skeleton id={`episodes-skel-num-${idx}`} width={28} height={18} borderRadius={4}/>
-                    <Skeleton id={`episodes-skel-thumb-${idx}`} width={120} height={68} borderRadius={8}/>
-                    <Box sx={{flex: 1, display: 'flex', flexDirection: 'column', gap: 0.75}}>
-                        <Skeleton
-                            id={`episodes-skel-title-${idx}`}
-                            width="80%"
-                            height={14}
-                            borderRadius={4}
-                        />
-                        <Skeleton
-                            id={`episodes-skel-sub-${idx}`}
-                            width="40%"
-                            height={10}
-                            borderRadius={4}
-                        />
+                    <Skeleton id={`episodes-skel-num-${idx}`} width={28} height={18} borderRadius={4} />
+                    <Skeleton id={`episodes-skel-thumb-${idx}`} width={120} height={68} borderRadius={8} />
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                        <Skeleton id={`episodes-skel-title-${idx}`} width="80%" height={14} borderRadius={4} />
+                        <Skeleton id={`episodes-skel-sub-${idx}`} width="40%" height={10} borderRadius={4} />
                     </Box>
                 </Box>
             ))}
@@ -428,7 +395,7 @@ const EpisodeListSkeleton = () => {
 EpisodeListSkeleton.displayName = 'EpisodeListSkeleton';
 
 const EpisodeEmptyState = () => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     return (
         <Box
             id="episodes-drawer-empty"
@@ -446,7 +413,7 @@ const EpisodeEmptyState = () => {
                 zIndex: 2,
             }}
         >
-            <TheatersIcon sx={{fontSize: '4rem', color: 'var(--text-dim)'}}/>
+            <TheatersIcon sx={{ fontSize: '4rem', color: 'var(--text-dim)' }} />
             <Typography
                 sx={{
                     color: 'var(--text-secondary)',
@@ -461,14 +428,10 @@ const EpisodeEmptyState = () => {
 };
 EpisodeEmptyState.displayName = 'EpisodeEmptyState';
 
-const EpisodesDrawer = observer(({
-                                     isOpen,
-                                     onClose,
-                                     onSelectEpisode,
-                                 }) => {
-    const {t} = useTranslations();
-    const {remoteFullItem, isRemoteFullItemLoading, playRemoteItem} = remoteStore;
-    const {showIntroDurations, setShowIntroDuration} = mediaStore;
+const EpisodesDrawer = observer(({ isOpen, onClose, onSelectEpisode }) => {
+    const { t } = useTranslations();
+    const { remoteFullItem, isRemoteFullItemLoading, playRemoteItem } = remoteStore;
+    const { showIntroDurations, setShowIntroDuration } = mediaStore;
 
     const nowPlayingItem = remoteStore.remoteSlaveState?.nowPlayingItem;
     const isEpisode = nowPlayingItem && 'episode_number' in nowPlayingItem;
@@ -504,8 +467,8 @@ const EpisodesDrawer = observer(({
         if (reducedMotion()) {
             gsap.fromTo(
                 paper,
-                {autoAlpha: 0},
-                {autoAlpha: 1, duration: durations.fadeFallback, ease: 'none', overwrite: 'auto'}
+                { autoAlpha: 0 },
+                { autoAlpha: 1, duration: durations.fadeFallback, ease: 'none', overwrite: 'auto' }
             );
             return undefined;
         }
@@ -513,7 +476,7 @@ const EpisodesDrawer = observer(({
         const tl = gsap.timeline();
         tl.fromTo(
             paper,
-            {autoAlpha: 0, x: 24, filter: 'blur(6px)'},
+            { autoAlpha: 0, x: 24, filter: 'blur(6px)' },
             {
                 autoAlpha: 1,
                 x: 0,
@@ -546,7 +509,7 @@ const EpisodesDrawer = observer(({
         const tl = gsap.timeline();
         tl.fromTo(
             items,
-            {autoAlpha: 0, y: 12},
+            { autoAlpha: 0, y: 12 },
             {
                 autoAlpha: 1,
                 y: 0,
@@ -592,12 +555,9 @@ const EpisodesDrawer = observer(({
         }
     };
 
-    const currentSeason = remoteFullItem?.seasons?.find(s => s.season_number === selectedSeason);
+    const currentSeason = remoteFullItem?.seasons?.find((s) => s.season_number === selectedSeason);
     const episodes = currentSeason?.episodes ?? [];
-    const totalEpisodes = remoteFullItem?.seasons?.reduce(
-        (acc, s) => acc + (s.episodes?.length || 0),
-        0
-    ) ?? 0;
+    const totalEpisodes = remoteFullItem?.seasons?.reduce((acc, s) => acc + (s.episodes?.length || 0), 0) ?? 0;
     const showName = remoteFullItem?.title || remoteFullItem?.name || '';
 
     return (
@@ -617,13 +577,13 @@ const EpisodesDrawer = observer(({
                         backgroundColor: 'rgba(5, 6, 13, 0.55)',
                         backdropFilter: 'blur(4px)',
                         WebkitBackdropFilter: 'blur(4px)',
-                    }
+                    },
                 },
                 paper: {
                     ref: paperRef,
                     className: 'episodes-drawer-paper holo-surface',
                     sx: {
-                        width: {xs: '85vw', sm: 400, md: 420},
+                        width: { xs: '85vw', sm: 400, md: 420 },
                         pt: 'env(safe-area-inset-top)',
                         pb: 'env(safe-area-inset-bottom)',
                         pr: 'env(safe-area-inset-right)',
@@ -635,8 +595,8 @@ const EpisodesDrawer = observer(({
                         backdropFilter: 'blur(12px) saturate(140%)',
                         WebkitBackdropFilter: 'blur(12px) saturate(140%)',
                         overflow: 'hidden',
-                    }
-                }
+                    },
+                },
             }}
         >
             <HoloDrawerHeader
@@ -646,25 +606,19 @@ const EpisodesDrawer = observer(({
                 onClose={onClose}
             />
 
-            <Box sx={{p: 2, position: 'relative', zIndex: 2}}>
-                <IntroDurationField value={introDuration} onChange={handleIntroDurationChange}/>
+            <Box sx={{ p: 2, position: 'relative', zIndex: 2 }}>
+                <IntroDurationField value={introDuration} onChange={handleIntroDurationChange} />
                 {remoteFullItem?.seasons && remoteFullItem.seasons.length > 0 && (
-                    <SeasonSelector
-                        seasons={remoteFullItem.seasons}
-                        value={selectedSeason}
-                        onChange={handleSeasonChange}
-                    />
+                    <SeasonSelector seasons={remoteFullItem.seasons} value={selectedSeason} onChange={handleSeasonChange} />
                 )}
             </Box>
 
-            <Divider
-                sx={{borderColor: 'rgba(76, 210, 255, 0.18)', position: 'relative', zIndex: 2}}
-            />
+            <Divider sx={{ borderColor: 'rgba(76, 210, 255, 0.18)', position: 'relative', zIndex: 2 }} />
 
             {isRemoteFullItemLoading ? (
-                <EpisodeListSkeleton/>
+                <EpisodeListSkeleton />
             ) : episodes.length === 0 ? (
-                <EpisodeEmptyState/>
+                <EpisodeEmptyState />
             ) : (
                 <List
                     ref={listRef}
@@ -678,9 +632,8 @@ const EpisodesDrawer = observer(({
                         zIndex: 2,
                     }}
                 >
-                    {episodes.map(episode => {
-                        const isPlayable = !!episode.video_url
-                            || (episode.video_urls && episode.video_urls.length > 0);
+                    {episodes.map((episode) => {
+                        const isPlayable = !!episode.video_url || (episode.video_urls && episode.video_urls.length > 0);
                         return (
                             <EpisodeRow
                                 key={episode.id}
@@ -695,7 +648,7 @@ const EpisodesDrawer = observer(({
                 </List>
             )}
 
-            <ScanlineOverlay id="episodes-drawer-scanline" intensity={0.08}/>
+            <ScanlineOverlay id="episodes-drawer-scanline" intensity={0.08} />
         </Drawer>
     );
 });

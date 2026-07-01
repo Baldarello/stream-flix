@@ -1,4 +1,4 @@
-import {uiStore} from './store/uiStore.js';
+import { uiStore } from './store/uiStore.js';
 /**
  * @fileoverview StreamFlix App - Main Application Component
  *
@@ -12,26 +12,25 @@ import {uiStore} from './store/uiStore.js';
  * class maps to the unified palette.
  */
 
-import React, {useEffect} from 'react';
-import {BrowserRouter, useNavigate} from 'react-router';
-import {observer} from 'mobx-react-lite';
-import {Box, createTheme, ThemeProvider} from '@mui/material';
+import React, { useEffect } from 'react';
+import { BrowserRouter, useNavigate } from 'react-router';
+import { observer } from 'mobx-react-lite';
+import { Box, createTheme, ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import {mediaStore} from './store/mediaStore.js';
-import {remoteStore} from './store/remoteStore.js';
-import {fxStore} from './store/fxStore.js';
-import {websocketService} from './services/websocketService.js';
-import {setNavigate} from './services/navigationService.js';
-import {StoreProvider} from './context/StoreContext.jsx';
-import {AppInitializer} from './features/shared/AppInitializer.jsx';
-import {ScrollLockManager} from './features/shared/ScrollLockManager.jsx';
-import {ViewSwitch} from './views/ViewSwitch.jsx';
-import {OverlayLayer} from './components/overlay/OverlayLayer.jsx';
-import {AmbientCanvas} from './fx/AmbientCanvas.jsx';
-import {SceneCanvas} from './fx/SceneCanvas.jsx';
-import {TransitionPortal} from './fx/TransitionPortal.jsx';
+import { mediaStore } from './store/mediaStore.js';
+import { remoteStore } from './store/remoteStore.js';
+import { fxStore } from './store/fxStore.js';
+import { websocketService } from './services/websocketService.js';
+import { setNavigate } from './services/navigationService.js';
+import { StoreProvider } from './context/StoreContext.jsx';
+import { AppInitializer } from './features/shared/AppInitializer.jsx';
+import { ScrollLockManager } from './features/shared/ScrollLockManager.jsx';
+import { ViewSwitch } from './views/ViewSwitch.jsx';
+import { OverlayLayer } from './components/overlay/OverlayLayer.jsx';
+import { AmbientCanvas } from './fx/AmbientCanvas.jsx';
+import { SceneCanvas } from './fx/SceneCanvas.jsx';
+import { TransitionPortal } from './fx/TransitionPortal.jsx';
 import DebugOverlay from './components/utilities/DebugOverlay.jsx';
-
 
 // Theme Configuration - single unified futuristic theme.
 const baseThemeOptions = {
@@ -43,14 +42,14 @@ const baseThemeOptions = {
         warning: { main: '#ff5e9b' },
         background: {
             default: '#05060d',
-            paper: 'rgba(10, 14, 28, 0.55)'
+            paper: 'rgba(10, 14, 28, 0.55)',
         },
         text: {
             primary: '#eaf2ff',
             secondary: '#8a99b8',
-            disabled: '#4b5772'
+            disabled: '#4b5772',
         },
-        divider: 'rgba(76, 210, 255, 0.18)'
+        divider: 'rgba(76, 210, 255, 0.18)',
     },
     typography: {
         fontFamily: "'Inter', sans-serif",
@@ -59,7 +58,7 @@ const baseThemeOptions = {
         h3: { fontFamily: "'Space Grotesk', 'Poppins', sans-serif", fontWeight: 700 },
         h4: { fontFamily: "'Space Grotesk', 'Poppins', sans-serif", fontWeight: 600 },
         h5: { fontFamily: "'Space Grotesk', 'Poppins', sans-serif", fontWeight: 600 },
-        h6: { fontFamily: "'Space Grotesk', 'Poppins', sans-serif", fontWeight: 600 }
+        h6: { fontFamily: "'Space Grotesk', 'Poppins', sans-serif", fontWeight: 600 },
     },
     shape: { borderRadius: 12 },
     components: {
@@ -72,10 +71,10 @@ const baseThemeOptions = {
                     transition: 'transform 180ms cubic-bezier(0.22,1,0.36,1), box-shadow 180ms cubic-bezier(0.22,1,0.36,1)',
                     '&:hover': {
                         transform: 'scale(1.04)',
-                        boxShadow: '0 0 18px rgba(76, 210, 255, 0.45)'
-                    }
-                }
-            }
+                        boxShadow: '0 0 18px rgba(76, 210, 255, 0.45)',
+                    },
+                },
+            },
         },
         MuiCard: {
             styleOverrides: {
@@ -84,9 +83,9 @@ const baseThemeOptions = {
                     backgroundImage: 'none',
                     backgroundColor: 'rgba(10, 14, 28, 0.55)',
                     border: '1px solid rgba(76, 210, 255, 0.18)',
-                    backdropFilter: 'blur(12px)'
-                }
-            }
+                    backdropFilter: 'blur(12px)',
+                },
+            },
         },
         MuiAppBar: {
             styleOverrides: {
@@ -95,31 +94,29 @@ const baseThemeOptions = {
                     backgroundColor: 'rgba(10, 14, 28, 0.55)',
                     backdropFilter: 'blur(16px) saturate(140%)',
                     borderBottom: '1px solid rgba(76, 210, 255, 0.12)',
-                    boxShadow: 'none'
-                }
-            }
+                    boxShadow: 'none',
+                },
+            },
         },
         MuiPaper: {
             styleOverrides: {
                 root: {
                     backgroundImage: 'none',
                     backgroundColor: 'rgba(10, 14, 28, 0.7)',
-                    border: '1px solid rgba(76, 210, 255, 0.12)'
-                }
-            }
-        }
-    }
+                    border: '1px solid rgba(76, 210, 255, 0.12)',
+                },
+            },
+        },
+    },
 };
 
 const cinematicTheme = createTheme(baseThemeOptions);
-
 
 /**
  * Inner App component that uses hooks requiring React context
  */
 const AppInner = observer(() => {
     const navigate = useNavigate();
-
 
     // Initialize navigation service with react-router's navigate
     useEffect(() => {
@@ -161,8 +158,6 @@ const AppInner = observer(() => {
             };
         }
     }, []);
-
-
 
     return (
         <ThemeProvider theme={cinematicTheme}>

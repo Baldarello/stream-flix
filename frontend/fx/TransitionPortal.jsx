@@ -11,13 +11,13 @@
  * restores.
  */
 
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
-import {observer} from 'mobx-react-lite';
-import {gsap} from 'gsap';
-import {fxStore} from '../store/fxStore.js';
-import {buildTransition} from '../motion/registry.js';
-import {reducedMotion} from '../utils/reducedMotion.js';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { observer } from 'mobx-react-lite';
+import { gsap } from 'gsap';
+import { fxStore } from '../store/fxStore.js';
+import { buildTransition } from '../motion/registry.js';
+import { reducedMotion } from '../utils/reducedMotion.js';
 
 const FOCUSABLE_SELECTOR = [
     'a[href]',
@@ -25,7 +25,7 @@ const FOCUSABLE_SELECTOR = [
     'input:not([disabled])',
     'select:not([disabled])',
     'textarea:not([disabled])',
-    '[tabindex]:not([tabindex="-1"])'
+    '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
 const getFocusable = (root) => {
@@ -39,28 +39,31 @@ const getFocusable = (root) => {
 
 const FocusTrap = ({ active, onEscape, children }) => {
     const ref = useRef(null);
-    const handler = useCallback((event) => {
-        if (!active || !ref.current) return;
-        if (event.key === 'Escape' && onEscape) {
-            onEscape();
-            return;
-        }
-        if (event.key !== 'Tab') return;
-        const items = getFocusable(ref.current);
-        if (items.length === 0) {
-            event.preventDefault();
-            return;
-        }
-        const first = items[0];
-        const last = items[items.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
-    }, [active, onEscape]);
+    const handler = useCallback(
+        (event) => {
+            if (!active || !ref.current) return;
+            if (event.key === 'Escape' && onEscape) {
+                onEscape();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const items = getFocusable(ref.current);
+            if (items.length === 0) {
+                event.preventDefault();
+                return;
+            }
+            const first = items[0];
+            const last = items[items.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        },
+        [active, onEscape]
+    );
 
     useEffect(() => {
         if (!active) return undefined;
@@ -79,12 +82,7 @@ const FocusTrap = ({ active, onEscape, children }) => {
     }, [active]);
 
     return (
-        <div
-            ref={ref}
-            tabIndex={-1}
-            data-testid="transition-portal-focus"
-            style={{ outline: 'none' }}
-        >
+        <div ref={ref} tabIndex={-1} data-testid="transition-portal-focus" style={{ outline: 'none' }}>
             {children}
         </div>
     );
@@ -124,14 +122,12 @@ export const TransitionPortal = observer(function TransitionPortalInner() {
             // the registry factories read DOM as a whole.
             const tl = buildTransition(fromKey, toKey, {
                 overlayNode: overlay,
-                nextViewNode: overlay
+                nextViewNode: overlay,
             });
             try {
                 if (reducedMotion() || !tl) {
                     // simple opacity fade fallback
-                    await gsap.fromTo(overlay,
-                        { autoAlpha: 0 },
-                        { autoAlpha: 1, duration: 0.12, ease: 'none' }).then();
+                    await gsap.fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none' }).then();
                 } else {
                     tl.play();
                     await new Promise((resolve) => {
@@ -156,17 +152,28 @@ export const TransitionPortal = observer(function TransitionPortalInner() {
             // Restore focus to the previously focused element if still in DOM.
             const previous = previousFocusRef.current;
             if (previous && document.contains(previous) && typeof previous.focus === 'function') {
-                try { previous.focus(); } catch (_e) { /* ignore */ }
+                try {
+                    previous.focus();
+                } catch (_e) {
+                    /* ignore */
+                }
             }
         };
         run();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [running, pending]);
 
     if (!running || !pending) return null;
 
     const node = (
-        <FocusTrap active onEscape={() => { /* no-op: portal completes via timeline */ }}>
+        <FocusTrap
+            active
+            onEscape={() => {
+                /* no-op: portal completes via timeline */
+            }}
+        >
             <div
                 id="transition-portal"
                 data-testid="transition-portal"
@@ -187,7 +194,7 @@ export const TransitionPortal = observer(function TransitionPortalInner() {
                     letterSpacing: '0.3em',
                     textTransform: 'uppercase',
                     fontSize: 12,
-                    textShadow: 'var(--hologram-shadow)'
+                    textShadow: 'var(--hologram-shadow)',
                 }}
             >
                 <span aria-hidden>

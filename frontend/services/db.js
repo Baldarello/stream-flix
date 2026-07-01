@@ -72,11 +72,13 @@ export class QuixDB extends Dexie {
             revisions: '++id, timestamp',
         });
 
-        this.version(4).stores({
-            episodeLinks: '++id, episodeId',
-        }).upgrade(tx => {
-            tx.table('episodeLinks').clear();
-        });
+        this.version(4)
+            .stores({
+                episodeLinks: '++id, episodeId',
+            })
+            .upgrade((tx) => {
+                tx.table('episodeLinks').clear();
+            });
 
         this.version(5).stores({
             showIntroDurations: '&id',
@@ -90,56 +92,58 @@ export class QuixDB extends Dexie {
             knownSlaves: '&id, shortCode',
         });
 
-        this.version(7).stores({
-            mediaLinks: '++id, mediaId',
-            episodeLinks: null,
-        }).upgrade(async (tx) => {
-            const episodeLinks = await tx.table('episodeLinks').toArray();
-            if (episodeLinks.length > 0) {
-                const mediaLinksToMigrate = episodeLinks.map(link => ({
-                    mediaId: link.episodeId,
-                    url: link.url,
-                    label: link.label || new URL(link.url).hostname,
-                }));
-                await tx.table('mediaLinks').bulkAdd(mediaLinksToMigrate);
-            }
-        });
+        this.version(7)
+            .stores({
+                mediaLinks: '++id, mediaId',
+                episodeLinks: null,
+            })
+            .upgrade(async (tx) => {
+                const episodeLinks = await tx.table('episodeLinks').toArray();
+                if (episodeLinks.length > 0) {
+                    const mediaLinksToMigrate = episodeLinks.map((link) => ({
+                        mediaId: link.episodeId,
+                        url: link.url,
+                        label: link.label || new URL(link.url).hostname,
+                    }));
+                    await tx.table('mediaLinks').bulkAdd(mediaLinksToMigrate);
+                }
+            });
 
-        this.version(8).stores({
-            myList: '&id, order',
-        }).upgrade(async (tx) => {
-            const oldMyList = await tx.table('myList').toArray();
-            if (oldMyList.length > 0 && typeof oldMyList[0].order === 'undefined') {
-                const newMyList = oldMyList.map((item, index) => ({
-                    id: item.id,
-                    order: index
-                }));
-                await tx.table('myList').clear();
-                await tx.table('myList').bulkAdd(newMyList);
-            }
-        });
+        this.version(8)
+            .stores({
+                myList: '&id, order',
+            })
+            .upgrade(async (tx) => {
+                const oldMyList = await tx.table('myList').toArray();
+                if (oldMyList.length > 0 && typeof oldMyList[0].order === 'undefined') {
+                    const newMyList = oldMyList.map((item, index) => ({
+                        id: item.id,
+                        order: index,
+                    }));
+                    await tx.table('myList').clear();
+                    await tx.table('myList').bulkAdd(newMyList);
+                }
+            });
 
         this.version(9).stores({
-            selectedSeasons: '&showId'
+            selectedSeasons: '&showId',
         });
 
         this.version(10).stores({
-            showFilterPreferences: '&showId'
+            showFilterPreferences: '&showId',
         });
 
         this.version(11).stores({
-            knownSlaves: '&id, lastSeen'
+            knownSlaves: '&id, lastSeen',
         });
 
         this.version(12).stores({
-            episodeProgress: '&episodeId, lastWatchedAt'
+            episodeProgress: '&episodeId, lastWatchedAt',
         });
 
         this.version(13).stores({
-            mediaLinks: '++id, mediaId, isValid'
+            mediaLinks: '++id, mediaId, isValid',
         });
-
-
     }
 
     /**
@@ -148,11 +152,14 @@ export class QuixDB extends Dexie {
      */
     handleDbChanges(changes) {
         for (const change of changes) {
-            if (change.type === 1) { // CREATE
+            if (change.type === 1) {
+                // CREATE
                 console.log(`[DB] Created: ${change.table}`, change.obj);
-            } else if (change.type === 2) { // UPDATE
+            } else if (change.type === 2) {
+                // UPDATE
                 console.log(`[DB] Updated: ${change.table}`, change.obj);
-            } else if (change.type === 3) { // DELETE
+            } else if (change.type === 3) {
+                // DELETE
                 console.log(`[DB] Deleted: ${change.table}`, change.key);
             }
         }
@@ -218,7 +225,9 @@ export class QuixDB extends Dexie {
         const linksCount = data.mediaLinks?.length || 0;
         const progressCount = data.episodeProgress?.length || 0;
 
-        console.log(`[DB] Import completed: ${showsCount} shows, ${myListCount} myList items, ${linksCount} links, ${progressCount} progress items`);
+        console.log(
+            `[DB] Import completed: ${showsCount} shows, ${myListCount} myList items, ${linksCount} links, ${progressCount} progress items`
+        );
     }
 }
 

@@ -16,7 +16,7 @@
  * shortcut that the app exposes so the suite doesn't have to walk
  * the full add-to-list flow (which is exercised elsewhere).
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 // This test uses ?testMode=stores which is only available in dev mode.
 // Skip in production Docker builds.
@@ -27,9 +27,7 @@ const SEED_SHOW = {
     title: 'E2E Seeded Show',
     media_type: 'tv',
     poster_path: '/seeded-poster.jpg',
-    seasons: [
-        {season_number: 1, episodes: [{id: 90011, name: 'Ep 1'}]}
-    ]
+    seasons: [{ season_number: 1, episodes: [{ id: 90011, name: 'Ep 1' }] }],
 };
 
 const SEED_MOVIE = {
@@ -38,38 +36,37 @@ const SEED_MOVIE = {
     name: 'E2E Seeded Movie',
     media_type: 'movie',
     poster_path: '/seeded-movie.jpg',
-    video_urls: ['https://example.com/movie.mp4']
+    video_urls: ['https://example.com/movie.mp4'],
 };
 
 const seedMyList = async (page) => {
     await page.goto('/?testMode=stores');
-    await page.waitForFunction(
-        () => Boolean(window.__quixTest && window.__quixTest.mediaStore),
-        null,
-        {timeout: 10_000}
+    await page.waitForFunction(() => Boolean(window.__quixTest && window.__quixTest.mediaStore), null, { timeout: 10_000 });
+    await page.evaluate(
+        (shows) => {
+            const { mediaStore, remoteStore } = window.__quixTest;
+            const lib = mediaStore;
+            // Reset and seed two items so the detail view has something
+            // to render against (and the stat chips get distinct values).
+            lib.myList = [];
+            for (const s of shows) {
+                lib.toggleMyList(s);
+            }
+            // Make sure the home view is the one we land on after the
+            // seeding so the navigation test starts from a clean state.
+            mediaStore.setActiveView('Home');
+        },
+        [SEED_SHOW, SEED_MOVIE]
     );
-    await page.evaluate((shows) => {
-        const {mediaStore, remoteStore} = window.__quixTest;
-        const lib = mediaStore;
-        // Reset and seed two items so the detail view has something
-        // to render against (and the stat chips get distinct values).
-        lib.myList = [];
-        for (const s of shows) {
-            lib.toggleMyList(s);
-        }
-        // Make sure the home view is the one we land on after the
-        // seeding so the navigation test starts from a clean state.
-        mediaStore.setActiveView('Home');
-    }, [SEED_SHOW, SEED_MOVIE]);
 };
 
 const myListSuite = IS_PROD ? test.describe.skip : test.describe;
 myListSuite('MyList navigation', () => {
-    test.beforeEach(async ({page}) => {
+    test.beforeEach(async ({ page }) => {
         await seedMyList(page);
     });
 
-    test('clicking the open-detail icon next to "La mia lista" navigates to the dedicated screen', async ({page}) => {
+    test('clicking the open-detail icon next to "La mia lista" navigates to the dedicated screen', async ({ page }) => {
         // Land on the home page (after the seeding redirect).
         await page.goto('/');
         // The row title is rendered by CinematicRow; the dedicated
@@ -90,7 +87,7 @@ myListSuite('MyList navigation', () => {
         await expect(detailView.locator('#my-list-detail-toolbar')).toBeVisible();
     });
 
-    test('the back button on the dedicated screen returns to the home view', async ({page}) => {
+    test('the back button on the dedicated screen returns to the home view', async ({ page }) => {
         await page.goto('/');
         const myListRow = page.locator('#content-row-misc\\.myList');
         await myListRow.locator('#row-view-detail').click();

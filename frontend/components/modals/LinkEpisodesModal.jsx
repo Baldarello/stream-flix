@@ -1,15 +1,13 @@
-import React, {useEffect, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {uiStore} from '../../store/uiStore.js';
-import {FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs} from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { uiStore } from '../../store/uiStore.js';
+import { FormControl, InputLabel, MenuItem, Select, Stack, Tab, Tabs } from '@mui/material';
 import ManageLinksView from '../library/ManageLinksView.jsx';
 import AddLinkTabs from '../library/AddLinkTabs.jsx';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {ModalShell} from './ModalShell.jsx';
-import {holoFieldSx} from "../../styles/style.js"
-
-
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { ModalShell } from './ModalShell.jsx';
+import { holoFieldSx } from '../../styles/style.js';
 
 // ponytail: observer wraps the component — reads uiStore.linkEpisodesTab reactively.
 const LinkEpisodesModal = observer(() => {
@@ -18,7 +16,7 @@ const LinkEpisodesModal = observer(() => {
 
     const { setEpisodeLinksForSeason } = mediaStore;
 
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     const initializedForId = useRef(null);
     const userManuallySwitchedToManage = useRef(false);
@@ -45,9 +43,9 @@ const LinkEpisodesModal = observer(() => {
 
     // ponytail: linkEpisodesSeason may be empty on first render (useEffect hasn't run yet).
     // Fall back to item.seasons[0] so AddLinkTabs renders on the first mount.
-    const currentSeason = item?.seasons?.find(s => s.season_number === mediaStore.linkEpisodesSeason)
-        || (!mediaStore.linkEpisodesSeason && item?.seasons?.[0]);
-
+    const currentSeason =
+        item?.seasons?.find((s) => s.season_number === mediaStore.linkEpisodesSeason) ||
+        (!mediaStore.linkEpisodesSeason && item?.seasons?.[0]);
 
     const handleSeasonChange = (eventOrValue) => {
         const rawValue = eventOrValue?.target?.value ?? eventOrValue;
@@ -63,10 +61,10 @@ const LinkEpisodesModal = observer(() => {
             data-component="link-episodes-modal"
             open={isModalOpen}
             onClose={() => mediaStore.closeLinkEpisodesModal()}
-            title={t('linkEpisodesModal.title', {name: item.name})}
+            title={t('linkEpisodesModal.title', { name: item.name })}
             maxWidth="md"
         >
-            <Stack spacing={2} sx={{pt: 1, display: 'flex', flexDirection: 'column'}}>
+            <Stack spacing={2} sx={{ pt: 1, display: 'flex', flexDirection: 'column' }}>
                 <FormControl fullWidth required sx={holoFieldSx}>
                     <InputLabel>{t('linkEpisodesModal.selectSeason')}</InputLabel>
                     <Select
@@ -74,8 +72,11 @@ const LinkEpisodesModal = observer(() => {
                         label={t('linkEpisodesModal.selectSeason')}
                         onChange={handleSeasonChange}
                     >
-                        {item.seasons?.map(season => <MenuItem key={season.id}
-                                                               value={season.season_number}>{season.name}</MenuItem>)}
+                        {item.seasons?.map((season) => (
+                            <MenuItem key={season.id} value={season.season_number}>
+                                {season.name}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </FormControl>
 
@@ -89,29 +90,28 @@ const LinkEpisodesModal = observer(() => {
                         '& .MuiTab-root': {
                             color: 'var(--text-secondary)',
                             fontFamily: "'Space Grotesk', 'Inter', sans-serif",
-                            textTransform: 'none'
+                            textTransform: 'none',
                         },
-                        '& .Mui-selected': {color: 'var(--neon-accent)'},
-                        '& .MuiTabs-indicator': {backgroundColor: 'var(--neon-accent)'}
+                        '& .Mui-selected': { color: 'var(--neon-accent)' },
+                        '& .MuiTabs-indicator': { backgroundColor: 'var(--neon-accent)' },
                     }}
                 >
-                    <Tab
-                        label={t('linkEpisodesModal.addLinks')}
-                        value="add"
-                        id="link-episodes-tab-add"
-                    />
-                    <Tab
-                        label={t('linkEpisodesModal.manageLinks')}
-                        value="manage"
-                        id="link-episodes-tab-manage"
-                    />
+                    <Tab label={t('linkEpisodesModal.addLinks')} value="add" id="link-episodes-tab-add" />
+                    <Tab label={t('linkEpisodesModal.manageLinks')} value="manage" id="link-episodes-tab-manage" />
                 </Tabs>
 
-                {snapTab === 'add' && currentSeason && <AddLinkTabs selectedSeason={currentSeason.season_number}
-                                                                            seasonEpisodeCount={currentSeason.episode_count}
-                                                                            seasonName={currentSeason.name}
-                                                                            onSave={setEpisodeLinksForSeason}
-                                                                            onSuccess={() => { userManuallySwitchedToManage.current = true; uiStore.setLinkEpisodesTab('manage'); }}/>}
+                {snapTab === 'add' && currentSeason && (
+                    <AddLinkTabs
+                        selectedSeason={currentSeason.season_number}
+                        seasonEpisodeCount={currentSeason.episode_count}
+                        seasonName={currentSeason.name}
+                        onSave={setEpisodeLinksForSeason}
+                        onSuccess={() => {
+                            userManuallySwitchedToManage.current = true;
+                            uiStore.setLinkEpisodesTab('manage');
+                        }}
+                    />
+                )}
                 {snapTab === 'manage' && currentSeason && (
                     <ManageLinksView
                         currentSeason={currentSeason}

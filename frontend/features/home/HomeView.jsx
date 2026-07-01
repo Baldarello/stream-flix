@@ -1,25 +1,25 @@
 /**
  * @fileoverview Home Feature - Home View Component
- * 
+ *
  * This component displays the home page content including:
  * - Hero banner with featured content
  * - Content rows based on active theme (Continue Watching, My List, Trending, etc.)
  */
 
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Container} from '@mui/material';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {mediaStore} from '../../store/mediaStore.js';
-import {CinematicHero} from '../../components/layout/CinematicHero.jsx';
-import {CinematicRow} from '../../components/layout/CinematicRow.jsx';
+import { observer } from 'mobx-react-lite';
+import { Box, Container } from '@mui/material';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { mediaStore } from '../../store/mediaStore.js';
+import { CinematicHero } from '../../components/layout/CinematicHero.jsx';
+import { CinematicRow } from '../../components/layout/CinematicRow.jsx';
 
 /**
  * Home View Component
- * 
+ *
  * Renders the main home page with hero banner and content rows.
  * The content rows vary based on the active theme (Anime, SerieTV, Film).
- * 
+ *
  * @returns {React.ReactElement} Home view component
  */
 export const HomeView = observer(() => {
@@ -51,7 +51,7 @@ export const HomeView = observer(() => {
                 sx={{ pt: { xs: 4, md: 8 }, pb: 8, pl: { xs: 2, md: 6 }, zIndex: 0, position: 'relative' }}
             >
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 4, md: 8 } }}>
-                    {homePageRows.map(row => {
+                    {homePageRows.map((row) => {
                         const isContinueWatching = row.titleKey === 'misc.continueWatching';
                         const isMyList = row.titleKey === 'misc.myList';
                         const handleCardClick = (item) => {

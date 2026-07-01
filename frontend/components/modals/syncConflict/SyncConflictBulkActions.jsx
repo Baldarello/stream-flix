@@ -12,11 +12,11 @@
  * is atomic and uses design tokens instead of literal rgba values.
  */
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Button} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Box, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 const neonButtonSx = {
     borderColor: 'rgba(76, 210, 255, 0.45)',
@@ -26,8 +26,8 @@ const neonButtonSx = {
     '&:hover': {
         borderColor: 'var(--neon-accent)',
         backgroundColor: 'rgba(76, 210, 255, 0.08)',
-        boxShadow: '0 0 12px rgba(76, 210, 255, 0.35)'
-    }
+        boxShadow: '0 0 12px rgba(76, 210, 255, 0.35)',
+    },
 };
 
 /**
@@ -39,24 +39,24 @@ const neonButtonSx = {
  *   is also useful in the overview step).
  * @returns {React.ReactElement} Bulk action rows
  */
-export const SyncConflictBulkActions = observer(({showDeletionRow = true}) => {
-    const {t} = useTranslations();
+export const SyncConflictBulkActions = observer(({ showDeletionRow = true }) => {
+    const { t } = useTranslations();
     const {
         syncConflictStats: stats,
         takeAllLocalSyncConflict,
         takeAllRemoteSyncConflict,
         takeAllBothSyncConflict,
         markLocalOnlySyncConflictForDeletion,
-        markRemoteOnlySyncConflictForDeletion
+        markRemoteOnlySyncConflictForDeletion,
     } = mediaStore;
 
     return (
         <Box
             id="sync-conflict-bulk-actions"
             data-component="sync-conflict-bulk-actions"
-            sx={{display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2}}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}
         >
-            <Box sx={{display: 'flex', gap: 1.5, flexWrap: 'wrap'}}>
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
                 <Button
                     id="sync-conflict-bulk-local"
                     data-component="sync-conflict-bulk-local"
@@ -90,13 +90,13 @@ export const SyncConflictBulkActions = observer(({showDeletionRow = true}) => {
             </Box>
 
             {showDeletionRow && (
-                <Box sx={{display: 'flex', gap: 1.5, flexWrap: 'wrap'}}>
+                <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
                     <Button
                         id="sync-conflict-delete-local-only"
                         data-component="sync-conflict-delete-local-only"
                         variant="outlined"
                         size="small"
-                        startIcon={<DeleteIcon/>}
+                        startIcon={<DeleteIcon />}
                         onClick={markLocalOnlySyncConflictForDeletion}
                         sx={{
                             borderColor: 'rgba(255, 76, 76, 0.5)',
@@ -104,18 +104,18 @@ export const SyncConflictBulkActions = observer(({showDeletionRow = true}) => {
                             '&:hover': {
                                 borderColor: '#ff6e6e',
                                 backgroundColor: 'rgba(255, 76, 76, 0.08)',
-                                boxShadow: '0 0 12px rgba(255, 76, 76, 0.35)'
-                            }
+                                boxShadow: '0 0 12px rgba(255, 76, 76, 0.35)',
+                            },
                         }}
                     >
-                        {t('syncConflict.deleteLocalOnly', {count: stats.localOnly})}
+                        {t('syncConflict.deleteLocalOnly', { count: stats.localOnly })}
                     </Button>
                     <Button
                         id="sync-conflict-delete-remote-only"
                         data-component="sync-conflict-delete-remote-only"
                         variant="outlined"
                         size="small"
-                        startIcon={<DeleteIcon/>}
+                        startIcon={<DeleteIcon />}
                         onClick={markRemoteOnlySyncConflictForDeletion}
                         sx={{
                             borderColor: 'rgba(255, 76, 76, 0.5)',
@@ -123,11 +123,11 @@ export const SyncConflictBulkActions = observer(({showDeletionRow = true}) => {
                             '&:hover': {
                                 borderColor: '#ff6e6e',
                                 backgroundColor: 'rgba(255, 76, 76, 0.08)',
-                                boxShadow: '0 0 12px rgba(255, 76, 76, 0.35)'
-                            }
+                                boxShadow: '0 0 12px rgba(255, 76, 76, 0.35)',
+                            },
                         }}
                     >
-                        {t('syncConflict.deleteRemoteOnly', {count: stats.remoteOnly})}
+                        {t('syncConflict.deleteRemoteOnly', { count: stats.remoteOnly })}
                     </Button>
                 </Box>
             )}

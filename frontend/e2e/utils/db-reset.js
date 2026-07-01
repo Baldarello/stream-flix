@@ -58,9 +58,7 @@ export async function resetIndexedDB(page) {
     const pages = context.pages();
     const targets = pages.length > 0 ? pages : [page];
 
-    await Promise.all(
-        targets.map((p) => deleteDatabaseInPage(p).catch(() => undefined)),
-    );
+    await Promise.all(targets.map((p) => deleteDatabaseInPage(p).catch(() => undefined)));
 
     // Service workers keep their own database connection alive even
     // when the page is hidden, so the delete request can stay
@@ -68,9 +66,7 @@ export async function resetIndexedDB(page) {
     // workers and ask them to drop the DB too.
     if (typeof context.serviceWorkers === 'function') {
         const workers = context.serviceWorkers();
-        await Promise.all(
-            workers.map((w) => deleteDatabaseInWorker(w).catch(() => undefined)),
-        );
+        await Promise.all(workers.map((w) => deleteDatabaseInWorker(w).catch(() => undefined)));
     }
 
     // Reload the supplied page so the app re-runs its Dexie open
@@ -106,8 +102,7 @@ export async function seedIndexedDB(page, fixtures) {
                 const req = indexedDB.open(dbName);
                 req.onerror = () => reject(req.error);
                 req.onsuccess = () => resolve(req.result);
-                req.onblocked = () =>
-                    reject(new Error(`Opening ${dbName} is blocked by another connection`));
+                req.onblocked = () => reject(new Error(`Opening ${dbName} is blocked by another connection`));
             });
 
             try {
@@ -149,7 +144,7 @@ export async function seedIndexedDB(page, fixtures) {
 
             return result;
         },
-        { dbName: QUIX_DB_NAME, payload: fixtures },
+        { dbName: QUIX_DB_NAME, payload: fixtures }
     );
 }
 
@@ -185,7 +180,7 @@ async function deleteDatabaseInPage(target) {
                 // connection cannot freeze the test runner.
                 setTimeout(finish, 2000);
             }),
-        QUIX_DB_NAME,
+        QUIX_DB_NAME
     );
 }
 
@@ -217,7 +212,7 @@ async function deleteDatabaseInWorker(worker) {
                     }
                     setTimeout(finish, 2000);
                 }),
-            QUIX_DB_NAME,
+            QUIX_DB_NAME
         );
     } catch (_e) {
         // Some worker contexts do not expose `evaluate` (e.g. they

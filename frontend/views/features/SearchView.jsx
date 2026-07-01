@@ -1,17 +1,17 @@
 /**
  * @fileoverview Search View - Search Interface
- * 
+ *
  * Displays the search interface when mediaStore.isSearchActive is true.
  * Shows search prompt, loading state, or search results.
  */
 
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, CircularProgress, Typography} from '@mui/material';
-import {useStores} from '../../context/StoreContext.jsx';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {CinematicGrid} from '../../components/layout/CinematicGrid.jsx';
-import {FloatingDock} from '../../components/layout/FloatingDock.jsx';
+import { observer } from 'mobx-react-lite';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import { useStores } from '../../context/StoreContext.jsx';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { CinematicGrid } from '../../components/layout/CinematicGrid.jsx';
+import { FloatingDock } from '../../components/layout/FloatingDock.jsx';
 
 /**
  * SearchShell - Shared layout wrapper for search branches
@@ -73,7 +73,13 @@ export const SearchView = observer(() => {
             <SearchShell centered>
                 <Box
                     id="screen-search-prompt"
-                    sx={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+                    sx={{
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
                 >
                     <Typography variant="h3" fontWeight="bold" gutterBottom>
                         {t('misc.searchPrompt.title')}

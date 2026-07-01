@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect, useMemo, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import {
     Alert,
     Box,
@@ -25,11 +25,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
 import SyncIcon from '@mui/icons-material/Sync';
-import {mediaStore} from '../../store/mediaStore.js';
-import {websocketService} from '../../services/websocketService';
+import { mediaStore } from '../../store/mediaStore.js';
+import { websocketService } from '../../services/websocketService';
 
-
-const MediaSyncModal = observer(({open, onClose, slaveId}) => {
+const MediaSyncModal = observer(({ open, onClose, slaveId }) => {
     const [mediaItems, setMediaItems] = useState(() => []);
     const [isLoading, setIsLoading] = useState(() => false);
     const [syncProgress, setSyncProgress] = useState(() => null);
@@ -72,7 +71,7 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
         setSyncError(null);
 
         try {
-            const {db} = await import('../../services/db.js');
+            const { db } = await import('../../services/db.js');
 
             // 1. Load IDs from db.myList
             const listItems = await db.myList.toArray();
@@ -141,25 +140,23 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
     };
 
     const handleSelectAll = (event) => {
-        setMediaItems(prev => prev.map(item => ({...item, selected: event.target.checked})));
+        setMediaItems((prev) => prev.map((item) => ({ ...item, selected: event.target.checked })));
     };
 
     const handleItemToggle = (id) => {
-        setMediaItems(prev => prev.map(item =>
-            item.id === id ? {...item, selected: !item.selected} : item
-        ));
+        setMediaItems((prev) => prev.map((item) => (item.id === id ? { ...item, selected: !item.selected } : item)));
     };
 
-    const selectedItems = useMemo(() => mediaItems.filter(item => item.selected), [mediaItems]);
+    const selectedItems = useMemo(() => mediaItems.filter((item) => item.selected), [mediaItems]);
 
     const handleStartSync = async () => {
         if (selectedItems.length === 0) return;
 
-        setSyncProgress({current: 0, total: selectedItems.length});
+        setSyncProgress({ current: 0, total: selectedItems.length });
         setSyncComplete(false);
         setSyncError(null);
 
-        const {db} = await import('../../services/db.js');
+        const { db } = await import('../../services/db.js');
 
         // Build the full payload: for each selected item, include the MediaItem + all its links
         const itemsWithLinks = await Promise.all(
@@ -205,7 +202,7 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
     };
 
     const getMediaTypeIcon = (type) => {
-        return type === 'movie' ? <MovieIcon/> : <TvIcon/>;
+        return type === 'movie' ? <MovieIcon /> : <TvIcon />;
     };
 
     const getMediaTypeLabel = (type) => {
@@ -228,68 +225,68 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
                 },
             }}
         >
-            <DialogTitle sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1}}>
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                    <CloudSyncIcon color="primary"/>
+            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CloudSyncIcon color="primary" />
                     <Typography variant="h6" fontWeight="bold">
                         Sincronizza Contenuti con TV
                     </Typography>
                 </Box>
                 <IconButton onClick={handleClose} disabled={!!syncProgress}>
-                    <CloseIcon/>
+                    <CloseIcon />
                 </IconButton>
             </DialogTitle>
 
             <DialogContent dividers>
                 {syncComplete ? (
                     <Fade in>
-                        <Box sx={{textAlign: 'center', py: 4}}>
-                            <CheckCircleIcon sx={{fontSize: 80, color: 'success.main', mb: 2}}/>
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                            <CheckCircleIcon sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
                             <Typography variant="h5" fontWeight="bold" gutterBottom>
                                 Sincronizzazione Completata
                             </Typography>
                             <Typography color="text.secondary">
                                 {selectedItems.length} contenuti sono ora disponibili sulla TV
                             </Typography>
-                            <Typography color="text.secondary" sx={{mt: 1}}>
+                            <Typography color="text.secondary" sx={{ mt: 1 }}>
                                 Puoi riprodurli anche senza connessione
                             </Typography>
                         </Box>
                     </Fade>
                 ) : syncProgress ? (
-                    <Box sx={{py: 4}}>
-                        <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 3}}>
-                            <SyncIcon sx={{fontSize: 40, color: 'primary.main', animation: 'spin 1s linear infinite'}}
-                                      onAnimationStart={() => {
-                                          const style = document.createElement('style');
-                                          style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
-                                          document.head.appendChild(style);
-                                      }}
+                    <Box sx={{ py: 4 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 3 }}>
+                            <SyncIcon
+                                sx={{ fontSize: 40, color: 'primary.main', animation: 'spin 1s linear infinite' }}
+                                onAnimationStart={() => {
+                                    const style = document.createElement('style');
+                                    style.textContent =
+                                        '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+                                    document.head.appendChild(style);
+                                }}
                             />
-                            <Typography variant="h6">
-                                Sincronizzazione in corso...
-                            </Typography>
+                            <Typography variant="h6">Sincronizzazione in corso...</Typography>
                         </Box>
                         <LinearProgress
                             variant="determinate"
                             value={(syncProgress.current / syncProgress.total) * 100}
-                            sx={{height: 10, borderRadius: 5, mb: 2}}
+                            sx={{ height: 10, borderRadius: 5, mb: 2 }}
                         />
                         <Typography variant="body2" color="text.secondary" textAlign="center">
                             {syncProgress.current} di {syncProgress.total} contenuti trasferiti
                         </Typography>
                     </Box>
                 ) : isLoading ? (
-                    <Box sx={{textAlign: 'center', py: 4}}>
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
                         <Typography color="text.secondary">Caricamento contenuti...</Typography>
                     </Box>
                 ) : syncError ? (
-                    <Alert severity="error" sx={{mb: 2}}>
+                    <Alert severity="error" sx={{ mb: 2 }}>
                         {syncError}
                     </Alert>
                 ) : (
                     <>
-                        <Box sx={{mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -300,22 +297,24 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
                                 }
                                 label="Seleziona tutti"
                             />
-                            <Box sx={{textAlign: 'right'}}>
+                            <Box sx={{ textAlign: 'right' }}>
                                 <Typography variant="body2" color="text.secondary">
                                     {selectedItems.length} selezionati
                                 </Typography>
                             </Box>
                         </Box>
 
-                        <Box sx={{
-                            maxHeight: 400,
-                            overflowY: 'auto',
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
-                            gap: 2,
-                            p: 1,
-                        }}>
-                            {mediaItems.map(item => (
+                        <Box
+                            sx={{
+                                maxHeight: 400,
+                                overflowY: 'auto',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                                gap: 2,
+                                p: 1,
+                            }}
+                        >
+                            {mediaItems.map((item) => (
                                 <Card
                                     key={item.id}
                                     sx={{
@@ -333,25 +332,31 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
                                     <CardMedia
                                         component="img"
                                         height="140"
-                                        image={item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : '/placeholder.png'}
+                                        image={
+                                            item.poster_path
+                                                ? `https://image.tmdb.org/t/p/w200${item.poster_path}`
+                                                : '/placeholder.png'
+                                        }
                                         alt={item.title}
-                                        sx={{objectFit: 'cover'}}
+                                        sx={{ objectFit: 'cover' }}
                                     />
-                                    <CardContent sx={{p: 1, '&:last-child': {pb: 1}}}>
+                                    <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
                                         <Typography variant="body2" noWrap fontWeight="bold">
                                             {item.title}
                                         </Typography>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            mt: 0.5
-                                        }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center',
+                                                mt: 0.5,
+                                            }}
+                                        >
                                             <Chip
                                                 icon={getMediaTypeIcon(item.media_type)}
                                                 label={getMediaTypeLabel(item.media_type)}
                                                 size="small"
-                                                sx={{height: 20, fontSize: '0.7rem'}}
+                                                sx={{ height: 20, fontSize: '0.7rem' }}
                                             />
                                         </Box>
                                         <FormControlLabel
@@ -364,7 +369,7 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
                                                 />
                                             }
                                             label=""
-                                            sx={{m: 0, p: 0}}
+                                            sx={{ m: 0, p: 0 }}
                                         />
                                     </CardContent>
                                 </Card>
@@ -372,10 +377,8 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
                         </Box>
 
                         {mediaItems.length === 0 && (
-                            <Box sx={{textAlign: 'center', py: 4}}>
-                                <Typography color="text.secondary">
-                                    Nessun contenuto disponibile nella libreria
-                                </Typography>
+                            <Box sx={{ textAlign: 'center', py: 4 }}>
+                                <Typography color="text.secondary">Nessun contenuto disponibile nella libreria</Typography>
                             </Box>
                         )}
                     </>
@@ -383,7 +386,7 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
             </DialogContent>
 
             {!syncComplete && !syncProgress && (
-                <DialogActions sx={{p: 2, gap: 1}}>
+                <DialogActions sx={{ p: 2, gap: 1 }}>
                     <Button onClick={handleClose} variant="outlined">
                         Annulla
                     </Button>
@@ -391,7 +394,7 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
                         onClick={handleStartSync}
                         variant="contained"
                         disabled={selectedItems.length === 0}
-                        startIcon={<CloudSyncIcon/>}
+                        startIcon={<CloudSyncIcon />}
                     >
                         Sync ({selectedItems.length})
                     </Button>
@@ -399,7 +402,7 @@ const MediaSyncModal = observer(({open, onClose, slaveId}) => {
             )}
 
             {syncComplete && (
-                <DialogActions sx={{p: 2, gap: 1}}>
+                <DialogActions sx={{ p: 2, gap: 1 }}>
                     <Button onClick={handleClose} variant="contained" fullWidth>
                         Chiudi
                     </Button>

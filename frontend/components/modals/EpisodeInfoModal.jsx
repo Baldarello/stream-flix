@@ -1,23 +1,18 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
 import PlaylistAddCheckCircleIcon from '@mui/icons-material/PlaylistAddCheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 const EpisodeInfoModal = observer(() => {
-    const {t} = useTranslations();
-    const {
-        isEpisodeInfoModalOpen,
-        episodeInfoModalData,
-        closeEpisodeInfoModal,
-        toggleEpisodeWatchedStatus
-    } = mediaStore;
+    const { t } = useTranslations();
+    const { isEpisodeInfoModalOpen, episodeInfoModalData, closeEpisodeInfoModal, toggleEpisodeWatchedStatus } = mediaStore;
 
     if (!episodeInfoModalData) return null;
 
-    const {episode, seasonNumber, uniqueLanguages} = episodeInfoModalData;
+    const { episode, seasonNumber, uniqueLanguages } = episodeInfoModalData;
     const episodeProgress = mediaStore.episodeProgress.get(episode.id);
     const isWatched = episodeProgress?.watched;
 
@@ -30,28 +25,29 @@ const EpisodeInfoModal = observer(() => {
             slotProps={{
                 paper: {
                     sx: {
-                        zIndex: 2200 // Above drawer zIndex 2100
-                    }
-                }
+                        zIndex: 2200, // Above drawer zIndex 2100
+                    },
+                },
             }}
         >
             <DialogTitle>
                 {episode.name}
-                <Typography variant="caption" color="text.secondary" sx={{display: 'block'}}>
-                    {t('episodesDrawer.season', {number: seasonNumber})} - {t('episodesDrawer.episode', {number: episode.episode_number})}
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                    {t('episodesDrawer.season', { number: seasonNumber })} -{' '}
+                    {t('episodesDrawer.episode', { number: episode.episode_number })}
                 </Typography>
             </DialogTitle>
             <DialogContent dividers>
                 {episode.overview && (
-                    <Typography variant="body2" sx={{mb: 2}}>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
                         {episode.overview}
                     </Typography>
                 )}
-                <Typography variant="subtitle2" sx={{mt: 2, mb: 1}}>
+                <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
                     {t('episodesDrawer.availableLanguages')}:
                 </Typography>
                 <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
-                    {uniqueLanguages.map(({lang, type}) => (
+                    {uniqueLanguages.map(({ lang, type }) => (
                         <Chip
                             key={`${lang}-${type}`}
                             label={`${lang.toUpperCase()} ${type === 'dub' ? 'Dubbed' : 'Subtitled'}`}
@@ -60,11 +56,11 @@ const EpisodeInfoModal = observer(() => {
                         />
                     ))}
                 </Stack>
-                <Box sx={{mt: 2}}>
+                <Box sx={{ mt: 2 }}>
                     <Typography variant="subtitle2">
                         {t('episodesDrawer.airDate')}: {episode.air_date || 'N/A'}
                     </Typography>
-                    <Typography variant="subtitle2" sx={{mt: 1}}>
+                    <Typography variant="subtitle2" sx={{ mt: 1 }}>
                         {t('episodesDrawer.runtime')}: {episode.runtime || episode.runtime || 'N/A'} min
                     </Typography>
                 </Box>
@@ -73,7 +69,7 @@ const EpisodeInfoModal = observer(() => {
                 <Button onClick={closeEpisodeInfoModal}>{t('common.close')}</Button>
                 <Button
                     variant="contained"
-                    startIcon={isWatched ? <RemoveCircleOutlineIcon/> : <PlaylistAddCheckCircleIcon/>}
+                    startIcon={isWatched ? <RemoveCircleOutlineIcon /> : <PlaylistAddCheckCircleIcon />}
                     onClick={() => {
                         if (episode) {
                             toggleEpisodeWatchedStatus(episode.id);

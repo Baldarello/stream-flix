@@ -101,7 +101,7 @@ function buildInstallScript(handlers) {
     push("            this.extensions = '';");
     push("            this.binaryType = 'blob';");
     push('            this.sentMessages = [];');
-    push("            this._listeners = { open: [], message: [], close: [], error: [] };");
+    push('            this._listeners = { open: [], message: [], close: [], error: [] };');
     push('            this._pendingMessages = [];');
     push('');
     push('            window.__wsMockInstances.push(this);');
@@ -116,7 +116,7 @@ function buildInstallScript(handlers) {
     push('                } catch (e) {');
     push("                    console.error('[ws-mock] onCreate threw:', e);");
     push('                }');
-    push("                if (userHandlers.autoOpen !== false) {");
+    push('                if (userHandlers.autoOpen !== false) {');
     push('                    this.mockServerOpen();');
     push('                    // Flush any messages that arrived before the open event');
     push('                    const pending = this._pendingMessages;');
@@ -127,8 +127,10 @@ function buildInstallScript(handlers) {
     push('        }');
     push('');
     push('        send(data) {');
-    push("            if (this.readyState !== STATES.OPEN) {");
-    push("                throw new Error('MockWebSocket: send() called before connection was opened (readyState=' + this.readyState + ')');");
+    push('            if (this.readyState !== STATES.OPEN) {');
+    push(
+        "                throw new Error('MockWebSocket: send() called before connection was opened (readyState=' + this.readyState + ')');"
+    );
     push('            }');
     push('            this.sentMessages.push(data);');
     push('            Promise.resolve().then(() => {');
@@ -171,7 +173,7 @@ function buildInstallScript(handlers) {
     push('         * delivered when the socket opens.');
     push('         */');
     push('        mockServerMessage(data) {');
-    push("            if (this.readyState !== STATES.OPEN) {");
+    push('            if (this.readyState !== STATES.OPEN) {');
     push('                this._pendingMessages.push(data);');
     push('                return;');
     push('            }');
@@ -192,7 +194,7 @@ function buildInstallScript(handlers) {
     push('        }');
     push('');
     push('        addEventListener(type, listener) {');
-    push("            if (!this._listeners[type]) this._listeners[type] = [];");
+    push('            if (!this._listeners[type]) this._listeners[type] = [];');
     push('            this._listeners[type].push(listener);');
     push('            super.addEventListener(type, listener);');
     push('        }');
@@ -205,7 +207,7 @@ function buildInstallScript(handlers) {
     push('        }');
     push('');
     push('        _dispatch(type, event) {');
-    push("            // Fire the property-style handler (e.g. ws.onopen = fn)");
+    push('            // Fire the property-style handler (e.g. ws.onopen = fn)');
     push("            const prop = 'on' + type;");
     push("            if (typeof this[prop] === 'function') {");
     push('                try {');
@@ -263,8 +265,7 @@ export async function mockWebSocket(page, handlers = {}) {
         const ok = await page.evaluate(() => Boolean(window.__wsMockInstalled));
         if (!ok) {
             throw new Error(
-                'ws-mock: init script did not run before navigation; ' +
-                    'call mockWebSocket(page) BEFORE page.goto()',
+                'ws-mock: init script did not run before navigation; ' + 'call mockWebSocket(page) BEFORE page.goto()'
             );
         }
     };
@@ -288,9 +289,7 @@ export async function mockWebSocket(page, handlers = {}) {
         /** Messages the app sent on the most recent instance. */
         async sentMessages() {
             await ensure();
-            return await page.evaluate(
-                () => window.__wsMockLast?.sentMessages || [],
-            );
+            return await page.evaluate(() => window.__wsMockLast?.sentMessages || []);
         },
         /** Reset the sent-message buffer on the most recent instance. */
         async clearSentMessages() {
@@ -339,7 +338,7 @@ export async function mockWebSocket(page, handlers = {}) {
                     }
                     window.__wsMockLast.mockServerClose(c, r);
                 },
-                { c: code ?? 1006, r: reason ?? '' },
+                { c: code ?? 1006, r: reason ?? '' }
             );
         },
     };

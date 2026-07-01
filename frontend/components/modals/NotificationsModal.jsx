@@ -14,21 +14,27 @@ import {
     ListItemIcon,
     ListItemText,
     Stack,
-    Typography
+    Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import WarningIcon from '@mui/icons-material/Warning';
 import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 const NotificationsModal = observer(() => {
-    const {isNotificationsModalOpen, notifications, closeNotificationsModal, markAllNotificationsRead, clearNotifications, markNotificationRead} = mediaStore;
-    const {t} = useTranslations();
+    const {
+        isNotificationsModalOpen,
+        notifications,
+        closeNotificationsModal,
+        markAllNotificationsRead,
+        clearNotifications,
+        markNotificationRead,
+    } = mediaStore;
+    const { t } = useTranslations();
 
     const handleManageLinks = (notification) => {
         const invalidLinks = notification.data;
@@ -52,7 +58,7 @@ const NotificationsModal = observer(() => {
             day: '2-digit',
             month: 'short',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
         });
     };
 
@@ -67,15 +73,15 @@ const NotificationsModal = observer(() => {
                     sx: {
                         bgcolor: 'background.paper',
                         backgroundImage: 'none',
-                    }
-                }
+                    },
+                },
             }}
         >
-            <DialogTitle sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Typography variant="h6" component="span">
                     {t('notifications.title')}
                 </Typography>
-                <Box sx={{display: 'flex', gap: 1}}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
                     {notifications.length > 0 && (
                         <>
                             <Button
@@ -86,12 +92,7 @@ const NotificationsModal = observer(() => {
                             >
                                 {t('notifications.markAllRead')}
                             </Button>
-                            <Button
-                                size="small"
-                                startIcon={<DeleteOutlineIcon />}
-                                onClick={clearNotifications}
-                                color="error"
-                            >
+                            <Button size="small" startIcon={<DeleteOutlineIcon />} onClick={clearNotifications} color="error">
                                 {t('notifications.clearAll')}
                             </Button>
                         </>
@@ -103,7 +104,7 @@ const NotificationsModal = observer(() => {
             </DialogTitle>
             <DialogContent dividers>
                 {notifications.length === 0 ? (
-                    <Box sx={{textAlign: 'center', py: 4}}>
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
                         <Typography variant="body1" color="text.secondary">
                             {t('notifications.noNotifications')}
                         </Typography>
@@ -122,16 +123,11 @@ const NotificationsModal = observer(() => {
                                     }}
                                     secondaryAction={
                                         !notification.read && (
-                                            <Chip
-                                                size="small"
-                                                label={t('notifications.new')}
-                                                color="primary"
-                                                sx={{mr: 1}}
-                                            />
+                                            <Chip size="small" label={t('notifications.new')} color="primary" sx={{ mr: 1 }} />
                                         )
                                     }
                                 >
-                                    <ListItemIcon sx={{minWidth: 40}}>
+                                    <ListItemIcon sx={{ minWidth: 40 }}>
                                         <WarningIcon color="warning" />
                                     </ListItemIcon>
                                     <ListItemText
@@ -141,11 +137,11 @@ const NotificationsModal = observer(() => {
                                             </Typography>
                                         }
                                         secondary={
-                                            <Box sx={{mt: 1}}>
+                                            <Box sx={{ mt: 1 }}>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {t(notification.message, {count: notification.data.length})}
+                                                    {t(notification.message, { count: notification.data.length })}
                                                 </Typography>
-                                                
+
                                                 {/* Group invalid links by show and season */}
                                                 {(() => {
                                                     // Group by showId
@@ -164,14 +160,21 @@ const NotificationsModal = observer(() => {
                                                     }, {});
 
                                                     return (
-                                                        <Box sx={{mt: 2, mb: 1}}>
+                                                        <Box sx={{ mt: 2, mb: 1 }}>
                                                             {Object.values(groupedByShow).map((group, idx) => (
-                                                                <Box key={idx} sx={{mb: 1}}>
-                                                                    <Typography variant="body2" sx={{fontWeight: 600}}>
+                                                                <Box key={idx} sx={{ mb: 1 }}>
+                                                                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                                                         {group.showName}
-                                                                        {group.seasonNumber && ` - ${t('notifications.season')} ${group.seasonNumber}`}
+                                                                        {group.seasonNumber &&
+                                                                            ` - ${t('notifications.season')} ${group.seasonNumber}`}
                                                                     </Typography>
-                                                                    <Stack direction="row" spacing={1} flexWrap="wrap" gap={1} sx={{mt: 0.5}}>
+                                                                    <Stack
+                                                                        direction="row"
+                                                                        spacing={1}
+                                                                        flexWrap="wrap"
+                                                                        gap={1}
+                                                                        sx={{ mt: 0.5 }}
+                                                                    >
                                                                         <Chip
                                                                             size="small"
                                                                             label={`${group.links.length} ${t('libraryManagement.filters.invalidLink')}`}
@@ -187,7 +190,7 @@ const NotificationsModal = observer(() => {
                                                 })()}
 
                                                 {/* Actions */}
-                                                <Box sx={{mt: 2, display: 'flex', gap: 1}}>
+                                                <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
                                                     <Button
                                                         size="small"
                                                         variant="contained"
@@ -204,7 +207,10 @@ const NotificationsModal = observer(() => {
                                                     </Button>
                                                 </Box>
 
-                                                <Typography variant="caption" sx={{display: 'block', mt: 2, color: 'text.disabled'}}>
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{ display: 'block', mt: 2, color: 'text.disabled' }}
+                                                >
                                                     {formatDate(notification.createdAt)}
                                                 </Typography>
                                             </Box>
@@ -217,9 +223,7 @@ const NotificationsModal = observer(() => {
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={closeNotificationsModal}>
-                    {t('common.close')}
-                </Button>
+                <Button onClick={closeNotificationsModal}>{t('common.close')}</Button>
             </DialogActions>
         </Dialog>
     );

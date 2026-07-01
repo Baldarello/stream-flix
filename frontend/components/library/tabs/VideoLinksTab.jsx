@@ -15,8 +15,8 @@
  * show dropdown and the "only invalid" switch.
  */
 
-import React, {useMemo, useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useMemo, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import {
     Box,
     Button,
@@ -40,11 +40,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LinkIcon from '@mui/icons-material/Link';
 import WarningIcon from '@mui/icons-material/Warning';
 
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {EmptyState} from '../shared/EmptyState.jsx';
-import {ShowInfoPanel} from './ShowInfoPanel.jsx';
-import {VideoLinksBulkBar} from './VideoLinksBulkBar.jsx';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { EmptyState } from '../shared/EmptyState.jsx';
+import { ShowInfoPanel } from './ShowInfoPanel.jsx';
+import { VideoLinksBulkBar } from './VideoLinksBulkBar.jsx';
 
 const matchesQuery = (link, query, epInfo) => {
     if (!query) return true;
@@ -53,7 +53,7 @@ const matchesQuery = (link, query, epInfo) => {
 };
 
 const VideoLinksTab = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     const [expandedShowId, setExpandedShowId] = useState(() => null);
 
     const query = mediaStore.librarySearchQuery;
@@ -111,10 +111,8 @@ const VideoLinksTab = observer(() => {
             const showId = epInfo?.showId ?? mediaId;
             const totalLinks = links.length;
             const invalidCount = links.filter((l) => l.id && mediaStore.invalidLinkIds.has(l.id)).length;
-            const episodeCount = epInfo
-                ? 1
-                : 0;
-            return {mediaId, showId, epInfo, links, totalLinks, invalidCount, episodeCount};
+            const episodeCount = epInfo ? 1 : 0;
+            return { mediaId, showId, epInfo, links, totalLinks, invalidCount, episodeCount };
         });
 
     // Group by show for the per-show expander section.
@@ -124,8 +122,11 @@ const VideoLinksTab = observer(() => {
             if (!groups.has(item.showId)) {
                 groups.set(item.showId, {
                     showId: item.showId,
-                    showName: item.epInfo?.showName || mediaStore.cachedItems.get(item.showId)?.name ||
-                        mediaStore.cachedItems.get(item.showId)?.title || `Show #${item.showId}`,
+                    showName:
+                        item.epInfo?.showName ||
+                        mediaStore.cachedItems.get(item.showId)?.name ||
+                        mediaStore.cachedItems.get(item.showId)?.title ||
+                        `Show #${item.showId}`,
                     items: [],
                 });
             }
@@ -151,12 +152,8 @@ const VideoLinksTab = observer(() => {
         return (
             <EmptyState
                 id="video-links-empty"
-                icon={<LinkIcon sx={{fontSize: 44}}/>}
-                title={
-                    hasQuery
-                        ? t('libraryManagement.videoLinks.emptySearch', {query})
-                        : t('libraryManagement.empty.links')
-                }
+                icon={<LinkIcon sx={{ fontSize: 44 }} />}
+                title={hasQuery ? t('libraryManagement.videoLinks.emptySearch', { query }) : t('libraryManagement.empty.links')}
             />
         );
     }
@@ -174,26 +171,14 @@ const VideoLinksTab = observer(() => {
                         border: '1px solid rgba(76, 210, 255, 0.18)',
                     }}
                 >
-                    <Stack
-                        direction="row"
-                        spacing={2}
-                        alignItems="center"
-                        flexWrap="wrap"
-                        rowGap={1.5}
-                    >
-                        <FormControl size="small" sx={{minWidth: 200}}>
-                            <InputLabel id="video-links-filter-show-label">
-                                {t('libraryManagement.filters.allShows')}
-                            </InputLabel>
+                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" rowGap={1.5}>
+                        <FormControl size="small" sx={{ minWidth: 200 }}>
+                            <InputLabel id="video-links-filter-show-label">{t('libraryManagement.filters.allShows')}</InputLabel>
                             <Select
                                 labelId="video-links-filter-show-label"
                                 value={mediaStore.linksFilterShowId || ''}
                                 label={t('libraryManagement.filters.allShows')}
-                                onChange={(e) =>
-                                    mediaStore.setLinksFilterShowId(
-                                        e.target.value ? Number(e.target.value) : null
-                                    )
-                                }
+                                onChange={(e) => mediaStore.setLinksFilterShowId(e.target.value ? Number(e.target.value) : null)}
                             >
                                 <MenuItem value="">
                                     <em>{t('libraryManagement.filters.allShows')}</em>
@@ -206,18 +191,20 @@ const VideoLinksTab = observer(() => {
                             </Select>
                         </FormControl>
 
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Switch
                                 id="video-links-only-invalid"
                                 checked={mediaStore.showOnlyInvalidLinks}
                                 onChange={(e) => mediaStore.setShowOnlyInvalidLinks(e.target.checked)}
                                 size="small"
                                 sx={{
-                                    '& .MuiSwitch-switchBase.Mui-checked': {color: 'var(--neon-accent)'},
-                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {backgroundColor: 'var(--neon-accent)'},
+                                    '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--neon-accent)' },
+                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                        backgroundColor: 'var(--neon-accent)',
+                                    },
                                 }}
                             />
-                            <Typography variant="body2" sx={{color: 'var(--text-secondary)'}}>
+                            <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
                                 {t('libraryManagement.filters.showOnlyInvalid')}
                             </Typography>
                         </Box>
@@ -228,7 +215,7 @@ const VideoLinksTab = observer(() => {
                                 variant="outlined"
                                 color="error"
                                 size="small"
-                                startIcon={<DeleteIcon/>}
+                                startIcon={<DeleteIcon />}
                                 onClick={handleDeleteAllInvalid}
                             >
                                 {t('libraryManagement.filters.deleteAllInvalid')} ({mediaStore.invalidLinkIds.size})
@@ -244,14 +231,14 @@ const VideoLinksTab = observer(() => {
                             sx={{
                                 color: 'var(--neon-accent)',
                                 borderColor: 'rgba(76, 210, 255, 0.45)',
-                                '&:hover': {borderColor: 'var(--neon-accent)'},
+                                '&:hover': { borderColor: 'var(--neon-accent)' },
                             }}
                         >
                             {mediaStore.invalidLinksLoading
                                 ? '...'
                                 : t('libraryManagement.filters.invalidLink').includes('scadut')
-                                    ? 'Valida link'
-                                    : 'Validate links'}
+                                  ? 'Valida link'
+                                  : 'Validate links'}
                         </Button>
                     </Stack>
                 </Paper>
@@ -280,7 +267,7 @@ const VideoLinksTab = observer(() => {
                                 gap: 1.5,
                             }}
                         >
-                            <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <IconButton
                                     id={`video-links-expand-${group.showId}`}
                                     onClick={() => setExpandedShowId(isExpanded ? null : group.showId)}
@@ -292,7 +279,7 @@ const VideoLinksTab = observer(() => {
                                     }}
                                     size="small"
                                 >
-                                    <ExpandMoreIcon/>
+                                    <ExpandMoreIcon />
                                 </IconButton>
                                 <Typography
                                     variant="subtitle1"
@@ -307,7 +294,7 @@ const VideoLinksTab = observer(() => {
                                 </Typography>
                                 {showInvalid > 0 && (
                                     <Tooltip title={t('libraryManagement.filters.invalidLink')}>
-                                        <WarningIcon color="error" fontSize="small"/>
+                                        <WarningIcon color="error" fontSize="small" />
                                     </Tooltip>
                                 )}
                             </Box>
@@ -341,9 +328,12 @@ const VideoLinksTab = observer(() => {
                                                 </Typography>
                                             )}
                                             {item.links
-                                                .filter((link) => !onlyInvalid || (link.id && mediaStore.invalidLinkIds.has(link.id)))
+                                                .filter(
+                                                    (link) => !onlyInvalid || (link.id && mediaStore.invalidLinkIds.has(link.id))
+                                                )
                                                 .map((link) => {
-                                                    const isSelected = link.id != null && mediaStore.librarySelectedLinkIds.has(link.id);
+                                                    const isSelected =
+                                                        link.id != null && mediaStore.librarySelectedLinkIds.has(link.id);
                                                     const isInvalid = link.id && mediaStore.invalidLinkIds.has(link.id);
                                                     return (
                                                         <Box
@@ -360,8 +350,8 @@ const VideoLinksTab = observer(() => {
                                                                 border: isSelected
                                                                     ? '1px solid var(--neon-accent)'
                                                                     : isInvalid
-                                                                        ? '1px solid var(--neon-accent-hot)'
-                                                                        : '1px solid rgba(76, 210, 255, 0.18)',
+                                                                      ? '1px solid var(--neon-accent-hot)'
+                                                                      : '1px solid rgba(76, 210, 255, 0.18)',
                                                                 background: isInvalid ? 'rgba(255, 90, 90, 0.08)' : undefined,
                                                             }}
                                                         >
@@ -372,12 +362,11 @@ const VideoLinksTab = observer(() => {
                                                                 onChange={() => mediaStore.toggleLinkSelection(link.id)}
                                                             />
                                                             {isInvalid && (
-                                                                <Tooltip
-                                                                    title={t('libraryManagement.filters.invalidLink')}>
-                                                                    <WarningIcon color="error" fontSize="small"/>
+                                                                <Tooltip title={t('libraryManagement.filters.invalidLink')}>
+                                                                    <WarningIcon color="error" fontSize="small" />
                                                                 </Tooltip>
                                                             )}
-                                                            <Box sx={{flex: 1, minWidth: 0}}>
+                                                            <Box sx={{ flex: 1, minWidth: 0 }}>
                                                                 <Typography
                                                                     variant="body2"
                                                                     sx={{
@@ -412,10 +401,17 @@ const VideoLinksTab = observer(() => {
                                                                 variant="outlined"
                                                             />
                                                             <Chip
-                                                                label={link.type === 'dub' ? t('libraryManagement.dub') : t('libraryManagement.sub')}
+                                                                label={
+                                                                    link.type === 'dub'
+                                                                        ? t('libraryManagement.dub')
+                                                                        : t('libraryManagement.sub')
+                                                                }
                                                                 size="small"
                                                                 sx={{
-                                                                    color: link.type === 'dub' ? 'var(--neon-accent-hot)' : 'var(--neon-accent)',
+                                                                    color:
+                                                                        link.type === 'dub'
+                                                                            ? 'var(--neon-accent-hot)'
+                                                                            : 'var(--neon-accent)',
                                                                     borderColor: 'rgba(76, 210, 255, 0.45)',
                                                                 }}
                                                                 variant="outlined"
@@ -425,9 +421,9 @@ const VideoLinksTab = observer(() => {
                                                                     id={`video-links-copy-${link.id}`}
                                                                     size="small"
                                                                     onClick={() => handleCopy(link.url)}
-                                                                    sx={{color: 'var(--neon-accent)'}}
+                                                                    sx={{ color: 'var(--neon-accent)' }}
                                                                 >
-                                                                    <ContentCopyIcon fontSize="small"/>
+                                                                    <ContentCopyIcon fontSize="small" />
                                                                 </IconButton>
                                                             </Tooltip>
                                                             <Tooltip title={t('libraryManagement.common.editLink')}>
@@ -435,9 +431,9 @@ const VideoLinksTab = observer(() => {
                                                                     id={`video-links-edit-${link.id}`}
                                                                     size="small"
                                                                     onClick={() => mediaStore.openLinkEditModal(link.id)}
-                                                                    sx={{color: 'var(--neon-accent)'}}
+                                                                    sx={{ color: 'var(--neon-accent)' }}
                                                                 >
-                                                                    <EditIcon fontSize="small"/>
+                                                                    <EditIcon fontSize="small" />
                                                                 </IconButton>
                                                             </Tooltip>
                                                             <Tooltip title={t('libraryManagement.common.delete')}>
@@ -447,7 +443,7 @@ const VideoLinksTab = observer(() => {
                                                                     color="error"
                                                                     onClick={() => mediaStore.deleteMediaLink(link.id)}
                                                                 >
-                                                                    <DeleteIcon fontSize="small"/>
+                                                                    <DeleteIcon fontSize="small" />
                                                                 </IconButton>
                                                             </Tooltip>
                                                         </Box>
@@ -461,7 +457,7 @@ const VideoLinksTab = observer(() => {
                     );
                 })}
             </Stack>
-            <VideoLinksBulkBar/>
+            <VideoLinksBulkBar />
         </>
     );
 });
@@ -469,7 +465,7 @@ const VideoLinksTab = observer(() => {
 VideoLinksTab.displayName = 'VideoLinksTab';
 
 export default VideoLinksTab;
-export {VideoLinksTab};
+export { VideoLinksTab };
 
 // Internal helpers exposed for tests.
-export const __test__ = {matchesQuery};
+export const __test__ = { matchesQuery };

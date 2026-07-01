@@ -9,17 +9,17 @@
  *
  * Production-safe: no store seeding needed, uses live API data.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('DetailView', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
-        page.on('pageerror', err => errors.push(err.message));
+        page.on('pageerror', (err) => errors.push(err.message));
         page._testErrors = errors;
     });
 
@@ -44,9 +44,7 @@ test.describe('DetailView', () => {
         expect(hasDetailContent).toBe(true);
 
         // No fatal errors
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors, `Console errors: ${fatalErrors.join('\n')}`).toHaveLength(0);
     });
 
@@ -63,7 +61,9 @@ test.describe('DetailView', () => {
         });
 
         // Find and click back — MUI uses arrow-back icon button
-        const backBtn = page.locator('button[aria-label="go back"], button[aria-label="back"], [data-component="back-button"]').first();
+        const backBtn = page
+            .locator('button[aria-label="go back"], button[aria-label="back"], [data-component="back-button"]')
+            .first();
         if (await backBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
             await backBtn.click();
             await page.waitForSelector('section#screen-home', { timeout: 10_000, state: 'attached' });

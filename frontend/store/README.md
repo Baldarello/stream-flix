@@ -8,14 +8,14 @@ of the app keeps using the same `mediaStore` import without changes.
 
 ## Sub-stores
 
-| Store | Owns |
-| --- | --- |
-| `catalogStore` | Trending, latest, top series, popular anime; `homePageRows`, `heroContent` |
-| `searchStore` | `query`, `results`, `isSearching`, debounce timer |
-| `libraryStore` | `myList`, `cachedItems`, `mediaLinks`, `episodeProgress`, `showIntroDurations`, `preferredSources`, `selectedSeasons`, `showFilterPreferences`, `episodeContextMap`, `viewingHistory`, bulk-selection state |
-| `preferencesStore` | Active language, future theme/accent prefs |
-| `uiStore` | Snackbar, notifications, debug overlay, every `is*ModalOpen` flag, expanded accordion state, profile drawer |
-| `playbackStore` | `nowPlayingItem`, `nowPlayingShowDetails`, `playbackOriginItem`, `selectedItem`, `currentSeasonEpisodes`, `nextEpisode` |
+| Store              | Owns                                                                                                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `catalogStore`     | Trending, latest, top series, popular anime; `homePageRows`, `heroContent`                                                                                                                                  |
+| `searchStore`      | `query`, `results`, `isSearching`, debounce timer                                                                                                                                                           |
+| `libraryStore`     | `myList`, `cachedItems`, `mediaLinks`, `episodeProgress`, `showIntroDurations`, `preferredSources`, `selectedSeasons`, `showFilterPreferences`, `episodeContextMap`, `viewingHistory`, bulk-selection state |
+| `preferencesStore` | Active language, future theme/accent prefs                                                                                                                                                                  |
+| `uiStore`          | Snackbar, notifications, debug overlay, every `is*ModalOpen` flag, expanded accordion state, profile drawer                                                                                                 |
+| `playbackStore`    | `nowPlayingItem`, `nowPlayingShowDetails`, `playbackOriginItem`, `selectedItem`, `currentSeasonEpisodes`, `nextEpisode`                                                                                     |
 
 The three cross-cutting stores (`remoteStore`, `watchTogetherStore`,
 `syncStore`) are unchanged: the facade simply re-exposes their

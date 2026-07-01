@@ -8,14 +8,14 @@
  *
  * Production-safe: uses live app navigation, no store seeding.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('PreferencesView', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
         page._testErrors = errors;
@@ -31,9 +31,7 @@ test.describe('PreferencesView', () => {
         const hasFormControls = bodyText.length > 50;
         expect(hasFormControls).toBe(true);
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors, `Console errors: ${fatalErrors.join('\n')}`).toHaveLength(0);
     });
 
@@ -45,8 +43,10 @@ test.describe('PreferencesView', () => {
         const langSelect = page.locator('select, [role="radiogroup"], [role="listbox"]').first();
         if (await langSelect.isVisible({ timeout: 3000 }).catch(() => false)) {
             // Change the value
-            if (await langSelect.getAttribute('role') === 'listbox' ||
-                await langSelect.evaluate(el => el.tagName) === 'SELECT') {
+            if (
+                (await langSelect.getAttribute('role')) === 'listbox' ||
+                (await langSelect.evaluate((el) => el.tagName)) === 'SELECT'
+            ) {
                 await langSelect.selectOption(1).catch(() => {});
             }
 
@@ -66,7 +66,7 @@ test.describe('PreferencesView', () => {
 test.describe('Navigation', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
         page._testErrors = errors;
@@ -89,9 +89,7 @@ test.describe('Navigation', () => {
             }
         }
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors).toHaveLength(0);
     });
 
@@ -106,7 +104,10 @@ test.describe('Navigation', () => {
         await page.waitForTimeout(500);
 
         // Drawer should be open — look for menu items
-        const drawer = page.locator('[data-component*="drawer"], [class*="drawer"], [role="dialog"]').filter({ visible: true }).first();
+        const drawer = page
+            .locator('[data-component*="drawer"], [class*="drawer"], [role="dialog"]')
+            .filter({ visible: true })
+            .first();
         const hasDrawer = await drawer.isVisible({ timeout: 3000 }).catch(() => false);
 
         if (hasDrawer) {
@@ -115,9 +116,7 @@ test.describe('Navigation', () => {
             expect(drawerText.length).toBeGreaterThan(5);
         }
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors).toHaveLength(0);
     });
 });

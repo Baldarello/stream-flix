@@ -1,7 +1,5 @@
 {
-  "name": "Quix",
-  "description": "A Netflix-inspired streaming platform UI to browse movies, TV series, and anime, featuring latest releases and trending content. Data is mocked to simulate fetching from an external API like TMDB.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+    "name": "Quix",
+    "description": "A Netflix-inspired streaming platform UI to browse movies, TV series, and anime, featuring latest releases and trending content. Data is mocked to simulate fetching from an external API like TMDB.",
+    "requestFramePermissions": ["camera"]
 }

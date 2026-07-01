@@ -1,9 +1,9 @@
-import React, {useEffect} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import tvStore from './tvStore.js';
-import {remoteStore} from '../../store/remoteStore.js';
-import {mediaStore} from '../../store/mediaStore.js';
-import {fxStore} from '../../store/fxStore.js';
+import { remoteStore } from '../../store/remoteStore.js';
+import { mediaStore } from '../../store/mediaStore.js';
+import { fxStore } from '../../store/fxStore.js';
 import TvScreenRouter from './screens/TvScreenRouter.jsx';
 import './styles/tv.css';
 
@@ -20,7 +20,7 @@ export const isTvModeRequested = () => {
 /**
  * TvApp - Root TV Mode Application
  * Lightweight TV interface with remote control navigation
- * 
+ *
  * This app:
  * - Does NOT import any fx/* modules (GSAP, three.js, etc.)
  * - Uses only CSS animations at 60fps

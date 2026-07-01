@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
 import {
     Accordion,
     AccordionDetails,
@@ -19,7 +19,7 @@ import {
     Stack,
     TextField,
     Tooltip,
-    Typography
+    Typography,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,9 +30,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
-const ManageLinksView = observer(({    }) => {
+const ManageLinksView = observer(({}) => {
     const { t } = useTranslations();
     const [domainInputs, setDomainInputs] = useState(() => ({}));
     const [editingLinkId, setEditingLinkId] = useState(() => null);
@@ -42,10 +42,10 @@ const ManageLinksView = observer(({    }) => {
         setExpandedLinkAccordionId,
         expandedLinkAccordionId,
         linkEpisodesSeason,
-        linksRefreshVersion
+        linksRefreshVersion,
     } = mediaStore;
 
-    const currentSeason = item.seasons?.find(s => s.season_number === linkEpisodesSeason);
+    const currentSeason = item.seasons?.find((s) => s.season_number === linkEpisodesSeason);
 
     const onAccordionChange = (panelId) => (event, isExpanded) => {
         setExpandedLinkAccordionId(isExpanded ? panelId : false);
@@ -54,7 +54,7 @@ const ManageLinksView = observer(({    }) => {
     // Build linksByDomain and episodeLinkMap from the observable mediaLinks Map.
     // String keys are used since libraryStore.safeKey converts all keys to string.
     const linksByDomain = {};
-    for (const ep of (currentSeason?.episodes || [])) {
+    for (const ep of currentSeason?.episodes || []) {
         const epLinks = mediaStore.mediaLinks.get(String(ep.id)) || [];
         for (const link of epLinks) {
             try {
@@ -66,7 +66,7 @@ const ManageLinksView = observer(({    }) => {
     }
 
     const episodeLinkMap = {};
-    for (const ep of (currentSeason?.episodes || [])) {
+    for (const ep of currentSeason?.episodes || []) {
         episodeLinkMap[ep.id] = mediaStore.mediaLinks.get(String(ep.id)) || [];
     }
 
@@ -75,10 +75,12 @@ const ManageLinksView = observer(({    }) => {
     // The forceUpdate above (linksRefreshVersion dep) already triggers re-render with
     // fresh episodeLinkMap/linksByDomain from the observable mediaLinks Map.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { mediaStore.refreshLinksForShow(item.id); }, [item.id]);
+    useEffect(() => {
+        mediaStore.refreshLinksForShow(item.id);
+    }, [item.id]);
     useEffect(() => {
         const initialInputs = {};
-        Object.keys(linksByDomain).forEach(origin => {
+        Object.keys(linksByDomain).forEach((origin) => {
             initialInputs[origin] = origin;
         });
         setDomainInputs(initialInputs);
@@ -86,11 +88,11 @@ const ManageLinksView = observer(({    }) => {
 
     const handleCopy = (text) => {
         navigator.clipboard.writeText(text);
-        mediaStore.showSnackbar("notifications.copiedToClipboard", "success", true);
+        mediaStore.showSnackbar('notifications.copiedToClipboard', 'success', true);
     };
 
     const handleDomainInputChange = (origin, value) => {
-        setDomainInputs(prev => ({ ...prev, [origin]: value }));
+        setDomainInputs((prev) => ({ ...prev, [origin]: value }));
     };
 
     const handleUpdateDomain = (origin) => {
@@ -113,7 +115,7 @@ const ManageLinksView = observer(({    }) => {
             url: link.url,
             label: link.label,
             language: link.language,
-            type: link.type
+            type: link.type,
         });
     };
 
@@ -130,13 +132,13 @@ const ManageLinksView = observer(({    }) => {
     };
 
     const handleEditFormChange = (field, value) => {
-        setEditFormData(prev => ({ ...prev, [field]: value }));
+        setEditFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const preferredOriginForShow = mediaStore.preferredSources.get(item.id);
 
     return (
-        <Box sx={{mt: 2, flex: 1, overflowY: 'auto', padding: "10px"}}>
+        <Box sx={{ mt: 2, flex: 1, overflowY: 'auto', padding: '10px' }}>
             <Button
                 color="error"
                 variant="outlined"
@@ -162,131 +164,198 @@ const ManageLinksView = observer(({    }) => {
                                     ? t('linkEpisodesModal.manage.removePreferred')
                                     : t('linkEpisodesModal.manage.setAsPreferred');
                                 return (
-                                <Paper key={origin} variant="outlined" sx={{ p: 2, position: 'relative' }}>
-                                    <Tooltip title={tooltipTitle}>
-                                         <IconButton
-                                            onClick={() => mediaStore.setPreferredSource(item.id, origin)}
-                                            sx={{ position: 'absolute', top: 4, right: 4 }}
-                                         >
-                                            {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
-                                         </IconButton>
-                                    </Tooltip>
-                                    <Typography gutterBottom>
-                                        {t('linkEpisodesModal.manage.linksFrom', { count: links.length })} <strong>{origin}</strong>
-                                    </Typography>
-                                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                        <TextField
-                                            label={t('linkEpisodesModal.manage.newDomain')}
-                                            fullWidth
-                                            variant="outlined"
-                                            size="small"
-                                            value={domainInputs[origin] || ''}
-                                            onChange={(e) => handleDomainInputChange(origin, e.target.value)}
-                                        />
-                                        <Button variant="contained" onClick={() => handleUpdateDomain(origin)}>
-                                            {t('linkEpisodesModal.manage.update')}
-                                        </Button>
-                                        <Tooltip title={t('linkEpisodesModal.manage.deleteAllFromDomainTooltip')}>
-                                            <IconButton color="error" onClick={() => handleDeleteDomain(origin, links.length)}>
-                                                <DeleteIcon />
+                                    <Paper key={origin} variant="outlined" sx={{ p: 2, position: 'relative' }}>
+                                        <Tooltip title={tooltipTitle}>
+                                            <IconButton
+                                                onClick={() => mediaStore.setPreferredSource(item.id, origin)}
+                                                sx={{ position: 'absolute', top: 4, right: 4 }}
+                                            >
+                                                {isPreferred ? <StarIcon color="warning" /> : <StarBorderIcon />}
                                             </IconButton>
                                         </Tooltip>
-                                    </Stack>
-                                </Paper>
-                            )})}
+                                        <Typography gutterBottom>
+                                            {t('linkEpisodesModal.manage.linksFrom', { count: links.length })}{' '}
+                                            <strong>{origin}</strong>
+                                        </Typography>
+                                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                                            <TextField
+                                                label={t('linkEpisodesModal.manage.newDomain')}
+                                                fullWidth
+                                                variant="outlined"
+                                                size="small"
+                                                value={domainInputs[origin] || ''}
+                                                onChange={(e) => handleDomainInputChange(origin, e.target.value)}
+                                            />
+                                            <Button variant="contained" onClick={() => handleUpdateDomain(origin)}>
+                                                {t('linkEpisodesModal.manage.update')}
+                                            </Button>
+                                            <Tooltip title={t('linkEpisodesModal.manage.deleteAllFromDomainTooltip')}>
+                                                <IconButton
+                                                    color="error"
+                                                    onClick={() => handleDeleteDomain(origin, links.length)}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Stack>
+                                    </Paper>
+                                );
+                            })}
                         </Stack>
                     </AccordionDetails>
                 </Accordion>
             )}
 
             <List>
-                {currentSeason.episodes.map(episode => {
+                {currentSeason.episodes.map((episode) => {
                     const epLinks = episodeLinkMap[episode.id];
                     return (
-                    <Accordion
-                        key={episode.id}
-                        expanded={expandedLinkAccordionId === episode.id}
-                        onChange={onAccordionChange(episode.id)}
-                        sx={{ bgcolor: 'background.paper', backgroundImage: 'none', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.12)', '&:before': { display: 'none' } }}
-                    >
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
+                        <Accordion
+                            key={episode.id}
+                            expanded={expandedLinkAccordionId === episode.id}
+                            onChange={onAccordionChange(episode.id)}
                             sx={{
-                                '& .MuiAccordionSummary-content': {
-                                    maxWidth: 'calc(100% - 48px)'
-                                }
+                                bgcolor: 'background.paper',
+                                backgroundImage: 'none',
+                                boxShadow: 'none',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                '&:before': { display: 'none' },
                             }}
                         >
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }}>
-                                <Typography noWrap sx={{ flex: 1, mr: 2 }}>
-                                    {episode.episode_number}. {episode.name}
-                                </Typography>
-                                <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
-                                    {t('linkEpisodesModal.manage.linksCount', { count: epLinks.length })}
-                                </Typography>
-                            </Box>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            {epLinks.length > 0 ? (
-                                <Stack spacing={1}>
-                                    {epLinks.map((link) => {
-                                        const isEditing = editingLinkId === link.id;
-                                        const truncatedLabel = link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{
+                                    '& .MuiAccordionSummary-content': {
+                                        maxWidth: 'calc(100% - 48px)',
+                                    },
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', minWidth: 0 }}>
+                                    <Typography noWrap sx={{ flex: 1, mr: 2 }}>
+                                        {episode.episode_number}. {episode.name}
+                                    </Typography>
+                                    <Typography sx={{ color: 'text.secondary', flexShrink: 0 }}>
+                                        {t('linkEpisodesModal.manage.linksCount', { count: epLinks.length })}
+                                    </Typography>
+                                </Box>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                {epLinks.length > 0 ? (
+                                    <Stack spacing={1}>
+                                        {epLinks.map((link) => {
+                                            const isEditing = editingLinkId === link.id;
+                                            const truncatedLabel =
+                                                link.label.length > 16 ? `${link.label.substring(0, 16)}...` : link.label;
 
-                                        return isEditing ? (
-                                            <Paper key={link.id} variant="outlined" sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                                <TextField size="small" fullWidth label="URL" value={editFormData.url} onChange={e => handleEditFormChange('url', e.target.value)} />
-                                                <TextField size="small" fullWidth label={t('linkEpisodesModal.add.linkLabel')} value={editFormData.label} onChange={e => handleEditFormChange('label', e.target.value)} />
-                                                <Stack direction="row" spacing={2}>
+                                            return isEditing ? (
+                                                <Paper
+                                                    key={link.id}
+                                                    variant="outlined"
+                                                    sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}
+                                                >
                                                     <TextField
-                                                        label={t('linkEpisodesModal.add.language')}
-                                                        value={editFormData.language}
-                                                        onChange={e => handleEditFormChange('language', e.target.value.toUpperCase())}
                                                         size="small"
-                                                        sx={{width: '100px'}}
-                                                        inputProps={{ maxLength: 3 }}
+                                                        fullWidth
+                                                        label="URL"
+                                                        value={editFormData.url}
+                                                        onChange={(e) => handleEditFormChange('url', e.target.value)}
                                                     />
-                                                    <FormControl fullWidth size="small">
-                                                        <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
-                                                        <Select value={editFormData.type} label={t('linkEpisodesModal.add.type')} onChange={(e) => handleEditFormChange('type', e.target.value)}>
-                                                            <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
-                                                            <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
-                                                        </Select>
-                                                    </FormControl>
-                                                </Stack>
-                                                <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                                                    <Tooltip title={t('linkEpisodesModal.manage.cancel')}>
-                                                        <IconButton onClick={handleCancelEdit}><CancelIcon /></IconButton>
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        label={t('linkEpisodesModal.add.linkLabel')}
+                                                        value={editFormData.label}
+                                                        onChange={(e) => handleEditFormChange('label', e.target.value)}
+                                                    />
+                                                    <Stack direction="row" spacing={2}>
+                                                        <TextField
+                                                            label={t('linkEpisodesModal.add.language')}
+                                                            value={editFormData.language}
+                                                            onChange={(e) =>
+                                                                handleEditFormChange('language', e.target.value.toUpperCase())
+                                                            }
+                                                            size="small"
+                                                            sx={{ width: '100px' }}
+                                                            inputProps={{ maxLength: 3 }}
+                                                        />
+                                                        <FormControl fullWidth size="small">
+                                                            <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
+                                                            <Select
+                                                                value={editFormData.type}
+                                                                label={t('linkEpisodesModal.add.type')}
+                                                                onChange={(e) => handleEditFormChange('type', e.target.value)}
+                                                            >
+                                                                <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
+                                                                <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Stack>
+                                                    <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                                                        <Tooltip title={t('linkEpisodesModal.manage.cancel')}>
+                                                            <IconButton onClick={handleCancelEdit}>
+                                                                <CancelIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title={t('linkEpisodesModal.manage.save')}>
+                                                            <IconButton onClick={handleSaveEdit} color="primary">
+                                                                <SaveIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </Stack>
+                                                </Paper>
+                                            ) : (
+                                                <Paper
+                                                    key={link.id}
+                                                    variant="outlined"
+                                                    sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+                                                >
+                                                    <ListItemText
+                                                        primary={truncatedLabel}
+                                                        secondary={link.url}
+                                                        secondaryTypographyProps={{
+                                                            noWrap: true,
+                                                            textOverflow: 'ellipsis',
+                                                            overflow: 'hidden',
+                                                        }}
+                                                    />
+                                                    <Chip label={link.language} size="small" variant="outlined" sx={{ mr: 1 }} />
+                                                    <Chip
+                                                        label={t(`linkEpisodesModal.add.${link.type}`)}
+                                                        size="small"
+                                                        color={link.type === 'dub' ? 'info' : 'primary'}
+                                                        variant="outlined"
+                                                        sx={{ mr: 1 }}
+                                                    />
+                                                    <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
+                                                        <IconButton size="small" onClick={() => handleCopy(link.url)}>
+                                                            <ContentCopyIcon fontSize="small" />
+                                                        </IconButton>
                                                     </Tooltip>
-                                                    <Tooltip title={t('linkEpisodesModal.manage.save')}>
-                                                         <IconButton onClick={handleSaveEdit} color="primary"><SaveIcon /></IconButton>
+                                                    <Tooltip title={t('linkEpisodesModal.manage.editLink')}>
+                                                        <IconButton size="small" onClick={() => handleStartEdit(link)}>
+                                                            <EditIcon fontSize="small" />
+                                                        </IconButton>
                                                     </Tooltip>
-                                                </Stack>
-                                            </Paper>
-                                        ) : (
-                                            <Paper key={link.id} variant="outlined" sx={{ p: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <ListItemText primary={truncatedLabel} secondary={link.url} secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}/>
-                                                <Chip label={link.language} size="small" variant="outlined" sx={{ mr: 1 }} />
-                                                <Chip label={t(`linkEpisodesModal.add.${link.type}`)} size="small" color={link.type === 'dub' ? 'info' : 'primary'} variant="outlined" sx={{ mr: 1 }} />
-                                                <Tooltip title={t('linkEpisodesModal.manage.copyUrl')}>
-                                                    <IconButton size="small" onClick={() => handleCopy(link.url)}><ContentCopyIcon fontSize='small' /></IconButton>
-                                                </Tooltip>
-                                                <Tooltip title={t('linkEpisodesModal.manage.editLink')}>
-                                                    <IconButton size="small" onClick={() => handleStartEdit(link)}><EditIcon fontSize='small' /></IconButton>
-                                                </Tooltip>
-                                                <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
-                                                    <IconButton size="small" onClick={() => mediaStore.deleteMediaLink(link.id)} color="error"><DeleteIcon fontSize='small'/></IconButton>
-                                                </Tooltip>
-                                            </Paper>
-                                        );
-                                    })}
-                                </Stack>
-                            ) : (
-                                <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
-                            )}
-                        </AccordionDetails>
-                    </Accordion>
-                )})}
+                                                    <Tooltip title={t('linkEpisodesModal.manage.deleteLink')}>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => mediaStore.deleteMediaLink(link.id)}
+                                                            color="error"
+                                                        >
+                                                            <DeleteIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Paper>
+                                            );
+                                        })}
+                                    </Stack>
+                                ) : (
+                                    <Typography color="text.secondary">{t('linkEpisodesModal.manage.noLinks')}</Typography>
+                                )}
+                            </AccordionDetails>
+                        </Accordion>
+                    );
+                })}
             </List>
         </Box>
     );

@@ -1,6 +1,6 @@
-import React, {useMemo, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
+import React, { useMemo, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
 import {
     Alert,
     Box,
@@ -16,32 +16,33 @@ import {
     Modal,
     TextField,
     Tooltip,
-    Typography
+    Typography,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import IosShareIcon from '@mui/icons-material/IosShare';
-import {createShareLink} from '../../services/shareService.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { createShareLink } from '../../services/shareService.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: { xs: '95%', sm: 500 },
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 2,
-  maxHeight: '90vh',
-  display: 'flex',
-  flexDirection: 'column',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: { xs: '95%', sm: 500 },
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 2,
+    maxHeight: '90vh',
+    display: 'flex',
+    flexDirection: 'column',
 };
 
 const ShareLibraryModal = observer(() => {
-    const { isShareModalOpen, closeShareModal, shareableShows, generateShareableData, showSnackbar, isLoggedIn, googleUser } = mediaStore;
+    const { isShareModalOpen, closeShareModal, shareableShows, generateShareableData, showSnackbar, isLoggedIn, googleUser } =
+        mediaStore;
     const { t } = useTranslations();
-    
+
     const [selectedShows, setSelectedShows] = useState(() => new Set());
     const [generatedLink, setGeneratedLink] = useState(() => '');
     const [isGenerating, setIsGenerating] = useState(() => false);
@@ -49,7 +50,7 @@ const ShareLibraryModal = observer(() => {
     // Memoize the initial selection to only run once when the modal opens
     useMemo(() => {
         if (isShareModalOpen) {
-            setSelectedShows(new Set(shareableShows.map(s => s.id)));
+            setSelectedShows(new Set(shareableShows.map((s) => s.id)));
         }
     }, [isShareModalOpen, shareableShows]);
 
@@ -62,14 +63,14 @@ const ShareLibraryModal = observer(() => {
         }
         setSelectedShows(newSelection);
     };
-    
+
     const handleSelectAll = () => {
         if (selectedShows.size === shareableShows.length) {
             setSelectedShows(new Set()); // Deselect all
         } else {
-            setSelectedShows(new Set(shareableShows.map(s => s.id))); // Select all
+            setSelectedShows(new Set(shareableShows.map((s) => s.id))); // Select all
         }
-    }
+    };
 
     const handleGenerateLink = async () => {
         if (!googleUser?.accessToken) return;
@@ -78,28 +79,28 @@ const ShareLibraryModal = observer(() => {
         try {
             const data = await generateShareableData(Array.from(selectedShows));
             if (data.shows.length === 0) {
-                showSnackbar("notifications.shareNoShowsSelected", "warning", true);
+                showSnackbar('notifications.shareNoShowsSelected', 'warning', true);
                 return;
             }
             const link = await createShareLink(googleUser.accessToken, data);
             setGeneratedLink(link);
         } catch (error) {
-            showSnackbar('notifications.shareLinkCreateError', 'error', true, { error: (error).message });
+            showSnackbar('notifications.shareLinkCreateError', 'error', true, { error: error.message });
         } finally {
             setIsGenerating(false);
         }
     };
-    
+
     const handleCopyToClipboard = () => {
         navigator.clipboard.writeText(generatedLink);
-        showSnackbar("notifications.copiedToClipboard", "success", true);
-    }
+        showSnackbar('notifications.copiedToClipboard', 'success', true);
+    };
 
     const handleClose = () => {
         setGeneratedLink('');
         setIsGenerating(false);
         closeShareModal();
-    }
+    };
 
     const isAllSelected = selectedShows.size > 0 && selectedShows.size === shareableShows.length;
     const isIndeterminate = selectedShows.size > 0 && selectedShows.size < shareableShows.length;
@@ -111,13 +112,15 @@ const ShareLibraryModal = observer(() => {
                     <Alert severity="warning" sx={{ mt: 2 }}>
                         {t('shareAndImport.loginRequired')}
                     </Alert>
-                    <Button onClick={handleClose} sx={{mt: 2}}>{t('watchTogether.cancel')}</Button>
+                    <Button onClick={handleClose} sx={{ mt: 2 }}>
+                        {t('watchTogether.cancel')}
+                    </Button>
                 </Box>
             );
         }
 
         if (generatedLink) {
-             return (
+            return (
                 <Box mt={2}>
                     <Typography gutterBottom>{t('shareAndImport.shareLinkReady')}</Typography>
                     {/* FIX: The 'readOnly' prop on TextField is passed via 'InputProps' to avoid a TypeScript error. */}
@@ -136,10 +139,12 @@ const ShareLibraryModal = observer(() => {
                                         </IconButton>
                                     </Tooltip>
                                 </InputAdornment>
-                            )
+                            ),
                         }}
                     />
-                     <Button onClick={() => setGeneratedLink('')} sx={{mt: 2}}>{t('shareAndImport.back')}</Button>
+                    <Button onClick={() => setGeneratedLink('')} sx={{ mt: 2 }}>
+                        {t('shareAndImport.back')}
+                    </Button>
                 </Box>
             );
         }
@@ -159,16 +164,11 @@ const ShareLibraryModal = observer(() => {
                         </ListItemIcon>
                         <ListItemText primary={t('shareAndImport.selectAll', { count: shareableShows.length })} />
                     </ListItem>
-                    {shareableShows.map(show => (
+                    {shareableShows.map((show) => (
                         <ListItem key={show.id} secondaryAction={<IconButton edge="end" aria-label="comments" />}>
                             <ListItemButton onClick={() => handleToggle(show.id)}>
                                 <ListItemIcon>
-                                    <Checkbox
-                                        edge="start"
-                                        checked={selectedShows.has(show.id)}
-                                        tabIndex={-1}
-                                        disableRipple
-                                    />
+                                    <Checkbox edge="start" checked={selectedShows.has(show.id)} tabIndex={-1} disableRipple />
                                 </ListItemIcon>
                                 <ListItemText primary={show.name} />
                             </ListItemButton>
@@ -185,14 +185,18 @@ const ShareLibraryModal = observer(() => {
                 </Button>
             </>
         );
-    }
+    };
 
     return (
         // FIX: (line 175) Wrap Box with Modal component
         <Modal open={isShareModalOpen} onClose={handleClose}>
             <Box sx={style}>
-                <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}><CloseIcon /></IconButton>
-                <Typography variant="h6" component="h2">{t('shareAndImport.shareTitle')}</Typography>
+                <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
+                    <CloseIcon />
+                </IconButton>
+                <Typography variant="h6" component="h2">
+                    {t('shareAndImport.shareTitle')}
+                </Typography>
                 {renderContent()}
             </Box>
         </Modal>

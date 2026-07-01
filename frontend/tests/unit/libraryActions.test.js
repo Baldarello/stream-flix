@@ -10,9 +10,9 @@
  * calls. Heavy link-resolution / playback flows are exercised by the
  * Playwright smoke test.
  */
-import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {libraryStore} from '../../store/libraryStore.js';
-import {mediaStore} from '../../store/mediaStore.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { libraryStore } from '../../store/libraryStore.js';
+import { mediaStore } from '../../store/mediaStore.js';
 
 vi.mock('../../services/db.js', () => {
     const tableMock = () => ({
@@ -59,7 +59,7 @@ describe('libraryStore actions', () => {
     });
 
     it('toggleMyList adds and removes an item', () => {
-        const item = {id: 1, title: 'Test Show'};
+        const item = { id: 1, title: 'Test Show' };
         libraryStore.toggleMyList(item);
         expect(libraryStore.myList).toEqual([1]);
         expect(libraryStore.cachedItems.get(1)).toEqual(item);
@@ -82,20 +82,20 @@ describe('libraryStore actions', () => {
     });
 
     it('removeFromContinueWatching deletes the progress entry', async () => {
-        libraryStore.episodeProgress.set(42, {episodeId: 42, currentTime: 1, duration: 10});
+        libraryStore.episodeProgress.set(42, { episodeId: 42, currentTime: 1, duration: 10 });
         await libraryStore.removeFromContinueWatching(42);
         expect(libraryStore.episodeProgress.has(42)).toBe(false);
     });
 
     it('updateEpisodeProgress flips the watched flag past 90%', () => {
-        libraryStore.updateEpisodeProgress({episodeId: 7, currentTime: 95, duration: 100});
+        libraryStore.updateEpisodeProgress({ episodeId: 7, currentTime: 95, duration: 100 });
         const stored = libraryStore.episodeProgress.get(7);
         expect(stored.watched).toBe(true);
         expect(stored.currentTime).toBe(95);
     });
 
     it('toggleEpisodeWatchedStatus flips the existing flag', async () => {
-        libraryStore.episodeProgress.set(7, {episodeId: 7, currentTime: 0, duration: 100, watched: false});
+        libraryStore.episodeProgress.set(7, { episodeId: 7, currentTime: 0, duration: 100, watched: false });
         await libraryStore.toggleEpisodeWatchedStatus(7);
         expect(libraryStore.episodeProgress.get(7).watched).toBe(true);
         await libraryStore.toggleEpisodeWatchedStatus(7);
@@ -110,9 +110,9 @@ describe('libraryStore actions', () => {
     });
 
     it('setShowFilterPreference merges with the existing entry', () => {
-        libraryStore.setShowFilterPreference(11, {language: 'it'});
-        libraryStore.setShowFilterPreference(11, {type: 'subbed'});
-        expect(libraryStore.showFilterPreferences.get(11)).toEqual({language: 'it', type: 'subbed'});
+        libraryStore.setShowFilterPreference(11, { language: 'it' });
+        libraryStore.setShowFilterPreference(11, { type: 'subbed' });
+        expect(libraryStore.showFilterPreferences.get(11)).toEqual({ language: 'it', type: 'subbed' });
     });
 
     it('getLinksForMedia returns an empty array when no links exist', async () => {
@@ -126,20 +126,20 @@ describe('libraryStore actions', () => {
                 {
                     season_number: 1,
                     episodes: [
-                        {id: 100, name: 'e1'},
-                        {id: 101, name: 'e2'},
+                        { id: 100, name: 'e1' },
+                        { id: 101, name: 'e2' },
                     ],
                 },
             ],
         };
-        libraryStore.mediaLinks.set(101, [{id: 1, url: 'x', mediaId: 101}]);
+        libraryStore.mediaLinks.set(101, [{ id: 1, url: 'x', mediaId: 101 }]);
         const ep = libraryStore.findFirstUnwatchedEpisode(show);
         expect(ep.id).toBe(101);
     });
 
     it('hasLinks returns true iff the in-memory map has entries', () => {
         expect(libraryStore.hasLinks(1)).toBe(false);
-        libraryStore.mediaLinks.set(1, [{id: 1, url: 'x', mediaId: 1}]);
+        libraryStore.mediaLinks.set(1, [{ id: 1, url: 'x', mediaId: 1 }]);
         expect(libraryStore.hasLinks(1)).toBe(true);
     });
 });
@@ -173,7 +173,7 @@ describe('mediaStore facade bindings', () => {
     });
 
     it('facade toggleMyList delegates to libraryStore', () => {
-        const item = {id: 1, title: 'X'};
+        const item = { id: 1, title: 'X' };
         mediaStore.toggleMyList(item);
         expect(libraryStore.myList).toEqual([1]);
     });

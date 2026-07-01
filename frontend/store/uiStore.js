@@ -7,7 +7,7 @@
  * no I/O: this is the part of the previous `mediaStore` that
  * was pure view state.
  */
-import {makeAutoObservable, runInAction} from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
 class UIStore {
     // ===== SNACKBAR =====
@@ -176,9 +176,7 @@ class UIStore {
     }
 
     setLinkEpisodesTab(tab) {
-
-            this.linkEpisodesTab = tab;
-
+        this.linkEpisodesTab = tab;
     }
 
     setLinkEpisodesSeason(season) {
@@ -186,7 +184,7 @@ class UIStore {
         // callbacks, MobX reactions) programmatically resetting season to Specials (0)
         // when a valid season is already selected. MUI Select onChange can fire with
         // value=0 during re-render/remount even when user selected a different season.
-        const isSpecialsReset = (season == 0) && (this.linkEpisodesSeason != 0) && (this.linkEpisodesSeason != '');
+        const isSpecialsReset = season == 0 && this.linkEpisodesSeason != 0 && this.linkEpisodesSeason != '';
         if (isSpecialsReset) return;
         this.linkEpisodesSeason = season;
     }

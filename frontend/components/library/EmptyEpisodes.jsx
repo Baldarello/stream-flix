@@ -1,17 +1,17 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Button, Typography} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Box, Button, Typography } from '@mui/material';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import LinkIcon from '@mui/icons-material/Link';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {mediaStore} from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { mediaStore } from '../../store/mediaStore.js';
 
 /**
  * EmptyEpisodes - Centered icon + copy shown when a season is known
  * to have no episodes. Includes a CTA to link the first episode.
  */
 const EmptyEpisodes = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     const handleLinkFirstEpisode = () => {
         // Open the link episodes modal for the current show/season
@@ -49,9 +49,7 @@ const EmptyEpisodes = observer(() => {
                     boxShadow: '0 0 18px rgba(76, 210, 255, 0.3)',
                 }}
             >
-                <TheatersIcon
-                    sx={{fontSize: '2rem', color: 'var(--neon-accent)'}}
-                />
+                <TheatersIcon sx={{ fontSize: '2rem', color: 'var(--neon-accent)' }} />
             </Box>
             <Typography
                 sx={{

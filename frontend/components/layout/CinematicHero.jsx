@@ -17,14 +17,14 @@
  * splash with no movement.
  */
 
-import React, {useEffect, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Button, Stack, Typography} from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import {gsap} from 'gsap';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {durations, easings, reducedMotion, stagger} from '../../motion/grammar.js';
+import { gsap } from 'gsap';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { durations, easings, reducedMotion, stagger } from '../../motion/grammar.js';
 
 const splitTitle = (title) => {
     if (!title) return [];
@@ -43,12 +43,7 @@ const splitTitle = (title) => {
     return tokens;
 };
 
-export const CinematicHero = observer(function CinematicHeroInner({
-    item,
-    onMoreInfoClick,
-    onPlayClick,
-    id = 'hero-cinematic'
-}) {
+export const CinematicHero = observer(function CinematicHeroInner({ item, onMoreInfoClick, onPlayClick, id = 'hero-cinematic' }) {
     const { t } = useTranslations();
     const rootRef = useRef(null);
     const titleRef = useRef(null);
@@ -78,7 +73,8 @@ export const CinematicHero = observer(function CinematicHeroInner({
         }
         const chars = titleRef.current ? titleRef.current.querySelectorAll('.kinetic-char') : [];
         if (chars.length > 0) {
-            tl.fromTo(chars,
+            tl.fromTo(
+                chars,
                 { y: '110%', autoAlpha: 0, filter: 'blur(8px)' },
                 {
                     y: '0%',
@@ -86,27 +82,34 @@ export const CinematicHero = observer(function CinematicHeroInner({
                     filter: 'blur(0px)',
                     duration: durations.cinematic,
                     ease: easings.emphasized,
-                    stagger: stagger.char
+                    stagger: stagger.char,
                 },
-                0);
+                0
+            );
         }
         if (overviewRef.current) {
-            tl.fromTo(overviewRef.current,
+            tl.fromTo(
+                overviewRef.current,
                 { y: 16, autoAlpha: 0 },
                 { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.standard },
-                0.45);
+                0.45
+            );
         }
         if (actionsRef.current) {
-            tl.fromTo(actionsRef.current.children,
+            tl.fromTo(
+                actionsRef.current.children,
                 { y: 18, autoAlpha: 0 },
                 { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.emphasized, stagger: 0.06 },
-                0.55);
+                0.55
+            );
         }
         if (backdropRef.current) {
-            tl.fromTo(backdropRef.current,
+            tl.fromTo(
+                backdropRef.current,
                 { scale: 1.1, filter: 'brightness(0.6)' },
                 { scale: 1.0, filter: 'brightness(1.0)', duration: durations.epic, ease: easings.cinematic },
-                0);
+                0
+            );
         }
         return () => {
             tl.kill();
@@ -151,7 +154,7 @@ export const CinematicHero = observer(function CinematicHeroInner({
                 alignItems: 'center',
                 overflow: 'hidden',
                 zIndex: 100,
-                pointerEvents: 'none'
+                pointerEvents: 'none',
             }}
         >
             {/* Backdrop */}
@@ -166,7 +169,7 @@ export const CinematicHero = observer(function CinematicHeroInner({
                     backgroundPosition: 'center',
                     filter: 'brightness(0.95)',
                     willChange: 'transform',
-                    zIndex: 1
+                    zIndex: 1,
                 }}
             />
             {/* Light leak */}
@@ -177,8 +180,9 @@ export const CinematicHero = observer(function CinematicHeroInner({
                 sx={{
                     position: 'absolute',
                     inset: 0,
-                    background: 'linear-gradient(to right, rgba(5,6,13,0.92) 0%, rgba(5,6,13,0.55) 45%, rgba(5,6,13,0.2) 80%, rgba(5,6,13,0.6) 100%), linear-gradient(to top, rgba(5,6,13,1) 8%, rgba(5,6,13,0.4) 50%, rgba(5,6,13,0) 90%)',
-                    zIndex: 3
+                    background:
+                        'linear-gradient(to right, rgba(5,6,13,0.92) 0%, rgba(5,6,13,0.55) 45%, rgba(5,6,13,0.2) 80%, rgba(5,6,13,0.6) 100%), linear-gradient(to top, rgba(5,6,13,1) 8%, rgba(5,6,13,0.4) 50%, rgba(5,6,13,0) 90%)',
+                    zIndex: 3,
                 }}
             />
             {/* Scanline overlay (subtle) */}
@@ -191,7 +195,7 @@ export const CinematicHero = observer(function CinematicHeroInner({
                     p: { xs: 2, md: 8 },
                     pt: { xs: 'calc(7rem + env(safe-area-inset-top))', md: 'calc(2rem + env(safe-area-inset-top))' },
                     width: { xs: '100%', md: '52%', lg: '42%' },
-                    pointerEvents: 'auto'
+                    pointerEvents: 'auto',
                 }}
             >
                 <Stack spacing={2.5}>
@@ -210,12 +214,14 @@ export const CinematicHero = observer(function CinematicHeroInner({
                             display: 'flex',
                             flexWrap: 'wrap',
                             rowGap: '0.1em',
-                            columnGap: 0
+                            columnGap: 0,
                         }}
                     >
-                        {tokens.map((tok, idx) => (
+                        {tokens.map((tok, idx) =>
                             tok.kind === 'space' ? (
-                                <span key={`s-${idx}`} style={{ width: '0.4em' }}>{tok.text}</span>
+                                <span key={`s-${idx}`} style={{ width: '0.4em' }}>
+                                    {tok.text}
+                                </span>
                             ) : (
                                 <span
                                     key={`c-${idx}`}
@@ -225,7 +231,7 @@ export const CinematicHero = observer(function CinematicHeroInner({
                                     {tok.text}
                                 </span>
                             )
-                        ))}
+                        )}
                     </Typography>
                     <Typography
                         ref={overviewRef}
@@ -235,17 +241,12 @@ export const CinematicHero = observer(function CinematicHeroInner({
                             color: 'var(--text-primary)',
                             opacity: 0.85,
                             textShadow: '0 1px 8px rgba(0,0,0,0.6)',
-                            maxWidth: 560
+                            maxWidth: 560,
                         }}
                     >
                         {trimmedOverview}
                     </Typography>
-                    <Stack
-                        ref={actionsRef}
-                        direction="row"
-                        spacing={1.5}
-                        sx={{ pt: 1.5, flexWrap: 'wrap' }}
-                    >
+                    <Stack ref={actionsRef} direction="row" spacing={1.5} sx={{ pt: 1.5, flexWrap: 'wrap' }}>
                         <Button
                             id="hero-cta-play"
                             data-testid="hero-cta-play"
@@ -265,8 +266,8 @@ export const CinematicHero = observer(function CinematicHeroInner({
                                 '&:hover': {
                                     bgcolor: 'var(--neon-accent-hot)',
                                     transform: 'translateY(-2px)',
-                                    boxShadow: '0 0 24px rgba(122, 240, 255, 0.65)'
-                                }
+                                    boxShadow: '0 0 24px rgba(122, 240, 255, 0.65)',
+                                },
                             }}
                         >
                             {t('hero.play')}
@@ -289,8 +290,8 @@ export const CinematicHero = observer(function CinematicHeroInner({
                                 '&:hover': {
                                     background: 'rgba(76, 210, 255, 0.12)',
                                     borderColor: 'var(--neon-accent-hot)',
-                                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.35)'
-                                }
+                                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.35)',
+                                },
                             }}
                         >
                             {t('hero.moreInfo')}

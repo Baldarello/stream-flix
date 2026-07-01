@@ -12,23 +12,21 @@
  * `--text-secondary`) instead of literal `rgba(...)` colours.
  */
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Card, CardContent, Checkbox, FormControl, MenuItem, Select, Typography} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Box, Card, CardContent, Checkbox, FormControl, MenuItem, Select, Typography } from '@mui/material';
 import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
-import {HoloChip} from '../../feedback/HoloChip.jsx';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { HoloChip } from '../../feedback/HoloChip.jsx';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 const cardSx = (deleteShow) => ({
     background: 'var(--holo-grad)',
     border: '1px solid rgba(76, 210, 255, 0.3)',
-    boxShadow: deleteShow
-        ? '0 0 14px rgba(255, 76, 76, 0.35)'
-        : '0 0 8px rgba(76, 210, 255, 0.18)',
-    transition: 'box-shadow 200ms ease'
+    boxShadow: deleteShow ? '0 0 14px rgba(255, 76, 76, 0.35)' : '0 0 8px rgba(76, 210, 255, 0.18)',
+    transition: 'box-shadow 200ms ease',
 });
 
 const labelSx = {
@@ -38,22 +36,22 @@ const labelSx = {
     textTransform: 'uppercase',
     fontSize: '0.7rem',
     display: 'block',
-    mb: 1
+    mb: 1,
 };
 
 const selectSx = {
     color: 'var(--text-primary)',
     fontFamily: "'Inter', sans-serif",
     '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'rgba(76,210,255,0.35)'
+        borderColor: 'rgba(76,210,255,0.35)',
     },
     '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--neon-accent-hot)'
+        borderColor: 'var(--neon-accent-hot)',
     },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: 'var(--neon-accent)',
-        boxShadow: '0 0 12px rgba(76, 210, 255, 0.35)'
-    }
+        boxShadow: '0 0 12px rgba(76, 210, 255, 0.35)',
+    },
 };
 
 /**
@@ -64,9 +62,9 @@ const selectSx = {
  *   `googleDriveSyncConflictStore.choices`.
  * @returns {React.ReactElement} Per-row chooser card
  */
-export const SyncConflictChoiceRow = observer(({choice}) => {
-    const {t} = useTranslations();
-    const {updateSyncConflictChoice, toggleSyncConflictDeleteShow} = mediaStore;
+export const SyncConflictChoiceRow = observer(({ choice }) => {
+    const { t } = useTranslations();
+    const { updateSyncConflictChoice, toggleSyncConflictDeleteShow } = mediaStore;
     const isMovie = choice.mediaType === 'movie';
 
     return (
@@ -82,17 +80,17 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                 mb: 1.5,
                 borderRadius: '12px',
                 border: '1px solid rgba(76, 210, 255, 0.2)',
-                backgroundColor: choice.deleteShow
-                    ? 'rgba(255, 76, 76, 0.08)'
-                    : 'rgba(76, 210, 255, 0.04)',
-                transition: 'background-color 200ms ease'
+                backgroundColor: choice.deleteShow ? 'rgba(255, 76, 76, 0.08)' : 'rgba(76, 210, 255, 0.04)',
+                transition: 'background-color 200ms ease',
             }}
         >
-            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1}}>
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, minWidth: 0}}>
-                    {isMovie
-                        ? <MovieIcon fontSize="small" sx={{color: 'var(--neon-accent)'}}/>
-                        : <TvIcon fontSize="small" sx={{color: 'var(--neon-accent)'}}/>}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                    {isMovie ? (
+                        <MovieIcon fontSize="small" sx={{ color: 'var(--neon-accent)' }} />
+                    ) : (
+                        <TvIcon fontSize="small" sx={{ color: 'var(--neon-accent)' }} />
+                    )}
                     <Typography
                         sx={{
                             flex: 1,
@@ -101,7 +99,7 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                             fontWeight: 600,
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
                         }}
                     >
                         {choice.title}
@@ -113,26 +111,26 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                             sx={{
                                 borderColor: 'rgba(255, 76, 76, 0.65)',
                                 color: '#ff6e6e',
-                                height: 20
+                                height: 20,
                             }}
                         />
                     )}
                 </Box>
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography
                         variant="caption"
-                        sx={{color: 'var(--text-secondary)', fontFamily: "'Space Grotesk', 'Inter', sans-serif"}}
+                        sx={{ color: 'var(--text-secondary)', fontFamily: "'Space Grotesk', 'Inter', sans-serif" }}
                     >
-                        {t('syncConflict.showId', {id: choice.id})}
+                        {t('syncConflict.showId', { id: choice.id })}
                     </Typography>
                     <Checkbox
                         id={`sync-conflict-choice-row-${choice.id}-delete`}
                         checked={choice.deleteShow}
                         onChange={() => toggleSyncConflictDeleteShow(choice.id)}
                         size="small"
-                        icon={<DeleteIcon sx={{color: 'var(--text-secondary)'}}/>}
-                        checkedIcon={<DeleteSweepIcon sx={{color: '#ff6e6e'}}/>}
-                        sx={{p: 0.5}}
+                        icon={<DeleteIcon sx={{ color: 'var(--text-secondary)' }} />}
+                        checkedIcon={<DeleteSweepIcon sx={{ color: '#ff6e6e' }} />}
+                        sx={{ p: 0.5 }}
                     />
                 </Box>
             </Box>
@@ -140,12 +138,12 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
             <Box
                 sx={{
                     display: 'grid',
-                    gridTemplateColumns: {xs: '1fr', sm: 'repeat(3, 1fr)'},
-                    gap: 1.5
+                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                    gap: 1.5,
                 }}
             >
                 <Card variant="outlined" sx={cardSx(choice.deleteShow)}>
-                    <CardContent sx={{p: 1.5, '&:last-child': {pb: 1.5}}}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                         <Typography sx={labelSx}>{t('syncConflict.myList')}</Typography>
                         <FormControl fullWidth size="small" sx={selectSx}>
                             <Select
@@ -165,7 +163,7 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                             sx={{
                                 color: 'var(--text-secondary)',
                                 mt: 0.5,
-                                display: 'block'
+                                display: 'block',
                             }}
                         >
                             {choice.myListAction === 'none' && t('syncConflict.options.notIncluded')}
@@ -177,9 +175,9 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                 </Card>
 
                 <Card variant="outlined" sx={cardSx(choice.deleteShow)}>
-                    <CardContent sx={{p: 1.5, '&:last-child': {pb: 1.5}}}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                         <Typography sx={labelSx}>
-                            {t('syncConflict.links', {local: choice.localLinkCount, remote: choice.remoteLinkCount})}
+                            {t('syncConflict.links', { local: choice.localLinkCount, remote: choice.remoteLinkCount })}
                         </Typography>
                         <FormControl fullWidth size="small" sx={selectSx}>
                             <Select
@@ -202,11 +200,11 @@ export const SyncConflictChoiceRow = observer(({choice}) => {
                 </Card>
 
                 <Card variant="outlined" sx={cardSx(choice.deleteShow)}>
-                    <CardContent sx={{p: 1.5, '&:last-child': {pb: 1.5}}}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                         <Typography sx={labelSx}>
                             {t('syncConflict.progress', {
                                 local: choice.localProgressCount,
-                                remote: choice.remoteProgressCount
+                                remote: choice.remoteProgressCount,
                             })}
                         </Typography>
                         <FormControl fullWidth size="small" sx={selectSx}>

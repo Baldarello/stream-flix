@@ -7,7 +7,7 @@
  * 5. Delete a link and verify it's gone
  * 6. Test advanced config for half-season link sets
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const IS_PROD = (process.env.SMOKE_URL || 'http://localhost:3002/').includes('localhost:3002');
 
@@ -72,9 +72,10 @@ runTest('link service: insert, view and delete episode links', async ({ page }) 
     await expect(snackbar).toBeVisible({ timeout: 5000 });
 
     // 12. Verify no console errors
-    const relevantErrors = consoleErrors.filter(e =>
-        !e.includes('net::ERR') && // ignore network errors for test URL
-        !e.includes('Failed to load resource')
+    const relevantErrors = consoleErrors.filter(
+        (e) =>
+            !e.includes('net::ERR') && // ignore network errors for test URL
+            !e.includes('Failed to load resource')
     );
     expect(relevantErrors, `Console errors: ${relevantErrors.join('\n')}`).toHaveLength(0);
 });
@@ -137,9 +138,6 @@ runTest('link service: advanced config for half-seasons', async ({ page }) => {
     const snackbar = page.locator('.MuiSnackbar-root, [role="alert"]');
     await expect(snackbar).toBeVisible({ timeout: 5000 });
 
-    const relevantErrors = consoleErrors.filter(e =>
-        !e.includes('net::ERR') &&
-        !e.includes('Failed to load resource')
-    );
+    const relevantErrors = consoleErrors.filter((e) => !e.includes('net::ERR') && !e.includes('Failed to load resource'));
     expect(relevantErrors, `Console errors: ${relevantErrors.join('\n')}`).toHaveLength(0);
 });

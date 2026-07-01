@@ -3,7 +3,7 @@
  * tests can run without installing the (heavy) browser-driven stack,
  * and we exercise the pure report/formatting logic directly.
  */
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@axe-core/playwright', () => {
     return {
@@ -26,9 +26,7 @@ vi.mock('@axe-core/playwright', () => {
     };
 });
 
-const { expectNoA11yViolations, formatViolationsReport, __testing } = await import(
-    '../../e2e/utils/a11y-helper.js'
-);
+const { expectNoA11yViolations, formatViolationsReport, __testing } = await import('../../e2e/utils/a11y-helper.js');
 
 function makeViolation(overrides = {}) {
     return {
@@ -146,10 +144,7 @@ describe('a11y-helper', () => {
 
         it('resolves silently when there are zero blocking violations', async () => {
             const page = makePage(async () => ({
-                violations: [
-                    makeViolation({ impact: 'minor' }),
-                    makeViolation({ id: 'label', impact: 'moderate' }),
-                ],
+                violations: [makeViolation({ impact: 'minor' }), makeViolation({ id: 'label', impact: 'moderate' })],
             }));
             await expect(expectNoA11yViolations(page)).resolves.toBeUndefined();
         });
@@ -192,9 +187,7 @@ describe('a11y-helper', () => {
             const page = makePage(async () => ({
                 violations: [makeViolation({ impact: 'critical' })],
             }));
-            await expect(expectNoA11yViolations(page)).rejects.toThrow(
-                /Accessibility audit failed/
-            );
+            await expect(expectNoA11yViolations(page)).rejects.toThrow(/Accessibility audit failed/);
         });
 
         it('throws a descriptive Error when a serious violation is found', async () => {
@@ -240,9 +233,7 @@ describe('a11y-helper', () => {
 
         it('rejects a missing page argument with a clear error', async () => {
             await expect(expectNoA11yViolations(null)).rejects.toThrow(/`page` argument is required/);
-            await expect(expectNoA11yViolations(undefined)).rejects.toThrow(
-                /`page` argument is required/
-            );
+            await expect(expectNoA11yViolations(undefined)).rejects.toThrow(/`page` argument is required/);
         });
     });
 
@@ -257,10 +248,7 @@ describe('a11y-helper', () => {
         });
 
         it('trims and drops empty entries', () => {
-            expect(__testing.normalizeExcludedTags(['  region  ', '', 'wcag2a'])).toEqual([
-                'region',
-                'wcag2a',
-            ]);
+            expect(__testing.normalizeExcludedTags(['  region  ', '', 'wcag2a'])).toEqual(['region', 'wcag2a']);
         });
     });
 });

@@ -8,7 +8,7 @@ const MAX_BACKUPS_TO_KEEP = 5;
 
 // Helper to create common headers
 const createHeaders = (accessToken) => ({
-    'Authorization': `Bearer ${accessToken}`,
+    Authorization: `Bearer ${accessToken}`,
 });
 
 // 1. Find the latest backup file in the appDataFolder
@@ -24,7 +24,7 @@ export const findLatestBackupFile = async (accessToken) => {
         headers: createHeaders(accessToken),
     });
     if (!response.ok) {
-        console.error("Drive API Error (find latest file):", await response.json());
+        console.error('Drive API Error (find latest file):', await response.json());
         throw new Error('Failed to search for backup file.');
     }
 
@@ -43,8 +43,8 @@ export const listBackupFiles = async (accessToken) => {
     const response = await fetch(`${DRIVE_API_URL}?${params}`, {
         headers: createHeaders(accessToken),
     });
-     if (!response.ok) {
-        console.error("Drive API Error (list files):", await response.json());
+    if (!response.ok) {
+        console.error('Drive API Error (list files):', await response.json());
         throw new Error('Failed to list backup files.');
     }
     const data = await response.json();
@@ -58,7 +58,7 @@ export const deleteOldBackups = async (accessToken) => {
         return; // Nothing to delete
     }
     const filesToDelete = files.slice(MAX_BACKUPS_TO_KEEP);
-    
+
     // Google Drive API does not support batch delete in v3 with a single HTTP request.
     // We must send one request per file.
     for (const file of filesToDelete) {
@@ -75,7 +75,7 @@ export const readBackupFile = async (accessToken, fileId) => {
         headers: createHeaders(accessToken),
     });
     if (!response.ok) {
-        console.error("Drive API Error (read file):", await response.json());
+        console.error('Drive API Error (read file):', await response.json());
         throw new Error('Failed to read backup file.');
     }
     return response.json();
@@ -85,7 +85,7 @@ export const readBackupFile = async (accessToken, fileId) => {
 export const writeBackupFile = async (accessToken, content) => {
     const timestamp = Date.now();
     const filename = `${BACKUP_FILE_PREFIX}${timestamp}.json`;
-    
+
     const metadata = {
         name: filename,
         mimeType: 'application/json',
@@ -108,7 +108,7 @@ export const writeBackupFile = async (accessToken, content) => {
 
     if (!response.ok) {
         const errorData = await response.json();
-        console.error("Google Drive API Error (write file):", errorData);
+        console.error('Google Drive API Error (write file):', errorData);
         throw new Error(`Failed to create backup file.`);
     }
     return response.json();
@@ -123,7 +123,7 @@ export const writeBackupFile = async (accessToken, content) => {
 export const createPublicShareFile = async (accessToken, content) => {
     const timestamp = Date.now();
     const filename = `quix_share_${timestamp}.json`;
-    
+
     // Step 1: Create the file in the user's root Drive folder
     const metadata = {
         name: filename,
@@ -142,16 +142,16 @@ export const createPublicShareFile = async (accessToken, content) => {
 
     if (!createResponse.ok) {
         const errorData = await createResponse.json();
-        console.error("Google Drive API Error (create share file):", errorData);
+        console.error('Google Drive API Error (create share file):', errorData);
         throw new Error(`Failed to create share file.`);
     }
-    
+
     const { id: fileId } = await createResponse.json();
 
     // Step 2: Make the file public (anyone with the link can read)
     const permissionBody = {
-        'role': 'reader',
-        'type': 'anyone'
+        role: 'reader',
+        type: 'anyone',
     };
 
     const permissionResponse = await fetch(`${DRIVE_API_URL}/${fileId}/permissions?supportsAllDrives=true`, {
@@ -160,14 +160,17 @@ export const createPublicShareFile = async (accessToken, content) => {
             ...createHeaders(accessToken),
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(permissionBody)
+        body: JSON.stringify(permissionBody),
     });
 
     if (!permissionResponse.ok) {
         const errorData = await permissionResponse.json();
-        console.error("Google Drive API Error (set permission):", errorData);
+        console.error('Google Drive API Error (set permission):', errorData);
         // Clean up by deleting the created file if permissions fail
-        await fetch(`${DRIVE_API_URL}/${fileId}?supportsAllDrives=true`, { method: 'DELETE', headers: createHeaders(accessToken) });
+        await fetch(`${DRIVE_API_URL}/${fileId}?supportsAllDrives=true`, {
+            method: 'DELETE',
+            headers: createHeaders(accessToken),
+        });
         throw new Error('Failed to set file permissions to public.');
     }
 

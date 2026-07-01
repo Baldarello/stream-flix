@@ -39,7 +39,11 @@ export const getWebGLSupport = () => {
     if (gl2) {
         const lose = gl2.getExtension && gl2.getExtension('WEBGL_lose_context');
         if (lose && typeof lose.loseContext === 'function') {
-            try { lose.loseContext(); } catch (_e) { /* ignore */ }
+            try {
+                lose.loseContext();
+            } catch (_e) {
+                /* ignore */
+            }
         }
         cached = { supported: true, version: 2 };
         return cached;
@@ -48,7 +52,11 @@ export const getWebGLSupport = () => {
     if (gl1) {
         const lose = gl1.getExtension && gl1.getExtension('WEBGL_lose_context');
         if (lose && typeof lose.loseContext === 'function') {
-            try { lose.loseContext(); } catch (_e) { /* ignore */ }
+            try {
+                lose.loseContext();
+            } catch (_e) {
+                /* ignore */
+            }
         }
         cached = { supported: true, version: 1 };
         return cached;

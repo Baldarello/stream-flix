@@ -1,28 +1,23 @@
 import React from 'react';
-import {Box, Button, Paper, Typography} from '@mui/material';
-import {observer} from 'mobx-react-lite';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {remoteStore} from '../../../store/remoteStore.js';
+import { Box, Button, Paper, Typography } from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { remoteStore } from '../../../store/remoteStore.js';
 import QRCodeCard from './SlaveQRCodeCard.jsx';
 
 const SlavePairingView = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    const baseUrl = isLocalhost ? window.location.origin : "https://q.tnl.one";
+    const baseUrl = isLocalhost ? window.location.origin : 'https://q.tnl.one';
     const remoteUrl = `${baseUrl}/?remote_for=${remoteStore.slaveId}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(remoteUrl)}`;
 
     return (
-        <Box sx={{textAlign: 'center', maxWidth: 400, mx: 'auto'}}>
+        <Box sx={{ textAlign: 'center', maxWidth: 400, mx: 'auto' }}>
             {/* Title */}
             <Box sx={{ mb: 4 }}>
-                <Typography
-                    variant="h4"
-                    component="h1"
-                    fontWeight="bold"
-                    sx={{ mb: 1, color: 'text.primary' }}
-                >
+                <Typography variant="h4" component="h1" fontWeight="bold" sx={{ mb: 1, color: 'text.primary' }}>
                     {t('smartTV.connectTitle')}
                 </Typography>
             </Box>
@@ -34,7 +29,11 @@ const SlavePairingView = observer(() => {
 
             {/* Code Display - lightweight version */}
             <Box sx={{ mt: 3, mb: 3 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1.5, mb: 1, display: 'block' }}>
+                <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ textTransform: 'uppercase', letterSpacing: 1.5, mb: 1, display: 'block' }}
+                >
                     Oppure inserisci manualmente:
                 </Typography>
                 <Paper
@@ -49,7 +48,7 @@ const SlavePairingView = observer(() => {
                     }}
                 >
                     <Typography
-                        id={"slave-code"}
+                        id={'slave-code'}
                         variant="h4"
                         component="p"
                         sx={{
@@ -66,12 +65,7 @@ const SlavePairingView = observer(() => {
 
             {/* Instructions styled as bullet list */}
             <Box sx={{ mt: 2, px: 3 }}>
-                <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    component="div"
-                    sx={{ lineHeight: 2 }}
-                >
+                <Typography variant="body1" color="text.secondary" component="div" sx={{ lineHeight: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
                         <Box
                             component="span"
@@ -92,9 +86,7 @@ const SlavePairingView = observer(() => {
                         >
                             1
                         </Box>
-                        <Box component="span">
-                            Apri la fotocamera sul tuo telefono
-                        </Box>
+                        <Box component="span">Apri la fotocamera sul tuo telefono</Box>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                         <Box
@@ -116,9 +108,7 @@ const SlavePairingView = observer(() => {
                         >
                             2
                         </Box>
-                        <Box component="span">
-                            Inquadra il codice QR per connetterti
-                        </Box>
+                        <Box component="span">Inquadra il codice QR per connetterti</Box>
                     </Box>
                 </Typography>
             </Box>

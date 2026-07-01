@@ -14,7 +14,7 @@
  * to the parameter for callers (like `LinkMovieModal`) that don't
  * set it themselves.
  */
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const bulkAddMock = vi.fn().mockResolvedValue(undefined);
 const putMock = vi.fn().mockResolvedValue(undefined);
@@ -34,18 +34,20 @@ vi.mock('../../services/db.js', () => {
         filter: vi.fn().mockReturnThis(),
         transaction: vi.fn((_mode, _store, cb) => cb()),
     });
-    return { db: {
-        myList: tableMock(),
-        cachedItems: tableMock(),
-        mediaLinks: { ...tableMock(), bulkAdd: bulkAddMock },
-        episodeProgress: tableMock(),
-        showIntroDurations: tableMock(),
-        selectedSeasons: tableMock(),
-        showFilterPreferences: tableMock(),
-        preferredSources: { ...tableMock(), put: putMock },
-        preferences: tableMock(),
-        episodeContext: tableMock(),
-    } };
+    return {
+        db: {
+            myList: tableMock(),
+            cachedItems: tableMock(),
+            mediaLinks: { ...tableMock(), bulkAdd: bulkAddMock },
+            episodeProgress: tableMock(),
+            showIntroDurations: tableMock(),
+            selectedSeasons: tableMock(),
+            showFilterPreferences: tableMock(),
+            preferredSources: { ...tableMock(), put: putMock },
+            preferences: tableMock(),
+            episodeContext: tableMock(),
+        },
+    };
 });
 
 const { addLinksToMedia, buildLinksForSeason } = await import('../../services/linkService.js');
@@ -69,9 +71,7 @@ describe('linkService.addLinksToMedia', () => {
     });
 
     it('falls back to the parent mediaId for callers that omit it (movie modal)', async () => {
-        await addLinksToMedia(7, [
-            { url: 'https://m.example/x.mp4', language: 'it', type: 'source' },
-        ]);
+        await addLinksToMedia(7, [{ url: 'https://m.example/x.mp4', language: 'it', type: 'source' }]);
 
         const persisted = bulkAddMock.mock.calls[0][0];
         expect(persisted[0].mediaId).toBe(7);
@@ -80,15 +80,17 @@ describe('linkService.addLinksToMedia', () => {
     it('end-to-end: buildLinksForSeason → addLinksToMedia keeps episode ids', async () => {
         const show = {
             id: 999,
-            seasons: [{
-                season_number: 1,
-                episode_count: 3,
-                episodes: [
-                    { id: 1001, episode_number: 1 },
-                    { id: 1002, episode_number: 2 },
-                    { id: 1003, episode_number: 3 },
-                ],
-            }],
+            seasons: [
+                {
+                    season_number: 1,
+                    episode_count: 3,
+                    episodes: [
+                        { id: 1001, episode_number: 1 },
+                        { id: 1002, episode_number: 2 },
+                        { id: 1003, episode_number: 3 },
+                    ],
+                },
+            ],
         };
 
         const result = await buildLinksForSeason({

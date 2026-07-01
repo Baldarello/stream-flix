@@ -14,10 +14,10 @@
  * (the current step) is read from the mobx store.
  */
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Button, Stack} from '@mui/material';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { observer } from 'mobx-react-lite';
+import { Box, Button, Stack } from '@mui/material';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 const primaryButtonSx = {
     background: 'var(--neon-accent)',
@@ -27,12 +27,12 @@ const primaryButtonSx = {
     letterSpacing: '0.04em',
     '&:hover': {
         background: 'var(--neon-accent-hot)',
-        boxShadow: '0 0 14px rgba(255, 138, 76, 0.45)'
+        boxShadow: '0 0 14px rgba(255, 138, 76, 0.45)',
     },
     '&.Mui-disabled': {
         background: 'rgba(76, 210, 255, 0.25)',
-        color: 'var(--text-secondary)'
-    }
+        color: 'var(--text-secondary)',
+    },
 };
 
 const outlinedButtonSx = {
@@ -43,8 +43,8 @@ const outlinedButtonSx = {
     '&:hover': {
         borderColor: 'var(--neon-accent)',
         backgroundColor: 'rgba(76, 210, 255, 0.08)',
-        boxShadow: '0 0 12px rgba(76, 210, 255, 0.35)'
-    }
+        boxShadow: '0 0 12px rgba(76, 210, 255, 0.35)',
+    },
 };
 
 const errorButtonSx = {
@@ -55,8 +55,8 @@ const errorButtonSx = {
     '&:hover': {
         borderColor: '#ff6e6e',
         backgroundColor: 'rgba(255, 76, 76, 0.08)',
-        boxShadow: '0 0 12px rgba(255, 76, 76, 0.35)'
-    }
+        boxShadow: '0 0 12px rgba(255, 76, 76, 0.35)',
+    },
 };
 
 /**
@@ -70,14 +70,9 @@ const errorButtonSx = {
  * @param {Function} props.onCancel - Cancel handler.
  * @returns {React.ReactElement} Action panel
  */
-export const SyncConflictActionPanel = observer(({
-                                                     onMerge,
-                                                     onOverwriteLocal,
-                                                     onOverwriteRemote,
-                                                     onCancel
-                                                 }) => {
-    const {t} = useTranslations();
-    const {syncConflictStep: step, setSyncConflictStep, syncConflictStats: stats} = mediaStore;
+export const SyncConflictActionPanel = observer(({ onMerge, onOverwriteLocal, onOverwriteRemote, onCancel }) => {
+    const { t } = useTranslations();
+    const { syncConflictStep: step, setSyncConflictStep, syncConflictStats: stats } = mediaStore;
 
     const isOverview = step === 'overview';
 
@@ -91,18 +86,18 @@ export const SyncConflictActionPanel = observer(({
                 gap: 1.5,
                 mt: 2,
                 pt: 2,
-                borderTop: '1px solid rgba(76, 210, 255, 0.15)'
+                borderTop: '1px solid rgba(76, 210, 255, 0.15)',
             }}
         >
             {isOverview ? (
                 <>
-                    <Stack direction={{xs: 'column', sm: 'row'}} spacing={1.5}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                         <Button
                             id="sync-conflict-action-continue"
                             data-component="sync-conflict-action-continue"
                             variant="contained"
                             onClick={() => setSyncConflictStep('choose')}
-                            sx={{...primaryButtonSx, flex: 1}}
+                            sx={{ ...primaryButtonSx, flex: 1 }}
                         >
                             {t('syncConflict.actions.continue')}
                         </Button>
@@ -111,18 +106,18 @@ export const SyncConflictActionPanel = observer(({
                             data-component="sync-conflict-action-merge-auto"
                             variant="outlined"
                             onClick={() => onMerge && onMerge([], [])}
-                            sx={{...outlinedButtonSx, flex: 1}}
+                            sx={{ ...outlinedButtonSx, flex: 1 }}
                         >
                             {t('syncConflict.actions.mergeAuto')}
                         </Button>
                     </Stack>
-                    <Stack direction={{xs: 'column', sm: 'row'}} spacing={1.5}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                         <Button
                             id="sync-conflict-action-overwrite-local"
                             data-component="sync-conflict-action-overwrite-local"
                             variant="outlined"
                             onClick={() => onOverwriteLocal && onOverwriteLocal()}
-                            sx={{...outlinedButtonSx, flex: 1}}
+                            sx={{ ...outlinedButtonSx, flex: 1 }}
                         >
                             {t('syncConflict.actions.overwriteLocal')}
                         </Button>
@@ -131,7 +126,7 @@ export const SyncConflictActionPanel = observer(({
                             data-component="sync-conflict-action-overwrite-remote"
                             variant="outlined"
                             onClick={() => onOverwriteRemote && onOverwriteRemote()}
-                            sx={{...outlinedButtonSx, flex: 1}}
+                            sx={{ ...outlinedButtonSx, flex: 1 }}
                         >
                             {t('syncConflict.actions.overwriteRemote')}
                         </Button>
@@ -147,13 +142,13 @@ export const SyncConflictActionPanel = observer(({
                     </Button>
                 </>
             ) : (
-                <Stack direction={{xs: 'column', sm: 'row'}} spacing={1.5}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
                     <Button
                         id="sync-conflict-action-back"
                         data-component="sync-conflict-action-back"
                         variant="outlined"
                         onClick={() => setSyncConflictStep('overview')}
-                        sx={{...outlinedButtonSx, flex: 1}}
+                        sx={{ ...outlinedButtonSx, flex: 1 }}
                     >
                         {t('syncConflict.actions.back')}
                     </Button>
@@ -162,9 +157,9 @@ export const SyncConflictActionPanel = observer(({
                         data-component="sync-conflict-action-confirm-merge"
                         variant="contained"
                         onClick={() => onMerge && onMerge(undefined, undefined, stats)}
-                        sx={{...primaryButtonSx, flex: 2}}
+                        sx={{ ...primaryButtonSx, flex: 2 }}
                     >
-                        {t('syncConflict.actions.confirmMerge', {count: stats.total - stats.toDelete})}
+                        {t('syncConflict.actions.confirmMerge', { count: stats.total - stats.toDelete })}
                     </Button>
                 </Stack>
             )}

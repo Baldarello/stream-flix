@@ -1,8 +1,8 @@
-import React, {useEffect} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import tvStore from '../tvStore.js';
-import {remoteStore} from '../../../store/remoteStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { remoteStore } from '../../../store/remoteStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 /**
  * TvPairingView - QR code pairing screen for connecting phone/tablet as remote
@@ -44,22 +44,13 @@ const TvPairingView = observer(() => {
     }, []);
 
     return (
-        <div 
-            id="tv-pairing-view" 
-            className="tv-screen tv-pairing-view"
-        >
+        <div id="tv-pairing-view" className="tv-screen tv-pairing-view">
             {/* Title */}
-            <h1 className="tv-text-center tv-mb-4">
-                {t('tv.pairingTitle', 'Connetti il tuo dispositivo')}
-            </h1>
+            <h1 className="tv-text-center tv-mb-4">{t('tv.pairingTitle', 'Connetti il tuo dispositivo')}</h1>
 
             {/* QR Code */}
             <div id="tv-pairing-qr" className="pairing-qr">
-                <img 
-                    src={qrCodeUrl} 
-                    alt={t('tv.qrCodeAlt', 'QR Code per pairing')}
-                    loading="lazy"
-                />
+                <img src={qrCodeUrl} alt={t('tv.qrCodeAlt', 'QR Code per pairing')} loading="lazy" />
             </div>
 
             {/* Short Code */}
@@ -72,7 +63,7 @@ const TvPairingView = observer(() => {
             {/* Instructions */}
             <div className="pairing-instructions">
                 <ol>
-                    <li>{t('tv.pairingStep1', 'Apri l\'app StreamFlix sul tuo telefono o tablet')}</li>
+                    <li>{t('tv.pairingStep1', "Apri l'app StreamFlix sul tuo telefono o tablet")}</li>
                     <li>{t('tv.pairingStep2', 'tocca "Connetti alla TV" e scansiona il QR code')}</li>
                 </ol>
             </div>
@@ -83,12 +74,7 @@ const TvPairingView = observer(() => {
             </p>
 
             {/* Back Button */}
-            <button 
-                id="tv-back-btn-pairing"
-                className="tv-back-button tv-focusable"
-                onClick={handleBack}
-                autoFocus
-            >
+            <button id="tv-back-btn-pairing" className="tv-back-button tv-focusable" onClick={handleBack} autoFocus>
                 ← {t('tv.back', 'Indietro')}
             </button>
         </div>

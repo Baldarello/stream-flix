@@ -7,23 +7,17 @@
  * futuristic `Skeleton` placeholders.
  */
 
-import React, {useEffect, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, Typography} from '@mui/material';
-import {gsap} from 'gsap';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {HoloCard} from './HoloCard.jsx';
-import {mediaStore} from '../../store/mediaStore.js';
-import {SkeletonCard} from '../feedback/Skeleton.jsx';
-import {durations, easings, reducedMotion, stagger as motionStagger} from '../../motion/grammar.js';
+import React, { useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box, Typography } from '@mui/material';
+import { gsap } from 'gsap';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { HoloCard } from './HoloCard.jsx';
+import { mediaStore } from '../../store/mediaStore.js';
+import { SkeletonCard } from '../feedback/Skeleton.jsx';
+import { durations, easings, reducedMotion, stagger as motionStagger } from '../../motion/grammar.js';
 
-const CinematicGridInner = ({
-    id = 'grid-cinematic',
-    title,
-    items = [],
-    onCardClick,
-    emptyKey = 'gridView.empty.default',
-}) => {
+const CinematicGridInner = ({ id = 'grid-cinematic', title, items = [], onCardClick, emptyKey = 'gridView.empty.default' }) => {
     const { t } = useTranslations();
     const gridRef = useRef(null);
 
@@ -32,9 +26,18 @@ const CinematicGridInner = ({
         if (!el || reducedMotion()) return;
         const cards = el.querySelectorAll('[data-component="holo-card"]');
         if (cards.length === 0) return;
-        gsap.fromTo(cards,
+        gsap.fromTo(
+            cards,
             { y: 24, autoAlpha: 0 },
-            { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.standard, stagger: motionStagger.grid, overwrite: 'auto' });
+            {
+                y: 0,
+                autoAlpha: 1,
+                duration: durations.med,
+                ease: easings.standard,
+                stagger: motionStagger.grid,
+                overwrite: 'auto',
+            }
+        );
     }, [items && items.length]);
 
     // Cards are clickable when the parent supplies a handler. The
@@ -57,7 +60,7 @@ const CinematicGridInner = ({
                     textShadow: 'var(--hologram-shadow)',
                     px: { xs: 2, md: 6 },
                     pt: 2,
-                    pb: 1
+                    pb: 1,
                 }}
             >
                 {title}
@@ -73,20 +76,15 @@ const CinematicGridInner = ({
                             sm: 'repeat(3, 1fr)',
                             md: 'repeat(4, 1fr)',
                             lg: 'repeat(5, 1fr)',
-                            xl: 'repeat(6, 1fr)'
+                            xl: 'repeat(6, 1fr)',
                         },
                         gap: { xs: 1.5, md: 2.5 },
                         px: { xs: 2, md: 6 },
-                        py: 2
+                        py: 2,
                     }}
                 >
                     {items.map((item) => (
-                        <HoloCard
-                            key={item.id}
-                            item={item}
-                            onClick={handleCardClick}
-                            displayMode="grid"
-                        />
+                        <HoloCard key={item.id} item={item} onClick={handleCardClick} displayMode="grid" />
                     ))}
                 </Box>
             ) : (

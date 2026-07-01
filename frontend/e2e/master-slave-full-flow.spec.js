@@ -24,7 +24,7 @@
  *   §8–9 UX surfaces     → t8_known_slaves_persistence
  */
 
-import {chromium, expect, test} from '@playwright/test';
+import { chromium, expect, test } from '@playwright/test';
 
 // Dev server is 3012 (Vite exposes `?testMode=stores` for store-level
 // Playwright affordances). Production build at 3002 minifies the affordance
@@ -32,7 +32,7 @@ import {chromium, expect, test} from '@playwright/test';
 // NOTE: These tests require ?testMode=stores which is only available in dev mode.
 // Skip entire suite when BASE points to a production Docker build.
 const IS_PROD = (process.env.BASE_URL || '').includes('3002');
-const BASE = IS_PROD ? 'http://localhost:3002' : (process.env.BASE_URL || 'http://localhost:3012');
+const BASE = IS_PROD ? 'http://localhost:3002' : process.env.BASE_URL || 'http://localhost:3012';
 
 // Fresh storage helper: clears cookies + local/session storage so the
 // persisted `isConfiguredAsSlave` / `remoteMasterForSlaveId` flags from
@@ -53,7 +53,9 @@ async function gotoFresh(context, path) {
         try {
             localStorage.clear();
             sessionStorage.clear();
-        } catch (_e) { /* ignore */ }
+        } catch (_e) {
+            /* ignore */
+        }
     });
     // IndexedDB cleanup: drop the quix DB so persisted slave/master identity
     // does not leak between runs.
@@ -63,7 +65,9 @@ async function gotoFresh(context, path) {
                 const req = indexedDB.deleteDatabase('quix');
                 req.onsuccess = req.onerror = req.onblocked = () => resolve();
             });
-        } catch (_e) { /* ignore */ }
+        } catch (_e) {
+            /* ignore */
+        }
     });
     await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded' });
     return page;
@@ -74,10 +78,14 @@ async function waitForStore(page) {
 }
 
 async function waitForShortCode(tvPage, timeout = 10000) {
-    await tvPage.waitForFunction(() => {
-        const rs = window.__quixTest?.remoteStore;
-        return rs && typeof rs.slaveShortCode === 'string' && rs.slaveShortCode.length === 5;
-    }, null, { timeout });
+    await tvPage.waitForFunction(
+        () => {
+            const rs = window.__quixTest?.remoteStore;
+            return rs && typeof rs.slaveShortCode === 'string' && rs.slaveShortCode.length === 5;
+        },
+        null,
+        { timeout }
+    );
     return tvPage.evaluate(() => window.__quixTest.remoteStore.slaveShortCode);
 }
 
@@ -157,9 +165,11 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
         // The Master is the page that owns the QR scanner. Open it via the
         // store (we already test the UI in slave-button-registration.spec.js).
         await masterPage.evaluate(() => window.__quixTest.remoteStore.openQRScanner());
-        await expect(masterPage.locator('#qr-scanner-region, [id*="qr-reader"]')).toHaveCount(1, { timeout: 10000 }).catch(() => {
-            // Some builds inline the scanner without an id; this is non-fatal.
-        });
+        await expect(masterPage.locator('#qr-scanner-region, [id*="qr-reader"]'))
+            .toHaveCount(1, { timeout: 10000 })
+            .catch(() => {
+                // Some builds inline the scanner without an id; this is non-fatal.
+            });
 
         // Force the TV to re-register as a slave on the backend. This
         // refreshes the slave's WebSocket binding so the master's
@@ -180,10 +190,14 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
             }, shortCode);
 
             try {
-                await masterPage.waitForFunction(() => {
-                    const rs = window.__quixTest.remoteStore;
-                    return rs?.isRemoteMasterConnected === true;
-                }, null, { timeout: 4000 });
+                await masterPage.waitForFunction(
+                    () => {
+                        const rs = window.__quixTest.remoteStore;
+                        return rs?.isRemoteMasterConnected === true;
+                    },
+                    null,
+                    { timeout: 4000 }
+                );
                 connected = true;
             } catch (_err) {
                 // Give the slave's WS a moment to settle between attempts.
@@ -194,10 +208,14 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
 
         // TV side: pairing view should disappear, slave should be in
         // "connected" mode (no QR shown).
-        await tvPage.waitForFunction(() => {
-            const rs = window.__quixTest.remoteStore;
-            return rs?.isSmartTV === true && rs?.slaveId && rs?.isSmartTVPairingVisible === false;
-        }, null, { timeout: 15000 });
+        await tvPage.waitForFunction(
+            () => {
+                const rs = window.__quixTest.remoteStore;
+                return rs?.isSmartTV === true && rs?.slaveId && rs?.isSmartTVPairingVisible === false;
+            },
+            null,
+            { timeout: 15000 }
+        );
 
         // Bidirectional: master's slaveId matches TV's slaveId.
         const masterSlaveId = await masterPage.evaluate(() => window.__quixTest.remoteStore.slaveId);
@@ -211,10 +229,14 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
     test('§3 heartbeat – master pings, connectionHealth = good', async () => {
         // The interval is set up by startPingInterval after quix-master-connected.
         // We wait for at least one ping to register on the master.
-        await masterPage.waitForFunction(() => {
-            const rs = window.__quixTest.remoteStore;
-            return rs?.connectionHealth !== undefined;
-        }, null, { timeout: 5000 });
+        await masterPage.waitForFunction(
+            () => {
+                const rs = window.__quixTest.remoteStore;
+                return rs?.connectionHealth !== undefined;
+            },
+            null,
+            { timeout: 5000 }
+        );
 
         // connectionHealth should default to "good" while pings are answered.
         const health = await masterPage.evaluate(() => window.__quixTest.remoteStore.connectionHealth);
@@ -268,13 +290,20 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
         });
         // The slave's mediaStore should now have a selected item or a detail
         // view open. We probe both observables for resilience.
-        const detailOpen = await tvPage.waitForFunction(() => {
-            const ms = window.__quixTest.mediaStore;
-            if (!ms) return false;
-            if (ms.isDetailViewOpen) return true;
-            if (ms.selectedItem) return true;
-            return false;
-        }, null, { timeout: 10000 }).then(() => true).catch(() => false);
+        const detailOpen = await tvPage
+            .waitForFunction(
+                () => {
+                    const ms = window.__quixTest.mediaStore;
+                    if (!ms) return false;
+                    if (ms.isDetailViewOpen) return true;
+                    if (ms.selectedItem) return true;
+                    return false;
+                },
+                null,
+                { timeout: 10000 }
+            )
+            .then(() => true)
+            .catch(() => false);
         // Some builds short-circuit select_item for unknown ids; we treat
         // the command itself as the contract. Log outcome for visibility.
         test.info().annotations.push({ type: 'select_item_observed', description: String(detailOpen) });
@@ -297,9 +326,17 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
 
         // The slave receives play_item, which both calls startPlayback and
         // triggers triggerAutoFullscreen(). Give the WS round-trip a moment.
-        await tvPage.waitForFunction(() => {
-            return window.__quixTest.remoteStore?.shouldAutoFullscreen === true;
-        }, null, { timeout: 10000 }).catch(() => { /* may race with media-start */ });
+        await tvPage
+            .waitForFunction(
+                () => {
+                    return window.__quixTest.remoteStore?.shouldAutoFullscreen === true;
+                },
+                null,
+                { timeout: 10000 }
+            )
+            .catch(() => {
+                /* may race with media-start */
+            });
 
         // We assert the optimistic state on the master: isPlaying flipped.
         const isPlaying = await masterPage.evaluate(() => {
@@ -315,15 +352,21 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
         // Ensure the slave's WebSocket is open before we send the command.
         // Under HMR the slave can briefly close its socket; we want the
         // command to land in a clean open window.
-        await tvPage.waitForFunction(() => {
-            const rs = window.__quixTest.remoteStore;
-            const ws = window.__quixTest.mediaStore?._ws?.ws;
-            // Slave must still own a slaveId and the WebSocket should be open.
-            return !!rs?.slaveId && (!ws || ws.readyState === 1);
-        }, null, { timeout: 10000 }).catch(() => {
-            // Fall through: even if we can't read the WS, the retry loop
-            // below has a chance to succeed once the slave reconnects.
-        });
+        await tvPage
+            .waitForFunction(
+                () => {
+                    const rs = window.__quixTest.remoteStore;
+                    const ws = window.__quixTest.mediaStore?._ws?.ws;
+                    // Slave must still own a slaveId and the WebSocket should be open.
+                    return !!rs?.slaveId && (!ws || ws.readyState === 1);
+                },
+                null,
+                { timeout: 10000 }
+            )
+            .catch(() => {
+                // Fall through: even if we can't read the WS, the retry loop
+                // below has a chance to succeed once the slave reconnects.
+            });
 
         const maxAttempts = 3;
         let modalOpen = false;
@@ -336,9 +379,13 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
             }, slaveId);
 
             try {
-                await tvPage.waitForFunction(() => {
-                    return window.__quixTest.remoteStore?.isMediaSyncModalOpen === true;
-                }, null, { timeout: 5000 });
+                await tvPage.waitForFunction(
+                    () => {
+                        return window.__quixTest.remoteStore?.isMediaSyncModalOpen === true;
+                    },
+                    null,
+                    { timeout: 5000 }
+                );
                 modalOpen = true;
             } catch (_err) {
                 await tvPage.evaluate(() => {
@@ -364,9 +411,13 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
     test('§7 disconnect + reconnect via short code', async () => {
         // Disconnect on master.
         await masterPage.evaluate(() => window.__quixTest.remoteStore.disconnectRemoteMaster());
-        await masterPage.waitForFunction(() => {
-            return window.__quixTest.remoteStore.isRemoteMaster === false;
-        }, null, { timeout: 10000 });
+        await masterPage.waitForFunction(
+            () => {
+                return window.__quixTest.remoteStore.isRemoteMaster === false;
+            },
+            null,
+            { timeout: 10000 }
+        );
 
         // TV should be in a "slave waiting" state again (isSmartTVPairingVisible
         // may or may not flip back, but isSmartTV stays true).
@@ -381,10 +432,14 @@ masterSlaveSuite('MASTER ↔ SLAVE end-to-end coverage', () => {
             window.__quixTest.remoteStore.reconnectToSlave(code);
         }, shortCode);
 
-        await masterPage.waitForFunction(() => {
-            const rs = window.__quixTest.remoteStore;
-            return rs?.isRemoteMaster === true && rs?.isRemoteMasterConnected === true;
-        }, null, { timeout: 15000 });
+        await masterPage.waitForFunction(
+            () => {
+                const rs = window.__quixTest.remoteStore;
+                return rs?.isRemoteMaster === true && rs?.isRemoteMasterConnected === true;
+            },
+            null,
+            { timeout: 15000 }
+        );
     });
 
     // ─────────────────────────────────────────────────────────────────────

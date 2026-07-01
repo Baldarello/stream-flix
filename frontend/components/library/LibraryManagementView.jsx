@@ -11,35 +11,35 @@
  */
 
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Box } from '@mui/material';
 
-import {mediaStore} from '../../store/mediaStore.js';
+import { mediaStore } from '../../store/mediaStore.js';
 
-import {LibraryDashboard} from './shared/LibraryDashboard.jsx';
-import {MyListTab} from './tabs/MyListTab.jsx';
-import {ContinueWatchingTab} from './tabs/ContinueWatchingTab.jsx';
-import {VideoLinksTab} from './tabs/VideoLinksTab.jsx';
-import {PreferredSourcesTab} from './tabs/PreferredSourcesTab.jsx';
-import {LinkEditModal} from './LinkEditModal.jsx';
-import {PreferredSourceEditModal} from './PreferredSourceEditModal.jsx';
+import { LibraryDashboard } from './shared/LibraryDashboard.jsx';
+import { MyListTab } from './tabs/MyListTab.jsx';
+import { ContinueWatchingTab } from './tabs/ContinueWatchingTab.jsx';
+import { VideoLinksTab } from './tabs/VideoLinksTab.jsx';
+import { PreferredSourcesTab } from './tabs/PreferredSourcesTab.jsx';
+import { LinkEditModal } from './LinkEditModal.jsx';
+import { PreferredSourceEditModal } from './PreferredSourceEditModal.jsx';
 
 const LibraryManagementView = observer(() => {
     const activeTab = mediaStore.activeLibraryTab;
 
     return (
-        <Box sx={{p: {xs: 2, md: 3}, maxWidth: 1400, mx: 'auto'}}>
-            <LibraryDashboard id="library-dashboard"/>
+        <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1400, mx: 'auto' }}>
+            <LibraryDashboard id="library-dashboard" />
 
             <Box role="tabpanel" id={`library-tabpanel-${activeTab}`}>
-                {activeTab === 0 && <MyListTab/>}
-                {activeTab === 1 && <ContinueWatchingTab/>}
-                {activeTab === 2 && <VideoLinksTab/>}
-                {activeTab === 3 && <PreferredSourcesTab/>}
+                {activeTab === 0 && <MyListTab />}
+                {activeTab === 1 && <ContinueWatchingTab />}
+                {activeTab === 2 && <VideoLinksTab />}
+                {activeTab === 3 && <PreferredSourcesTab />}
             </Box>
 
-            <LinkEditModal/>
-            <PreferredSourceEditModal/>
+            <LinkEditModal />
+            <PreferredSourceEditModal />
         </Box>
     );
 });

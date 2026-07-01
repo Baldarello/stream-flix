@@ -8,29 +8,29 @@
  * `HomeView`/`GridView` callers keep working.
  */
 
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme} from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import EditIcon from '@mui/icons-material/Edit';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import {gsap} from 'gsap';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {mediaStore} from '../../store/mediaStore.js';
-import {HoloCard} from './HoloCard.jsx';
-import {durations, easings, reducedMotion, stagger as motionStagger} from '../../motion/grammar.js';
+import { gsap } from 'gsap';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { mediaStore } from '../../store/mediaStore.js';
+import { HoloCard } from './HoloCard.jsx';
+import { durations, easings, reducedMotion, stagger as motionStagger } from '../../motion/grammar.js';
 
 const CinematicRowInner = ({
-                               id = 'row-cinematic',
-                               title,
-                               items = [],
-                               onCardClick,
-                               isContinueWatching = false,
-                               isReorderable = false,
-                               onViewDetail,
-                               viewDetailLabel
-                           }) => {
+    id = 'row-cinematic',
+    title,
+    items = [],
+    onCardClick,
+    isContinueWatching = false,
+    isReorderable = false,
+    onViewDetail,
+    viewDetailLabel,
+}) => {
     const scrollContainerRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(() => false);
     const [canScrollRight, setCanScrollRight] = useState(() => false);
@@ -50,7 +50,7 @@ const CinematicRowInner = ({
     const [dropTargetId, setDropTargetId] = useState(() => null);
     const dragItemIdRef = useRef(null);
     const dropTargetIdRef = useRef(null);
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -80,16 +80,18 @@ const CinematicRowInner = ({
         if (!el || reducedMotion()) return;
         const cards = el.querySelectorAll('[data-component="holo-card"]');
         if (cards.length === 0) return;
-        gsap.fromTo(cards,
-            {y: 16, autoAlpha: 0},
+        gsap.fromTo(
+            cards,
+            { y: 16, autoAlpha: 0 },
             {
                 y: 0,
                 autoAlpha: 1,
                 duration: durations.med,
                 ease: easings.standard,
                 stagger: motionStagger.row,
-                overwrite: 'auto'
-            });
+                overwrite: 'auto',
+            }
+        );
     }, [items && items.length]);
 
     const handleScroll = (dir) => {
@@ -97,7 +99,7 @@ const CinematicRowInner = ({
         if (!el) return;
         const card = el.querySelector('[data-component="holo-card"]');
         const step = card ? card.clientWidth + 16 : el.clientWidth * 0.8;
-        el.scrollBy({left: dir * step * 1.5, behavior: 'smooth'});
+        el.scrollBy({ left: dir * step * 1.5, behavior: 'smooth' });
     };
 
     const handleCardClick = useCallback((item) => onCardClick && onCardClick(item), [onCardClick]);
@@ -181,10 +183,10 @@ const CinematicRowInner = ({
             sx={{
                 position: 'relative',
                 zIndex: 0,
-                '&:hover .row-arrow': {opacity: 1}
+                '&:hover .row-arrow': { opacity: 1 },
             }}
         >
-            <Box sx={{display: 'flex', alignItems: 'center', mb: 1.5, gap: 2}}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, gap: 2 }}>
                 <Typography
                     variant="h5"
                     data-testid="row-title"
@@ -194,7 +196,7 @@ const CinematicRowInner = ({
                         letterSpacing: '0.01em',
                         color: 'var(--text-primary)',
                         textShadow: '0 0 12px rgba(76, 210, 255, 0.15)',
-                        pl: {xs: 1, md: 0}
+                        pl: { xs: 1, md: 0 },
                     }}
                 >
                     {title}
@@ -211,16 +213,17 @@ const CinematicRowInner = ({
                                 border: '1px solid rgba(76, 210, 255, 0.45)',
                                 borderRadius: '999px',
                                 padding: '6px',
-                                transition: 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms cubic-bezier(0.22, 1, 0.36, 1)',
+                                transition:
+                                    'transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background 180ms cubic-bezier(0.22, 1, 0.36, 1)',
                                 '&:hover': {
                                     background: 'rgba(76, 210, 255, 0.18)',
                                     transform: 'translateY(-1px) scale(1.05)',
-                                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.4)'
+                                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.4)',
                                 },
-                                '&:focus-visible': {outline: '2px solid var(--neon-accent)', outlineOffset: 2}
+                                '&:focus-visible': { outline: '2px solid var(--neon-accent)', outlineOffset: 2 },
                             }}
                         >
-                            <OpenInNewIcon fontSize="small"/>
+                            <OpenInNewIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                 )}
@@ -229,13 +232,13 @@ const CinematicRowInner = ({
                         id="row-reorder-toggle"
                         aria-label="reorder"
                         onClick={() => mediaStore.toggleReorderMode && mediaStore.toggleReorderMode()}
-                        sx={{color: 'var(--text-secondary)'}}
+                        sx={{ color: 'var(--text-secondary)' }}
                     >
-                        <EditIcon fontSize="small"/>
+                        <EditIcon fontSize="small" />
                     </IconButton>
                 )}
             </Box>
-            <Box sx={{position: 'relative'}}>
+            <Box sx={{ position: 'relative' }}>
                 <IconButton
                     className="row-arrow"
                     aria-label="scroll-left"
@@ -250,10 +253,10 @@ const CinematicRowInner = ({
                         transition: 'opacity 180ms cubic-bezier(0.22,1,0.36,1)',
                         bgcolor: 'rgba(5, 6, 13, 0.7)',
                         color: 'var(--neon-accent)',
-                        '&:hover': {bgcolor: 'rgba(5, 6, 13, 0.9)'}
+                        '&:hover': { bgcolor: 'rgba(5, 6, 13, 0.9)' },
                     }}
                 >
-                    <ChevronLeftIcon/>
+                    <ChevronLeftIcon />
                 </IconButton>
                 <IconButton
                     className="row-arrow"
@@ -269,10 +272,10 @@ const CinematicRowInner = ({
                         transition: 'opacity 180ms cubic-bezier(0.22,1,0.36,1)',
                         bgcolor: 'rgba(5, 6, 13, 0.7)',
                         color: 'var(--neon-accent)',
-                        '&:hover': {bgcolor: 'rgba(5, 6, 13, 0.9)'}
+                        '&:hover': { bgcolor: 'rgba(5, 6, 13, 0.9)' },
                     }}
                 >
-                    <ChevronRightIcon/>
+                    <ChevronRightIcon />
                 </IconButton>
                 <Box
                     ref={scrollContainerRef}
@@ -287,14 +290,14 @@ const CinematicRowInner = ({
                         scrollSnapType: 'x mandatory',
                         scrollbarWidth: 'none',
                         msOverflowStyle: 'none',
-                        '&::-webkit-scrollbar': {display: 'none'},
+                        '&::-webkit-scrollbar': { display: 'none' },
                         py: 1,
-                        px: {xs: 1, md: 0}
+                        px: { xs: 1, md: 0 },
                     }}
                 >
                     {items && items.length > 0 ? (
                         items.map((item) => (
-                            <Box key={item.id} sx={{scrollSnapAlign: 'start'}}>
+                            <Box key={item.id} sx={{ scrollSnapAlign: 'start' }}>
                                 <HoloCard
                                     item={item}
                                     onClick={handleCardClick}
@@ -314,11 +317,7 @@ const CinematicRowInner = ({
                             </Box>
                         ))
                     ) : (
-                        <Typography
-                            sx={{color: 'var(--text-secondary)', py: 4, px: 2}}
-                        >
-                            {t('contentRow.empty')}
-                        </Typography>
+                        <Typography sx={{ color: 'var(--text-secondary)', py: 4, px: 2 }}>{t('contentRow.empty')}</Typography>
                     )}
                 </Box>
             </Box>

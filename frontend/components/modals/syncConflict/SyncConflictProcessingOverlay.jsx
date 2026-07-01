@@ -7,8 +7,8 @@
  * its presence.
  */
 import React from 'react';
-import {Box, LinearProgress, Typography} from '@mui/material';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { Box, LinearProgress, Typography } from '@mui/material';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 /**
  * SyncConflictProcessingOverlay Component
@@ -16,7 +16,7 @@ import {useTranslations} from '../../../hooks/useTranslations.js';
  * @returns {React.ReactElement} Processing overlay
  */
 export const SyncConflictProcessingOverlay = () => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     return (
         <Box
@@ -28,7 +28,7 @@ export const SyncConflictProcessingOverlay = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 2
+                gap: 2,
             }}
         >
             <LinearProgress
@@ -40,15 +40,15 @@ export const SyncConflictProcessingOverlay = () => {
                     background: 'rgba(76, 210, 255, 0.15)',
                     '& .MuiLinearProgress-bar': {
                         background: 'var(--neon-accent)',
-                        boxShadow: '0 0 12px rgba(76, 210, 255, 0.5)'
-                    }
+                        boxShadow: '0 0 12px rgba(76, 210, 255, 0.5)',
+                    },
                 }}
             />
             <Typography
                 sx={{
                     color: 'var(--text-primary)',
                     fontFamily: "'Space Grotesk', 'Inter', sans-serif",
-                    letterSpacing: '0.04em'
+                    letterSpacing: '0.04em',
                 }}
             >
                 {t('syncConflict.processing')}

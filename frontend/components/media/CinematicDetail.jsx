@@ -10,16 +10,16 @@
  * (open/close) drive the entry / exit animation.
  */
 
-import React, {useEffect, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box} from '@mui/material';
-import {gsap} from 'gsap';
+import React, { useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box } from '@mui/material';
+import { gsap } from 'gsap';
 import DetailView from './DetailView.jsx';
-import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
-import {durations, easings, reducedMotion} from '../../motion/grammar.js';
-import {mediaStore} from '../../store/mediaStore.js';
+import { ScanlineOverlay } from '../feedback/ScanlineOverlay.jsx';
+import { durations, easings, reducedMotion } from '../../motion/grammar.js';
+import { mediaStore } from '../../store/mediaStore.js';
 
-const CinematicDetailInner = ({id = 'detail-cinematic'}) => {
+const CinematicDetailInner = ({ id = 'detail-cinematic' }) => {
     // ponytail: key only on item id — NOT linksRefreshVersion.
     // Including linksRefreshVersion remounts DetailView (and the
     // LinkEpisodesModal inside it) on every link mutation, which
@@ -46,13 +46,15 @@ const CinematicDetailInner = ({id = 'detail-cinematic'}) => {
         // The component re-mounts whenever the detail view opens, so a
         // single timeline is enough. Reduced motion collapses to a fade.
         if (reducedMotion()) {
-            gsap.fromTo(root, {autoAlpha: 0}, {autoAlpha: 1, duration: 0.12, ease: 'none'});
+            gsap.fromTo(root, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none' });
             return undefined;
         }
         const tl = gsap.timeline();
-        tl.fromTo(anim || root,
-            {autoAlpha: 0, scale: 0.97, filter: 'blur(8px)'},
-            {autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: durations.cinematic, ease: easings.cinematic});
+        tl.fromTo(
+            anim || root,
+            { autoAlpha: 0, scale: 0.97, filter: 'blur(8px)' },
+            { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: durations.cinematic, ease: easings.cinematic }
+        );
         lastKeyRef.current = Date.now();
         return () => tl.kill();
     }, []);
@@ -69,10 +71,10 @@ const CinematicDetailInner = ({id = 'detail-cinematic'}) => {
                 position: 'fixed',
                 inset: 0,
                 zIndex: 1199,
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
             }}
         >
-            <DetailView key={detailKey}/>
+            <DetailView key={detailKey} />
             <Box
                 id={`${id}-scanline-wrapper`}
                 ref={animRef}
@@ -83,10 +85,10 @@ const CinematicDetailInner = ({id = 'detail-cinematic'}) => {
                     zIndex: 1300,
                     // Sits above DetailView (zIndex 1200) so the
                     // scanline overlay can sweep on top of the detail.
-                    willChange: 'transform, filter, opacity'
+                    willChange: 'transform, filter, opacity',
                 }}
             >
-                <ScanlineOverlay id="detail-scanline" intensity={0.18}/>
+                <ScanlineOverlay id="detail-scanline" intensity={0.18} />
             </Box>
         </Box>
     );

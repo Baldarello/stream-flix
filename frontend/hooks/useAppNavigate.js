@@ -15,10 +15,10 @@
  * - `/qr` → QR scanner
  */
 
-import {useCallback, useEffect, useRef} from 'react';
-import {useLocation, useNavigate} from 'react-router';
-import {mediaStore} from '../store/mediaStore.js';
-import {remoteStore} from '../store/remoteStore.js';
+import { useCallback, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { mediaStore } from '../store/mediaStore.js';
+import { remoteStore } from '../store/remoteStore.js';
 
 /**
  * Get the current route from MobX state
@@ -98,7 +98,11 @@ export const useAppNavigate = () => {
         // Handle navigation to/from preferences
         if (newPath === '/preferences' && mediaStore.currentActiveView !== 'Preferences') {
             mediaStore.setActiveView('Preferences');
-        } else if (currentPath === '/preferences' && newPath !== '/preferences' && mediaStore.currentActiveView === 'Preferences') {
+        } else if (
+            currentPath === '/preferences' &&
+            newPath !== '/preferences' &&
+            mediaStore.currentActiveView === 'Preferences'
+        ) {
             mediaStore.setActiveView('Home');
         }
 
@@ -114,18 +118,25 @@ export const useAppNavigate = () => {
         if (newPath === '/pairing' && !remoteStore.isSmartTVPairingVisible) {
             remoteStore.showSmartTVPairing();
         }
-        if (currentPath === '/pairing' && newPath !== '/pairing' && remoteStore.isSmartTVPairingVisible && !mediaStore.nowPlayingItem) {
+        if (
+            currentPath === '/pairing' &&
+            newPath !== '/pairing' &&
+            remoteStore.isSmartTVPairingVisible &&
+            !mediaStore.nowPlayingItem
+        ) {
             remoteStore.exitSmartTVPairingMode();
         }
-
     }, [location.pathname]);
 
     // Navigate to a route based on MobX state
-    const syncToUrl = useCallback((path) => {
-        if (location.pathname !== path) {
-            navigate(path, { replace: true });
-        }
-    }, [navigate, location.pathname]);
+    const syncToUrl = useCallback(
+        (path) => {
+            if (location.pathname !== path) {
+                navigate(path, { replace: true });
+            }
+        },
+        [navigate, location.pathname]
+    );
 
     // Navigation methods
     const goHome = useCallback(() => {

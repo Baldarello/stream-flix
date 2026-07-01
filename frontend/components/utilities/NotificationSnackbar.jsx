@@ -1,10 +1,10 @@
-import React, {useEffect, useId, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Alert, Button, Snackbar} from '@mui/material';
-import {gsap} from 'gsap';
-import {mediaStore} from '../../store/mediaStore.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {durations, easings, reducedMotion} from '../../motion/grammar.js';
+import React, { useEffect, useId, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Alert, Button, Snackbar } from '@mui/material';
+import { gsap } from 'gsap';
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { durations, easings, reducedMotion } from '../../motion/grammar.js';
 
 /**
  * @fileoverview NotificationSnackbar - re-skinned futuristic snackbar.
@@ -19,7 +19,9 @@ export const NotificationSnackbar = observer(() => {
     const lastMessageRef = useRef(null);
     const uniqueId = useId();
     const snackbarId = 'notification-snackbar';
-    const alertId = snackbarMessage?.message ? `notification-snackbar-alert-${snackbarMessage.message}` : `notification-snackbar-alert-${uniqueId}`;
+    const alertId = snackbarMessage?.message
+        ? `notification-snackbar-alert-${snackbarMessage.message}`
+        : `notification-snackbar-alert-${uniqueId}`;
 
     const isAssertive = snackbarMessage?.severity === 'error' || snackbarMessage?.severity === 'warning';
     const role = isAssertive ? 'alert' : 'status';
@@ -34,15 +36,15 @@ export const NotificationSnackbar = observer(() => {
         if (!snackbarMessage) return undefined;
 
         if (reducedMotion()) {
-            gsap.fromTo(alert,
-                { autoAlpha: 0 },
-                { autoAlpha: 1, duration: 0.12, ease: 'none', overwrite: 'auto' });
+            gsap.fromTo(alert, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none', overwrite: 'auto' });
             return undefined;
         }
 
-        gsap.fromTo(alert,
+        gsap.fromTo(
+            alert,
             { y: 24, autoAlpha: 0, scale: 0.96 },
-            { y: 0, autoAlpha: 1, scale: 1, duration: durations.med, ease: easings.emphasized, overwrite: 'auto' });
+            { y: 0, autoAlpha: 1, scale: 1, duration: durations.med, ease: easings.emphasized, overwrite: 'auto' }
+        );
     }, [snackbarMessage]);
 
     const handleClose = (event, reason) => {
@@ -65,10 +67,14 @@ export const NotificationSnackbar = observer(() => {
         : '';
 
     const action = snackbarMessage?.action ? (
-        <Button color="inherit" size="small" onClick={() => {
-            snackbarMessage.action?.onClick();
-            hideSnackbar();
-        }}>
+        <Button
+            color="inherit"
+            size="small"
+            onClick={() => {
+                snackbarMessage.action?.onClick();
+                hideSnackbar();
+            }}
+        >
             {actionLabelText}
         </Button>
     ) : null;
@@ -102,8 +108,8 @@ export const NotificationSnackbar = observer(() => {
                     borderRadius: '12px',
                     fontFamily: "'Inter', sans-serif",
                     '& .MuiAlert-icon': {
-                        color: 'var(--neon-accent)'
-                    }
+                        color: 'var(--neon-accent)',
+                    },
                 }}
                 action={action}
             >

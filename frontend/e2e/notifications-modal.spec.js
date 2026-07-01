@@ -9,17 +9,17 @@
  *
  * Production-safe: no store seeding needed.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('NotificationsModal', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
-        page.on('pageerror', err => errors.push(err.message));
+        page.on('pageerror', (err) => errors.push(err.message));
         page._testErrors = errors;
     });
 
@@ -41,9 +41,7 @@ test.describe('NotificationsModal', () => {
         const dialogTitle = dialog.locator('[class*="DialogTitle"]');
         await expect(dialogTitle).toBeVisible({ timeout: 3000 });
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors, `Console errors: ${fatalErrors.join('\n')}`).toHaveLength(0);
     });
 
@@ -79,9 +77,7 @@ test.describe('NotificationsModal', () => {
         expect(bodyText.length).toBeGreaterThan(5);
 
         // No fatal errors
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors).toHaveLength(0);
     });
 });

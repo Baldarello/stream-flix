@@ -1,23 +1,18 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, IconButton} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Box, IconButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InfoIcon from '@mui/icons-material/Info';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 /**
  * EpisodeActions - Action buttons for an episode row.
  * Includes mark watched/unwatched toggle and details button.
  * Designed for desktop inline display with hover reveal.
  */
-const EpisodeActions = observer(({
-    isWatched,
-    onToggleWatched,
-    onShowDetails,
-    sx = {}
-}) => {
-    const {t} = useTranslations();
+const EpisodeActions = observer(({ isWatched, onToggleWatched, onShowDetails, sx = {} }) => {
+    const { t } = useTranslations();
 
     return (
         <Box
@@ -42,7 +37,7 @@ const EpisodeActions = observer(({
                     },
                 }}
             >
-                {isWatched ? <RemoveCircleOutlineIcon fontSize="small"/> : <CheckCircleIcon fontSize="small"/>}
+                {isWatched ? <RemoveCircleOutlineIcon fontSize="small" /> : <CheckCircleIcon fontSize="small" />}
             </IconButton>
             <IconButton
                 size="small"
@@ -57,7 +52,7 @@ const EpisodeActions = observer(({
                     },
                 }}
             >
-                <InfoIcon fontSize="small"/>
+                <InfoIcon fontSize="small" />
             </IconButton>
         </Box>
     );
@@ -69,13 +64,8 @@ EpisodeActions.displayName = 'EpisodeActions';
  * EpisodeSwipeActions - Swipe-reveal action panel for mobile.
  * Same actions as EpisodeActions but styled for the swipe panel.
  */
-const EpisodeSwipeActions = observer(({
-    isWatched,
-    onToggleWatched,
-    onShowDetails,
-    sx = {}
-}) => {
-    const {t} = useTranslations();
+const EpisodeSwipeActions = observer(({ isWatched, onToggleWatched, onShowDetails, sx = {} }) => {
+    const { t } = useTranslations();
 
     return (
         <Box
@@ -112,7 +102,7 @@ const EpisodeSwipeActions = observer(({
                     },
                 }}
             >
-                {isWatched ? <RemoveCircleOutlineIcon fontSize="small"/> : <CheckCircleIcon fontSize="small"/>}
+                {isWatched ? <RemoveCircleOutlineIcon fontSize="small" /> : <CheckCircleIcon fontSize="small" />}
                 {isWatched ? t('episodesDrawer.markUnwatched') : t('episodesDrawer.markWatched')}
             </Box>
             <Box
@@ -142,7 +132,7 @@ const EpisodeSwipeActions = observer(({
                     },
                 }}
             >
-                <InfoIcon fontSize="small"/>
+                <InfoIcon fontSize="small" />
                 {t('episodesDrawer.details')}
             </Box>
         </Box>
@@ -151,5 +141,5 @@ const EpisodeSwipeActions = observer(({
 
 EpisodeSwipeActions.displayName = 'EpisodeSwipeActions';
 
-export {EpisodeActions, EpisodeSwipeActions};
+export { EpisodeActions, EpisodeSwipeActions };
 export default EpisodeActions;

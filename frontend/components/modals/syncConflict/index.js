@@ -8,10 +8,10 @@
  * its own state from `mediaStore` / `googleDriveSyncConflictStore`,
  * so no props need to be threaded through.
  */
-export {SyncConflictStats} from './SyncConflictStats.jsx';
-export {SyncConflictBulkActions} from './SyncConflictBulkActions.jsx';
-export {SyncConflictChoiceRow} from './SyncConflictChoiceRow.jsx';
-export {SyncConflictOverviewStep} from './SyncConflictOverviewStep.jsx';
-export {SyncConflictChooseStep} from './SyncConflictChooseStep.jsx';
-export {SyncConflictActionPanel} from './SyncConflictActionPanel.jsx';
-export {SyncConflictProcessingOverlay} from './SyncConflictProcessingOverlay.jsx';
+export { SyncConflictStats } from './SyncConflictStats.jsx';
+export { SyncConflictBulkActions } from './SyncConflictBulkActions.jsx';
+export { SyncConflictChoiceRow } from './SyncConflictChoiceRow.jsx';
+export { SyncConflictOverviewStep } from './SyncConflictOverviewStep.jsx';
+export { SyncConflictChooseStep } from './SyncConflictChooseStep.jsx';
+export { SyncConflictActionPanel } from './SyncConflictActionPanel.jsx';
+export { SyncConflictProcessingOverlay } from './SyncConflictProcessingOverlay.jsx';

@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
 import {
     AppBar,
     Box,
@@ -13,7 +13,7 @@ import {
     Select,
     Toolbar,
     Tooltip,
-    Typography
+    Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -24,18 +24,11 @@ import EpisodesDrawer from '../library/EpisodesDrawer.jsx';
 import VideoControlsContainer from './VideoControlsContainer.jsx';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import ListAltIcon from '@mui/icons-material/ListAlt';
-import {useTranslations} from '../../hooks/useTranslations.js';
-
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 const VideoPlayer = observer(() => {
-    const {
-        nowPlayingItem,
-        roomId,
-        isHost,
-        sendPlaybackControl,
-        stopPlayback,
-    } = mediaStore;
-    const {t} = useTranslations();
+    const { nowPlayingItem, roomId, isHost, sendPlaybackControl, stopPlayback } = mediaStore;
+    const { t } = useTranslations();
     const videoRef = useRef(null);
     const playerContainerRef = useRef(null);
     const [isSyncing, setIsSyncing] = useState(() => false);
@@ -82,37 +75,43 @@ const VideoPlayer = observer(() => {
         playbackRate: 1,
     }));
 
-
     // Effect for Watch Together Synchronization
     useEffect(() => {
         const videoElement = videoRef.current;
         if (!videoElement || !roomId) return;
 
         if (!isHost) {
-            const {playbackState} = mediaStore;
+            const { playbackState } = mediaStore;
             const initialSync = () => {
                 if (!videoRef.current) return;
                 if (Math.abs(videoRef.current.currentTime - playbackState.time) > 1.5) {
                     videoRef.current.currentTime = playbackState.time;
                 }
                 if (playbackState.status === 'playing' && videoRef.current.paused) {
-                    videoRef.current.play().catch(e => console.error("Sync play failed", e));
+                    videoRef.current.play().catch((e) => console.error('Sync play failed', e));
                 } else if (playbackState.status === 'paused' && !videoRef.current.paused) {
                     videoRef.current.pause();
                 }
             };
             if (videoElement.readyState >= videoElement.HAVE_METADATA) initialSync();
-            else videoElement.addEventListener('loadedmetadata', initialSync, {once: true});
+            else videoElement.addEventListener('loadedmetadata', initialSync, { once: true });
         }
 
-        const handlePlay = () => isHost && !isSyncing && sendPlaybackControl({
-            status: 'playing',
-            time: videoElement.currentTime
-        });
-        const handlePause = () => isHost && !isSyncing && !isSeekingRef.current && sendPlaybackControl({
-            status: 'paused',
-            time: videoElement.currentTime
-        });
+        const handlePlay = () =>
+            isHost &&
+            !isSyncing &&
+            sendPlaybackControl({
+                status: 'playing',
+                time: videoElement.currentTime,
+            });
+        const handlePause = () =>
+            isHost &&
+            !isSyncing &&
+            !isSeekingRef.current &&
+            sendPlaybackControl({
+                status: 'paused',
+                time: videoElement.currentTime,
+            });
         const handleSeeking = () => {
             if (isHost && !isSyncing) isSeekingRef.current = true;
         };
@@ -121,17 +120,23 @@ const VideoPlayer = observer(() => {
                 isSeekingRef.current = false;
                 sendPlaybackControl({
                     status: videoElement.paused ? 'paused' : 'playing',
-                    time: videoElement.currentTime
+                    time: videoElement.currentTime,
                 });
             }
         };
         const handleTimeUpdate = () => {
             const now = Date.now();
-            if (isHost && !isSyncing && !isSeekingRef.current && !videoElement.paused && (now - lastHostUpdateTimeRef.current > 1000)) {
+            if (
+                isHost &&
+                !isSyncing &&
+                !isSeekingRef.current &&
+                !videoElement.paused &&
+                now - lastHostUpdateTimeRef.current > 1000
+            ) {
                 lastHostUpdateTimeRef.current = now;
-                sendPlaybackControl({status: 'playing', time: videoElement.currentTime});
+                sendPlaybackControl({ status: 'playing', time: videoElement.currentTime });
             }
-        }
+        };
 
         if (isHost) {
             videoElement.addEventListener('play', handlePlay);
@@ -169,12 +174,13 @@ const VideoPlayer = observer(() => {
         const startTime = nowPlayingItem?.startTime;
         if (video && startTime) {
             const handleMetadata = () => {
-                if (videoRef.current && videoRef.current.readyState >= 1) { // HAVE_METADATA
+                if (videoRef.current && videoRef.current.readyState >= 1) {
+                    // HAVE_METADATA
                     videoRef.current.currentTime = startTime;
                 }
             };
             if (video.readyState >= 1) handleMetadata();
-            else video.addEventListener('loadedmetadata', handleMetadata, {once: true});
+            else video.addEventListener('loadedmetadata', handleMetadata, { once: true });
             return () => video.removeEventListener('loadedmetadata', handleMetadata);
         }
     }, [nowPlayingItem?.id, nowPlayingItem?.startTime]);
@@ -187,7 +193,7 @@ const VideoPlayer = observer(() => {
         const episodeId = nowPlayingItem.id;
         const saveProgress = () => {
             if (video && video.duration > 0 && !video.seeking) {
-                mediaStore.updateEpisodeProgress({episodeId, currentTime: video.currentTime, duration: video.duration});
+                mediaStore.updateEpisodeProgress({ episodeId, currentTime: video.currentTime, duration: video.duration });
             }
         };
         const interval = setInterval(saveProgress, 5000); // Save every 5 seconds
@@ -247,11 +253,9 @@ const VideoPlayer = observer(() => {
         return () => {
             if (uiTimeoutRef.current) clearTimeout(uiTimeoutRef.current);
             playerContainer.removeEventListener('mousemove', showAndThenHideUi);
-            playerContainer.removeEventListener('mouseleave', () => {
-            });
+            playerContainer.removeEventListener('mouseleave', () => {});
         };
     }, [playerState.isPlaying]);
-
 
     const handleTogglePlay = useCallback(() => {
         if (videoRef.current) videoRef.current.paused ? videoRef.current.play() : videoRef.current.pause();
@@ -260,9 +264,9 @@ const VideoPlayer = observer(() => {
         if (videoRef.current) videoRef.current.muted = !videoRef.current.muted;
     }, []);
     const handleToggleFullScreen = useCallback(() => {
-        if (!document.fullscreenElement) playerContainerRef.current?.requestFullscreen(); else document.exitFullscreen();
+        if (!document.fullscreenElement) playerContainerRef.current?.requestFullscreen();
+        else document.exitFullscreen();
     }, []);
-
 
     const handleRewind10 = useCallback(() => {
         if (videoRef.current) {
@@ -279,7 +283,11 @@ const VideoPlayer = observer(() => {
     const handleSkipIntro = useCallback(() => {
         if (videoRef.current && nowPlayingItem) {
             let skipDuration = 0;
-            if ('intro_end_s' in nowPlayingItem && nowPlayingItem.intro_end_s && nowPlayingItem.intro_end_s > nowPlayingItem.intro_start_s) {
+            if (
+                'intro_end_s' in nowPlayingItem &&
+                nowPlayingItem.intro_end_s &&
+                nowPlayingItem.intro_end_s > nowPlayingItem.intro_start_s
+            ) {
                 skipDuration = nowPlayingItem.intro_end_s - videoRef.current.currentTime;
             } else {
                 const showId = 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : nowPlayingItem.id;
@@ -352,27 +360,38 @@ const VideoPlayer = observer(() => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [playerState.playbackRate, handleTogglePlay, handleToggleFullScreen, handleToggleMute, handleRewind10, handleForward10, handleSkipIntro, roomId, isHost]);
+    }, [
+        playerState.playbackRate,
+        handleTogglePlay,
+        handleToggleFullScreen,
+        handleToggleMute,
+        handleRewind10,
+        handleForward10,
+        handleSkipIntro,
+        roomId,
+        isHost,
+    ]);
 
     // Player state management and event listeners
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        const updateState = () => setPlayerState(prev => ({
-            ...prev,
-            isPlaying: !video.paused,
-            progress: (video.currentTime / video.duration) * 100,
-            currentTime: video.currentTime,
-            duration: video.duration,
-            volume: video.volume,
-            isMuted: video.muted,
-            playbackRate: video.playbackRate,
-        }));
+        const updateState = () =>
+            setPlayerState((prev) => ({
+                ...prev,
+                isPlaying: !video.paused,
+                progress: (video.currentTime / video.duration) * 100,
+                currentTime: video.currentTime,
+                duration: video.duration,
+                volume: video.volume,
+                isMuted: video.muted,
+                playbackRate: video.playbackRate,
+            }));
 
-        const onPlay = () => setPlayerState(p => ({...p, isPlaying: true}));
-        const onPause = () => setPlayerState(p => ({...p, isPlaying: false}));
-        const onFsChange = () => setPlayerState(p => ({...p, isFullScreen: !!document.fullscreenElement}));
+        const onPlay = () => setPlayerState((p) => ({ ...p, isPlaying: true }));
+        const onPause = () => setPlayerState((p) => ({ ...p, isPlaying: false }));
+        const onFsChange = () => setPlayerState((p) => ({ ...p, isFullScreen: !!document.fullscreenElement }));
 
         video.addEventListener('timeupdate', updateState);
         video.addEventListener('durationchange', updateState);
@@ -395,7 +414,6 @@ const VideoPlayer = observer(() => {
         };
     }, [nowPlayingItem?.id]);
 
-
     if (!nowPlayingItem) return null;
 
     const handleSeek = (event, newValue) => {
@@ -403,7 +421,7 @@ const VideoPlayer = observer(() => {
             const newTime = (newValue / 100) * playerState.duration;
             videoRef.current.currentTime = newTime;
             // Send playback control to sync with other clients in Watch Together
-            sendPlaybackControl({status: videoRef.current.paused ? 'paused' : 'playing', time: newTime});
+            sendPlaybackControl({ status: videoRef.current.paused ? 'paused' : 'playing', time: newTime });
         }
     };
     const handleVolumeChange = (event, newValue) => {
@@ -412,7 +430,7 @@ const VideoPlayer = observer(() => {
 
     const isEpisode = 'episode_number' in nowPlayingItem;
     const currentShowId = isEpisode && 'show_id' in nowPlayingItem ? nowPlayingItem.show_id : null;
-    let videoSrc = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+    let videoSrc = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
     let title;
 
     if (isEpisode) {
@@ -427,14 +445,26 @@ const VideoPlayer = observer(() => {
 
     // Extract initial language/type from the current video_url if not already in preferences
     const videoUrls = nowPlayingItem.video_urls || [];
-    const currentVideoUrl = videoSrc && videoSrc !== "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" ? videoSrc : null;
-    if (currentVideoUrl && currentShowId && !mediaStore.showFilterPreferences.get(currentShowId)) {
-        const currentLink = videoUrls.find(l => l.url === currentVideoUrl);
+    const currentVideoUrl =
+        videoSrc && videoSrc !== 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            ? videoSrc
+            : null;
+    if (currentVideoUrl && currentShowId) {
+        const currentLink = videoUrls.find((l) => l.url === currentVideoUrl);
         if (currentLink) {
-            mediaStore.setShowFilterPreference(currentShowId, {
-                language: currentLink.language,
-                type: currentLink.type
-            });
+            // ponytail: align stale filter to the link actually playing.
+            // In TV mode playback starts directly from a card (no DetailView),
+            // so a persisted {type:'sub'} while the only links are 'dub' would
+            // disable every row in the episodes drawer.
+            const pref = mediaStore.showFilterPreferences.get(currentShowId);
+            const langMismatch = pref?.language && pref.language.toUpperCase() !== currentLink.language.toUpperCase();
+            const typeMismatch = pref?.type && pref.type !== currentLink.type;
+            if (!pref || langMismatch || typeMismatch) {
+                mediaStore.setShowFilterPreference(currentShowId, {
+                    language: currentLink.language,
+                    type: currentLink.type,
+                });
+            }
         }
     }
 
@@ -456,18 +486,18 @@ const VideoPlayer = observer(() => {
             const showId = mediaStore.currentShow.id;
             // Get current language/type preferences to apply to next episode
             const prefs = mediaStore.showFilterPreferences.get(showId) || {};
-            
+
             // Filter the video URLs based on preferences
             const allUrls = nextEp.video_urls || [];
-            const filteredUrls = allUrls.filter(link => {
+            const filteredUrls = allUrls.filter((link) => {
                 const langMatch = !prefs.language || link.language.toUpperCase() === prefs.language.toUpperCase();
                 const typeMatch = !prefs.type || link.type === prefs.type;
                 return langMatch && typeMatch;
             });
-            
+
             // Get the video_url from filtered results, or first available
             const videoUrl = filteredUrls[0]?.url || allUrls[0]?.url;
-            
+
             mediaStore.startPlayback({
                 ...nextEp,
                 show_id: showId,
@@ -489,13 +519,13 @@ const VideoPlayer = observer(() => {
     // Extract available languages and types from video_urls (videoUrls already declared at line 456)
     const availableLanguages = useMemo(() => {
         const langs = new Set();
-        videoUrls.forEach(link => langs.add(link.language));
+        videoUrls.forEach((link) => langs.add(link.language));
         return Array.from(langs);
     }, [videoUrls]);
 
     const availableTypes = useMemo(() => {
         const types = new Set();
-        videoUrls.forEach(link => types.add(link.type));
+        videoUrls.forEach((link) => types.add(link.type));
         return Array.from(types);
     }, [videoUrls]);
 
@@ -511,7 +541,7 @@ const VideoPlayer = observer(() => {
     const handleLanguageChange = (lang) => {
         if (currentShowId) {
             const newType = lang ? selectedType : null;
-            const updates = {language: lang};
+            const updates = { language: lang };
             if (newType && (newType === 'sub' || newType === 'dub')) {
                 updates.type = newType;
             }
@@ -522,13 +552,13 @@ const VideoPlayer = observer(() => {
 
     const handleTypeChange = (type) => {
         if (currentShowId) {
-            mediaStore.setShowFilterPreference(currentShowId, {type});
+            mediaStore.setShowFilterPreference(currentShowId, { type });
             reloadVideoWithFilters(selectedLanguage, type);
         }
     };
 
     const reloadVideoWithFilters = (lang, type) => {
-        const filteredLinks = videoUrls.filter(link => {
+        const filteredLinks = videoUrls.filter((link) => {
             const langMatch = !lang || link.language.toUpperCase() === lang.toUpperCase();
             const typeMatch = !type || link.type === type;
             return langMatch && typeMatch;
@@ -540,10 +570,10 @@ const VideoPlayer = observer(() => {
                 // Save current progress before changing src
                 const currentTime = videoRef.current.currentTime;
                 lastProgressBeforeLanguageChangeRef.current = currentTime;
-                
+
                 setCurrentVideoSrc(newVideoSrc);
                 videoRef.current.src = newVideoSrc;
-                
+
                 // Restore progress after new video loads metadata
                 const video = videoRef.current;
                 const restoreProgress = () => {
@@ -552,13 +582,13 @@ const VideoPlayer = observer(() => {
                         lastProgressBeforeLanguageChangeRef.current = null;
                     }
                 };
-                
+
                 if (video.readyState >= 1) {
                     restoreProgress();
                 } else {
                     video.addEventListener('loadedmetadata', restoreProgress, { once: true });
                 }
-                
+
                 videoRef.current.play().catch(console.error);
             }
         }
@@ -581,16 +611,19 @@ const VideoPlayer = observer(() => {
     };
 
     return (
-        <Box ref={playerContainerRef} sx={{
-            position: 'relative',
-            width: '100vw',
-            height: '100dvh',
-            bgcolor: 'black',
-            display: 'flex',
-            flexDirection: 'row',
-            cursor: isUiVisible ? 'default' : 'none'
-        }}>
-            <Box sx={{flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <Box
+            ref={playerContainerRef}
+            sx={{
+                position: 'relative',
+                width: '100vw',
+                height: '100dvh',
+                bgcolor: 'black',
+                display: 'flex',
+                flexDirection: 'row',
+                cursor: isUiVisible ? 'default' : 'none',
+            }}
+        >
+            <Box sx={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <video
                     ref={videoRef}
                     src={videoSrc}
@@ -598,34 +631,47 @@ const VideoPlayer = observer(() => {
                     onClick={() => {
                         if (!roomId || isHost) handleTogglePlay();
                     }}
-                    style={{width: '100%', height: '100%', objectFit: 'contain'}}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
                 {/* FIX: (line 358) Wrap Box with Fade component */}
                 <Fade in={isUiVisible} timeout={500}>
-                    <Box sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)',
-                        pointerEvents: 'none'
-                    }}>
-
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            inset: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            background:
+                                'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.7) 100%)',
+                            pointerEvents: 'none',
+                        }}
+                    >
                         {/* Top Bar */}
-                        <AppBar position="static" sx={{
-                            backgroundColor: 'transparent',
-                            boxShadow: 'none',
-                            pointerEvents: 'auto',
-                            paddingTop: 'env(safe-area-inset-top)'
-                        }}>
+                        <AppBar
+                            position="static"
+                            sx={{
+                                backgroundColor: 'transparent',
+                                boxShadow: 'none',
+                                pointerEvents: 'auto',
+                                paddingTop: 'env(safe-area-inset-top)',
+                            }}
+                        >
                             <Toolbar>
-                                <IconButton edge="start" color="inherit" aria-label={t('videoPlayer.back')}
-                                            onClick={stopPlayback}><ArrowBackIcon/></IconButton>
-                                <Typography variant="h6" sx={{flexGrow: 1}} noWrap>{title}</Typography>
+                                <IconButton
+                                    edge="start"
+                                    color="inherit"
+                                    aria-label={t('videoPlayer.back')}
+                                    onClick={stopPlayback}
+                                >
+                                    <ArrowBackIcon />
+                                </IconButton>
+                                <Typography variant="h6" sx={{ flexGrow: 1 }} noWrap>
+                                    {title}
+                                </Typography>
                                 {/* Language/Subtitle pickers - only show when multiple options available */}
-                                {showLanguagePickers && (
-                                    isPortraitMobile ? (
+                                {showLanguagePickers &&
+                                    (isPortraitMobile ? (
                                         // Mobile: IconButton with Popover
                                         <>
                                             <IconButton color="inherit" onClick={handleOpenLanguageMenu}>
@@ -639,9 +685,9 @@ const VideoPlayer = observer(() => {
                                                     paper: {
                                                         sx: {
                                                             bgcolor: 'rgba(30, 30, 30, 0.95)',
-                                                            minWidth: 120
-                                                        }
-                                                    }
+                                                            minWidth: 120,
+                                                        },
+                                                    },
                                                 }}
                                             >
                                                 {hasMultipleLanguages && (
@@ -649,46 +695,56 @@ const VideoPlayer = observer(() => {
                                                         <MenuItem disabled sx={{ opacity: 0.7, fontSize: '0.75rem' }}>
                                                             Lingua
                                                         </MenuItem>
-                                                        {availableLanguages.map(lang => (
-                                                            <MenuItem 
-                                                                key={lang} 
-                                                                value={lang} 
-                                                                onClick={() => { handleLanguageChange(lang); handleCloseLanguageMenu(); }}
+                                                        {availableLanguages.map((lang) => (
+                                                            <MenuItem
+                                                                key={lang}
+                                                                value={lang}
+                                                                onClick={() => {
+                                                                    handleLanguageChange(lang);
+                                                                    handleCloseLanguageMenu();
+                                                                }}
                                                                 sx={{
                                                                     py: 0.75,
                                                                     px: 2,
                                                                     opacity: 0.7,
                                                                     fontSize: '0.875rem',
                                                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' },
                                                                 }}
                                                             >
-                                                                {selectedLanguage === lang && '✓ '}{lang}
+                                                                {selectedLanguage === lang && '✓ '}
+                                                                {lang}
                                                             </MenuItem>
                                                         ))}
                                                     </>
                                                 )}
-                                                {hasMultipleLanguages && hasMultipleTypes && <Box sx={{ borderTop: 1, borderColor: 'divider', my: 0.5 }} />}
+                                                {hasMultipleLanguages && hasMultipleTypes && (
+                                                    <Box sx={{ borderTop: 1, borderColor: 'divider', my: 0.5 }} />
+                                                )}
                                                 {hasMultipleTypes && (
                                                     <>
                                                         <MenuItem disabled sx={{ opacity: 0.7, fontSize: '0.75rem' }}>
                                                             Tipo
                                                         </MenuItem>
-                                                        {availableTypes.map(type => (
-                                                            <MenuItem 
-                                                                key={type} 
-                                                                value={type} 
-                                                                onClick={() => { handleTypeChange(type); handleCloseLanguageMenu(); }}
+                                                        {availableTypes.map((type) => (
+                                                            <MenuItem
+                                                                key={type}
+                                                                value={type}
+                                                                onClick={() => {
+                                                                    handleTypeChange(type);
+                                                                    handleCloseLanguageMenu();
+                                                                }}
                                                                 sx={{
                                                                     py: 0.75,
                                                                     px: 2,
                                                                     opacity: 0.7,
                                                                     fontSize: '0.875rem',
                                                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' },
                                                                 }}
                                                             >
-                                                                {selectedType === type && '✓ '}{type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
+                                                                {selectedType === type && '✓ '}
+                                                                {type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
                                                             </MenuItem>
                                                         ))}
                                                     </>
@@ -697,9 +753,9 @@ const VideoPlayer = observer(() => {
                                         </>
                                     ) : (
                                         // Desktop: Select dropdowns
-                                        <Box sx={{display: 'flex', gap: 1, mr: 1}}>
+                                        <Box sx={{ display: 'flex', gap: 1, mr: 1 }}>
                                             {hasMultipleLanguages && (
-                                                <FormControl size="small" sx={{minWidth: 80}}>
+                                                <FormControl size="small" sx={{ minWidth: 80 }}>
                                                     <Select
                                                         value={selectedLanguage}
                                                         onChange={(e) => handleLanguageChange(e.target.value)}
@@ -707,34 +763,34 @@ const VideoPlayer = observer(() => {
                                                             color: 'white',
                                                             bgcolor: 'rgba(0,0,0,0.5)',
                                                             borderRadius: 4,
-                                                            '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
-                                                            '& .MuiSelect-icon': {color: 'white'},
-                                                            '& .MuiSelect-select': {py: 0.5, px: 1}
+                                                            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                                            '& .MuiSelect-icon': { color: 'white' },
+                                                            '& .MuiSelect-select': { py: 0.5, px: 1 },
                                                         }}
                                                         slotProps={{
                                                             paper: {
                                                                 sx: {
                                                                     bgcolor: 'rgba(30, 30, 30, 0.95)',
                                                                     color: 'white',
-                                                                    minWidth: 120
-                                                                }
+                                                                    minWidth: 120,
+                                                                },
                                                             },
                                                             list: {
                                                                 sx: {
-                                                                    py: 0.5
-                                                                }
-                                                            }
+                                                                    py: 0.5,
+                                                                },
+                                                            },
                                                         }}
                                                         renderValue={(val) => (
-                                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                                                <VolumeUpIcon sx={{fontSize: 18}} />
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                <VolumeUpIcon sx={{ fontSize: 18 }} />
                                                                 <Typography variant="caption">{val || 'Lingua'}</Typography>
                                                             </Box>
                                                         )}
                                                     >
-                                                        {availableLanguages.map(lang => (
-                                                            <MenuItem 
-                                                                key={lang} 
+                                                        {availableLanguages.map((lang) => (
+                                                            <MenuItem
+                                                                key={lang}
                                                                 value={lang}
                                                                 sx={{
                                                                     py: 0.75,
@@ -742,17 +798,18 @@ const VideoPlayer = observer(() => {
                                                                     opacity: 0.7,
                                                                     fontSize: '0.875rem',
                                                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' },
                                                                 }}
                                                             >
-                                                                {selectedLanguage === lang && '✓ '}{lang}
+                                                                {selectedLanguage === lang && '✓ '}
+                                                                {lang}
                                                             </MenuItem>
                                                         ))}
                                                     </Select>
                                                 </FormControl>
                                             )}
                                             {hasMultipleTypes && (
-                                                <FormControl size="small" sx={{minWidth: 70}}>
+                                                <FormControl size="small" sx={{ minWidth: 70 }}>
                                                     <Select
                                                         value={selectedType}
                                                         onChange={(e) => handleTypeChange(e.target.value)}
@@ -760,34 +817,34 @@ const VideoPlayer = observer(() => {
                                                             color: 'white',
                                                             bgcolor: 'rgba(0,0,0,0.5)',
                                                             borderRadius: 4,
-                                                            '& .MuiOutlinedInput-notchedOutline': {border: 'none'},
-                                                            '& .MuiSelect-icon': {color: 'white'},
-                                                            '& .MuiSelect-select': {py: 0.5, px: 1}
+                                                            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                                                            '& .MuiSelect-icon': { color: 'white' },
+                                                            '& .MuiSelect-select': { py: 0.5, px: 1 },
                                                         }}
                                                         slotProps={{
                                                             paper: {
                                                                 sx: {
                                                                     bgcolor: 'rgba(30, 30, 30, 0.95)',
                                                                     color: 'white',
-                                                                    minWidth: 120
-                                                                }
+                                                                    minWidth: 120,
+                                                                },
                                                             },
                                                             list: {
                                                                 sx: {
-                                                                    py: 0.5
-                                                                }
-                                                            }
+                                                                    py: 0.5,
+                                                                },
+                                                            },
                                                         }}
                                                         renderValue={(val) => (
-                                                            <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
-                                                                <ClosedCaptionIcon sx={{fontSize: 18}} />
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                <ClosedCaptionIcon sx={{ fontSize: 18 }} />
                                                                 <Typography variant="caption">{val || 'Sub'}</Typography>
                                                             </Box>
                                                         )}
                                                     >
-                                                        {availableTypes.map(type => (
-                                                            <MenuItem 
-                                                                key={type} 
+                                                        {availableTypes.map((type) => (
+                                                            <MenuItem
+                                                                key={type}
                                                                 value={type}
                                                                 sx={{
                                                                     py: 0.75,
@@ -795,37 +852,50 @@ const VideoPlayer = observer(() => {
                                                                     opacity: 0.7,
                                                                     fontSize: '0.875rem',
                                                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' }
+                                                                    '&.Mui-selected': { bgcolor: 'rgba(255,255,255,0.1)' },
                                                                 }}
                                                             >
-                                                                {selectedType === type && '✓ '}{type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
+                                                                {selectedType === type && '✓ '}
+                                                                {type === 'dub' ? 'Doppiaggio' : 'Sottotitoli'}
                                                             </MenuItem>
                                                         ))}
                                                     </Select>
                                                 </FormControl>
                                             )}
                                         </Box>
-                                    )
-                                )}
+                                    ))}
                                 {/* Buttons - positioned after language pickers */}
-                                {mediaStore.nextEpisode &&
-                                    <Tooltip title={t('videoPlayer.nextEpisode')}><IconButton color="inherit"
-                                                                                              onClick={handleNextEpisode}
-                                                                                              disabled={!!roomId && !isHost}><SkipNextIcon/></IconButton></Tooltip>}
-                                {isEpisode && <Tooltip title={t('videoPlayer.episodeList')}><IconButton color="inherit"
-                                                                                                        onClick={mediaStore.openEpisodesDrawer}
-                                                                                                        disabled={!!roomId && !isHost}><ListAltIcon/></IconButton></Tooltip>}
+                                {mediaStore.nextEpisode && (
+                                    <Tooltip title={t('videoPlayer.nextEpisode')}>
+                                        <IconButton color="inherit" onClick={handleNextEpisode} disabled={!!roomId && !isHost}>
+                                            <SkipNextIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                                {isEpisode && (
+                                    <Tooltip title={t('videoPlayer.episodeList')}>
+                                        <IconButton
+                                            color="inherit"
+                                            onClick={mediaStore.openEpisodesDrawer}
+                                            disabled={!!roomId && !isHost}
+                                        >
+                                            <ListAltIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
                             </Toolbar>
                         </AppBar>
 
                         {/* Bottom Controls with Fade */}
                         <Fade in={isUiVisible} timeout={500}>
-                            <Box sx={{
-                                px: 2,
-                                pt: 2,
-                                pb: 'calc(1rem + env(safe-area-inset-bottom))',
-                                pointerEvents: 'auto'
-                            }}>
+                            <Box
+                                sx={{
+                                    px: 2,
+                                    pt: 2,
+                                    pb: 'calc(1rem + env(safe-area-inset-bottom))',
+                                    pointerEvents: 'auto',
+                                }}
+                            >
                                 <VideoControlsContainer
                                     playerState={playerState}
                                     handleSeek={handleSeek}
@@ -852,11 +922,12 @@ const VideoPlayer = observer(() => {
                             onClick={skipIntro}
                             sx={{
                                 position: 'absolute',
-                                bottom: {xs: '80px', md: '100px'},
+                                bottom: { xs: '80px', md: '100px' },
                                 right: '20px',
                                 zIndex: 2,
-                                bgcolor: 'rgba(255, 255, 255, 0.8)', color: 'black',
-                                '&:hover': {bgcolor: 'white'},
+                                bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                color: 'black',
+                                '&:hover': { bgcolor: 'white' },
                             }}
                         >
                             {t('videoPlayer.skipIntro')}
@@ -864,8 +935,8 @@ const VideoPlayer = observer(() => {
                     </Fade>
                 )}
             </Box>
-            {roomId && <Chat/>}
-            {isEpisode && <EpisodesDrawer/>}
+            {roomId && <Chat />}
+            {isEpisode && <EpisodesDrawer />}
         </Box>
     );
 });

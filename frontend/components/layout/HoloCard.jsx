@@ -18,38 +18,38 @@
  * so existing tests and CSS hooks continue to work.
  */
 
-import React, {useEffect, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, CardMedia, IconButton, Tooltip, Typography} from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box, CardMedia, IconButton, Tooltip, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import {mediaStore} from '../../store/mediaStore.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {reducedMotion} from '../../utils/reducedMotion.js';
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { reducedMotion } from '../../utils/reducedMotion.js';
 
 const HoloCardInner = ({
-                           item,
-                           onClick,
-                           displayMode = 'row',
-                           className,
-                           style,
-                           isContinueWatching = false,
-                           isReorderable = false,
-                           onReorderTop,
-                           onReorderBottom,
-                           isDragActive = false,
-                           isDropTarget = false,
-                           onDragStartCard,
-                           onDragEnterCard,
-                           onDragOverCard,
-                           onDragLeaveCard,
-                           onDragEndCard
-                       }) => {
-    const {t} = useTranslations();
+    item,
+    onClick,
+    displayMode = 'row',
+    className,
+    style,
+    isContinueWatching = false,
+    isReorderable = false,
+    onReorderTop,
+    onReorderBottom,
+    isDragActive = false,
+    isDropTarget = false,
+    onDragStartCard,
+    onDragEnterCard,
+    onDragOverCard,
+    onDragLeaveCard,
+    onDragEndCard,
+}) => {
+    const { t } = useTranslations();
     const rootRef = useRef(null);
     const innerRef = useRef(null);
     const title = item.title || item.name;
@@ -91,7 +91,8 @@ const HoloCardInner = ({
                 // explicit helps with cross-browser behaviour.
                 event.dataTransfer.effectAllowed = 'move';
             }
-        } catch (_) { /* setData can throw in jsdom / tests */
+        } catch (_) {
+            /* setData can throw in jsdom / tests */
         }
         onDragStartCard && onDragStartCard(item);
     };
@@ -141,16 +142,18 @@ const HoloCardInner = ({
         'card-3d-wrap',
         isDragActive ? 'selected-for-reorder' : '',
         isDropTarget ? 'reorder-target' : '',
-        className || ''
-    ].filter(Boolean).join(' ');
+        className || '',
+    ]
+        .filter(Boolean)
+        .join(' ');
 
     const actionButtonTooltip = isContinueWatching
         ? t('card.removeFromContinueWatching')
-        : (isInMyList ? t('card.removeFromList') : t('card.addToList'));
+        : isInMyList
+          ? t('card.removeFromList')
+          : t('card.addToList');
 
-    const actionButtonIcon = isContinueWatching
-        ? <CloseIcon/>
-        : (isInMyList ? <CheckIcon/> : <AddIcon/>);
+    const actionButtonIcon = isContinueWatching ? <CloseIcon /> : isInMyList ? <CheckIcon /> : <AddIcon />;
 
     // 3D tilt on hover. Reduced motion collapses to a static glow.
     //
@@ -193,9 +196,10 @@ const HoloCardInner = ({
         position: 'relative',
         backgroundColor: 'transparent',
         flexShrink: 0,
-        width: {xs: 160, md: 208, lg: 256},
+        width: { xs: 160, md: 208, lg: 256 },
         aspectRatio: '2/3',
-        transition: 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1), border-color 320ms cubic-bezier(0.22, 1, 0.36, 1)',
+        transition:
+            'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1), border-color 320ms cubic-bezier(0.22, 1, 0.36, 1)',
         overflow: 'visible',
         zIndex: 1,
         borderRadius: '12px',
@@ -211,23 +215,23 @@ const HoloCardInner = ({
         WebkitTouchCallout: 'none',
         WebkitTapHighlightColor: 'transparent',
         touchAction: 'manipulation',
-        '& .title-overlay': {opacity: 0, transition: 'opacity 240ms cubic-bezier(0.22,1,0.36,1)'},
-        '&:hover .title-overlay': {opacity: 1},
+        '& .title-overlay': { opacity: 0, transition: 'opacity 240ms cubic-bezier(0.22,1,0.36,1)' },
+        '&:hover .title-overlay': { opacity: 1 },
         '& .add-to-list-btn': {
             opacity: 0,
             transform: 'translateY(10px)',
-            transition: 'opacity 240ms cubic-bezier(0.22,1,0.36,1), transform 240ms cubic-bezier(0.22,1,0.36,1)'
+            transition: 'opacity 240ms cubic-bezier(0.22,1,0.36,1), transform 240ms cubic-bezier(0.22,1,0.36,1)',
         },
-        '&:hover .add-to-list-btn': {opacity: 1, transform: 'translateY(0)'},
-        '& .reorder-btn': {opacity: 0, transform: 'scale(0.8)', transition: 'opacity 200ms ease, transform 200ms ease'},
-        '&:hover .reorder-btn': {opacity: 1, transform: 'scale(1)'},
+        '&:hover .add-to-list-btn': { opacity: 1, transform: 'translateY(0)' },
+        '& .reorder-btn': { opacity: 0, transform: 'scale(0.8)', transition: 'opacity 200ms ease, transform 200ms ease' },
+        '&:hover .reorder-btn': { opacity: 1, transform: 'scale(1)' },
         ...(displayMode === 'row' && {
             '&:hover': {
                 transform: 'translateY(-6px) scale(1.05)',
                 zIndex: 5,
                 borderColor: 'var(--neon-accent)',
-                boxShadow: '0 18px 40px rgba(0, 0, 0, 0.55), 0 0 18px rgba(76, 210, 255, 0.45)'
-            }
+                boxShadow: '0 18px 40px rgba(0, 0, 0, 0.55), 0 0 18px rgba(76, 210, 255, 0.45)',
+            },
         }),
         ...(displayMode === 'grid' && {
             width: '100%',
@@ -235,15 +239,15 @@ const HoloCardInner = ({
                 transform: 'translateY(-4px) scale(1.03)',
                 zIndex: 10,
                 borderColor: 'var(--neon-accent)',
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.55), 0 0 16px rgba(76, 210, 255, 0.35)'
-            }
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.55), 0 0 16px rgba(76, 210, 255, 0.35)',
+            },
         }),
         ...(isDragActive && {
             transform: 'scale(1.1) translateY(-6px)',
             borderColor: 'var(--neon-accent)',
             boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(76, 210, 255, 0.45)',
-            zIndex: 100
-        })
+            zIndex: 100,
+        }),
     };
 
     return (
@@ -264,7 +268,7 @@ const HoloCardInner = ({
             onDragEnd={handleDragEnd}
             onDrop={handleDrop}
             role="button"
-            aria-label={t('card.detailsFor', {title})}
+            aria-label={t('card.detailsFor', { title })}
         >
             {/* Tilted visual layer (the only element that gets the 3D
                 transform written to it). Contains the holographic
@@ -272,11 +276,14 @@ const HoloCardInner = ({
             <Box
                 ref={innerRef}
                 className="card-3d-inner"
-                sx={{position: 'absolute', inset: 0, borderRadius: '12px', overflow: 'hidden'}}
+                sx={{ position: 'absolute', inset: 0, borderRadius: '12px', overflow: 'hidden' }}
             >
                 {/* Holographic surface (sweep on hover) */}
-                <Box aria-hidden className="holo-surface"
-                     sx={{position: 'absolute', inset: 0, zIndex: 0, borderRadius: '12px', pointerEvents: 'none'}}/>
+                <Box
+                    aria-hidden
+                    className="holo-surface"
+                    sx={{ position: 'absolute', inset: 0, zIndex: 0, borderRadius: '12px', pointerEvents: 'none' }}
+                />
                 {/* Poster / placeholder */}
                 {item.poster_path ? (
                     <CardMedia
@@ -296,21 +303,23 @@ const HoloCardInner = ({
                             objectFit: 'cover',
                             position: 'relative',
                             zIndex: 1,
-                            pointerEvents: 'none'
+                            pointerEvents: 'none',
                         }}
                     />
                 ) : (
-                    <Box sx={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'rgba(10, 14, 28, 0.55)',
-                        position: 'relative',
-                        zIndex: 1
-                    }}>
-                        <TheatersIcon sx={{fontSize: '6rem', color: 'var(--text-dim)'}}/>
+                    <Box
+                        sx={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'rgba(10, 14, 28, 0.55)',
+                            position: 'relative',
+                            zIndex: 1,
+                        }}
+                    >
+                        <TheatersIcon sx={{ fontSize: '6rem', color: 'var(--text-dim)' }} />
                     </Box>
                 )}
             </Box>
@@ -323,7 +332,7 @@ const HoloCardInner = ({
                 hit-testing on the buttons is stable. */}
             <Box
                 className="card-3d-overlay"
-                sx={{position: 'absolute', inset: 0, zIndex: 10, borderRadius: '12px', overflow: 'hidden'}}
+                sx={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: '12px', overflow: 'hidden' }}
             >
                 {/* Reorder buttons */}
                 {isReorderable && (
@@ -339,13 +348,18 @@ const HoloCardInner = ({
                                 onPointerDown={stopMouseDownBubble}
                                 aria-label={t('card.moveToTop') || 'Move to top'}
                                 sx={{
-                                    position: 'absolute', top: 8, left: 8, zIndex: 11,
-                                    bgcolor: 'rgba(5, 6, 13, 0.7)', color: 'var(--text-primary)',
-                                    width: 28, height: 28,
-                                    '&:hover': {bgcolor: 'rgba(5, 6, 13, 0.9)', transform: 'scale(1.1)'}
+                                    position: 'absolute',
+                                    top: 8,
+                                    left: 8,
+                                    zIndex: 11,
+                                    bgcolor: 'rgba(5, 6, 13, 0.7)',
+                                    color: 'var(--text-primary)',
+                                    width: 28,
+                                    height: 28,
+                                    '&:hover': { bgcolor: 'rgba(5, 6, 13, 0.9)', transform: 'scale(1.1)' },
                                 }}
                             >
-                                <ArrowUpwardIcon sx={{fontSize: 18}}/>
+                                <ArrowUpwardIcon sx={{ fontSize: 18 }} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={t('card.moveToBottom') || 'Move to bottom'}>
@@ -359,13 +373,18 @@ const HoloCardInner = ({
                                 onPointerDown={stopMouseDownBubble}
                                 aria-label={t('card.moveToBottom') || 'Move to bottom'}
                                 sx={{
-                                    position: 'absolute', top: 42, left: 8, zIndex: 11,
-                                    bgcolor: 'rgba(5, 6, 13, 0.7)', color: 'var(--text-primary)',
-                                    width: 28, height: 28,
-                                    '&:hover': {bgcolor: 'rgba(5, 6, 13, 0.9)', transform: 'scale(1.1)'}
+                                    position: 'absolute',
+                                    top: 42,
+                                    left: 8,
+                                    zIndex: 11,
+                                    bgcolor: 'rgba(5, 6, 13, 0.7)',
+                                    color: 'var(--text-primary)',
+                                    width: 28,
+                                    height: 28,
+                                    '&:hover': { bgcolor: 'rgba(5, 6, 13, 0.9)', transform: 'scale(1.1)' },
                                 }}
                             >
-                                <ArrowDownwardIcon sx={{fontSize: 18}}/>
+                                <ArrowDownwardIcon sx={{ fontSize: 18 }} />
                             </IconButton>
                         </Tooltip>
                     </>
@@ -380,9 +399,13 @@ const HoloCardInner = ({
                         onPointerDown={stopMouseDownBubble}
                         aria-label={actionButtonTooltip}
                         sx={{
-                            position: 'absolute', top: 8, right: 8, zIndex: 11,
-                            bgcolor: 'rgba(5, 6, 13, 0.65)', color: 'var(--neon-accent)',
-                            '&:hover': {bgcolor: 'rgba(5, 6, 13, 0.85)', transform: 'scale(1.1)'}
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            zIndex: 11,
+                            bgcolor: 'rgba(5, 6, 13, 0.65)',
+                            color: 'var(--neon-accent)',
+                            '&:hover': { bgcolor: 'rgba(5, 6, 13, 0.85)', transform: 'scale(1.1)' },
                         }}
                     >
                         {actionButtonIcon}
@@ -399,7 +422,7 @@ const HoloCardInner = ({
                         right: 0,
                         p: 1.5,
                         background: 'linear-gradient(to top, rgba(5,6,13,0.95) 0%, rgba(5,6,13,0.4) 70%, transparent 100%)',
-                        zIndex: 5
+                        zIndex: 5,
                     }}
                 >
                     <Typography
@@ -411,7 +434,7 @@ const HoloCardInner = ({
                             fontFamily: "'Space Grotesk', 'Inter', sans-serif",
                             letterSpacing: '0.01em',
                             textShadow: 'var(--hologram-shadow)',
-                            animationDelay: '40ms'
+                            animationDelay: '40ms',
                         }}
                     >
                         {title}

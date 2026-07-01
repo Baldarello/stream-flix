@@ -1,18 +1,18 @@
-import React, {useEffect} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import TvQuickActionRow from '../components/TvQuickActionRow.jsx';
 import TvListRow from '../components/TvListRow.jsx';
 import TvEmptyState from '../components/TvEmptyState.jsx';
 import tvStore from '../tvStore.js';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 /**
  * TvHomeView - Main TV home screen
  * Shows quick actions at top, then Continue Watching and My List rows
  */
 const TvHomeView = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     // Get items from mediaStore
     const continueWatchingItems = mediaStore.continueWatchingItems || [];
@@ -38,7 +38,7 @@ const TvHomeView = observer(() => {
     if (showEmptyState) {
         return (
             <div id="tv-home-view" className="tv-screen tv-home-view">
-                <TvQuickActionRow/>
+                <TvQuickActionRow />
                 <TvEmptyState
                     message={t('tv.emptyHome', 'Accedi con Google e connetti un dispositivo per iniziare')}
                     ctaLabel={t('tv.browseCatalog', 'Sfoglia il catalogo')}
@@ -57,7 +57,7 @@ const TvHomeView = observer(() => {
     return (
         <div id="tv-home-view" className="tv-screen tv-home-view">
             {/* Quick Action Tiles: Google, QR, My List */}
-            <TvQuickActionRow/>
+            <TvQuickActionRow />
 
             {/* Continue Watching Row */}
             {continueWatchingItems.length > 0 && (

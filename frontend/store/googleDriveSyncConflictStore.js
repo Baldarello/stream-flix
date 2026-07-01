@@ -13,7 +13,7 @@
  * hydrates `choices` via `initializeFromConflictData(conflictData)` whenever
  * the upstream `syncConflictData` changes or when the modal re-opens.
  */
-import {makeAutoObservable} from 'mobx';
+import { makeAutoObservable } from 'mobx';
 
 class GoogleDriveSyncConflictStore {
     /**
@@ -37,7 +37,7 @@ class GoogleDriveSyncConflictStore {
     choices = [];
 
     constructor() {
-        makeAutoObservable(this, {}, {autoBind: true});
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     // ===== COMPUTED =====
@@ -57,21 +57,21 @@ class GoogleDriveSyncConflictStore {
      */
     get stats() {
         if (!this.choices.length) {
-            return {total: 0, withConflicts: 0, localOnly: 0, remoteOnly: 0, toDelete: 0};
+            return { total: 0, withConflicts: 0, localOnly: 0, remoteOnly: 0, toDelete: 0 };
         }
 
-        const withConflicts = this.choices.filter(c =>
-            c.myListAction === 'both' || c.linksAction === 'both' || c.progressAction === 'both'
+        const withConflicts = this.choices.filter(
+            (c) => c.myListAction === 'both' || c.linksAction === 'both' || c.progressAction === 'both'
         ).length;
-        const localOnly = this.choices.filter(c =>
-            c.myListAction === 'local' && c.linksAction === 'local' && c.progressAction === 'local'
+        const localOnly = this.choices.filter(
+            (c) => c.myListAction === 'local' && c.linksAction === 'local' && c.progressAction === 'local'
         ).length;
-        const remoteOnly = this.choices.filter(c =>
-            c.myListAction === 'remote' && c.linksAction === 'remote' && c.progressAction === 'remote'
+        const remoteOnly = this.choices.filter(
+            (c) => c.myListAction === 'remote' && c.linksAction === 'remote' && c.progressAction === 'remote'
         ).length;
-        const toDelete = this.choices.filter(c => c.deleteShow).length;
+        const toDelete = this.choices.filter((c) => c.deleteShow).length;
 
-        return {total: this.choices.length, withConflicts, localOnly, remoteOnly, toDelete};
+        return { total: this.choices.length, withConflicts, localOnly, remoteOnly, toDelete };
     }
 
     // ===== ACTIONS =====
@@ -110,12 +110,8 @@ class GoogleDriveSyncConflictStore {
             return Number.isFinite(n) ? n : null;
         };
 
-        const myListLocalIds = (conflictData.myList?.local || [])
-            .map(toIdKey)
-            .filter((id) => id !== null);
-        const myListRemoteIds = (conflictData.myList?.remote || [])
-            .map(toIdKey)
-            .filter((id) => id !== null);
+        const myListLocalIds = (conflictData.myList?.local || []).map(toIdKey).filter((id) => id !== null);
+        const myListRemoteIds = (conflictData.myList?.remote || []).map(toIdKey).filter((id) => id !== null);
         const myListLocalIdSet = new Set(myListLocalIds);
         const myListRemoteIdSet = new Set(myListRemoteIds);
 
@@ -145,33 +141,32 @@ class GoogleDriveSyncConflictStore {
         const episodeProgressRemote = conflictData.episodeProgress?.remote || [];
 
         const result = [];
-        candidateIds.forEach(id => {
-            const showEntry = (typeof conflictData.shows?.get === 'function')
-                ? conflictData.shows.get(id)
-                : conflictData.shows?.[id];
+        candidateIds.forEach((id) => {
+            const showEntry =
+                typeof conflictData.shows?.get === 'function' ? conflictData.shows.get(id) : conflictData.shows?.[id];
             const localShow = showEntry?.local;
             const remoteShow = showEntry?.remote;
 
-            const localLinks = mediaLinksLocal.filter(l => {
+            const localLinks = mediaLinksLocal.filter((l) => {
                 if (localShow?.seasons) {
-                    return localShow.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                    return localShow.seasons.some((s) => s.episodes.some((e) => e.id === l.mediaId));
                 }
                 return l.mediaId === id;
             });
-            const remoteLinks = mediaLinksRemote.filter(l => {
+            const remoteLinks = mediaLinksRemote.filter((l) => {
                 if (remoteShow?.seasons) {
-                    return remoteShow.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                    return remoteShow.seasons.some((s) => s.episodes.some((e) => e.id === l.mediaId));
                 }
                 return l.mediaId === id;
             });
 
-            const localProgress = episodeProgressLocal.filter(p => {
+            const localProgress = episodeProgressLocal.filter((p) => {
                 if (!localShow?.seasons) return false;
-                return localShow.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                return localShow.seasons.some((s) => s.episodes.some((e) => e.id === p.episodeId));
             });
-            const remoteProgress = episodeProgressRemote.filter(p => {
+            const remoteProgress = episodeProgressRemote.filter((p) => {
                 if (!remoteShow?.seasons) return false;
-                return remoteShow.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                return remoteShow.seasons.some((s) => s.episodes.some((e) => e.id === p.episodeId));
             });
 
             const localInList = myListLocalIdSet.has(id);
@@ -233,15 +228,11 @@ class GoogleDriveSyncConflictStore {
      * controls (myList/links/progress) and by the delete checkbox.
      */
     updateChoice(id, field, value) {
-        this.choices = this.choices.map(c => (
-            c.id === id ? {...c, [field]: value} : c
-        ));
+        this.choices = this.choices.map((c) => (c.id === id ? { ...c, [field]: value } : c));
     }
 
     toggleDeleteShow(id) {
-        this.choices = this.choices.map(c => (
-            c.id === id ? {...c, deleteShow: !c.deleteShow} : c
-        ));
+        this.choices = this.choices.map((c) => (c.id === id ? { ...c, deleteShow: !c.deleteShow } : c));
     }
 
     /**
@@ -250,7 +241,7 @@ class GoogleDriveSyncConflictStore {
      * 'none' for myList, mirroring the legacy implementation.
      */
     takeAllLocal() {
-        this.choices = this.choices.map(s => ({
+        this.choices = this.choices.map((s) => ({
             ...s,
             myListAction: s.myListAction === 'local' || s.myListAction === 'both' ? 'local' : 'none',
             linksAction: 'local',
@@ -263,7 +254,7 @@ class GoogleDriveSyncConflictStore {
      * implementation.
      */
     takeAllRemote() {
-        this.choices = this.choices.map(s => ({
+        this.choices = this.choices.map((s) => ({
             ...s,
             myListAction: s.myListAction === 'remote' || s.myListAction === 'both' ? 'remote' : 'none',
             linksAction: 'remote',
@@ -277,7 +268,7 @@ class GoogleDriveSyncConflictStore {
      * legacy implementation.
      */
     takeAllBoth() {
-        this.choices = this.choices.map(s => ({
+        this.choices = this.choices.map((s) => ({
             ...s,
             myListAction: s.myListAction === 'none' ? 'none' : 'both',
             linksAction: 'both',
@@ -290,12 +281,9 @@ class GoogleDriveSyncConflictStore {
      * considered local-only when all three of its actions are 'local'.
      */
     markLocalOnlyForDeletion() {
-        this.choices = this.choices.map(s => {
-            const isLocalOnly =
-                s.myListAction === 'local' &&
-                s.linksAction === 'local' &&
-                s.progressAction === 'local';
-            return {...s, deleteShow: isLocalOnly};
+        this.choices = this.choices.map((s) => {
+            const isLocalOnly = s.myListAction === 'local' && s.linksAction === 'local' && s.progressAction === 'local';
+            return { ...s, deleteShow: isLocalOnly };
         });
     }
 
@@ -304,12 +292,9 @@ class GoogleDriveSyncConflictStore {
      * `markLocalOnlyForDeletion`.
      */
     markRemoteOnlyForDeletion() {
-        this.choices = this.choices.map(s => {
-            const isRemoteOnly =
-                s.myListAction === 'remote' &&
-                s.linksAction === 'remote' &&
-                s.progressAction === 'remote';
-            return {...s, deleteShow: isRemoteOnly};
+        this.choices = this.choices.map((s) => {
+            const isRemoteOnly = s.myListAction === 'remote' && s.linksAction === 'remote' && s.progressAction === 'remote';
+            return { ...s, deleteShow: isRemoteOnly };
         });
     }
 

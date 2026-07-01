@@ -1,5 +1,5 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite';
 import tvStore from '../tvStore.js';
 import TvHomeView from './TvHomeView.jsx';
 import TvMyListView from './TvMyListView.jsx';
@@ -28,11 +28,7 @@ const TvScreenRouter = observer(() => {
     };
 
     return (
-        <div 
-            id="tv-screen" 
-            className="tv-screen"
-            data-screen={currentScreen}
-        >
+        <div id="tv-screen" className="tv-screen" data-screen={currentScreen}>
             {renderScreen()}
         </div>
     );

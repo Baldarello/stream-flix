@@ -15,7 +15,7 @@ export const durations = {
     med: 0.32,
     cinematic: 0.72,
     epic: 1.4,
-    fadeFallback: 0.12
+    fadeFallback: 0.12,
 };
 
 export const easings = {
@@ -24,13 +24,13 @@ export const easings = {
     emphasized: 'power3.out',
     emphasizedInOut: 'power3.inOut',
     cinematic: 'expo.inOut',
-    snap: 'power4.out'
+    snap: 'power4.out',
 };
 
 export const stagger = {
     row: 0.04,
     grid: 0.03,
-    char: 0.025
+    char: 0.025,
 };
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
@@ -53,7 +53,11 @@ const ensureCached = () => {
             const handler = (event) => {
                 cachedMatch = event.matches;
                 subscribers.forEach((cb) => {
-                    try { cb(cachedMatch); } catch (e) { /* ignore subscriber errors */ }
+                    try {
+                        cb(cachedMatch);
+                    } catch (e) {
+                        /* ignore subscriber errors */
+                    }
                 });
             };
             if (typeof cachedListener.addEventListener === 'function') {

@@ -12,8 +12,8 @@
  * before calling `mediaStore.toggleMyList`.
  */
 
-import React, {useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import {
     Box,
     Button,
@@ -32,18 +32,19 @@ import LinkIcon from '@mui/icons-material/Link';
 import MovieIcon from '@mui/icons-material/Movie';
 import TvIcon from '@mui/icons-material/Tv';
 
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {HoloChip} from '../../feedback/HoloChip.jsx';
-import {EmptyState} from '../shared/EmptyState.jsx';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { HoloChip } from '../../feedback/HoloChip.jsx';
+import { EmptyState } from '../shared/EmptyState.jsx';
 
 const formatDate = (timestamp) => {
     if (!timestamp) return '';
     try {
-        return new Date(timestamp).toLocaleDateString(
-            mediaStore.language === 'en' ? 'en-US' : 'it-IT',
-            {day: '2-digit', month: '2-digit', year: 'numeric'}
-        );
+        return new Date(timestamp).toLocaleDateString(mediaStore.language === 'en' ? 'en-US' : 'it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
     } catch (e) {
         return '';
     }
@@ -56,15 +57,13 @@ const matchesQuery = (item, query) => {
 };
 
 const MyListTab = observer(() => {
-    const {t} = useTranslations();
-    const items = mediaStore.myListItems.filter((item) =>
-        matchesQuery(item, mediaStore.librarySearchQuery)
-    );
+    const { t } = useTranslations();
+    const items = mediaStore.myListItems.filter((item) => matchesQuery(item, mediaStore.librarySearchQuery));
     const [pendingRemove, setPendingRemove] = useState(() => null);
 
     const handleConfirmRemove = () => {
         if (!pendingRemove) return;
-        mediaStore.toggleMyList({id: pendingRemove.id});
+        mediaStore.toggleMyList({ id: pendingRemove.id });
         setPendingRemove(null);
     };
 
@@ -73,10 +72,10 @@ const MyListTab = observer(() => {
         return (
             <EmptyState
                 id="my-list-empty"
-                icon={<FolderIcon sx={{fontSize: 44}}/>}
+                icon={<FolderIcon sx={{ fontSize: 44 }} />}
                 title={
                     hasQuery
-                        ? t('libraryManagement.dashboard.noResults', {query: mediaStore.librarySearchQuery})
+                        ? t('libraryManagement.dashboard.noResults', { query: mediaStore.librarySearchQuery })
                         : t('libraryManagement.empty.myList')
                 }
                 ctaLabel={hasQuery ? undefined : t('libraryManagement.myList.exploreCta')}
@@ -84,10 +83,10 @@ const MyListTab = observer(() => {
                     hasQuery
                         ? undefined
                         : () => {
-                            // Switch to the home view; the layout reads
-                            // `activeView` from the store.
-                            mediaStore.activeView = 'Home';
-                        }
+                              // Switch to the home view; the layout reads
+                              // `activeView` from the store.
+                              mediaStore.activeView = 'Home';
+                          }
                 }
             />
         );
@@ -99,7 +98,7 @@ const MyListTab = observer(() => {
                 {items.map((item) => {
                     const linksCount = item.seasons
                         ? item.seasons.reduce((acc, s) => acc + (s.episodes?.length || 0), 0)
-                        : (item.video_urls?.length || 0);
+                        : item.video_urls?.length || 0;
                     const lastEdited = mediaStore.libraryLastEdited.get(item.id);
                     return (
                         <Box
@@ -117,11 +116,7 @@ const MyListTab = observer(() => {
                         >
                             <Box
                                 component="img"
-                                src={
-                                    item.poster_path
-                                        ? `https://image.tmdb.org/t/p/w200${item.poster_path}`
-                                        : '/placeholder.png'
-                                }
+                                src={item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : '/placeholder.png'}
                                 alt={item.name || item.title}
                                 sx={{
                                     width: 80,
@@ -130,7 +125,7 @@ const MyListTab = observer(() => {
                                     borderRadius: 1,
                                 }}
                             />
-                            <Box sx={{flex: 1, minWidth: 200}}>
+                            <Box sx={{ flex: 1, minWidth: 200 }}>
                                 <Typography
                                     variant="h6"
                                     sx={{
@@ -141,10 +136,10 @@ const MyListTab = observer(() => {
                                 >
                                     {item.name || item.title}
                                 </Typography>
-                                <Stack direction="row" spacing={1} sx={{mt: 1, flexWrap: 'wrap', rowGap: 1}}>
+                                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', rowGap: 1 }}>
                                     <HoloChip
                                         id={`my-list-${item.id}-type`}
-                                        icon={item.media_type === 'tv' ? <TvIcon/> : <MovieIcon/>}
+                                        icon={item.media_type === 'tv' ? <TvIcon /> : <MovieIcon />}
                                         label={
                                             item.media_type === 'tv'
                                                 ? t('libraryManagement.type.series')
@@ -153,7 +148,7 @@ const MyListTab = observer(() => {
                                     />
                                     <HoloChip
                                         id={`my-list-${item.id}-links`}
-                                        icon={<LinkIcon/>}
+                                        icon={<LinkIcon />}
                                         label={`${linksCount} ${t('libraryManagement.links')}`}
                                     />
                                     {lastEdited && (
@@ -164,7 +159,7 @@ const MyListTab = observer(() => {
                                                 alignSelf: 'center',
                                             }}
                                         >
-                                            {t('libraryManagement.myList.lastEdited', {date: formatDate(lastEdited)})}
+                                            {t('libraryManagement.myList.lastEdited', { date: formatDate(lastEdited) })}
                                         </Typography>
                                     )}
                                 </Stack>
@@ -181,7 +176,7 @@ const MyListTab = observer(() => {
                                             })
                                         }
                                     >
-                                        <DeleteIcon/>
+                                        <DeleteIcon />
                                     </IconButton>
                                 </Tooltip>
                             </Stack>
@@ -190,21 +185,13 @@ const MyListTab = observer(() => {
                 })}
             </Stack>
 
-            <Dialog
-                open={!!pendingRemove}
-                onClose={() => setPendingRemove(null)}
-                id="my-list-confirm-dialog"
-            >
+            <Dialog open={!!pendingRemove} onClose={() => setPendingRemove(null)} id="my-list-confirm-dialog">
                 <DialogTitle>{t('libraryManagement.deleteConfirm.title')}</DialogTitle>
                 <DialogContent>
-                    <Typography>
-                        {t('libraryManagement.myList.removeConfirm', {name: pendingRemove?.name || ''})}
-                    </Typography>
+                    <Typography>{t('libraryManagement.myList.removeConfirm', { name: pendingRemove?.name || '' })}</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setPendingRemove(null)}>
-                        {t('libraryManagement.cancel')}
-                    </Button>
+                    <Button onClick={() => setPendingRemove(null)}>{t('libraryManagement.cancel')}</Button>
                     <Button onClick={handleConfirmRemove} color="error">
                         {t('libraryManagement.delete')}
                     </Button>
@@ -217,4 +204,4 @@ const MyListTab = observer(() => {
 MyListTab.displayName = 'MyListTab';
 
 export default MyListTab;
-export {MyListTab};
+export { MyListTab };

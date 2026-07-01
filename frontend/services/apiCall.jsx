@@ -1,62 +1,57 @@
 import axios from 'axios';
 
-
 // The API key must be obtained exclusively from the environment variable process.env.API_KEY
 // Assuming this is available in the execution environment.
 const API_BASE_URL = 'https://production-api.tnl.one/';
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/';
-const BASE_PATH="service/tmdb/"
+const BASE_PATH = 'service/tmdb/';
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+    baseURL: API_BASE_URL,
 });
 
-
-
-
 // 2. Log della richiesta nell api
-apiClient.interceptors.request.use(async request => {
-
-
-    request.headers["Access-Control-Allow-Origin"] = "*";
-    request.headers["Access-Control-Allow-Headers"] = "Origin, X-Requested-With, Content-Type, Accept";
-    request.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,PATCH,OPTIONS";
-    if ((request.headers["Authorization"] === undefined || request.headers["Authorization"] === null || request.headers["Authorization"] === "")) {
+apiClient.interceptors.request.use(async (request) => {
+    request.headers['Access-Control-Allow-Origin'] = '*';
+    request.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept';
+    request.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,PATCH,OPTIONS';
+    if (
+        request.headers['Authorization'] === undefined ||
+        request.headers['Authorization'] === null ||
+        request.headers['Authorization'] === ''
+    ) {
         // FIX: Use TMDB_API_TOKEN from environment variables instead of a hardcoded key.
-        request.headers["Authorization"] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g"
+        request.headers['Authorization'] =
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsInByb2R1Y3RJZCI6IjhhYzRkZmRhLWUwM2EtNGYzMC05MTA2LTViYTJjYjA0ZDEzZiIsInNlcnZpY2VJZCI6MywicHJvamVjdFNlZWRJZCI6IjQxNzBlYTMxLTk0MGItNGRhZS05MWRjLWYxODZkY2FhMzUzZiIsImlhdCI6MTcyMjI0NjQyNX0.Mo403gt40NyS3F1ynsEj0CVWkk46YIijJSuZO3NFb3g';
     }
 
     return request;
 });
 
-
-
 const buildImageURL = (path, size = 'original') => {
-  return path ? `${IMAGE_BASE_URL}${size}${path}` : '';
+    return path ? `${IMAGE_BASE_URL}${size}${path}` : '';
 };
 
 const tmdbToMediaItem = (item) => ({
-  id: item.id,
-  title: item.title || item.name,
-  name: item.name,
-  overview: item.overview,
-  poster_path: buildImageURL(item.poster_path, 'w500'),
-  backdrop_path: buildImageURL(item.backdrop_path),
-  vote_average: item.vote_average,
-  release_date: item.release_date,
-  first_air_date: item.first_air_date,
-  media_type: item.media_type || (item.title ? 'movie' : 'tv'),
+    id: item.id,
+    title: item.title || item.name,
+    name: item.name,
+    overview: item.overview,
+    poster_path: buildImageURL(item.poster_path, 'w500'),
+    backdrop_path: buildImageURL(item.backdrop_path),
+    vote_average: item.vote_average,
+    release_date: item.release_date,
+    first_air_date: item.first_air_date,
+    media_type: item.media_type || (item.title ? 'movie' : 'tv'),
 });
-
 
 /**
  * Fetches trending movies and TV shows for the week.
  */
 export const getTrending = async () => {
-  const response = await apiClient.get(`${BASE_PATH}3/trending/all/week`);
-  return response.data.results.map(tmdbToMediaItem);
+    const response = await apiClient.get(`${BASE_PATH}3/trending/all/week`);
+    return response.data.results.map(tmdbToMediaItem);
 };
-
 
 /**
  * Fetches movies that are currently playing in theaters.
@@ -64,7 +59,7 @@ export const getTrending = async () => {
 export const getLatestMovies = async () => {
     const response = await apiClient.get(`${BASE_PATH}3/movie/now_playing`);
     return response.data.results.map(tmdbToMediaItem);
-}
+};
 
 /**
  * Fetches the top-rated TV series.
@@ -72,86 +67,87 @@ export const getLatestMovies = async () => {
 export const getTopRatedSeries = async () => {
     const response = await apiClient.get(`${BASE_PATH}3/tv/top_rated`);
     return response.data.results.map(tmdbToMediaItem);
-}
+};
 
 /**
  * Fetches popular anime series.
  */
 export const getPopularAnime = async () => {
-    const response = await apiClient.get(`${BASE_PATH}3/discover/tv`, { params: { with_genres: 16, sort_by: 'popularity.desc' } });
+    const response = await apiClient.get(`${BASE_PATH}3/discover/tv`, {
+        params: { with_genres: 16, sort_by: 'popularity.desc' },
+    });
     return response.data.results.map(tmdbToMediaItem);
-}
-
+};
 
 /**
  * Fetches detailed information for a specific TV series.
  */
 export const getSeriesDetails = async (seriesId) => {
-  const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}`);
-  const seriesData = response.data;
+    const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}`);
+    const seriesData = response.data;
 
-  // If the main data object is missing, we cannot proceed. Throw an error.
-  if (!seriesData) {
-      throw new Error(`API returned no data for series ${seriesId}`);
-  }
+    // If the main data object is missing, we cannot proceed. Throw an error.
+    if (!seriesData) {
+        throw new Error(`API returned no data for series ${seriesId}`);
+    }
 
-  // Safely access the seasons array, defaulting to an empty array if it's missing or not an array.
-  const seasonsData = Array.isArray(seriesData.seasons) ? seriesData.seasons : [];
+    // Safely access the seasons array, defaulting to an empty array if it's missing or not an array.
+    const seasonsData = Array.isArray(seriesData.seasons) ? seriesData.seasons : [];
 
-  const details = {
-      ...tmdbToMediaItem(seriesData),
-      seasons: seasonsData.map((season) => ({
-          id: season.id,
-          season_number: season.season_number,
-          name: season.name,
-          episode_count: season.episode_count,
-          episodes: [], // Episodes for each season must be fetched separately
-      })),
-  };
-  return details;
+    const details = {
+        ...tmdbToMediaItem(seriesData),
+        seasons: seasonsData.map((season) => ({
+            id: season.id,
+            season_number: season.season_number,
+            name: season.name,
+            episode_count: season.episode_count,
+            episodes: [], // Episodes for each season must be fetched separately
+        })),
+    };
+    return details;
 };
 
 /**
  * Fetches all episodes for a specific season of a TV series.
  */
 export const getSeriesEpisodes = async (seriesId, seasonNumber) => {
-  const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/season/${seasonNumber}`);
-  const seasonData = response.data;
+    const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/season/${seasonNumber}`);
+    const seasonData = response.data;
 
-  // If the season data object is missing, or if it doesn't contain a valid episodes array,
-  // return an empty array to prevent crashes.
-  if (!seasonData || !Array.isArray(seasonData.episodes)) {
-      return [];
-  }
+    // If the season data object is missing, or if it doesn't contain a valid episodes array,
+    // return an empty array to prevent crashes.
+    if (!seasonData || !Array.isArray(seasonData.episodes)) {
+        return [];
+    }
 
-  return seasonData.episodes.map((ep) => {
-    // Mocking intro times for demonstration purposes of the "Skip Intro" feature
-    const hasIntro = ep.episode_number > 1; // Assume pilot doesn't have a skippable intro
-    return {
-      id: ep.id,
-      episode_number: ep.episode_number,
-      name: ep.name,
-      overview: ep.overview,
-      still_path: buildImageURL(ep.still_path, 'w300'),
-      intro_start_s: hasIntro ? 15 : 0,
-    };
-  });
+    return seasonData.episodes.map((ep) => {
+        // Mocking intro times for demonstration purposes of the "Skip Intro" feature
+        const hasIntro = ep.episode_number > 1; // Assume pilot doesn't have a skippable intro
+        return {
+            id: ep.id,
+            episode_number: ep.episode_number,
+            name: ep.name,
+            overview: ep.overview,
+            still_path: buildImageURL(ep.still_path, 'w300'),
+            intro_start_s: hasIntro ? 15 : 0,
+        };
+    });
 };
 
 /**
  * Fetches images for a TV series.
  */
 export const getSeriesImages = async (seriesId) => {
-  const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/images`);
-  const backdrops = response.data.backdrops.map((img) => buildImageURL(img.file_path));
-  const posters = response.data.posters.map((img) => buildImageURL(img.file_path));
-  return { backdrops, posters };
+    const response = await apiClient.get(`${BASE_PATH}3/tv/${seriesId}/images`);
+    const backdrops = response.data.backdrops.map((img) => buildImageURL(img.file_path));
+    const posters = response.data.posters.map((img) => buildImageURL(img.file_path));
+    return { backdrops, posters };
 };
 
 /**
  * Searches for a TV show by a query string.
  */
 export const searchShow = async (query) => {
-  const response = await apiClient.get(`${BASE_PATH}3/search/tv`, { params: { query } });
-  return response.data.results.map(tmdbToMediaItem);
+    const response = await apiClient.get(`${BASE_PATH}3/search/tv`, { params: { query } });
+    return response.data.results.map(tmdbToMediaItem);
 };

@@ -1,9 +1,8 @@
-import {makeAutoObservable, runInAction} from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
 import * as driveService from '../services/googleDriveService';
-import {db} from '../services/db';
-import {mediaStore} from './mediaStore';
-
+import { db } from '../services/db';
+import { mediaStore } from './mediaStore';
 
 class SyncStore {
     // Google Auth state
@@ -11,7 +10,7 @@ class SyncStore {
     isSyncing = false;
     isReloadingData = false;
     isGoogleAuthLoading = false;
-    
+
     // Sync conflict modal
     isSyncConflictModalOpen = false;
     syncConflictData = null;
@@ -19,15 +18,19 @@ class SyncStore {
 
     // Backup debounce timer
     backupDebounceTimer = null;
-    
+
     // Expose showSnackbar for methods that need to show notifications
-    get showSnackbar() { return mediaStore.showSnackbar; }
-    get hideSnackbar() { return mediaStore.hideSnackbar; }
+    get showSnackbar() {
+        return mediaStore.showSnackbar;
+    }
+    get hideSnackbar() {
+        return mediaStore.hideSnackbar;
+    }
 
     constructor() {
         makeAutoObservable(this);
     }
-    
+
     // Getters
     get isLoggedIn() {
         return !!this.googleUser;
@@ -83,7 +86,7 @@ class SyncStore {
 
                 // Check for significant differences
                 const hasLocalData = localMyListIds.length > 0 || localMediaLinks.length > 0;
-                const hasRemoteData = (remoteMyListIds.length > 0) || (remoteData.mediaLinks?.length > 0);
+                const hasRemoteData = remoteMyListIds.length > 0 || remoteData.mediaLinks?.length > 0;
 
                 // Detect if there's a real conflict (different data in both)
                 const localOnlyItems = localMyListIds.filter((id) => !remoteMyListIds.includes(id));
@@ -97,7 +100,7 @@ class SyncStore {
 
                     const showsMap = new Map();
                     const allIds = new Set([...localItemsMap.keys(), ...remoteItemsMap.keys()]);
-                    allIds.forEach(id => {
+                    allIds.forEach((id) => {
                         showsMap.set(id, {
                             local: localItemsMap.get(id),
                             remote: remoteItemsMap.get(id),
@@ -129,7 +132,7 @@ class SyncStore {
                 // No conflict or one side is empty - proceed with simple restore
                 this.showSnackbar('notifications.restoringFromCloud', 'info', true);
                 await db.importData(remoteData);
-                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 await this.reloadAllData();
             } else {
@@ -137,11 +140,11 @@ class SyncStore {
                 this.showSnackbar('notifications.noBackupFoundCreating', 'info', true);
                 const newFile = await this.backupToDrive(false);
                 if (newFile) {
-                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
                 }
             }
         } catch (error) {
-            console.error("Error during initial sync:", error);
+            console.error('Error during initial sync:', error);
             this.showSnackbar('notifications.syncError', 'error', true);
         } finally {
             runInAction(() => {
@@ -168,7 +171,7 @@ class SyncStore {
         });
 
         try {
-            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
+            const { myList, shows, mediaLinks, episodeProgress } = this.syncConflictData;
 
             // If no choices provided, do automatic merge (keep everything)
             if (!choices || choices.length === 0) {
@@ -199,7 +202,10 @@ class SyncStore {
                 const mergedProgressMap = new Map();
                 [...episodeProgress.local, ...episodeProgress.remote].forEach((progress) => {
                     const existing = mergedProgressMap.get(progress.episodeId);
-                    if (!existing || (progress.lastWatchedAt && existing.lastWatchedAt && progress.lastWatchedAt > existing.lastWatchedAt)) {
+                    if (
+                        !existing ||
+                        (progress.lastWatchedAt && existing.lastWatchedAt && progress.lastWatchedAt > existing.lastWatchedAt)
+                    ) {
                         mergedProgressMap.set(progress.episodeId, progress);
                     }
                 });
@@ -212,10 +218,14 @@ class SyncStore {
 
                 // Import merged data
                 const mergedData = {
-                    myList: JSON.parse(JSON.stringify((mergedMyList || [])
-                        .map((id) => typeof id === 'object' && id !== null ? id.id : id)
-                        .filter((id) => typeof id === 'number' || typeof id === 'string')
-                        .map((id, index) => ({id, order: index})))),
+                    myList: JSON.parse(
+                        JSON.stringify(
+                            (mergedMyList || [])
+                                .map((id) => (typeof id === 'object' && id !== null ? id.id : id))
+                                .filter((id) => typeof id === 'number' || typeof id === 'string')
+                                .map((id, index) => ({ id, order: index }))
+                        )
+                    ),
                     cachedItems: cleanedShows,
                     mediaLinks: cleanedLinks,
                     episodeProgress: cleanedProgress,
@@ -226,7 +236,7 @@ class SyncStore {
                 // Backup merged data to drive
                 const newFile = await this.backupToDrive(false);
                 if (newFile) {
-                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
                 }
 
                 this.showSnackbar('notifications.syncMergeComplete', 'success', true);
@@ -267,22 +277,22 @@ class SyncStore {
                         }
                     }
                     if (choice.myListAction === 'remote' || choice.myListAction === 'both') {
-                        if (showData.remote && !finalShows.some(s => s.id === showData.remote.id)) {
+                        if (showData.remote && !finalShows.some((s) => s.id === showData.remote.id)) {
                             finalShows.push(showData.remote);
                         }
                     }
                 }
 
                 // Links based on choice
-                const localLinks = mediaLinks.local.filter(l => {
+                const localLinks = mediaLinks.local.filter((l) => {
                     if (showData.local?.seasons) {
-                        return showData.local.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                        return showData.local.seasons.some((s) => s.episodes.some((e) => e.id === l.mediaId));
                     }
                     return l.mediaId === choice.id;
                 });
-                const remoteLinks = mediaLinks.remote.filter(l => {
+                const remoteLinks = mediaLinks.remote.filter((l) => {
                     if (showData.remote?.seasons) {
-                        return showData.remote.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                        return showData.remote.seasons.some((s) => s.episodes.some((e) => e.id === l.mediaId));
                     }
                     return l.mediaId === choice.id;
                 });
@@ -291,30 +301,35 @@ class SyncStore {
                     finalLinks.push(...localLinks);
                 } else if (choice.linksAction === 'remote') {
                     finalLinks.push(...remoteLinks);
-                } else { // both
+                } else {
+                    // both
                     finalLinks.push(...localLinks, ...remoteLinks);
                 }
 
                 // Progress based on choice
-                const localProgress = episodeProgress.local.filter(p => {
+                const localProgress = episodeProgress.local.filter((p) => {
                     if (!showData.local?.seasons) return false;
-                    return showData.local.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                    return showData.local.seasons.some((s) => s.episodes.some((e) => e.id === p.episodeId));
                 });
-                const remoteProgress = episodeProgress.remote.filter(p => {
+                const remoteProgress = episodeProgress.remote.filter((p) => {
                     if (!showData.remote?.seasons) return false;
-                    return showData.remote.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                    return showData.remote.seasons.some((s) => s.episodes.some((e) => e.id === p.episodeId));
                 });
 
                 if (choice.progressAction === 'local') {
                     finalProgress.push(...localProgress);
                 } else if (choice.progressAction === 'remote') {
                     finalProgress.push(...remoteProgress);
-                } else { // both
+                } else {
+                    // both
                     // For both, merge with timestamp check
                     const progressMap = new Map();
-                    [...localProgress, ...remoteProgress].forEach(p => {
+                    [...localProgress, ...remoteProgress].forEach((p) => {
                         const existing = progressMap.get(p.episodeId);
-                        if (!existing || (p.lastWatchedAt && existing.lastWatchedAt && p.lastWatchedAt > existing.lastWatchedAt)) {
+                        if (
+                            !existing ||
+                            (p.lastWatchedAt && existing.lastWatchedAt && p.lastWatchedAt > existing.lastWatchedAt)
+                        ) {
                             progressMap.set(p.episodeId, p);
                         }
                     });
@@ -337,33 +352,33 @@ class SyncStore {
                 }
                 // Also keep any links / progress attached to the unchosen
                 // show so the user's existing data is preserved.
-                const localLinks = mediaLinks.local.filter(l => {
+                const localLinks = mediaLinks.local.filter((l) => {
                     if (data.local?.seasons) {
-                        return data.local.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                        return data.local.seasons.some((s) => s.episodes.some((e) => e.id === l.mediaId));
                     }
                     return l.mediaId === id;
                 });
-                const remoteLinks = mediaLinks.remote.filter(l => {
+                const remoteLinks = mediaLinks.remote.filter((l) => {
                     if (data.remote?.seasons) {
-                        return data.remote.seasons.some(s => s.episodes.some(e => e.id === l.mediaId));
+                        return data.remote.seasons.some((s) => s.episodes.some((e) => e.id === l.mediaId));
                     }
                     return l.mediaId === id;
                 });
                 finalLinks.push(...localLinks, ...remoteLinks);
-                const localProgress = episodeProgress.local.filter(p => {
+                const localProgress = episodeProgress.local.filter((p) => {
                     if (!data.local?.seasons) return false;
-                    return data.local.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                    return data.local.seasons.some((s) => s.episodes.some((e) => e.id === p.episodeId));
                 });
-                const remoteProgress = episodeProgress.remote.filter(p => {
+                const remoteProgress = episodeProgress.remote.filter((p) => {
                     if (!data.remote?.seasons) return false;
-                    return data.remote.seasons.some(s => s.episodes.some(e => e.id === p.episodeId));
+                    return data.remote.seasons.some((s) => s.episodes.some((e) => e.id === p.episodeId));
                 });
                 finalProgress.push(...localProgress, ...remoteProgress);
             });
 
             // Remove duplicate links by URL
             const uniqueLinksMap = new Map();
-            finalLinks.forEach(link => {
+            finalLinks.forEach((link) => {
                 const key = `${link.mediaId}|${link.url}`;
                 if (!uniqueLinksMap.has(key)) {
                     uniqueLinksMap.set(key, link);
@@ -377,10 +392,14 @@ class SyncStore {
 
             // Import merged data
             const mergedData = {
-                myList: JSON.parse(JSON.stringify((finalMyList || [])
-                    .map((id) => typeof id === 'object' && id !== null ? id.id : id)
-                    .filter((id) => typeof id === 'number' || typeof id === 'string')
-                    .map((id, index) => ({id, order: index})))),
+                myList: JSON.parse(
+                    JSON.stringify(
+                        (finalMyList || [])
+                            .map((id) => (typeof id === 'object' && id !== null ? id.id : id))
+                            .filter((id) => typeof id === 'number' || typeof id === 'string')
+                            .map((id, index) => ({ id, order: index }))
+                    )
+                ),
                 cachedItems: cleanedShows,
                 mediaLinks: cleanedLinks,
                 episodeProgress: cleanedProgress,
@@ -390,7 +409,7 @@ class SyncStore {
 
             // Delete shows marked for deletion
             if (deletedIds.length > 0) {
-                console.log("Deleting shows:", deletedIds);
+                console.log('Deleting shows:', deletedIds);
                 await db.myList.bulkDelete(deletedIds);
                 await db.cachedItems.bulkDelete(deletedIds);
                 await db.mediaLinks.where('mediaId').anyOf(deletedIds).delete();
@@ -400,15 +419,15 @@ class SyncStore {
             // Backup merged data to drive
             const newFile = await this.backupToDrive(false);
             if (newFile) {
-                await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+                await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
             }
 
             this.showSnackbar('notifications.syncMergeComplete', 'success', true);
             this.closeSyncConflictModal();
             await this.reloadAllData();
         } catch (error) {
-            console.error("Error merging data:", error);
-            this.showSnackbar('notifications.syncMergeError', 'error', true, {error: (error).message});
+            console.error('Error merging data:', error);
+            this.showSnackbar('notifications.syncMergeError', 'error', true, { error: error.message });
         } finally {
             runInAction(() => {
                 this.isProcessingSyncConflict = false;
@@ -431,16 +450,24 @@ class SyncStore {
             const remoteFile = await driveService.findLatestBackupFile(this.googleUser.accessToken);
 
             // Build the remote data structure from conflict data
-            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
+            const { myList, shows, mediaLinks, episodeProgress } = this.syncConflictData;
 
             const remoteData = {
-                myList: JSON.parse(JSON.stringify((myList.remote || [])
-                    .map(id => typeof id === 'object' && id !== null ? id.id : id)
-                    .filter(id => typeof id === 'number' || typeof id === 'string')
-                    .map((id, index) => ({id, order: index})))),
-                cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
-                    .filter((s) => s.remote)
-                    .map((s) => s.remote))),
+                myList: JSON.parse(
+                    JSON.stringify(
+                        (myList.remote || [])
+                            .map((id) => (typeof id === 'object' && id !== null ? id.id : id))
+                            .filter((id) => typeof id === 'number' || typeof id === 'string')
+                            .map((id, index) => ({ id, order: index }))
+                    )
+                ),
+                cachedItems: JSON.parse(
+                    JSON.stringify(
+                        Array.from(shows.values())
+                            .filter((s) => s.remote)
+                            .map((s) => s.remote)
+                    )
+                ),
                 mediaLinks: JSON.parse(JSON.stringify(mediaLinks.remote)),
                 episodeProgress: JSON.parse(JSON.stringify(episodeProgress.remote)),
             };
@@ -448,15 +475,15 @@ class SyncStore {
             await db.importData(remoteData);
 
             if (remoteFile) {
-                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
             }
 
             this.showSnackbar('notifications.syncOverwriteLocalComplete', 'success', true);
             this.closeSyncConflictModal();
             await this.reloadAllData();
         } catch (error) {
-            console.error("Error overwriting local data:", error);
-            this.showSnackbar('notifications.syncOverwriteLocalError', 'error', true, {error: (error).message});
+            console.error('Error overwriting local data:', error);
+            this.showSnackbar('notifications.syncOverwriteLocalError', 'error', true, { error: error.message });
         } finally {
             runInAction(() => {
                 this.isProcessingSyncConflict = false;
@@ -475,28 +502,48 @@ class SyncStore {
         });
 
         try {
-            const {myList, shows, mediaLinks, episodeProgress} = this.syncConflictData;
+            const { myList, shows, mediaLinks, episodeProgress } = this.syncConflictData;
 
             // Build local data structure
             const localData = {
-                myList: JSON.parse(JSON.stringify((myList.local || [])
-                    .map(id => typeof id === 'object' && id !== null ? id.id : id)
-                    .filter(id => typeof id === 'number' || typeof id === 'string')
-                    .map((id, index) => ({id, order: index})))),
-                cachedItems: JSON.parse(JSON.stringify(Array.from(shows.values())
-                    .filter((s) => s.local)
-                    .map((s) => s.local))),
+                myList: JSON.parse(
+                    JSON.stringify(
+                        (myList.local || [])
+                            .map((id) => (typeof id === 'object' && id !== null ? id.id : id))
+                            .filter((id) => typeof id === 'number' || typeof id === 'string')
+                            .map((id, index) => ({ id, order: index }))
+                    )
+                ),
+                cachedItems: JSON.parse(
+                    JSON.stringify(
+                        Array.from(shows.values())
+                            .filter((s) => s.local)
+                            .map((s) => s.local)
+                    )
+                ),
                 mediaLinks: JSON.parse(JSON.stringify(mediaLinks.local)),
                 episodeProgress: JSON.parse(JSON.stringify(episodeProgress.local)),
             };
 
             // Backup local data to drive (overwrites remote)
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
+            const tablesToBackup = [
+                'myList',
+                'viewingHistory',
+                'cachedItems',
+                'mediaLinks',
+                'showIntroDurations',
+                'preferences',
+                'episodeProgress',
+                'preferredSources',
+                'selectedSeasons',
+                'showFilterPreferences',
+                'knownSlaves',
+            ];
             const data = {};
             for (const tableName of tablesToBackup) {
-                if ((db)[tableName]) {
+                if (db[tableName]) {
                     // Strip Dexie Proxy objects before storing to Drive
-                    data[tableName] = JSON.parse(JSON.stringify(await (db)[tableName].toArray()));
+                    data[tableName] = JSON.parse(JSON.stringify(await db[tableName].toArray()));
                 }
             }
 
@@ -504,14 +551,14 @@ class SyncStore {
             await driveService.deleteOldBackups(this.googleUser.accessToken);
 
             if (newFile) {
-                await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+                await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
             }
 
             this.showSnackbar('notifications.syncOverwriteRemoteComplete', 'success', true);
             this.closeSyncConflictModal();
         } catch (error) {
-            console.error("Error overwriting remote data:", error);
-            this.showSnackbar('notifications.syncOverwriteRemoteError', 'error', true, {error: (error).message});
+            console.error('Error overwriting remote data:', error);
+            this.showSnackbar('notifications.syncOverwriteRemoteError', 'error', true, { error: error.message });
         } finally {
             runInAction(() => {
                 this.isProcessingSyncConflict = false;
@@ -523,7 +570,7 @@ class SyncStore {
         // Close modal and sign out
         this.closeSyncConflictModal();
         // Import dynamically to avoid circular dependency
-        import('../services/googleAuthService').then(({handleSignOut}) => {
+        import('../services/googleAuthService').then(({ handleSignOut }) => {
             handleSignOut();
         });
         this.showSnackbar('notifications.syncCancelled', 'info', true);
@@ -539,11 +586,23 @@ class SyncStore {
             this.isSyncing = true;
         });
         try {
-            const tablesToBackup = ['myList', 'viewingHistory', 'cachedItems', 'mediaLinks', 'showIntroDurations', 'preferences', 'episodeProgress', 'preferredSources', 'selectedSeasons', 'showFilterPreferences', 'knownSlaves'];
-            const data= {};
+            const tablesToBackup = [
+                'myList',
+                'viewingHistory',
+                'cachedItems',
+                'mediaLinks',
+                'showIntroDurations',
+                'preferences',
+                'episodeProgress',
+                'preferredSources',
+                'selectedSeasons',
+                'showFilterPreferences',
+                'knownSlaves',
+            ];
+            const data = {};
             for (const tableName of tablesToBackup) {
-                if ((db)[tableName]) {
-                    data[tableName] = await (db)[tableName].toArray();
+                if (db[tableName]) {
+                    data[tableName] = await db[tableName].toArray();
                 }
             }
 
@@ -577,15 +636,15 @@ class SyncStore {
             if (remoteFile) {
                 const data = await driveService.readBackupFile(this.googleUser.accessToken, remoteFile.id);
                 await db.importData(data);
-                await db.preferences.put({key: 'lastSyncFileId', value: remoteFile.id});
+                await db.preferences.put({ key: 'lastSyncFileId', value: remoteFile.id });
                 this.showSnackbar('notifications.restoreComplete', 'success', true);
                 await this.reloadAllData();
             } else {
                 this.showSnackbar('notifications.noBackupFound', 'warning', true);
             }
         } catch (error) {
-            console.error("Error during restore:", error);
-            this.showSnackbar('notifications.restoreError', 'error', true, {error: (error).message});
+            console.error('Error during restore:', error);
+            this.showSnackbar('notifications.restoreError', 'error', true, { error: error.message });
         } finally {
             runInAction(() => {
                 this.isSyncing = false;
@@ -599,7 +658,7 @@ class SyncStore {
             if (this.isLoggedIn) {
                 const newFile = await this.backupToDrive();
                 if (newFile) {
-                    await db.preferences.put({key: 'lastSyncFileId', value: newFile.id});
+                    await db.preferences.put({ key: 'lastSyncFileId', value: newFile.id });
                 }
             }
         }, 30000); // 30-second debounce
@@ -610,7 +669,7 @@ class SyncStore {
             this.googleUser = user;
         });
         if (user) {
-            this.showSnackbar('notifications.welcomeUser', 'success', true, {name: user.name});
+            this.showSnackbar('notifications.welcomeUser', 'success', true, { name: user.name });
         } else {
             this.showSnackbar('notifications.logoutSuccess', 'info', true);
         }

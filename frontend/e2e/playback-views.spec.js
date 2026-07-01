@@ -18,17 +18,17 @@
  *   - /qr      → needs isQRScannerOpen (only via dock button, tested in qr-scanner.spec.js)
  *   - /pairing → needs isSmartTVPairingVisible
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('URL Routing', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
-        page.on('pageerror', err => errors.push(err.message));
+        page.on('pageerror', (err) => errors.push(err.message));
         page._testErrors = errors;
     });
 
@@ -40,8 +40,8 @@ test.describe('URL Routing', () => {
         // Use section#screen-home (ViewSwitch landmark) to avoid strict-mode violation
         await expect(page.locator('section#screen-home')).toBeVisible();
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver') && !e.includes('favicon')
+        const fatalErrors = (page._testErrors || []).filter(
+            (e) => !e.includes('Warning') && !e.includes('ResizeObserver') && !e.includes('favicon')
         );
         expect(fatalErrors, `Console errors: ${fatalErrors.join('\n')}`).toHaveLength(0);
     });

@@ -8,7 +8,7 @@
  * fails, the app is either not running, broken at boot, or the home
  * view contract has regressed.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
@@ -40,9 +40,7 @@ test('smoke: home page loads cleanly for guest users', async ({ page }) => {
     // The home view must not produce any console errors.
     expect(
         consoleErrors,
-        consoleErrors.length > 0
-            ? `Unexpected console.error events:\n${consoleErrors.join('\n')}`
-            : ''
+        consoleErrors.length > 0 ? `Unexpected console.error events:\n${consoleErrors.join('\n')}` : ''
     ).toHaveLength(0);
 
     // Capture a screenshot of the rendered home view for visual

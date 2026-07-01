@@ -1,14 +1,14 @@
-import React, {useEffect, useRef} from 'react';
-import {observer} from 'mobx-react-lite';
-import {runInAction} from 'mobx';
-import {mediaStore} from '../../store/mediaStore.js';
-import {Box, Drawer, FormControl, InputAdornment, InputLabel, List, MenuItem, Select, TextField} from '@mui/material';
-import {gsap} from 'gsap';
-import {durations, easings, reducedMotion, stagger} from '../../motion/grammar.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
-import {Skeleton} from '../feedback/Skeleton.jsx';
-import {holoFieldSx} from '../../styles/style.js';
+import React, { useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { runInAction } from 'mobx';
+import { mediaStore } from '../../store/mediaStore.js';
+import { Box, Drawer, FormControl, InputAdornment, InputLabel, List, MenuItem, Select, TextField } from '@mui/material';
+import { gsap } from 'gsap';
+import { durations, easings, reducedMotion, stagger } from '../../motion/grammar.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { ScanlineOverlay } from '../feedback/ScanlineOverlay.jsx';
+import { Skeleton } from '../feedback/Skeleton.jsx';
+import { holoFieldSx } from '../../styles/style.js';
 
 import HoloDrawerHeader from './HoloDrawerHeader.jsx';
 import EpisodeRow from './EpisodeRow.jsx';
@@ -17,19 +17,28 @@ import EmptyEpisodes from './EmptyEpisodes.jsx';
 const SKELETON_ROWS = 6;
 
 const EpisodeListSkeleton = () => (
-    <Box data-component="episodes-drawer-skeleton" sx={{position: 'relative', zIndex: 2, p: 1.5}}>
-        {Array.from({length: SKELETON_ROWS}).map((_, index) => (
-            <Box key={`skeleton-row-${index}`} sx={{
-                display: 'flex', alignItems: 'center', gap: 2, p: 1.25, mb: 1, borderRadius: '12px',
-                background: 'rgba(76, 210, 255, 0.04)', border: '1px solid rgba(76, 210, 255, 0.08)',
-                animation: 'episodes-skeleton-stagger 320ms cubic-bezier(0.22, 1, 0.36, 1) both',
-                animationDelay: `${index * 40}ms`,
-            }}>
-                <Skeleton id={`episodes-drawer-skeleton-num-${index}`} width={28} height={18} borderRadius={6}/>
-                <Skeleton id={`episodes-drawer-skeleton-thumb-${index}`} width={120} height={68} borderRadius={10}/>
-                <Box sx={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.75}}>
-                    <Skeleton id={`episodes-drawer-skeleton-title-${index}`} width="80%" height={14} borderRadius={6}/>
-                    <Skeleton id={`episodes-drawer-skeleton-sub-${index}`} width="40%" height={10} borderRadius={6}/>
+    <Box data-component="episodes-drawer-skeleton" sx={{ position: 'relative', zIndex: 2, p: 1.5 }}>
+        {Array.from({ length: SKELETON_ROWS }).map((_, index) => (
+            <Box
+                key={`skeleton-row-${index}`}
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 1.25,
+                    mb: 1,
+                    borderRadius: '12px',
+                    background: 'rgba(76, 210, 255, 0.04)',
+                    border: '1px solid rgba(76, 210, 255, 0.08)',
+                    animation: 'episodes-skeleton-stagger 320ms cubic-bezier(0.22, 1, 0.36, 1) both',
+                    animationDelay: `${index * 40}ms`,
+                }}
+            >
+                <Skeleton id={`episodes-drawer-skeleton-num-${index}`} width={28} height={18} borderRadius={6} />
+                <Skeleton id={`episodes-drawer-skeleton-thumb-${index}`} width={120} height={68} borderRadius={10} />
+                <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                    <Skeleton id={`episodes-drawer-skeleton-title-${index}`} width="80%" height={14} borderRadius={6} />
+                    <Skeleton id={`episodes-drawer-skeleton-sub-${index}`} width="40%" height={10} borderRadius={6} />
                 </Box>
             </Box>
         ))}
@@ -44,11 +53,21 @@ EpisodeListSkeleton.displayName = 'EpisodeListSkeleton';
  */
 const EpisodesDrawer = observer(() => {
     const {
-        isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes,
-        nowPlayingItem, showFilterPreferences, roomId, isHost, changeWatchTogetherMedia,
-        selectedSeasons, setSelectedSeasonForShow, showIntroDurations, setShowIntroDuration,
+        isEpisodesDrawerOpen,
+        closeEpisodesDrawer,
+        currentShow,
+        currentSeasonEpisodes,
+        nowPlayingItem,
+        showFilterPreferences,
+        roomId,
+        isHost,
+        changeWatchTogetherMedia,
+        selectedSeasons,
+        setSelectedSeasonForShow,
+        showIntroDurations,
+        setShowIntroDuration,
     } = mediaStore;
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     const paperRef = useRef(null);
     const listRef = useRef(null);
     const hasAnimatedOnceRef = useRef(false);
@@ -57,7 +76,7 @@ const EpisodesDrawer = observer(() => {
 
     const currentEpisodeId = nowPlayingItem.id;
     const seasonNumber = nowPlayingItem.season_number;
-    const {language: languageFilter, type: typeFilter} = showFilterPreferences.get(currentShow.id) || {};
+    const { language: languageFilter, type: typeFilter } = showFilterPreferences.get(currentShow.id) || {};
 
     const showSeasons = currentShow?.seasons || [];
     const introDuration = showIntroDurations.get(currentShow.id) ?? 80;
@@ -78,15 +97,20 @@ const EpisodesDrawer = observer(() => {
 
     const handleSelectEpisode = (episode) => {
         const allVideoUrls = episode.video_urls || [];
-        const filteredLinks = allVideoUrls.filter(link =>
-            (!languageFilter || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
-            (!typeFilter || link.type === typeFilter)
+        const filteredLinks = allVideoUrls.filter(
+            (link) =>
+                (!languageFilter || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
+                (!typeFilter || link.type === typeFilter)
         );
         const firstFilteredLink = filteredLinks[0] || null;
         const episodeToPlay = {
-            ...episode, video_urls: allVideoUrls, video_url: firstFilteredLink?.url,
-            show_id: currentShow.id, show_title: currentShow.title || currentShow.name || '',
-            backdrop_path: currentShow.backdrop_path, season_number: seasonNumber,
+            ...episode,
+            video_urls: allVideoUrls,
+            video_url: firstFilteredLink?.url,
+            show_id: currentShow.id,
+            show_title: currentShow.title || currentShow.name || '',
+            backdrop_path: currentShow.backdrop_path,
+            season_number: seasonNumber,
         };
         if (roomId && isHost) {
             changeWatchTogetherMedia(episodeToPlay);
@@ -107,15 +131,27 @@ const EpisodesDrawer = observer(() => {
         if (!paper) return undefined;
         const timeline = gsap.timeline();
         if (reducedMotion()) {
-            timeline.fromTo(paper, {autoAlpha: 0}, {
-                autoAlpha: 1,
-                duration: durations.fadeFallback,
-                ease: easings.standard
-            });
+            timeline.fromTo(
+                paper,
+                { autoAlpha: 0 },
+                {
+                    autoAlpha: 1,
+                    duration: durations.fadeFallback,
+                    ease: easings.standard,
+                }
+            );
         } else {
-            timeline.fromTo(paper, {autoAlpha: 0, x: 24, filter: 'blur(6px)'}, {
-                autoAlpha: 1, x: 0, filter: 'blur(0px)', duration: durations.med, ease: easings.emphasized,
-            });
+            timeline.fromTo(
+                paper,
+                { autoAlpha: 0, x: 24, filter: 'blur(6px)' },
+                {
+                    autoAlpha: 1,
+                    x: 0,
+                    filter: 'blur(0px)',
+                    duration: durations.med,
+                    ease: easings.emphasized,
+                }
+            );
         }
         return () => timeline.kill();
     }, [isEpisodesDrawerOpen]);
@@ -134,9 +170,17 @@ const EpisodesDrawer = observer(() => {
                 hasAnimatedOnceRef.current = true;
                 return;
             }
-            gsap.fromTo(rows, {autoAlpha: 0, y: 12}, {
-                autoAlpha: 1, y: 0, duration: durations.med, ease: easings.emphasized, stagger: stagger.row,
-            });
+            gsap.fromTo(
+                rows,
+                { autoAlpha: 0, y: 12 },
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    duration: durations.med,
+                    ease: easings.emphasized,
+                    stagger: stagger.row,
+                }
+            );
             hasAnimatedOnceRef.current = true;
         }, 0);
         return () => window.clearTimeout(handle);
@@ -153,7 +197,7 @@ const EpisodesDrawer = observer(() => {
                     ref: paperRef,
                     className: 'holo-surface',
                     sx: {
-                        width: {xs: '85%', sm: 400},
+                        width: { xs: '85%', sm: 400 },
                         background: 'var(--bg-deep)',
                         backgroundImage: 'var(--holo-grad)',
                         borderLeft: '1px solid rgba(76, 210, 255, 0.35)',
@@ -162,12 +206,12 @@ const EpisodesDrawer = observer(() => {
                         WebkitBackdropFilter: 'blur(12px) saturate(140%)',
                         paddingTop: 'env(safe-area-inset-top)',
                         paddingBottom: 'env(safe-area-inset-bottom)',
-                    }
-                }
+                    },
+                },
             }}
             aria-label={t('episodesDrawer.title')}
         >
-            <Box sx={{display: 'flex', flexDirection: 'column', height: '100%', position: 'relative'}}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
                 <HoloDrawerHeader
                     title={t('episodesDrawer.title')}
                     subtitle={currentShow?.title || currentShow?.name}
@@ -175,11 +219,20 @@ const EpisodesDrawer = observer(() => {
                     onClose={closeEpisodesDrawer}
                 />
                 {showSeasons.length > 0 && (
-                    <Box id="episodes-drawer-controls" data-component="episodes-drawer-controls" sx={{
-                        display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1, flexWrap: 'wrap',
-                        borderBottom: '1px solid rgba(76, 210, 255, 0.12)',
-                    }}>
-                        <FormControl size="small" sx={{minWidth: 110, flex: 1}}>
+                    <Box
+                        id="episodes-drawer-controls"
+                        data-component="episodes-drawer-controls"
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            px: 2,
+                            py: 1,
+                            flexWrap: 'wrap',
+                            borderBottom: '1px solid rgba(76, 210, 255, 0.12)',
+                        }}
+                    >
+                        <FormControl size="small" sx={{ minWidth: 110, flex: 1 }}>
                             <InputLabel id="drawer-season-select-label">{t('detail.season')}</InputLabel>
                             <Select
                                 labelId="drawer-season-select-label"
@@ -189,8 +242,10 @@ const EpisodesDrawer = observer(() => {
                                 onChange={(e) => handleSeasonChange(Number(e.target.value))}
                                 sx={holoFieldSx}
                             >
-                                {showSeasons.map(season => (
-                                    <MenuItem key={season.id} value={season.season_number}>{season.name}</MenuItem>
+                                {showSeasons.map((season) => (
+                                    <MenuItem key={season.id} value={season.season_number}>
+                                        {season.name}
+                                    </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
@@ -203,26 +258,32 @@ const EpisodesDrawer = observer(() => {
                             value={introDuration}
                             onChange={handleIntroDurationChange}
                             onFocus={(e) => e.target.select()}
-                            sx={{width: 130, ...holoFieldSx}}
+                            sx={{ width: 130, ...holoFieldSx }}
                             InputProps={{
                                 endAdornment: <InputAdornment position="end">sec</InputAdornment>,
-                                inputProps: {min: 0}
+                                inputProps: { min: 0 },
                             }}
                         />
                     </Box>
                 )}
-                <Box sx={{position: 'relative', zIndex: 2, flex: 1, minHeight: 0, overflowY: 'auto'}}>
+                <Box sx={{ position: 'relative', zIndex: 2, flex: 1, minHeight: 0, overflowY: 'auto' }}>
                     {isSeasonLoading ? (
-                        <EpisodeListSkeleton/>
+                        <EpisodeListSkeleton />
                     ) : isSeasonEmpty ? (
-                        <EmptyEpisodes/>
+                        <EmptyEpisodes />
                     ) : (
-                        <List id="episodes-drawer-list" ref={listRef} role="region" aria-label="Episode list"
-                              sx={{px: 1.5, py: 1}}>
+                        <List
+                            id="episodes-drawer-list"
+                            ref={listRef}
+                            role="region"
+                            aria-label="Episode list"
+                            sx={{ px: 1.5, py: 1 }}
+                        >
                             {currentSeasonEpisodes.map((episode) => {
-                                const hasPlayableLinks = (episode.video_urls || []).some(link =>
-                                    (!languageFilter || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
-                                    (!typeFilter || link.type === typeFilter)
+                                const hasPlayableLinks = (episode.video_urls || []).some(
+                                    (link) =>
+                                        (!languageFilter || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
+                                        (!typeFilter || link.type === typeFilter)
                                 );
                                 return (
                                     <EpisodeRow
@@ -238,7 +299,7 @@ const EpisodesDrawer = observer(() => {
                         </List>
                     )}
                 </Box>
-                <ScanlineOverlay id="episodes-drawer-scanline" intensity={0.08}/>
+                <ScanlineOverlay id="episodes-drawer-scanline" intensity={0.08} />
             </Box>
         </Drawer>
     );

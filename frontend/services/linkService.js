@@ -10,7 +10,7 @@
  * passes in, so the same code can run from the mediaStore facade, from
  * a future server-side resolver, and from unit tests.
  */
-import {db} from './db.js';
+import { db } from './db.js';
 
 const PREF_KEY_PREFIX = 'preferredSource:';
 

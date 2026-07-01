@@ -15,9 +15,9 @@
  * shared `Skeleton` component from the futuristic rework.
  */
 
-import React, {useEffect, useState} from 'react';
-import {Box, Stack, Typography} from '@mui/material';
-import {Skeleton} from '../../components/feedback/Skeleton.jsx';
+import React, { useEffect, useState } from 'react';
+import { Box, Stack, Typography } from '@mui/material';
+import { Skeleton } from '../../components/feedback/Skeleton.jsx';
 
 const CAPTION = 'INITIALIZING';
 
@@ -45,7 +45,7 @@ const TypewriterCaption = () => {
                 color: 'var(--neon-accent)',
                 textShadow: '0 0 16px rgba(76, 210, 255, 0.45)',
                 minWidth: 220,
-                textAlign: 'center'
+                textAlign: 'center',
             }}
             aria-live="polite"
         >
@@ -62,13 +62,22 @@ const PulsingOrb = () => (
             width: 64,
             height: 64,
             borderRadius: '50%',
-            background: 'radial-gradient(circle at 50% 50%, var(--neon-accent-hot) 0%, var(--neon-accent) 35%, rgba(76, 210, 255, 0.0) 70%)',
+            background:
+                'radial-gradient(circle at 50% 50%, var(--neon-accent-hot) 0%, var(--neon-accent) 35%, rgba(76, 210, 255, 0.0) 70%)',
             boxShadow: '0 0 24px rgba(76, 210, 255, 0.55), 0 0 60px rgba(76, 210, 255, 0.35)',
             animation: 'loading-orb-pulse 1.6s ease-in-out infinite',
             '@keyframes loading-orb-pulse': {
-                '0%, 100%': { transform: 'scale(1)', opacity: 0.85, boxShadow: '0 0 24px rgba(76, 210, 255, 0.55), 0 0 60px rgba(76, 210, 255, 0.35)' },
-                '50%': { transform: 'scale(1.18)', opacity: 1, boxShadow: '0 0 40px rgba(76, 210, 255, 0.85), 0 0 90px rgba(76, 210, 255, 0.55)' }
-            }
+                '0%, 100%': {
+                    transform: 'scale(1)',
+                    opacity: 0.85,
+                    boxShadow: '0 0 24px rgba(76, 210, 255, 0.55), 0 0 60px rgba(76, 210, 255, 0.35)',
+                },
+                '50%': {
+                    transform: 'scale(1.18)',
+                    opacity: 1,
+                    boxShadow: '0 0 40px rgba(76, 210, 255, 0.85), 0 0 90px rgba(76, 210, 255, 0.55)',
+                },
+            },
         }}
     />
 );
@@ -97,7 +106,7 @@ export const LoadingView = () => {
                 color: 'var(--text-primary)',
                 gap: 6,
                 px: { xs: 2, md: 6 },
-                py: 8
+                py: 8,
             }}
         >
             <PulsingOrb />
@@ -109,7 +118,7 @@ export const LoadingView = () => {
                 sx={{
                     width: '100%',
                     maxWidth: 720,
-                    opacity: 0.85
+                    opacity: 0.85,
                 }}
             >
                 <Skeleton id="loading-skeleton-row-1" height={48} borderRadius={10} />

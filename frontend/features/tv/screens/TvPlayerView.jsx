@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import tvStore from '../tvStore.js';
-import {remoteStore} from '../../../store/remoteStore.js';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { remoteStore } from '../../../store/remoteStore.js';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 // Dynamic imports to avoid bundling these in TV mode when not needed
 // These will only be loaded when TvPlayerView is actually mounted
@@ -93,35 +93,33 @@ const TvPlayerView = observer(() => {
     }
 
     return (
-        <div 
-            id="tv-player-view" 
+        <div
+            id="tv-player-view"
             className="tv-screen tv-player-view"
-            style={{ 
+            style={{
                 position: 'relative',
-                pointerEvents: 'none' // Disable mouse/hover interactions
+                pointerEvents: 'none', // Disable mouse/hover interactions
             }}
         >
             {/* Playback Component Container */}
-            <div 
-                style={{ 
+            <div
+                style={{
                     pointerEvents: 'auto',
                     width: '100%',
-                    height: '100%'
+                    height: '100%',
                 }}
             >
                 {PlaybackComponent ? (
                     <PlaybackComponent />
                 ) : (
-                    <div className="tv-loading">
-                        {t('common.loading', 'Caricamento...')}
-                    </div>
+                    <div className="tv-loading">{t('common.loading', 'Caricamento...')}</div>
                 )}
             </div>
 
             {/* Exit Confirmation Dialog */}
             {showExitConfirm && (
-                <div 
-                    id="tv-exit-dialog" 
+                <div
+                    id="tv-exit-dialog"
                     className="tv-confirm-dialog tv-focusable"
                     role="dialog"
                     aria-modal="true"
@@ -131,24 +129,15 @@ const TvPlayerView = observer(() => {
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
                         zIndex: 1000,
-                        pointerEvents: 'auto'
+                        pointerEvents: 'auto',
                     }}
                 >
-                    <h3 className="dialog-title">
-                        {t('tv.exitPlayerTitle', 'Vuoi interrompere la riproduzione?')}
-                    </h3>
+                    <h3 className="dialog-title">{t('tv.exitPlayerTitle', 'Vuoi interrompere la riproduzione?')}</h3>
                     <div className="dialog-buttons">
-                        <button 
-                            className="dialog-btn cancel"
-                            onClick={handleExitCancel}
-                            autoFocus
-                        >
+                        <button className="dialog-btn cancel" onClick={handleExitCancel} autoFocus>
                             {t('common.cancel', 'Annulla')}
                         </button>
-                        <button 
-                            className="dialog-btn confirm"
-                            onClick={handleExitConfirm}
-                        >
+                        <button className="dialog-btn confirm" onClick={handleExitConfirm}>
                             {t('tv.exit', 'Esci')}
                         </button>
                     </div>

@@ -1,11 +1,10 @@
-import {makeAutoObservable, runInAction} from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
-import {websocketService} from '../services/websocketService.js';
-import {db} from '../services/db';
-import {mediaStore} from './mediaStore';
-import {getSeriesDetails, getSeriesEpisodes} from '../services/apiCall';
-import {isSmartTV as detectSmartTV} from '../utils/device.js';
-
+import { websocketService } from '../services/websocketService.js';
+import { db } from '../services/db';
+import { mediaStore } from './mediaStore';
+import { getSeriesDetails, getSeriesEpisodes } from '../services/apiCall';
+import { isSmartTV as detectSmartTV } from '../utils/device.js';
 
 class RemoteStore {
     // ===== OBSERVABLE STATE =====
@@ -89,10 +88,10 @@ class RemoteStore {
         const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
         if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
 
-        const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
+        const season = this.remoteFullItem.seasons.find((s) => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        const currentEpisodeIndex = season.episodes.findIndex((ep) => ep.id === nowPlaying.id);
         if (currentEpisodeIndex > -1 && currentEpisodeIndex < season.episodes.length - 1) {
             return season.episodes[currentEpisodeIndex + 1];
         }
@@ -103,10 +102,10 @@ class RemoteStore {
         const nowPlaying = this.remoteSlaveState?.nowPlayingItem;
         if (!nowPlaying || !('episode_number' in nowPlaying) || !this.remoteFullItem?.seasons) return null;
 
-        const season = this.remoteFullItem.seasons.find(s => s.season_number === nowPlaying.season_number);
+        const season = this.remoteFullItem.seasons.find((s) => s.season_number === nowPlaying.season_number);
         if (!season?.episodes) return null;
 
-        const currentEpisodeIndex = season.episodes.findIndex(ep => ep.id === nowPlaying.id);
+        const currentEpisodeIndex = season.episodes.findIndex((ep) => ep.id === nowPlaying.id);
         if (currentEpisodeIndex > 0) {
             return season.episodes[currentEpisodeIndex - 1];
         }
@@ -114,7 +113,7 @@ class RemoteStore {
     }
 
     handleSlavesOffline = () => {
-        this.knownSlaves.forEach(slave => {
+        this.knownSlaves.forEach((slave) => {
             slave.isOnline = false;
         });
     };
@@ -136,7 +135,7 @@ class RemoteStore {
         this.isSmartTV = true;
         this.isSmartTVPairingVisible = true;
         mediaStore.isProfileDrawerOpen = false;
-        db.preferences.put({key: 'isConfiguredAsSlave', value: true});
+        db.preferences.put({ key: 'isConfiguredAsSlave', value: true });
         const payload = {};
         if (this.slaveId) payload.slaveId = this.slaveId;
         if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
@@ -171,7 +170,7 @@ class RemoteStore {
             this.isRemoteMaster = true;
             this.slaveId = slaveId;
             this.isQRScannerOpen = false;
-            db.preferences.put({key: 'remoteMasterForSlaveId', value: slaveId});
+            db.preferences.put({ key: 'remoteMasterForSlaveId', value: slaveId });
         });
 
         // Prefer shortCode for reconnection if available, otherwise use full slaveId
@@ -182,16 +181,17 @@ class RemoteStore {
         // the knownSlaves entry from the shortCode key to the full id.
         // If the input itself is a 5-character short code, remember it
         // even when the existing row has no shortCode metadata.
-        this._lastConnectShortCode = shortCode
-            || (slaveId && slaveId.length === 5 ? slaveId : null)
-            || (existingSlave?.id && existingSlave.id.length === 5 ? existingSlave.id : null);
-        websocketService.registerMaster({slaveId: shortCode || slaveId});
+        this._lastConnectShortCode =
+            shortCode ||
+            (slaveId && slaveId.length === 5 ? slaveId : null) ||
+            (existingSlave?.id && existingSlave.id.length === 5 ? existingSlave.id : null);
+        websocketService.registerMaster({ slaveId: shortCode || slaveId });
 
         const slaveData = {
             id: slaveId,
             name: existingSlave?.name || `TV ${slaveId.substring(0, 4)}`,
             lastSeen: Date.now(),
-            shortCode: shortCode || (slaveId.length === 5 ? slaveId : existingSlave?.shortCode)
+            shortCode: shortCode || (slaveId.length === 5 ? slaveId : existingSlave?.shortCode),
         };
         await db.knownSlaves.put(slaveData);
 
@@ -215,14 +215,14 @@ class RemoteStore {
             this.stopPingInterval();
             this.showSnackbar('notifications.disconnectedFromTV', 'info', true);
         });
-    }
+    };
 
     reconnectToSlave = (slaveId) => {
         this.connectAsRemoteMaster(slaveId);
     };
 
     updateSlaveName = async (slaveId, name) => {
-        await db.knownSlaves.update(slaveId, {name});
+        await db.knownSlaves.update(slaveId, { name });
         const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
         runInAction(() => {
             this.knownSlaves = updatedSlaves;
@@ -230,7 +230,7 @@ class RemoteStore {
     };
 
     updateSlaveShortCode = async (slaveId, shortCode) => {
-        await db.knownSlaves.update(slaveId, {shortCode});
+        await db.knownSlaves.update(slaveId, { shortCode });
         const updatedSlaves = await db.knownSlaves.orderBy('lastSeen').reverse().toArray();
         runInAction(() => {
             this.knownSlaves = updatedSlaves;
@@ -247,12 +247,8 @@ class RemoteStore {
         // ack can land before the put() is observable in memory.
         const shortCode = this._lastConnectShortCode;
         const currentSlaveId = this.slaveId;
-        const shortCodeEntry = shortCode
-            ? await db.knownSlaves.get(shortCode)
-            : null;
-        const currentIdEntry = currentSlaveId
-            ? await db.knownSlaves.get(currentSlaveId)
-            : null;
+        const shortCodeEntry = shortCode ? await db.knownSlaves.get(shortCode) : null;
+        const currentIdEntry = currentSlaveId ? await db.knownSlaves.get(currentSlaveId) : null;
         const existingSlave = shortCodeEntry || currentIdEntry;
 
         if (existingSlave && existingSlave.id !== newSlaveId) {
@@ -261,7 +257,7 @@ class RemoteStore {
             const updatedSlave = {
                 ...existingSlave,
                 id: newSlaveId,
-                lastSeen: Date.now()
+                lastSeen: Date.now(),
             };
             await db.knownSlaves.put(updatedSlave);
 
@@ -289,7 +285,7 @@ class RemoteStore {
 
     setSlaveOnlineStatus = async (slaveId, isOnline) => {
         runInAction(() => {
-            const slave = this.knownSlaves.find(s => s.id === slaveId);
+            const slave = this.knownSlaves.find((s) => s.id === slaveId);
             if (slave) {
                 slave.isOnline = isOnline;
             }
@@ -297,7 +293,7 @@ class RemoteStore {
         // Persist isOnline status to IndexedDB so it survives page refreshes
         if (slaveId) {
             try {
-                await db.knownSlaves.update(slaveId, {isOnline});
+                await db.knownSlaves.update(slaveId, { isOnline });
             } catch (error) {
                 console.error('[RemoteStore] Failed to persist isOnline status:', error);
             }
@@ -316,7 +312,7 @@ class RemoteStore {
             });
 
             // Send command to slave to select the item
-            this.sendRemoteCommand({command: 'select_item', item: item});
+            this.sendRemoteCommand({ command: 'select_item', item: item });
 
             // Fetch details for the master's display
             try {
@@ -328,7 +324,7 @@ class RemoteStore {
                     }
                 });
             } catch (error) {
-                console.error("Failed to load details for remote control", error);
+                console.error('Failed to load details for remote control', error);
                 this.showSnackbar('notifications.failedToLoadSeriesDetails', 'error', true);
             } finally {
                 runInAction(() => {
@@ -355,15 +351,17 @@ class RemoteStore {
 
             websocketService.sendMessage({
                 type: 'quix-remote-command',
-                payload: {...command, slaveId: this.slaveId}
+                payload: { ...command, slaveId: this.slaveId },
             });
         } else {
-            console.log(`[RemoteStore] sendRemoteCommand: NOT sending - isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`);
+            console.log(
+                `[RemoteStore] sendRemoteCommand: NOT sending - isRemoteMaster=${this.isRemoteMaster}, slaveId=${this.slaveId}`
+            );
         }
     };
 
     sendPlayCommandAndOptimisticallyUpdate = (item) => {
-        this.sendRemoteCommand({command: 'play_item', item: item});
+        this.sendRemoteCommand({ command: 'play_item', item: item });
         runInAction(() => {
             this.isStoppingRemotePlayback = false;
             this.remoteSlaveState = {
@@ -387,19 +385,19 @@ class RemoteStore {
 
         // --- Resolve URL ---
         const mediaId = 'episode_number' in item ? item.id : item.id;
-        const allLinks = (item).video_urls || await mediaStore.getLinksForMedia(mediaId);
+        const allLinks = item.video_urls || (await mediaStore.getLinksForMedia(mediaId));
 
         if (allLinks.length === 0) {
-            this.showSnackbar("notifications.noVideoLinks", "warning", true);
+            this.showSnackbar('notifications.noVideoLinks', 'warning', true);
             return;
         }
 
         let candidateLinks = allLinks;
-        const showId = 'show_id' in item ? (item).show_id : item.id;
+        const showId = 'show_id' in item ? item.show_id : item.id;
         const preferredOrigin = mediaStore.preferredSources.get(showId);
 
         if (preferredOrigin) {
-            const linksFromPreferred = allLinks.filter(l => {
+            const linksFromPreferred = allLinks.filter((l) => {
                 try {
                     return new URL(l.url).origin === preferredOrigin;
                 } catch {
@@ -412,7 +410,7 @@ class RemoteStore {
         }
 
         if (candidateLinks.length === 1) {
-            this.sendPlayCommandAndOptimisticallyUpdate({...item, video_url: candidateLinks[0].url});
+            this.sendPlayCommandAndOptimisticallyUpdate({ ...item, video_url: candidateLinks[0].url });
             return;
         }
 
@@ -426,13 +424,13 @@ class RemoteStore {
     };
 
     stopRemotePlayback = () => {
-        this.sendRemoteCommand({command: 'stop'});
+        this.sendRemoteCommand({ command: 'stop' });
     };
 
     fetchRemoteFullItem = async () => {
         if (!this.remoteSlaveState?.nowPlayingItem) return;
         const item = this.remoteSlaveState.nowPlayingItem;
-        const showId = 'show_id' in item ? (item).show_id : item.id;
+        const showId = 'show_id' in item ? item.show_id : item.id;
 
         runInAction(() => {
             this.isRemoteFullItemLoading = true;
@@ -442,18 +440,20 @@ class RemoteStore {
             const seasonsWithEpisodes = await Promise.all(
                 fullDetails.seasons?.map(async (season) => {
                     const episodes = await getSeriesEpisodes(showId, season.season_number);
-                    const episodesWithLinks = await Promise.all(episodes.map(async ep => {
-                        const links = await mediaStore.getLinksForMedia(ep.id);
-                        return {...ep, video_urls: links, video_url: links[0]?.url};
-                    }));
-                    return {...season, episodes: episodesWithLinks};
+                    const episodesWithLinks = await Promise.all(
+                        episodes.map(async (ep) => {
+                            const links = await mediaStore.getLinksForMedia(ep.id);
+                            return { ...ep, video_urls: links, video_url: links[0]?.url };
+                        })
+                    );
+                    return { ...season, episodes: episodesWithLinks };
                 }) || []
             );
             runInAction(() => {
-                this.remoteFullItem = {...fullDetails, seasons: seasonsWithEpisodes};
+                this.remoteFullItem = { ...fullDetails, seasons: seasonsWithEpisodes };
             });
         } catch (error) {
-            console.error("Failed to fetch full remote item details", error);
+            console.error('Failed to fetch full remote item details', error);
         } finally {
             runInAction(() => {
                 this.isRemoteFullItemLoading = false;
@@ -463,13 +463,13 @@ class RemoteStore {
 
     // Handle remote command received from master (slave-side)
     handleRemoteCommand = (payload) => {
-        const {command, item, time} = payload;
+        const { command, item, time } = payload;
 
         // Commands that do NOT require an existing video element
         switch (command) {
             case 'play_item':
                 mediaStore.startPlayback(item);
-                mediaStore.isPlaying = true;  // Set playing state since startPlayback doesn't set it
+                mediaStore.isPlaying = true; // Set playing state since startPlayback doesn't set it
                 this.sendSlaveStatusUpdate();
                 this.triggerAutoFullscreen();
                 return;
@@ -521,10 +521,14 @@ class RemoteStore {
                 const remoteItem = this.remoteSlaveState?.nowPlayingItem;
                 const activeItem = remoteItem ?? mediaStore.nowPlayingItem;
                 if (video && activeItem) {
-                    if ('intro_end_s' in activeItem && (activeItem).intro_end_s && (activeItem).intro_end_s > (activeItem).intro_start_s) {
-                        video.currentTime = (activeItem).intro_end_s;
+                    if (
+                        'intro_end_s' in activeItem &&
+                        activeItem.intro_end_s &&
+                        activeItem.intro_end_s > activeItem.intro_start_s
+                    ) {
+                        video.currentTime = activeItem.intro_end_s;
                     } else {
-                        const showId = 'show_id' in activeItem ? (activeItem).show_id : (activeItem).id;
+                        const showId = 'show_id' in activeItem ? activeItem.show_id : activeItem.id;
                         const skipDuration = payload.skipDuration ?? mediaStore.showIntroDurations.get(showId) ?? 80;
                         video.currentTime = Math.min(video.duration, video.currentTime + skipDuration);
                     }
@@ -536,7 +540,9 @@ class RemoteStore {
     };
 
     sendSlaveStatusUpdate = () => {
-        console.log(`[RemoteStore] sendSlaveStatusUpdate: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, isPlaying=${mediaStore.isPlaying}`);
+        console.log(
+            `[RemoteStore] sendSlaveStatusUpdate: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, isPlaying=${mediaStore.isPlaying}`
+        );
         if (this.isSmartTV && this.slaveId) {
             const video = document.querySelector('video');
             websocketService.sendMessage({
@@ -547,8 +553,8 @@ class RemoteStore {
                     nowPlayingItem: mediaStore.nowPlayingItem,
                     isIntroSkippable: this.isIntroSkippableOnSlave,
                     currentTime: video?.currentTime,
-                    duration: video?.duration
-                }
+                    duration: video?.duration,
+                },
             });
         } else {
             console.log(`[RemoteStore] sendSlaveStatusUpdate: BLOCKED - isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}`);
@@ -580,10 +586,10 @@ class RemoteStore {
                 if (this.isRemoteMaster && this.slaveId && this.isRemoteMasterConnected) {
                     websocketService.sendMessage({
                         type: 'heartbeat-ping',
-                        payload: {slaveId: this.slaveId}
+                        payload: { slaveId: this.slaveId },
                     });
                     this.lastPingTime = Date.now();
-                    console.log("[RemoteStore] Sent heartbeat-ping to slave");
+                    console.log('[RemoteStore] Sent heartbeat-ping to slave');
 
                     // Check for missed ping after timeout
                     setTimeout(() => {
@@ -593,10 +599,10 @@ class RemoteStore {
                                 console.log(`[RemoteStore] Missed ping detected, missedPings=${this.missedPings}`);
                                 if (this.missedPings >= 3) {
                                     this.connectionHealth = 'poor';
-                                    console.log("[RemoteStore] Connection health: POOR");
+                                    console.log('[RemoteStore] Connection health: POOR');
                                 } else if (this.missedPings >= 1) {
                                     this.connectionHealth = 'degraded';
-                                    console.log("[RemoteStore] Connection health: DEGRADED");
+                                    console.log('[RemoteStore] Connection health: DEGRADED');
                                 }
                             });
                         }
@@ -630,12 +636,12 @@ class RemoteStore {
         this.masterReconnectTimer = window.setInterval(() => {
             if (!this.isRemoteMasterConnected && this.slaveId && this.masterReconnectAttempts < 12) {
                 // Use shortCode if available, otherwise full slaveId
-                const payload = this.slaveShortCode
-                    ? {slaveId: this.slaveShortCode}
-                    : {slaveId: this.slaveId};
-                websocketService.sendMessage({type: 'quix-register-master', payload});
+                const payload = this.slaveShortCode ? { slaveId: this.slaveShortCode } : { slaveId: this.slaveId };
+                websocketService.sendMessage({ type: 'quix-register-master', payload });
                 this.masterReconnectAttempts++;
-                console.log(`[RemoteStore] Master reconnection attempt ${this.masterReconnectAttempts}/12 using ${this.slaveShortCode ? "shortCode" : "fullId"}`);
+                console.log(
+                    `[RemoteStore] Master reconnection attempt ${this.masterReconnectAttempts}/12 using ${this.slaveShortCode ? 'shortCode' : 'fullId'}`
+                );
             } else if (this.masterReconnectAttempts >= 12 || this.isRemoteMasterConnected) {
                 this.stopMasterReconnectTimer();
             }
@@ -662,20 +668,20 @@ class RemoteStore {
     // Sync media from master to slave
     syncMediaFromMaster = async (mediaItems) => {
         try {
-            const {db: localDb} = await import('../services/db.js');
+            const { db: localDb } = await import('../services/db.js');
 
             for (let i = 0; i < mediaItems.length; i++) {
-                const {mediaItem, links} = mediaItems[i];
+                const { mediaItem, links } = mediaItems[i];
 
                 // Save the full media item metadata
                 await localDb.cachedItems.put(mediaItem);
 
                 // Add to myList
-                await localDb.myList.put({id: mediaItem.id, order: Date.now() + i});
+                await localDb.myList.put({ id: mediaItem.id, order: Date.now() + i });
 
                 // Save all links (strip the id field to let IndexedDB auto-assign)
                 if (links && links.length > 0) {
-                    const linksToSave = links.map(({id: _id, ...link}) => link);
+                    const linksToSave = links.map(({ id: _id, ...link }) => link);
                     await localDb.mediaLinks.bulkPut(linksToSave);
 
                     // Clear the in-memory mediaLinks cache for these media IDs to prevent stale data
@@ -687,19 +693,18 @@ class RemoteStore {
                 // Send progress update back to master
                 websocketService.sendMessage({
                     type: 'sync-progress-update',
-                    payload: {completed: i + 1, total: mediaItems.length}
+                    payload: { completed: i + 1, total: mediaItems.length },
                 });
             }
 
             this.showSnackbar(`Sincronizzati ${mediaItems.length} contenuti sulla TV`, 'success', true);
-            websocketService.sendMessage({type: 'tv-sync-completed'});
+            websocketService.sendMessage({ type: 'tv-sync-completed' });
 
             // Reload the local data so the slave's UI reflects the new content
             await mediaStore.reloadAllData();
-
         } catch (error) {
             console.error('Error syncing media from master:', error);
-            websocketService.sendMessage({type: 'tv-sync-error', payload: {error: 'Failed to sync media'}});
+            websocketService.sendMessage({ type: 'tv-sync-error', payload: { error: 'Failed to sync media' } });
         }
     };
 
@@ -708,12 +713,12 @@ class RemoteStore {
         // For slave: only register after initial data has been loaded
         if (this.isSmartTV) {
             if (!this.hasLoadedInitialData) {
-                console.log("[RemoteStore] initRemoteSession: waiting for initial data to load before registering slave");
+                console.log('[RemoteStore] initRemoteSession: waiting for initial data to load before registering slave');
                 this._pendingRemoteSessionInit = true; // Mark that we need to retry after data loads
                 return;
             }
             if (!websocketService.isConnected) {
-                console.log("[RemoteStore] initRemoteSession: websocket not connected, will retry on reconnect");
+                console.log('[RemoteStore] initRemoteSession: websocket not connected, will retry on reconnect');
                 this._pendingRemoteSessionInit = true;
                 return;
             }
@@ -722,14 +727,16 @@ class RemoteStore {
             const payload = {};
             if (this.slaveId) payload.slaveId = this.slaveId;
             if (this.slaveShortCode) payload.shortCode = this.slaveShortCode;
-            console.log(`[RemoteStore] initRemoteSession: registering slave with slaveId=${this.slaveId || "null (will be created)"}, shortCode=${this.slaveShortCode || "null"}`);
-            websocketService.sendMessage({type: 'quix-register-slave', payload});
+            console.log(
+                `[RemoteStore] initRemoteSession: registering slave with slaveId=${this.slaveId || 'null (will be created)'}, shortCode=${this.slaveShortCode || 'null'}`
+            );
+            websocketService.sendMessage({ type: 'quix-register-slave', payload });
         } else if (this.isRemoteMaster && this.slaveId) {
             // When the WebSocket connects (or reconnects), if this client is a master,
             // it needs to re-register with its slave to re-establish the control session.
-            websocketService.sendMessage({type: 'quix-register-master', payload: {slaveId: this.slaveId}});
+            websocketService.sendMessage({ type: 'quix-register-master', payload: { slaveId: this.slaveId } });
             // Request the current status from the slave to sync the UI
-            this.sendRemoteCommand({command: 'request_status'});
+            this.sendRemoteCommand({ command: 'request_status' });
         }
     };
 
@@ -759,14 +766,16 @@ class RemoteStore {
             }
             this.knownSlaves = knownSlavesData;
             this.hasLoadedInitialData = true;
-            console.log(`[remoteStore] loadPersistedData: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, shortCode=${this.slaveShortCode}`);
+            console.log(
+                `[remoteStore] loadPersistedData: isSmartTV=${this.isSmartTV}, slaveId=${this.slaveId}, shortCode=${this.slaveShortCode}`
+            );
         });
     };
 
     // WebSocket message handler
     handleIncomingMessage = (message) => {
         runInAction(() => {
-            const {type, payload} = message;
+            const { type, payload } = message;
             this.addDebugMessage(`IN: ${type} ${JSON.stringify(payload || {})}`);
 
             switch (type) {
@@ -775,8 +784,8 @@ class RemoteStore {
                     this.slaveShortCode = payload.shortCode;
                     // Always persist slave ID and short code so they survive page refreshes
                     // and the user can reconnect with the same short code
-                    db.preferences.put({key: 'selfSlaveId', value: payload.slaveId});
-                    db.preferences.put({key: 'selfShortCode', value: payload.shortCode});
+                    db.preferences.put({ key: 'selfSlaveId', value: payload.slaveId });
+                    db.preferences.put({ key: 'selfShortCode', value: payload.shortCode });
                     this.showSnackbar('notifications.tvReady', 'info', true);
                     break;
                 case 'quix-master-connected':
@@ -830,7 +839,9 @@ class RemoteStore {
                     break;
                 case 'quix-master-connection-status':
                     // This message is sent to the master when connection status changes
-                    console.log(`[RemoteStore] quix-master-connection-status: status=${payload?.status}, slaveId=${payload?.slaveId}`);
+                    console.log(
+                        `[RemoteStore] quix-master-connection-status: status=${payload?.status}, slaveId=${payload?.slaveId}`
+                    );
                     if (payload?.status === 'slave-reconnecting') {
                         this.showSnackbar('notifications.slaveReconnecting', 'warning', true);
                         // Retry is handled by startMasterReconnectTimer
@@ -842,11 +853,11 @@ class RemoteStore {
                     }
                     break;
                 case 'connection-established':
-                    if ((payload)?.role === 'master') {
-                        console.log(`[RemoteStore] connection-established: masterId=${(payload).masterId}, tvId=${(payload).tvId}`);
+                    if (payload?.role === 'master') {
+                        console.log(`[RemoteStore] connection-established: masterId=${payload.masterId}, tvId=${payload.tvId}`);
                         runInAction(() => {
                             this.isRemoteMasterConnected = true;
-                            this.slaveId = (payload).tvId;
+                            this.slaveId = payload.tvId;
                         });
                         this.startPingInterval();
                         this.stopMasterReconnectTimer();
@@ -854,8 +865,8 @@ class RemoteStore {
                             this.openMediaSyncModal(this.slaveId);
                         }
                         this.showSnackbar('notifications.remoteConnected', 'success', true);
-                    } else if ((payload)?.role === 'slave') {
-                        console.log(`[RemoteStore] connection-established: slave connected to master ${(payload).masterId}`);
+                    } else if (payload?.role === 'slave') {
+                        console.log(`[RemoteStore] connection-established: slave connected to master ${payload.masterId}`);
                         runInAction(() => {
                             this.isSmartTVPairingVisible = false;
                             this.isRemoteMasterConnected = true;
@@ -863,29 +874,29 @@ class RemoteStore {
                     }
                     break;
                 case 'connection-error':
-                    console.log(`[RemoteStore] connection-error: ${(payload).error} - ${(payload).message}`);
-                    if ((payload).error === 'TV_BUSY') {
+                    console.log(`[RemoteStore] connection-error: ${payload.error} - ${payload.message}`);
+                    if (payload.error === 'TV_BUSY') {
                         this.showSnackbar('notifications.slaveBusy', 'warning', true);
-                    } else if ((payload).error === 'TV_NOT_FOUND') {
+                    } else if (payload.error === 'TV_NOT_FOUND') {
                         this.showSnackbar('notifications.slaveNotFound', 'error', true);
-                        this.handleReconnectFailed((payload).shortCode);
-                    } else if ((payload).error === 'TV_OFFLINE') {
+                        this.handleReconnectFailed(payload.shortCode);
+                    } else if (payload.error === 'TV_OFFLINE') {
                         this.showSnackbar('notifications.slaveOffline', 'warning', true);
                     } else {
-                        this.showSnackbar((payload).message || 'Connection failed', 'error', true);
+                        this.showSnackbar(payload.message || 'Connection failed', 'error', true);
                     }
                     break;
                 case 'connection-terminated':
-                    console.log(`[RemoteStore] connection-terminated: target=${(payload).target}, reason=${(payload).reason}`);
-                    if ((payload).target === 'slave') {
+                    console.log(`[RemoteStore] connection-terminated: target=${payload.target}, reason=${payload.reason}`);
+                    if (payload.target === 'slave') {
                         this.setSlaveOnlineStatus(this.slaveId, false);
-                        this.handleSlaveDisconnected((payload).reason !== 'slave-initiated');
+                        this.handleSlaveDisconnected(payload.reason !== 'slave-initiated');
                         this.stopPingInterval();
-                    } else if ((payload).target === 'master') {
+                    } else if (payload.target === 'master') {
                         runInAction(() => {
                             this.isRemoteMasterConnected = false;
                         });
-                        this.knownSlaves.forEach(slave => {
+                        this.knownSlaves.forEach((slave) => {
                             slave.isOnline = false;
                         });
                         this.stopPingInterval();
@@ -902,23 +913,23 @@ class RemoteStore {
                     });
                     break;
                 case 'heartbeat-ping':
-                    console.log("[RemoteStore] Received heartbeat-ping from", (payload).source);
+                    console.log('[RemoteStore] Received heartbeat-ping from', payload.source);
                     if (this.slaveId) {
                         websocketService.sendMessage({
                             type: 'heartbeat-pong',
-                            payload: {target: 'master', tvId: this.slaveId}
+                            payload: { target: 'master', tvId: this.slaveId },
                         });
                     }
                     break;
                 case 'heartbeat-pong':
-                    console.log("[RemoteStore] Received heartbeat-pong");
+                    console.log('[RemoteStore] Received heartbeat-pong');
                     runInAction(() => {
                         this.missedPings = 0;
                         this.connectionHealth = 'good';
                     });
                     break;
                 case 'sync-response':
-                    if ((payload).accepted) {
+                    if (payload.accepted) {
                         this.showSnackbar('notifications.syncCompleted', 'success', true);
                     } else {
                         this.showSnackbar('notifications.syncCancelled', 'info', true);
@@ -926,8 +937,8 @@ class RemoteStore {
                     break;
                 case 'error':
                 case 'command-error':
-                    console.log("[RemoteStore] Error received:", payload);
-                    this.showSnackbar((payload).message || 'An error occurred', 'error', true);
+                    console.log('[RemoteStore] Error received:', payload);
+                    this.showSnackbar(payload.message || 'An error occurred', 'error', true);
                     break;
             }
         });
@@ -945,7 +956,7 @@ class RemoteStore {
         runInAction(() => {
             this.isReconnecting = false;
         });
-        console.log("[RemoteStore] Reconnect stopped. User should scan QR code to reconnect.");
+        console.log('[RemoteStore] Reconnect stopped. User should scan QR code to reconnect.');
     };
 }
 

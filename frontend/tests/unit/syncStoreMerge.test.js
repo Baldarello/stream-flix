@@ -15,21 +15,21 @@
  * are still preserved in the merge result so the local cache is not
  * wiped by the import.
  */
-import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {syncStore} from '../../store/syncStore.js';
-import {db} from '../../services/db.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { syncStore } from '../../store/syncStore.js';
+import { db } from '../../services/db.js';
 import * as driveService from '../../services/googleDriveService.js';
 
 vi.mock('../../services/googleDriveService', () => ({
     findLatestBackupFile: vi.fn(),
     readBackupFile: vi.fn(),
-    writeBackupFile: vi.fn().mockResolvedValue({id: 'new-file'}),
+    writeBackupFile: vi.fn().mockResolvedValue({ id: 'new-file' }),
     deleteOldBackups: vi.fn().mockResolvedValue(undefined),
 }));
 
 const importDataMock = vi.fn().mockResolvedValue(undefined);
 const bulkDeleteMock = vi.fn().mockResolvedValue(undefined);
-const whereAnyOfMock = vi.fn().mockReturnValue({delete: vi.fn().mockResolvedValue(undefined)});
+const whereAnyOfMock = vi.fn().mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) });
 
 vi.mock('../../services/db.js', () => {
     const tableMock = () => ({
@@ -55,13 +55,17 @@ vi.mock('../../services/db.js', () => {
             },
             mediaLinks: {
                 ...tableMock(),
-                where: vi.fn().mockReturnValue({anyOf: vi.fn().mockReturnValue({delete: vi.fn().mockResolvedValue(undefined)})}),
-                anyOf: vi.fn().mockReturnValue({delete: vi.fn().mockResolvedValue(undefined)}),
+                where: vi
+                    .fn()
+                    .mockReturnValue({ anyOf: vi.fn().mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }) }),
+                anyOf: vi.fn().mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }),
             },
             episodeProgress: {
                 ...tableMock(),
-                where: vi.fn().mockReturnValue({anyOf: vi.fn().mockReturnValue({delete: vi.fn().mockResolvedValue(undefined)})}),
-                anyOf: vi.fn().mockReturnValue({delete: vi.fn().mockResolvedValue(undefined)}),
+                where: vi
+                    .fn()
+                    .mockReturnValue({ anyOf: vi.fn().mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }) }),
+                anyOf: vi.fn().mockReturnValue({ delete: vi.fn().mockResolvedValue(undefined) }),
             },
             preferences: {
                 ...tableMock(),
@@ -87,7 +91,7 @@ describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', ()
     beforeEach(() => {
         vi.clearAllMocks();
         syncStore.syncConflictData = null;
-        syncStore.googleUser = {accessToken: 'token'};
+        syncStore.googleUser = { accessToken: 'token' };
         syncStore.isProcessingSyncConflict = false;
     });
 
@@ -102,27 +106,34 @@ describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', ()
                 remote: [1, 3],
             },
             shows: new Map([
-                [1, {
-                    local: {id: 1, name: 'Show 1', media_type: 'tv'},
-                    remote: {id: 1, name: 'Show 1', media_type: 'tv'},
-                }],
-                [2, {
-                    local: {id: 2, name: 'Show 2', media_type: 'tv'},
-                    remote: null,
-                }],
-                [3, {
-                    local: null,
-                    remote: {id: 3, name: 'Show 3', media_type: 'tv'},
-                }],
+                [
+                    1,
+                    {
+                        local: { id: 1, name: 'Show 1', media_type: 'tv' },
+                        remote: { id: 1, name: 'Show 1', media_type: 'tv' },
+                    },
+                ],
+                [
+                    2,
+                    {
+                        local: { id: 2, name: 'Show 2', media_type: 'tv' },
+                        remote: null,
+                    },
+                ],
+                [
+                    3,
+                    {
+                        local: null,
+                        remote: { id: 3, name: 'Show 3', media_type: 'tv' },
+                    },
+                ],
             ]),
             mediaLinks: {
                 local: [
-                    {mediaId: 1, url: 'https://example.com/a', label: 'A'},
-                    {mediaId: 1, url: 'https://example.com/b', label: 'B'},
+                    { mediaId: 1, url: 'https://example.com/a', label: 'A' },
+                    { mediaId: 1, url: 'https://example.com/b', label: 'B' },
                 ],
-                remote: [
-                    {mediaId: 1, url: 'https://example.com/a', label: 'A duplicate'},
-                ],
+                remote: [{ mediaId: 1, url: 'https://example.com/a', label: 'A duplicate' }],
             },
             episodeProgress: {
                 local: [],
@@ -134,9 +145,9 @@ describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', ()
         // only in remote), to exercise the "remote" branch of the
         // linksAction / myListAction switch.
         const choices = [
-            {id: 1, myListAction: 'local', linksAction: 'local', progressAction: 'local', deleteShow: false},
-            {id: 2, myListAction: 'local', linksAction: 'local', progressAction: 'local', deleteShow: false},
-            {id: 3, myListAction: 'remote', linksAction: 'remote', progressAction: 'remote', deleteShow: false},
+            { id: 1, myListAction: 'local', linksAction: 'local', progressAction: 'local', deleteShow: false },
+            { id: 2, myListAction: 'local', linksAction: 'local', progressAction: 'local', deleteShow: false },
+            { id: 3, myListAction: 'remote', linksAction: 'remote', progressAction: 'remote', deleteShow: false },
         ];
 
         await expect(syncStore.mergeLocalAndRemote(choices, [])).resolves.not.toThrow();
@@ -159,50 +170,47 @@ describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', ()
                 remote: [1],
             },
             shows: new Map([
-                [1, {
-                    local: {
-                        id: 1,
-                        name: 'Show 1',
-                        media_type: 'tv',
-                        seasons: [
-                            {
-                                season_number: 1,
-                                episodes: [{id: 100, name: 'e1'}],
-                            },
-                        ],
+                [
+                    1,
+                    {
+                        local: {
+                            id: 1,
+                            name: 'Show 1',
+                            media_type: 'tv',
+                            seasons: [
+                                {
+                                    season_number: 1,
+                                    episodes: [{ id: 100, name: 'e1' }],
+                                },
+                            ],
+                        },
+                        remote: {
+                            id: 1,
+                            name: 'Show 1',
+                            media_type: 'tv',
+                            seasons: [
+                                {
+                                    season_number: 1,
+                                    episodes: [{ id: 100, name: 'e1' }],
+                                },
+                            ],
+                        },
                     },
-                    remote: {
-                        id: 1,
-                        name: 'Show 1',
-                        media_type: 'tv',
-                        seasons: [
-                            {
-                                season_number: 1,
-                                episodes: [{id: 100, name: 'e1'}],
-                            },
-                        ],
-                    },
-                }],
+                ],
             ]),
             mediaLinks: {
                 local: [],
                 remote: [],
             },
             episodeProgress: {
-                local: [
-                    {episodeId: 100, currentTime: 10, duration: 100, lastWatchedAt: 1000},
-                ],
-                remote: [
-                    {episodeId: 100, currentTime: 20, duration: 100, lastWatchedAt: 2000},
-                ],
+                local: [{ episodeId: 100, currentTime: 10, duration: 100, lastWatchedAt: 1000 }],
+                remote: [{ episodeId: 100, currentTime: 20, duration: 100, lastWatchedAt: 2000 }],
             },
         };
 
         // "both" forces the merge code through the inner `new Map()()`
         // dedupe path for progress entries.
-        const choices = [
-            {id: 1, myListAction: 'both', linksAction: 'both', progressAction: 'both', deleteShow: false},
-        ];
+        const choices = [{ id: 1, myListAction: 'both', linksAction: 'both', progressAction: 'both', deleteShow: false }];
 
         await expect(syncStore.mergeLocalAndRemote(choices, [])).resolves.not.toThrow();
 
@@ -221,14 +229,20 @@ describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', ()
                 remote: [1],
             },
             shows: new Map([
-                [1, {
-                    local: {id: 1, name: 'Configured Show', media_type: 'tv'},
-                    remote: {id: 1, name: 'Configured Show', media_type: 'tv'},
-                }],
-                [99, {
-                    local: {id: 99, name: 'Never Configured', media_type: 'tv'},
-                    remote: null,
-                }],
+                [
+                    1,
+                    {
+                        local: { id: 1, name: 'Configured Show', media_type: 'tv' },
+                        remote: { id: 1, name: 'Configured Show', media_type: 'tv' },
+                    },
+                ],
+                [
+                    99,
+                    {
+                        local: { id: 99, name: 'Never Configured', media_type: 'tv' },
+                        remote: null,
+                    },
+                ],
             ]),
             mediaLinks: {
                 local: [],
@@ -240,9 +254,7 @@ describe('syncStore.mergeLocalAndRemote (regression: new Map()() TypeError)', ()
             },
         };
 
-        const choices = [
-            {id: 1, myListAction: 'both', linksAction: 'both', progressAction: 'both', deleteShow: false},
-        ];
+        const choices = [{ id: 1, myListAction: 'both', linksAction: 'both', progressAction: 'both', deleteShow: false }];
 
         await syncStore.mergeLocalAndRemote(choices, []);
 
@@ -257,7 +269,7 @@ describe('syncStore.mergeLocalAndRemote (auto-merge path)', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         syncStore.syncConflictData = null;
-        syncStore.googleUser = {accessToken: 'token'};
+        syncStore.googleUser = { accessToken: 'token' };
         syncStore.isProcessingSyncConflict = false;
     });
 
@@ -268,16 +280,16 @@ describe('syncStore.mergeLocalAndRemote (auto-merge path)', () => {
                 remote: [2],
             },
             shows: new Map([
-                [1, {local: {id: 1, name: 'Local Show'}, remote: null}],
-                [2, {local: null, remote: {id: 2, name: 'Remote Show'}}],
+                [1, { local: { id: 1, name: 'Local Show' }, remote: null }],
+                [2, { local: null, remote: { id: 2, name: 'Remote Show' } }],
             ]),
             mediaLinks: {
-                local: [{mediaId: 1, url: 'https://a.example', label: 'A'}],
-                remote: [{mediaId: 1, url: 'https://a.example', label: 'A2'}],
+                local: [{ mediaId: 1, url: 'https://a.example', label: 'A' }],
+                remote: [{ mediaId: 1, url: 'https://a.example', label: 'A2' }],
             },
             episodeProgress: {
-                local: [{episodeId: 100, currentTime: 10, lastWatchedAt: 1000}],
-                remote: [{episodeId: 100, currentTime: 20, lastWatchedAt: 2000}],
+                local: [{ episodeId: 100, currentTime: 10, lastWatchedAt: 1000 }],
+                remote: [{ episodeId: 100, currentTime: 20, lastWatchedAt: 2000 }],
             },
         };
 
@@ -290,9 +302,7 @@ describe('syncStore.mergeLocalAndRemote (auto-merge path)', () => {
         const urls = importArg.mediaLinks.map((l) => l.url);
         expect(urls).toEqual(['https://a.example']);
         // The newer remote progress must have won.
-        expect(importArg.episodeProgress).toEqual([
-            {episodeId: 100, currentTime: 20, lastWatchedAt: 2000},
-        ]);
+        expect(importArg.episodeProgress).toEqual([{ episodeId: 100, currentTime: 20, lastWatchedAt: 2000 }]);
     });
 });
 

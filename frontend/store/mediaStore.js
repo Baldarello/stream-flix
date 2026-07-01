@@ -25,34 +25,34 @@
  * back/forward navigation). Anything that fits a single domain
  * lives in the sub-store.
  */
-import {makeAutoObservable, runInAction} from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
-import {checkLinksForShow} from '../services/linkValidator.js';
-import {websocketService} from '../services/websocketService.js';
-import {db} from '../services/db';
-import {getSeriesDetails, getSeriesEpisodes} from '../services/apiCall';
-import {it as itTranslations} from '../locales/it.js';
-import {en as enTranslations} from '../locales/en.js';
+import { checkLinksForShow } from '../services/linkValidator.js';
+import { websocketService } from '../services/websocketService.js';
+import { db } from '../services/db';
+import { getSeriesDetails, getSeriesEpisodes } from '../services/apiCall';
+import { it as itTranslations } from '../locales/it.js';
+import { en as enTranslations } from '../locales/en.js';
 import {
     addLinksToMedia as addLinksToMediaSvc,
     buildLinksForSeason,
     deleteMediaLink as deleteMediaLinkSvc,
     setPreferredSource as setPreferredSourceSvc,
 } from '../services/linkService.js';
-import {searchStore} from './searchStore.js';
-import {libraryStore} from './libraryStore.js';
-import {uiStore} from './uiStore.js';
-import {playbackStore} from './playbackStore.js';
-import {watchTogetherStore} from './watchTogetherStore.js';
-import {syncStore} from './syncStore.js';
-import {remoteStore} from './remoteStore.js';
-import {preferencesStore} from './preferencesStore.js';
-import {navigateTo, Routes} from '../services/navigationService.js';
-import {catalogStore} from './catalogStore.js';
-import {googleDriveSyncConflictStore} from './googleDriveSyncConflictStore';
-import {tvStore} from '../features/tv/tvStore.js';
+import { searchStore } from './searchStore.js';
+import { libraryStore } from './libraryStore.js';
+import { uiStore } from './uiStore.js';
+import { playbackStore } from './playbackStore.js';
+import { watchTogetherStore } from './watchTogetherStore.js';
+import { syncStore } from './syncStore.js';
+import { remoteStore } from './remoteStore.js';
+import { preferencesStore } from './preferencesStore.js';
+import { navigateTo, Routes } from '../services/navigationService.js';
+import { catalogStore } from './catalogStore.js';
+import { googleDriveSyncConflictStore } from './googleDriveSyncConflictStore';
+import { tvStore } from '../features/tv/tvStore.js';
 
-const ALL_TRANSLATIONS = {it: itTranslations, en: enTranslations};
+const ALL_TRANSLATIONS = { it: itTranslations, en: enTranslations };
 
 class MediaStore {
     /**
@@ -66,7 +66,7 @@ class MediaStore {
     linksRefreshVersion = 0;
 
     constructor() {
-        makeAutoObservable(this, {events: false});
+        makeAutoObservable(this, { events: false });
         this._bindWebsocketEvents();
     }
 
@@ -239,7 +239,7 @@ class MediaStore {
     validateLink = async (linkId) => {
         const link = await db.mediaLinks.get(linkId);
         if (!link) return false;
-        const {checkLinkValidity} = await import('../services/linkValidator.js');
+        const { checkLinkValidity } = await import('../services/linkValidator.js');
         return await checkLinkValidity(link.url);
     };
 
@@ -260,12 +260,12 @@ class MediaStore {
     // ===== BULK LINK OPERATIONS =============================
     setBulkLinkLanguage = async (ids, language) => {
         if (!ids || ids.length === 0) return;
-        await db.mediaLinks.where('id').anyOf(ids).modify({language});
+        await db.mediaLinks.where('id').anyOf(ids).modify({ language });
     };
 
     setBulkLinkType = async (ids, type) => {
         if (!ids || ids.length === 0) return;
-        await db.mediaLinks.where('id').anyOf(ids).modify({type});
+        await db.mediaLinks.where('id').anyOf(ids).modify({ type });
     };
 
     bulkDeleteLinks = async (ids) => {
@@ -304,7 +304,7 @@ class MediaStore {
         for (const showId of uniqueShowIds) {
             await this.refreshLinksForMediaId(showId);
         }
-        this.showSnackbar('notifications.invalidLinksDeleted', 'success', true, {count: invalidIds.length});
+        this.showSnackbar('notifications.invalidLinksDeleted', 'success', true, { count: invalidIds.length });
     };
 
     validateAllLinks = async () => {
@@ -321,7 +321,7 @@ class MediaStore {
                 const allIds = [String(show.id), ...episodeIds.map(String)];
                 const links = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
                 if (links.length === 0) continue;
-                const {checkLinksForShow} = await import('../services/linkValidator.js');
+                const { checkLinksForShow } = await import('../services/linkValidator.js');
                 const invalid = await checkLinksForShow(show, libraryStore.mediaLinks);
                 for (const inv of invalid) {
                     if (inv.mediaId) freshInvalidIds.add(String(inv.mediaId));
@@ -412,7 +412,7 @@ class MediaStore {
 
     setLanguage = (lang) => {
         preferencesStore.setLanguage(lang);
-        this.events.dispatchEvent(new CustomEvent('languagechange', {detail: {language: lang}}));
+        this.events.dispatchEvent(new CustomEvent('languagechange', { detail: { language: lang } }));
     };
 
     // ===== UI ======================================================
@@ -901,8 +901,10 @@ class MediaStore {
     takeAllLocalSyncConflict = googleDriveSyncConflictStore.takeAllLocal.bind(googleDriveSyncConflictStore);
     takeAllRemoteSyncConflict = googleDriveSyncConflictStore.takeAllRemote.bind(googleDriveSyncConflictStore);
     takeAllBothSyncConflict = googleDriveSyncConflictStore.takeAllBoth.bind(googleDriveSyncConflictStore);
-    markLocalOnlySyncConflictForDeletion = googleDriveSyncConflictStore.markLocalOnlyForDeletion.bind(googleDriveSyncConflictStore);
-    markRemoteOnlySyncConflictForDeletion = googleDriveSyncConflictStore.markRemoteOnlyForDeletion.bind(googleDriveSyncConflictStore);
+    markLocalOnlySyncConflictForDeletion =
+        googleDriveSyncConflictStore.markLocalOnlyForDeletion.bind(googleDriveSyncConflictStore);
+    markRemoteOnlySyncConflictForDeletion =
+        googleDriveSyncConflictStore.markRemoteOnlyForDeletion.bind(googleDriveSyncConflictStore);
     resetSyncConflict = googleDriveSyncConflictStore.reset.bind(googleDriveSyncConflictStore);
 
     // ===== REMOTE (delegated) ======================================
@@ -1201,10 +1203,18 @@ class MediaStore {
      */
     loadPersistedData = async () => {
         const [
-            myListItems, cachedItems, mediaLinksData, introDurations, languagePref,
-            progress, preferredSourcesData, usernamePref,
-            selectedSeasonsData, showFilterPreferencesData,
-            remoteMasterSlaveId, episodeContext
+            myListItems,
+            cachedItems,
+            mediaLinksData,
+            introDurations,
+            languagePref,
+            progress,
+            preferredSourcesData,
+            usernamePref,
+            selectedSeasonsData,
+            showFilterPreferencesData,
+            remoteMasterSlaveId,
+            episodeContext,
         ] = await Promise.all([
             db.myList.orderBy('order').toArray(),
             db.cachedItems.toArray(),
@@ -1293,11 +1303,11 @@ class MediaStore {
      * modal's `onSave` contract doesn't change.
      */
     setEpisodeLinksForSeason = async (payload) => {
-        const {seasonNumber, method, data, language, type, seasonName} = payload;
+        const { seasonNumber, method, data, language, type, seasonName } = payload;
         const show = uiStore.linkingEpisodesForItem;
         if (!show) return false;
 
-        const result = await buildLinksForSeason({show, seasonNumber, method, data, language, type, seasonName});
+        const result = await buildLinksForSeason({ show, seasonNumber, method, data, language, type, seasonName });
         if (result.error === 'link-count-mismatch') {
             uiStore.showSnackbar('notifications.linkCountMismatch', 'error', true, {
                 linkCount: result.linkCount,
@@ -1306,10 +1316,10 @@ class MediaStore {
             return false;
         }
         if (result.error) {
-            uiStore.showSnackbar('notifications.processingError', 'error', true, {error: result.error});
+            uiStore.showSnackbar('notifications.processingError', 'error', true, { error: result.error });
             return false;
         }
-        const {linksToAdd} = result;
+        const { linksToAdd } = result;
         if (linksToAdd.length > 0) {
             try {
                 const savedCount = await addLinksToMediaSvc(show.id, linksToAdd);
@@ -1333,7 +1343,7 @@ class MediaStore {
                 return true;
             } catch (error) {
                 console.error(error);
-                uiStore.showSnackbar('notifications.processingError', 'error', true, {error: error.message});
+                uiStore.showSnackbar('notifications.processingError', 'error', true, { error: error.message });
                 return false;
             }
         }
@@ -1365,21 +1375,21 @@ class MediaStore {
         if (showId) await this.refreshLinksForShow(showId);
     };
     updateLinksDomain = async (payload) => {
-        const {links, newDomain} = payload;
+        const { links, newDomain } = payload;
         try {
-            const updatedLinks = links.map(link => {
+            const updatedLinks = links.map((link) => {
                 const url = new URL(link.url);
                 const newUrl = new URL(url.pathname + url.search, newDomain);
-                return {...link, url: newUrl.toString()};
+                return { ...link, url: newUrl.toString() };
             });
             await db.mediaLinks.bulkPut(updatedLinks);
             const showId = uiStore.linkingEpisodesForItem?.id;
             if (showId) await this.refreshLinksForShow(showId);
-            this.showSnackbar('notifications.linksUpdated', 'success', true, {count: updatedLinks.length});
+            this.showSnackbar('notifications.linksUpdated', 'success', true, { count: updatedLinks.length });
         } catch (error) {
-            this.showSnackbar('notifications.domainUpdateError', 'error', true, {error: (error).message});
+            this.showSnackbar('notifications.domainUpdateError', 'error', true, { error: error.message });
         }
-    }
+    };
 
     /**
      * Patch `currentSelectedItem` and `cachedItems` episodes so their
@@ -1400,9 +1410,9 @@ class MediaStore {
         // DetailView (which reads currentSelectedItem) re-renders.
         for (const item of targets) {
             if (!item || item.id !== showId || !item.seasons) continue;
-            const patchedSeasons = item.seasons.map(season => ({
+            const patchedSeasons = item.seasons.map((season) => ({
                 ...season,
-                episodes: (season.episodes || []).map(ep => ({
+                episodes: (season.episodes || []).map((ep) => ({
                     ...ep,
                     video_urls: libraryStore.mediaLinks.get(String(ep.id)) || [],
                     video_url: (libraryStore.mediaLinks.get(String(ep.id)) || [])[0]?.url || null,
@@ -1411,7 +1421,7 @@ class MediaStore {
             item.seasons = patchedSeasons;
             if (item === this.selectedItem) {
                 // Force a new reference so observer of selectedItem detects change
-                this.selectedItem = {...item, seasons: patchedSeasons};
+                this.selectedItem = { ...item, seasons: patchedSeasons };
             }
         }
         // ponytail: LinkEpisodesModal reads uiStore.linkingEpisodesForItem directly.
@@ -1419,9 +1429,9 @@ class MediaStore {
         // gets a new reference (this.selectedItem = {...}).
         const linking = uiStore.linkingEpisodesForItem;
         if (linking && linking.id === showId && linking.seasons) {
-            linking.seasons = linking.seasons.map(season => ({
+            linking.seasons = linking.seasons.map((season) => ({
                 ...season,
-                episodes: (season.episodes || []).map(ep => ({
+                episodes: (season.episodes || []).map((ep) => ({
                     ...ep,
                     video_urls: libraryStore.mediaLinks.get(String(ep.id)) || [],
                     video_url: (libraryStore.mediaLinks.get(String(ep.id)) || [])[0]?.url || null,
@@ -1431,9 +1441,9 @@ class MediaStore {
         // Also patch cachedItems so next detail open is warm
         const cached = libraryStore.cachedItems.get(showId);
         if (cached && cached.seasons) {
-            cached.seasons = cached.seasons.map(season => ({
+            cached.seasons = cached.seasons.map((season) => ({
                 ...season,
-                episodes: (season.episodes || []).map(ep => ({
+                episodes: (season.episodes || []).map((ep) => ({
                     ...ep,
                     video_urls: libraryStore.mediaLinks.get(String(ep.id)) || [],
                     video_url: (libraryStore.mediaLinks.get(String(ep.id)) || [])[0]?.url || null,
@@ -1448,12 +1458,12 @@ class MediaStore {
         // Use episode IDs from linkingEpisodesForItem (same source that
         // buildLinksForSeason used to save links) to avoid TVMaze/TMDB
         // ID mismatch when cachedItems has different episode ID systems.
-        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId
-            ? uiStore.linkingEpisodesForItem
-            : null;
+        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId ? uiStore.linkingEpisodesForItem : null;
         const show = libraryStore.cachedItems.get(String(showId));
-        const episodeIds = linkingShow?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ??
-            show?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ?? [];
+        const episodeIds =
+            linkingShow?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ??
+            show?.seasons?.flatMap((s) => s.episodes?.map((e) => e.id) ?? []) ??
+            [];
         const allIds = [showId, ...episodeIds];
         const allLinks = await db.mediaLinks.where('mediaId').anyOf(allIds).toArray();
         const grouped = Object.groupBy(allLinks, (link) => String(link.mediaId));
@@ -1492,7 +1502,6 @@ class MediaStore {
     findEpisodeById = libraryStore.findEpisodeById.bind(libraryStore);
     hasLinks = libraryStore.hasLinks.bind(libraryStore);
     findFirstUnwatchedEpisode = libraryStore.findFirstUnwatchedEpisode.bind(libraryStore);
-
 
     // ===== TV / SHARED PLAYBACK HELPERS =============================
 
@@ -1671,7 +1680,7 @@ class MediaStore {
                     tvStore.navigate('player');
                 } else {
                     const shouldReplace = window.history.state?.playerOpen;
-                    navigateTo(Routes.PLAYER, {replace: shouldReplace});
+                    navigateTo(Routes.PLAYER, { replace: shouldReplace });
                 }
                 if (this.selectedItem) {
                     this.playbackOriginItem = this.selectedItem;
@@ -1704,7 +1713,7 @@ class MediaStore {
                 this.isDetailLoading = true;
             });
 
-            this.sendRemoteCommand({command: 'select_item', item: item});
+            this.sendRemoteCommand({ command: 'select_item', item: item });
 
             try {
                 let fullItemDetails = libraryStore.cachedItems.get(item.id) || item;
@@ -1718,7 +1727,11 @@ class MediaStore {
                     // Same logic as the non-master detailView path.
                     // NOTE: assign via uiStore reference directly — Rollup
                     // tree-shakes const-linking mutations otherwise.
-                    if (uiStore.linkingEpisodesForItem?.id === item.id && uiStore.linkingEpisodesForItem.seasons && fullItemDetails.seasons) {
+                    if (
+                        uiStore.linkingEpisodesForItem?.id === item.id &&
+                        uiStore.linkingEpisodesForItem.seasons &&
+                        fullItemDetails.seasons
+                    ) {
                         // ponytail: use eval() to force Rollup to keep this code.
                         const __linkRef = uiStore.linkingEpisodesForItem;
                         /* eslint-disable no-eval */
@@ -1772,7 +1785,7 @@ class MediaStore {
             case 'detailView': {
                 // Navigate to home (detail view is an overlay on home)
                 const shouldReplace = Boolean(this.selectedItem);
-                navigateTo(Routes.HOME, {replace: shouldReplace});
+                navigateTo(Routes.HOME, { replace: shouldReplace });
                 runInAction(() => {
                     this.selectedItem = item;
                     this.isDetailLoading = true;
@@ -1821,7 +1834,11 @@ class MediaStore {
                         // selection after saving links.
                         // NOTE: assign via uiStore reference directly — Rollup
                         // tree-shakes const-linking mutations otherwise.
-                        if (uiStore.linkingEpisodesForItem?.id === item.id && uiStore.linkingEpisodesForItem.seasons && fullItemDetails.seasons) {
+                        if (
+                            uiStore.linkingEpisodesForItem?.id === item.id &&
+                            uiStore.linkingEpisodesForItem.seasons &&
+                            fullItemDetails.seasons
+                        ) {
                             // ponytail: use eval() to force Rollup to keep this code.
                             // Without eval, Rollup tree-shakes the entire block because
                             // it considers the seasons patching a "pure" operation with no
@@ -1867,12 +1884,7 @@ class MediaStore {
                         if (this.watchTogetherSelectedItem?.id === item.id) {
                             this.watchTogetherSelectedItem = fullItemDetails;
                         }
-                        if (
-                            this.roomId &&
-                            !this.isHost &&
-                            !this.nowPlayingItem &&
-                            this.playbackState.status === 'playing'
-                        ) {
+                        if (this.roomId && !this.isHost && !this.nowPlayingItem && this.playbackState.status === 'playing') {
                             this.startPlayback(fullItemDetails);
                         }
                         break;
@@ -1898,43 +1910,39 @@ class MediaStore {
     clearLinksForSeason = async (seasonNumber, showId) => {
         // Use linkingEpisodesForItem season (same episode IDs used to save links)
         // instead of cachedItems to avoid TVMaze/TMDB ID mismatch.
-        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId
-            ? uiStore.linkingEpisodesForItem
-            : null;
+        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId ? uiStore.linkingEpisodesForItem : null;
         const show = linkingShow || this.cachedItems.get(showId);
         if (!show) return;
-        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        const season = show.seasons?.find((s) => s.season_number === seasonNumber);
         if (!season) return;
 
-        const episodeIds = season.episodes.map(ep => ep.id);
+        const episodeIds = season.episodes.map((ep) => ep.id);
         const linksToDelete = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
         if (linksToDelete.length > 0) {
-            await db.mediaLinks.bulkDelete(linksToDelete.map(l => l.id));
+            await db.mediaLinks.bulkDelete(linksToDelete.map((l) => l.id));
             await this.refreshLinksForShow(showId);
             this.showSnackbar('notifications.allSeasonLinksDeleted', 'success', true, {
                 count: linksToDelete.length,
-                season: seasonNumber
+                season: seasonNumber,
             });
         } else {
-            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
         }
-    }
+    };
 
     clearLinksForDomain = async (showId, seasonNumber, origin) => {
         // Use linkingEpisodesForItem season (same episode IDs used to save links)
         // instead of cachedItems to avoid TVMaze/TMDB ID mismatch.
-        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId
-            ? uiStore.linkingEpisodesForItem
-            : null;
+        const linkingShow = uiStore.linkingEpisodesForItem?.id === showId ? uiStore.linkingEpisodesForItem : null;
         const show = linkingShow || this.cachedItems.get(showId);
         if (!show) return;
-        const season = show.seasons?.find(s => s.season_number === seasonNumber);
+        const season = show.seasons?.find((s) => s.season_number === seasonNumber);
         if (!season) return;
 
-        const episodeIds = season.episodes.map(ep => ep.id);
+        const episodeIds = season.episodes.map((ep) => ep.id);
         const allLinks = await db.mediaLinks.where('mediaId').anyOf(episodeIds).toArray();
 
-        const linksToDelete = allLinks.filter(link => {
+        const linksToDelete = allLinks.filter((link) => {
             try {
                 return new URL(link.url).origin === origin;
             } catch {
@@ -1943,17 +1951,17 @@ class MediaStore {
         });
 
         if (linksToDelete.length > 0) {
-            const linkIdsToDelete = linksToDelete.map(l => l.id);
+            const linkIdsToDelete = linksToDelete.map((l) => l.id);
             await db.mediaLinks.bulkDelete(linkIdsToDelete);
             await this.refreshLinksForShow(showId);
             this.showSnackbar('notifications.linksFromDomainDeletedSuccess', 'success', true, {
                 count: linksToDelete.length,
-                domain: origin
+                domain: origin,
             });
         } else {
-            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, {season: seasonNumber});
+            this.showSnackbar('notifications.noLinksToDelete', 'warning', true, { season: seasonNumber });
         }
-    }
+    };
     /**
      * Hydrate the cached item with seasons, episodes and per-episode
      * links. Mirrors the previous monolithic `mediaStore` behaviour:
@@ -1969,8 +1977,7 @@ class MediaStore {
         let fullItemDetails = initialItem;
         const needsApiFetch =
             fullItemDetails.media_type === 'tv' &&
-            (!fullItemDetails.seasons ||
-                fullItemDetails.seasons.some((s) => !s.episodes || s.episodes.length === 0));
+            (!fullItemDetails.seasons || fullItemDetails.seasons.some((s) => !s.episodes || s.episodes.length === 0));
 
         if (needsApiFetch) {
             const apiDetails = await getSeriesDetails(itemId);
@@ -1989,10 +1996,10 @@ class MediaStore {
                             };
                         })
                     );
-                    return {...season, episodes: episodesWithLinks};
+                    return { ...season, episodes: episodesWithLinks };
                 })
             );
-            fullItemDetails = {...apiDetails, seasons: seasonsWithEpisodes};
+            fullItemDetails = { ...apiDetails, seasons: seasonsWithEpisodes };
         } else if (fullItemDetails.media_type === 'tv' && fullItemDetails.seasons) {
             const seasonsWithFreshLinks = await Promise.all(
                 fullItemDetails.seasons.map(async (season) => {
@@ -2008,10 +2015,10 @@ class MediaStore {
                             };
                         })
                     );
-                    return {...season, episodes: episodesWithLinks};
+                    return { ...season, episodes: episodesWithLinks };
                 })
             );
-            fullItemDetails = {...fullItemDetails, seasons: seasonsWithFreshLinks};
+            fullItemDetails = { ...fullItemDetails, seasons: seasonsWithFreshLinks };
         } else if (fullItemDetails.media_type === 'movie') {
             const links = await this.getLinksForMedia(itemId);
             fullItemDetails = {

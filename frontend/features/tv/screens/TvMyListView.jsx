@@ -1,10 +1,10 @@
-import React, {useEffect} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect } from 'react';
+import { observer } from 'mobx-react-lite';
 import TvListRow from '../components/TvListRow.jsx';
 import TvEmptyState from '../components/TvEmptyState.jsx';
 import tvStore from '../tvStore.js';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 /**
  * TvMyListView - Full screen My List view
@@ -43,12 +43,7 @@ const TvMyListView = observer(() => {
     if (showEmptyState) {
         return (
             <div id="tv-my-list-view" className="tv-screen tv-my-list-view">
-                <button 
-                    id="tv-back-btn-mylist"
-                    className="tv-back-button tv-focusable"
-                    onClick={handleBack}
-                    autoFocus
-                >
+                <button id="tv-back-btn-mylist" className="tv-back-button tv-focusable" onClick={handleBack} autoFocus>
                     ← {t('tv.back', 'Indietro')}
                 </button>
                 <TvEmptyState
@@ -64,11 +59,7 @@ const TvMyListView = observer(() => {
         <div id="tv-my-list-view" className="tv-screen tv-my-list-view">
             {/* Header with Back Button */}
             <div className="tv-header">
-                <button 
-                    id="tv-back-btn-mylist"
-                    className="tv-back-button tv-focusable"
-                    onClick={handleBack}
-                >
+                <button id="tv-back-btn-mylist" className="tv-back-button tv-focusable" onClick={handleBack}>
                     ← {t('tv.back', 'Indietro')}
                 </button>
                 <h1>{t('tv.myList', 'La mia lista')}</h1>

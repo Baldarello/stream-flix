@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, FormControl, MenuItem, Select, Typography} from '@mui/material';
-import {useStores} from '../../context/StoreContext.jsx';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { observer } from 'mobx-react-lite';
+import { Box, FormControl, MenuItem, Select, Typography } from '@mui/material';
+import { useStores } from '../../context/StoreContext.jsx';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 /**
  * PreferencesView Component

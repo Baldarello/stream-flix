@@ -9,10 +9,10 @@
  *   - `libraryStore` (read): contributes `myListItems` and
  *     `continueWatchingItems` to the home-page rows.
  */
-import {makeAutoObservable, runInAction} from 'mobx';
-import {getLatestMovies, getPopularAnime, getTopRatedSeries, getTrending} from '../services/apiCall';
-import {db} from '../services/db';
-import {libraryStore} from './libraryStore.js';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { getLatestMovies, getPopularAnime, getTopRatedSeries, getTrending } from '../services/apiCall';
+import { db } from '../services/db';
+import { libraryStore } from './libraryStore.js';
 
 class CatalogStore {
     trending = [];
@@ -23,7 +23,9 @@ class CatalogStore {
     error = null;
 
     constructor() {
-        makeAutoObservable(this, { /* no overrides */ });
+        makeAutoObservable(this, {
+            /* no overrides */
+        });
     }
 
     get heroContent() {

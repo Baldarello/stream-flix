@@ -1,7 +1,7 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {Box, Typography} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { Box, Typography } from '@mui/material';
 
 const DebugOverlay = () => {
     const { isDebugModeActive, debugMessages } = mediaStore;
@@ -32,13 +32,14 @@ const DebugOverlay = () => {
             aria-live="polite"
             aria-atomic="true"
         >
-            <Typography variant="subtitle2" sx={{ fontFamily: 'monospace', borderBottom: '1px solid #00ff00', pb: 1, mb: 1, color: 'white' }}>
+            <Typography
+                variant="subtitle2"
+                sx={{ fontFamily: 'monospace', borderBottom: '1px solid #00ff00', pb: 1, mb: 1, color: 'white' }}
+            >
                 LOG DI DEBUG WEBSOCKET
             </Typography>
             {debugMessages.length === 0 ? (
-                <Typography sx={{ fontFamily: 'monospace', color: 'grey.500' }}>
-                    In attesa di eventi...
-                </Typography>
+                <Typography sx={{ fontFamily: 'monospace', color: 'grey.500' }}>In attesa di eventi...</Typography>
             ) : (
                 [...debugMessages].reverse().map((msg, index) => (
                     <Typography key={index} sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>

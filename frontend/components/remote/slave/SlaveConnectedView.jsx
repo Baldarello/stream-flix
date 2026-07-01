@@ -1,16 +1,16 @@
 import React from 'react';
-import {Box, Button, Typography} from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 import ConnectionIndicator from '../../utilities/ConnectionIndicator.jsx';
-import {remoteStore} from '../../../store/remoteStore.js';
+import { remoteStore } from '../../../store/remoteStore.js';
 
 const SlaveConnectedView = () => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     return (
-        <Box sx={{textAlign: 'center'}}>
+        <Box sx={{ textAlign: 'center' }}>
             {/* Success Icon - lightweight, no animations */}
             <Box
                 sx={{
@@ -40,7 +40,7 @@ const SlaveConnectedView = () => {
                     mb: 3,
                 }}
             >
-                <ConnectionIndicator/>
+                <ConnectionIndicator />
                 <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 500 }}>
                     Connected
                 </Typography>
@@ -57,18 +57,14 @@ const SlaveConnectedView = () => {
             >
                 {t('smartTV.connected')}
             </Typography>
-            <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ mb: 5, opacity: 0.8 }}
-            >
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 5, opacity: 0.8 }}>
                 {t('smartTV.connectedSubtitle')}
             </Typography>
             <Button
                 variant="outlined"
                 size="large"
                 onClick={() => remoteStore.exitSmartTVPairingMode()}
-                startIcon={<QrCodeScannerIcon/>}
+                startIcon={<QrCodeScannerIcon />}
                 sx={{
                     px: 4,
                     py: 1.5,

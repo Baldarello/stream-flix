@@ -62,9 +62,7 @@ export async function expectNoA11yViolations(page, options = {}) {
     }
 
     const results = await builder.analyze();
-    const blocking = (results.violations || []).filter((v) =>
-        BLOCKING_IMPACTS.has(v.impact)
-    );
+    const blocking = (results.violations || []).filter((v) => BLOCKING_IMPACTS.has(v.impact));
 
     if (blocking.length === 0) {
         return;
@@ -93,8 +91,7 @@ export function formatViolationsReport(violations) {
     const nodeWord = totalNodes === 1 ? 'node' : 'nodes';
 
     const header =
-        `Accessibility audit failed: ${violations.length} blocking ${ruleWord} ` +
-        `affecting ${totalNodes} ${nodeWord}.`;
+        `Accessibility audit failed: ${violations.length} blocking ${ruleWord} ` + `affecting ${totalNodes} ${nodeWord}.`;
 
     const sections = violations.map((v, i) => {
         const ruleHeader = `  ${i + 1}. [${v.impact ?? 'unknown'}] ${v.id} — ${v.help ?? '(no help text)'}`;
@@ -111,17 +108,10 @@ export function formatViolationsReport(violations) {
 
 function formatNode(node, index) {
     if (!node) return '';
-    const target = Array.isArray(node.target)
-        ? node.target.map(String).join(' ')
-        : String(node.target ?? '(unknown target)');
+    const target = Array.isArray(node.target) ? node.target.map(String).join(' ') : String(node.target ?? '(unknown target)');
     const html = truncate(normalizeWhitespace(node.html), 200);
-    const summary = node.failureSummary
-        ? normalizeWhitespace(node.failureSummary).replace(/\n+/g, ' ')
-        : '';
-    const lines = [
-        `      [${index + 1}] target: ${target}`,
-        `          html:   ${html}`,
-    ];
+    const summary = node.failureSummary ? normalizeWhitespace(node.failureSummary).replace(/\n+/g, ' ') : '';
+    const lines = [`      [${index + 1}] target: ${target}`, `          html:   ${html}`];
     if (summary) {
         lines.push(`          fix:    ${summary}`);
     }
@@ -137,7 +127,9 @@ function normalizeExcludedTags(tags) {
 }
 
 function normalizeWhitespace(s) {
-    return String(s ?? '').replace(/\s+/g, ' ').trim();
+    return String(s ?? '')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 function truncate(s, max) {

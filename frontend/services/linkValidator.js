@@ -33,7 +33,7 @@ export const checkLinkValidity = async (url) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({url}),
+            body: JSON.stringify({ url }),
         });
 
         if (!response.ok) {
@@ -63,11 +63,11 @@ export const checkLinksForEpisode = async (links) => {
         const results = await Promise.all(
             batch.map(async (link) => {
                 const isValid = await checkLinkValidity(link.url);
-                return {link, isValid};
+                return { link, isValid };
             })
         );
 
-        for (const {link, isValid} of results) {
+        for (const { link, isValid } of results) {
             if (isValid) {
                 valid.push(link);
             } else {
@@ -76,7 +76,7 @@ export const checkLinksForEpisode = async (links) => {
         }
     }
 
-    return {valid, invalid};
+    return { valid, invalid };
 };
 
 /**
@@ -100,7 +100,7 @@ export const checkLinksForShow = async (item, existingLinks) => {
                             episode,
                             season,
                         });
-                    // ponytail: safeKey — Map keys are strings, episode.id is a number.
+                        // ponytail: safeKey — Map keys are strings, episode.id is a number.
                     } else if (existingLinks && existingLinks.has(safeKey(episode.id))) {
                         const dbLinks = existingLinks.get(safeKey(episode.id)) || [];
                         if (dbLinks.length > 0) {
@@ -114,7 +114,7 @@ export const checkLinksForShow = async (item, existingLinks) => {
         // For movies, check direct links
         if (item.video_urls && item.video_urls.length > 0) {
             linksToCheck.push({ links: item.video_urls });
-        // ponytail: safeKey — Map keys are strings, item.id may be a number.
+            // ponytail: safeKey — Map keys are strings, item.id may be a number.
         } else if (existingLinks && existingLinks.has(safeKey(item.id))) {
             const dbLinks = existingLinks.get(safeKey(item.id)) || [];
             if (dbLinks.length > 0) {
@@ -124,9 +124,9 @@ export const checkLinksForShow = async (item, existingLinks) => {
     }
 
     // Check all links
-    for (const {links, episode, season} of linksToCheck) {
-        const {invalid} = await checkLinksForEpisode(links);
-        
+    for (const { links, episode, season } of linksToCheck) {
+        const { invalid } = await checkLinksForEpisode(links);
+
         for (const link of invalid) {
             invalidLinks.push({
                 mediaId: link.mediaId,

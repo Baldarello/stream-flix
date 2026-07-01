@@ -41,13 +41,13 @@ class EventEmitter {
 
     off(event, listener) {
         if (this.listeners[event]) {
-            this.listeners[event] = this.listeners[event].filter(l => l !== listener);
+            this.listeners[event] = this.listeners[event].filter((l) => l !== listener);
         }
     }
 
     emit(event, data) {
         if (this.listeners[event]) {
-            this.listeners[event].forEach(l => l(data));
+            this.listeners[event].forEach((l) => l(data));
         }
     }
 }
@@ -108,7 +108,7 @@ class WebSocketService {
 
                 // Handle ping from server (for heartbeat)
                 if (message.type === 'ping') {
-                    this.sendMessage({type: 'pong'});
+                    this.sendMessage({ type: 'pong' });
                     return;
                 }
 
@@ -136,7 +136,9 @@ class WebSocketService {
                         const hasText = !!lastMsg.text;
                         const hasImage = !!lastMsg.image;
                         const imageSize = lastMsg.image ? Math.round(lastMsg.image.length * 0.75) : 0;
-                        console.log(`[WebSocket] Chat message received: hasText=${hasText}, hasImage=${hasImage}, imageSize=~${(imageSize / 1024).toFixed(1)}KB`);
+                        console.log(
+                            `[WebSocket] Chat message received: hasText=${hasText}, hasImage=${hasImage}, imageSize=~${(imageSize / 1024).toFixed(1)}KB`
+                        );
                     }
                 }
 
@@ -184,7 +186,9 @@ class WebSocketService {
                 const hasText = !!text;
                 const hasImage = !!image;
                 const imageSize = image ? Math.round(image.length * 0.75) : 0; // Estimate original size from base64
-                console.log(`[WebSocket] Sending message: type=${messageType}, hasText=${hasText}, hasImage=${hasImage}, imageSize=~${(imageSize / 1024).toFixed(1)}KB`);
+                console.log(
+                    `[WebSocket] Sending message: type=${messageType}, hasText=${hasText}, hasImage=${hasImage}, imageSize=~${(imageSize / 1024).toFixed(1)}KB`
+                );
             } else {
                 console.log(`[WebSocket] Sending message: type=${messageType}`);
             }
@@ -203,14 +207,14 @@ class WebSocketService {
      * @param {string} [options.shortCode] - Short code for quick reconnection
      */
     registerSlave(options = {}) {
-        this.sendMessage({type: 'quix-register-slave', payload: options});
+        this.sendMessage({ type: 'quix-register-slave', payload: options });
     }
 
     /**
      * Leave the current watch together room
      */
     leaveRoom() {
-        this.sendMessage({type: 'quix-leave-room'});
+        this.sendMessage({ type: 'quix-leave-room' });
     }
 
     /**
@@ -220,7 +224,7 @@ class WebSocketService {
      * @param {Object} options.media - Media item to share
      */
     createRoom(options) {
-        this.sendMessage({type: 'quix-create-room', payload: options});
+        this.sendMessage({ type: 'quix-create-room', payload: options });
     }
 
     /**
@@ -230,7 +234,7 @@ class WebSocketService {
      * @param {string} options.username - Username
      */
     joinRoom(options) {
-        this.sendMessage({type: 'quix-join-room', payload: options});
+        this.sendMessage({ type: 'quix-join-room', payload: options });
     }
 
     /**
@@ -238,14 +242,14 @@ class WebSocketService {
      * @param {Object} media - Media item to select
      */
     selectMedia(media) {
-        this.sendMessage({type: 'quix-select-media', payload: {media}});
+        this.sendMessage({ type: 'quix-select-media', payload: { media } });
     }
 
     /**
      * Change the room code (host only)
      */
     changeRoomCode() {
-        this.sendMessage({type: 'quix-change-room-code'});
+        this.sendMessage({ type: 'quix-change-room-code' });
     }
 
     /**
@@ -254,7 +258,7 @@ class WebSocketService {
      * @param {string} options.slaveId - Slave ID to connect to
      */
     registerMaster(options) {
-        this.sendMessage({type: 'quix-register-master', payload: options});
+        this.sendMessage({ type: 'quix-register-master', payload: options });
     }
 
     /**
@@ -262,7 +266,7 @@ class WebSocketService {
      * @param {Object} playbackState - Playback state
      */
     playbackControl(playbackState) {
-        this.sendMessage({type: 'quix-playback-control', payload: {playbackState}});
+        this.sendMessage({ type: 'quix-playback-control', payload: { playbackState } });
     }
 
     /**
@@ -272,7 +276,7 @@ class WebSocketService {
      * @param {string} [message.image] - Image (base64)
      */
     sendChatMessage(message) {
-        this.sendMessage({type: 'quix-chat-message', payload: {message}});
+        this.sendMessage({ type: 'quix-chat-message', payload: { message } });
     }
 
     /**
@@ -280,7 +284,7 @@ class WebSocketService {
      * @param {string} newHostId - ID of new host
      */
     transferHost(newHostId) {
-        this.sendMessage({type: 'quix-transfer-host', payload: {newHostId}});
+        this.sendMessage({ type: 'quix-transfer-host', payload: { newHostId } });
     }
 
     /**
@@ -290,7 +294,7 @@ class WebSocketService {
      * @param {string} options.name - New name
      */
     changeName(options) {
-        this.sendMessage({type: 'quix-change-name', payload: options});
+        this.sendMessage({ type: 'quix-change-name', payload: options });
     }
 
     // ==================== REMOTE CONTROL METHODS ====================
@@ -300,7 +304,7 @@ class WebSocketService {
      * @param {Object} payload - Command payload (command, item, time, etc.)
      */
     sendRemoteCommand(payload) {
-        this.sendMessage({type: 'quix-remote-command', payload});
+        this.sendMessage({ type: 'quix-remote-command', payload });
     }
 
     /**
@@ -315,7 +319,7 @@ class WebSocketService {
      */
     sendSlaveStatusUpdate(status) {
         // Always include slaveId from the connection to ensure consistency with backend
-        this.sendMessage({type: 'quix-slave-status-update', payload: {slaveId: this._clientId, ...status}});
+        this.sendMessage({ type: 'quix-slave-status-update', payload: { slaveId: this._clientId, ...status } });
     }
 
     /**
@@ -323,7 +327,7 @@ class WebSocketService {
      * @param {string} slaveId - Target slave ID
      */
     ping(slaveId) {
-        this.sendMessage({type: 'quix-ping', payload: {slaveId}});
+        this.sendMessage({ type: 'quix-ping', payload: { slaveId } });
     }
 
     /**
@@ -333,7 +337,10 @@ class WebSocketService {
      * @param {number} [options.timestamp] - Timestamp from ping
      */
     pong(options) {
-        this.sendMessage({type: 'quix-pong', payload: {from: 'slave', slaveId: options.slaveId || this._clientId, timestamp: options.timestamp}});
+        this.sendMessage({
+            type: 'quix-pong',
+            payload: { from: 'slave', slaveId: options.slaveId || this._clientId, timestamp: options.timestamp },
+        });
     }
 
     /**
@@ -341,7 +348,7 @@ class WebSocketService {
      * @param {string} slaveId - Slave ID being disconnected from
      */
     masterDisconnecting(slaveId) {
-        this.sendMessage({type: 'quix-master-disconnecting', payload: {slaveId}});
+        this.sendMessage({ type: 'quix-master-disconnecting', payload: { slaveId } });
     }
 
     // ==================== MEDIA SYNC METHODS ====================
@@ -353,7 +360,7 @@ class WebSocketService {
      * @param {Array} options.mediaItems - Media items with links to sync
      */
     requestSyncMedia(options) {
-        this.sendMessage({type: 'quix-sync-media-request', payload: options});
+        this.sendMessage({ type: 'quix-sync-media-request', payload: options });
     }
 
     /**
@@ -363,7 +370,7 @@ class WebSocketService {
      * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
     sendSyncProgressUpdate(completed, total) {
-        this.sendMessage({type: 'quix-sync-progress-update', payload: {slaveId: this._clientId, completed, total}});
+        this.sendMessage({ type: 'quix-sync-progress-update', payload: { slaveId: this._clientId, completed, total } });
     }
 
     /**
@@ -371,7 +378,7 @@ class WebSocketService {
      * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
     sendSyncCompleted(slaveId) {
-        this.sendMessage({type: 'quix-sync-completed', payload: {slaveId: slaveId || this._clientId}});
+        this.sendMessage({ type: 'quix-sync-completed', payload: { slaveId: slaveId || this._clientId } });
     }
 
     /**
@@ -380,7 +387,7 @@ class WebSocketService {
      * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
     sendSyncError(error, slaveId) {
-        this.sendMessage({type: 'quix-sync-error', payload: {slaveId: slaveId || this._clientId, error}});
+        this.sendMessage({ type: 'quix-sync-error', payload: { slaveId: slaveId || this._clientId, error } });
     }
 
     // ==================== SMART TV METHODS ====================
@@ -390,7 +397,7 @@ class WebSocketService {
      * @param {string} slaveId - This slave's ID (auto-filled from connection)
      */
     slaveDisconnecting(slaveId) {
-        this.sendMessage({type: 'quix-slave-disconnecting', payload: {slaveId: slaveId || this._clientId}});
+        this.sendMessage({ type: 'quix-slave-disconnecting', payload: { slaveId: slaveId || this._clientId } });
     }
 
     setClientId(id) {
@@ -404,7 +411,7 @@ class WebSocketService {
         // Send periodic pings to the server
         this.heartbeatInterval = setInterval(() => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                this.sendMessage({type: 'ping'});
+                this.sendMessage({ type: 'ping' });
 
                 // Set a timeout to detect if we don't get a response
                 this.pingTimeout = setTimeout(() => {

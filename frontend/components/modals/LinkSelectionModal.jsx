@@ -1,111 +1,116 @@
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {Box, IconButton, List, ListItem, ListItemButton, ListItemText, Modal, Typography} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { Box, IconButton, List, ListItem, ListItemButton, ListItemText, Modal, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: { xs: '90%', sm: 400 },
-  bgcolor: 'background.paper',
-  backdropFilter: 'blur(10px)',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 3,
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: { xs: '90%', sm: 400 },
+    bgcolor: 'background.paper',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 3,
 };
 
 const LinkSelectionModal = () => {
-  const { isLinkSelectionModalOpen, linksForSelection, itemForLinkSelection, closeLinkSelectionModal, startPlayback, linkSelectionContext, playRemoteItem } = mediaStore;
-  const { t } = useTranslations();
+    const {
+        isLinkSelectionModalOpen,
+        linksForSelection,
+        itemForLinkSelection,
+        closeLinkSelectionModal,
+        startPlayback,
+        linkSelectionContext,
+        playRemoteItem,
+    } = mediaStore;
+    const { t } = useTranslations();
 
-  const handleSelectLink = (link) => {
-    if (itemForLinkSelection) {
-      // Create a new item object with the selected video_url to pass to the player
-      const itemToPlay = {
-        ...itemForLinkSelection,
-        video_url: link.url,
-        video_urls: itemForLinkSelection.video_urls || []
-      };
+    const handleSelectLink = (link) => {
+        if (itemForLinkSelection) {
+            // Create a new item object with the selected video_url to pass to the player
+            const itemToPlay = {
+                ...itemForLinkSelection,
+                video_url: link.url,
+                video_urls: itemForLinkSelection.video_urls || [],
+            };
 
-      // Save the language/type preference based on the selected link
-      const showId = 'show_id' in itemForLinkSelection ? itemForLinkSelection.show_id : itemForLinkSelection.id;
-      if (showId) {
-        mediaStore.setShowFilterPreference(showId, {
-          language: link.language,
-          type: link.type
-        });
-      }
+            // Save the language/type preference based on the selected link
+            const showId = 'show_id' in itemForLinkSelection ? itemForLinkSelection.show_id : itemForLinkSelection.id;
+            if (showId) {
+                mediaStore.setShowFilterPreference(showId, {
+                    language: link.language,
+                    type: link.type,
+                });
+            }
 
-      if (linkSelectionContext === 'remote') {
-        playRemoteItem(itemToPlay);
-      } else {
-        startPlayback(itemToPlay);
-      }
-      closeLinkSelectionModal();
+            if (linkSelectionContext === 'remote') {
+                playRemoteItem(itemToPlay);
+            } else {
+                startPlayback(itemToPlay);
+            }
+            closeLinkSelectionModal();
+        }
+    };
+
+    const handleClose = () => {
+        closeLinkSelectionModal();
+    };
+
+    // FIX: Use an explicit type guard to safely access properties on the PlayableItem union type.
+    let title;
+    if (itemForLinkSelection && 'episode_number' in itemForLinkSelection) {
+        title = t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name });
+        // FIX: Property 'title' does not exist on type 'PlayableItem'. Added a more specific type guard.
+    } else if (itemForLinkSelection && 'title' in itemForLinkSelection) {
+        // This will be a MediaItem
+        title = itemForLinkSelection.title || itemForLinkSelection.name || t('linkSelectionModal.defaultTitle');
+    } else {
+        title = t('linkSelectionModal.defaultTitle');
     }
-  };
 
-  const handleClose = () => {
-    closeLinkSelectionModal();
-  };
-  
-  // FIX: Use an explicit type guard to safely access properties on the PlayableItem union type.
-  let title;
-  if (itemForLinkSelection && 'episode_number' in itemForLinkSelection) {
-      title = t('linkSelectionModal.title', { episode: itemForLinkSelection.episode_number, name: itemForLinkSelection.name });
-  // FIX: Property 'title' does not exist on type 'PlayableItem'. Added a more specific type guard.
-  } else if (itemForLinkSelection && 'title' in itemForLinkSelection) { // This will be a MediaItem
-      title = itemForLinkSelection.title || itemForLinkSelection.name || t('linkSelectionModal.defaultTitle');
-  } else {
-      title = t('linkSelectionModal.defaultTitle');
-  }
-
-  return (
-    // FIX: (line 58) Wrap Box with Modal component
-    <Modal
-      open={isLinkSelectionModalOpen}
-      onClose={handleClose}
-      aria-labelledby="link-selection-modal-title"
-    >
-      <Box sx={style}>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{ position: 'absolute', right: 8, top: 8, color: 'grey.500' }}
-        >
-          <CloseIcon />
-        </IconButton>
-        <Typography id="link-selection-modal-title" variant="h6" component="h2" noWrap>
-          {title}
-        </Typography>
-        <Typography variant="subtitle1" sx={{ mt: 1, mb: 2 }}>
-            {t('linkSelectionModal.subtitle')}
-        </Typography>
-        <List>
-          {linksForSelection.map((link) => (
-            <ListItem key={link.id} disablePadding>
-              <ListItemButton onClick={() => handleSelectLink(link)}>
-                <PlayArrowIcon sx={{ mr: 2 }}/>
-                <ListItemText 
-                  primary={link.label} 
-                  secondary={link.url} 
-                  primaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}
-                  secondaryTypographyProps={{noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden'}}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Box>
-    </Modal>
-  );
+    return (
+        // FIX: (line 58) Wrap Box with Modal component
+        <Modal open={isLinkSelectionModalOpen} onClose={handleClose} aria-labelledby="link-selection-modal-title">
+            <Box sx={style}>
+                <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                    sx={{ position: 'absolute', right: 8, top: 8, color: 'grey.500' }}
+                >
+                    <CloseIcon />
+                </IconButton>
+                <Typography id="link-selection-modal-title" variant="h6" component="h2" noWrap>
+                    {title}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ mt: 1, mb: 2 }}>
+                    {t('linkSelectionModal.subtitle')}
+                </Typography>
+                <List>
+                    {linksForSelection.map((link) => (
+                        <ListItem key={link.id} disablePadding>
+                            <ListItemButton onClick={() => handleSelectLink(link)}>
+                                <PlayArrowIcon sx={{ mr: 2 }} />
+                                <ListItemText
+                                    primary={link.label}
+                                    secondary={link.url}
+                                    primaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden' }}
+                                    secondaryTypographyProps={{ noWrap: true, textOverflow: 'ellipsis', overflow: 'hidden' }}
+                                />
+                            </ListItemButton>
+                        </ListItem>
+                    ))}
+                </List>
+            </Box>
+        </Modal>
+    );
 };
 
 export default observer(LinkSelectionModal);

@@ -1,7 +1,7 @@
-import {useCallback, useMemo, useSyncExternalStore} from 'react';
-import {mediaStore} from '../store/mediaStore.js';
-import {it as itLocale} from '../locales/it.js';
-import {en as enLocale} from '../locales/en.js';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { mediaStore } from '../store/mediaStore.js';
+import { it as itLocale } from '../locales/it.js';
+import { en as enLocale } from '../locales/en.js';
 
 export const AVAILABLE_LANGUAGES = ['it', 'en'];
 export const FALLBACK_LANGUAGE = 'it';
@@ -59,12 +59,13 @@ export const useTranslations = () => {
         [events]
     );
 
-    const language = useSyncExternalStore(subscribe, () => mediaStore.language, () => mediaStore.language);
-
-    const dictionary = useMemo(
-        () => allTranslations[language] || allTranslations[FALLBACK_LANGUAGE],
-        [language]
+    const language = useSyncExternalStore(
+        subscribe,
+        () => mediaStore.language,
+        () => mediaStore.language
     );
+
+    const dictionary = useMemo(() => allTranslations[language] || allTranslations[FALLBACK_LANGUAGE], [language]);
     const fallback = useMemo(() => allTranslations[FALLBACK_LANGUAGE], []);
 
     const t = useCallback(
@@ -80,9 +81,7 @@ export const useTranslations = () => {
             // clear, localizable error instead of a generic "Objects
             // are not valid as a React child" runtime error.
             if (typeof translated !== 'string') {
-                console.warn(
-                    `[Translation] Key "${key}" for language "${language}" is not a string (got ${typeof translated}).`
-                );
+                console.warn(`[Translation] Key "${key}" for language "${language}" is not a string (got ${typeof translated}).`);
                 return key;
             }
             return interpolate(translated, values);

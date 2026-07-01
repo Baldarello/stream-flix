@@ -1,14 +1,14 @@
-import React, {useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {Box, CardMedia, ListItemButton, Stack, Typography} from '@mui/material';
+import React, { useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { Box, CardMedia, ListItemButton, Stack, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import TheatersIcon from '@mui/icons-material/Theaters';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {HoloChip} from '../feedback/HoloChip.jsx';
-import {EpisodeProgressRing} from './EpisodeProgressRing.jsx';
-import {EpisodeActions, EpisodeSwipeActions} from './EpisodeActions.jsx';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { HoloChip } from '../feedback/HoloChip.jsx';
+import { EpisodeProgressRing } from './EpisodeProgressRing.jsx';
+import { EpisodeActions, EpisodeSwipeActions } from './EpisodeActions.jsx';
 
 /**
  * EpisodeRow - A single episode entry in the drawer.
@@ -29,15 +29,9 @@ import {EpisodeActions, EpisodeSwipeActions} from './EpisodeActions.jsx';
  *  - On sm+ the same two actions appear as compact icon buttons that
  *    fade in on hover/focus
  */
-const EpisodeRow = observer(({
-                                 episode,
-                                 isCurrent,
-                                 hasPlayableLinks,
-                                 onPlay,
-                                 seasonNumber
-                             }) => {
-    const {episodeProgress, toggleEpisodeWatchedStatus} = mediaStore;
-    const {t} = useTranslations();
+const EpisodeRow = observer(({ episode, isCurrent, hasPlayableLinks, onPlay, seasonNumber }) => {
+    const { episodeProgress, toggleEpisodeWatchedStatus } = mediaStore;
+    const { t } = useTranslations();
     const [swipeX, setSwipeX] = useState(() => 0);
     const [startX, setStartX] = useState(() => 0);
     const cardRef = useRef(null);
@@ -46,15 +40,16 @@ const EpisodeRow = observer(({
     const isWatched = progress?.watched;
 
     // Get available languages from video_urls
-    const availableLanguages = episode.video_urls?.map(link => ({
-        lang: link.language,
-        type: link.type // 'dub' or 'sub'
-    })) || [];
+    const availableLanguages =
+        episode.video_urls?.map((link) => ({
+            lang: link.language,
+            type: link.type, // 'dub' or 'sub'
+        })) || [];
 
     // Deduplicate languages (check both lang AND type to keep dub AND sub)
-    const uniqueLanguages = availableLanguages.reduce((acc, {lang, type}) => {
-        if (!acc.find(l => l.lang === lang && l.type === type)) {
-            acc.push({lang, type});
+    const uniqueLanguages = availableLanguages.reduce((acc, { lang, type }) => {
+        if (!acc.find((l) => l.lang === lang && l.type === type)) {
+            acc.push({ lang, type });
         }
         return acc;
     }, []);
@@ -99,7 +94,7 @@ const EpisodeRow = observer(({
         handleCloseSwipe();
     };
 
-    const seasonLabel = t('episodesDrawer.season', {number: seasonNumber});
+    const seasonLabel = t('episodesDrawer.season', { number: seasonNumber });
     const subParts = [seasonLabel];
     if (episode.runtime) {
         subParts.push(`${episode.runtime} min`);
@@ -141,7 +136,7 @@ const EpisodeRow = observer(({
                     isWatched={isWatched}
                     onToggleWatched={handleToggleWatched}
                     onShowDetails={handleShowDetails}
-                    sx={{flex: 1}}
+                    sx={{ flex: 1 }}
                 />
             </Box>
 
@@ -238,17 +233,20 @@ const EpisodeRow = observer(({
                                 component="img"
                                 image={episode.still_path}
                                 alt={episode.name}
-                                sx={{width: '100%', height: '100%', objectFit: 'cover'}}
+                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         ) : (
                             <Box
                                 sx={{
-                                    width: '100%', height: '100%',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    width: '100%',
+                                    height: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                     color: 'var(--text-secondary)',
                                 }}
                             >
-                                <TheatersIcon sx={{fontSize: '2rem', opacity: 0.6}}/>
+                                <TheatersIcon sx={{ fontSize: '2rem', opacity: 0.6 }} />
                             </Box>
                         )}
                         {/* 2px progress bar at bottom of thumbnail */}
@@ -296,7 +294,7 @@ const EpisodeRow = observer(({
                     </Box>
 
                     {/* Right column: title + meta + language chips + inline actions */}
-                    <Box sx={{flex: 1, minWidth: 0, pr: {xs: 0, sm: 7}}}>
+                    <Box sx={{ flex: 1, minWidth: 0, pr: { xs: 0, sm: 7 } }}>
                         <Typography
                             sx={{
                                 fontFamily: "'Space Grotesk', 'Inter', sans-serif",
@@ -313,7 +311,7 @@ const EpisodeRow = observer(({
                         >
                             {episode.name}
                         </Typography>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mt: 0.5}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                             <Typography
                                 sx={{
                                     fontFamily: "'Inter', sans-serif",
@@ -323,21 +321,15 @@ const EpisodeRow = observer(({
                             >
                                 {subText}
                             </Typography>
-                            {watchedPercent > 0 && !isWatched && (
-                                <EpisodeProgressRing progress={watchedPercent} size={32} />
-                            )}
+                            {watchedPercent > 0 && !isWatched && <EpisodeProgressRing progress={watchedPercent} size={32} />}
                         </Box>
                         {uniqueLanguages.length > 0 && (
-                            <Stack
-                                direction="row"
-                                spacing={0.5}
-                                sx={{mt: 0.75, flexWrap: 'wrap', gap: 0.5}}
-                            >
-                                {uniqueLanguages.map(({lang, type}) => (
+                            <Stack direction="row" spacing={0.5} sx={{ mt: 0.75, flexWrap: 'wrap', gap: 0.5 }}>
+                                {uniqueLanguages.map(({ lang, type }) => (
                                     <HoloChip
                                         key={`${lang}-${type}`}
                                         label={`${lang.toUpperCase()} ${type === 'dub' ? 'DUB' : 'SUB'}`}
-                                        sx={{height: 20, fontSize: '0.6rem'}}
+                                        sx={{ height: 20, fontSize: '0.6rem' }}
                                     />
                                 ))}
                             </Stack>
@@ -351,7 +343,7 @@ const EpisodeRow = observer(({
                             right: 8,
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            display: {xs: 'none', sm: 'flex'},
+                            display: { xs: 'none', sm: 'flex' },
                             flexDirection: 'column',
                             gap: 0.5,
                             opacity: 0,

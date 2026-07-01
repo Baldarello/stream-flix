@@ -12,7 +12,10 @@ test('links appear in ManageLinksView and DetailView after adding without refres
     await page.waitForTimeout(3000);
 
     // 1. Open DetailView for a show with seasons
-    const alleInfoBtn = page.locator('button').filter({ hasText: /Altre Info/i }).first();
+    const alleInfoBtn = page
+        .locator('button')
+        .filter({ hasText: /Altre Info/i })
+        .first();
     await alleInfoBtn.click();
     await page.waitForTimeout(3000);
 
@@ -86,7 +89,9 @@ test('links appear in ManageLinksView and DetailView after adding without refres
 
     // 10. Check DetailView language chips (should show ITA SUB if links were added)
     // Close modal first
-    const closeBtn = page.locator('[data-component="link-episodes-modal"] [aria-label="close"], [data-component="link-episodes-modal"] .MuiDialogTitle button');
+    const closeBtn = page.locator(
+        '[data-component="link-episodes-modal"] [aria-label="close"], [data-component="link-episodes-modal"] .MuiDialogTitle button'
+    );
     await closeBtn.click();
     await page.waitForTimeout(1000);
 

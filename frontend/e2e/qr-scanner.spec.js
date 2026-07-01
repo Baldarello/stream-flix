@@ -9,17 +9,17 @@
  *
  * Production-safe: no store seeding needed.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('QRScanner / MasterScreen', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
-        page.on('pageerror', err => errors.push(err.message));
+        page.on('pageerror', (err) => errors.push(err.message));
         page._testErrors = errors;
     });
 
@@ -41,9 +41,7 @@ test.describe('QRScanner / MasterScreen', () => {
         const codeInput = page.locator('#master-slave-code-input');
         await expect(codeInput).toBeVisible({ timeout: 5000 });
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors, `Console errors: ${fatalErrors.join('\n')}`).toHaveLength(0);
     });
 

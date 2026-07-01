@@ -8,19 +8,19 @@
  * `useState` hooks.
  */
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Alert, Box, Divider, Typography} from '@mui/material';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {SyncConflictBulkActions} from './SyncConflictBulkActions.jsx';
-import {SyncConflictChoiceRow} from './SyncConflictChoiceRow.jsx';
+import { observer } from 'mobx-react-lite';
+import { Alert, Box, Divider, Typography } from '@mui/material';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { SyncConflictBulkActions } from './SyncConflictBulkActions.jsx';
+import { SyncConflictChoiceRow } from './SyncConflictChoiceRow.jsx';
 
 const alertSx = {
     mb: 2,
     background: 'var(--holo-grad)',
     color: 'var(--text-primary)',
     border: '1px solid rgba(76, 210, 255, 0.35)',
-    '& .MuiAlert-icon': {color: 'var(--neon-accent)'}
+    '& .MuiAlert-icon': { color: 'var(--neon-accent)' },
 };
 
 /**
@@ -29,22 +29,22 @@ const alertSx = {
  * @returns {React.ReactElement} Choose body
  */
 export const SyncConflictChooseStep = observer(() => {
-    const {t} = useTranslations();
-    const {syncConflictChoices: choices, syncConflictStats: stats} = mediaStore;
+    const { t } = useTranslations();
+    const { syncConflictChoices: choices, syncConflictStats: stats } = mediaStore;
 
     return (
         <Box
             id="sync-conflict-choose-step"
             data-component="sync-conflict-choose-step"
-            sx={{display: 'flex', flexDirection: 'column'}}
+            sx={{ display: 'flex', flexDirection: 'column' }}
         >
             <Alert severity="info" sx={alertSx}>
                 {t('syncConflict.chooseInfo')}
             </Alert>
 
-            <SyncConflictBulkActions showDeletionRow/>
+            <SyncConflictBulkActions showDeletionRow />
 
-            <Divider sx={{my: 1, borderColor: 'rgba(76, 210, 255, 0.15)'}}/>
+            <Divider sx={{ my: 1, borderColor: 'rgba(76, 210, 255, 0.15)' }} />
 
             <Box
                 sx={{
@@ -53,7 +53,7 @@ export const SyncConflictChooseStep = observer(() => {
                     alignItems: 'center',
                     mb: 1.5,
                     flexWrap: 'wrap',
-                    gap: 1
+                    gap: 1,
                 }}
             >
                 <Typography
@@ -63,7 +63,7 @@ export const SyncConflictChooseStep = observer(() => {
                         fontFamily: "'Space Grotesk', 'Inter', sans-serif",
                         letterSpacing: '0.04em',
                         textTransform: 'uppercase',
-                        fontSize: '0.75rem'
+                        fontSize: '0.75rem',
                     }}
                 >
                     {t('syncConflict.chooseInfo')}
@@ -72,12 +72,12 @@ export const SyncConflictChooseStep = observer(() => {
                     variant="caption"
                     sx={{
                         color: stats.toDelete > 0 ? '#ff6e6e' : 'var(--text-secondary)',
-                        fontFamily: "'Space Grotesk', 'Inter', sans-serif"
+                        fontFamily: "'Space Grotesk', 'Inter', sans-serif",
                     }}
                 >
                     {stats.toDelete > 0
-                        ? t('syncConflict.rowsCountWithDelete', {count: choices.length, toDelete: stats.toDelete})
-                        : t('syncConflict.rowsCount', {count: choices.length})}
+                        ? t('syncConflict.rowsCountWithDelete', { count: choices.length, toDelete: stats.toDelete })
+                        : t('syncConflict.rowsCount', { count: choices.length })}
                 </Typography>
             </Box>
 
@@ -85,17 +85,15 @@ export const SyncConflictChooseStep = observer(() => {
                 sx={{
                     maxHeight: 400,
                     overflowY: 'auto',
-                    pr: 0.5
+                    pr: 0.5,
                 }}
             >
-                {choices.map(choice => (
-                    <SyncConflictChoiceRow key={`sync-conflict-choice-row-key-${choice.id}`} choice={choice}/>
+                {choices.map((choice) => (
+                    <SyncConflictChoiceRow key={`sync-conflict-choice-row-key-${choice.id}`} choice={choice} />
                 ))}
                 {choices.length === 0 && (
-                    <Box sx={{p: 3, textAlign: 'center'}}>
-                        <Typography sx={{color: 'var(--text-secondary)'}}>
-                            {t('syncConflict.noConflict')}
-                        </Typography>
+                    <Box sx={{ p: 3, textAlign: 'center' }}>
+                        <Typography sx={{ color: 'var(--text-secondary)' }}>{t('syncConflict.noConflict')}</Typography>
                     </Box>
                 )}
             </Box>

@@ -11,8 +11,8 @@
  * for now, which is responsible for calling `bulkImportFromDb` on this
  * store at boot time.
  */
-import {makeAutoObservable} from 'mobx';
-import {db} from '../services/db.js';
+import { makeAutoObservable } from 'mobx';
+import { db } from '../services/db.js';
 
 class LibraryStore {
     /** @type {number[]} Ordered list of media IDs in the user's library. */
@@ -108,9 +108,7 @@ class LibraryStore {
     }
 
     get shareableShows() {
-        return Array.from(this.cachedItems.values()).filter(
-            (item) => item.media_type === 'tv' && this.hasLinks(item.id)
-        );
+        return Array.from(this.cachedItems.values()).filter((item) => item.media_type === 'tv' && this.hasLinks(item.id));
     }
 
     get showsWithLinks() {
@@ -130,7 +128,9 @@ class LibraryStore {
                 }
             }
         }
-        return Array.from(showIds).map((id) => this.cachedItems.get(id)).filter((item) => !!item);
+        return Array.from(showIds)
+            .map((id) => this.cachedItems.get(id))
+            .filter((item) => !!item);
     }
 
     get libraryCounts() {
@@ -144,7 +144,9 @@ class LibraryStore {
 
     // ponytail: safeKey — coerces any value to string key, never throws.
     // Guards against objects which would throw "Cannot convert to primitive".
-    static safeKey(v) { return String(v == null ? '' : v); }
+    static safeKey(v) {
+        return String(v == null ? '' : v);
+    }
 
     hasLinks(mediaId) {
         const links = this.mediaLinks.get(LibraryStore.safeKey(mediaId));
@@ -215,19 +217,15 @@ class LibraryStore {
         const itemId = item.id;
         if (this.myList.includes(itemId)) {
             this.myList = this.myList.filter((id) => id !== itemId);
-            db.myList.delete(itemId).catch((e) =>
-                console.warn('[libraryStore] failed to delete myList entry', e)
-            );
+            db.myList.delete(itemId).catch((e) => console.warn('[libraryStore] failed to delete myList entry', e));
         } else {
             this.myList = [...this.myList, itemId];
-            db.myList.put({ id: itemId, order: this.myList.length - 1 }).catch((e) =>
-                console.warn('[libraryStore] failed to persist myList entry', e)
-            );
+            db.myList
+                .put({ id: itemId, order: this.myList.length - 1 })
+                .catch((e) => console.warn('[libraryStore] failed to persist myList entry', e));
             if (!this.cachedItems.has(itemId)) {
                 this.cachedItems.set(itemId, item);
-                db.cachedItems.put(item).catch((e) =>
-                    console.warn('[libraryStore] failed to cache new myList item', e)
-                );
+                db.cachedItems.put(item).catch((e) => console.warn('[libraryStore] failed to cache new myList item', e));
             }
         }
     }
@@ -303,9 +301,7 @@ class LibraryStore {
             lastWatchedAt: Date.now(),
         };
         this.episodeProgress.set(episodeId, newProgress);
-        db.episodeProgress.put(newProgress).catch((e) =>
-            console.warn('[libraryStore] failed to persist episodeProgress', e)
-        );
+        db.episodeProgress.put(newProgress).catch((e) => console.warn('[libraryStore] failed to persist episodeProgress', e));
     }
 
     /**
@@ -334,17 +330,17 @@ class LibraryStore {
     /** Persist a custom intro duration (in seconds) for a show. */
     setShowIntroDuration(showId, duration) {
         this.showIntroDurations.set(showId, duration);
-        db.showIntroDurations.put({ id: showId, duration }).catch((e) =>
-            console.warn('[libraryStore] failed to persist showIntroDurations', e)
-        );
+        db.showIntroDurations
+            .put({ id: showId, duration })
+            .catch((e) => console.warn('[libraryStore] failed to persist showIntroDurations', e));
     }
 
     /** Persist the season the user is currently viewing for a show. */
     setSelectedSeasonForShow(showId, seasonNumber) {
         this.selectedSeasons.set(showId, seasonNumber);
-        db.selectedSeasons.put({ showId, seasonNumber }).catch((e) =>
-            console.warn('[libraryStore] failed to persist selectedSeasons', e)
-        );
+        db.selectedSeasons
+            .put({ showId, seasonNumber })
+            .catch((e) => console.warn('[libraryStore] failed to persist selectedSeasons', e));
     }
 
     /**
@@ -355,9 +351,9 @@ class LibraryStore {
         const current = this.showFilterPreferences.get(showId) || {};
         const merged = { ...current, ...preference };
         this.showFilterPreferences.set(showId, merged);
-        db.showFilterPreferences.put({ showId, ...merged }).catch((e) =>
-            console.warn('[libraryStore] failed to persist showFilterPreferences', e)
-        );
+        db.showFilterPreferences
+            .put({ showId, ...merged })
+            .catch((e) => console.warn('[libraryStore] failed to persist showFilterPreferences', e));
     }
 
     // ===== LINK HELPERS =====

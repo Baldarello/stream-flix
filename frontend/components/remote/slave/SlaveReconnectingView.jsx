@@ -1,12 +1,12 @@
 import React from 'react';
-import {Box, Typography} from '@mui/material';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { Box, Typography } from '@mui/material';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 const SlaveReconnectingView = () => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
 
     return (
-        <Box sx={{textAlign: 'center'}}>
+        <Box sx={{ textAlign: 'center' }}>
             {/* Loading spinner - functional animation only */}
             <Box
                 sx={{

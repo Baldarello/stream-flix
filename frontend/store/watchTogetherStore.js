@@ -1,14 +1,13 @@
-import {makeAutoObservable, runInAction} from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
 
-import {websocketService} from '../services/websocketService.js';
-import {db} from '../services/db';
-import {mediaStore} from './mediaStore';
-
+import { websocketService } from '../services/websocketService.js';
+import { db } from '../services/db';
+import { mediaStore } from './mediaStore';
 
 class WatchTogetherStore {
     // Modal state
     watchTogetherModalOpen = false;
-    
+
     // Room state
     roomId = null;
     hostId = null;
@@ -16,7 +15,7 @@ class WatchTogetherStore {
     participants = [];
     username = null;
     watchTogetherError = null;
-    playbackState = {status: 'paused', time: 0};
+    playbackState = { status: 'paused', time: 0 };
     chatHistory = [];
     playbackListeners = [];
     joinRoomIdFromUrl = null;
@@ -29,19 +28,19 @@ class WatchTogetherStore {
         // WebSocket events per Watch Together
         websocketService.events.on('message', this.handleWatchTogetherMessage);
     }
-    
+
     // Playback listeners
     addPlaybackListener = (listener) => {
         this.playbackListeners.push(listener);
         return () => {
-            this.playbackListeners = this.playbackListeners.filter(l => l !== listener);
+            this.playbackListeners = this.playbackListeners.filter((l) => l !== listener);
         };
     };
-    
+
     notifyPlaybackListeners = (state) => {
-        this.playbackListeners.forEach(listener => listener(state));
+        this.playbackListeners.forEach((listener) => listener(state));
     };
-    
+
     // Watch Together Methods
     openWatchTogetherModal = (item) => {
         this.watchTogetherError = null;
@@ -61,25 +60,25 @@ class WatchTogetherStore {
 
     createRoom = (username) => {
         this.username = username;
-        db.preferences.put({key: 'username', value: username});
+        db.preferences.put({ key: 'username', value: username });
         if (this.watchTogetherSelectedItem) {
-            websocketService.createRoom({username, media: this.watchTogetherSelectedItem});
+            websocketService.createRoom({ username, media: this.watchTogetherSelectedItem });
         }
     };
 
     joinRoom = (roomId, username) => {
         this.username = username;
-        db.preferences.put({key: 'username', value: username});
-        websocketService.joinRoom({roomId: roomId.toUpperCase(), username});
+        db.preferences.put({ key: 'username', value: username });
+        websocketService.joinRoom({ roomId: roomId.toUpperCase(), username });
     };
 
     changeWatchTogetherMedia = (item) => {
         this.watchTogetherSelectedItem = item;
         if (this.isHost) {
             // Ensure video_url is set from video_urls for WebSocket broadcast
-            const mediaToSend = {...item};
-            if (!mediaToSend.video_url && (mediaToSend).video_urls?.length > 0) {
-                mediaToSend.video_url = (mediaToSend).video_urls[0].url;
+            const mediaToSend = { ...item };
+            if (!mediaToSend.video_url && mediaToSend.video_urls?.length > 0) {
+                mediaToSend.video_url = mediaToSend.video_urls[0].url;
             }
             websocketService.selectMedia(mediaToSend);
         }
@@ -106,25 +105,25 @@ class WatchTogetherStore {
 
     changeName = (participantId, newName) => {
         // Optimistically update local participant state for immediate UI feedback
-        const updatedParticipants = this.participants.map(p =>
-            p.id === participantId ? {...p, name: newName} : p
-        );
-        const participantExists = updatedParticipants.some(p => p.id === participantId && p.name === newName);
+        const updatedParticipants = this.participants.map((p) => (p.id === participantId ? { ...p, name: newName } : p));
+        const participantExists = updatedParticipants.some((p) => p.id === participantId && p.name === newName);
         if (participantExists) {
             this.participants = updatedParticipants;
         }
         // Send to server for broadcast to all room members
-        websocketService.changeName({participantId, name: newName});
+        websocketService.changeName({ participantId, name: newName });
     };
 
     // WebSocket message handler for Watch Together events
     handleWatchTogetherMessage = (message) => {
-        const {type, payload} = message;
+        const { type, payload } = message;
 
         switch (type) {
             case 'quix-room-update': {
-                console.log(`[WatchTogetherStore] quix-room-update received: roomId=${payload.roomId}, participants count=${payload.participants?.length}, myClientId=${websocketService.clientId}`);
-                
+                console.log(
+                    `[WatchTogetherStore] quix-room-update received: roomId=${payload.roomId}, participants count=${payload.participants?.length}, myClientId=${websocketService.clientId}`
+                );
+
                 runInAction(() => {
                     this.roomId = payload.roomId;
                     this.hostId = payload.hostId;
@@ -139,7 +138,7 @@ class WatchTogetherStore {
                 if (payload.selectedMedia) {
                     const existing = mediaStore.cachedItems.get(payload.selectedMedia.id);
                     const isNonHost = !this.isHost;
-                    const hasNewEpisode = this.watchTogetherSelectedItem?.id !== (payload.selectedMedia)?.id;
+                    const hasNewEpisode = this.watchTogetherSelectedItem?.id !== payload.selectedMedia?.id;
 
                     // Set watchTogetherSelectedItem from the payload's episode (which has video_urls)
                     runInAction(() => {
@@ -153,10 +152,10 @@ class WatchTogetherStore {
                     }
 
                     // For non-hosts, if the episode changed, start playback with the video_url from video_urls
-                    if (isNonHost && hasNewEpisode && (payload.selectedMedia)?.video_urls?.length > 0) {
+                    if (isNonHost && hasNewEpisode && payload.selectedMedia?.video_urls?.length > 0) {
                         const episodeWithUrl = {
-                            ...(payload.selectedMedia),
-                            video_url: (payload.selectedMedia).video_urls[0].url
+                            ...payload.selectedMedia,
+                            video_url: payload.selectedMedia.video_urls[0].url,
                         };
                         mediaStore.startPlayback(episodeWithUrl);
                     }
@@ -171,7 +170,13 @@ class WatchTogetherStore {
                 this.notifyPlaybackListeners(newState);
 
                 // If we are in a room, not the host, and not currently playing, this update means the host has started playback
-                if (this.roomId && !this.isHost && !mediaStore.nowPlayingItem && this.watchTogetherSelectedItem && newState.status === 'playing') {
+                if (
+                    this.roomId &&
+                    !this.isHost &&
+                    !mediaStore.nowPlayingItem &&
+                    this.watchTogetherSelectedItem &&
+                    newState.status === 'playing'
+                ) {
                     mediaStore.startPlayback(this.watchTogetherSelectedItem);
                 }
                 break;

@@ -12,15 +12,15 @@
  * the heavy re-render at 200ms.
  */
 
-import React, {useEffect, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box, InputAdornment, Stack, Tab, Tabs, TextField, Typography} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box, InputAdornment, Stack, Tab, Tabs, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {HoloChip} from '../../feedback/HoloChip.jsx';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { HoloChip } from '../../feedback/HoloChip.jsx';
 
-const CounterChip = observer(({id, label, value, accent = 'var(--neon-accent)'}) => (
+const CounterChip = observer(({ id, label, value, accent = 'var(--neon-accent)' }) => (
     <HoloChip
         id={id}
         sx={{
@@ -33,7 +33,7 @@ const CounterChip = observer(({id, label, value, accent = 'var(--neon-accent)'})
             },
         }}
         label={
-            <Box component="span" sx={{display: 'inline-flex', alignItems: 'center', gap: 0.75}}>
+            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
                 <span>{label}</span>
                 <span className="counter-value">{value}</span>
             </Box>
@@ -48,8 +48,8 @@ const CounterChip = observer(({id, label, value, accent = 'var(--neon-accent)'})
  * @param {string} [props.id] - DOM id prefix.
  * @returns {React.ReactElement}
  */
-export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
-    const {t} = useTranslations();
+export const LibraryDashboard = observer(({ id = 'library-dashboard' }) => {
+    const { t } = useTranslations();
     const counts = mediaStore.libraryCounts;
     const storeQuery = mediaStore.librarySearchQuery;
     const [inputValue, setInputValue] = useState(() => storeQuery);
@@ -73,10 +73,10 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
             className="holo-surface"
             sx={{
                 position: 'sticky',
-                top: {xs: 64, md: 72},
+                top: { xs: 64, md: 72 },
                 zIndex: 5,
-                py: {xs: 2, md: 2.5},
-                px: {xs: 2, md: 3},
+                py: { xs: 2, md: 2.5 },
+                px: { xs: 2, md: 3 },
                 borderRadius: '14px',
                 mb: 3,
                 display: 'flex',
@@ -84,13 +84,15 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                 gap: 2,
             }}
         >
-            <Box sx={{
-                display: 'flex',
-                flexDirection: {xs: 'column', sm: 'row'},
-                gap: 2,
-                alignItems: {sm: 'center'},
-                justifyContent: 'space-between'
-            }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 2,
+                    alignItems: { sm: 'center' },
+                    justifyContent: 'space-between',
+                }}
+            >
                 <Typography
                     variant="h4"
                     sx={{
@@ -99,7 +101,7 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                         letterSpacing: '0.04em',
                         color: 'var(--text-primary)',
                         textShadow: '0 0 16px rgba(76, 210, 255, 0.25)',
-                        fontSize: {xs: '1.5rem', md: '2rem'},
+                        fontSize: { xs: '1.5rem', md: '2rem' },
                     }}
                 >
                     {t('libraryManagement.title')}
@@ -114,7 +116,7 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                     }}
                     size="small"
                     sx={{
-                        minWidth: {xs: '100%', sm: 320},
+                        minWidth: { xs: '100%', sm: 320 },
                         '& .MuiOutlinedInput-notchedOutline': {
                             borderColor: 'rgba(76, 210, 255, 0.35)',
                         },
@@ -133,7 +135,7 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
-                                <SearchIcon sx={{color: 'var(--neon-accent)'}}/>
+                                <SearchIcon sx={{ color: 'var(--neon-accent)' }} />
                             </InputAdornment>
                         ),
                     }}
@@ -145,7 +147,7 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                 sx={{
                     flexWrap: 'wrap',
                     rowGap: 1,
-                    '& > *': {mr: 0.5},
+                    '& > *': { mr: 0.5 },
                 }}
             >
                 <CounterChip
@@ -189,25 +191,17 @@ export const LibraryDashboard = observer(({id = 'library-dashboard'}) => {
                         fontWeight: 600,
                         letterSpacing: '0.02em',
                     },
-                    '& .Mui-selected': {color: 'var(--neon-accent)'},
+                    '& .Mui-selected': { color: 'var(--neon-accent)' },
                     '& .MuiTabs-indicator': {
                         backgroundColor: 'var(--neon-accent)',
                         boxShadow: 'var(--edge-glow)',
                     },
                 }}
             >
-                <Tab id={`${id}-tab-my-list`} label={t('libraryManagement.tabs.myList')} value={0}/>
-                <Tab
-                    id={`${id}-tab-continue`}
-                    label={t('libraryManagement.tabs.continueWatching')}
-                    value={1}
-                />
-                <Tab id={`${id}-tab-links`} label={t('libraryManagement.tabs.links')} value={2}/>
-                <Tab
-                    id={`${id}-tab-preferred`}
-                    label={t('libraryManagement.tabs.preferredSources')}
-                    value={3}
-                />
+                <Tab id={`${id}-tab-my-list`} label={t('libraryManagement.tabs.myList')} value={0} />
+                <Tab id={`${id}-tab-continue`} label={t('libraryManagement.tabs.continueWatching')} value={1} />
+                <Tab id={`${id}-tab-links`} label={t('libraryManagement.tabs.links')} value={2} />
+                <Tab id={`${id}-tab-preferred`} label={t('libraryManagement.tabs.preferredSources')} value={3} />
             </Tabs>
         </Box>
     );

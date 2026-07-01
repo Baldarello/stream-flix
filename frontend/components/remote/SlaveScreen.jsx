@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box} from '@mui/material';
-import {remoteStore} from '../../store/remoteStore.js';
-import {websocketService} from '../../services/websocketService.js';
+import React, { useEffect, useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Box } from '@mui/material';
+import { remoteStore } from '../../store/remoteStore.js';
+import { websocketService } from '../../services/websocketService.js';
 import SmartTVBackground from './slave/SlaveBackground.jsx';
 import SlaveLoadingView from './slave/SlaveLoadingView.jsx';
 import SlaveReconnectingView from './slave/SlaveReconnectingView.jsx';

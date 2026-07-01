@@ -4,7 +4,7 @@
  * 2. Advanced config (half-season ranges with startNum/endNum)
  * 3. URL hostname extraction via safeHostname
  */
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../services/db.js', () => {
     const tableMock = () => ({
@@ -13,7 +13,7 @@ vi.mock('../../services/db.js', () => {
         delete: vi.fn().mockResolvedValue(undefined),
         bulkAdd: vi.fn().mockResolvedValue(undefined),
         bulkPut: vi.fn().mockResolvedValue(undefined),
-        get: vi.fn().mockResolvedValue(null),   // ← null so !(await getPreferredSource) is true
+        get: vi.fn().mockResolvedValue(null), // ← null so !(await getPreferredSource) is true
         toArray: vi.fn().mockResolvedValue([]),
         orderBy: vi.fn().mockReturnThis(),
         where: vi.fn().mockReturnThis(),
@@ -36,12 +36,14 @@ const DRSTONE_PATTERN = 'https://srv18-tsurukusa.sweetpixel.org/DDL/ANIME/DrSton
 const makeShow = (episodes) => ({
     id: 42,
     name: 'Dr. Stone',
-    seasons: [{
-        season_number: 1,
-        name: 'Stagione 1',
-        episode_count: episodes.length,
-        episodes,
-    }],
+    seasons: [
+        {
+            season_number: 1,
+            name: 'Stagione 1',
+            episode_count: episodes.length,
+            episodes,
+        },
+    ],
 });
 
 describe('buildLinksForSeason – pattern method', () => {
@@ -151,9 +153,9 @@ describe('buildLinksForSeason – advanced half-season config', () => {
                 pattern: 'https://srv18-tsurukusa.sweetpixel.org/DDL/ANIME/DrStone4ITA/DrStone4_Ep_[@EP]_ITA.mp4',
                 padding: 2,
                 label: '',
-                start: 7,      // start at episode 7
-                end: 12,       // end at episode 12
-                startNum: 7,   // use number 7 in the URL
+                start: 7, // start at episode 7
+                end: 12, // end at episode 12
+                startNum: 7, // use number 7 in the URL
             },
             language: 'ITA',
             type: 'sub',
@@ -234,7 +236,7 @@ describe('buildLinksForSeason – advanced half-season config', () => {
                 start: 1,
                 end: 6,
                 startNum: 7,
-                endNum: 11,  // ← only 5 numbers available (7,8,9,10,11)
+                endNum: 11, // ← only 5 numbers available (7,8,9,10,11)
             },
             language: 'ITA',
             type: 'sub',
@@ -274,9 +276,7 @@ describe('buildLinksForSeason – advanced half-season config', () => {
     });
 
     it('addLinksToMedia persists episode links and sets preferred source', async () => {
-        const show = makeShow([
-            { id: 101, episode_number: 1 },
-        ]);
+        const show = makeShow([{ id: 101, episode_number: 1 }]);
 
         const result = await buildLinksForSeason({
             show,

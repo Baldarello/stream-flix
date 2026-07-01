@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import {Box, Button, Typography} from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import InboxIcon from '@mui/icons-material/Inbox';
 
 /**
@@ -23,14 +23,7 @@ import InboxIcon from '@mui/icons-material/Inbox';
  * @param {string} [props.id] - DOM id.
  * @returns {React.ReactElement}
  */
-export const EmptyState = ({
-                               icon,
-                               title,
-                               subtitle,
-                               ctaLabel,
-                               onCta,
-                               id = 'library-empty-state',
-                           }) => {
+export const EmptyState = ({ icon, title, subtitle, ctaLabel, onCta, id = 'library-empty-state' }) => {
     return (
         <Box
             id={id}
@@ -42,7 +35,7 @@ export const EmptyState = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 2,
-                py: {xs: 6, md: 8},
+                py: { xs: 6, md: 8 },
                 px: 3,
                 textAlign: 'center',
                 borderRadius: '14px',
@@ -63,7 +56,7 @@ export const EmptyState = ({
                     color: 'var(--neon-accent)',
                 }}
             >
-                {icon || <InboxIcon sx={{fontSize: 44}}/>}
+                {icon || <InboxIcon sx={{ fontSize: 44 }} />}
             </Box>
             {title && (
                 <Typography
@@ -79,10 +72,7 @@ export const EmptyState = ({
                 </Typography>
             )}
             {subtitle && (
-                <Typography
-                    variant="body2"
-                    sx={{color: 'var(--text-secondary)', maxWidth: 480}}
-                >
+                <Typography variant="body2" sx={{ color: 'var(--text-secondary)', maxWidth: 480 }}>
                     {subtitle}
                 </Typography>
             )}

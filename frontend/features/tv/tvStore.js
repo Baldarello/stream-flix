@@ -1,4 +1,4 @@
-import {makeAutoObservable} from 'mobx';
+import { makeAutoObservable } from 'mobx';
 
 /**
  * TvStore - MobX store for TV mode navigation and focus management
@@ -55,10 +55,10 @@ class TvStore {
      */
     registerFocus(id, el, row, col) {
         if (!id || !el) return;
-        
+
         const screen = this.screen;
         this.focusableElements.set(id, { el, row, col, screen });
-        
+
         // If no focus is set yet and this is the first element or the first in the current screen, focus it
         if (!this.currentFocusId) {
             const firstInScreen = this._getFirstFocusableInScreen(screen);
@@ -152,7 +152,7 @@ class TvStore {
             const clickEvent = new MouseEvent('click', {
                 bubbles: true,
                 cancelable: true,
-                view: window
+                view: window,
             });
             current.el.dispatchEvent(clickEvent);
         }
@@ -281,7 +281,7 @@ class TvStore {
             if (data.screen === this.screen && id !== this.currentFocusId) {
                 const dRow = data.row - row;
                 const dCol = data.col - col;
-                
+
                 // Check if the element is in the right direction
                 let isInDirection = false;
                 switch (direction) {
@@ -314,7 +314,7 @@ class TvStore {
 
     _applyFocus(el) {
         if (!el) return;
-        
+
         // Use requestAnimationFrame to ensure smooth focus transition
         requestAnimationFrame(() => {
             if (el && typeof el.focus === 'function') {

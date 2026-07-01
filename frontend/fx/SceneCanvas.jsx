@@ -11,13 +11,13 @@
  * `prefers-reduced-motion: reduce` is set.
  */
 
-import React, {forwardRef, useEffect, useImperativeHandle, useRef} from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
-import {holoFragment, holoVertex} from './shaders/holo.glsl.js';
-import {lightleakFragment, lightleakVertex} from './shaders/lightleak.glsl.js';
-import {getWebGLSupport} from '../utils/webglDetect.js';
-import {reducedMotion} from '../utils/reducedMotion.js';
-import {durations} from '../motion/grammar.js';
+import { holoFragment, holoVertex } from './shaders/holo.glsl.js';
+import { lightleakFragment, lightleakVertex } from './shaders/lightleak.glsl.js';
+import { getWebGLSupport } from '../utils/webglDetect.js';
+import { reducedMotion } from '../utils/reducedMotion.js';
+import { durations } from '../motion/grammar.js';
 
 const DEFAULT_INTENSITY = 0.0;
 
@@ -32,66 +32,70 @@ const SceneCanvas = forwardRef((props, ref) => {
         rafId: 0,
         intensity: DEFAULT_INTENSITY,
         progress: 0,
-        disposed: false
+        disposed: false,
     });
 
-    useImperativeHandle(ref, () => ({
-        setPalette: (partial) => {
-            const { holoMaterial, leakMaterial } = stateRef.current;
-            if (holoMaterial) {
-                if (partial && partial.accent) holoMaterial.uniforms.uAccent.value.set(partial.accent);
-                if (partial && partial.warn) holoMaterial.uniforms.uWarn.value.set(partial.warn);
-            }
-            if (leakMaterial) {
-                if (partial && partial.accent) leakMaterial.uniforms.uColorA.value.set(partial.accent);
-                if (partial && partial.warn) leakMaterial.uniforms.uColorB.value.set(partial.warn);
-            }
-        },
-        playMorph: ({ intensity = 0.85, durationMs = 700 } = {}) => {
-            return new Promise((resolve) => {
-                if (reducedMotion() || !getWebGLSupport().supported) {
-                    resolve();
-                    return;
+    useImperativeHandle(
+        ref,
+        () => ({
+            setPalette: (partial) => {
+                const { holoMaterial, leakMaterial } = stateRef.current;
+                if (holoMaterial) {
+                    if (partial && partial.accent) holoMaterial.uniforms.uAccent.value.set(partial.accent);
+                    if (partial && partial.warn) holoMaterial.uniforms.uWarn.value.set(partial.warn);
                 }
-                const state = stateRef.current;
-                if (!state.holoMaterial || !state.leakMaterial) {
-                    resolve();
-                    return;
+                if (leakMaterial) {
+                    if (partial && partial.accent) leakMaterial.uniforms.uColorA.value.set(partial.accent);
+                    if (partial && partial.warn) leakMaterial.uniforms.uColorB.value.set(partial.warn);
                 }
-                const start = performance.now();
-                const dur = Math.max(120, durationMs);
-                const animate = (now) => {
-                    if (state.disposed) {
+            },
+            playMorph: ({ intensity = 0.85, durationMs = 700 } = {}) => {
+                return new Promise((resolve) => {
+                    if (reducedMotion() || !getWebGLSupport().supported) {
                         resolve();
                         return;
                     }
-                    const t = Math.min(1, (now - start) / dur);
-                    state.progress = t;
-                    state.holoMaterial.uniforms.uProgress.value = t;
-                    state.holoMaterial.uniforms.uIntensity.value = intensity * (1 - Math.abs(0.5 - t) * 2);
-                    state.leakMaterial.uniforms.uProgress.value = t;
-                    state.leakMaterial.uniforms.uOpacity.value = 0.4 * intensity * (1 - Math.abs(0.5 - t) * 2);
-                    state.holoMaterial.uniforms.uTime.value = (now || performance.now()) * 0.001;
-                    state.leakMaterial.uniforms.uTime.value = (now || performance.now()) * 0.001;
-                    if (state.renderer && state.scene && state.camera) {
-                        state.renderer.render(state.scene, state.camera);
-                    }
-                    if (t < 1) {
-                        state.rafId = requestAnimationFrame(animate);
-                    } else {
-                        state.intensity = 0;
-                        state.holoMaterial.uniforms.uIntensity.value = 0;
-                        state.leakMaterial.uniforms.uOpacity.value = 0;
+                    const state = stateRef.current;
+                    if (!state.holoMaterial || !state.leakMaterial) {
                         resolve();
+                        return;
                     }
-                };
-                state.rafId = requestAnimationFrame(animate);
-            });
-        },
-        dispose: () => {
-            disposeScene(stateRef.current);
-        }
-    }), []);
+                    const start = performance.now();
+                    const dur = Math.max(120, durationMs);
+                    const animate = (now) => {
+                        if (state.disposed) {
+                            resolve();
+                            return;
+                        }
+                        const t = Math.min(1, (now - start) / dur);
+                        state.progress = t;
+                        state.holoMaterial.uniforms.uProgress.value = t;
+                        state.holoMaterial.uniforms.uIntensity.value = intensity * (1 - Math.abs(0.5 - t) * 2);
+                        state.leakMaterial.uniforms.uProgress.value = t;
+                        state.leakMaterial.uniforms.uOpacity.value = 0.4 * intensity * (1 - Math.abs(0.5 - t) * 2);
+                        state.holoMaterial.uniforms.uTime.value = (now || performance.now()) * 0.001;
+                        state.leakMaterial.uniforms.uTime.value = (now || performance.now()) * 0.001;
+                        if (state.renderer && state.scene && state.camera) {
+                            state.renderer.render(state.scene, state.camera);
+                        }
+                        if (t < 1) {
+                            state.rafId = requestAnimationFrame(animate);
+                        } else {
+                            state.intensity = 0;
+                            state.holoMaterial.uniforms.uIntensity.value = 0;
+                            state.leakMaterial.uniforms.uOpacity.value = 0;
+                            resolve();
+                        }
+                    };
+                    state.rafId = requestAnimationFrame(animate);
+                });
+            },
+            dispose: () => {
+                disposeScene(stateRef.current);
+            },
+        }),
+        []
+    );
 
     useEffect(() => {
         if (reducedMotion()) return undefined;
@@ -105,7 +109,7 @@ const SceneCanvas = forwardRef((props, ref) => {
             canvas,
             antialias: false,
             alpha: true,
-            powerPreference: 'low-power'
+            powerPreference: 'low-power',
         });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5) * 0.75);
         renderer.setClearColor(0x000000, 0);
@@ -123,8 +127,8 @@ const SceneCanvas = forwardRef((props, ref) => {
                 uProgress: { value: 0 },
                 uAccent: { value: new THREE.Color('#4cd2ff') },
                 uWarn: { value: new THREE.Color('#ff5e9b') },
-                uIntensity: { value: 0 }
-            }
+                uIntensity: { value: 0 },
+            },
         });
         const leakMaterial = new THREE.ShaderMaterial({
             vertexShader: lightleakVertex,
@@ -137,8 +141,8 @@ const SceneCanvas = forwardRef((props, ref) => {
                 uProgress: { value: 0 },
                 uColorA: { value: new THREE.Color('#4cd2ff') },
                 uColorB: { value: new THREE.Color('#ff5e9b') },
-                uOpacity: { value: 0 }
-            }
+                uOpacity: { value: 0 },
+            },
         });
 
         const quad = new THREE.PlaneGeometry(2, 2);
@@ -184,9 +188,16 @@ const disposeScene = (state) => {
     if (state.rafId) cancelAnimationFrame(state.rafId);
     if (state.holoMaterial) state.holoMaterial.dispose();
     if (state.leakMaterial) state.leakMaterial.dispose();
-    if (state.scene) state.scene.traverse((obj) => { if (obj.geometry) obj.geometry.dispose(); });
+    if (state.scene)
+        state.scene.traverse((obj) => {
+            if (obj.geometry) obj.geometry.dispose();
+        });
     if (state.renderer) {
-        try { state.renderer.dispose(); } catch (_e) { /* ignore */ }
+        try {
+            state.renderer.dispose();
+        } catch (_e) {
+            /* ignore */
+        }
     }
     state.renderer = null;
     state.scene = null;

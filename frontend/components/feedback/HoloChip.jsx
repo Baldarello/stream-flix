@@ -10,8 +10,8 @@
  */
 
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Chip} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Chip } from '@mui/material';
 
 /**
  * HoloChip Component
@@ -42,9 +42,9 @@ export const HoloChip = observer((props) => {
                 boxShadow: '0 0 8px rgba(76, 210, 255, 0.2)',
                 '&:hover': {
                     borderColor: 'var(--neon-accent)',
-                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.4)'
+                    boxShadow: '0 0 14px rgba(76, 210, 255, 0.4)',
                 },
-                ...(sx || {})
+                ...(sx || {}),
             }}
             {...rest}
         />

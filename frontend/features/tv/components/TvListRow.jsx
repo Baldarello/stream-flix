@@ -1,7 +1,7 @@
-import React, {useRef} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useRef } from 'react';
+import { observer } from 'mobx-react-lite';
 import TvCard from './TvCard.jsx';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
 /**
  * TvListRow - Horizontal scrollable row of TV cards
@@ -10,12 +10,7 @@ import {useTranslations} from '../../../hooks/useTranslations.js';
  * @param {number} startRow - Starting row number for focus navigation
  * @param {Function} onItemActivate - Callback when an item is activated
  */
-const TvListRow = observer(({
-    title,
-    items = [],
-    startRow = 1,
-    onItemActivate
-}) => {
+const TvListRow = observer(({ title, items = [], startRow = 1, onItemActivate }) => {
     const { t } = useTranslations();
     const scrollRef = useRef(null);
     const rowId = `tv-${title.toLowerCase().replace(/\s+/g, '-')}-row`;
@@ -35,14 +30,14 @@ const TvListRow = observer(({
                 e.preventDefault();
                 scrollRef.current.scrollTo({
                     left: Math.max(0, scrollLeft - scrollAmount),
-                    behavior: 'smooth'
+                    behavior: 'smooth',
                 });
                 break;
             case 'ArrowRight':
                 e.preventDefault();
                 scrollRef.current.scrollTo({
                     left: scrollLeft + scrollAmount,
-                    behavior: 'smooth'
+                    behavior: 'smooth',
                 });
                 break;
             default:
@@ -56,20 +51,10 @@ const TvListRow = observer(({
     }
 
     return (
-        <div
-            id={rowId}
-            className="tv-list-row"
-            role="region"
-            aria-label={title}
-        >
+        <div id={rowId} className="tv-list-row" role="region" aria-label={title}>
             <h3 className="row-title">{title}</h3>
 
-            <div
-                ref={scrollRef}
-                className="row-items"
-                onKeyDown={handleKeyDown}
-                tabIndex={-1}
-            >
+            <div ref={scrollRef} className="row-items" onKeyDown={handleKeyDown} tabIndex={-1}>
                 {displayItems.map((item, index) => (
                     <TvCard
                         key={item.id || index}

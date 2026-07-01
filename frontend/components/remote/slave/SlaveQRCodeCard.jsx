@@ -1,9 +1,9 @@
 import React from 'react';
-import {Box, Paper} from '@mui/material';
-import {useTranslations} from '../../../hooks/useTranslations.js';
+import { Box, Paper } from '@mui/material';
+import { useTranslations } from '../../../hooks/useTranslations.js';
 
-const QRCodeCard = ({qrCodeUrl}) => {
-    const {t} = useTranslations();
+const QRCodeCard = ({ qrCodeUrl }) => {
+    const { t } = useTranslations();
 
     return (
         <Paper

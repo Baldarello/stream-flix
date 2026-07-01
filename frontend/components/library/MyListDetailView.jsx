@@ -18,8 +18,8 @@
  * exposes a "back" handler that flips the active view to `Home`.
  */
 
-import React, {useEffect, useMemo, useRef, useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import {
     Box,
     Button,
@@ -34,7 +34,7 @@ import {
     Stack,
     TextField,
     Tooltip,
-    Typography
+    Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -44,13 +44,13 @@ import MovieIcon from '@mui/icons-material/Movie';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
 import TvIcon from '@mui/icons-material/Tv';
-import {gsap} from 'gsap';
-import {mediaStore} from '../../store/mediaStore.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {HoloCard} from '../layout/HoloCard.jsx';
-import {HoloChip} from '../feedback/HoloChip.jsx';
-import {EmptyState} from './shared/EmptyState.jsx';
-import {durations, easings, reducedMotion} from '../../motion/grammar.js';
+import { gsap } from 'gsap';
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { HoloCard } from '../layout/HoloCard.jsx';
+import { HoloChip } from '../feedback/HoloChip.jsx';
+import { EmptyState } from './shared/EmptyState.jsx';
+import { durations, easings, reducedMotion } from '../../motion/grammar.js';
 
 const FILTER_KEYS = ['all', 'movie', 'tv'];
 const SORT_KEYS = ['recent', 'title', 'edited'];
@@ -84,17 +84,18 @@ const sortItems = (items, sortKey) => {
 const formatDate = (timestamp) => {
     if (!timestamp) return '';
     try {
-        return new Date(timestamp).toLocaleDateString(
-            mediaStore.language === 'en' ? 'en-US' : 'it-IT',
-            {day: '2-digit', month: '2-digit', year: 'numeric'}
-        );
+        return new Date(timestamp).toLocaleDateString(mediaStore.language === 'en' ? 'en-US' : 'it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
     } catch (e) {
         return '';
     }
 };
 
 const MyListDetailView = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     const gridRef = useRef(null);
 
     const {
@@ -108,7 +109,7 @@ const MyListDetailView = observer(() => {
         toggleReorderMode,
         isReorderMode,
         reorderMyList,
-        toggleMyList
+        toggleMyList,
     } = mediaStore;
 
     const [filter, setFilter] = useState(() => 'all');
@@ -140,13 +141,15 @@ const MyListDetailView = observer(() => {
         if (!el || reducedMotion()) return;
         const cards = el.querySelectorAll('[data-component="holo-card"]');
         if (cards.length === 0) return;
-        gsap.fromTo(cards,
-            {y: 18, autoAlpha: 0},
-            {y: 0, autoAlpha: 1, duration: durations.med, ease: easings.standard, stagger: 0.04, overwrite: 'auto'});
+        gsap.fromTo(
+            cards,
+            { y: 18, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.standard, stagger: 0.04, overwrite: 'auto' }
+        );
     }, [myListItems && myListItems.length, filter, sort]);
 
     const counts = useMemo(() => {
-        const result = {all: 0, movie: 0, tv: 0};
+        const result = { all: 0, movie: 0, tv: 0 };
         for (const item of myListItems) {
             if (!item) continue;
             result.all += 1;
@@ -176,7 +179,7 @@ const MyListDetailView = observer(() => {
 
     const handleConfirmRemove = () => {
         if (!pendingRemove) return;
-        toggleMyList({id: pendingRemove.id});
+        toggleMyList({ id: pendingRemove.id });
         setPendingRemove(null);
     };
 
@@ -240,7 +243,7 @@ const MyListDetailView = observer(() => {
         <Box
             id="my-list-detail-view"
             data-component="my-list-detail-view"
-            sx={{pt: 'calc(80px + env(safe-area-inset-top))', pb: 8, color: 'text.primary'}}
+            sx={{ pt: 'calc(80px + env(safe-area-inset-top))', pb: 8, color: 'text.primary' }}
         >
             {/* Sticky header: back + title + actions */}
             <Box
@@ -248,20 +251,20 @@ const MyListDetailView = observer(() => {
                 className="holo-surface"
                 sx={{
                     position: 'sticky',
-                    top: {xs: 64, md: 72},
+                    top: { xs: 64, md: 72 },
                     zIndex: 5,
-                    mx: {xs: 0, md: 3},
-                    mt: {xs: 0, md: 2},
-                    p: {xs: 1.5, md: 2},
+                    mx: { xs: 0, md: 3 },
+                    mt: { xs: 0, md: 2 },
+                    p: { xs: 1.5, md: 2 },
                     borderRadius: '14px',
                     display: 'flex',
-                    flexDirection: {xs: 'column', md: 'row'},
+                    flexDirection: { xs: 'column', md: 'row' },
                     gap: 2,
-                    alignItems: {md: 'center'},
-                    justifyContent: 'space-between'
+                    alignItems: { md: 'center' },
+                    justifyContent: 'space-between',
                 }}
             >
-                <Stack direction="row" alignItems="center" spacing={1.5} sx={{minWidth: 0, flex: 1}}>
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0, flex: 1 }}>
                     <IconButton
                         id="my-list-detail-back"
                         aria-label={t('common.back') || t('detail.close')}
@@ -269,12 +272,12 @@ const MyListDetailView = observer(() => {
                         sx={{
                             color: 'var(--text-primary)',
                             border: '1px solid rgba(76, 210, 255, 0.25)',
-                            '&:hover': {borderColor: 'var(--neon-accent)', color: 'var(--neon-accent)'}
+                            '&:hover': { borderColor: 'var(--neon-accent)', color: 'var(--neon-accent)' },
                         }}
                     >
-                        <ArrowBackIcon/>
+                        <ArrowBackIcon />
                     </IconButton>
-                    <Box sx={{minWidth: 0}}>
+                    <Box sx={{ minWidth: 0 }}>
                         <Typography
                             id="my-list-detail-title"
                             variant="h4"
@@ -284,27 +287,19 @@ const MyListDetailView = observer(() => {
                                 letterSpacing: '0.02em',
                                 color: 'var(--text-primary)',
                                 textShadow: '0 0 14px rgba(76, 210, 255, 0.25)',
-                                fontSize: {xs: '1.5rem', md: '2rem'},
-                                lineHeight: 1.1
+                                fontSize: { xs: '1.5rem', md: '2rem' },
+                                lineHeight: 1.1,
                             }}
                         >
                             {t('myListDetail.title')}
                         </Typography>
-                        <Typography
-                            variant="body2"
-                            sx={{color: 'var(--text-secondary)', mt: 0.5}}
-                        >
-                            {t('myListDetail.subtitle', {count: myListItems.length})}
+                        <Typography variant="body2" sx={{ color: 'var(--text-secondary)', mt: 0.5 }}>
+                            {t('myListDetail.subtitle', { count: myListItems.length })}
                         </Typography>
                     </Box>
                 </Stack>
 
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    alignItems="center"
-                    sx={{flexWrap: 'wrap', rowGap: 1}}
-                >
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap', rowGap: 1 }}>
                     <TextField
                         id="my-list-detail-search"
                         value={librarySearchQuery}
@@ -312,7 +307,7 @@ const MyListDetailView = observer(() => {
                         placeholder={t('myListDetail.searchPlaceholder')}
                         size="small"
                         sx={{
-                            minWidth: {xs: '100%', sm: 240},
+                            minWidth: { xs: '100%', sm: 240 },
                             '& .MuiOutlinedInput-notchedOutline': {
                                 borderColor: 'rgba(76, 210, 255, 0.35)',
                             },
@@ -326,14 +321,14 @@ const MyListDetailView = observer(() => {
                             '& .MuiInputBase-input': {
                                 color: 'var(--text-primary)',
                                 fontFamily: "'Inter', sans-serif",
-                            }
+                            },
                         }}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
-                                    <SearchIcon sx={{color: 'var(--neon-accent)'}}/>
+                                    <SearchIcon sx={{ color: 'var(--neon-accent)' }} />
                                 </InputAdornment>
-                            )
+                            ),
                         }}
                     />
                     <Tooltip title={isReorderMode ? t('myListDetail.reorderOff') : t('myListDetail.reorderOn')}>
@@ -345,10 +340,10 @@ const MyListDetailView = observer(() => {
                                 sx={{
                                     color: isReorderMode ? 'var(--neon-accent)' : 'var(--text-primary)',
                                     border: '1px solid rgba(76, 210, 255, 0.25)',
-                                    '&:hover': {borderColor: 'var(--neon-accent)'}
+                                    '&:hover': { borderColor: 'var(--neon-accent)' },
                                 }}
                             >
-                                <EditIcon fontSize="small"/>
+                                <EditIcon fontSize="small" />
                             </IconButton>
                         </span>
                     </Tooltip>
@@ -359,27 +354,24 @@ const MyListDetailView = observer(() => {
             <Box
                 id="my-list-detail-stats"
                 sx={{
-                    mx: {xs: 0, md: 3},
+                    mx: { xs: 0, md: 3 },
                     mt: 2,
                     display: 'flex',
                     flexWrap: 'wrap',
                     gap: 1,
-                    '& > *': {mr: 0.5}
+                    '& > *': { mr: 0.5 },
                 }}
             >
-                <HoloChip
-                    id="my-list-detail-stat-total"
-                    label={t('myListDetail.stats.total', {count: counts.all})}
-                />
+                <HoloChip id="my-list-detail-stat-total" label={t('myListDetail.stats.total', { count: counts.all })} />
                 <HoloChip
                     id="my-list-detail-stat-movies"
-                    icon={<MovieIcon/>}
-                    label={t('myListDetail.stats.movies', {count: counts.movie})}
+                    icon={<MovieIcon />}
+                    label={t('myListDetail.stats.movies', { count: counts.movie })}
                 />
                 <HoloChip
                     id="my-list-detail-stat-series"
-                    icon={<TvIcon/>}
-                    label={t('myListDetail.stats.series', {count: counts.tv})}
+                    icon={<TvIcon />}
+                    label={t('myListDetail.stats.series', { count: counts.tv })}
                 />
             </Box>
 
@@ -387,21 +379,17 @@ const MyListDetailView = observer(() => {
             <Box
                 id="my-list-detail-toolbar"
                 sx={{
-                    mx: {xs: 0, md: 3},
+                    mx: { xs: 0, md: 3 },
                     mt: 2,
                     display: 'flex',
-                    flexDirection: {xs: 'column', sm: 'row'},
+                    flexDirection: { xs: 'column', sm: 'row' },
                     gap: 1.5,
-                    alignItems: {sm: 'center'},
+                    alignItems: { sm: 'center' },
                     justifyContent: 'space-between',
-                    px: {xs: 0, md: 0.5}
+                    px: { xs: 0, md: 0.5 },
                 }}
             >
-                <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{flexWrap: 'wrap', rowGap: 1, '& > *': {mr: 0.5}}}
-                >
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1, '& > *': { mr: 0.5 } }}>
                     {FILTER_KEYS.map((key) => {
                         const isActive = filter === key;
                         return (
@@ -410,7 +398,7 @@ const MyListDetailView = observer(() => {
                                 id={`my-list-detail-filter-${key}`}
                                 data-filter={key}
                                 data-active={isActive ? 'true' : 'false'}
-                                startIcon={key === 'movie' ? <MovieIcon/> : key === 'tv' ? <TvIcon/> : <FilterListIcon/>}
+                                startIcon={key === 'movie' ? <MovieIcon /> : key === 'tv' ? <TvIcon /> : <FilterListIcon />}
                                 onClick={() => setFilter(key)}
                                 size="small"
                                 sx={{
@@ -424,7 +412,7 @@ const MyListDetailView = observer(() => {
                                     borderColor: isActive ? 'var(--neon-accent)' : 'rgba(76, 210, 255, 0.18)',
                                     borderRadius: '999px',
                                     px: 1.5,
-                                    '&:hover': {borderColor: 'var(--neon-accent)'}
+                                    '&:hover': { borderColor: 'var(--neon-accent)' },
                                 }}
                             >
                                 {t(`myListDetail.filter.${key}`)}
@@ -433,7 +421,7 @@ const MyListDetailView = observer(() => {
                     })}
                 </Stack>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                    <SortIcon sx={{color: 'var(--text-secondary)'}} fontSize="small"/>
+                    <SortIcon sx={{ color: 'var(--text-secondary)' }} fontSize="small" />
                     <Select
                         id="my-list-detail-sort"
                         value={sort}
@@ -453,15 +441,11 @@ const MyListDetailView = observer(() => {
                                 borderColor: 'var(--neon-accent)',
                                 boxShadow: 'var(--edge-glow)',
                             },
-                            '& .MuiSelect-icon': {color: 'var(--neon-accent)'}
+                            '& .MuiSelect-icon': { color: 'var(--neon-accent)' },
                         }}
                     >
                         {SORT_KEYS.map((key) => (
-                            <MenuItem
-                                key={`sort-${key}`}
-                                id={`my-list-detail-sort-${key}`}
-                                value={key}
-                            >
+                            <MenuItem key={`sort-${key}`} id={`my-list-detail-sort-${key}`} value={key}>
                                 {t(`myListDetail.sort.${key}`)}
                             </MenuItem>
                         ))}
@@ -475,7 +459,7 @@ const MyListDetailView = observer(() => {
                 id="my-list-detail-grid"
                 data-testid="my-list-detail-grid"
                 sx={{
-                    mx: {xs: 0, md: 3},
+                    mx: { xs: 0, md: 3 },
                     mt: 3,
                     display: 'grid',
                     gridTemplateColumns: {
@@ -483,9 +467,9 @@ const MyListDetailView = observer(() => {
                         sm: 'repeat(3, 1fr)',
                         md: 'repeat(4, 1fr)',
                         lg: 'repeat(5, 1fr)',
-                        xl: 'repeat(6, 1fr)'
+                        xl: 'repeat(6, 1fr)',
                     },
-                    gap: {xs: 1.5, md: 2.5}
+                    gap: { xs: 1.5, md: 2.5 },
                 }}
             >
                 {filteredItems.map((item) => (
@@ -499,7 +483,7 @@ const MyListDetailView = observer(() => {
                         onDragLeave={() => handleCardDragLeave(item)}
                         onDragEnd={handleCardDragEnd}
                         onDrop={handleCardDragEnd}
-                        sx={{position: 'relative'}}
+                        sx={{ position: 'relative' }}
                     >
                         <HoloCard
                             item={item}
@@ -518,7 +502,7 @@ const MyListDetailView = observer(() => {
                                         e.stopPropagation();
                                         setPendingRemove({
                                             id: item.id,
-                                            name: item.name || item.title || item.id
+                                            name: item.name || item.title || item.id,
                                         });
                                     }}
                                     sx={{
@@ -531,11 +515,11 @@ const MyListDetailView = observer(() => {
                                         opacity: 0,
                                         transform: 'translateY(-4px) scale(0.9)',
                                         transition: 'opacity 200ms ease, transform 200ms ease',
-                                        '.my-list-detail-card-wrap:hover &': {opacity: 1, transform: 'translateY(0) scale(1)'},
-                                        '&:hover': {bgcolor: 'rgba(5, 6, 13, 0.9)'}
+                                        '.my-list-detail-card-wrap:hover &': { opacity: 1, transform: 'translateY(0) scale(1)' },
+                                        '&:hover': { bgcolor: 'rgba(5, 6, 13, 0.9)' },
                                     }}
                                 >
-                                    <DeleteIcon fontSize="small"/>
+                                    <DeleteIcon fontSize="small" />
                                 </IconButton>
                             </Tooltip>
                         )}
@@ -550,10 +534,10 @@ const MyListDetailView = observer(() => {
                                     color: 'var(--text-secondary)',
                                     fontFamily: "'Inter', sans-serif",
                                     textShadow: '0 1px 2px rgba(0,0,0,0.6)',
-                                    pointerEvents: 'none'
+                                    pointerEvents: 'none',
                                 }}
                             >
-                                {t('libraryManagement.myList.lastEdited', {date: formatDate(libraryLastEdited.get(item.id))})}
+                                {t('libraryManagement.myList.lastEdited', { date: formatDate(libraryLastEdited.get(item.id)) })}
                             </Typography>
                         )}
                     </Box>
@@ -561,20 +545,16 @@ const MyListDetailView = observer(() => {
             </Box>
 
             {filteredItems.length === 0 && (
-                <Box sx={{mx: {xs: 0, md: 3}, mt: 4}}>
+                <Box sx={{ mx: { xs: 0, md: 3 }, mt: 4 }}>
                     <EmptyState
                         id="my-list-detail-empty"
-                        icon={<FilterListIcon sx={{fontSize: 44}}/>}
+                        icon={<FilterListIcon sx={{ fontSize: 44 }} />}
                         title={
                             librarySearchQuery
-                                ? t('libraryManagement.dashboard.noResults', {query: librarySearchQuery})
+                                ? t('libraryManagement.dashboard.noResults', { query: librarySearchQuery })
                                 : t('myListDetail.emptyTitle')
                         }
-                        subtitle={
-                            librarySearchQuery
-                                ? undefined
-                                : t('myListDetail.emptySubtitle')
-                        }
+                        subtitle={librarySearchQuery ? undefined : t('myListDetail.emptySubtitle')}
                         ctaLabel={librarySearchQuery ? undefined : t('myListDetail.emptyCta')}
                         onCta={librarySearchQuery ? undefined : handleBack}
                     />
@@ -582,21 +562,13 @@ const MyListDetailView = observer(() => {
             )}
 
             {/* Remove confirmation dialog */}
-            <Dialog
-                open={!!pendingRemove}
-                onClose={() => setPendingRemove(null)}
-                id="my-list-detail-remove-dialog"
-            >
+            <Dialog open={!!pendingRemove} onClose={() => setPendingRemove(null)} id="my-list-detail-remove-dialog">
                 <DialogTitle>{t('libraryManagement.deleteConfirm.title')}</DialogTitle>
                 <DialogContent>
-                    <Typography>
-                        {t('libraryManagement.myList.removeConfirm', {name: pendingRemove?.name || ''})}
-                    </Typography>
+                    <Typography>{t('libraryManagement.myList.removeConfirm', { name: pendingRemove?.name || '' })}</Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setPendingRemove(null)}>
-                        {t('libraryManagement.cancel')}
-                    </Button>
+                    <Button onClick={() => setPendingRemove(null)}>{t('libraryManagement.cancel')}</Button>
                     <Button onClick={handleConfirmRemove} color="error">
                         {t('libraryManagement.delete')}
                     </Button>
@@ -609,4 +581,4 @@ const MyListDetailView = observer(() => {
 MyListDetailView.displayName = 'MyListDetailView';
 
 export default MyListDetailView;
-export {MyListDetailView};
+export { MyListDetailView };

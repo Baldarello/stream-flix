@@ -13,15 +13,14 @@
  * a modal, not a screen, so `useState` is allowed here).
  */
 
-import React, {useEffect, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {Alert, Button, Stack, TextField, Typography,} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
 
-import {mediaStore} from '../../store/mediaStore.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {ModalShell} from '../modals/ModalShell.jsx';
-import {holoFieldSx} from "../../styles/style.js"
-
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { ModalShell } from '../modals/ModalShell.jsx';
+import { holoFieldSx } from '../../styles/style.js';
 
 const buildPreview = (rawUrl) => {
     if (!rawUrl) return '';
@@ -34,7 +33,7 @@ const buildPreview = (rawUrl) => {
 };
 
 const PreferredSourceEditModal = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     const showId = mediaStore.libraryEditingPreferredSourceShowId;
     const open = showId != null;
     const show = showId != null ? mediaStore.cachedItems.get(showId) : null;
@@ -73,11 +72,7 @@ const PreferredSourceEditModal = observer(() => {
         if (!showId) return;
         const origin = buildPreview(url);
         if (!origin) {
-            mediaStore.showSnackbar(
-                'libraryManagement.preferredSources.editInvalidUrl',
-                'warning',
-                true
-            );
+            mediaStore.showSnackbar('libraryManagement.preferredSources.editInvalidUrl', 'warning', true);
             return;
         }
         await mediaStore.setPreferredSource(showId, origin);
@@ -93,17 +88,17 @@ const PreferredSourceEditModal = observer(() => {
             data-component="preferred-source-edit-modal"
             open={open}
             onClose={handleClose}
-            title={t('libraryManagement.preferredSources.editTitle', {name: showName})}
+            title={t('libraryManagement.preferredSources.editTitle', { name: showName })}
             maxWidth="sm"
         >
-            <Stack spacing={2} sx={{pt: 1}}>
+            <Stack spacing={2} sx={{ pt: 1 }}>
                 <Alert
                     severity="info"
                     sx={{
                         background: 'var(--holo-grad)',
                         color: 'var(--text-primary)',
                         border: '1px solid rgba(76, 210, 255, 0.35)',
-                        '& .MuiAlert-icon': {color: 'var(--neon-accent)'},
+                        '& .MuiAlert-icon': { color: 'var(--neon-accent)' },
                     }}
                 >
                     {t('libraryManagement.preferredSources.editInfo')}
@@ -120,20 +115,13 @@ const PreferredSourceEditModal = observer(() => {
                 />
 
                 {preview && (
-                    <Typography
-                        variant="caption"
-                        sx={{color: 'var(--text-secondary)', mt: -1}}
-                    >
-                        {t('libraryManagement.preferredSources.editPreview', {preview})}
+                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)', mt: -1 }}>
+                        {t('libraryManagement.preferredSources.editPreview', { preview })}
                     </Typography>
                 )}
 
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Button
-                        id="preferred-source-edit-cancel"
-                        onClick={handleClose}
-                        sx={{color: 'var(--text-secondary)'}}
-                    >
+                    <Button id="preferred-source-edit-cancel" onClick={handleClose} sx={{ color: 'var(--text-secondary)' }}>
                         {t('libraryManagement.preferredSources.editCancel')}
                     </Button>
                     <Button
@@ -146,7 +134,7 @@ const PreferredSourceEditModal = observer(() => {
                             fontFamily: "'Space Grotesk', 'Inter', sans-serif",
                             fontWeight: 700,
                             letterSpacing: '0.04em',
-                            '&:hover': {background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)'},
+                            '&:hover': { background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)' },
                         }}
                     >
                         {t('libraryManagement.preferredSources.editSave')}
@@ -160,4 +148,4 @@ const PreferredSourceEditModal = observer(() => {
 PreferredSourceEditModal.displayName = 'PreferredSourceEditModal';
 
 export default PreferredSourceEditModal;
-export {PreferredSourceEditModal};
+export { PreferredSourceEditModal };

@@ -16,8 +16,8 @@
  *   - The exported database name constant is the literal `quix-db`
  *     requested in the todo.
  */
-import {describe, expect, it, vi} from 'vitest';
-import {QUIX_DB_NAME, resetIndexedDB, seedIndexedDB,} from '../../e2e/utils/db-reset.js';
+import { describe, expect, it, vi } from 'vitest';
+import { QUIX_DB_NAME, resetIndexedDB, seedIndexedDB } from '../../e2e/utils/db-reset.js';
 
 /**
  * Build a fake Playwright Page. The returned object implements the
@@ -56,9 +56,7 @@ describe('e2e/utils/db-reset', () => {
     });
 
     it('resetIndexedDB throws when called without a page', async () => {
-        await expect(resetIndexedDB(undefined)).rejects.toThrow(
-            /requires a Playwright page/i,
-        );
+        await expect(resetIndexedDB(undefined)).rejects.toThrow(/requires a Playwright page/i);
     });
 
     it('resetIndexedDB throws when the page has no context', async () => {
@@ -103,7 +101,11 @@ describe('e2e/utils/db-reset', () => {
     });
 
     it('resetIndexedDB tolerates a worker that throws (e.g. cross-origin)', async () => {
-        const worker = { evaluate: vi.fn(async () => { throw new Error('cross-origin'); }) };
+        const worker = {
+            evaluate: vi.fn(async () => {
+                throw new Error('cross-origin');
+            }),
+        };
         const page = makeFakePage();
         const context = makeFakeContext({ pages: [page], workers: [worker] });
         page.context.mockReturnValue(context);
@@ -171,8 +173,6 @@ describe('e2e/utils/db-reset', () => {
         const page = makeFakePage();
         await expect(seedIndexedDB(page, null)).rejects.toThrow(TypeError);
         await expect(seedIndexedDB(page, 'not-an-object')).rejects.toThrow(TypeError);
-        await expect(seedIndexedDB(undefined, {})).rejects.toThrow(
-            /requires a Playwright page/i,
-        );
+        await expect(seedIndexedDB(undefined, {})).rejects.toThrow(/requires a Playwright page/i);
     });
 });

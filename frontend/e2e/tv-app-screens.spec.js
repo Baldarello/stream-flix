@@ -6,17 +6,17 @@
  *
  * Production-safe: no store seeding needed.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('TV App Screens', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
-        page.on('pageerror', err => errors.push(err.message));
+        page.on('pageerror', (err) => errors.push(err.message));
         page._testErrors = errors;
     });
 
@@ -34,9 +34,7 @@ test.describe('TV App Screens', () => {
         const count = await quickActions.count();
         expect(count).toBeGreaterThan(0);
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors).toHaveLength(0);
     });
 
@@ -63,7 +61,10 @@ test.describe('TV App Screens', () => {
 
         // Find and click the "My List" quick action tile
         // The tile has a specific id pattern or we navigate via keyboard
-        const myListTile = page.locator('#tv-tile-mylist, [class*="tile"]').filter({ hasText: /lista|my list/i }).first();
+        const myListTile = page
+            .locator('#tv-tile-mylist, [class*="tile"]')
+            .filter({ hasText: /lista|my list/i })
+            .first();
         if (await myListTile.isVisible({ timeout: 3000 }).catch(() => false)) {
             await myListTile.click();
             await page.waitForTimeout(1500);
@@ -72,9 +73,7 @@ test.describe('TV App Screens', () => {
             await expect(tvRoot).toBeVisible();
         }
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors).toHaveLength(0);
     });
 

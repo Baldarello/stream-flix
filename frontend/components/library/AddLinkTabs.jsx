@@ -1,7 +1,7 @@
-import {observer} from "mobx-react-lite";
-import React, {useEffect, useRef, useState} from 'react';
-import {mediaStore} from "../../store/mediaStore.js";
-import {useTranslations} from "../../hooks/useTranslations.js";
+import { observer } from 'mobx-react-lite';
+import React, { useEffect, useRef, useState } from 'react';
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
 import {
     Alert,
     Autocomplete,
@@ -17,14 +17,13 @@ import {
     Switch,
     Tab,
     Tabs,
-    TextField
-} from "@mui/material";
-import {holoFieldSx} from "../../styles/style.js"
-import {previewPattern} from "../../utils/patternResolver.js"
+    TextField,
+} from '@mui/material';
+import { holoFieldSx } from '../../styles/style.js';
+import { previewPattern } from '../../utils/patternResolver.js';
 
-
-const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, onSave, onSuccess}) => {
-    const {t} = useTranslations();
+const AddLinkTabs = observer(({ selectedSeason, seasonEpisodeCount, seasonName, onSave, onSuccess }) => {
+    const { t } = useTranslations();
     const [addMethod, setAddMethod] = useState(() => 'pattern');
     const [pattern, setPattern] = useState(() => '');
     const [padding, setPadding] = useState(() => '2');
@@ -56,7 +55,10 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
 
     const handleSave = async () => {
         setIsSaving(true);
-        let data, error = null, isErrorKey = false, errorValues = {};
+        let data,
+            error = null,
+            isErrorKey = false,
+            errorValues = {};
         switch (addMethod) {
             case 'pattern':
                 if (!pattern) {
@@ -66,7 +68,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                     error = 'linkEpisodesModal.add.errors.missingPlaceholder';
                     isErrorKey = true;
                 } else {
-                    data = {pattern, padding: parseInt(padding, 10), label};
+                    data = { pattern, padding: parseInt(padding, 10), label };
                     if (isAdvanced) {
                         const startEp = parseInt(startEpisode, 10);
                         const endEp = parseInt(endEpisode, 10);
@@ -78,7 +80,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                         } else if (endEp - startEp !== endNum - startNum) {
                             error = 'notifications.episodeNumberRangeMismatch';
                             isErrorKey = true;
-                            errorValues = {epRange: endEp - startEp + 1, numRange: endNum - startNum + 1};
+                            errorValues = { epRange: endEp - startEp + 1, numRange: endNum - startNum + 1 };
                         } else {
                             data.start = startEp;
                             data.end = endEp;
@@ -92,13 +94,13 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                 if (!linkList.trim()) {
                     error = 'linkEpisodesModal.add.errors.emptyList';
                     isErrorKey = true;
-                } else data = {list: linkList};
+                } else data = { list: linkList };
                 break;
             case 'json':
                 if (!json.trim()) {
                     error = 'linkEpisodesModal.add.errors.emptyJson';
                     isErrorKey = true;
-                } else data = {json};
+                } else data = { json };
                 break;
         }
 
@@ -112,7 +114,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                 data,
                 language,
                 type,
-                seasonName
+                seasonName,
             });
             if (success) {
                 // Reset state for next time
@@ -185,14 +187,17 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                 background: 'var(--holo-grad)',
                                 color: 'var(--text-primary)',
                                 border: '1px solid rgba(76, 210, 255, 0.35)',
-                                '& .MuiAlert-icon': {color: 'var(--neon-accent)'}
+                                '& .MuiAlert-icon': { color: 'var(--neon-accent)' },
                             }}
-                        >{t('linkEpisodesModal.add.patternInfo')}</Alert>
+                        >
+                            {t('linkEpisodesModal.add.patternInfo')}
+                        </Alert>
                         <TextField
-                            id={"pattern-url-episode"}
+                            id={'pattern-url-episode'}
                             label={t('linkEpisodesModal.add.patternUrl')}
-                            required value={pattern}
-                            onChange={e => setPattern(e.target.value)}
+                            required
+                            value={pattern}
+                            onChange={(e) => setPattern(e.target.value)}
                             inputRef={patternInputRef}
                             sx={holoFieldSx}
                             InputProps={{
@@ -200,11 +205,11 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                     <Button
                                         onMouseDown={(e) => e.preventDefault()}
                                         onClick={() => handleInsertPlaceholder('[@EP]')}
-                                        sx={{color: 'var(--neon-accent)'}}
+                                        sx={{ color: 'var(--neon-accent)' }}
                                     >
                                         &#91;@EP&#93;
                                     </Button>
-                                )
+                                ),
                             }}
                         />
                         {patternPreview.length > 0 && (
@@ -217,30 +222,36 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                     background: 'rgba(76, 210, 255, 0.04)',
                                 }}
                             >
-                                <Box sx={{fontSize: 12, color: 'var(--text-secondary)', mb: 0.5}}>
+                                <Box sx={{ fontSize: 12, color: 'var(--text-secondary)', mb: 0.5 }}>
                                     {t('linkEpisodesModal.add.preview.title')}
                                 </Box>
                                 <Box
                                     component="ul"
-                                    sx={{m: 0, pl: 2, fontFamily: 'monospace', fontSize: 12, color: 'var(--text-primary)'}}
+                                    sx={{ m: 0, pl: 2, fontFamily: 'monospace', fontSize: 12, color: 'var(--text-primary)' }}
                                 >
                                     {patternPreview.map((url, idx) => (
-                                        <Box component="li" key={idx} sx={{wordBreak: 'break-all'}}>{url}</Box>
+                                        <Box component="li" key={idx} sx={{ wordBreak: 'break-all' }}>
+                                            {url}
+                                        </Box>
                                     ))}
                                 </Box>
                             </Box>
                         )}
                         <FormControlLabel
-                            control={<Switch
-                                checked={isAdvanced}
-                                onChange={(e) => setIsAdvanced(e.target.checked)}
-                                sx={{
-                                    '& .MuiSwitch-switchBase.Mui-checked': {color: 'var(--neon-accent)'},
-                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {backgroundColor: 'var(--neon-accent)'}
-                                }}
-                            />}
+                            control={
+                                <Switch
+                                    checked={isAdvanced}
+                                    onChange={(e) => setIsAdvanced(e.target.checked)}
+                                    sx={{
+                                        '& .MuiSwitch-switchBase.Mui-checked': { color: 'var(--neon-accent)' },
+                                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                            backgroundColor: 'var(--neon-accent)',
+                                        },
+                                    }}
+                                />
+                            }
                             label={t('linkEpisodesModal.add.advancedConfig')}
-                            sx={{color: 'var(--text-secondary)'}}
+                            sx={{ color: 'var(--text-secondary)' }}
                         />
                         {isAdvanced && (
                             <Stack spacing={2}>
@@ -250,7 +261,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                         type="number"
                                         value={startEpisode}
                                         onChange={(e) => setStartEpisode(e.target.value)}
-                                        inputProps={{min: 1}}
+                                        inputProps={{ min: 1 }}
                                         fullWidth
                                         sx={holoFieldSx}
                                     />
@@ -259,7 +270,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                         type="number"
                                         value={endEpisode}
                                         onChange={(e) => setEndEpisode(e.target.value)}
-                                        inputProps={{min: 1}}
+                                        inputProps={{ min: 1 }}
                                         fullWidth
                                         sx={holoFieldSx}
                                     />
@@ -270,7 +281,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                         type="number"
                                         value={startNumber}
                                         onChange={(e) => setStartNumber(e.target.value)}
-                                        inputProps={{min: 1}}
+                                        inputProps={{ min: 1 }}
                                         fullWidth
                                         sx={holoFieldSx}
                                     />
@@ -279,7 +290,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                         type="number"
                                         value={endNumber}
                                         onChange={(e) => setEndNumber(e.target.value)}
-                                        inputProps={{min: 1}}
+                                        inputProps={{ min: 1 }}
                                         fullWidth
                                         sx={holoFieldSx}
                                     />
@@ -305,7 +316,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                     required
                                     type="number"
                                     value={padding}
-                                    onChange={e => setPadding(e.target.value)}
+                                    onChange={(e) => setPadding(e.target.value)}
                                     helperText={t('linkEpisodesModal.add.paddingHelper')}
                                     sx={holoFieldSx}
                                 />
@@ -322,15 +333,17 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                 background: 'var(--holo-grad)',
                                 color: 'var(--text-primary)',
                                 border: '1px solid rgba(76, 210, 255, 0.35)',
-                                '& .MuiAlert-icon': {color: 'var(--neon-accent)'}
+                                '& .MuiAlert-icon': { color: 'var(--neon-accent)' },
                             }}
-                        >{t('linkEpisodesModal.add.listInfo', {count: seasonEpisodeCount})}</Alert>
+                        >
+                            {t('linkEpisodesModal.add.listInfo', { count: seasonEpisodeCount })}
+                        </Alert>
                         <TextField
                             label={t('linkEpisodesModal.add.listLinks')}
                             multiline
                             rows={8}
                             value={linkList}
-                            onChange={e => setLinkList(e.target.value)}
+                            onChange={(e) => setLinkList(e.target.value)}
                             sx={holoFieldSx}
                         />
                     </Stack>
@@ -344,15 +357,17 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                 background: 'var(--holo-grad)',
                                 color: 'var(--text-primary)',
                                 border: '1px solid rgba(76, 210, 255, 0.35)',
-                                '& .MuiAlert-icon': {color: 'var(--neon-accent)'}
+                                '& .MuiAlert-icon': { color: 'var(--neon-accent)' },
                             }}
-                        >{t('linkEpisodesModal.add.jsonInfo')}</Alert>
+                        >
+                            {t('linkEpisodesModal.add.jsonInfo')}
+                        </Alert>
                         <TextField
                             label={t('linkEpisodesModal.add.jsonArray')}
                             multiline
                             rows={8}
                             value={json}
-                            onChange={e => setJson(e.target.value)}
+                            onChange={(e) => setJson(e.target.value)}
                             placeholder={t('linkEpisodesModal.add.jsonPlaceholder')}
                             sx={holoFieldSx}
                         />
@@ -362,15 +377,11 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
     };
 
     return (
-        <Box sx={{display: 'flex', flexDirection: 'column', mt: 2}}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2 }}>
             {/* Top Controls: Common inputs + Mobile Method Selector */}
-            <Stack spacing={2} sx={{mb: 2, flexShrink: 0}}>
+            <Stack spacing={2} sx={{ mb: 2, flexShrink: 0 }}>
                 {/* Mobile-only method selector */}
-                <FormControl
-                    fullWidth
-                    required
-                    sx={{display: {xs: 'block', md: 'none'}, ...holoFieldSx}}
-                >
+                <FormControl fullWidth required sx={{ display: { xs: 'block', md: 'none' }, ...holoFieldSx }}>
                     <InputLabel>{t('linkEpisodesModal.add.method')}</InputLabel>
                     <Select
                         value={addMethod}
@@ -388,15 +399,14 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                     <TextField
                         label={t('linkEpisodesModal.add.language')}
                         value={language}
-                        onChange={e => setLanguage(e.target.value.toUpperCase())}
+                        onChange={(e) => setLanguage(e.target.value.toUpperCase())}
                         required
-                        sx={{width: '100px', ...holoFieldSx}}
-                        inputProps={{maxLength: 3}}
+                        sx={{ width: '100px', ...holoFieldSx }}
+                        inputProps={{ maxLength: 3 }}
                     />
                     <FormControl fullWidth required sx={holoFieldSx}>
                         <InputLabel>{t('linkEpisodesModal.add.type')}</InputLabel>
-                        <Select value={type} label={t('linkEpisodesModal.add.type')}
-                                onChange={(e) => setType(e.target.value)}>
+                        <Select value={type} label={t('linkEpisodesModal.add.type')} onChange={(e) => setType(e.target.value)}>
                             <MenuItem value="sub">{t('linkEpisodesModal.add.sub')}</MenuItem>
                             <MenuItem value="dub">{t('linkEpisodesModal.add.dub')}</MenuItem>
                         </Select>
@@ -405,7 +415,7 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
             </Stack>
 
             {/* Content area */}
-            <Box sx={{display: 'flex'}}>
+            <Box sx={{ display: 'flex' }}>
                 {/* Desktop-only vertical tabs */}
                 <Tabs
                     orientation="vertical"
@@ -416,25 +426,23 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                         borderRight: '1px solid rgba(76, 210, 255, 0.25)',
                         mr: 2,
                         flexShrink: 0,
-                        display: {xs: 'none', md: 'flex'},
-                        '& .MuiTab-root': {color: 'var(--text-secondary)', alignItems: 'flex-start', textAlign: 'left'},
-                        '& .Mui-selected': {color: 'var(--neon-accent)'},
-                        '& .MuiTabs-indicator': {backgroundColor: 'var(--neon-accent)'}
+                        display: { xs: 'none', md: 'flex' },
+                        '& .MuiTab-root': { color: 'var(--text-secondary)', alignItems: 'flex-start', textAlign: 'left' },
+                        '& .Mui-selected': { color: 'var(--neon-accent)' },
+                        '& .MuiTabs-indicator': { backgroundColor: 'var(--neon-accent)' },
                     }}
                 >
-                    <Tab label={t('linkEpisodesModal.add.pattern')} value="pattern"/>
-                    <Tab label={t('linkEpisodesModal.add.list')} value="list"/>
-                    <Tab label={t('linkEpisodesModal.add.json')} value="json"/>
+                    <Tab label={t('linkEpisodesModal.add.pattern')} value="pattern" />
+                    <Tab label={t('linkEpisodesModal.add.list')} value="list" />
+                    <Tab label={t('linkEpisodesModal.add.json')} value="json" />
                 </Tabs>
 
                 {/* The main content that changes based on method, and save button */}
-                <Box sx={{flexGrow: 1, display: 'flex', flexDirection: 'column'}}>
-                    <Box sx={{pr: 1}}>
-                        {renderAddContent()}
-                    </Box>
-                    <Box sx={{mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1, pr: 0}}>
+                <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ pr: 1 }}>{renderAddContent()}</Box>
+                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', flexShrink: 0, p: 1, pr: 0 }}>
                         <Button
-                            id={"add-links-button"}
+                            id={'add-links-button'}
                             data-component="add-links-button"
                             className="neon-edge"
                             onClick={handleSave}
@@ -446,14 +454,14 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
                                 fontFamily: "'Space Grotesk', 'Inter', sans-serif",
                                 fontWeight: 700,
                                 letterSpacing: '0.04em',
-                                '&:hover': {background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)'},
+                                '&:hover': { background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)' },
                                 '&.Mui-disabled': {
                                     background: 'rgba(76, 210, 255, 0.25)',
-                                    color: 'var(--text-secondary)'
-                                }
+                                    color: 'var(--text-secondary)',
+                                },
                             }}
                         >
-                            {isSaving ? <CircularProgress size={24} color="inherit"/> : t('linkEpisodesModal.add.save')}
+                            {isSaving ? <CircularProgress size={24} color="inherit" /> : t('linkEpisodesModal.add.save')}
                         </Button>
                     </Box>
                 </Box>
@@ -463,5 +471,4 @@ const AddLinkTabs = observer(({selectedSeason, seasonEpisodeCount, seasonName, o
 });
 AddLinkTabs.displayName = 'AddLinkTabs';
 
-
-export default AddLinkTabs
+export default AddLinkTabs;

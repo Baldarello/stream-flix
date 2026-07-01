@@ -10,8 +10,8 @@
  * store only tracks the data the rest of the UI needs to render
  * the hero, the continue-watching row, and the back navigation.
  */
-import {makeAutoObservable, runInAction} from 'mobx';
-import {libraryStore} from './libraryStore.js';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { libraryStore } from './libraryStore.js';
 
 class PlaybackStore {
     isPlaying = false;
@@ -33,9 +33,7 @@ class PlaybackStore {
         if (!this.nowPlayingItem || !('season_number' in this.nowPlayingItem) || !this.nowPlayingShowDetails?.seasons) {
             return [];
         }
-        const season = this.nowPlayingShowDetails.seasons.find(
-            (s) => s.season_number === this.nowPlayingItem.season_number
-        );
+        const season = this.nowPlayingShowDetails.seasons.find((s) => s.season_number === this.nowPlayingItem.season_number);
         return season?.episodes || [];
     }
 

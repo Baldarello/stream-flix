@@ -19,10 +19,10 @@
  *
  * Any match = violation. The test fails with the full list of offending lines.
  */
-import {expect, test} from '@playwright/test';
-import {spawnSync} from 'node:child_process';
+import { expect, test } from '@playwright/test';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,8 +36,10 @@ const GREP_CMD = 'grep';
 // Matches ONLY non-lazy useState calls — see file header for pattern rationale.
 const GREP_ARGS = [
     '-rn',
-    '-e', 'useState\\([^)]*?\\)',
-    '-e', 'useState\\(\\w+\\)',
+    '-e',
+    'useState\\([^)]*?\\)',
+    '-e',
+    'useState\\(\\w+\\)',
     'frontend/views/',
     'frontend/features/',
     'frontend/components/',
@@ -57,7 +59,7 @@ test('screen-level files must not import or call useState', () => {
     if (result.error) {
         throw new Error(
             `Failed to spawn \`${GREP_CMD}\`: ${result.error.message}. ` +
-                'Make sure GNU grep is on PATH (Git Bash / WSL / Linux / macOS).',
+                'Make sure GNU grep is on PATH (Git Bash / WSL / Linux / macOS).'
         );
     }
 
@@ -81,7 +83,7 @@ test('screen-level files must not import or call useState', () => {
         throw new Error(
             `MobX invariant violated: useState must not appear in screen-level ` +
                 `files outside lazy initializers (useState(() => …)). ` +
-                `Move this state into a MobX store. Offending occurrences:\n${list}`,
+                `Move this state into a MobX store. Offending occurrences:\n${list}`
         );
     }
 

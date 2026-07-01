@@ -4,7 +4,7 @@
  * happening at runtime. This is a manual diagnostic, not a regression
  * test. Remove it (or skip it) once the Google login works end-to-end.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('debug google login flow', async ({ page }) => {
     const consoleMessages = [];
@@ -58,8 +58,7 @@ test('debug google login flow', async ({ page }) => {
     // path that lets the login work even if the .env is not available
     // at build time.
     await page.addInitScript(() => {
-        window.__QUIX_GOOGLE_CLIENT_ID__ =
-            '12998500978-9rk2hki7jntah53m20m9nag4bgk1kr1o.apps.googleusercontent.com';
+        window.__QUIX_GOOGLE_CLIENT_ID__ = '12998500978-9rk2hki7jntah53m20m9nag4bgk1kr1o.apps.googleusercontent.com';
     });
 
     const baseUrl = 'http://localhost:3002/';
@@ -98,8 +97,7 @@ test('debug google login flow', async ({ page }) => {
     // 4. Click the Google login button. The list item text is translated
     // ("Accedi con Google" in Italian, "Login with Google" in English) so
     // we look for any visible list item button containing the Google icon.
-    const loginButton = page
-        .locator('.MuiListItemButton-root:has(svg[data-testid="GoogleIcon"])');
+    const loginButton = page.locator('.MuiListItemButton-root:has(svg[data-testid="GoogleIcon"])');
     const loginButtonCount = await loginButton.count();
     console.log('[DEBUG] login button count:', loginButtonCount);
 

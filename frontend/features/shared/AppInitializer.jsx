@@ -10,11 +10,11 @@
  *   transition portal, holo cards and the floating dock.
  */
 
-import {useEffect} from 'react';
-import {gsap} from 'gsap';
-import {ScrollTrigger} from 'gsap/ScrollTrigger';
-import {mediaStore} from '../../store/mediaStore.js';
-import {initGoogleAuth} from '../../services/googleAuthService';
+import { useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { mediaStore } from '../../store/mediaStore.js';
+import { initGoogleAuth } from '../../services/googleAuthService';
 
 // Register the ScrollTrigger plugin once at app boot. Safe to call multiple
 // times - GSAP dedupes plugin registration internally.

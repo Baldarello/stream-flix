@@ -6,8 +6,8 @@
  * service only waited 500ms for the GSI library, and verify that the
  * service can now wait longer and lazily initialize on first sign-in.
  */
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import {mediaStore} from '../../store/mediaStore.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { mediaStore } from '../../store/mediaStore.js';
 
 // The `GOOGLE_CLIENT_ID` constant is captured at module load time, so the
 // env var must be set BEFORE the service module is imported. Vitest's

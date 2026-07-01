@@ -9,17 +9,17 @@
  *
  * Production-safe: uses live API search endpoint.
  */
-import {expect, test} from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const APP_URL = process.env.SMOKE_URL || 'http://localhost:3002/';
 
 test.describe('SearchView', () => {
     test.beforeEach(async ({ page }) => {
         const errors = [];
-        page.on('console', msg => {
+        page.on('console', (msg) => {
             if (msg.type() === 'error') errors.push(msg.text());
         });
-        page.on('pageerror', err => errors.push(err.message));
+        page.on('pageerror', (err) => errors.push(err.message));
         page._testErrors = errors;
     });
 
@@ -41,9 +41,7 @@ test.describe('SearchView', () => {
         const hasPrompt = /cerca|trova|cercando/i.test(bodyText);
         expect(hasPrompt).toBe(true);
 
-        const fatalErrors = (page._testErrors || []).filter(e =>
-            !e.includes('Warning') && !e.includes('ResizeObserver')
-        );
+        const fatalErrors = (page._testErrors || []).filter((e) => !e.includes('Warning') && !e.includes('ResizeObserver'));
         expect(fatalErrors, `Console errors: ${fatalErrors.join('\n')}`).toHaveLength(0);
     });
 
@@ -78,7 +76,10 @@ test.describe('SearchView', () => {
         await searchInput.fill('Breaking Bad');
         await page.waitForTimeout(2000);
 
-        const firstResult = page.locator('[class*="card"], [class*="Card"]').filter({ hasText: /breaking/i }).first();
+        const firstResult = page
+            .locator('[class*="card"], [class*="Card"]')
+            .filter({ hasText: /breaking/i })
+            .first();
         if (await firstResult.isVisible({ timeout: 5000 }).catch(() => false)) {
             await firstResult.click();
             await page.waitForTimeout(2000);

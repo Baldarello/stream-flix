@@ -10,8 +10,8 @@
  * Cards are filtered by `mediaStore.librarySearchQuery`.
  */
 
-import React, {useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import {
     Box,
     Button,
@@ -29,9 +29,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
-import {mediaStore} from '../../../store/mediaStore.js';
-import {useTranslations} from '../../../hooks/useTranslations.js';
-import {EmptyState} from '../shared/EmptyState.jsx';
+import { mediaStore } from '../../../store/mediaStore.js';
+import { useTranslations } from '../../../hooks/useTranslations.js';
+import { EmptyState } from '../shared/EmptyState.jsx';
 
 const formatDuration = (seconds) => {
     const safe = Math.max(0, Math.floor(seconds || 0));
@@ -47,10 +47,8 @@ const matchesQuery = (item, query) => {
 };
 
 const ContinueWatchingTab = observer(() => {
-    const {t} = useTranslations();
-    const items = mediaStore.continueWatchingItems.filter((item) =>
-        matchesQuery(item, mediaStore.librarySearchQuery)
-    );
+    const { t } = useTranslations();
+    const items = mediaStore.continueWatchingItems.filter((item) => matchesQuery(item, mediaStore.librarySearchQuery));
     const [pendingRemove, setPendingRemove] = useState(() => null);
 
     const handleConfirmRemove = async () => {
@@ -64,10 +62,10 @@ const ContinueWatchingTab = observer(() => {
         return (
             <EmptyState
                 id="continue-watching-empty"
-                icon={<AccessTimeIcon sx={{fontSize: 44}}/>}
+                icon={<AccessTimeIcon sx={{ fontSize: 44 }} />}
                 title={
                     hasQuery
-                        ? t('libraryManagement.dashboard.noResults', {query: mediaStore.librarySearchQuery})
+                        ? t('libraryManagement.dashboard.noResults', { query: mediaStore.librarySearchQuery })
                         : t('libraryManagement.empty.continueWatching')
                 }
                 ctaLabel={hasQuery ? undefined : t('libraryManagement.continueWatching.emptyCta')}
@@ -75,8 +73,8 @@ const ContinueWatchingTab = observer(() => {
                     hasQuery
                         ? undefined
                         : () => {
-                            mediaStore.activeView = 'Home';
-                        }
+                              mediaStore.activeView = 'Home';
+                          }
                 }
             />
         );
@@ -107,11 +105,7 @@ const ContinueWatchingTab = observer(() => {
                         >
                             <Box
                                 component="img"
-                                src={
-                                    item.poster_path
-                                        ? `https://image.tmdb.org/t/p/w200${item.poster_path}`
-                                        : '/placeholder.png'
-                                }
+                                src={item.poster_path ? `https://image.tmdb.org/t/p/w200${item.poster_path}` : '/placeholder.png'}
                                 alt={item.name || item.title}
                                 sx={{
                                     width: 120,
@@ -120,7 +114,7 @@ const ContinueWatchingTab = observer(() => {
                                     borderRadius: 1,
                                 }}
                             />
-                            <Box sx={{flex: 1, minWidth: 200}}>
+                            <Box sx={{ flex: 1, minWidth: 200 }}>
                                 <Typography
                                     variant="subtitle1"
                                     sx={{
@@ -131,10 +125,10 @@ const ContinueWatchingTab = observer(() => {
                                 >
                                     {item.show_title || item.name || item.title}
                                 </Typography>
-                                <Typography variant="body2" sx={{color: 'var(--text-secondary)'}}>
+                                <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
                                     {`S${item.season_number ?? '?'}E${item.episode_number ?? '?'}${item.name ? ` - ${item.name}` : ''}`}
                                 </Typography>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1, mt: 1}}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                                     <LinearProgress
                                         variant="determinate"
                                         value={progressPercent}
@@ -148,11 +142,9 @@ const ContinueWatchingTab = observer(() => {
                                             },
                                         }}
                                     />
-                                    <Typography
-                                        variant="caption"
-                                        sx={{color: 'var(--text-secondary)'}}
-                                    >
-                                        {progress ? formatDuration(progress.currentTime) : '0:00'} / {progress ? formatDuration(progress.duration) : '0:00'}
+                                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                                        {progress ? formatDuration(progress.currentTime) : '0:00'} /{' '}
+                                        {progress ? formatDuration(progress.duration) : '0:00'}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -173,7 +165,7 @@ const ContinueWatchingTab = observer(() => {
                                             },
                                         }}
                                     >
-                                        <PlayArrowIcon/>
+                                        <PlayArrowIcon />
                                     </IconButton>
                                 </Tooltip>
                                 <Tooltip
@@ -191,7 +183,7 @@ const ContinueWatchingTab = observer(() => {
                                         sx={{
                                             color: 'var(--neon-accent)',
                                             borderColor: 'rgba(76, 210, 255, 0.45)',
-                                            '&:hover': {borderColor: 'var(--neon-accent)'},
+                                            '&:hover': { borderColor: 'var(--neon-accent)' },
                                         }}
                                     >
                                         {progress?.watched
@@ -210,7 +202,7 @@ const ContinueWatchingTab = observer(() => {
                                             })
                                         }
                                     >
-                                        <DeleteIcon/>
+                                        <DeleteIcon />
                                     </IconButton>
                                 </Tooltip>
                             </Stack>
@@ -219,21 +211,15 @@ const ContinueWatchingTab = observer(() => {
                 })}
             </Stack>
 
-            <Dialog
-                open={!!pendingRemove}
-                onClose={() => setPendingRemove(null)}
-                id="continue-watching-confirm-dialog"
-            >
+            <Dialog open={!!pendingRemove} onClose={() => setPendingRemove(null)} id="continue-watching-confirm-dialog">
                 <DialogTitle>{t('libraryManagement.deleteConfirm.title')}</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        {t('libraryManagement.continueWatching.removeConfirm', {name: pendingRemove?.name || ''})}
+                        {t('libraryManagement.continueWatching.removeConfirm', { name: pendingRemove?.name || '' })}
                     </Typography>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setPendingRemove(null)}>
-                        {t('libraryManagement.cancel')}
-                    </Button>
+                    <Button onClick={() => setPendingRemove(null)}>{t('libraryManagement.cancel')}</Button>
                     <Button onClick={handleConfirmRemove} color="error">
                         {t('libraryManagement.delete')}
                     </Button>
@@ -246,4 +232,4 @@ const ContinueWatchingTab = observer(() => {
 ContinueWatchingTab.displayName = 'ContinueWatchingTab';
 
 export default ContinueWatchingTab;
-export {ContinueWatchingTab};
+export { ContinueWatchingTab };

@@ -6,8 +6,8 @@
  * refresh and that does not belong to a specific content domain
  * goes here.
  */
-import {makeAutoObservable, runInAction} from 'mobx';
-import {db} from '../services/db';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { db } from '../services/db';
 
 const STORAGE_KEY = 'language';
 const DEFAULT_LANGUAGE = 'it';

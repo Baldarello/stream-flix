@@ -12,8 +12,8 @@
  * simple opacity fade.
  */
 
-import {gsap} from 'gsap';
-import {durations, easings, reducedMotion, reducedMotionCondition} from './grammar.js';
+import { gsap } from 'gsap';
+import { durations, easings, reducedMotion, reducedMotionCondition } from './grammar.js';
 
 export const VIEW_KEYS = {
     HOME: 'home',
@@ -26,7 +26,7 @@ export const VIEW_KEYS = {
     MASTER: 'master',
     SLAVE: 'slave',
     LOADING: 'loading',
-    ERROR: 'error'
+    ERROR: 'error',
 };
 
 const ensureMatchMedia = () => {
@@ -39,8 +39,8 @@ const ensureMatchMedia = () => {
     return ensureMatchMedia._mm;
 };
 
-const fadeOnlyTimeline = (target) => gsap.timeline()
-    .fromTo(target, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none' });
+const fadeOnlyTimeline = (target) =>
+    gsap.timeline().fromTo(target, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none' });
 
 /**
  * Cinematic morph used by Hero -> Detail and similar "expansion" transitions.
@@ -52,14 +52,25 @@ const morphExpand = (overlayNode, nextViewNode, { sceneCanvasRef } = {}) => {
     if (!overlayNode || !nextViewNode) return tl;
 
     tl.set(overlayNode, { autoAlpha: 1 });
-    tl.fromTo(overlayNode,
+    tl.fromTo(
+        overlayNode,
         { scaleY: 0, transformOrigin: '50% 50%' },
-        { scaleY: 1, duration: durations.cinematic, ease: easings.cinematic });
-    tl.fromTo(nextViewNode, { y: 24, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.emphasized }, '<0.2');
+        { scaleY: 1, duration: durations.cinematic, ease: easings.cinematic }
+    );
+    tl.fromTo(
+        nextViewNode,
+        { y: 24, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: durations.med, ease: easings.emphasized },
+        '<0.2'
+    );
     if (sceneCanvasRef && sceneCanvasRef.current && typeof sceneCanvasRef.current.playMorph === 'function') {
-        tl.call(() => {
-            sceneCanvasRef.current.playMorph({ intensity: 0.7, durationMs: durations.cinematic * 1000 });
-        }, [], '<');
+        tl.call(
+            () => {
+                sceneCanvasRef.current.playMorph({ intensity: 0.7, durationMs: durations.cinematic * 1000 });
+            },
+            [],
+            '<'
+        );
     }
     tl.to(overlayNode, { autoAlpha: 0, duration: durations.med, ease: easings.standard }, '>-0.1');
     return tl;
@@ -73,16 +84,26 @@ const cameraDive = (overlayNode, nextViewNode, { sceneCanvasRef } = {}) => {
     const tl = gsap.timeline();
     if (!overlayNode || !nextViewNode) return tl;
     tl.set(overlayNode, { autoAlpha: 1 });
-    tl.fromTo(overlayNode,
+    tl.fromTo(
+        overlayNode,
         { scaleY: 0, transformOrigin: '50% 0%' },
-        { scaleY: 1, duration: durations.cinematic, ease: easings.cinematic });
+        { scaleY: 1, duration: durations.cinematic, ease: easings.cinematic }
+    );
     if (sceneCanvasRef && sceneCanvasRef.current && typeof sceneCanvasRef.current.playMorph === 'function') {
-        tl.call(() => {
-            sceneCanvasRef.current.playMorph({ intensity: 0.95, durationMs: durations.cinematic * 1000 });
-        }, [], '<');
+        tl.call(
+            () => {
+                sceneCanvasRef.current.playMorph({ intensity: 0.95, durationMs: durations.cinematic * 1000 });
+            },
+            [],
+            '<'
+        );
     }
-    tl.fromTo(nextViewNode, { scale: 0.92, autoAlpha: 0, filter: 'blur(12px)' },
-        { scale: 1, autoAlpha: 1, filter: 'blur(0px)', duration: durations.cinematic, ease: easings.cinematic }, '<0.1');
+    tl.fromTo(
+        nextViewNode,
+        { scale: 0.92, autoAlpha: 0, filter: 'blur(12px)' },
+        { scale: 1, autoAlpha: 1, filter: 'blur(0px)', duration: durations.cinematic, ease: easings.cinematic },
+        '<0.1'
+    );
     tl.to(overlayNode, { autoAlpha: 0, duration: durations.med, ease: easings.standard }, '>-0.1');
     return tl;
 };
@@ -94,11 +115,13 @@ const swipeSwap = (overlayNode, nextViewNode) => {
     const tl = gsap.timeline();
     if (!overlayNode || !nextViewNode) return tl;
     tl.set(overlayNode, { autoAlpha: 1 });
-    tl.fromTo(overlayNode,
-        { xPercent: -100 },
-        { xPercent: 0, duration: durations.med, ease: easings.emphasized });
-    tl.fromTo(nextViewNode, { xPercent: 12, autoAlpha: 0 },
-        { xPercent: 0, autoAlpha: 1, duration: durations.med, ease: easings.emphasized }, '<');
+    tl.fromTo(overlayNode, { xPercent: -100 }, { xPercent: 0, duration: durations.med, ease: easings.emphasized });
+    tl.fromTo(
+        nextViewNode,
+        { xPercent: 12, autoAlpha: 0 },
+        { xPercent: 0, autoAlpha: 1, duration: durations.med, ease: easings.emphasized },
+        '<'
+    );
     tl.to(overlayNode, { autoAlpha: 0, duration: durations.med, ease: easings.standard }, '>-0.05');
     return tl;
 };
@@ -118,7 +141,7 @@ const REGISTRY = {
     'master->home': swipeSwap,
     'slave->home': morphExpand,
     'qr->home': swipeSwap,
-    'pairing->home': swipeSwap
+    'pairing->home': swipeSwap,
 };
 
 export const buildTransition = (fromKey, toKey, args) => {

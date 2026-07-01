@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import {Box} from '@mui/material';
+import { Box } from '@mui/material';
 
 const SkeletonInner = ({ id = 'skeleton-shimmer', width = '100%', height = 220, borderRadius = 12, sx }) => {
     return (
@@ -20,10 +20,11 @@ const SkeletonInner = ({ id = 'skeleton-shimmer', width = '100%', height = 220, 
                 width,
                 height,
                 borderRadius,
-                background: 'linear-gradient(110deg, rgba(76, 210, 255, 0.06) 0%, rgba(122, 240, 255, 0.18) 50%, rgba(76, 210, 255, 0.06) 100%)',
+                background:
+                    'linear-gradient(110deg, rgba(76, 210, 255, 0.06) 0%, rgba(122, 240, 255, 0.18) 50%, rgba(76, 210, 255, 0.06) 100%)',
                 backgroundSize: '200% 100%',
                 border: '1px solid rgba(76, 210, 255, 0.12)',
-                ...sx
+                ...sx,
             }}
         />
     );

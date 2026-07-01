@@ -16,8 +16,8 @@
  * effect right away.
  */
 
-import React, {useEffect, useState} from 'react';
-import {observer} from 'mobx-react-lite';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import {
     Alert,
     Box,
@@ -36,11 +36,10 @@ import {
 import VerifiedIcon from '@mui/icons-material/Verified';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
-import {mediaStore} from '../../store/mediaStore.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {ModalShell} from '../modals/ModalShell.jsx';
-import {holoFieldSx} from "../../styles/style.js"
-
+import { mediaStore } from '../../store/mediaStore.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { ModalShell } from '../modals/ModalShell.jsx';
+import { holoFieldSx } from '../../styles/style.js';
 
 const buildPreview = (rawUrl) => {
     if (!rawUrl) return '';
@@ -71,14 +70,14 @@ const getContextForLink = (link) => {
             }
         }
         if (show.id === mediaId) {
-            return {showName: show.name || show.title || 'Unknown', season: null, episode: null};
+            return { showName: show.name || show.title || 'Unknown', season: null, episode: null };
         }
     }
     return null;
 };
 
 const LinkEditModal = observer(() => {
-    const {t} = useTranslations();
+    const { t } = useTranslations();
     const linkId = mediaStore.libraryEditingLinkId;
     const open = linkId != null;
     // Flat lookup: mediaLinks is a Map<mediaId, Link[]>, so we
@@ -145,7 +144,7 @@ const LinkEditModal = observer(() => {
             mediaStore.showSnackbar('libraryManagement.linkEdit.savedSuccess', 'success', true);
             handleClose();
         } catch (e) {
-            mediaStore.showSnackbar('notifications.processingError', 'error', true, {error: e.message});
+            mediaStore.showSnackbar('notifications.processingError', 'error', true, { error: e.message });
         }
     };
 
@@ -179,7 +178,10 @@ const LinkEditModal = observer(() => {
 
     const context = resolved ? getContextForLink(resolved) : null;
     const preview = buildPreview(debouncedUrl);
-    const isPreferred = !!(resolved && context && mediaStore.preferredSources.get(context.showId) &&
+    const isPreferred = !!(
+        resolved &&
+        context &&
+        mediaStore.preferredSources.get(context.showId) &&
         (() => {
             try {
                 return new URL(resolved.url).origin === mediaStore.preferredSources.get(context.showId);
@@ -200,7 +202,7 @@ const LinkEditModal = observer(() => {
             title={t('libraryManagement.linkEdit.title')}
             maxWidth="sm"
         >
-            <Stack spacing={2} sx={{pt: 1}}>
+            <Stack spacing={2} sx={{ pt: 1 }}>
                 {context && (
                     <Alert
                         severity="info"
@@ -208,15 +210,15 @@ const LinkEditModal = observer(() => {
                             background: 'var(--holo-grad)',
                             color: 'var(--text-primary)',
                             border: '1px solid rgba(76, 210, 255, 0.35)',
-                            '& .MuiAlert-icon': {color: 'var(--neon-accent)'},
+                            '& .MuiAlert-icon': { color: 'var(--neon-accent)' },
                         }}
                     >
                         {context.season != null
                             ? t('libraryManagement.linkEdit.showContext', {
-                                show: context.showName,
-                                season: context.season,
-                                episode: context.episode,
-                            })
+                                  show: context.showName,
+                                  season: context.season,
+                                  episode: context.episode,
+                              })
                             : context.showName}
                     </Alert>
                 )}
@@ -225,16 +227,13 @@ const LinkEditModal = observer(() => {
                     id="link-edit-url"
                     label={t('libraryManagement.linkEdit.urlLabel')}
                     value={draft.url}
-                    onChange={(e) => setDraft({...draft, url: e.target.value})}
+                    onChange={(e) => setDraft({ ...draft, url: e.target.value })}
                     fullWidth
                     sx={holoFieldSx}
                 />
                 {preview && (
-                    <Typography
-                        variant="caption"
-                        sx={{color: 'var(--text-secondary)', mt: -1}}
-                    >
-                        {t('libraryManagement.linkEdit.urlPreview', {preview})}
+                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)', mt: -1 }}>
+                        {t('libraryManagement.linkEdit.urlPreview', { preview })}
                     </Typography>
                 )}
 
@@ -242,7 +241,7 @@ const LinkEditModal = observer(() => {
                     id="link-edit-label"
                     label={t('libraryManagement.linkEdit.labelLabel')}
                     value={draft.label}
-                    onChange={(e) => setDraft({...draft, label: e.target.value})}
+                    onChange={(e) => setDraft({ ...draft, label: e.target.value })}
                     fullWidth
                     sx={holoFieldSx}
                 />
@@ -252,21 +251,17 @@ const LinkEditModal = observer(() => {
                         id="link-edit-language"
                         label={t('libraryManagement.linkEdit.languageLabel')}
                         value={draft.language}
-                        onChange={(e) =>
-                            setDraft({...draft, language: e.target.value.toUpperCase().slice(0, 3)})
-                        }
-                        sx={{...holoFieldSx, width: 140}}
-                        inputProps={{maxLength: 3}}
+                        onChange={(e) => setDraft({ ...draft, language: e.target.value.toUpperCase().slice(0, 3) })}
+                        sx={{ ...holoFieldSx, width: 140 }}
+                        inputProps={{ maxLength: 3 }}
                     />
                     <FormControl fullWidth sx={holoFieldSx}>
-                        <InputLabel id="link-edit-type-label">
-                            {t('libraryManagement.linkEdit.typeLabel')}
-                        </InputLabel>
+                        <InputLabel id="link-edit-type-label">{t('libraryManagement.linkEdit.typeLabel')}</InputLabel>
                         <Select
                             labelId="link-edit-type-label"
                             value={draft.type}
                             label={t('libraryManagement.linkEdit.typeLabel')}
-                            onChange={(e) => setDraft({...draft, type: e.target.value})}
+                            onChange={(e) => setDraft({ ...draft, type: e.target.value })}
                         >
                             <MenuItem value="sub">{t('libraryManagement.sub')}</MenuItem>
                             <MenuItem value="dub">{t('libraryManagement.dub')}</MenuItem>
@@ -282,27 +277,25 @@ const LinkEditModal = observer(() => {
                             onChange={handleTogglePreferred}
                             sx={{
                                 color: 'var(--neon-accent)',
-                                '&.Mui-checked': {color: 'var(--neon-accent)'},
+                                '&.Mui-checked': { color: 'var(--neon-accent)' },
                             }}
                         />
                     }
                     label={t('libraryManagement.linkEdit.preferredSwitch')}
-                    sx={{color: 'var(--text-secondary)'}}
+                    sx={{ color: 'var(--text-secondary)' }}
                 />
 
                 {validateResult !== null && (
                     <Alert
                         severity={validateResult ? 'success' : 'warning'}
-                        icon={validateResult ? <VerifiedIcon/> : <ReportProblemIcon/>}
+                        icon={validateResult ? <VerifiedIcon /> : <ReportProblemIcon />}
                         sx={{
                             background: 'var(--holo-grad)',
                             color: 'var(--text-primary)',
                             border: '1px solid rgba(76, 210, 255, 0.35)',
                         }}
                     >
-                        {validateResult
-                            ? t('libraryManagement.linkEdit.valid')
-                            : t('libraryManagement.linkEdit.invalid')}
+                        {validateResult ? t('libraryManagement.linkEdit.valid') : t('libraryManagement.linkEdit.invalid')}
                     </Alert>
                 )}
 
@@ -315,17 +308,13 @@ const LinkEditModal = observer(() => {
                         sx={{
                             color: 'var(--neon-accent)',
                             borderColor: 'rgba(76, 210, 255, 0.45)',
-                            '&:hover': {borderColor: 'var(--neon-accent)'},
+                            '&:hover': { borderColor: 'var(--neon-accent)' },
                         }}
                     >
-                        {validating ? <CircularProgress size={18}/> : t('libraryManagement.linkEdit.validateNow')}
+                        {validating ? <CircularProgress size={18} /> : t('libraryManagement.linkEdit.validateNow')}
                     </Button>
-                    <Box sx={{flex: 1}}/>
-                    <Button
-                        id="link-edit-cancel"
-                        onClick={handleClose}
-                        sx={{color: 'var(--text-secondary)'}}
-                    >
+                    <Box sx={{ flex: 1 }} />
+                    <Button id="link-edit-cancel" onClick={handleClose} sx={{ color: 'var(--text-secondary)' }}>
                         {t('libraryManagement.linkEdit.cancel')}
                     </Button>
                     <Button
@@ -338,7 +327,7 @@ const LinkEditModal = observer(() => {
                             fontFamily: "'Space Grotesk', 'Inter', sans-serif",
                             fontWeight: 700,
                             letterSpacing: '0.04em',
-                            '&:hover': {background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)'},
+                            '&:hover': { background: 'var(--neon-accent-hot)', boxShadow: 'var(--edge-glow-hot)' },
                         }}
                     >
                         {t('libraryManagement.linkEdit.save')}
@@ -352,4 +341,4 @@ const LinkEditModal = observer(() => {
 LinkEditModal.displayName = 'LinkEditModal';
 
 export default LinkEditModal;
-export {LinkEditModal};
+export { LinkEditModal };

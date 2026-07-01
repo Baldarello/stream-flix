@@ -1,10 +1,10 @@
 import React from 'react';
-import {Box} from '@mui/material';
-import {observer} from 'mobx-react-lite';
-import {remoteStore} from '../../store/remoteStore.js';
+import { Box } from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { remoteStore } from '../../store/remoteStore.js';
 
 const ConnectionIndicator = observer(() => {
-    const {connectionHealth, missedPings, isRemoteMasterConnected} = remoteStore;
+    const { connectionHealth, missedPings, isRemoteMasterConnected } = remoteStore;
 
     // Determine color based on connection health
     const getColor = () => {
@@ -51,9 +51,9 @@ const ConnectionIndicator = observer(() => {
                 title: getTooltip(),
                 transition: 'all 0.3s ease',
                 '@keyframes pulse': {
-                    '0%': {boxShadow: `0 0 8px ${getColor()}80`},
-                    '50%': {boxShadow: `0 0 16px ${getColor()}80`},
-                    '100%': {boxShadow: `0 0 8px ${getColor()}80`},
+                    '0%': { boxShadow: `0 0 8px ${getColor()}80` },
+                    '50%': { boxShadow: `0 0 16px ${getColor()}80` },
+                    '100%': { boxShadow: `0 0 8px ${getColor()}80` },
                 },
                 animation: connectionHealth === 'degraded' ? 'pulse 1.5s ease-in-out infinite' : 'none',
             }}

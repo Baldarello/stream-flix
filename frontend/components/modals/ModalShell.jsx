@@ -15,13 +15,13 @@
  * `<Dialog open={...} onClose={...}>`.
  */
 
-import React, {useEffect, useRef} from 'react';
-import {Box, Dialog, DialogContent, DialogTitle, IconButton} from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { Box, Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {gsap} from 'gsap';
-import {durations, easings, reducedMotion} from '../../motion/grammar.js';
-import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
-import {useTranslations} from '../../hooks/useTranslations.js';
+import { gsap } from 'gsap';
+import { durations, easings, reducedMotion } from '../../motion/grammar.js';
+import { ScanlineOverlay } from '../feedback/ScanlineOverlay.jsx';
+import { useTranslations } from '../../hooks/useTranslations.js';
 
 /**
  * ModalShell Component
@@ -68,9 +68,7 @@ export const ModalShell = ({
         if (!paper) return undefined;
 
         if (reducedMotion()) {
-            gsap.fromTo(paper,
-                { autoAlpha: 0 },
-                { autoAlpha: 1, duration: 0.12, ease: 'none', overwrite: 'auto' });
+            gsap.fromTo(paper, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, ease: 'none', overwrite: 'auto' });
             return undefined;
         }
 
@@ -78,16 +76,20 @@ export const ModalShell = ({
         // temporary bright overlay on the paper; we move it from left
         // to right and then remove it.
         const tl = gsap.timeline();
-        tl.fromTo(paper,
+        tl.fromTo(
+            paper,
             { autoAlpha: 0, scale: 0.94, filter: 'blur(6px)' },
-            { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: durations.med, ease: easings.emphasized, overwrite: 'auto' });
+            { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: durations.med, ease: easings.emphasized, overwrite: 'auto' }
+        );
 
         const sweep = paper.querySelector('.modal-shell-sweep');
         if (sweep) {
-            tl.fromTo(sweep,
+            tl.fromTo(
+                sweep,
                 { x: '-100%' },
                 { x: '100%', duration: durations.med, ease: easings.standard, overwrite: 'auto' },
-                '<0.05');
+                '<0.05'
+            );
         }
 
         return () => tl.kill();
@@ -124,10 +126,10 @@ export const ModalShell = ({
                             background: 'var(--holo-grad)',
                             opacity: 0.35,
                             pointerEvents: 'none',
-                            zIndex: 0
-                        }
-                    }
-                }
+                            zIndex: 0,
+                        },
+                    },
+                },
             }}
             {...rest}
         >
@@ -142,8 +144,9 @@ export const ModalShell = ({
                     left: 0,
                     width: '30%',
                     pointerEvents: 'none',
-                    background: 'linear-gradient(100deg, rgba(76, 210, 255, 0) 0%, rgba(122, 240, 255, 0.35) 50%, rgba(76, 210, 255, 0) 100%)',
-                    zIndex: 1
+                    background:
+                        'linear-gradient(100deg, rgba(76, 210, 255, 0) 0%, rgba(122, 240, 255, 0.35) 50%, rgba(76, 210, 255, 0) 100%)',
+                    zIndex: 1,
                 }}
             />
             {title && (
@@ -157,7 +160,7 @@ export const ModalShell = ({
                         letterSpacing: '0.01em',
                         color: 'var(--text-primary)',
                         textShadow: '0 0 12px rgba(76, 210, 255, 0.25)',
-                        pr: 6
+                        pr: 6,
                     }}
                 >
                     {title}
@@ -171,7 +174,11 @@ export const ModalShell = ({
                                 right: 8,
                                 top: 8,
                                 color: 'var(--neon-accent)',
-                                '&:hover': { color: 'var(--neon-accent-hot)', transform: 'rotate(90deg)', transition: 'transform 200ms ease' }
+                                '&:hover': {
+                                    color: 'var(--neon-accent-hot)',
+                                    transform: 'rotate(90deg)',
+                                    transition: 'transform 200ms ease',
+                                },
                             }}
                         >
                             <CloseIcon />
@@ -183,7 +190,7 @@ export const ModalShell = ({
                 sx={{
                     position: 'relative',
                     zIndex: 2,
-                    color: 'var(--text-primary)'
+                    color: 'var(--text-primary)',
                 }}
             >
                 {children}

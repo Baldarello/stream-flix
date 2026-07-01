@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import {observer} from 'mobx-react-lite';
-import {Box} from '@mui/material';
+import { observer } from 'mobx-react-lite';
+import { Box } from '@mui/material';
 
 export const ScanlineOverlay = observer(function ScanlineOverlayInner(props) {
     const { id = 'scanline-overlay', intensity = 0.6, label } = props;
@@ -20,7 +20,7 @@ export const ScanlineOverlay = observer(function ScanlineOverlayInner(props) {
                 inset: 0,
                 pointerEvents: 'none',
                 opacity: intensity,
-                zIndex: 4
+                zIndex: 4,
             }}
         >
             {label ? (
@@ -36,7 +36,7 @@ export const ScanlineOverlay = observer(function ScanlineOverlayInner(props) {
                         fontSize: 12,
                         letterSpacing: '0.2em',
                         textTransform: 'uppercase',
-                        textShadow: 'var(--hologram-shadow)'
+                        textShadow: 'var(--hologram-shadow)',
                     }}
                 >
                     {label}

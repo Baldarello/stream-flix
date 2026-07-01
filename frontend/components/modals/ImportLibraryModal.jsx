@@ -1,22 +1,22 @@
-import React, {useEffect, useState} from 'react';
-import {observer} from 'mobx-react-lite';
-import {mediaStore} from '../../store/mediaStore.js';
-import {Alert, Box, Button, CircularProgress, IconButton, Modal, TextField, Typography} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { mediaStore } from '../../store/mediaStore.js';
+import { Alert, Box, Button, CircularProgress, IconButton, Modal, TextField, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {parseDataFromLink} from '../../services/shareService.js';
-import {useTranslations} from '../../hooks/useTranslations.js';
-import {runInAction} from 'mobx';
+import { parseDataFromLink } from '../../services/shareService.js';
+import { useTranslations } from '../../hooks/useTranslations.js';
+import { runInAction } from 'mobx';
 
 const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: { xs: '95%', sm: 500 },
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 2,
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: { xs: '95%', sm: 500 },
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 2,
 };
 
 const ImportLibraryModal = observer(() => {
@@ -41,15 +41,17 @@ const ImportLibraryModal = observer(() => {
                         throw new Error(t('notifications.importInvalidLink'));
                     }
                 } catch (e) {
-                    setError(t('notifications.importError', { error: (e).message }));
+                    setError(t('notifications.importError', { error: e.message }));
                     // Manually stop the spinner if fetch or parsing fails.
-                    runInAction(() => { (mediaStore).isImportingLibrary = false; });
+                    runInAction(() => {
+                        mediaStore.isImportingLibrary = false;
+                    });
                 }
             };
             doImport();
         }
     }, [importUrl, isImportModalOpen, importSharedLibrary, t]);
-    
+
     const handleImport = async () => {
         setError('');
         const data = await parseDataFromLink(link);
@@ -60,20 +62,24 @@ const ImportLibraryModal = observer(() => {
             setError(t('notifications.importInvalidLink'));
         }
     };
-    
+
     const handleClose = () => {
         setLink('');
         setError('');
         closeImportModal();
-    }
+    };
 
     return (
         // FIX: (line 72) Wrap Box with Modal component
         <Modal open={isImportModalOpen} onClose={handleClose}>
             <Box sx={style}>
-                 <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }} disabled={isImportingLibrary}><CloseIcon /></IconButton>
-                <Typography variant="h6" component="h2">{t('shareAndImport.importTitle')}</Typography>
-                
+                <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }} disabled={isImportingLibrary}>
+                    <CloseIcon />
+                </IconButton>
+                <Typography variant="h6" component="h2">
+                    {t('shareAndImport.importTitle')}
+                </Typography>
+
                 {isImportingLibrary ? (
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
                         <CircularProgress />
@@ -90,13 +96,12 @@ const ImportLibraryModal = observer(() => {
                             onChange={(e) => setLink(e.target.value)}
                             placeholder={t('shareAndImport.linkPlaceholder')}
                         />
-                        {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-                        <Button
-                            variant="contained"
-                            onClick={handleImport}
-                            disabled={!link.trim()}
-                            sx={{ mt: 2 }}
-                        >
+                        {error && (
+                            <Alert severity="error" sx={{ mt: 1 }}>
+                                {error}
+                            </Alert>
+                        )}
+                        <Button variant="contained" onClick={handleImport} disabled={!link.trim()} sx={{ mt: 2 }}>
                             {t('shareAndImport.import')}
                         </Button>
                     </>
