@@ -1,12 +1,14 @@
 import React, {useEffect, useRef} from 'react';
 import {observer} from 'mobx-react-lite';
+import {runInAction} from 'mobx';
 import {mediaStore} from '../../store/mediaStore.js';
-import {Box, Drawer, List} from '@mui/material';
+import {Box, Drawer, FormControl, InputAdornment, InputLabel, List, MenuItem, Select, TextField} from '@mui/material';
 import {gsap} from 'gsap';
 import {durations, easings, reducedMotion, stagger} from '../../motion/grammar.js';
 import {useTranslations} from '../../hooks/useTranslations.js';
 import {ScanlineOverlay} from '../feedback/ScanlineOverlay.jsx';
 import {Skeleton} from '../feedback/Skeleton.jsx';
+import {holoFieldSx} from '../../styles/style.js';
 
 import HoloDrawerHeader from './HoloDrawerHeader.jsx';
 import EpisodeRow from './EpisodeRow.jsx';
@@ -43,7 +45,8 @@ EpisodeListSkeleton.displayName = 'EpisodeListSkeleton';
 const EpisodesDrawer = observer(() => {
     const {
         isEpisodesDrawerOpen, closeEpisodesDrawer, currentShow, currentSeasonEpisodes,
-        nowPlayingItem, showFilterPreferences, roomId, isHost, changeWatchTogetherMedia
+        nowPlayingItem, showFilterPreferences, roomId, isHost, changeWatchTogetherMedia,
+        selectedSeasons, setSelectedSeasonForShow, showIntroDurations, setShowIntroDuration,
     } = mediaStore;
     const {t} = useTranslations();
     const paperRef = useRef(null);
@@ -55,6 +58,23 @@ const EpisodesDrawer = observer(() => {
     const currentEpisodeId = nowPlayingItem.id;
     const seasonNumber = nowPlayingItem.season_number;
     const {language: languageFilter, type: typeFilter} = showFilterPreferences.get(currentShow.id) || {};
+
+    const showSeasons = currentShow?.seasons || [];
+    const introDuration = showIntroDurations.get(currentShow.id) ?? 80;
+
+    const handleSeasonChange = (newSeasonNumber) => {
+        setSelectedSeasonForShow(currentShow.id, newSeasonNumber);
+        runInAction(() => {
+            nowPlayingItem.season_number = newSeasonNumber;
+        });
+    };
+
+    const handleIntroDurationChange = (e) => {
+        const value = e.target.value;
+        const duration = parseInt(value, 10);
+        if (value === '' || isNaN(duration)) setShowIntroDuration(currentShow.id, 80);
+        else if (duration >= 0) setShowIntroDuration(currentShow.id, duration);
+    };
 
     const handleSelectEpisode = (episode) => {
         const allVideoUrls = episode.video_urls || [];
@@ -87,7 +107,11 @@ const EpisodesDrawer = observer(() => {
         if (!paper) return undefined;
         const timeline = gsap.timeline();
         if (reducedMotion()) {
-            timeline.fromTo(paper, {autoAlpha: 0}, {autoAlpha: 1, duration: durations.fadeFallback, ease: easings.standard});
+            timeline.fromTo(paper, {autoAlpha: 0}, {
+                autoAlpha: 1,
+                duration: durations.fadeFallback,
+                ease: easings.standard
+            });
         } else {
             timeline.fromTo(paper, {autoAlpha: 0, x: 24, filter: 'blur(6px)'}, {
                 autoAlpha: 1, x: 0, filter: 'blur(0px)', duration: durations.med, ease: easings.emphasized,
@@ -106,7 +130,10 @@ const EpisodesDrawer = observer(() => {
         if (!list) return undefined;
         const handle = window.setTimeout(() => {
             const rows = list.querySelectorAll('[data-testid^="episode-row-"]');
-            if (rows.length === 0) { hasAnimatedOnceRef.current = true; return; }
+            if (rows.length === 0) {
+                hasAnimatedOnceRef.current = true;
+                return;
+            }
             gsap.fromTo(rows, {autoAlpha: 0, y: 12}, {
                 autoAlpha: 1, y: 0, duration: durations.med, ease: easings.emphasized, stagger: stagger.row,
             });
@@ -147,13 +174,51 @@ const EpisodesDrawer = observer(() => {
                     totalEpisodes={currentSeasonEpisodes.length}
                     onClose={closeEpisodesDrawer}
                 />
+                {showSeasons.length > 0 && (
+                    <Box id="episodes-drawer-controls" data-component="episodes-drawer-controls" sx={{
+                        display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1, flexWrap: 'wrap',
+                        borderBottom: '1px solid rgba(76, 210, 255, 0.12)',
+                    }}>
+                        <FormControl size="small" sx={{minWidth: 110, flex: 1}}>
+                            <InputLabel id="drawer-season-select-label">{t('detail.season')}</InputLabel>
+                            <Select
+                                labelId="drawer-season-select-label"
+                                id="drawer-season-select"
+                                value={seasonNumber ?? ''}
+                                label={t('detail.season')}
+                                onChange={(e) => handleSeasonChange(Number(e.target.value))}
+                                sx={holoFieldSx}
+                            >
+                                {showSeasons.map(season => (
+                                    <MenuItem key={season.id} value={season.season_number}>{season.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <TextField
+                            id="drawer-intro-duration"
+                            label={t('detail.introDuration')}
+                            type="number"
+                            variant="outlined"
+                            size="small"
+                            value={introDuration}
+                            onChange={handleIntroDurationChange}
+                            onFocus={(e) => e.target.select()}
+                            sx={{width: 130, ...holoFieldSx}}
+                            InputProps={{
+                                endAdornment: <InputAdornment position="end">sec</InputAdornment>,
+                                inputProps: {min: 0}
+                            }}
+                        />
+                    </Box>
+                )}
                 <Box sx={{position: 'relative', zIndex: 2, flex: 1, minHeight: 0, overflowY: 'auto'}}>
                     {isSeasonLoading ? (
                         <EpisodeListSkeleton/>
                     ) : isSeasonEmpty ? (
                         <EmptyEpisodes/>
                     ) : (
-                        <List id="episodes-drawer-list" ref={listRef} role="region" aria-label="Episode list" sx={{px: 1.5, py: 1}}>
+                        <List id="episodes-drawer-list" ref={listRef} role="region" aria-label="Episode list"
+                              sx={{px: 1.5, py: 1}}>
                             {currentSeasonEpisodes.map((episode) => {
                                 const hasPlayableLinks = (episode.video_urls || []).some(link =>
                                     (!languageFilter || link.language.toUpperCase() === languageFilter.toUpperCase()) &&
